@@ -1,0 +1,175 @@
+#include "Validator.h"
+
+template <typename T>
+Validator<T>::~Validator() {
+    if ( do_cleanup_on_end ) {
+        if (in_set != nullptr) {
+            delete in_set;
+        }
+
+        if (not_in_set != nullptr) {
+            delete not_in_set;
+        }
+    }
+}
+
+template <typename T>
+Validator<T>* Validator<T>::in(T *set, int size) {
+    in_set = set;
+    in_set_size = size;
+    use_in_set = true;
+    return this;
+}
+
+template <typename T>
+Validator<T>* Validator<T>::not_in(T *set, int size) {
+    not_in_set = set;
+    not_in_set_size = size;
+    use_not_in_set = true;
+    return this;
+}
+
+template <typename T>
+Validator<T>* Validator<T>::equals(T val) {
+    equality = val;
+    use_equality = true;
+    return this;
+}
+
+template <typename T>
+Validator<T>* Validator<T>::greater_than(T val, bool inclusive) {
+    _greater_than = val;
+    use_greater_than = true;
+    use_greater_than_inclusivity = inclusive;
+    return this;
+}
+
+template <typename T>
+Validator<T>* Validator<T>::less_than(T val, bool inclusive) {
+    _less_than = val;
+    use_less_than = true;
+    use_less_than_inclusivity = inclusive;
+    return this;
+}
+
+template <typename T>
+bool Validator<T>::check(T value) {
+    bool valid  = true;
+
+    if ( use_less_than ) {
+        if ( use_less_than_inclusivity ) {
+            valid = valid && (value <= _less_than);
+        } else {
+            valid = valid && (value < _less_than);
+        }
+    }
+
+    if ( use_greater_than ) {
+        if ( use_greater_than_inclusivity ) {
+            valid = valid && (value >= _greater_than);
+        } else {
+            valid = valid && (value > _greater_than);
+        }
+    }
+
+    if ( use_equality ) {
+        valid = valid && (value == equality);
+    }
+
+    if ( use_in_set ) {
+        bool found = false;
+        for ( int i = 0; i < in_set_size; i++ ) {
+            found = found || (in_set[i] == value);
+        }
+
+        valid = valid && found;
+    }
+
+    if ( use_not_in_set ) {
+        bool found = false;
+        for ( int i = 0; i < not_in_set_size; i++ ) {
+            found = found || (not_in_set[i] == value);
+        }
+
+        valid = valid && !found;
+    }
+
+    return valid;
+}
+
+template <typename T>
+std::string Validator<T>::requirements(std::string name) {
+    std::string reqs = "";
+    bool has_one = false;
+
+    if ( use_in_set ) {
+        if ( has_one ) reqs += " and ";
+        else has_one = true;
+
+        reqs += name+" must be one of: ";
+        std::stringstream s;
+        for ( int i = 0; i < in_set_size; i++ ) {
+            s << in_set[i];
+            if ( i < in_set_size-1 ) {
+                s << ", ";
+            }
+        }
+
+        reqs += s.str();
+    }
+
+    if ( use_not_in_set ) {
+        if ( has_one ) reqs += " and ";
+        else has_one = true;
+
+        reqs += name+" must not be one of: ";
+        std::stringstream s;
+        for ( int i = 0; i < not_in_set_size; i++ ) {
+            s << not_in_set[i];
+            if ( i < not_in_set_size-1 ) {
+                s << ", ";
+            }
+        }
+
+        reqs += s.str();
+    }
+
+    if ( use_equality ) {
+        if ( has_one ) reqs += " and ";
+        else has_one = true;
+
+        reqs += name+" must be exactly: ";
+
+        std::stringstream s;
+        s << equality;
+
+        reqs += s.str();
+    }
+
+    if ( use_less_than ) {
+        if ( has_one ) reqs += " and ";
+        else has_one = true;
+
+        reqs += name+" must be less than: ";
+
+        std::stringstream s;
+        s << _less_than;
+
+        reqs += s.str();
+    }
+
+    if ( use_greater_than ) {
+        if ( has_one ) reqs += " and ";
+        else has_one = true;
+
+        reqs += name+" must be greater than: ";
+
+        std::stringstream s;
+        s << _greater_than;
+
+        reqs += s.str();
+    }
+
+    return reqs;
+}
+

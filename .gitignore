@@ -30,3 +30,10 @@
 *.exe
 *.out
 *.app
+
+swarmc
+build*
+.vscode
+.idea
+.sublime
+swarmc_debug
