@@ -8,7 +8,7 @@
 class IStringable {
 public:
     virtual ~IStringable() {}
-    virtual std::string to_string() const = 0;
+    virtual std::string toString() const = 0;
 };
 
 #endif //SWARMC_ISTRINGABLE_H

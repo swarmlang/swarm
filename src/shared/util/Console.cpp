@@ -138,7 +138,7 @@ Console* Console::debug() {
     return this;
 }
 
-bool Console::is_debug() {
+bool Console::isDebug() {
     return _debug;
 }
 
@@ -192,7 +192,7 @@ std::string Console::pad(std::string text, unsigned int pad, std::string with) c
     return s.str();
 }
 
-std::string Console::pad_front(std::string text, unsigned int pad, std::string with) const {
+std::string Console::padFront(std::string text, unsigned int pad, std::string with) const {
     std::stringstream s;
 
     int pad_diff = pad - text.length();
@@ -204,7 +204,7 @@ std::string Console::pad_front(std::string text, unsigned int pad, std::string w
     return s.str();
 }
 
-std::string Console::pad_center(std::string text, unsigned int pad, std::string with) const {
+std::string Console::padCenter(std::string text, unsigned int pad, std::string with) const {
     std::stringstream s;
 
     if ( text.length() >= pad ) {
@@ -227,7 +227,7 @@ std::string Console::pad_center(std::string text, unsigned int pad, std::string 
 }
 
 Console* Console::header(std::string text) {
-    text = pad_center(text, _vp_width-2);
+    text = padCenter(text, _vp_width-2);
     box(text)->print("\n")->reset();
     return this;
 }
@@ -245,14 +245,14 @@ Console* Console::box(std::string text) {
 }
 
 Console* Console::grid(int rows, int cols) {
-    _vp_in_grid = true;
+    _vp_inGrid = true;
     _vp_grid_cols = cols;
     _vp_grid_rows = rows;
     return this;
 }
 
 Console* Console::grid(int cols) {
-    _vp_in_grid = true;
+    _vp_inGrid = true;
     _vp_grid_cols = cols;
     _vp_grid_rows = 0;
     _vp_grid_inf_rows = true;
@@ -314,7 +314,7 @@ Console* Console::row(bool skip_newline) {
         _vp_grid_cols = 0;
         _vp_curr_col = 0;
         _vp_curr_row = 0;
-        _vp_in_grid = false;
+        _vp_inGrid = false;
         _vp_grid_inf_rows = false;
     }
 
@@ -322,15 +322,15 @@ Console* Console::row(bool skip_newline) {
     return this;
 }
 
-Console* Console::end_grid() {
-    if ( !_vp_in_grid ) return this;
+Console* Console::endGrid() {
+    if ( !_vp_inGrid ) return this;
     _vp_grid_inf_rows = false;
     _vp_curr_row = _vp_grid_rows + 1;
     return row();
 }
 
 Console* Console::col(std::string text) {
-    text = pad_center(text, _vp_col_width);
+    text = padCenter(text, _vp_col_width);
     print(UNI_BAR_VERT)->print(text);
     _vp_curr_col += 1;
 
@@ -365,7 +365,7 @@ Console* Console::position(int &x, int &y) {
 }
 
 // TODO account for this in the virtual position
-Console* Console::jump_to(int x, int y) {
+Console* Console::jumpTo(int x, int y) {
     printf("\033[%d;%dH", x, y);
     return this;
 }
@@ -377,39 +377,39 @@ Console* Console::sep() {
     return this;
 }
 
-std::string Console::to_string(int text) const {
+std::string Console::toString(int text) const {
     return std::to_string(text);
 }
 
-std::string Console::to_string(unsigned int text) const {
+std::string Console::toString(unsigned int text) const {
     return std::to_string(text);
 }
 
-std::string Console::to_string(long int text) const {
+std::string Console::toString(long int text) const {
     return std::to_string(text);
 }
 
-std::string Console::to_string(double text) const {
+std::string Console::toString(double text) const {
     return std::to_string(text);
 }
 
-std::string Console::to_string(char text) const {
+std::string Console::toString(char text) const {
     std::stringstream s;
     s << text;
     return s.str();
 }
 
-std::string Console::to_string(bool text) const {
+std::string Console::toString(bool text) const {
     if ( text ) { return "true"; }
     else { return "false"; }
 }
 
-std::string Console::to_string(IStringable &stringable) const {
-    return stringable.to_string();
+std::string Console::toString(IStringable &stringable) const {
+    return stringable.toString();
 }
 
-std::string Console::to_string(IStringable* stringable) const {
-    return stringable->to_string();
+std::string Console::toString(IStringable* stringable) const {
+    return stringable->toString();
 }
 
 bool Console::mute() const {
@@ -439,7 +439,7 @@ Console* Console::progress(double value) {
 
     std::string space = this->pad("", (width - (filled)), UNI_BLOCK_FULL);
     this->output(space);
-    this->color((value >= 1 ? "white" : "green"))->output(this->pad_front(this->to_string(percent)+"%", 5))->reset();
+    this->color((value >= 1 ? "white" : "green"))->output(this->padFront(this->toString(percent)+"%", 5))->reset();
     std::cout.flush();
 
     return this;
@@ -456,7 +456,7 @@ std::string Console::trim(std::string input) {
     return input.substr(first_real_index, (last_real_index - first_real_index + 1));
 }
 
-std::string Console::prompt_allowing_whitespace(std::string message) {
+std::string Console::promptAllowingWhitespace(std::string message) {
     this->line("")->color("green")->print("   ")->print(message)->reset()->line("");
     this->print("   > ");
 

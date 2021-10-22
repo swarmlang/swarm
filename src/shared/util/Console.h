@@ -18,7 +18,7 @@ private:
     // Viewport utility methods. Used to track viewport size, and grid printing information.
     int _vp_width = 70;
     int _vp_height = -1; // -1 disables height-specific adjustments
-    bool _vp_in_grid = false;
+    bool _vp_inGrid = false;
     int _vp_grid_rows = 0;
     bool _vp_grid_inf_rows = false;
     int _vp_grid_cols = 0;
@@ -121,7 +121,7 @@ public:
     Console* debug();
     Console* end();
 
-    bool is_debug();
+    bool isDebug();
 
 
     // ===== Viewport functions =====
@@ -145,19 +145,19 @@ public:
     Console* position(int& x, int& y);
 
     // Move the cursor to the specified position
-    Console* jump_to(int x, int y);
+    Console* jumpTo(int x, int y);
 
     // Print a visual separator to the screen
     Console* sep();
 
     // Start a new row when in grid-mode
-    // Note, should also be called AFTER the last row is printed to close off the grid (or end_grid())
+    // Note, should also be called AFTER the last row is printed to close off the grid (or endGrid())
     Console* row(bool skip_newline = false);
 
     // Explicitly end the grid.
     // Used if the grid is in infinite row mode,
     // or if you want to end the grid before all rows have printed.
-    Console* end_grid();
+    Console* endGrid();
 
     // Print a single cell's value in grid mode
     Console* col(std::string text);
@@ -175,19 +175,19 @@ public:
     Console* output(std::string raw);
 
     // Primitive conversion helpers
-    std::string to_string(char text) const;
-    std::string to_string(int text) const;
-    std::string to_string(unsigned int text) const;
-    std::string to_string(double text) const;
-    std::string to_string(bool text) const;
-    std::string to_string(long int text) const;
-    std::string to_string(IStringable &stringable) const;
-    std::string to_string(IStringable* stringable) const;
+    std::string toString(char text) const;
+    std::string toString(int text) const;
+    std::string toString(unsigned int text) const;
+    std::string toString(double text) const;
+    std::string toString(bool text) const;
+    std::string toString(long int text) const;
+    std::string toString(IStringable &stringable) const;
+    std::string toString(IStringable* stringable) const;
 
     // Pad the back of a string with spaces until it is at least the min length
     std::string pad(std::string text, unsigned int pad = 20, std::string with = " ") const;
 
-    static std::string s_pad(std::string text, unsigned int pad = 20, std::string with = " ") {
+    static std::string sPad(std::string text, unsigned int pad = 20, std::string with = " ") {
         std::stringstream s;
         s << text;
 
@@ -200,13 +200,13 @@ public:
     }
 
     // Pad the front of a string with spaces until it is at least the min length
-    std::string pad_front(std::string text, unsigned int pad = 20, std::string with = " ") const;
+    std::string padFront(std::string text, unsigned int pad = 20, std::string with = " ") const;
 
     // Pad the front and back of a string with spaces until it is at least the min length
     // Keeps it roughly centered
-    std::string pad_center(std::string text, unsigned int pad = 20, std::string with = " ") const;
+    std::string padCenter(std::string text, unsigned int pad = 20, std::string with = " ") const;
 
-    static std::string s_pad_center(std::string text, unsigned int pad = 20, std::string with = " ") {
+    static std::string sPadCenter(std::string text, unsigned int pad = 20, std::string with = " ") {
         std::stringstream s;
 
         if ( text.length() >= pad ) {
@@ -218,9 +218,9 @@ public:
         if ( lhs % 2 == 1 ) { lhs -= 1; bit = true; }
         lhs /= 2;
 
-        s << Console::s_pad("", lhs, with);
+        s << Console::sPad("", lhs, with);
         s << text;
-        s << Console::s_pad("", lhs, with);
+        s << Console::sPad("", lhs, with);
         if ( bit ) {
             s << with;
         }
@@ -243,13 +243,13 @@ public:
     InputType prompt(std::string message, InputType default_value, std::string name, Validator<InputType> &valid);
 
     // A special implementation of "prompt" that allows the user input to contain whitespace
-    std::string prompt_allowing_whitespace(std::string message);
+    std::string promptAllowingWhitespace(std::string message);
 
     std::string trim(std::string input);
 
     // True if grid mode is enabled
-    bool in_grid() {
-        return _vp_in_grid;
+    bool inGrid() {
+        return _vp_inGrid;
     }
 };
 
