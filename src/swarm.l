@@ -109,6 +109,26 @@ map {
 	return makeBareToken(TokenKind::MAP);
 }
 
+if {
+	return makeBareToken(TokenKind::IF);
+}
+
+true {
+	return makeBareToken(TokenKind::TRUE);
+}
+
+false {
+	return makeBareToken(TokenKind::FALSE);
+}
+
+"&&" {
+	return makeBareToken(TokenKind::AND);
+}
+
+"||" {
+	return makeBareToken(TokenKind::OR);
+}
+
 ({LETTER})({LETTER}|{DIGIT})* {
 	return makeIDToken();
 }
