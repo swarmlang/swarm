@@ -45,6 +45,74 @@ enumerate {
 	return makeBareToken(TokenKind::ENUMERATE);
 }
 
+as {
+	return makeBareToken(TokenKind::AS);
+}
+
+with {
+	return makeBareToken(TokenKind::WITH);
+}
+
+"{" {
+	return makeBareToken(TokenKind::LBRACE);
+}
+
+"}" {
+	return makeBareToken(TokenKind::RBRACE);
+}
+
+"<" {
+	return makeBareToken(TokenKind::LARROW);
+}
+
+">" {
+	return makeBareToken(TokenKind::RARROW);
+}
+
+"[" {
+	return makeBareToken(TokenKind::LBRACKET);
+}
+
+"]" {
+	return makeBareToken(TokenKind::RBRACKET);
+}
+
+";" {
+	return makeBareToken(TokenKind::SEMICOLON);
+}
+
+"," {
+	return makeBareToken(TokenKind::COMMA);
+}
+
+"=" {
+	return makeBareToken(TokenKind::ASSIGN);
+}
+
+string {
+	return makeBareToken(TokenKind::STRING);
+}
+
+number {
+	return makeBareToken(TokenKind::NUMBER);
+}
+
+bool {
+	return makeBareToken(TokenKind::BOOL);
+}
+
+enumerable {
+	return makeBareToken(TokenKind::ENUMERABLE);
+}
+
+map {
+	return makeBareToken(TokenKind::MAP);
+}
+
+({LETTER})({LETTER}|{DIGIT})* {
+	return makeIDToken();
+}
+
 \n|(\r\n) {
 	lineNum++;
 	colNum = 1;

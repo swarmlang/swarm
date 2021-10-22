@@ -33,6 +33,23 @@ namespace Lang {
         std::string _display;
     };
 
+
+
+    /**
+     * Token class representing an identifier.
+     */
+    class IDToken : public Token {
+    public:
+        IDToken(Position* pos, int kind, std::string display, std::string identifier) : Token(pos, kind, display), _identifier(identifier) {};
+
+        /** Get the string identifier of this token. */
+        std::string identifier() const {
+            return _identifier;
+        }
+    protected:
+        std::string _identifier;
+    };
+
 }
 }
 

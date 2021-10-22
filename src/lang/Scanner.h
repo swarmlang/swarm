@@ -36,6 +36,16 @@ namespace Lang {
             return tagIn;
         }
 
+        int makeIDToken() {
+            int tagIn = Parser::token::ID;
+            size_t length = static_cast<size_t>(yyleng);
+            Position* pos = new Position(lineNum, colNum, lineNum, colNum+length);
+
+            yylval->lexeme = new IDToken(pos, tagIn, Debugging::tokenKindToString(tagIn), yytext);
+            colNum += length;
+            return tagIn;
+        }
+
         /** Lex and output the tokens to the given output stream. Mainly for debugging. **/
         void outputTokens(std::ostream& out) {
             Parser::semantic_type lex;

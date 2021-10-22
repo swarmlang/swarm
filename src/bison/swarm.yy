@@ -44,12 +44,30 @@
     swarmc::Lang::Token*            transToken;
     swarmc::Lang::Token*            lexeme;
     swarmc::Lang::ProgramNode*      transProgram;
+    swarmc::Lang::IDToken*          transIDToken;
 }
 
 %define parse.assert
 
 %token                   END	    0 "end file"
 %token <transToken>      ENUMERATE
+%token <transIDToken>    ID
+%token <transToken>      AS
+%token <transToken>      WITH
+%token <transToken>      LBRACE
+%token <transToken>      RBRACE
+%token <transToken>      LBRACKET
+%token <transToken>      RBRACKET
+%token <transToken>      LARROW
+%token <transToken>      RARROW
+%token <transToken>      SEMICOLON
+%token <transToken>      COMMA
+%token <transToken>      ASSIGN
+%token <transToken>      STRING
+%token <transToken>      NUMBER
+%token <transToken>      BOOL
+%token <transToken>      ENUMERABLE
+%token <transToken>      MAP
 
 /*    (attribute type)    (nonterminal)    */
 %type <transProgram>    program
