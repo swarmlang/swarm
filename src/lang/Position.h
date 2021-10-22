@@ -9,6 +9,9 @@
 namespace swarmc {
 namespace Lang {
 
+    /**
+     * Class representing a character range in the input file.
+     */
     class Position : public IStringable {
     public:
         Position(uint64_t startLine, uint64_t endLine, uint64_t startCol, uint64_t endCol) :

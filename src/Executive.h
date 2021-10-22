@@ -5,15 +5,29 @@
 #include <string>
 #include <fstream>
 #include <chrono>
+#include <vector>
 
 #include "shared/util/Console.h"
 
+/**
+ * Executive class for CLI applications. Handles arg parsing and manages runtime globals.
+ */
 class Executive : public IUsesConsole {
 public:
     Executive() : IUsesConsole() {};
 
     int run(int argc, char **argv);
-    bool parse_args(int argc, char** argv);
+    bool parseArgs(std::vector<std::string>&);
+    void printUsage();
+
+protected:
+    // CLI options
+    bool flagOutputTokens = false;
+    std::string flagOutputTokensTo;
+    std::string inputFile;
+    std::istream* _input = nullptr;
+
+    int debugOutputTokens();
 };
 
 

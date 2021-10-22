@@ -41,4 +41,17 @@ STRELT (([\\][nt"\\])|([^\\\n"]))
 	this->yylval = lval;
 %}
 
+enumerate {
+	return makeBareToken(TokenKind::ENUMERATE);
+}
+
+\n|(\r\n) {
+	lineNum++;
+	colNum = 1;
+}
+
+[ \t]+ {
+	colNum += yyleng;
+}
+
 %%

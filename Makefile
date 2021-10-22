@@ -23,14 +23,14 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall
 CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall -DSWARM_DEBUG
 
-$(TARGET_EXEC): $(OBJS) $(BUILD_DIR)/lexer.o
+$(TARGET_EXEC): $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
 	g++ $(OBJS) $(BUILD_DIR)/lexer.o -o $@ $(LDFLAGS)
 
 .PHONY: all
 all: $(TARGET_EXEC) debug
 
 # c++ sources
-$(BUILD_DIR)/%.cpp.o: %.cpp
+$(BUILD_DIR)/%.cpp.o: %.cpp src/bison/parser.cc
 	$(MKDIR_P) $(dir $@)
 	g++ $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 
@@ -51,7 +51,7 @@ debug: $(DEBUG_OBJS) $(DEBUG_BUILD_DIR)/parser.o $(DEBUG_BUILD_DIR)/lexer.o
 	g++ $(DEBUG_OBJS) $(DEBUG_BUILD_DIR)/lexer.o $(DEBUG_BUILD_DIR)/parser.o -o $(TARGET_EXEC)_debug $(LDFLAGS) $(CPPFLAGS_debug)
 
 # c++ sources for debug
-$(DEBUG_BUILD_DIR)/%.cpp.o: %.cpp
+$(DEBUG_BUILD_DIR)/%.cpp.o: %.cpp src/bison/parser.cc
 	$(MKDIR_P) $(dir $@)
 	g++ $(CPPFLAGS_debug) $(CPPFLAGS_debug) -c $< -o $@
 
@@ -64,7 +64,7 @@ $(DEBUG_BUILD_DIR)/lexer.o: $(DEBUG_BUILD_DIR)/lexer.yy.cc
 
 # This is PHONY to force the Bison generated source files to re-generate
 # between debug and release builds.
-.PHONY: src/bison.parser.cc
+.PHONY: src/bison/parser.cc
 src/bison/parser.cc: src/bison/swarm.yy
 	cd src/bison && $(BISON) -Wall --defines=grammar.hh -v swarm.yy
 

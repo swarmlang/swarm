@@ -41,12 +41,15 @@
 }
 
 %union {
+    swarmc::Lang::Token*            transToken;
+    swarmc::Lang::Token*            lexeme;
     swarmc::Lang::ProgramNode*      transProgram;
 }
 
 %define parse.assert
 
-%token                   END	   0 "end file"
+%token                   END	    0 "end file"
+%token <transToken>      ENUMERATE
 
 /*    (attribute type)    (nonterminal)    */
 %type <transProgram>    program
