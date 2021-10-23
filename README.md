@@ -10,6 +10,21 @@ To build a normal version, run `make`. This outputs a `swarmc` executable.
 
 To build a version with debug output enabled, run `make debug`. This outputs a `swarmc_debug` executable.
 
+## Testing
+
+Run `make test` to run the test suite.
+
+To add a new test:
+
+1. Create a new folder in test, e.g. `003_my_test`
+2. In that folder, create an executable `run` that performs the test
+    - The test should write to standard output and standard error
+    - The following environment variables are available
+        - `$SWARMC` - the absolute path to the compiled `swarmc` to test
+        - `$TESTSWARM` - the absolute path to the `test.swarm` file in the test dir
+3. Create `err.expected` and `out.expected` files in that folder with the expected standard error and output, respectively
+4. If you need Swarm code to test, put it in `test.swarm` and the file path will be available to the test code
+
 
 ## Lexer Notes
 
