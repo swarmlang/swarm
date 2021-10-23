@@ -1,0 +1,11 @@
+enumerate items as item {
+
+}
+
+with myResource as rscCapture {
+
+}
+
+enumerable<string> myenum = [];
+map<number> mymap;
+

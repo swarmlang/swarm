@@ -1,0 +1,9 @@
+bool myId = true;
+
+if ( myId && true ) {
+
+}
+
+if ( myId || false ) {
+
+}
