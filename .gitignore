@@ -38,3 +38,4 @@ build*
 .sublime
 swarmc_debug
 *.swarm
+run_tests

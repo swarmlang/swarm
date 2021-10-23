@@ -73,7 +73,12 @@ $(DEBUG_BUILD_DIR)/parser.o: src/bison/parser.cc
 
 .PHONY: clean
 clean:
-	$(RM) -r $(BUILD_DIR) $(TARGET_EXEC) $(DEBUG_BUILD_DIR) $(TARGET_EXEC)_debug $(BISON_FILES)
+	$(RM) -r $(BUILD_DIR) $(TARGET_EXEC) $(DEBUG_BUILD_DIR) $(TARGET_EXEC)_debug $(BISON_FILES) run_tests
+
+
+.PHONY: test
+test: $(TARGET_EXEC)
+	./bin/run_tests.bash
 
 -include $(DEPS)
 
