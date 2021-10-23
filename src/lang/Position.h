@@ -14,7 +14,7 @@ namespace Lang {
      */
     class Position : public IStringable {
     public:
-        Position(uint64_t startLine, uint64_t endLine, uint64_t startCol, uint64_t endCol) :
+        Position(size_t startLine, size_t endLine, size_t startCol, size_t endCol) :
             _startLine(startLine), _endLine(endLine), _startCol(startCol), _endCol(endCol) {};
 
         Position(Position* start, Position* end) {
@@ -47,10 +47,10 @@ namespace Lang {
         }
 
     protected:
-        uint64_t _startLine;
-        uint64_t _endLine;
-        uint64_t _startCol;
-        uint64_t _endCol;
+        size_t _startLine;
+        size_t _endLine;
+        size_t _startCol;
+        size_t _endCol;
     };
 
 }

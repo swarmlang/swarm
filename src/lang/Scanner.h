@@ -1,13 +1,13 @@
 #ifndef SWARMC_SCANNER_H
 #define SWARMC_SCANNER_H
 
-#include "Debugging.h"
 #include <cstdint>
 #include <iostream>
 #if !defined(yyFlexLexerOnce)
 #include <FlexLexer.h>
 #endif
 
+#include "Debugging.h"
 #include "Token.h"
 #include "../bison/grammar.hh"
 
@@ -29,7 +29,7 @@ namespace Lang {
         /** Creates a new Token instance for the given Parser::token kind. */
         int makeBareToken(int tagIn) {
             size_t length = static_cast<size_t>(yyleng);
-            Position* pos = new Position(lineNum, colNum, lineNum, colNum+length);
+            Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             yylval->lexeme = new Token(pos, tagIn, Debugging::tokenKindToString(tagIn));
             colNum += length;
@@ -39,7 +39,7 @@ namespace Lang {
         int makeIDToken() {
             int tagIn = Parser::token::ID;
             size_t length = static_cast<size_t>(yyleng);
-            Position* pos = new Position(lineNum, colNum, lineNum, colNum+length);
+            Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             yylval->lexeme = new IDToken(pos, tagIn, Debugging::tokenKindToString(tagIn), yytext);
             colNum += length;
@@ -65,8 +65,8 @@ namespace Lang {
 
     protected:
         Parser::semantic_type* yylval = nullptr;
-        uint64_t lineNum = 1;
-        uint64_t colNum = 1;
+        size_t lineNum = 1;
+        size_t colNum = 1;
     };
 
 }
