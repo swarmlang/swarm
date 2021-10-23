@@ -56,6 +56,8 @@
 %token <transToken>      WITH
 %token <transToken>      LBRACE
 %token <transToken>      RBRACE
+%token <transToken>      LPAREN
+%token <transToken>      RPAREN
 %token <transToken>      LBRACKET
 %token <transToken>      RBRACKET
 %token <transToken>      LARROW
@@ -68,6 +70,11 @@
 %token <transToken>      BOOL
 %token <transToken>      ENUMERABLE
 %token <transToken>      MAP
+%token <transToken>      IF
+%token <transToken>      TRUE
+%token <transToken>      FALSE
+%token <transToken>      AND
+%token <transToken>      OR
 
 /*    (attribute type)    (nonterminal)    */
 %type <transProgram>    program

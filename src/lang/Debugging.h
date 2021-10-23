@@ -23,6 +23,8 @@ namespace Lang {
             if (kind == Parser::token::WITH) return "WITH";
             if (kind == Parser::token::LBRACE) return "LBRACE";
             if (kind == Parser::token::RBRACE) return "RBRACE";
+            if (kind == Parser::token::LPAREN) return "LPAREN";
+            if (kind == Parser::token::RPAREN) return "RPAREN";
             if (kind == Parser::token::LBRACKET) return "LBRACKET";
             if (kind == Parser::token::RBRACKET) return "RBRACKET";
             if (kind == Parser::token::LARROW) return "LARROW";
@@ -35,6 +37,11 @@ namespace Lang {
             if (kind == Parser::token::BOOL) return "BOOL";
             if (kind == Parser::token::MAP) return "MAP";
             if (kind == Parser::token::ENUMERABLE) return "ENUMERABLE";
+            if (kind == Parser::token::IF) return "IF";
+            if (kind == Parser::token::TRUE) return "TRUE";
+            if (kind == Parser::token::FALSE) return "FALSE";
+            if (kind == Parser::token::AND) return "AND";
+            if (kind == Parser::token::OR) return "OR";
 
             return "UNKNOWN";
         }

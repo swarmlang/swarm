@@ -61,6 +61,14 @@ with {
 	return makeBareToken(TokenKind::RBRACE);
 }
 
+"(" {
+	return makeBareToken(TokenKind::LPAREN);
+}
+
+")" {
+	return makeBareToken(TokenKind::RPAREN);
+}
+
 "<" {
 	return makeBareToken(TokenKind::LARROW);
 }
