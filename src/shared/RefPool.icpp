@@ -1,0 +1,31 @@
+template <typename T>
+RefInstance<T>::~RefInstance() {
+    _ref->release();
+}
+
+template <typename T>
+RefInstance<T>* RefInstance<T>::newInstance() {
+    return _ref->get();
+}
+
+template <typename T>
+void Ref<T>::release() {
+    instances -= 1;
+    if ( instances == 0 ) {
+        _pool->tryfree(this);
+    }
+}
+
+
+template <typename T>
+RefPool<T>* RefPool<T>::_global = nullptr;
+
+template <typename T>
+RefPool<T>* RefPool<T>::get()  {
+    /** TODO - this is not thread-safe. Protect with a mutex in multi-threaded env. */
+    if ( _global == nullptr ) {
+        _global = new RefPool<T>();
+    }
+
+    return (RefPool<T>*) _global;
+}
