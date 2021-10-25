@@ -4,6 +4,7 @@
 #include <vector>
 #include "Executive.h"
 #include "lang/Scanner.h"
+#include "lang/AST.h"
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
@@ -23,7 +24,17 @@ int Executive::run(int argc, char **argv) {
     console->debug("Got input file: " + inputFile);
 
     if ( flagOutputTokens ) {
-        result = debugOutputTokens();
+        int lexResult = debugOutputTokens();
+        if ( lexResult != 0 ) {
+            result = lexResult;
+        }
+    }
+
+    if ( flagParseAndStop ) {
+        int parseResult = debugParseAndStop();
+        if ( parseResult != 0 ) {
+            result = parseResult;
+        }
     }
 
     delete console;
@@ -65,6 +76,8 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputTokens = true;
             flagOutputTokensTo = outfile;
             skipOne = true;
+        } else if ( arg == "--dbg-parse" ) {
+            flagParseAndStop = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -115,6 +128,9 @@ void Executive::printUsage() {
         ->line("Lex the input and output the tokens to the specified file.")
         ->line("                                       If the output file is \"--\", will write to stdout.")
         ->line();
+
+    console->bold()->print("  --dbg-parse  :  ", true)
+        ->line("Lex and parse the input, then stop.");
     
     // Output in debugging mode only:
     console->debug()
@@ -137,5 +153,20 @@ int Executive::debugOutputTokens() {
         scanner.outputTokens(outfile);
     }
 
+    return 0;
+}
+
+int Executive::debugParseAndStop() {
+    swarmc::Lang::Scanner scanner(_input);
+    swarmc::Lang::ProgramNode* root = nullptr;
+    swarmc::Lang::Parser parser(scanner, &root);
+
+    int error = parser.parse();
+    if ( error ) {
+        console->error("Parse error!");
+        return error;
+    }
+
+    console->success("Parsed input program.");
     return 0;
 }
