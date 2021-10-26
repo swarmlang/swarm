@@ -1,0 +1,6 @@
+STRING [l: 1, c: 1]->[l: 1, c: 7]
+ID [l: 1, c: 8]->[l: 1, c: 16]
+ASSIGN [l: 1, c: 17]->[l: 1, c: 18]
+STRINGLITERAL [l: 1, c: 19]->[l: 1, c: 42]
+SEMICOLON [l: 1, c: 42]->[l: 1, c: 43]
+EOF

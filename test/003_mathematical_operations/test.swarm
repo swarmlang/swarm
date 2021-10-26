@@ -1,0 +1,16 @@
+number myNum = 2 + 3;
+myNum = 2 - 3;
+myNum = 2 * 3;
+myNum = 2 / 3;
+myNum = 2 % 3;
+myNum = 2 ^ 3;
+myNum += 3;
+myNum *= 3;
+
+if ( myNum == 0 ) {
+	
+}
+
+if ( myNum != 1 ) {
+	
+}

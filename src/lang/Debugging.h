@@ -35,6 +35,8 @@ namespace Lang {
             if (kind == Parser::token::STRING) return "STRING";
             if (kind == Parser::token::NUMBER) return "NUMBER";
             if (kind == Parser::token::BOOL) return "BOOL";
+            if (kind == Parser::token::NUMBERLITERAL) return "NUMBERLITERAL";
+            if (kind == Parser::token::STRINGLITERAL) return "STRINGLITERAL";
             if (kind == Parser::token::MAP) return "MAP";
             if (kind == Parser::token::ENUMERABLE) return "ENUMERABLE";
             if (kind == Parser::token::IF) return "IF";

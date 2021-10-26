@@ -68,6 +68,8 @@
 %token <transToken>      STRING
 %token <transToken>      NUMBER
 %token <transToken>      BOOL
+%token <transToken>      NUMBERLITERAL
+%token <transToken>      STRINGLITERAL
 %token <transToken>      ENUMERABLE
 %token <transToken>      MAP
 %token <transToken>      IF

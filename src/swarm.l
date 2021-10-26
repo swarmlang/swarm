@@ -109,6 +109,14 @@ bool {
 	return makeBareToken(TokenKind::BOOL);
 }
 
+[0-9.]+ {
+	return makeBareToken(TokenKind::NUMBERLITERAL);
+}
+
+['"].+['"] {
+	return makeBareToken(TokenKind::STRINGLITERAL);
+}
+
 enumerable {
 	return makeBareToken(TokenKind::ENUMERABLE);
 }
