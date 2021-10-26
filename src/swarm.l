@@ -137,6 +137,50 @@ false {
 	return makeBareToken(TokenKind::OR);
 }
 
+"!" {
+	return makeBareToken(TokenKind::NOT);
+}
+
+"==" {
+	return makeBareToken(TokenKind::EQUAL);
+}
+
+"!=" {
+	return makeBareToken(TokenKind::NOTEQUAL);
+}
+
+"+" {
+	return makeBareToken(TokenKind::ADD);
+}
+
+"-" {
+	return makeBareToken(TokenKind::SUBTRACT);
+}
+
+"*" {
+	return makeBareToken(TokenKind::MULTIPLY);
+}
+
+"/" {
+	return makeBareToken(TokenKind::DIVIDE);
+}
+
+"+=" {
+	return makeBareToken(TokenKind::ADDASSIGN);
+}
+
+"*=" {
+	return makeBareToken(TokenKind::MULTIPLYASSIGN);
+}
+
+"%" {
+	return makeBareToken(TokenKind::MODULUS);
+}
+
+"^" {
+	return makeBareToken(TokenKind::POWER);
+}
+
 ({LETTER})({LETTER}|{DIGIT})* {
 	return makeIDToken();
 }
