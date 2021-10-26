@@ -113,7 +113,7 @@ bool {
 	return makeBareToken(TokenKind::NUMBERLITERAL);
 }
 
-['"].+['"] {
+(\"([^\\\"]|\\.)*\")|(\'([^\\\"]|\\.)*\') {
 	return makeBareToken(TokenKind::STRINGLITERAL);
 }
 
