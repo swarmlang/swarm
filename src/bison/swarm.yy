@@ -75,6 +75,17 @@
 %token <transToken>      FALSE
 %token <transToken>      AND
 %token <transToken>      OR
+%token <transToken>      NOT
+%token <transToken>      EQUAL
+%token <transToken>      NOTEQUAL
+%token <transToken>      ADD
+%token <transToken>      SUBTRACT
+%token <transToken>      MULTIPLY
+%token <transToken>      DIVIDE
+%token <transToken>      ADDASSIGN
+%token <transToken>      MULTIPLYASSIGN
+%token <transToken>      MODULUS
+%token <transToken>      POWER
 
 /*    (attribute type)    (nonterminal)    */
 %type <transProgram>    program

@@ -42,6 +42,17 @@ namespace Lang {
             if (kind == Parser::token::FALSE) return "FALSE";
             if (kind == Parser::token::AND) return "AND";
             if (kind == Parser::token::OR) return "OR";
+            if (kind == Parser::token::NOT) return "NOT";
+            if (kind == Parser::token::EQUAL) return "EQUAL";
+            if (kind == Parser::token::NOTEQUAL) return "NOTEQUAL";
+            if (kind == Parser::token::ADD) return "ADD";
+            if (kind == Parser::token::SUBTRACT) return "SUBTRACT";
+            if (kind == Parser::token::MULTIPLY) return "MULTIPLY";
+            if (kind == Parser::token::DIVIDE) return "DIVIDE";
+            if (kind == Parser::token::ADDASSIGN) return "ADDASSIGN";
+            if (kind == Parser::token::MULTIPLYASSIGN) return "MULTIPLYASSIGN";
+            if (kind == Parser::token::MODULUS) return "MODULUS";
+            if (kind == Parser::token::POWER) return "POWER";
 
             return "UNKNOWN";
         }
