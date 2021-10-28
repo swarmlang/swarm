@@ -24,7 +24,7 @@ CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall
 CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall -DSWARM_DEBUG
 
 $(TARGET_EXEC): $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
-	g++ $(OBJS) $(BUILD_DIR)/lexer.o -o $@ $(LDFLAGS)
+	g++ $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o -o $@ $(LDFLAGS)
 
 .PHONY: all
 all: $(TARGET_EXEC) debug

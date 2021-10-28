@@ -5,6 +5,7 @@
 #include "Executive.h"
 #include "lang/Scanner.h"
 #include "lang/AST.h"
+#include "bison/grammar.hh"
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
