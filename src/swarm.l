@@ -203,7 +203,7 @@ false {
 }
 
 . {
-	console->error("Parse error, unexpected character");
+	Console::get()->error("Parse error, unexpected character");
 	exit(1);
 }
 %%
