@@ -55,7 +55,8 @@ namespace Lang {
             if (kind == Parser::token::MULTIPLYASSIGN) return "MULTIPLYASSIGN";
             if (kind == Parser::token::MODULUS) return "MODULUS";
             if (kind == Parser::token::POWER) return "POWER";
-
+            if (kind == Parser::token::CAT) return "CAT";
+            
             return "UNKNOWN";
         }
     };

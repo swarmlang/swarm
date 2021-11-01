@@ -185,6 +185,10 @@ false {
 	return makeBareToken(TokenKind::POWER);
 }
 
+[.] {
+	return makeBareToken(TokenKind::CAT);
+}
+
 ({LETTER})({LETTER}|{DIGIT})* {
 	return makeIDToken();
 }

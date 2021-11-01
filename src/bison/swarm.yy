@@ -88,6 +88,7 @@
 %token <transToken>      MULTIPLYASSIGN
 %token <transToken>      MODULUS
 %token <transToken>      POWER
+%token <transToken>      CAT
 
 /*    (attribute type)    (nonterminal)    */
 %type <transProgram>    program
