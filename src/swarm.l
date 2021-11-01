@@ -109,12 +109,8 @@ bool {
 	return makeBareToken(TokenKind::BOOL);
 }
 
-[0-9.]+ {
+[0-9]+([.][0-9]+)? {
 	return makeBareToken(TokenKind::NUMBERLITERAL);
-}
-
-(\"([^\\\"]|\\.)*\")|(\'([^\\\"]|\\.)*\') {
-	return makeBareToken(TokenKind::STRINGLITERAL);
 }
 
 enumerable {
@@ -193,6 +189,10 @@ false {
 	return makeIDToken();
 }
 
+(\"{STRELT}*\") {
+	return makeBareToken(TokenKind::STRINGLITERAL);
+}
+
 \n|(\r\n) {
 	lineNum++;
 	colNum = 1;
@@ -202,4 +202,8 @@ false {
 	colNum += yyleng;
 }
 
+. {
+	console->error("Parse error, unexpected character");
+	exit(1);
+}
 %%
