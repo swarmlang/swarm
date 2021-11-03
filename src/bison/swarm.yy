@@ -41,6 +41,7 @@
 }
 
 %union {
+    swarmc::Lang::ASTNode*          transPlaceholder;
     swarmc::Lang::Token*            transToken;
     swarmc::Lang::Token*            lexeme;
     swarmc::Lang::ProgramNode*      transProgram;

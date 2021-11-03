@@ -40,3 +40,35 @@ To test that your tokens are being recognized correctly, you can parse an input 
 ```sh
 ./swarmc_debug --dbg-output-tokens-to -- test.swarm
 ```
+
+## Parser Notes
+
+The general workflow for adding an item to the parser is as follows:
+
+1. Modify `src/bison/swarm.yy` to add your grammar productions
+    - Easiest to leave the productions empty for now, just get the grammar structure right
+
+    - Shouldn't need to add any terminals, but you can add non-termals below the comment c. line 94.
+        - Use the `transPlaceholder` type to start. We'll fill it in later.
+
+2. Modify `src/lang/AST.h` to create the AST nodes necessary for your productions.
+
+    1. Declare the class at the bottom of the namespace
+        - Make sure to extend the appropriate parent class.
+        - In most cases, want to mark the class as `final`, unless it's a generic parent class designed to be reused.
+        - You'll need to implement `IStringable::toString()`
+
+    2. See below note on error handling
+
+3. Now that you've declared the new AST node class, add a mapping for it to the `%union` at the top of `swarm.yy`.
+    - Generally, this should start with the `trans` prefix, for translation.
+
+4. If you added a non-termal in step (1), change its type to the new alias you just added.
+
+5. Fill out the productions in the file to instantiate your new AST node clases.
+
+
+### Note on Error Handling
+If you notice any edge cases with your AST node classes that should cause an error, declare a new error class in its own file in `src/errors`.
+
+Make the error class extend `swarmc::Errors::SwarmError` and provide a descriptive error message.
