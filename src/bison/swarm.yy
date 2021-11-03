@@ -41,13 +41,16 @@
 }
 
 %union {
-    swarmc::Lang::ASTNode*          transPlaceholder;
-    swarmc::Lang::Token*            transToken;
-    swarmc::Lang::Token*            lexeme;
-    swarmc::Lang::ProgramNode*      transProgram;
-    swarmc::Lang::IDToken*          transIDToken;
-    swarmc::Lang::StatementNode*    transStatement;
-    swarmc::Lang::IdentifierNode*   transID;
+    swarmc::Lang::ASTNode*              transPlaceholder;
+    swarmc::Lang::Token*                transToken;
+    swarmc::Lang::Token*                lexeme;
+    swarmc::Lang::ProgramNode*          transProgram;
+    swarmc::Lang::IDToken*              transIDToken;
+    swarmc::Lang::StatementNode*        transStatement;
+    swarmc::Lang::IdentifierNode*       transID;
+    swarmc::Lang::ExpressionNode*       transExpression;
+    swarmc::Lang::CallExpressionNode*   transCallExpression;
+    std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
 }
 
 %define parse.assert
@@ -93,11 +96,14 @@
 %token <transToken>      POWER
 %token <transToken>      CAT
 
-/*    (attribute type)    (nonterminal)    */
-%type <transProgram>      program
-%type <transProgram>      statements
-%type <transStatement>    statement
-%type <transID>           id
+/*    (attribute type)      (nonterminal)    */
+%type <transProgram>        program
+%type <transProgram>        statements
+%type <transStatement>      statement
+%type <transID>             id
+%type <transExpression>     expression
+%type <transCallExpression> callExpression
+%type <transExpressions>    actuals
 
 %%
 
@@ -128,11 +134,50 @@ statement :
         $$ = e;
     }
 
+    | callExpression SEMICOLON {
+        Position* pos = new Position($1->position(), $2->position());
+        $$ = new ExpressionStatementNode(pos, $1);
+    }
+
 
 
 id :
     ID {
         $$ = new IdentifierNode($1->position(), $1->identifier());
+    }
+
+
+
+expression :
+    callExpression {
+        $$ = $1;
+    }
+
+
+
+actuals :
+    expression {
+        std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
+        actuals->push_back($1);
+        $$ = actuals;
+    }
+
+    | actuals COMMA expression {
+        $$ = $1;
+        $$->push_back($3);
+    }
+
+
+
+callExpression :
+    id LPAREN RPAREN {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new CallExpressionNode(pos, $1, new std::vector<ExpressionNode*>());
+    }
+
+    | id LPAREN actuals RPAREN {
+        Position* pos = new Position($1->position(), $4->position());
+        $$ = new CallExpressionNode(pos, $1, $3);
     }
 
 %%
