@@ -1,0 +1,7 @@
+string a = nop();
+number b = nop();
+bool c = nop();
+enumerable<bool> d = nop();
+map<number> e = nop();
+enumerable<map<string>> f = nop();
+

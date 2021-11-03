@@ -4,6 +4,7 @@
 #include <vector>
 #include "../shared/IStringable.h"
 #include "Position.h"
+#include "Type.h"
 
 namespace swarmc {
 namespace Lang {
@@ -140,6 +141,56 @@ namespace Lang {
     public:
         TypeNode(Position* pos) : ASTNode(pos) {}
         virtual ~TypeNode() {}
+    };
+
+
+    /** AST node referencing a primitive type declaration. */
+    class PrimitiveTypeNode final : public TypeNode {
+    public:
+        PrimitiveTypeNode(Position* pos, PrimitiveType* t) : TypeNode(pos), _t(t) {}
+        virtual ~PrimitiveTypeNode() {}
+
+        virtual std::string toString() const {
+            return "PrimitiveTypeNode<of: " + Type::valueTypeToString(_t->valueType()) + ">";
+        }
+
+    protected:
+        PrimitiveType* _t;
+    };
+
+
+    /** Base class for TypeNodes that take a type-generic. */
+    class GenericTypeNode : public TypeNode {
+    public:
+        GenericTypeNode(Position* pos, TypeNode* concrete) : TypeNode(pos), _concrete(concrete) {}
+        virtual ~GenericTypeNode() {}
+
+    protected:
+        TypeNode* _concrete;
+    };
+
+
+    /** AST node referencing an enumerable type declaration. */
+    class EnumerableTypeNode final : public GenericTypeNode {
+    public:
+        EnumerableTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
+        virtual ~EnumerableTypeNode() {}
+
+        virtual std::string toString() const {
+            return "EnumerableTypeNode<of: " + _concrete->toString() + ">";
+        }
+    };
+
+
+    /** AST node referencing a map type declaration. */
+    class MapTypeNode final : public GenericTypeNode {
+    public:
+        MapTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
+        virtual ~MapTypeNode() {}
+
+        virtual std::string toString() const {
+            return "MapTypeNode<of: " + _concrete->toString() + ">";
+        }
     };
 
 

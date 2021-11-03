@@ -13,6 +13,7 @@
     #include "../shared/util/Console.h"
 	#include "../lang/Token.h"
    	#include "../lang/AST.h"
+   	#include "../lang/Type.h"
 	namespace swarmc::Lang {
 		class Scanner;
 	}
@@ -50,6 +51,8 @@
     swarmc::Lang::IdentifierNode*       transID;
     swarmc::Lang::ExpressionNode*       transExpression;
     swarmc::Lang::CallExpressionNode*   transCallExpression;
+    swarmc::Lang::TypeNode*             transType;
+    swarmc::Lang::DeclarationNode*      transDeclaration;
     std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
 }
 
@@ -102,8 +105,11 @@
 %type <transStatement>      statement
 %type <transID>             id
 %type <transExpression>     expression
+%type <transExpression>     term
 %type <transCallExpression> callExpression
 %type <transExpressions>    actuals
+%type <transType>           type
+%type <transDeclaration>    declaration
 
 %%
 
@@ -134,7 +140,7 @@ statement :
         $$ = e;
     }
 
-    | WITH expression AS id LBRACE statements RBRACE {
+    | WITH term AS id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $7->position());
         WithStatement* w = new WithStatement(pos, $2, $4);
         w->assumeAndReduceStatements($6->reduceToStatements());
@@ -146,6 +152,19 @@ statement :
         $$ = new ExpressionStatementNode(pos, $1);
     }
 
+    | declaration SEMICOLON {
+        $$ = $1;
+    }
+
+
+
+declaration :
+    type id ASSIGN expression {
+        Position* pos = new Position($1->position(), $4->position());
+        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $1, $2, $4);
+        $$ = var;
+    }
+
 
 
 id :
@@ -155,7 +174,42 @@ id :
 
 
 
+type :
+    STRING {
+        PrimitiveType* t = PrimitiveType::of(ValueType::TSTRING);
+        $$ = new PrimitiveTypeNode($1->position(), t);
+    }
+
+    | NUMBER {
+        PrimitiveType* t = PrimitiveType::of(ValueType::TNUM);
+        $$ = new PrimitiveTypeNode($1->position(), t);
+    }
+
+    | BOOL {
+        PrimitiveType* t = PrimitiveType::of(ValueType::TBOOL);
+        $$ = new PrimitiveTypeNode($1->position(), t);
+    }
+
+    | ENUMERABLE LARROW type RARROW {
+        Position* pos = new Position($1->position(), $4->position());
+        $$ = new EnumerableTypeNode(pos, $3);
+    }
+
+    | MAP LARROW type RARROW {
+        Position* pos = new Position($1->position(), $4->position());
+        $$ = new MapTypeNode(pos, $3);
+    }
+
+
+
 expression :
+    term {
+        $$ = $1;
+    }
+
+
+
+term :
     callExpression {
         $$ = $1;
     }
