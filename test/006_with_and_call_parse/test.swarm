@@ -1,0 +1,5 @@
+with random() as myRandom {
+    callAsAStatement();
+    callAsAStatement(myRandom, myRandom);
+}
+

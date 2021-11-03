@@ -225,14 +225,13 @@ namespace Lang {
     };
 
 
-    class EnumerationStatement : public StatementNode {
+    class BlockStatementNode : public StatementNode {
     public:
-        EnumerationStatement(Position* pos, IdentifierNode* enumerable, IdentifierNode* local)
-            : StatementNode(pos), _enumerable(enumerable), _local(local) {
-                _body = new StatementList();
-            }
+        BlockStatementNode(Position* pos) : StatementNode(pos) {
+            _body = new StatementList();
+        }
 
-        virtual ~EnumerationStatement() {}
+        virtual ~BlockStatementNode() {}
 
         void pushStatement(StatementNode* statement) {
             _body->push_back(statement);
@@ -246,6 +245,18 @@ namespace Lang {
             delete body;
         }
 
+    protected:
+        StatementList* _body;
+    };
+
+
+    class EnumerationStatement final : public BlockStatementNode {
+    public:
+        EnumerationStatement(Position* pos, IdentifierNode* enumerable, IdentifierNode* local)
+            : BlockStatementNode(pos), _enumerable(enumerable), _local(local) {}
+
+        virtual ~EnumerationStatement() {}
+
         virtual std::string toString() const {
             return "EnumerationStatement<e: " + _enumerable->name() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
         }
@@ -253,7 +264,23 @@ namespace Lang {
     protected:
         IdentifierNode* _enumerable;
         IdentifierNode* _local;
-        StatementList* _body;
+    };
+
+
+    class WithStatement final : public BlockStatementNode {
+    public:
+        WithStatement(Position* pos, ExpressionNode* resource, IdentifierNode* local)
+            : BlockStatementNode(pos), _resource(resource), _local(local) {}
+
+        virtual ~WithStatement() {}
+
+        virtual std::string toString() const {
+            return "WithStatement<r: " + _resource->toString() + ", as: " + _local->name() + ">";
+        }
+
+    protected:
+        ExpressionNode* _resource;
+        IdentifierNode* _local;
     };
 
 }

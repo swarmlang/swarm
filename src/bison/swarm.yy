@@ -134,6 +134,13 @@ statement :
         $$ = e;
     }
 
+    | WITH expression AS id LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $7->position());
+        WithStatement* w = new WithStatement(pos, $2, $4);
+        w->assumeAndReduceStatements($6->reduceToStatements());
+        $$ = w;
+    }
+
     | callExpression SEMICOLON {
         Position* pos = new Position($1->position(), $2->position());
         $$ = new ExpressionStatementNode(pos, $1);
@@ -150,6 +157,10 @@ id :
 
 expression :
     callExpression {
+        $$ = $1;
+    }
+
+    | id {
         $$ = $1;
     }
 
