@@ -39,12 +39,18 @@ namespace Lang {
             _body = new std::vector<StatementNode*>();
         }
 
+        /**
+         * Demote this program to a list of statements.
+         * This destructs the current instance, so only the
+         * returned StatementList is valid.
+         */
         StatementList* reduceToStatements() {
             StatementList* list = _body;
             delete this;
             return list;
         }
 
+        /** Append a statement to the program. */
         virtual void pushStatement(StatementNode* statement) {
             _body->push_back(statement);
         }
@@ -225,6 +231,7 @@ namespace Lang {
     };
 
 
+    /** Base class for AST nodes that contain a body of statements. */
     class BlockStatementNode : public StatementNode {
     public:
         BlockStatementNode(Position* pos) : StatementNode(pos) {
@@ -233,10 +240,15 @@ namespace Lang {
 
         virtual ~BlockStatementNode() {}
 
+        /** Push a new statement to the end of the body. */
         void pushStatement(StatementNode* statement) {
             _body->push_back(statement);
         }
 
+        /**
+         * Given a list of statements, concatentate them onto the
+         * body and delete the original list container.
+         */
         void assumeAndReduceStatements(StatementList* body) {
             for ( auto statement : *body ) {
                 pushStatement(statement);
@@ -250,6 +262,7 @@ namespace Lang {
     };
 
 
+    /** AST node representing an enumeration block. */
     class EnumerationStatement final : public BlockStatementNode {
     public:
         EnumerationStatement(Position* pos, IdentifierNode* enumerable, IdentifierNode* local)
@@ -267,6 +280,7 @@ namespace Lang {
     };
 
 
+    /** AST node representing a with-resource block. */
     class WithStatement final : public BlockStatementNode {
     public:
         WithStatement(Position* pos, ExpressionNode* resource, IdentifierNode* local)
