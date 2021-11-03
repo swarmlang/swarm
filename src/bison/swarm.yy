@@ -46,6 +46,8 @@
     swarmc::Lang::Token*            lexeme;
     swarmc::Lang::ProgramNode*      transProgram;
     swarmc::Lang::IDToken*          transIDToken;
+    swarmc::Lang::StatementNode*    transStatement;
+    swarmc::Lang::IdentifierNode*   transID;
 }
 
 %define parse.assert
@@ -92,16 +94,47 @@
 %token <transToken>      CAT
 
 /*    (attribute type)    (nonterminal)    */
-%type <transProgram>    program
+%type <transProgram>      program
+%type <transProgram>      statements
+%type <transStatement>    statement
+%type <transID>           id
 
 %%
 
 program :
-    END {
-        $$ = new ProgramNode();
-        *root = $$;
+    statements {
+        $$ = $1;
     }
-	
+
+
+
+statements :
+    statements statement {
+        $1->pushStatement($2);
+        $$ = $1;
+    }
+
+    | %empty {
+        $$ = new ProgramNode();
+    }
+
+
+
+statement :
+    ENUMERATE id AS id LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $7->position());
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, $4);
+        e->assumeAndReduceStatements($6->reduceToStatements());
+        $$ = e;
+    }
+
+
+
+id :
+    ID {
+        $$ = new IdentifierNode($1->position(), $1->identifier());
+    }
+
 %%
 
 void swarmc::Lang::Parser::error(const std::string& msg){

@@ -17,6 +17,10 @@ namespace Lang {
         Token(Position* pos, int kind, std::string display) : _pos(pos), _kind(kind), _display(display) {};
         virtual ~Token() {}
 
+        Position* position() const {
+            return _pos;
+        }
+
         /** Implements IStringable. */
         virtual std::string toString() const {
             std::stringstream s;

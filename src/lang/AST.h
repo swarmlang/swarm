@@ -10,6 +10,8 @@ namespace Lang {
 
     class StatementNode;
 
+    using StatementList = std::vector<StatementNode*>;
+
     /** Base class for all AST nodes. */
     class ASTNode : public IStringable {
     public:
@@ -37,13 +39,23 @@ namespace Lang {
             _body = new std::vector<StatementNode*>();
         }
 
+        StatementList* reduceToStatements() {
+            StatementList* list = _body;
+            delete this;
+            return list;
+        }
+
+        virtual void pushStatement(StatementNode* statement) {
+            _body->push_back(statement);
+        }
+
         virtual std::string toString() const override {
             return "ProgramNode<#body: " + std::to_string(_body->size()) + ">";
         }
 
     protected:
         /** The statements that comprise the program. */
-        std::vector<StatementNode*>* _body;
+        StatementList* _body;
     };
 
 
@@ -95,9 +107,9 @@ namespace Lang {
 
 
     /** Base class for AST nodes that can have a value assigned to them. */
-    class LValNode : public ASTNode {
+    class LValNode : public ExpressionNode {
     public:
-        LValNode(Position* pos) : ASTNode(pos) {}
+        LValNode(Position* pos) : ExpressionNode(pos) {}
         virtual ~LValNode() {}
     };
 
@@ -210,6 +222,38 @@ namespace Lang {
 
     protected:
         ExpressionNode* _exp;
+    };
+
+
+    class EnumerationStatement : public StatementNode {
+    public:
+        EnumerationStatement(Position* pos, IdentifierNode* enumerable, IdentifierNode* local)
+            : StatementNode(pos), _enumerable(enumerable), _local(local) {
+                _body = new StatementList();
+            }
+
+        virtual ~EnumerationStatement() {}
+
+        void pushStatement(StatementNode* statement) {
+            _body->push_back(statement);
+        }
+
+        void assumeAndReduceStatements(StatementList* body) {
+            for ( auto statement : *body ) {
+                pushStatement(statement);
+            }
+
+            delete body;
+        }
+
+        virtual std::string toString() const {
+            return "EnumerationStatement<e: " + _enumerable->name() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
+        }
+
+    protected:
+        IdentifierNode* _enumerable;
+        IdentifierNode* _local;
+        StatementList* _body;
     };
 
 }
