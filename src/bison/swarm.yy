@@ -156,6 +156,14 @@ statement :
         $$ = $1;
     }
 
+    | id ADDASSIGN SEMICOLON {
+        $$ = $1;
+    }
+
+    | id MULTIPLYASSIGN SEMICOLON {
+        $$ = $1;
+    }
+
 
 
 declaration :
@@ -190,6 +198,16 @@ type :
         $$ = new PrimitiveTypeNode($1->position(), t);
     }
 
+    | NUMBERLITERAL {
+        PrimitiveType* t = PrimitiveType::of(ValueType::TNUMBERLITERAL);
+        $$ = new PrimitiveTypeNode($1->position(), t);
+    }
+
+    | STRINGLITERAL {
+        PrimitiveType* t = PrimitiveType::of(ValueType::TSTRINGLITERAL);
+        $$ = new PrimitiveTypeNode($1->position(), t);
+    }
+
     | ENUMERABLE LARROW type RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new EnumerableTypeNode(pos, $3);
@@ -204,6 +222,11 @@ type :
 
 expression :
     term {
+        $$ = $1;
+    }
+
+    | type operation type { # not sure if this goes here
+        # should filter only number and string types?
         $$ = $1;
     }
 
@@ -243,6 +266,43 @@ callExpression :
     | id LPAREN actuals RPAREN {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new CallExpressionNode(pos, $1, $3);
+    }
+
+operation :
+    EQUAL {
+        $$ = $1; # tbf
+    }
+
+    | NOTEQUAL {
+        $$ = $1; # tbf
+    }
+
+    | ADD {
+        $$ = $1; # tbf
+    }
+    
+    | SUBTRACT {
+        $$ = $1; # tbf
+    }
+
+    | MULTIPLY {
+        $$ = $1; # tbf
+    }
+
+    | DIVIDE {
+        $$ = $1; # tbf
+    }
+
+    | MODULUS {
+        $$ = $1; # tbf
+    }
+
+    | POWER {
+        $$ = $1; # tbf
+    }
+
+    | CAT 
+        $$ = $1; # tbf
     }
 
 %%
