@@ -11,9 +11,11 @@ namespace Lang {
 
     class StatementNode;
     class ExpressionNode;
+    class MapStatementNode;
 
     using StatementList = std::vector<StatementNode*>;
     using ExpressionList = std::vector<ExpressionNode*>;
+    using MapBody = std::vector<MapStatementNode*>;
 
     /** Base class for all AST nodes. */
     class ASTNode : public IStringable {
@@ -363,6 +365,37 @@ namespace Lang {
     protected:
         ExpressionNode* _resource;
         IdentifierNode* _local;
+    };
+
+
+    /** AST node referencing one entry in a map. */
+    class MapStatementNode final : public ASTNode {
+    public:
+        MapStatementNode(Position* pos, IdentifierNode* id, ExpressionNode* value) : ASTNode(pos), _id(id), _value(value) {}
+        virtual ~MapStatementNode() {}
+
+        std::string toString() const {
+            return "MapStatementNode<id: " + _id->name() + ">";
+        }
+
+    protected:
+        IdentifierNode* _id;
+        ExpressionNode* _value;
+    };
+
+
+    /** AST node referencing a map literal. */
+    class MapNode final : public ExpressionNode {
+    public:
+        MapNode(Position* pos, MapBody* body) : ExpressionNode(pos), _body(body) {}
+        virtual ~MapNode() {}
+
+        std::string toString() const {
+            return "MapNode<#body: " + std::to_string(_body->size()) + ">";
+        }
+
+    protected:
+        MapBody* _body;
     };
 
 }
