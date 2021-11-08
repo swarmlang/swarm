@@ -10,8 +10,10 @@ namespace swarmc {
 namespace Lang {
 
     class StatementNode;
+    class ExpressionNode;
 
     using StatementList = std::vector<StatementNode*>;
+    using ExpressionList = std::vector<ExpressionNode*>;
 
     /** Base class for all AST nodes. */
     class ASTNode : public IStringable {
@@ -279,6 +281,21 @@ namespace Lang {
 
     protected:
         ExpressionNode* _exp;
+    };
+
+
+    /** AST node representing literal enumerations. */
+    class EnumerationLiteralExpressionNode final : public ExpressionNode {
+    public:
+        EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals) : ExpressionNode(pos), _actuals(actuals) {}
+        virtual ~EnumerationLiteralExpressionNode() {}
+
+        std::string toString() const {
+            return "EnumerationLiteralExpressionNode<#actuals: " + std::to_string(_actuals->size()) + ">";
+        }
+
+    protected:
+        ExpressionList* _actuals;
     };
 
 

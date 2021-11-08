@@ -207,6 +207,17 @@ expression :
         $$ = $1;
     }
 
+    | LBRACKET RBRACKET {
+        Position* pos = new Position($1->position(), $2->position());
+        std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
+        $$ = new EnumerationLiteralExpressionNode(pos, actuals);
+    }
+
+    | LBRACKET actuals RBRACKET {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new EnumerationLiteralExpressionNode(pos, $2);
+    }
+
 
 
 term :

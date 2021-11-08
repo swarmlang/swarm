@@ -66,7 +66,7 @@ $(DEBUG_BUILD_DIR)/lexer.o: $(DEBUG_BUILD_DIR)/lexer.yy.cc
 # between debug and release builds.
 .PHONY: src/bison/parser.cc
 src/bison/parser.cc: src/bison/swarm.yy
-	cd src/bison && $(BISON) -Wall --defines=grammar.hh -v swarm.yy
+	cd src/bison && $(BISON) -v -Wall --defines=grammar.hh -v swarm.yy
 
 $(DEBUG_BUILD_DIR)/parser.o: src/bison/parser.cc
 	g++ $(CPPFLAGS_debug) -c -o $@ $<
