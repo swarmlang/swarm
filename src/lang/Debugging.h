@@ -30,6 +30,7 @@ namespace Lang {
             if (kind == Parser::token::LARROW) return "LARROW";
             if (kind == Parser::token::RARROW) return "RARROW";
             if (kind == Parser::token::SEMICOLON) return "SEMICOLON";
+            if (kind == Parser::token::COLON) return "COLON";
             if (kind == Parser::token::COMMA) return "COMMA";
             if (kind == Parser::token::ASSIGN) return "ASSIGN";
             if (kind == Parser::token::STRING) return "STRING";

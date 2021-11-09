@@ -53,6 +53,8 @@
     swarmc::Lang::CallExpressionNode*   transCallExpression;
     swarmc::Lang::TypeNode*             transType;
     swarmc::Lang::DeclarationNode*      transDeclaration;
+    swarmc::Lang::MapStatementNode*     transMapStatement;
+    std::vector<MapStatementNode*>*     transMapStatements;
     std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
 }
 
@@ -72,6 +74,7 @@
 %token <transToken>      LARROW
 %token <transToken>      RARROW
 %token <transToken>      SEMICOLON
+%token <transToken>      COLON
 %token <transToken>      COMMA
 %token <transToken>      ASSIGN
 %token <transToken>      STRING
@@ -110,6 +113,8 @@
 %type <transExpressions>    actuals
 %type <transType>           type
 %type <transDeclaration>    declaration
+%type <transMapStatement>   mapStatement
+%type <transMapStatements>  mapStatements
 
 %%
 
@@ -225,9 +230,32 @@ expression :
         $$ = $1;
     }
 
+<<<<<<< HEAD
     | type operation type { # not sure if this goes here
         # should filter only number and string types?
         $$ = $1;
+=======
+    | LBRACKET RBRACKET {
+        Position* pos = new Position($1->position(), $2->position());
+        std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
+        $$ = new EnumerationLiteralExpressionNode(pos, actuals);
+    }
+
+    | LBRACKET actuals RBRACKET {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new EnumerationLiteralExpressionNode(pos, $2);
+    }
+
+    | LBRACE RBRACE {
+        Position* pos = new Position($1->position(), $2->position());
+        std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
+        $$ = new MapNode(pos, body);
+    }
+
+    | LBRACE mapStatements RBRACE {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new MapNode(pos, $2);
+>>>>>>> f62a614347bc94973933f369129fed9723ace32f
     }
 
 
@@ -253,6 +281,28 @@ actuals :
     | actuals COMMA expression {
         $$ = $1;
         $$->push_back($3);
+    }
+
+
+
+mapStatements :
+    mapStatement {
+        std::vector<MapStatementNode*>* stmts = new std::vector<MapStatementNode*>();
+        stmts->push_back($1);
+        $$ = stmts;
+    }
+
+    | mapStatements COMMA mapStatement {
+        $1->push_back($3);
+        $$ = $1;
+    }
+
+
+
+mapStatement :
+    id COLON expression {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new MapStatementNode(pos, $1, $3);
     }
 
 

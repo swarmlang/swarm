@@ -89,6 +89,10 @@ with {
 	return makeBareToken(TokenKind::SEMICOLON);
 }
 
+":" {
+	return makeBareToken(TokenKind::COLON);
+}
+
 "," {
 	return makeBareToken(TokenKind::COMMA);
 }
