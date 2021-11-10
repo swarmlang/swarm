@@ -398,6 +398,34 @@ namespace Lang {
         MapBody* _body;
     };
 
+    /** AST node representing literal strings. */
+    class StringLiteralExpressionNode final : public ExpressionNode {
+    public:
+        StringLiteralExpressionNode(Position* pos, ExpressionNode* value) : ExpressionNode(pos), _value(value) {}
+        virtual ~StringLiteralExpressionNode() {}
+
+        std::string toString() const {
+            return "StringLiteralExpressionNode<#value: " + std::to_string(_value->size()) + ">";
+        }
+
+    protected:
+        ExpressionNode* _value;
+    };
+
+    /** AST node representing literal numbers. */
+    class NumberLiteralExpressionNode final : public ExpressionNode {
+    public:
+        NumberLiteralExpressionNode(Position* pos, ExpressionNode* value) : ExpressionNode(pos), _value(value) {}
+        virtual ~NumberLiteralExpressionNode() {}
+
+        std::string toString() const {
+            return "NumberLiteralExpressionNode<#value: " + std::to_string(_value->size()) + ">";
+        }
+
+    protected:
+        ExpressionNode* _value;
+    };
+
 }
 }
 
