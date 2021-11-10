@@ -162,11 +162,13 @@ statement :
     }
 
     | id ADDASSIGN SEMICOLON {
-        $$ = $1;
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new AssignExpressionNode(pos, $1, $2, $3);
     }
 
     | id MULTIPLYASSIGN SEMICOLON {
-        $$ = $1;
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new AssignExpressionNode(pos, $1, $2, $3);
     }
 
 
@@ -203,16 +205,6 @@ type :
         $$ = new PrimitiveTypeNode($1->position(), t);
     }
 
-    | NUMBERLITERAL {
-        PrimitiveType* t = PrimitiveType::of(ValueType::TNUMBERLITERAL);
-        $$ = new PrimitiveTypeNode($1->position(), t);
-    }
-
-    | STRINGLITERAL {
-        PrimitiveType* t = PrimitiveType::of(ValueType::TSTRINGLITERAL);
-        $$ = new PrimitiveTypeNode($1->position(), t);
-    }
-
     | ENUMERABLE LARROW type RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new EnumerableTypeNode(pos, $3);
@@ -223,6 +215,14 @@ type :
         $$ = new MapTypeNode(pos, $3);
     }
 
+    | STRINGLITERAL {
+        $$ = new StringLiteralExpressionNode($1->position(), $1);
+    }
+
+    | NUMBERLITERAL {
+        $$ = new NumberLiteralExpressionNode($1->position(), $1);
+    }
+
 
 
 expression :
@@ -230,11 +230,6 @@ expression :
         $$ = $1;
     }
 
-<<<<<<< HEAD
-    | type operation type { # not sure if this goes here
-        # should filter only number and string types?
-        $$ = $1;
-=======
     | LBRACKET RBRACKET {
         Position* pos = new Position($1->position(), $2->position());
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
@@ -255,7 +250,51 @@ expression :
     | LBRACE mapStatements RBRACE {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new MapNode(pos, $2);
->>>>>>> f62a614347bc94973933f369129fed9723ace32f
+    }
+
+    | type EQUAL type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
+    }
+
+    | type NOTEQUAL type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
+    }
+
+    | type ADD type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
+    }
+
+    | type SUBTRACT type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
+    }
+
+    | type MULTIPLY type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
+    }
+
+    | type DIVIDE type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
+    }
+
+    | type MODULUS type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
+    }
+
+    | type POWER type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
+    }
+
+    | type CAT type { # not sure if this goes here
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new BinaryExpressionNode(pos, $1, $3);
     }
 
 
@@ -316,43 +355,6 @@ callExpression :
     | id LPAREN actuals RPAREN {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new CallExpressionNode(pos, $1, $3);
-    }
-
-operation :
-    EQUAL {
-        $$ = $1; # tbf
-    }
-
-    | NOTEQUAL {
-        $$ = $1; # tbf
-    }
-
-    | ADD {
-        $$ = $1; # tbf
-    }
-    
-    | SUBTRACT {
-        $$ = $1; # tbf
-    }
-
-    | MULTIPLY {
-        $$ = $1; # tbf
-    }
-
-    | DIVIDE {
-        $$ = $1; # tbf
-    }
-
-    | MODULUS {
-        $$ = $1; # tbf
-    }
-
-    | POWER {
-        $$ = $1; # tbf
-    }
-
-    | CAT 
-        $$ = $1; # tbf
     }
 
 %%
