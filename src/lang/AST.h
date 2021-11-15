@@ -367,6 +367,19 @@ namespace Lang {
         IdentifierNode* _local;
     };
 
+    class IfStatement final : public BlockStatementNode {
+    public:
+        IfStatement(Position* pos, ExpressionNode* condition)
+            : BlockStatementNode(pos), _condition(condition) {}
+
+        virtual ~IfStatement() {}
+
+        virtual std::string toString() const {
+            return "IFStatement<f: if " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
+        }
+    protected:
+        ExpressionNode* _condition;
+    }
 
     /** AST node referencing one entry in a map. */
     class MapStatementNode final : public ASTNode {
@@ -397,6 +410,8 @@ namespace Lang {
     protected:
         MapBody* _body;
     };
+
+
 
 }
 }
