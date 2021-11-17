@@ -213,7 +213,7 @@ namespace Lang {
 
     class BoolLiteralNode : public ExpressionNode {
     public:
-        BoolLiteralNode(Position* pos, const bool val) : ExpressionNode(pos, val), _val(val) {}
+        BoolLiteralNode(Position* pos, const bool val) : ExpressionNode(pos), _val(val) {}
     private:
         const bool _val;
     };
@@ -325,7 +325,7 @@ namespace Lang {
 
     class NotNode : public UnaryExpressionNode {
         NotNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
-    }
+    };
 
     /** AST node representing literal enumerations. */
     class EnumerationLiteralExpressionNode final : public ExpressionNode {
@@ -420,7 +420,7 @@ namespace Lang {
         }
     protected:
         ExpressionNode* _condition;
-    }
+    };
 
     class WhileStatement final : public BlockStatementNode {
     public:
@@ -435,7 +435,7 @@ namespace Lang {
 
     protected:
         ExpressionNode* _condition;
-    }
+    };
 
     /** AST node referencing one entry in a map. */
     class MapStatementNode final : public ASTNode {
