@@ -309,21 +309,37 @@ namespace Lang {
     class AndNode final : public BinaryExpressionNode {
     public:
         AndNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
+
+        std::string toString() const {
+            return "AndNode<>";
+        }
     };
 
     class OrNode final : public BinaryExpressionNode {
     public:
         OrNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
+
+        std::string toString() const {
+            return "OrNode<>";
+        }
     };
 
     class EqualsNode final : public BinaryExpressionNode {
        public:
         EqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        std::string toString() const {
+            return "EqualsNode<>";
+        }
     };
 
     class NotEqualsNode final : public BinaryExpressionNode {
        public:
         NotEqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        std::string toString() const {
+            return "NotEqualsNode<>";
+        }
     };
 
     /** Base class for expressions of one operand. */
