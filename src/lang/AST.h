@@ -162,6 +162,7 @@ namespace Lang {
         PrimitiveType* _t;
     };
 
+
     /** Base class for TypeNodes that take a type-generic. */
     class GenericTypeNode : public TypeNode {
     public:
@@ -196,22 +197,26 @@ namespace Lang {
         }
     };
 
+
+    /** AST node referencing literal numbers. */
     class NumLiteralNode final : public ExpressionNode {
     public:
         NumLiteralNode(Position* pos, const double num) : ExpressionNode(pos), _num(num) {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "NumLiteralNode<of: " + std::to_string(_num) + ">";
         }
-    private: 
+    private:
         const int _num;
     };
 
+
+    /** AST node referencing literal strings. */
     class StrLiteralNode final : public ExpressionNode {
     public:
         StrLiteralNode(Position* pos, const std::string str) : ExpressionNode(pos), _str(str) {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "StrLiteralNode<of: " + _str + ">";
         }
 
@@ -219,11 +224,13 @@ namespace Lang {
         const std::string _str;
     };
 
+
+    /** AST node referencing a literal boolean value. */
     class BoolLiteralNode final : public ExpressionNode {
     public:
         BoolLiteralNode(Position* pos, const bool val) : ExpressionNode(pos), _val(val) {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "BoolLiteralNode<of: " + std::to_string(_val) + ">";
         }
 
@@ -231,12 +238,14 @@ namespace Lang {
         const bool _val;
     };
 
+
     /** Base class for AST nodes declaring things in scope. */
     class DeclarationNode : public StatementNode {
     public:
         DeclarationNode(Position* pos) : StatementNode(pos) {}
         virtual ~DeclarationNode() {}
     };
+
 
     /** AST node that declares a variable and sets its value to some expression's result. */
     class VariableDeclarationNode final : public DeclarationNode {
@@ -306,41 +315,50 @@ namespace Lang {
         ExpressionNode* _right;
     };
 
+
+    /** AST node referencing boolean AND of two expressions. */
     class AndNode final : public BinaryExpressionNode {
     public:
         AndNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "AndNode<>";
         }
     };
 
+
+    /** AST node referencing boolean OR of two expressions. */
     class OrNode final : public BinaryExpressionNode {
     public:
         OrNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "OrNode<>";
         }
     };
 
+
+    /** AST node referencing equality comparison of two expressions. */
     class EqualsNode final : public BinaryExpressionNode {
-       public:
+    public:
         EqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "EqualsNode<>";
         }
     };
 
+
+    /** AST node referencing inequality comparison of two expressions. */
     class NotEqualsNode final : public BinaryExpressionNode {
-       public:
+    public:
         NotEqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "NotEqualsNode<>";
         }
     };
+
 
     /** Base class for expressions of one operand. */
     class UnaryExpressionNode : public ExpressionNode {
@@ -352,13 +370,16 @@ namespace Lang {
         ExpressionNode* _exp;
     };
 
+
+    /** AST node referencing boolean negation of an expression. */
     class NotNode final : public UnaryExpressionNode {
         NotNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "NotNode<>";
         }
     };
+
 
     /** AST node representing literal enumerations. */
     class EnumerationLiteralExpressionNode final : public ExpressionNode {
@@ -441,6 +462,8 @@ namespace Lang {
         IdentifierNode* _local;
     };
 
+
+    /** AST node referencing a single-clause conditional statement. */
     class IfStatement final : public BlockStatementNode {
     public:
         IfStatement(Position* pos, ExpressionNode* condition)
@@ -455,6 +478,8 @@ namespace Lang {
         ExpressionNode* _condition;
     };
 
+
+    /** AST node referencing a conditional loop. */
     class WhileStatement final : public BlockStatementNode {
     public:
         WhileStatement(Position* pos, ExpressionNode* condition)
@@ -470,13 +495,14 @@ namespace Lang {
         ExpressionNode* _condition;
     };
 
+
     /** AST node referencing one entry in a map. */
     class MapStatementNode final : public ASTNode {
     public:
         MapStatementNode(Position* pos, IdentifierNode* id, ExpressionNode* value) : ASTNode(pos), _id(id), _value(value) {}
         virtual ~MapStatementNode() {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "MapStatementNode<id: " + _id->name() + ">";
         }
 
@@ -484,6 +510,7 @@ namespace Lang {
         IdentifierNode* _id;
         ExpressionNode* _value;
     };
+
 
     /** AST node referencing a map literal. */
     class MapNode final : public ExpressionNode {
@@ -498,8 +525,6 @@ namespace Lang {
     protected:
         MapBody* _body;
     };
-
-
 
 }
 }
