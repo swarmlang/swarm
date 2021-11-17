@@ -199,13 +199,21 @@ namespace Lang {
     class NumLiteralNode final : public ExpressionNode {
     public:
         NumLiteralNode(Position* pos, const double num) : ExpressionNode(pos), _num(num) {}
-    private:
+
+        std::string toString() const {
+            return "NumLiteralNode<of: " + std::to_string(_num) + ">";
+        }
+    private: 
         const int _num;
     };
 
     class StrLiteralNode final : public ExpressionNode {
     public:
         StrLiteralNode(Position* pos, const std::string str) : ExpressionNode(pos), _str(str) {}
+
+        std::string toString() const {
+            return "StrLiteralNode<of: " + _str + ">";
+        }
 
     private:
         const std::string _str;
@@ -214,6 +222,11 @@ namespace Lang {
     class BoolLiteralNode final : public ExpressionNode {
     public:
         BoolLiteralNode(Position* pos, const bool val) : ExpressionNode(pos), _val(val) {}
+
+        std::string toString() const {
+            return "BoolLiteralNode<of: " + std::to_string(_val) + ">";
+        }
+
     private:
         const bool _val;
     };
