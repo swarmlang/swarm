@@ -196,14 +196,14 @@ namespace Lang {
         }
     };
 
-    class NumLiteralNode: public ExpressionNode {
+    class NumLiteralNode final : public ExpressionNode {
     public:
         NumLiteralNode(Position* pos, const double num) : ExpressionNode(pos), _num(num) {}
     private:
         const int _num;
     };
 
-    class StrLiteralNode : public ExpressionNode {
+    class StrLiteralNode final : public ExpressionNode {
     public:
         StrLiteralNode(Position* pos, const std::string str) : ExpressionNode(pos), _str(str) {}
 
@@ -211,7 +211,7 @@ namespace Lang {
         const std::string _str;
     };
 
-    class BoolLiteralNode : public ExpressionNode {
+    class BoolLiteralNode final : public ExpressionNode {
     public:
         BoolLiteralNode(Position* pos, const bool val) : ExpressionNode(pos), _val(val) {}
     private:
@@ -293,22 +293,22 @@ namespace Lang {
         ExpressionNode* _right;
     };
 
-    class AndNode : public BinaryExpressionNode {
+    class AndNode final : public BinaryExpressionNode {
     public:
         AndNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
     };
 
-    class OrNode : public BinaryExpressionNode {
+    class OrNode final : public BinaryExpressionNode {
     public:
         OrNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
     };
 
-    class EqualsNode : public BinaryExpressionNode {
+    class EqualsNode final : public BinaryExpressionNode {
        public:
         EqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
     };
 
-    class NotEqualsNode : public BinaryExpressionNode {
+    class NotEqualsNode final : public BinaryExpressionNode {
        public:
         NotEqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
     };
@@ -323,7 +323,7 @@ namespace Lang {
         ExpressionNode* _exp;
     };
 
-    class NotNode : public UnaryExpressionNode {
+    class NotNode final : public UnaryExpressionNode {
         NotNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
     };
 
