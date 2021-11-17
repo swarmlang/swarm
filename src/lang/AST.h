@@ -354,6 +354,10 @@ namespace Lang {
 
     class NotNode final : public UnaryExpressionNode {
         NotNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
+
+        std::string toString() const {
+            return "NotNode<>";
+        }
     };
 
     /** AST node representing literal enumerations. */
