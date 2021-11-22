@@ -457,13 +457,13 @@ namespace Lang {
     };
 
 
-    /** AST node referencing concatenation of two values. */
-    class CatNode final : public BinaryExpressionNode {
+    /** AST node referencing concatenation of two strings. */
+    class ConcatenateNode final : public BinaryExpressionNode {
     public:
-        CatNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        ConcatenateNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
-            return "CatNode<>";
+            return "ConcatenateNode<>";
         }
     };
 
@@ -643,6 +643,10 @@ namespace Lang {
             return "StringLiteralExpressionNode<#value: " + std::to_string(_value.size()) + ">";
         }
 
+        std::string value() {
+            return _value;
+        }
+
     protected:
         std::string _value;
     };
@@ -655,6 +659,10 @@ namespace Lang {
 
         std::string toString() const {
             return "NumberLiteralExpressionNode<#value: " + std::to_string(std::to_string(_value).size()) + ">";
+        }
+
+        double value() const {
+            return _value;
         }
 
     protected:

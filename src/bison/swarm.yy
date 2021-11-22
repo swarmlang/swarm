@@ -111,7 +111,7 @@
 %type <transID>             id
 %type <transExpression>     expression
 %type <transExpression>     term
-%type <transAssignExpression>     operation
+%type <transAssignExpression> assignment
 %type <transCallExpression> callExpression
 %type <transExpressions>    actuals
 %type <transType>           type
@@ -157,7 +157,7 @@ statement :
 
     | IF LPAREN expression RPAREN LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $7->position());
-        IfStatement* i = new IfStatement(pos, $3)
+        IfStatement* i = new IfStatement(pos, $3);
         i->assumeAndReduceStatements($6->reduceToStatements());
         $$ = i;
     } 
@@ -178,7 +178,7 @@ statement :
         $$ = $1;
     }
 
-    | operation SEMICOLON {
+    | assignment SEMICOLON {
         Position* pos = new Position($1->position(), $2->position());
         $$ = new ExpressionStatementNode(pos, $1);
     }
@@ -193,21 +193,23 @@ declaration :
     }
 
 
-operation :
+
+assignment :
     id ASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AssignExpressionNode(pos, $1, $3);
     }
 
-    | id ADDASSIGN term {
+    | id ADDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AddAssignExpressionNode(pos, $1, $3);
     }
 
-    | id MULTIPLYASSIGN term {
+    | id MULTIPLYASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new MultiplyAssignExpressionNode(pos, $1, $3);
     }
+
 
 
 id :
@@ -244,6 +246,7 @@ type :
     }
 
 
+
 expression :
     term {
         $$ = $1;
@@ -269,6 +272,10 @@ expression :
     | LBRACE mapStatements RBRACE {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new MapNode(pos, $2);
+    }
+
+    | assignment {
+        $$ = $1;
     }
 
     | term EQUAL term {
@@ -313,8 +320,9 @@ expression :
 
     | term CAT term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new CatNode(pos, $1, $3);
+        $$ = new ConcatenateNode(pos, $1, $3);
     }
+
 
 
 term :
@@ -342,6 +350,7 @@ term :
     | FALSE {
         $$ = new BoolLiteralNode($1->pos(), false);
     }
+
 
 
 actuals :
