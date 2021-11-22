@@ -155,14 +155,16 @@ statement :
 
     | IF LPAREN expression RPAREN LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $7->position());
-        IfStatement* i = new IfStatement(pos, $3, $6);
+        IfStatement* i = new IfStatement(pos, $3)
+        i->assumeAndReduceStatements($6->reduceToStatements());
         $$ = i;
     } 
 
     | WHILE LPAREN expression RPAREN LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $7->position());
-        WhileStatement* w = new WhileStatement(pos, $3, $6);
-        $$ = i;
+        WhileStatement* w = new WhileStatement(pos, $3);
+        w->assumeAndReduceStatements($6->reduceToStatements());
+        $$ = w;
     } 
 
     | callExpression SEMICOLON {
