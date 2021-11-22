@@ -50,6 +50,7 @@
     swarmc::Lang::StatementNode*        transStatement;
     swarmc::Lang::IdentifierNode*       transID;
     swarmc::Lang::ExpressionNode*       transExpression;
+    swarmc::Lang::AssignExpressionNode* transAssignExpression;
     swarmc::Lang::CallExpressionNode*   transCallExpression;
     swarmc::Lang::TypeNode*             transType;
     swarmc::Lang::DeclarationNode*      transDeclaration;
@@ -110,6 +111,7 @@
 %type <transID>             id
 %type <transExpression>     expression
 %type <transExpression>     term
+%type <transAssignExpression>     operation
 %type <transCallExpression> callExpression
 %type <transExpressions>    actuals
 %type <transType>           type
@@ -162,14 +164,9 @@ statement :
         $$ = $1;
     }
 
-    | id ADDASSIGN SEMICOLON {
-        Position* pos = new Position($1->position(), $3->position());
-        $$ = new AssignExpressionNode(pos, $1, $2, $3);
-    }
-
-    | id MULTIPLYASSIGN SEMICOLON {
-        Position* pos = new Position($1->position(), $3->position());
-        $$ = new AssignExpressionNode(pos, $1, $2, $3);
+    | operation SEMICOLON {
+        Position* pos = new Position($1->position(), $2->position());
+        $$ = new ExpressionStatementNode(pos, $1);
     }
 
 
@@ -181,6 +178,22 @@ declaration :
         $$ = var;
     }
 
+
+operation :
+    id ASSIGN expression {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new AssignExpressionNode(pos, $1, $3);
+    }
+
+    | id ADDASSIGN term {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new AddAssignExpressionNode(pos, $1, $3);
+    }
+
+    | id MULTIPLYASSIGN term {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new MultiplyAssignExpressionNode(pos, $1, $3);
+    }
 
 
 id :
@@ -216,15 +229,6 @@ type :
         $$ = new MapTypeNode(pos, $3);
     }
 
-    | STRINGLITERAL {
-        $$ = new StringLiteralExpressionNode($1->position(), $1);
-    }
-
-    | NUMBERLITERAL {
-        $$ = new NumberLiteralExpressionNode($1->position(), $1);
-    }
-
-
 
 expression :
     term {
@@ -253,51 +257,50 @@ expression :
         $$ = new MapNode(pos, $2);
     }
 
-    | type EQUAL type { # not sure if this goes here
+    | term EQUAL term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new EqualsNode(pos, $1, $3);
     }
 
-    | type NOTEQUAL type { # not sure if this goes here
+    | term NOTEQUAL term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new NotEqualsNode(pos, $1, $3);
     }
 
-    | type ADD type { # not sure if this goes here
+    | term ADD term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new AddNode(pos, $1, $3);
     }
 
-    | type SUBTRACT type { # not sure if this goes here
+    | term SUBTRACT term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new SubtractNode(pos, $1, $3);
     }
 
-    | type MULTIPLY type { # not sure if this goes here
+    | term MULTIPLY term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new MultiplyNode(pos, $1, $3);
     }
 
-    | type DIVIDE type { # not sure if this goes here
+    | term DIVIDE term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new DivideNode(pos, $1, $3);
     }
 
-    | type MODULUS type { # not sure if this goes here
+    | term MODULUS term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new ModulusNode(pos, $1, $3);
     }
 
-    | type POWER type { # not sure if this goes here
+    | term POWER term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new PowerNode(pos, $1, $3);
     }
 
-    | type CAT type { # not sure if this goes here
+    | term CAT term {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new BinaryExpressionNode(pos, $1, $3);
+        $$ = new CatNode(pos, $1, $3);
     }
-
 
 
 term :
@@ -307,6 +310,15 @@ term :
 
     | id {
         $$ = $1;
+    }
+
+    | STRINGLITERAL {
+        std::string str = $1->toString();
+        $$ = new StringLiteralExpressionNode($1->position(), str.substr(1, str.size()-1));
+    }
+
+    | NUMBERLITERAL {
+        $$ = new NumberLiteralExpressionNode($1->position(), std::stod($1->toString()));
     }
 
 
