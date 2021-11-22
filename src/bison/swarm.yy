@@ -344,11 +344,11 @@ term :
     }
 
     | TRUE {
-        $$ = new BoolLiteralNode($1->pos(), true);
+        $$ = new BoolLiteralNode($1->position(), true);
     }
 
     | FALSE {
-        $$ = new BoolLiteralNode($1->pos(), false);
+        $$ = new BoolLiteralNode($1->position(), false);
     }
 
 
