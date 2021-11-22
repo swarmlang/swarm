@@ -153,6 +153,18 @@ statement :
         $$ = w;
     }
 
+    | IF LPAREN expression RPAREN LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $7->position());
+        IfStatement* i = new IfStatement(pos, $3, $6);
+        $$ = i;
+    } 
+
+    | WHILE LPAREN expression RPAREN LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $7->position());
+        WhileStatement* w = new WhileStatement(pos, $3, $6);
+        $$ = i;
+    } 
+
     | callExpression SEMICOLON {
         Position* pos = new Position($1->position(), $2->position());
         $$ = new ExpressionStatementNode(pos, $1);
@@ -246,6 +258,13 @@ term :
         $$ = $1;
     }
 
+    | TRUE {
+        $$ = new BoolLiteralNode($1->pos(), true);
+    }
+
+    | FALSE {
+        $$ = new BoolLiteralNode($1->pos(), false);
+    }
 
 
 actuals :
