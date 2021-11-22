@@ -273,7 +273,7 @@ namespace Lang {
 
 
     /** AST node representing an assignment of a value to an lval. */
-    class AssignExpressionNode final : public StatementExpressionNode {
+    class AssignExpressionNode : public StatementExpressionNode {
     public:
         AssignExpressionNode(Position* pos, LValNode* dest, ExpressionNode* value) : StatementExpressionNode(pos), _dest(dest), _value(value) {}
         virtual ~AssignExpressionNode() {}
@@ -359,6 +359,113 @@ namespace Lang {
         }
     };
 
+    /** AST node referencing addition of two values. */
+    class AddNode final : public BinaryExpressionNode {
+    public:
+        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "AddNode<>";
+        }
+    };
+
+    /** AST node representing the addition of a value to the existing value of a lval. */
+    class AddAssignExpressionNode final : public AssignExpressionNode {
+    public:
+        AddAssignExpressionNode(Position* pos, LValNode* dest, ExpressionNode* value) : 
+            AssignExpressionNode(
+                pos, 
+                dest, 
+                new AddNode(pos, dest, value)
+            ) {}
+        virtual ~AddAssignExpressionNode() {}
+
+        virtual std::string toString() const {
+            return "AddAssignExpressionNode<lval: " + _dest->toString() + ">";
+        }
+    };
+
+    /** AST node referencing subtraction of two values. */
+    class SubtractNode final : public BinaryExpressionNode {
+    public:
+        SubtractNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "SubtractNode<>";
+        }
+    };
+
+
+    /** AST node referencing multiplication of two values. */
+    class MultiplyNode final : public BinaryExpressionNode {
+    public:
+        MultiplyNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "MultiplyNode<>";
+        }
+    };
+
+
+    /** AST node representing the multiplication of a value to the existing value of a lval. */
+    class MultiplyAssignExpressionNode final : public AssignExpressionNode {
+    public:
+        MultiplyAssignExpressionNode(Position* pos, LValNode* dest, ExpressionNode* value) :
+            AssignExpressionNode(
+                pos, 
+                dest, 
+                new MultiplyNode(pos, dest, value)
+            ) {}
+        virtual ~MultiplyAssignExpressionNode() {}
+
+        virtual std::string toString() const {
+            return "MultiplyAssignExpressionNode<lval: " + _dest->toString() + ">";
+        }
+    };
+
+
+    /** AST node referencing division of two values. */
+    class DivideNode final : public BinaryExpressionNode {
+    public:
+        DivideNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "DivideNode<>";
+        }
+    };
+
+
+    /** AST node referencing the modulus of two values. */
+    class ModulusNode final : public BinaryExpressionNode {
+    public:
+        ModulusNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "ModulusNode<>";
+        }
+    };
+
+
+    /** AST node referencing the exponential of two values. */
+    class PowerNode final : public BinaryExpressionNode {
+    public:
+        PowerNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "PowerNode<>";
+        }
+    };
+
+
+    /** AST node referencing concatenation of two values. */
+    class CatNode final : public BinaryExpressionNode {
+    public:
+        CatNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "CatNode<>";
+        }
+    };
 
     /** Base class for expressions of one operand. */
     class UnaryExpressionNode : public ExpressionNode {
@@ -524,6 +631,34 @@ namespace Lang {
 
     protected:
         MapBody* _body;
+    };
+
+    /** AST node representing literal strings. */
+    class StringLiteralExpressionNode final : public ExpressionNode {
+    public:
+        StringLiteralExpressionNode(Position* pos, std::string value) : ExpressionNode(pos), _value(value) {}
+        virtual ~StringLiteralExpressionNode() {}
+
+        std::string toString() const {
+            return "StringLiteralExpressionNode<#value: " + std::to_string(_value.size()) + ">";
+        }
+
+    protected:
+        std::string _value;
+    };
+
+    /** AST node representing literal numbers. */
+    class NumberLiteralExpressionNode final : public ExpressionNode {
+    public:
+        NumberLiteralExpressionNode(Position* pos, double value) : ExpressionNode(pos), _value(value) {}
+        virtual ~NumberLiteralExpressionNode() {}
+
+        std::string toString() const {
+            return "NumberLiteralExpressionNode<#value: " + std::to_string(std::to_string(_value).size()) + ">";
+        }
+
+    protected:
+        double _value;
     };
 
 }
