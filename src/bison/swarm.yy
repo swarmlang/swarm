@@ -124,6 +124,7 @@
 program :
     statements {
         $$ = $1;
+        *root = $$;
     }
 
 

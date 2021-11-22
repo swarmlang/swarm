@@ -1,2 +1,20 @@
 [32m[SUCCESS] [0mParsed input program.
-[0m
+[0mProgramNode<#body: 6>
+  VariableDeclarationNode<name: a>
+    PrimitiveTypeNode<of: TSTRING>
+    CallExpressionNode<id: nop, #args: 0>
+  VariableDeclarationNode<name: b>
+    PrimitiveTypeNode<of: TNUM>
+    CallExpressionNode<id: nop, #args: 0>
+  VariableDeclarationNode<name: c>
+    PrimitiveTypeNode<of: TBOOL>
+    CallExpressionNode<id: nop, #args: 0>
+  VariableDeclarationNode<name: d>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL>>
+    CallExpressionNode<id: nop, #args: 0>
+  VariableDeclarationNode<name: e>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    CallExpressionNode<id: nop, #args: 0>
+  VariableDeclarationNode<name: f>
+    EnumerableTypeNode<of: MapTypeNode<of: PrimitiveTypeNode<of: TSTRING>>>
+    CallExpressionNode<id: nop, #args: 0>

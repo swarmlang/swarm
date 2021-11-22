@@ -1,2 +1,5 @@
 [32m[SUCCESS] [0mParsed input program.
-[0m
+[0mProgramNode<#body: 1>
+  VariableDeclarationNode<name: myM>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    MapNode<#body: 0>

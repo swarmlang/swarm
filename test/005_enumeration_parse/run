@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-$SWARMC --dbg-parse $TESTSWARM
+$SWARMC --dbg-output-parse-to -- $TESTSWARM

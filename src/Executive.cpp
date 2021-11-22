@@ -31,6 +31,13 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( flagOutputParse ) {
+        int parseResult = debugOutputParse();
+        if ( parseResult != 0 ) {
+            result = parseResult;
+        }
+    }
+
     if ( flagParseAndStop ) {
         int parseResult = debugParseAndStop();
         if ( parseResult != 0 ) {
@@ -79,6 +86,19 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             skipOne = true;
         } else if ( arg == "--dbg-parse" ) {
             flagParseAndStop = true;
+        } else if ( arg == "--dbg-output-parse-to" ) {
+            if ( i+1 >= params.size() ) {
+                console->error("Missing required parameter for --dbg-output-parse-to. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            std::string outfile = params.at(i+1);
+            console->debug("Parse output file: " + outfile);
+
+            flagOutputParse = true;
+            flagOutputParseTo = outfile;
+            skipOne = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -131,7 +151,13 @@ void Executive::printUsage() {
         ->line();
 
     console->bold()->print("  --dbg-parse  :  ", true)
-        ->line("Lex and parse the input, then stop.");
+        ->line("Lex and parse the input, then stop.")
+        ->line();
+    
+    console->bold()->print("  --dbg-output-parse-to <OUTFILE>  :  ", true)
+        ->line("Parse the input and output the AST to the specified file.")
+        ->line("                                      If the output file is \"--\", will write to stdout.")
+        ->line();
     
     // Output in debugging mode only:
     console->debug()
@@ -152,6 +178,34 @@ int Executive::debugOutputTokens() {
         }
 
         scanner.outputTokens(outfile);
+    }
+
+    return 0;
+}
+
+int Executive::debugOutputParse() {
+    swarmc::Lang::Scanner scanner(_input);
+    swarmc::Lang::ProgramNode* root = nullptr;
+    swarmc::Lang::Parser parser(scanner, &root);
+
+    int error = parser.parse();
+    if ( error ) {
+        console->error("Parse error!");
+        return error;
+    }
+
+    console->success("Parsed input program.");
+
+    if ( flagOutputParseTo == "--" ) {
+        root->printTree(std::cout);
+    } else {
+        std::ofstream outfile(flagOutputParseTo);
+        if ( outfile.bad() ) {
+            console->error("Could not open parse output file for writing: " + flagOutputParseTo);
+            return 1;
+        }
+
+        root->printTree(outfile);
     }
 
     return 0;

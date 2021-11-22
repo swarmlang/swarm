@@ -24,11 +24,14 @@ protected:
     // CLI options
     bool flagOutputTokens = false;
     bool flagParseAndStop = false;
+    bool flagOutputParse = false;
     std::string flagOutputTokensTo;
+    std::string flagOutputParseTo;
     std::string inputFile;
     std::istream* _input = nullptr;
 
     int debugOutputTokens();
+    int debugOutputParse();
     int debugParseAndStop();
 };
 

@@ -1,2 +1,3 @@
 [32m[SUCCESS] [0mParsed input program.
-[0m
+[0mProgramNode<#body: 1>
+  EnumerationStatement<e: myEnum, as: myItem, #body: 0>
