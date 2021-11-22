@@ -41,6 +41,7 @@ namespace Lang {
             if (kind == Parser::token::MAP) return "MAP";
             if (kind == Parser::token::ENUMERABLE) return "ENUMERABLE";
             if (kind == Parser::token::IF) return "IF";
+            if (kind == Parser::token::WHILE) return "WHILE";
             if (kind == Parser::token::TRUE) return "TRUE";
             if (kind == Parser::token::FALSE) return "FALSE";
             if (kind == Parser::token::AND) return "AND";

@@ -129,6 +129,10 @@ if {
 	return makeBareToken(TokenKind::IF);
 }
 
+while {
+	return makeBareToken(TokenKind::WHILE);
+}
+
 true {
 	return makeBareToken(TokenKind::TRUE);
 }

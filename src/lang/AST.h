@@ -198,6 +198,47 @@ namespace Lang {
     };
 
 
+    /** AST node referencing literal numbers. */
+    class NumLiteralNode final : public ExpressionNode {
+    public:
+        NumLiteralNode(Position* pos, const double num) : ExpressionNode(pos), _num(num) {}
+
+        virtual std::string toString() const {
+            return "NumLiteralNode<of: " + std::to_string(_num) + ">";
+        }
+    private:
+        const int _num;
+    };
+
+
+    /** AST node referencing literal strings. */
+    class StrLiteralNode final : public ExpressionNode {
+    public:
+        StrLiteralNode(Position* pos, const std::string str) : ExpressionNode(pos), _str(str) {}
+
+        virtual std::string toString() const {
+            return "StrLiteralNode<of: " + _str + ">";
+        }
+
+    private:
+        const std::string _str;
+    };
+
+
+    /** AST node referencing a literal boolean value. */
+    class BoolLiteralNode final : public ExpressionNode {
+    public:
+        BoolLiteralNode(Position* pos, const bool val) : ExpressionNode(pos), _val(val) {}
+
+        virtual std::string toString() const {
+            return "BoolLiteralNode<of: " + std::to_string(_val) + ">";
+        }
+
+    private:
+        const bool _val;
+    };
+
+
     /** Base class for AST nodes declaring things in scope. */
     class DeclarationNode : public StatementNode {
     public:
@@ -275,6 +316,50 @@ namespace Lang {
     };
 
 
+    /** AST node referencing boolean AND of two expressions. */
+    class AndNode final : public BinaryExpressionNode {
+    public:
+        AndNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "AndNode<>";
+        }
+    };
+
+
+    /** AST node referencing boolean OR of two expressions. */
+    class OrNode final : public BinaryExpressionNode {
+    public:
+        OrNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "OrNode<>";
+        }
+    };
+
+
+    /** AST node referencing equality comparison of two expressions. */
+    class EqualsNode final : public BinaryExpressionNode {
+    public:
+        EqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "EqualsNode<>";
+        }
+    };
+
+
+    /** AST node referencing inequality comparison of two expressions. */
+    class NotEqualsNode final : public BinaryExpressionNode {
+    public:
+        NotEqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string toString() const {
+            return "NotEqualsNode<>";
+        }
+    };
+
+
     /** Base class for expressions of one operand. */
     class UnaryExpressionNode : public ExpressionNode {
     public:
@@ -283,6 +368,16 @@ namespace Lang {
 
     protected:
         ExpressionNode* _exp;
+    };
+
+
+    /** AST node referencing boolean negation of an expression. */
+    class NotNode final : public UnaryExpressionNode {
+        NotNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
+
+        virtual std::string toString() const {
+            return "NotNode<>";
+        }
     };
 
 
@@ -368,13 +463,46 @@ namespace Lang {
     };
 
 
+    /** AST node referencing a single-clause conditional statement. */
+    class IfStatement final : public BlockStatementNode {
+    public:
+        IfStatement(Position* pos, ExpressionNode* condition)
+            : BlockStatementNode(pos), _condition(condition) {}
+
+        virtual ~IfStatement() {}
+
+        virtual std::string toString() const {
+            return "IfStatement<f: if " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
+        }
+    protected:
+        ExpressionNode* _condition;
+    };
+
+
+    /** AST node referencing a conditional loop. */
+    class WhileStatement final : public BlockStatementNode {
+    public:
+        WhileStatement(Position* pos, ExpressionNode* condition)
+            : BlockStatementNode(pos), _condition(condition) {}
+
+        virtual ~WhileStatement() {}
+
+        virtual std::string toString() const {
+            return "WhileStatement<w: while " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
+        }
+
+    protected:
+        ExpressionNode* _condition;
+    };
+
+
     /** AST node referencing one entry in a map. */
     class MapStatementNode final : public ASTNode {
     public:
         MapStatementNode(Position* pos, IdentifierNode* id, ExpressionNode* value) : ASTNode(pos), _id(id), _value(value) {}
         virtual ~MapStatementNode() {}
 
-        std::string toString() const {
+        virtual std::string toString() const {
             return "MapStatementNode<id: " + _id->name() + ">";
         }
 

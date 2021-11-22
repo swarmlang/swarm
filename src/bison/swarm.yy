@@ -85,6 +85,7 @@
 %token <transToken>      ENUMERABLE
 %token <transToken>      MAP
 %token <transToken>      IF
+%token <transToken>      WHILE
 %token <transToken>      TRUE
 %token <transToken>      FALSE
 %token <transToken>      AND
