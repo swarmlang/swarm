@@ -324,6 +324,16 @@ expression :
         $$ = new ConcatenateNode(pos, $1, $3);
     }
 
+    | term OR term {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new OrNode(pos, $1, $3);
+    }
+
+    | term AND term {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new AndNode(pos, $1, $3);
+    }
+
 
 
 term :
