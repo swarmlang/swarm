@@ -275,10 +275,6 @@ expression :
         $$ = new MapNode(pos, $2);
     }
 
-    | assignment {
-        $$ = $1;
-    }
-
     | term EQUAL term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new EqualsNode(pos, $1, $3);
@@ -351,7 +347,9 @@ term :
     }
 
     | NUMBERLITERAL {
-        $$ = new NumberLiteralExpressionNode($1->position(), std::stod($1->toString()));
+        std::string str = $1->toString();
+        double num = ::atof(str.c_str());
+        $$ = new NumberLiteralExpressionNode($1->position(), num);
     }
 
     | TRUE {
