@@ -1,4 +1,4 @@
-number myNum = 3 * (2 + 3);
+number myNum = 2;
 
 number myNum2 = 1 + myNum;
 
