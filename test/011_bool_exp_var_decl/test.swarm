@@ -1,0 +1,5 @@
+bool myTrue = (true || false) && true;
+
+bool myFalse = false || (myTrue && false);
+
+myTrue = (myTrue || false) || myFalse; 

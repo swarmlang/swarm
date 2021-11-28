@@ -1,0 +1,7 @@
+number myNum = 3 * (2 + 3);
+
+number myNum2 = 1 + myNum;
+
+myNum = (3 * 4) - 2;
+
+myNum2 = myNum - (1 + 3);
