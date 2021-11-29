@@ -83,7 +83,7 @@ $(DEBUG_BUILD_DIR)/lexer.o: $(DEBUG_BUILD_DIR)/lexer.yy.cc
 .PHONY: src/bison/parser.cc
 src/bison/parser.cc: src/bison/swarm.yy
 	$(EPARSER) $<
-	$(Q)cd src/bison && $(BISON) -Wcounterexamples -v -Wall --defines=grammar.hh -v swarm.yy
+	$(Q)cd src/bison && $(BISON) -v -Wall --defines=grammar.hh -v swarm.yy
 
 $(DEBUG_BUILD_DIR)/parser.o: src/bison/parser.cc
 	$(ECXX) $<
