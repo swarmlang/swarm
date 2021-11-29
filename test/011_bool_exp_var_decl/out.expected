@@ -1,4 +1,5 @@
-ProgramNode<#body: 3>
+[32m[SUCCESS] [0mParsed input program.
+[0mProgramNode<#body: 3>
   VariableDeclarationNode<name: myTrue>
     PrimitiveTypeNode<of: TBOOL>
     AndNode<>
