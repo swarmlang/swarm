@@ -4,6 +4,7 @@
 #include <string>
 
 #include "../bison/grammar.hh"
+#include "./SymbolTable.h"
 
 namespace swarmc {
 namespace Lang {
@@ -58,6 +59,12 @@ namespace Lang {
             if (kind == Parser::token::MODULUS) return "MODULUS";
             if (kind == Parser::token::POWER) return "POWER";
             if (kind == Parser::token::CAT) return "CAT";
+            
+            return "UNKNOWN";
+        }
+
+        static std::string semanticSymbolKindToString(int kind) {
+            if (kind == SemanticSymbolKind::VARIABLE) return "VARIABLE";
             
             return "UNKNOWN";
         }
