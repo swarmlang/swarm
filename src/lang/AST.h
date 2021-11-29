@@ -7,6 +7,7 @@
 #include "Position.h"
 #include "Type.h"
 #include "SymbolTable.h"
+#include "TypeTable.h"
 
 namespace swarmc {
 namespace Lang {
@@ -37,6 +38,12 @@ namespace Lang {
          * @return false if name analysis failed
          */
         virtual bool nameAnalysis(SymbolTable* symbols) = 0;
+
+        /**
+         * Perform type analysis on this node and its subtree.
+         * @return false if type analysis failed
+         */
+        virtual bool typeAnalysis(TypeTable* types) = 0;
 
         /** Get the node's Position instance. */
         virtual Position* position() const {
@@ -80,6 +87,8 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+
     protected:
         /** The statements that comprise the program. */
         StatementList* _body;
@@ -103,6 +112,8 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
     };
 
 
@@ -135,6 +146,8 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
     protected:
         StatementExpressionNode* _exp;
@@ -173,6 +186,8 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
     };
 
 
@@ -297,6 +312,8 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+
     protected:
         TypeNode* _type;
         IdentifierNode* _id;
@@ -318,6 +335,8 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+
     protected:
         LValNode* _dest;
         ExpressionNode* _value;
@@ -338,6 +357,8 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+
     protected:
         IdentifierNode* _id;
         std::vector<ExpressionNode*>* _args;
@@ -353,6 +374,8 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
     protected:
         ExpressionNode* _left;
@@ -520,6 +543,8 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+
     protected:
         ExpressionNode* _exp;
     };
@@ -548,6 +573,8 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
     protected:
         ExpressionList* _actuals;
@@ -583,6 +610,8 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
     protected:
         StatementList* _body;
@@ -672,6 +701,8 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+
     protected:
         IdentifierNode* _id;
         ExpressionNode* _value;
@@ -691,6 +722,8 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
+        virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
     protected:
         MapBody* _body;
