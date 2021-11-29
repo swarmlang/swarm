@@ -6,6 +6,7 @@
 #include "../shared/IStringable.h"
 #include "Position.h"
 #include "Type.h"
+#include "SymbolTable.h"
 
 namespace swarmc {
 namespace Lang {
@@ -28,7 +29,14 @@ namespace Lang {
         /** Implements IStringable. */
         virtual std::string toString() const = 0;
 
+        /** Print this node and its subtree. */
         virtual void printTree(std::ostream& out, std::string prefix = "") const = 0;
+
+        /**
+         * Perform name analysis on this node and its subtree.
+         * @return false if name analysis failed
+         */
+        virtual bool nameAnalysis(SymbolTable* symbols) = 0;
 
         /** Get the node's Position instance. */
         virtual Position* position() const {
@@ -37,6 +45,7 @@ namespace Lang {
 
     private:
         Position* _pos = nullptr;
+        ScopeTable* _scope = nullptr;
     };
 
 
@@ -69,6 +78,8 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
     protected:
         /** The statements that comprise the program. */
         StatementList* _body;
@@ -90,6 +101,8 @@ namespace Lang {
         virtual ~ExpressionNode() {}
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
     };
 
 
@@ -120,6 +133,8 @@ namespace Lang {
         }
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
     protected:
         StatementExpressionNode* _exp;
@@ -156,6 +171,8 @@ namespace Lang {
         virtual ~TypeNode() {}
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
     };
 
 
@@ -278,6 +295,8 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
     protected:
         TypeNode* _type;
         IdentifierNode* _id;
@@ -297,6 +316,8 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
     protected:
         LValNode* _dest;
         ExpressionNode* _value;
@@ -315,6 +336,8 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
     protected:
         IdentifierNode* _id;
         std::vector<ExpressionNode*>* _args;
@@ -328,6 +351,8 @@ namespace Lang {
         virtual ~BinaryExpressionNode() {}
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
     protected:
         ExpressionNode* _left;
@@ -493,6 +518,8 @@ namespace Lang {
         virtual ~UnaryExpressionNode() {}
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
     protected:
         ExpressionNode* _exp;
     };
@@ -519,6 +546,8 @@ namespace Lang {
         }
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
     protected:
         ExpressionList* _actuals;
@@ -552,6 +581,8 @@ namespace Lang {
         }
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
     protected:
         StatementList* _body;
@@ -639,6 +670,8 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
     protected:
         IdentifierNode* _id;
         ExpressionNode* _value;
@@ -656,6 +689,8 @@ namespace Lang {
         }
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
     protected:
         MapBody* _body;
