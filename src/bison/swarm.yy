@@ -275,63 +275,59 @@ expression :
         $$ = new MapNode(pos, $2);
     }
 
-    | expression EQUAL expression {
+    | term EQUAL term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new EqualsNode(pos, $1, $3);
     }
 
-    | expression NOTEQUAL expression {
+    | term NOTEQUAL term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new NotEqualsNode(pos, $1, $3);
     }
 
-    | expression ADD expression {
+    | term ADD term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AddNode(pos, $1, $3);
     }
 
-    | expression SUBTRACT expression {
+    | term SUBTRACT term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new SubtractNode(pos, $1, $3);
     }
 
-    | expression MULTIPLY expression {
+    | term MULTIPLY term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new MultiplyNode(pos, $1, $3);
     }
 
-    | expression DIVIDE expression {
+    | term DIVIDE term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new DivideNode(pos, $1, $3);
     }
 
-    | expression MODULUS expression {
+    | term MODULUS term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new ModulusNode(pos, $1, $3);
     }
 
-    | expression POWER expression {
+    | term POWER term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new PowerNode(pos, $1, $3);
     }
 
-    | expression CAT expression {
+    | term CAT term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new ConcatenateNode(pos, $1, $3);
     }
 
-    | expression OR expression {
+    | term OR term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new OrNode(pos, $1, $3);
     }
 
-    | expression AND expression {
+    | term AND term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AndNode(pos, $1, $3);
-    }
-
-    | LPAREN expression RPAREN {
-        $$ = $2;
     }
 
 
@@ -362,6 +358,10 @@ term :
 
     | FALSE {
         $$ = new BoolLiteralNode($1->position(), false);
+    }
+
+    | LPAREN expression RPAREN {
+        $$ = $2;
     }
 
 

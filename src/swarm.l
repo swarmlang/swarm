@@ -193,7 +193,7 @@ false {
 	return makeBareToken(TokenKind::POWER);
 }
 
-[.] {
+\. {
 	return makeBareToken(TokenKind::CAT);
 }
 
