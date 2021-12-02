@@ -194,6 +194,11 @@ int Executive::debugOutputParse() {
         return error;
     }
 
+    bool nameAnalysisResult = root->nameAnalysis();
+    if ( !nameAnalysisResult ) {
+        return 1;
+    }
+
     console->success("Parsed input program.");
 
     if ( flagOutputParseTo == "--" ) {
@@ -220,6 +225,11 @@ int Executive::debugParseAndStop() {
     if ( error ) {
         console->error("Parse error!");
         return error;
+    }
+
+    bool nameAnalysisResult = root->nameAnalysis();
+    if ( !nameAnalysisResult ) {
+        return 1;
     }
 
     console->success("Parsed input program.");

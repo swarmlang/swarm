@@ -85,7 +85,13 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        /**
+         * Helper that instantiates a new SymbolTable and starts name analysis.
+         * @returns true if all names were valid
+         */
+        virtual bool nameAnalysis();
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -110,8 +116,6 @@ namespace Lang {
         virtual ~ExpressionNode() {}
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
     };
@@ -145,7 +149,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -172,8 +176,16 @@ namespace Lang {
             return "IdentifierNode<name: " + _name + ">";
         }
 
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
+
+        /** Get the semantic symbol associated with this identifier in its scope. */
+        SemanticSymbol* symbol() const {
+            return _symbol;
+        }
+
     protected:
         std::string _name;
+        SemanticSymbol* _symbol = nullptr;
     };
 
 
@@ -183,9 +195,12 @@ namespace Lang {
         TypeNode(Position* pos) : ASTNode(pos) {}
         virtual ~TypeNode() {}
 
+        /** Get the Type instance this node describes. */
+        virtual Type* type() const = 0;
+
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
     };
@@ -199,6 +214,10 @@ namespace Lang {
 
         virtual std::string toString() const override {
             return "PrimitiveTypeNode<of: " + Type::valueTypeToString(_t->valueType()) + ">";
+        }
+
+        virtual Type* type() const override {
+            return _t;
         }
 
     protected:
@@ -223,6 +242,10 @@ namespace Lang {
         EnumerableTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
         virtual ~EnumerableTypeNode() {}
 
+        virtual Type* type() const override {
+            return GenericType::of(TENUMERABLE, _concrete->type());
+        }
+
         virtual std::string toString() const override {
             return "EnumerableTypeNode<of: " + _concrete->toString() + ">";
         }
@@ -235,46 +258,30 @@ namespace Lang {
         MapTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
         virtual ~MapTypeNode() {}
 
+        virtual Type* type() const override {
+            return GenericType::of(TMAP, _concrete->type());
+        }
+
         virtual std::string toString() const override {
             return "MapTypeNode<of: " + _concrete->toString() + ">";
         }
     };
 
 
-    /** AST node referencing literal numbers. */
-    class NumLiteralNode final : public ExpressionNode {
-    public:
-        NumLiteralNode(Position* pos, const double num) : ExpressionNode(pos), _num(num) {}
-
-        virtual std::string toString() const override {
-            return "NumLiteralNode<of: " + std::to_string(_num) + ">";
-        }
-    private:
-        const int _num;
-    };
-
-
-    /** AST node referencing literal strings. */
-    class StrLiteralNode final : public ExpressionNode {
-    public:
-        StrLiteralNode(Position* pos, const std::string str) : ExpressionNode(pos), _str(str) {}
-
-        virtual std::string toString() const override {
-            return "StrLiteralNode<of: " + _str + ">";
-        }
-
-    private:
-        const std::string _str;
-    };
-
-
     /** AST node referencing a literal boolean value. */
-    class BoolLiteralNode final : public ExpressionNode {
+    class BooleanLiteralExpressionNode final : public ExpressionNode {
     public:
-        BoolLiteralNode(Position* pos, const bool val) : ExpressionNode(pos), _val(val) {}
+        BooleanLiteralExpressionNode(Position* pos, const bool val) : ExpressionNode(pos), _val(val) {}
 
         virtual std::string toString() const override {
             return "BoolLiteralNode<of: " + std::to_string(_val) + ">";
+        }
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
+
+        /** Get the value of the literal expression. */
+        virtual bool value() const {
+            return _val;
         }
 
     private:
@@ -310,7 +317,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -333,7 +340,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -355,7 +362,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -373,7 +380,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -541,7 +548,7 @@ namespace Lang {
         virtual ~UnaryExpressionNode() {}
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -572,7 +579,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -609,7 +616,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -626,9 +633,11 @@ namespace Lang {
 
         virtual ~EnumerationStatement() {}
 
-        virtual std::string toString() const {
+        virtual std::string toString() const override {
             return "EnumerationStatement<e: " + _enumerable->name() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
         }
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
     protected:
         IdentifierNode* _enumerable;
@@ -644,9 +653,11 @@ namespace Lang {
 
         virtual ~WithStatement() {}
 
-        virtual std::string toString() const {
+        virtual std::string toString() const override {
             return "WithStatement<r: " + _resource->toString() + ", as: " + _local->name() + ">";
         }
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
     protected:
         ExpressionNode* _resource;
@@ -699,9 +710,19 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
+
+        /**
+         * Get the identifier for the key of this entry.
+         * NOTE: This identifier is *NOT* a "real" identifier in the sense that it
+         *       has no semantic symbol attached to it and, therefore, no type directly.
+         *       Instead, its type is inferred from the type of the map.
+         */
+        virtual IdentifierNode* id() const {
+            return _id;
+        }
 
     protected:
         IdentifierNode* _id;
@@ -721,7 +742,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
@@ -743,6 +764,8 @@ namespace Lang {
             return _value;
         }
 
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
+
     protected:
         std::string _value;
     };
@@ -753,13 +776,15 @@ namespace Lang {
         NumberLiteralExpressionNode(Position* pos, double value) : ExpressionNode(pos), _value(value) {}
         virtual ~NumberLiteralExpressionNode() {}
 
-        std::string toString() const {
+        std::string toString() const override {
             return "NumberLiteralExpressionNode<#value: " + std::to_string(std::to_string(_value).size()) + ">";
         }
 
         double value() const {
             return _value;
         }
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
     protected:
         double _value;

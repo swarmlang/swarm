@@ -353,11 +353,11 @@ term :
     }
 
     | TRUE {
-        $$ = new BoolLiteralNode($1->position(), true);
+        $$ = new BooleanLiteralExpressionNode($1->position(), true);
     }
 
     | FALSE {
-        $$ = new BoolLiteralNode($1->position(), false);
+        $$ = new BooleanLiteralExpressionNode($1->position(), false);
     }
 
     | LPAREN expression RPAREN {

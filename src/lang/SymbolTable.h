@@ -6,6 +6,7 @@
 #include <list>
 #include <stdexcept>
 #include "../shared/IStringable.h"
+#include "Position.h"
 #include "Type.h"
 
 namespace swarmc {
@@ -13,17 +14,18 @@ namespace Lang {
 
     /** Enum of the various possible things that a name may reference. */
     enum SemanticSymbolKind {
-        VARIABLE
+        VARIABLE,
+        FUNCTION,
     };
 
 
     /** Base class for names identified in code. */
     class SemanticSymbol : public IStringable {
     public:
-        SemanticSymbol(std::string name, const Type* type) : _name(name), _type(type) {}
+        SemanticSymbol(std::string name, const Type* type, const Position* declaredAt) : _name(name), _type(type), _declaredAt(declaredAt) {}
 
         virtual std::string toString() const {
-            return "SemanticSymbol<name: " + _name + ", type: " + _type->toString() + ">";
+            return "SemanticSymbol<name: " + _name + ", type: " + _type->toString() + ", declaredAt: " + _declaredAt->start() + ">";
         }
 
         /** The user-given name of the symbol. */
@@ -39,19 +41,36 @@ namespace Lang {
             return _type;
         }
 
+        /** Get the position where this symbol was declared. */
+        virtual const Position* declaredAt() const {
+            return _declaredAt;
+        }
+
     protected:
         std::string _name;
         const Type* _type;
+        const Position* _declaredAt;
     };
 
 
     /** Semantic symbol implementation for names referencing variables. */
     class VariableSymbol : public SemanticSymbol {
     public:
-        VariableSymbol(std::string name, const Type* type) : SemanticSymbol(name, type) {}
+        VariableSymbol(std::string name, const Type* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
 
         virtual SemanticSymbolKind kind() const override {
             return VARIABLE;
+        }
+    };
+
+
+    /** Semantic symbol implementation for names referencing variables. */
+    class FunctionSymbol : public SemanticSymbol {
+    public:
+        FunctionSymbol(std::string name, const FunctionType* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
+
+        virtual SemanticSymbolKind kind() const override {
+            return FUNCTION;
         }
     };
 
@@ -91,8 +110,8 @@ namespace Lang {
         }
 
         /** Add a new variable to this scope. */
-        void addVariable(std::string name, Type* type) {
-            insert(new VariableSymbol(name, type));
+        void addVariable(std::string name, Type* type, const Position* declaredAt) {
+            insert(new VariableSymbol(name, type, declaredAt));
         }
 
         virtual std::string toString() const {
@@ -163,8 +182,8 @@ namespace Lang {
         }
 
         /** Add a new variable to the current scope. */
-        void addVariable(std::string name, Type* type) {
-            return current()->addVariable(name, type);
+        void addVariable(std::string name, Type* type, const Position* declaredAt) {
+            return current()->addVariable(name, type, declaredAt);
         }
 
         virtual std::string toString() const {
