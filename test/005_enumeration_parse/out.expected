@@ -1,3 +1,7 @@
-[32m[SUCCESS] [0mParsed input program.
-[0mProgramNode<#body: 1>
+ProgramNode<#body: 2>
+  VariableDeclarationNode<name: myEnum>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    EnumerationLiteralExpressionNode<#actuals: 0>
   EnumerationStatement<e: myEnum, as: myItem, #body: 0>
+[32m[SUCCESS] [0mParsed input program.
+[0m

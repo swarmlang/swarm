@@ -1,9 +1,10 @@
-[32m[SUCCESS] [0mParsed input program.
-[0mProgramNode<#body: 1>
+ProgramNode<#body: 1>
   WithStatement<r: CallExpressionNode<id: random, #args: 0>, as: myRandom>
-    ExpressionStatementNode<CallExpressionNode<id: callAsAStatement, #args: 0>>
-      CallExpressionNode<id: callAsAStatement, #args: 0>
-    ExpressionStatementNode<CallExpressionNode<id: callAsAStatement, #args: 2>>
-      CallExpressionNode<id: callAsAStatement, #args: 2>
+    ExpressionStatementNode<CallExpressionNode<id: zero, #args: 0>>
+      CallExpressionNode<id: zero, #args: 0>
+    ExpressionStatementNode<CallExpressionNode<id: zero2, #args: 2>>
+      CallExpressionNode<id: zero2, #args: 2>
         IdentifierNode<name: myRandom>
         IdentifierNode<name: myRandom>
+[32m[SUCCESS] [0mParsed input program.
+[0m

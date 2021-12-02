@@ -1,3 +1,5 @@
+enumerable<number> myEnum = [];
+
 enumerate myEnum as myItem {
 
 }

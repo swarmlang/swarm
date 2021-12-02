@@ -1,5 +1,5 @@
 with random() as myRandom {
-    nop();
-    nop(myRandom, myRandom);
+    zero();
+    zero2(myRandom, myRandom);
 }
 
