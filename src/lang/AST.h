@@ -94,6 +94,11 @@ namespace Lang {
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        
+        virtual bool typeAnalysis() {
+            TypeTable* types = new TypeTable();
+            return typeAnalysis(types);
+        }
 
     protected:
         /** The statements that comprise the program. */

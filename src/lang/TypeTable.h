@@ -25,6 +25,10 @@ namespace Lang {
         const Type* getTypeOf(const ASTNode* node) {
             return _map[node];
         }
+
+        std::string toString() const override {
+            return "TypeTable<#entries: " + std::to_string(_map.size()) + ">";
+        }
     protected:
         TypeMap _map;
     };

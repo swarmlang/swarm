@@ -3,9 +3,8 @@
 #include <string>
 #include <vector>
 #include "Executive.h"
-#include "lang/Scanner.h"
-#include "lang/AST.h"
-#include "bison/grammar.hh"
+#include "pipeline/Pipeline.h"
+#include "errors/ParseError.h"
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
@@ -166,10 +165,11 @@ void Executive::printUsage() {
 }
 
 int Executive::debugOutputTokens() {
-    swarmc::Lang::Scanner scanner(_input);
+    swarmc::Pipeline pipeline(_input);
+    std::ostream* stream = nullptr;
 
     if ( flagOutputTokensTo == "--" ) {
-        scanner.outputTokens(std::cout);
+        stream = &std::cout;
     } else {
         std::ofstream outfile(flagOutputTokensTo);
         if ( outfile.bad() ) {
@@ -177,32 +177,19 @@ int Executive::debugOutputTokens() {
             return 1;
         }
 
-        scanner.outputTokens(outfile);
+        stream = &outfile;
     }
 
+    pipeline.targetTokenRepresentation(*stream);
     return 0;
 }
 
 int Executive::debugOutputParse() {
-    swarmc::Lang::Scanner scanner(_input);
-    swarmc::Lang::ProgramNode* root = nullptr;
-    swarmc::Lang::Parser parser(scanner, &root);
-
-    int error = parser.parse();
-    if ( error ) {
-        console->error("Parse error!");
-        return error;
-    }
-
-    bool nameAnalysisResult = root->nameAnalysis();
-    if ( !nameAnalysisResult ) {
-        return 1;
-    }
-
-    console->success("Parsed input program.");
+    swarmc::Pipeline pipeline(_input);
+    std::ostream* stream = nullptr;
 
     if ( flagOutputParseTo == "--" ) {
-        root->printTree(std::cout);
+        stream = &std::cout;
     } else {
         std::ofstream outfile(flagOutputParseTo);
         if ( outfile.bad() ) {
@@ -210,26 +197,26 @@ int Executive::debugOutputParse() {
             return 1;
         }
 
-        root->printTree(outfile);
+        stream = &outfile;
     }
 
+    try {
+        pipeline.targetASTRepresentation(*stream);
+    } catch (swarmc::Errors::ParseError& e) {
+        return e.exitCode;
+    }
+
+    console->success("Parsed input program.");
     return 0;
 }
 
 int Executive::debugParseAndStop() {
-    swarmc::Lang::Scanner scanner(_input);
-    swarmc::Lang::ProgramNode* root = nullptr;
-    swarmc::Lang::Parser parser(scanner, &root);
+    swarmc::Pipeline pipeline(_input);
 
-    int error = parser.parse();
-    if ( error ) {
-        console->error("Parse error!");
-        return error;
-    }
-
-    bool nameAnalysisResult = root->nameAnalysis();
-    if ( !nameAnalysisResult ) {
-        return 1;
+    try {
+        pipeline.targetASTSymbolic();
+    } catch (swarmc::Errors::ParseError& e) {
+        return e.exitCode;
     }
 
     console->success("Parsed input program.");

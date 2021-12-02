@@ -1,5 +1,4 @@
-[32m[SUCCESS] [0mParsed input program.
-[0mProgramNode<#body: 3>
+ProgramNode<#body: 3>
   VariableDeclarationNode<name: myTrue>
     PrimitiveTypeNode<of: TBOOL>
     AndNode<>
@@ -21,3 +20,5 @@
           IdentifierNode<name: myTrue>
           BoolLiteralNode<of: 0>
         IdentifierNode<name: myFalse>
+[32m[SUCCESS] [0mParsed input program.
+[0m
