@@ -40,7 +40,7 @@ namespace Lang {
             return s.str();
         }
 
-        std::string toString() const {
+        virtual std::string toString() const override {
             std::stringstream s;
             s << start() << "-" << end();
             return s.str();
@@ -51,6 +51,28 @@ namespace Lang {
         size_t _endLine;
         size_t _startCol;
         size_t _endCol;
+    };
+
+
+    /** Arbitrary Position instance representing something defined in the Prologue standard library. */
+    class ProloguePosition : public Position {
+    public:
+        ProloguePosition(std::string symbolName): Position(0, 0, 0, 0), _symbolName(symbolName) {}
+
+        virtual std::string start() const override {
+            return toString();
+        }
+
+        virtual std::string end() const override {
+            return toString();
+        }
+
+        virtual std::string toString() const override {
+            return "[Prologue Definition: " + _symbolName + "]";
+        }
+
+    protected:
+        std::string _symbolName;
     };
 
 }

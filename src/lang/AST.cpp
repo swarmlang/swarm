@@ -97,15 +97,16 @@ namespace Lang {
         // Enter the global scope
         symbols->enter();
 
-        bool result = true;
-
         for ( auto stmt : *_body ) {
-            result = stmt->nameAnalysis(symbols) && result;
+            if ( !stmt->nameAnalysis(symbols) ) {
+                symbols->leave();
+                return false;
+            }
         }
 
         // Exit the global scope
         symbols->leave();
-        return result;
+        return true;
     }
 
     bool ProgramNode::nameAnalysis() {
@@ -166,14 +167,17 @@ namespace Lang {
     }
 
     bool CallExpressionNode::nameAnalysis(SymbolTable* symbols) {
-        bool idResult = _id->nameAnalysis(symbols);
-
-        bool allArgsResult = true;
-        for ( auto arg : *_args ) {
-            allArgsResult = arg->nameAnalysis(symbols) && allArgsResult;
+        if ( !_id->nameAnalysis(symbols) ) {
+            return false;
         }
 
-        return idResult && allArgsResult;
+        for ( auto arg : *_args ) {
+            if ( !arg->nameAnalysis(symbols) ) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     bool BinaryExpressionNode::nameAnalysis(SymbolTable* symbols) {
@@ -187,27 +191,29 @@ namespace Lang {
     }
 
     bool EnumerationLiteralExpressionNode::nameAnalysis(SymbolTable* symbols) {
-        bool allActualsResult = true;
-
         for ( auto actual : *_actuals ) {
-            allActualsResult = actual->nameAnalysis(symbols) && allActualsResult;
+            if ( !actual->nameAnalysis(symbols) ) {
+                return false;
+            }
         }
 
-        return allActualsResult;
+        return true;
     }
 
     bool BlockStatementNode::nameAnalysis(SymbolTable* symbols) {
-        bool allStatementsResult = true;
-
         for ( auto stmt : *_body ) {
-            allStatementsResult = stmt->nameAnalysis(symbols) && allStatementsResult;
+            if ( !stmt->nameAnalysis(symbols) ) {
+                return false;
+            }
         }
 
-        return allStatementsResult;
+        return true;
     }
 
     bool EnumerationStatement::nameAnalysis(SymbolTable* symbols) {
-        bool enumResult = _enumerable->nameAnalysis(symbols);
+        if ( !_enumerable->nameAnalysis(symbols) ) {
+            return false;
+        }
 
         // Need to register the block-local variable
         // Its type is implicit as the generic type of the enumerable
@@ -226,16 +232,20 @@ namespace Lang {
         symbols->enter();
         symbols->addVariable(name, type, pos);
 
-        bool idResult = _local->nameAnalysis(symbols);
+        if ( !_local->nameAnalysis(symbols) ) {
+            symbols->leave();
+            return false;
+        }
+
         bool bodyResult = BlockStatementNode::nameAnalysis(symbols);
-
         symbols->leave();
-
-        return enumResult && idResult && bodyResult;
+        return bodyResult;
     }
 
     bool WithStatement::nameAnalysis(SymbolTable* symbols) {
-        bool resourceResult = _resource->nameAnalysis(symbols);
+        if ( !_resource->nameAnalysis(symbols) ) {
+            return false;
+        }
 
         // need to register the block-local variable
         // Its type is implicit as the result of the expression
@@ -249,12 +259,14 @@ namespace Lang {
         symbols->enter();
         symbols->addVariable(name, type, pos);
 
-        bool idResult = _local->nameAnalysis(symbols);
+        if ( !_local->nameAnalysis(symbols) ) {
+            symbols->leave();
+            return false;
+        }
+
         bool bodyResult = BlockStatementNode::nameAnalysis(symbols);
-
         symbols->leave();
-
-        return resourceResult && idResult && bodyResult;
+        return bodyResult;
     }
 
     bool MapStatementNode::nameAnalysis(SymbolTable* symbols) {
@@ -262,8 +274,6 @@ namespace Lang {
     }
 
     bool MapNode::nameAnalysis(SymbolTable* symbols) {
-        bool anyError = false;
-
         // Check each entry in the map
         for ( auto entry : *_body ) {
             // Check for duplicate name
@@ -280,14 +290,16 @@ namespace Lang {
                     "Duplicate map key: \"" + entry->id()->name() + "\""
                 );
 
-                anyError = true;
+                return false;
             }
 
             // Check the value expression
-            anyError = !(entry->nameAnalysis(symbols)) || anyError;
+            if ( !entry->nameAnalysis(symbols) ) {
+                return false;
+            }
         }
 
-        return !anyError;
+        return true;
     }
 }
 }

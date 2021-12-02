@@ -78,6 +78,8 @@ namespace Lang {
     /** Partial symbol table for a specific scope. */
     class ScopeTable : public IStringable {
     public:
+        static ScopeTable* prologue();
+
         ScopeTable() {
             _symbols = new std::map<std::string, SemanticSymbol*>();
         }
@@ -114,6 +116,11 @@ namespace Lang {
             insert(new VariableSymbol(name, type, declaredAt));
         }
 
+        /** Add a new function to this scope. */
+        void addFunction(std::string name, FunctionType* type, const Position* declaredAt) {
+            insert(new FunctionSymbol(name, type, declaredAt));
+        }
+
         virtual std::string toString() const {
             return "ScopeTable<#symbols: " + std::to_string(_symbols->size()) + " >";
         }
@@ -136,6 +143,7 @@ namespace Lang {
     public:
         SymbolTable() {
             _scopes = new std::list<ScopeTable*>();
+            _scopes->push_back(ScopeTable::prologue());
         }
 
         /** Create a new scope. */
@@ -184,6 +192,11 @@ namespace Lang {
         /** Add a new variable to the current scope. */
         void addVariable(std::string name, Type* type, const Position* declaredAt) {
             return current()->addVariable(name, type, declaredAt);
+        }
+
+        /** Add a new function to the current scope. */
+        void addFunction(std::string name, FunctionType* type, const Position* declaredAt) {
+            return current()->addFunction(name, type, declaredAt);
         }
 
         virtual std::string toString() const {
