@@ -396,6 +396,7 @@ namespace Lang {
     };
 
 
+    /** Base class for expression nodes over static types. */
     class PureBinaryExpressionNode : public BinaryExpressionNode {
     public:
         PureBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
@@ -412,6 +413,7 @@ namespace Lang {
     };
 
 
+    /** Base class for binary nodes that take bool -> bool -> bool */
     class PureBooleanBinaryExpressionNode : public PureBinaryExpressionNode {
     public:
         PureBooleanBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
@@ -431,6 +433,7 @@ namespace Lang {
     };
 
 
+    /** Base class for binary nodes that take num -> num -> num */
     class PureNumberBinaryExpressionNode : public PureBinaryExpressionNode {
     public:
         PureNumberBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
@@ -450,6 +453,7 @@ namespace Lang {
     };
 
 
+    /** Base class for binary nodes that take string -> string -> string */
     class PureStringBinaryExpressionNode : public PureBinaryExpressionNode {
     public:
         PureStringBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
