@@ -301,6 +301,235 @@ namespace Lang {
 
         return true;
     }
+
+
+
+    /************* TYPE ANALYSIS *************/
+
+    bool ProgramNode::typeAnalysis(TypeTable* types) {
+        for ( auto stmt : *_body ) {
+            if ( !stmt->typeAnalysis(types) ) {
+                return false;
+            }
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        return true;
+    }
+
+    bool ExpressionStatementNode::typeAnalysis(TypeTable* types) {
+        bool expResult = _exp->typeAnalysis(types);
+
+        if ( expResult ) {
+            types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        }
+
+        return expResult;
+    }
+
+    bool IdentifierNode::typeAnalysis(TypeTable* types) {
+        if ( _symbol->type() == nullptr ) {
+            Reporting::typeError(
+                position(),
+                "Invalid type of free identifier: " + _name
+            );
+
+            return false;
+        }
+
+        types->setTypeOf(this, _symbol->type());
+        return true;
+    }
+
+    bool TypeNode::typeAnalysis(TypeTable* types) {
+        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        return true;
+    }
+
+    bool BooleanLiteralExpressionNode::typeAnalysis(TypeTable* types) {
+        types->setTypeOf(this, PrimitiveType::of(TBOOL));
+        return true;
+    }
+
+    bool VariableDeclarationNode::typeAnalysis(TypeTable* types) {
+        if (
+            !_type->typeAnalysis(types)
+            || !_id->typeAnalysis(types)
+            || !_value->typeAnalysis(types)
+        ) {
+            return false;
+        }
+
+        const Type* typeOfValue = types->getTypeOf(_value);
+        if ( !_type->type()->is(typeOfValue) ) {
+            Reporting::typeError(
+                position(),
+                "Attempted to initialize identifier of type " + _type->type()->toString() + " with value of type " + typeOfValue->toString() + "."
+            );
+
+            return false;
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        return true;
+    }
+
+    bool AssignExpressionNode::typeAnalysis(TypeTable* types) {
+        if (
+            !_dest->typeAnalysis(types)
+            || !_value->typeAnalysis(types)
+        ) {
+            return false;
+        }
+
+        const Type* typeOfValue = types->getTypeOf(_value);
+        const Type* typeOfDest = types->getTypeOf(_dest);
+
+        if ( !typeOfValue->is(typeOfDest) ) {
+            Reporting::typeError(
+                position(),
+                "Attempted to assign value of type " + typeOfValue->toString() + " to lval of type " + typeOfDest->toString() + "."
+            );
+
+            return false;
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        return true;
+    }
+
+    bool CallExpressionNode::typeAnalysis(TypeTable* types) {
+        // Perform type analysis on the callable
+        if ( !_id->typeAnalysis(types) ) {
+            return false;
+        }
+
+        // Perform type analysis on the arguments
+        for ( auto arg : *_args ) {
+            if ( !arg->typeAnalysis(types) ) {
+                return false;
+            }
+        }
+
+        // Make sure the callee is actually a function type
+        const Type* baseTypeOfCallee = types->getTypeOf(_id);
+        if ( baseTypeOfCallee->kind() != KFUNCTION ) {
+            Reporting::typeError(
+                position(),
+                "Attempted to call non-callable type " + baseTypeOfCallee->toString() + "."
+            );
+        }
+
+        const FunctionType* typeOfCallee = (FunctionType*) baseTypeOfCallee;
+        std::vector<Type*>* argTypes = typeOfCallee->getArgumentTypes();
+
+        // Make sure the # of arguments matches
+        if ( argTypes->size() != _args->size() ) {
+            Reporting::typeError(
+                position(),
+                "Invalid number of arguments for call (expected: " + std::to_string(argTypes->size()) + ")."
+            );
+
+            return false;
+        }
+
+        // Make sure the type of each argument matches
+        for ( size_t i = 0; i < argTypes->size(); i += 1 ) {
+            const Type* expectedType = argTypes->at(i);
+            const Type* actualType = types->getTypeOf(_args->at(i));
+
+            if ( !actualType->is(expectedType) ) {
+                Reporting::typeError(
+                    position(),
+                    "Invalid argument of type " + actualType->toString() + " in position " + std::to_string(i) + " (expected: " + expectedType->toString() + ")."
+                );
+
+                return false;
+            }
+        }
+
+        types->setTypeOf(this, typeOfCallee->returnType());
+        return true;
+    }
+
+    bool PureBinaryExpressionNode::typeAnalysis(TypeTable* types) {
+        if (
+            !_left->typeAnalysis(types)
+            || !_right->typeAnalysis(types)
+        ) {
+            return false;
+        }
+
+        const Type* actualLeftType = types->getTypeOf(_left);
+        const Type* actualRightType = types->getTypeOf(_right);
+
+        if ( !leftType()->is(actualLeftType) ) {
+            Reporting::typeError(
+                position(),
+                "Invalid type " + actualLeftType->toString() + " of left-hand operand to expression (expected: " + leftType()->toString() + ")."
+            );
+
+            return false;
+        }
+
+        if ( !rightType()->is(actualRightType) ) {
+            Reporting::typeError(
+                position(),
+                "Invalid type " + actualRightType->toString() + " of right-hand operand to expression (expected: " + rightType()->toString() + ")."
+            );
+
+            return false;
+        }
+
+        types->setTypeOf(this, resultType());
+        return true;
+    }
+
+    bool EqualsNode::typeAnalysis(TypeTable* types) {
+        if (
+            !_left->typeAnalysis(types)
+            || !_right->typeAnalysis(types)
+        ) {
+            return false;
+        }
+
+        const Type* actualLeftType = types->getTypeOf(_left);
+        const Type* actualRightType = types->getTypeOf(_right);
+        if ( !actualLeftType->is(actualRightType) ) {
+            Reporting::typeError(
+                position(),
+                "Invalid comparison between left-hand type " + actualLeftType->toString() + " and right-hand type " + actualRightType->toString() + "."
+            );
+
+            return false;
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TBOOL));
+        return true;
+    }
+
+    bool NotEqualsNode::typeAnalysis(TypeTable* types) {
+        if (
+            !_left->typeAnalysis(types)
+            || !_right->typeAnalysis(types)
+        ) {
+            return false;
+        }
+
+        const Type* actualLeftType = types->getTypeOf(_left);
+        const Type* actualRightType = types->getTypeOf(_right);
+        if ( !actualLeftType->is(actualRightType) ) {
+            Reporting::typeError(
+                position(),
+                "Invalid comparison between left-hand type " + actualLeftType->toString() + " and right-hand type " + actualRightType->toString() + "."
+            );
+
+            return false;
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TBOOL));
+        return true;
+    }
 }
 }
 

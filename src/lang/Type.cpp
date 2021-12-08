@@ -8,6 +8,7 @@ namespace Lang {
             t == ValueType::TSTRING
             || t == ValueType::TNUM
             || t == ValueType::TBOOL
+            || t == ValueType::TUNIT
         );
     }
 
@@ -17,6 +18,7 @@ namespace Lang {
         if ( t == ValueType::TENUMERABLE ) return "TENUMERABLE";
         if ( t == ValueType::TMAP ) return "TMAP";
         if ( t == ValueType::TNUM ) return "TNUM";
+        if ( t == ValueType::TUNIT ) return "TUNIT";
         return "TUNKNOWN";
     }
 }

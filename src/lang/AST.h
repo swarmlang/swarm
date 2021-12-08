@@ -93,7 +93,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
         
         virtual bool typeAnalysis() {
             TypeTable* types = new TypeTable();
@@ -156,7 +156,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
 
     protected:
         StatementExpressionNode* _exp;
@@ -183,6 +183,8 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
+        virtual bool typeAnalysis(TypeTable* types) override;
+
         /** Get the semantic symbol associated with this identifier in its scope. */
         SemanticSymbol* symbol() const {
             return _symbol;
@@ -207,7 +209,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
     };
 
 
@@ -284,6 +286,8 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
+        virtual bool typeAnalysis(TypeTable* types) override;
+
         /** Get the value of the literal expression. */
         virtual bool value() const {
             return _val;
@@ -324,7 +328,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
 
     protected:
         TypeNode* _type;
@@ -347,7 +351,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
 
     protected:
         LValNode* _dest;
@@ -369,7 +373,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
 
     protected:
         IdentifierNode* _id;
@@ -386,19 +390,89 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
-
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
-
     protected:
         ExpressionNode* _left;
         ExpressionNode* _right;
     };
 
 
-    /** AST node referencing boolean AND of two expressions. */
-    class AndNode final : public BinaryExpressionNode {
+    class PureBinaryExpressionNode : public BinaryExpressionNode {
     public:
-        AndNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
+        PureBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        virtual ~PureBinaryExpressionNode() {}
+
+        virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual const Type* leftType() const = 0;
+
+        virtual const Type* rightType() const = 0;
+
+        virtual const Type* resultType() const = 0;
+
+    };
+
+
+    class PureBooleanBinaryExpressionNode : public PureBinaryExpressionNode {
+    public:
+        PureBooleanBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
+        virtual ~PureBooleanBinaryExpressionNode() {}
+
+        virtual const Type* leftType() const override {
+            return PrimitiveType::of(TBOOL);
+        }
+
+        virtual const Type* rightType() const override {
+            return PrimitiveType::of(TBOOL);
+        }
+
+        virtual const Type* resultType() const override {
+            return PrimitiveType::of(TBOOL);
+        }
+    };
+
+
+    class PureNumberBinaryExpressionNode : public PureBinaryExpressionNode {
+    public:
+        PureNumberBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
+        virtual ~PureNumberBinaryExpressionNode() {}
+
+        virtual const Type* leftType() const override {
+            return PrimitiveType::of(TNUM);
+        }
+
+        virtual const Type* rightType() const override {
+            return PrimitiveType::of(TNUM);
+        }
+
+        virtual const Type* resultType() const override {
+            return PrimitiveType::of(TNUM);
+        }
+    };
+
+
+    class PureStringBinaryExpressionNode : public PureBinaryExpressionNode {
+    public:
+        PureStringBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
+        virtual ~PureStringBinaryExpressionNode() {}
+
+        virtual const Type* leftType() const override {
+            return PrimitiveType::of(TSTRING);
+        }
+
+        virtual const Type* rightType() const override {
+            return PrimitiveType::of(TSTRING);
+        }
+
+        virtual const Type* resultType() const override {
+            return PrimitiveType::of(TSTRING);
+        }
+    };
+
+
+    /** AST node referencing boolean AND of two expressions. */
+    class AndNode final : public PureBooleanBinaryExpressionNode {
+    public:
+        AndNode(Position* pos, ExpressionNode* left, ExpressionNode* right): PureBooleanBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const override {
             return "AndNode<>";
@@ -407,9 +481,9 @@ namespace Lang {
 
 
     /** AST node referencing boolean OR of two expressions. */
-    class OrNode final : public BinaryExpressionNode {
+    class OrNode final : public PureBooleanBinaryExpressionNode {
     public:
-        OrNode(Position* pos, ExpressionNode* left, ExpressionNode* right): BinaryExpressionNode(pos, left, right) {}
+        OrNode(Position* pos, ExpressionNode* left, ExpressionNode* right): PureBooleanBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
             return "OrNode<>";
@@ -422,7 +496,9 @@ namespace Lang {
     public:
         EqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual std::string toString() const override {
             return "EqualsNode<>";
         }
     };
@@ -433,15 +509,17 @@ namespace Lang {
     public:
         NotEqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual std::string toString() const override {
             return "NotEqualsNode<>";
         }
     };
 
     /** AST node referencing addition of two values. */
-    class AddNode final : public BinaryExpressionNode {
+    class AddNode final : public PureNumberBinaryExpressionNode {
     public:
-        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
             return "AddNode<>";
@@ -465,9 +543,9 @@ namespace Lang {
     };
 
     /** AST node referencing subtraction of two values. */
-    class SubtractNode final : public BinaryExpressionNode {
+    class SubtractNode final : public PureNumberBinaryExpressionNode {
     public:
-        SubtractNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        SubtractNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
             return "SubtractNode<>";
@@ -476,9 +554,9 @@ namespace Lang {
 
 
     /** AST node referencing multiplication of two values. */
-    class MultiplyNode final : public BinaryExpressionNode {
+    class MultiplyNode final : public PureNumberBinaryExpressionNode {
     public:
-        MultiplyNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        MultiplyNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
             return "MultiplyNode<>";
@@ -504,9 +582,9 @@ namespace Lang {
 
 
     /** AST node referencing division of two values. */
-    class DivideNode final : public BinaryExpressionNode {
+    class DivideNode final : public PureNumberBinaryExpressionNode {
     public:
-        DivideNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        DivideNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
             return "DivideNode<>";
@@ -515,9 +593,9 @@ namespace Lang {
 
 
     /** AST node referencing the modulus of two values. */
-    class ModulusNode final : public BinaryExpressionNode {
+    class ModulusNode final : public PureNumberBinaryExpressionNode {
     public:
-        ModulusNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        ModulusNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
             return "ModulusNode<>";
@@ -526,9 +604,9 @@ namespace Lang {
 
 
     /** AST node referencing the exponential of two values. */
-    class PowerNode final : public BinaryExpressionNode {
+    class PowerNode final : public PureNumberBinaryExpressionNode {
     public:
-        PowerNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        PowerNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
             return "PowerNode<>";
@@ -537,9 +615,9 @@ namespace Lang {
 
 
     /** AST node referencing concatenation of two strings. */
-    class ConcatenateNode final : public BinaryExpressionNode {
+    class ConcatenateNode final : public PureStringBinaryExpressionNode {
     public:
-        ConcatenateNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+        ConcatenateNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureStringBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string toString() const {
             return "ConcatenateNode<>";

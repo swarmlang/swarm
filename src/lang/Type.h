@@ -19,6 +19,7 @@ namespace Lang {
         TMAP,           // maps
         TERROR,         // special error type (internal use only)
         TFUNCTION,      // functions
+        TUNIT,          // statement return type
     };
 
     /** All possible kinds of types. */
@@ -204,6 +205,20 @@ namespace Lang {
         /** Add an argument to the function's signature. */
         void addArgument(Type* arg) {
             _args.push_back(arg);
+        }
+
+        const Type* returnType() const {
+            return _return;
+        }
+
+        std::vector<Type*>* getArgumentTypes() const {
+            std::vector<Type*>* types = new std::vector<Type*>();
+
+            for ( auto type : _args ) {
+                types->push_back(type);
+            }
+
+            return types;
         }
 
     protected:
