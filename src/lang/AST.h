@@ -763,6 +763,9 @@ namespace Lang {
         virtual std::string toString() const {
             return "IfStatement<f: if " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
         }
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
+
     protected:
         ExpressionNode* _condition;
     };
@@ -779,6 +782,8 @@ namespace Lang {
         virtual std::string toString() const {
             return "WhileStatement<w: while " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
         }
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
     protected:
         ExpressionNode* _condition;

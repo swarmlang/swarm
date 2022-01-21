@@ -269,6 +269,28 @@ namespace Lang {
         return bodyResult;
     }
 
+    bool IfStatement::nameAnalysis(SymbolTable* symbols) {
+        if (!_condition->nameAnalysis(symbols)) {
+            return false;
+        }
+
+        symbols->enter();
+        bool bodyResult = BlockStatementNode::nameAnalysis(symbols);
+        symbols->leave();
+        return bodyResult;
+    }
+
+    bool WhileStatement::nameAnalysis(SymbolTable* symbols) {
+        if (!_condition->nameAnalysis(symbols) ) {
+            return false;
+        }
+
+        symbols->enter();
+        bool bodyResult = BlockStatementNode::nameAnalysis(symbols);
+        symbols->leave();
+        return bodyResult;
+    }
+
     bool MapStatementNode::nameAnalysis(SymbolTable* symbols) {
         return _value->nameAnalysis(symbols);
     }
