@@ -46,6 +46,22 @@ namespace Lang {
             return s.str();
         }
 
+        size_t startLine() const {
+            return _startLine;
+        }
+
+        size_t endLine() const {
+            return _endLine;
+        }
+
+        size_t startCol() const {
+            return _startCol;
+        }
+
+        size_t endCol() const {
+            return _endCol;
+        }
+
     protected:
         size_t _startLine;
         size_t _endLine;
