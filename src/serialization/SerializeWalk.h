@@ -31,6 +31,10 @@ namespace Serialization {
             return obj;
         }
 
+        virtual std::string toString() const {
+            return "SerializeWalk<>";
+        }
+
     protected:
         RefPool<nlohmann::json> _jsons;
         RefPool<std::vector<nlohmann::json>> _vectors;
@@ -414,6 +418,7 @@ namespace Serialization {
             nlohmann::json json = *obj;
 
             json["name"] = sym->name();
+            json["uuid"] = sym->uuid();
             json["kind"] = sym->kind();
             json["type"] = *walkType(sym->type());
             json["declaredAt"] = *walkPosition(sym->declaredAt());

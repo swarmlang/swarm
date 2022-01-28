@@ -9,6 +9,7 @@
 #include "../lang/Scanner.h"
 #include "../bison/grammar.hh"
 #include "../lang/AST.h"
+#include "../serialization/SerializeWalk.h"
 
 namespace swarmc {
 
@@ -81,6 +82,14 @@ namespace swarmc {
         void targetASTRepresentation(std::ostream& out) {
             targetASTSymbolic();
             _root->printTree(out);
+        }
+
+        void targetSerialOutput(std::ostream& out) {
+            targetASTSymbolicTyped();
+
+            Serialization::SerializeWalk walk;
+            std::string json = walk.toJSON(_root);
+            out << json;
         }
 
     protected:

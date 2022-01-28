@@ -6,6 +6,7 @@
 #include <list>
 #include <stdexcept>
 #include "../shared/IStringable.h"
+#include "../shared/uuid.h"
 #include "Position.h"
 #include "Type.h"
 
@@ -22,10 +23,12 @@ namespace Lang {
     /** Base class for names identified in code. */
     class SemanticSymbol : public IStringable {
     public:
-        SemanticSymbol(std::string name, const Type* type, const Position* declaredAt) : _name(name), _type(type), _declaredAt(declaredAt) {}
+        SemanticSymbol(std::string name, const Type* type, const Position* declaredAt) : _name(name), _type(type), _declaredAt(declaredAt) {
+            _uuid = util::uuid4();
+        }
 
         virtual std::string toString() const {
-            return "SemanticSymbol<name: " + _name + ", type: " + _type->toString() + ", declaredAt: " + _declaredAt->start() + ">";
+            return "SemanticSymbol<name: " + _name + ", type: " + _type->toString() + ", declaredAt: " + _declaredAt->start() + ", uuid: " + _uuid + ">";
         }
 
         /** The user-given name of the symbol. */
@@ -46,7 +49,13 @@ namespace Lang {
             return _declaredAt;
         }
 
+        /** Get a universally-unique ID for this symbol. */
+        virtual std::string uuid() const {
+            return _uuid;
+        }
+
     protected:
+        std::string _uuid;
         std::string _name;
         const Type* _type;
         const Position* _declaredAt;
