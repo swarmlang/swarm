@@ -10,6 +10,7 @@ namespace util {
     static std::uniform_int_distribution<> distribution(0, 15);
     static std::uniform_int_distribution<> distribution2(8, 11);
 
+    /** Adapted from https://stackoverflow.com/questions/24365331, modified to use mersenne x64 */
     inline std::string uuid4() {
         std::stringstream s;
         int i;
