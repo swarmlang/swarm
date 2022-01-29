@@ -765,6 +765,7 @@ namespace Lang {
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
+        virtual bool typeAnalysis(TypeTable* types) override;
 
     protected:
         ExpressionNode* _condition;
@@ -784,6 +785,7 @@ namespace Lang {
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
+        virtual bool typeAnalysis(TypeTable* types) override;
 
     protected:
         ExpressionNode* _condition;

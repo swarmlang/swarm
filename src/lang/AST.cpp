@@ -552,5 +552,33 @@ namespace Lang {
         types->setTypeOf(this, PrimitiveType::of(TBOOL));
         return true;
     }
+
+    bool IfStatementNode::typeAnalysis(TypeTable* types) {
+        if (!_condition->typeAnalysis(types)) {
+            return false;
+        }
+
+        const Type* condType = types->getTypeOf(_condition);
+        if ( condType->type() != TBOOL ) {
+            Reporting::typeError(
+                position(),
+                "Condition for if loop not boolean " + condType->toString() + "."
+            );
+        }
+    }
+
+    bool WhileStatement::typeAnalysis(TypeTable* types) {
+        if (!_condition->typeAnalysis(types)) {
+            return false;
+        }
+
+        const Type* condType = types->getTypeOf(_condition);
+        if ( condType->type() != TBOOL ) {
+            Reporting::typeError(
+                position(),
+                "Condition for while loop not boolean " + condType->toString() + "."
+            );
+        }
+    }
 }
 }
