@@ -54,6 +54,18 @@ namespace Lang {
         /** Get the type-kind of this type. */
         virtual TypeKind kind() const = 0;
 
+        virtual bool isPrimitiveType() const {
+            return false;
+        }
+
+        virtual bool isGenericType() const {
+            return false;
+        }
+
+        virtual bool isFunctionType() const {
+            return false;
+        }
+
     protected:
         Type(ValueType t) : _type(t) {}
         ValueType _type;
@@ -96,6 +108,10 @@ namespace Lang {
         virtual TypeKind kind() const override {
             return KPRIMITIVE;
         }
+
+        virtual bool isPrimitiveType() const override {
+            return true;
+        }
     private:
         PrimitiveType(ValueType t) : Type(t) {
             if ( !Type::isPrimitiveValueType(t) ) {
@@ -136,6 +152,10 @@ namespace Lang {
         /** Get the Type of the parameter type. */
         Type* concrete() const {
             return _concrete;
+        }
+
+        virtual bool isGenericType() const override {
+            return true;
         }
     private:
         GenericType(ValueType t, Type* concrete) : Type(t), _concrete(concrete) {}
@@ -219,6 +239,10 @@ namespace Lang {
             }
 
             return types;
+        }
+
+        virtual bool isFunctionType() const override {
+            return true;
         }
 
     protected:

@@ -485,6 +485,8 @@ namespace Lang {
         const Type* actualLeftType = types->getTypeOf(_left);
         const Type* actualRightType = types->getTypeOf(_right);
 
+        console->debug("Typing PureBinaryExpressionNode for " + getName());
+
         if ( !leftType()->is(actualLeftType) ) {
             Reporting::typeError(
                 position(),

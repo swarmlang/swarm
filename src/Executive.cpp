@@ -44,6 +44,13 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( flagOutputSerialize ) {
+        int serializeResult = debugOutputSerialize();
+        if ( serializeResult != 0 ) {
+            result = serializeResult;
+        }
+    }
+
     delete console;
     if ( _input != nullptr ) delete _input;
     return result;
@@ -97,6 +104,19 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
 
             flagOutputParse = true;
             flagOutputParseTo = outfile;
+            skipOne = true;
+        } else if ( arg == "--dbg-output-serialize-to" ) {
+            if ( i+1 >= params.size() ) {
+                console->error("Missing required parameter for --dbg-output-serialize-to. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            std::string outfile = params.at(i+1);
+            console->debug("Serialized AST output file: " + outfile);
+
+            flagOutputSerialize = true;
+            flagOutputSerializeTo = outfile;
             skipOne = true;
         } else {
             // Is this the input file?
@@ -155,6 +175,11 @@ void Executive::printUsage() {
     
     console->bold()->print("  --dbg-output-parse-to <OUTFILE>  :  ", true)
         ->line("Parse the input and output the AST to the specified file.")
+        ->line("                                      If the output file is \"--\", will write to stdout.")
+        ->line();
+
+    console->bold()->print("  --dbg-output-serialize-to <OUTFILE>  :  ", true)
+        ->line("Parse the input and output the serialized AST to the specified file.")
         ->line("                                      If the output file is \"--\", will write to stdout.")
         ->line();
     
@@ -220,5 +245,31 @@ int Executive::debugParseAndStop() {
     }
 
     console->success("Parsed input program.");
+    return 0;
+}
+
+int Executive::debugOutputSerialize() {
+    swarmc::Pipeline pipeline(_input);
+    std::ostream* stream = nullptr;
+
+    if ( flagOutputParseTo == "--" ) {
+        stream = &std::cout;
+    } else {
+        std::ofstream outfile(flagOutputParseTo);
+        if ( outfile.bad() ) {
+            console->error("Could not open parse output file for writing: " + flagOutputParseTo);
+            return 1;
+        }
+
+        stream = &outfile;
+    }
+    
+    try {
+        pipeline.targetSerialOutput(*stream);
+    } catch (swarmc::Errors::ParseError& e) {
+        return e.exitCode;
+    }
+
+    console->success("Serialized input program.");
     return 0;
 }

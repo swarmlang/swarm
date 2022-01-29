@@ -25,14 +25,17 @@ protected:
     bool flagOutputTokens = false;
     bool flagParseAndStop = false;
     bool flagOutputParse = false;
+    bool flagOutputSerialize = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
+    std::string flagOutputSerializeTo;
     std::string inputFile;
     std::istream* _input = nullptr;
 
     int debugOutputTokens();
     int debugOutputParse();
     int debugParseAndStop();
+    int debugOutputSerialize();
 };
 
 

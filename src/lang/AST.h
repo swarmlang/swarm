@@ -4,6 +4,7 @@
 #include <vector>
 #include <ostream>
 #include "../shared/IStringable.h"
+#include "../shared/util/Console.h"
 #include "Position.h"
 #include "Type.h"
 #include "SymbolTable.h"
@@ -21,9 +22,9 @@ namespace Lang {
     using MapBody = std::vector<MapStatementNode*>;
 
     /** Base class for all AST nodes. */
-    class ASTNode : public IStringable {
+    class ASTNode : public IStringable, public IUsesConsole {
     public:
-        ASTNode(Position* pos) : _pos(pos) {};
+        ASTNode(Position* pos) : IUsesConsole(), _pos(pos) {};
 
         virtual ~ASTNode() {}
 
@@ -50,6 +51,8 @@ namespace Lang {
             return _pos;
         };
 
+        virtual std::string getName() const = 0;
+
     private:
         Position* _pos = nullptr;
         ScopeTable* _scope = nullptr;
@@ -61,6 +64,14 @@ namespace Lang {
     public:
         ProgramNode() : ASTNode(new Position(0, 0, 0, 0)) {
             _body = new std::vector<StatementNode*>();
+        }
+
+        virtual std::string getName() const override {
+            return "ProgramNode";
+        }
+
+        const StatementList* body() const {
+            return _body;
         }
 
         /**
@@ -148,8 +159,16 @@ namespace Lang {
         ExpressionStatementNode(Position* pos, StatementExpressionNode* exp) : StatementNode(pos), _exp(exp) {}
         virtual ~ExpressionStatementNode() {}
 
+        virtual std::string getName() const override {
+            return "ExpressionStatementNode";
+        }
+
         virtual std::string toString() const override {
             return "ExpressionStatementNode<" + _exp->toString() + ">";
+        }
+
+        StatementExpressionNode* expression() const {
+            return _exp;
         }
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
@@ -176,6 +195,10 @@ namespace Lang {
     public:
         IdentifierNode(Position* pos, std::string name) : LValNode(pos), _name(name) {}
         const std::string name() { return _name; }
+
+        virtual std::string getName() const override {
+            return "IdentifierNode";
+        }
 
         virtual std::string toString() const override {
             return "IdentifierNode<name: " + _name + ">";
@@ -219,6 +242,10 @@ namespace Lang {
         PrimitiveTypeNode(Position* pos, PrimitiveType* t) : TypeNode(pos), _t(t) {}
         virtual ~PrimitiveTypeNode() {}
 
+        virtual std::string getName() const override {
+            return "PrimitiveTypeNode";
+        }
+
         virtual std::string toString() const override {
             return "PrimitiveTypeNode<of: " + Type::valueTypeToString(_t->valueType()) + ">";
         }
@@ -249,6 +276,10 @@ namespace Lang {
         EnumerableTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
         virtual ~EnumerableTypeNode() {}
 
+        virtual std::string getName() const override {
+            return "EnumerableTypeNode";
+        }
+
         virtual Type* type() const override {
             return GenericType::of(TENUMERABLE, _concrete->type());
         }
@@ -265,6 +296,10 @@ namespace Lang {
         MapTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
         virtual ~MapTypeNode() {}
 
+        virtual std::string getName() const override {
+            return "MapTypeNode";
+        }
+
         virtual Type* type() const override {
             return GenericType::of(TMAP, _concrete->type());
         }
@@ -279,6 +314,10 @@ namespace Lang {
     class BooleanLiteralExpressionNode final : public ExpressionNode {
     public:
         BooleanLiteralExpressionNode(Position* pos, const bool val) : ExpressionNode(pos), _val(val) {}
+
+        virtual std::string getName() const override {
+            return "BooleanLiteralExpressionNode";
+        }
 
         virtual std::string toString() const override {
             return "BoolLiteralNode<of: " + std::to_string(_val) + ">";
@@ -318,6 +357,10 @@ namespace Lang {
         VariableDeclarationNode(Position* pos, TypeNode* type, IdentifierNode* id, ExpressionNode* value)
             : DeclarationNode(pos), _type(type), _id(id), _value(value) {}
 
+        virtual std::string getName() const override {
+            return "VariableDeclarationNode";
+        }
+
         virtual ~VariableDeclarationNode() {}
 
         virtual std::string toString() const override {
@@ -329,6 +372,18 @@ namespace Lang {
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
+
+        IdentifierNode* id() const {
+            return _id;
+        }
+
+        ExpressionNode* value() const {
+            return _value;
+        }
+
+        TypeNode* typeNode() const {
+            return _type;
+        }
 
     protected:
         TypeNode* _type;
@@ -353,6 +408,18 @@ namespace Lang {
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
+        virtual std::string getName() const override {
+            return "AssignExpressionNode";
+        }
+
+        virtual LValNode* dest() const {
+            return _dest;
+        }
+
+        virtual ExpressionNode* value() const {
+            return _value;
+        }
+
     protected:
         LValNode* _dest;
         ExpressionNode* _value;
@@ -365,6 +432,10 @@ namespace Lang {
         CallExpressionNode(Position* pos, IdentifierNode* id, std::vector<ExpressionNode*>* args) : StatementExpressionNode(pos), _id(id), _args(args) {}
         virtual ~CallExpressionNode() {}
 
+        virtual std::string getName() const override {
+            return "CallExpressionNode";
+        }
+
         virtual std::string toString() const override {
             return "CallExpressionNode<id: " + _id->name() + ", #args: " + std::to_string(_args->size()) + ">";
         }
@@ -374,6 +445,14 @@ namespace Lang {
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
+
+        IdentifierNode* id() const {
+            return _id;
+        }
+
+        std::vector<ExpressionNode*>* args() const {
+            return _args;
+        }
 
     protected:
         IdentifierNode* _id;
@@ -390,6 +469,14 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
+
+        ExpressionNode* left() const {
+            return _left;
+        }
+
+        ExpressionNode* right() const {
+            return _right;
+        }
     protected:
         ExpressionNode* _left;
         ExpressionNode* _right;
@@ -478,6 +565,10 @@ namespace Lang {
     public:
         AndNode(Position* pos, ExpressionNode* left, ExpressionNode* right): PureBooleanBinaryExpressionNode(pos, left, right) {}
 
+        virtual std::string getName() const override {
+            return "AndNode";
+        }
+
         virtual std::string toString() const override {
             return "AndNode<>";
         }
@@ -489,7 +580,11 @@ namespace Lang {
     public:
         OrNode(Position* pos, ExpressionNode* left, ExpressionNode* right): PureBooleanBinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "OrNode";
+        }
+
+        virtual std::string toString() const override {
             return "OrNode<>";
         }
     };
@@ -499,6 +594,10 @@ namespace Lang {
     class EqualsNode final : public BinaryExpressionNode {
     public:
         EqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
+
+        virtual std::string getName() const override {
+            return "EqualsNode";
+        }
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -513,6 +612,10 @@ namespace Lang {
     public:
         NotEqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
 
+        virtual std::string getName() const override {
+            return "NotEqualsNode";
+        }
+
         virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual std::string toString() const override {
@@ -523,9 +626,15 @@ namespace Lang {
     /** AST node referencing addition of two values. */
     class AddNode final : public PureNumberBinaryExpressionNode {
     public:
-        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
+        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {
+            console->debug("Created AddNode: " + left->toString() + right->toString());
+        }
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "AddNode";
+        }
+
+        virtual std::string toString() const override {
             return "AddNode<>";
         }
     };
@@ -541,7 +650,11 @@ namespace Lang {
             ) {}
         virtual ~AddAssignExpressionNode() {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "AddAssignExpressionNode";
+        }
+
+        virtual std::string toString() const override {
             return "AddAssignExpressionNode<lval: " + _dest->toString() + ">";
         }
     };
@@ -551,7 +664,11 @@ namespace Lang {
     public:
         SubtractNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "SubtractNode";
+        }
+
+        virtual std::string toString() const override {
             return "SubtractNode<>";
         }
     };
@@ -562,7 +679,11 @@ namespace Lang {
     public:
         MultiplyNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "MultiplyNode";
+        }
+
+        virtual std::string toString() const override {
             return "MultiplyNode<>";
         }
     };
@@ -579,7 +700,11 @@ namespace Lang {
             ) {}
         virtual ~MultiplyAssignExpressionNode() {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "MultiplyAssignExpressionNode";
+        }
+
+        virtual std::string toString() const override {
             return "MultiplyAssignExpressionNode<lval: " + _dest->toString() + ">";
         }
     };
@@ -590,7 +715,11 @@ namespace Lang {
     public:
         DivideNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "DivideNode";
+        }
+
+        virtual std::string toString() const override {
             return "DivideNode<>";
         }
     };
@@ -601,7 +730,11 @@ namespace Lang {
     public:
         ModulusNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "ModulusNode";
+        }
+
+        virtual std::string toString() const override {
             return "ModulusNode<>";
         }
     };
@@ -612,7 +745,11 @@ namespace Lang {
     public:
         PowerNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "PowerNode";
+        }
+
+        virtual std::string toString() const override {
             return "PowerNode<>";
         }
     };
@@ -623,7 +760,11 @@ namespace Lang {
     public:
         ConcatenateNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureStringBinaryExpressionNode(pos, left, right) {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "ConcatenateNode";
+        }
+
+        virtual std::string toString() const override {
             return "ConcatenateNode<>";
         }
     };
@@ -639,6 +780,9 @@ namespace Lang {
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
+        ExpressionNode* exp() const {
+            return _exp;
+        }
     protected:
         ExpressionNode* _exp;
     };
@@ -648,7 +792,11 @@ namespace Lang {
     class NotNode final : public UnaryExpressionNode {
         NotNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "NotNode";
+        }
+
+        virtual std::string toString() const override {
             return "NotNode<>";
         }
     };
@@ -664,11 +812,19 @@ namespace Lang {
             return "EnumerationLiteralExpressionNode<#actuals: " + std::to_string(_actuals->size()) + ">";
         }
 
+        virtual std::string getName() const override {
+            return "EnumerationLiteralExpressionNode";
+        }
+
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
+
+        ExpressionList* actuals() const {
+            return _actuals;
+        }
 
     protected:
         ExpressionList* _actuals;
@@ -707,6 +863,9 @@ namespace Lang {
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
+        StatementList* body() const {
+            return _body;
+        }
     protected:
         StatementList* _body;
     };
@@ -720,12 +879,23 @@ namespace Lang {
 
         virtual ~EnumerationStatement() {}
 
+        virtual std::string getName() const override {
+            return "EnumerationStatement";
+        }
+
         virtual std::string toString() const override {
             return "EnumerationStatement<e: " + _enumerable->name() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
+        IdentifierNode* enumerable() const {
+            return _enumerable;
+        }
+
+        IdentifierNode* local() const {
+            return _local;
+        }
     protected:
         IdentifierNode* _enumerable;
         IdentifierNode* _local;
@@ -740,12 +910,23 @@ namespace Lang {
 
         virtual ~WithStatement() {}
 
+        virtual std::string getName() const override {
+            return "WithStatement";
+        }
+
         virtual std::string toString() const override {
             return "WithStatement<r: " + _resource->toString() + ", as: " + _local->name() + ">";
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
+        ExpressionNode* resource() const {
+            return _resource;
+        }
+
+        IdentifierNode* local() const {
+            return _local;
+        }
     protected:
         ExpressionNode* _resource;
         IdentifierNode* _local;
@@ -760,13 +941,20 @@ namespace Lang {
 
         virtual ~IfStatement() {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "IfStatement";
+        }
+
+        virtual std::string toString() const override {
             return "IfStatement<f: if " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
         virtual bool typeAnalysis(TypeTable* types) override;
 
+        ExpressionNode* condition() const {
+            return _condition;
+        }
     protected:
         ExpressionNode* _condition;
     };
@@ -780,13 +968,20 @@ namespace Lang {
 
         virtual ~WhileStatement() {}
 
-        virtual std::string toString() const {
+        virtual std::string getName() const override {
+            return "WhileStatement";
+        }
+
+        virtual std::string toString() const override {
             return "WhileStatement<w: while " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
         virtual bool typeAnalysis(TypeTable* types) override;
 
+        ExpressionNode* condition() const {
+            return _condition;
+        }
     protected:
         ExpressionNode* _condition;
     };
@@ -797,6 +992,10 @@ namespace Lang {
     public:
         MapStatementNode(Position* pos, IdentifierNode* id, ExpressionNode* value) : ASTNode(pos), _id(id), _value(value) {}
         virtual ~MapStatementNode() {}
+
+        virtual std::string getName() const override {
+            return "MapStatementNode";
+        }
 
         virtual std::string toString() const override {
             return "MapStatementNode<id: " + _id->name() + ">";
@@ -818,6 +1017,10 @@ namespace Lang {
             return _id;
         }
 
+        ExpressionNode* value() const {
+            return _value;
+        }
+
     protected:
         IdentifierNode* _id;
         ExpressionNode* _value;
@@ -830,6 +1033,10 @@ namespace Lang {
         MapNode(Position* pos, MapBody* body) : ExpressionNode(pos), _body(body) {}
         virtual ~MapNode() {}
 
+        virtual std::string getName() const override {
+            return "MapNode";
+        }
+
         std::string toString() const override {
             return "MapNode<#body: " + std::to_string(_body->size()) + ">";
         }
@@ -840,6 +1047,10 @@ namespace Lang {
 
         virtual bool typeAnalysis(TypeTable* types) override { return true; }
 
+        MapBody* body() const {
+            return _body;
+        }
+
     protected:
         MapBody* _body;
     };
@@ -849,6 +1060,10 @@ namespace Lang {
     public:
         StringLiteralExpressionNode(Position* pos, std::string value) : ExpressionNode(pos), _value(value) {}
         virtual ~StringLiteralExpressionNode() {}
+
+        virtual std::string getName() const override {
+            return "StringLiteralExpressionNode";
+        }
 
         std::string toString() const override {
             return "StringLiteralExpressionNode<#value: " + std::to_string(_value.size()) + ">";
@@ -869,6 +1084,10 @@ namespace Lang {
     public:
         NumberLiteralExpressionNode(Position* pos, double value) : ExpressionNode(pos), _value(value) {}
         virtual ~NumberLiteralExpressionNode() {}
+
+        virtual std::string getName() const override {
+            return "NumberLiteralExpressionNode";
+        }
 
         std::string toString() const override {
             return "NumberLiteralExpressionNode<#value: " + std::to_string(std::to_string(_value).size()) + ">";

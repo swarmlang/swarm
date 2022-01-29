@@ -1,0 +1,14 @@
+{
+  "0 debug pnpm:scope": {
+    "selected": 1
+  },
+  "1 error pnpm": {
+    "code": "ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND",
+    "err": {
+      "name": "pnpm",
+      "message": "No package.json (or package.yaml, or package.json5) was found in \"/home/garrettmills/Projects/Classes/swarm\".",
+      "code": "ERR_PNPM_NO_IMPORTER_MANIFEST_FOUND",
+      "stack": "pnpm: No package.json (or package.yaml, or package.json5) was found in \"/home/garrettmills/Projects/Classes/swarm\".\n    at readProjectManifest (/home/garrettmills/.config/yarn/global/node_modules/pnpm/dist/pnpm.cjs:40497:13)\n    at async Object.readProjectManifestOnly (/home/garrettmills/.config/yarn/global/node_modules/pnpm/dist/pnpm.cjs:40501:28)\n    at async Object.readProjectManifestOnly (/home/garrettmills/.config/yarn/global/node_modules/pnpm/dist/pnpm.cjs:40720:24)\n    at async Object.handler (/home/garrettmills/.config/yarn/global/node_modules/pnpm/dist/pnpm.cjs:129562:24)\n    at async /home/garrettmills/.config/yarn/global/node_modules/pnpm/dist/pnpm.cjs:133736:20\n    at async run (/home/garrettmills/.config/yarn/global/node_modules/pnpm/dist/pnpm.cjs:133711:34)\n    at async runPnpm (/home/garrettmills/.config/yarn/global/node_modules/pnpm/dist/pnpm.cjs:133921:5)\n    at async /home/garrettmills/.config/yarn/global/node_modules/pnpm/dist/pnpm.cjs:133913:7"
+    }
+  }
+}
