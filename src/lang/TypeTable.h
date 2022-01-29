@@ -3,6 +3,7 @@
 
 #include <map>
 #include "../shared/IStringable.h"
+#include "../errors/SwarmError.h"
 #include "./Type.h"
 
 namespace swarmc {
@@ -23,7 +24,10 @@ namespace Lang {
         }
 
         const Type* getTypeOf(const ASTNode* node) {
-            return _map[node];
+            const Type* type = _map[node];
+            if ( type == nullptr ) {
+                throw Errors::SwarmError("Unable to determine type for node");
+            }
         }
 
         std::string toString() const override {

@@ -4,6 +4,7 @@
 #include <vector>
 #include <ostream>
 #include "../shared/IStringable.h"
+#include "../shared/util/Console.h"
 #include "Position.h"
 #include "Type.h"
 #include "SymbolTable.h"
@@ -21,9 +22,9 @@ namespace Lang {
     using MapBody = std::vector<MapStatementNode*>;
 
     /** Base class for all AST nodes. */
-    class ASTNode : public IStringable {
+    class ASTNode : public IStringable, public IUsesConsole {
     public:
-        ASTNode(Position* pos) : _pos(pos) {};
+        ASTNode(Position* pos) : IUsesConsole(), _pos(pos) {};
 
         virtual ~ASTNode() {}
 
@@ -625,7 +626,9 @@ namespace Lang {
     /** AST node referencing addition of two values. */
     class AddNode final : public PureNumberBinaryExpressionNode {
     public:
-        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
+        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {
+            console->debug("Created AddNode: " + left->toString() + right->toString());
+        }
 
         virtual std::string getName() const override {
             return "AddNode";

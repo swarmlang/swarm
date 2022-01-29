@@ -80,7 +80,7 @@ namespace swarmc {
         }
 
         void targetASTRepresentation(std::ostream& out) {
-            targetASTSymbolic();
+            targetASTSymbolicTyped();
             _root->printTree(out);
         }
 

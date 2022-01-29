@@ -19,6 +19,8 @@ namespace Serialization {
      */
     class SerializeWalk : public Lang::Walk<nlohmann::json*> {
     public:
+        SerializeWalk() : Lang::Walk<nlohmann::json*>() {}
+
         virtual std::string toJSON(ASTNode* node) {
             return walk(node)->dump();
         }

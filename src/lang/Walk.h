@@ -2,6 +2,7 @@
 #define SWARMC_WALK_H
 
 #include "../shared/IStringable.h"
+#include "../shared/util/Console.h"
 #include "../errors/SwarmError.h"
 #include "AST.h"
 
@@ -9,8 +10,10 @@ namespace swarmc {
 namespace Lang {
 
     template <typename TReturn>
-    class Walk : public IStringable {
+    class Walk : public IStringable, public IUsesConsole {
     public:
+        Walk() : IUsesConsole() {}
+
         virtual TReturn walk(ASTNode* node) {
             if ( node->getName() == "ProgramNode" ) return walkProgramNode((ProgramNode*) node);
             if ( node->getName() == "ExpressionStatementNode" ) return walkExpressionStatementNode((ExpressionStatementNode*) node);
