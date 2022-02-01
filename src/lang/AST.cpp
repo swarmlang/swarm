@@ -555,13 +555,13 @@ namespace Lang {
         return true;
     }
 
-    bool IfStatementNode::typeAnalysis(TypeTable* types) {
+    bool IfStatement::typeAnalysis(TypeTable* types) {
         if (!_condition->typeAnalysis(types)) {
             return false;
         }
 
         const Type* condType = types->getTypeOf(_condition);
-        if ( condType->type() != TBOOL ) {
+        if ( condType->is(PrimitiveType::of(TBOOL))) {
             Reporting::typeError(
                 position(),
                 "Condition for if loop not boolean " + condType->toString() + "."
@@ -575,7 +575,7 @@ namespace Lang {
         }
 
         const Type* condType = types->getTypeOf(_condition);
-        if ( condType->type() != TBOOL ) {
+        if ( condType->is(PrimitiveType::of(TBOOL))) {
             Reporting::typeError(
                 position(),
                 "Condition for while loop not boolean " + condType->toString() + "."
