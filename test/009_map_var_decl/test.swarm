@@ -1,1 +1,1 @@
-map<number> myM = {};
+map<number> myM = {abc: 123};

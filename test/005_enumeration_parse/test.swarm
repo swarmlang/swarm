@@ -1,4 +1,4 @@
-enumerable<number> myEnum = [];
+enumerable<number> myEnum = [1];
 
 enumerate myEnum as myItem {
 

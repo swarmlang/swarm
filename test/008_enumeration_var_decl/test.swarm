@@ -1,1 +1,1 @@
-enumerable<number> myE = [];
+enumerable<number> myE = [1, 2, 3];
