@@ -1,0 +1,21 @@
+ProgramNode<#body: 5>
+  VariableDeclarationNode<name: a>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    EnumerationLiteralExpressionNode<#actuals: 0>
+  VariableDeclarationNode<name: b>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL>>
+    EnumerationLiteralExpressionNode<#actuals: 0>
+  VariableDeclarationNode<name: c>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    MapNode<#body: 0>
+  VariableDeclarationNode<name: d>
+    MapTypeNode<of: PrimitiveTypeNode<of: TSTRING>>
+    MapNode<#body: 0>
+  VariableDeclarationNode<name: e>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL>>
+    EnumerationLiteralExpressionNode<#actuals: 2>
+      NotNode<>
+        BoolLiteralNode<of: 1>
+      BoolLiteralNode<of: 0>
+[32m[SUCCESS] [0mParsed input program.
+[0m

@@ -655,16 +655,16 @@ namespace Lang {
         }
 
         const Type* type = types->getTypeOf(_resource);
-        if ( type == nullptr || !type->isResourceType() ) {
+        if ( type == nullptr || !type->isGenericType() || type->valueType() != TRESOURCE ) {
             Reporting::typeError(
                 position(),
-                "Attempted to gather invalid resource type"
+                "Expected TRESOURCE, found: " + (type == nullptr ? "none" : type->toString())
             );
 
             return false;
         }
 
-        ResourceType* resourceType = (ResourceType*) type;
+        GenericType* resourceType = (GenericType*) type;
         types->setTypeOf(_local, resourceType->concrete());
 
         for ( auto stmt : *_body ) {
@@ -678,13 +678,15 @@ namespace Lang {
     }
 
     bool EnumerationLiteralExpressionNode::typeAnalysis(TypeTable* types) {
-        if ( _actuals->size() < 1 ) {
-            // TODO what do?
-        }
-
         size_t idx = 0;
         bool hadFirst = false;
         const Type* innerType = nullptr;
+
+        if ( _disambiguationType != nullptr ) {
+            innerType = _disambiguationType->type();
+            hadFirst = true;
+        }
+
         for ( auto exp : *_actuals ) {
             if ( !exp->typeAnalysis(types) ) {
                 return false;
@@ -704,19 +706,21 @@ namespace Lang {
             idx += 1;
         }
 
-        EnumerationType* type = new EnumerationType(TENUMERABLE, (Type*) innerType);
+        GenericType* type = GenericType::of(TENUMERABLE, (Type*) innerType);
         types->setTypeOf(this, type);
         return true;
     }
 
     bool MapNode::typeAnalysis(TypeTable* types) {
-        if ( _body->size() < 1 ) {
-            // TODO what do?
-        }
-
         size_t idx = 0;
         bool hadFirst = false;
         const Type* innerType = nullptr;
+
+        if ( _disambiguationType != nullptr ) {
+            innerType = _disambiguationType->type();
+            hadFirst = true;
+        }
+
         for ( auto stmt : *_body ) {
             if ( !stmt->typeAnalysis(types) ) {
                 return false;
@@ -747,6 +751,25 @@ namespace Lang {
         }
 
         types->setTypeOf(this, types->getTypeOf(_value));
+        return true;
+    }
+
+    bool NotNode::typeAnalysis(TypeTable* types) {
+        if ( !_exp->typeAnalysis(types) ) {
+            return false;
+        }
+
+        const Type* boolType = PrimitiveType::of(TBOOL);
+        const Type* expType = types->getTypeOf(_exp);
+        if ( !expType->is(boolType) ) {
+            Reporting::typeError(
+                position(),
+                "Attempted to perform boolean negation on invalid type. Expected: " + boolType->toString() + "; actual: " + expType->toString()
+            );
+            return false;
+        }
+
+        types->setTypeOf(this, boolType);
         return true;
     }
 }

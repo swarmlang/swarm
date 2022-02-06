@@ -790,6 +790,7 @@ namespace Lang {
 
     /** AST node referencing boolean negation of an expression. */
     class NotNode final : public UnaryExpressionNode {
+    public:
         NotNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
 
         virtual std::string getName() const override {
@@ -799,6 +800,8 @@ namespace Lang {
         virtual std::string toString() const override {
             return "NotNode<>";
         }
+
+        virtual bool typeAnalysis(TypeTable* types) override;
     };
 
 
@@ -806,6 +809,7 @@ namespace Lang {
     class EnumerationLiteralExpressionNode final : public ExpressionNode {
     public:
         EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals) : ExpressionNode(pos), _actuals(actuals) {}
+        EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals, TypeNode* disambiguationType) : ExpressionNode(pos), _actuals(actuals), _disambiguationType(disambiguationType) {}
         virtual ~EnumerationLiteralExpressionNode() {}
 
         std::string toString() const override {
@@ -828,6 +832,7 @@ namespace Lang {
 
     protected:
         ExpressionList* _actuals;
+        TypeNode* _disambiguationType = nullptr;
     };
 
 
@@ -1035,6 +1040,7 @@ namespace Lang {
     class MapNode final : public ExpressionNode {
     public:
         MapNode(Position* pos, MapBody* body) : ExpressionNode(pos), _body(body) {}
+        MapNode(Position* pos, MapBody* body, TypeNode* disambiguationType) : ExpressionNode(pos), _body(body), _disambiguationType(disambiguationType) {}
         virtual ~MapNode() {}
 
         virtual std::string getName() const override {
@@ -1057,6 +1063,7 @@ namespace Lang {
 
     protected:
         MapBody* _body;
+        TypeNode* _disambiguationType;
     };
 
     /** AST node representing literal strings. */

@@ -67,6 +67,7 @@
 %token <transToken>      ENUMERATE
 %token <transIDToken>    ID
 %token <transToken>      AS
+%token <transToken>      OF
 %token <transToken>      WITH
 %token <transToken>      LBRACE
 %token <transToken>      RBRACE
@@ -255,10 +256,10 @@ expression :
         $$ = $1;
     }
 
-    | LBRACKET RBRACKET {
-        Position* pos = new Position($1->position(), $2->position());
+    | LBRACKET RBRACKET OF type {
+        Position* pos = new Position($1->position(), $4->position());
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
-        $$ = new EnumerationLiteralExpressionNode(pos, actuals);
+        $$ = new EnumerationLiteralExpressionNode(pos, actuals, $4);
     }
 
     | LBRACKET actuals RBRACKET {
@@ -266,10 +267,10 @@ expression :
         $$ = new EnumerationLiteralExpressionNode(pos, $2);
     }
 
-    | LBRACE RBRACE {
-        Position* pos = new Position($1->position(), $2->position());
+    | LBRACE RBRACE OF type {
+        Position* pos = new Position($1->position(), $4->position());
         std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
-        $$ = new MapNode(pos, body);
+        $$ = new MapNode(pos, body, $4);
     }
 
     | LBRACE mapStatements RBRACE {
@@ -330,6 +331,11 @@ expression :
     | term AND term {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AndNode(pos, $1, $3);
+    }
+
+    | NOT term {
+        Position* pos = new Position($1->position(), $2->position());
+        $$ = new NotNode(pos, $2);
     }
 
 

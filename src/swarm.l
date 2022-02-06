@@ -49,6 +49,10 @@ as {
 	return makeBareToken(TokenKind::AS);
 }
 
+of {
+	return makeBareToken(TokenKind::OF);
+}
+
 with {
 	return makeBareToken(TokenKind::WITH);
 }

@@ -67,14 +67,6 @@ namespace Lang {
             return false;
         }
 
-        virtual bool isResourceType() const {
-            return false;
-        }
-
-        virtual bool isEnumerationType() const {
-            return false;
-        }
-
     protected:
         Type(ValueType t) : _type(t) {}
         ValueType _type;
@@ -259,48 +251,6 @@ namespace Lang {
         std::vector<Type*> _args;
         Type* _return;
         bool _builtin = false;
-    };
-
-    class ResourceType : public GenericType {
-    public:
-        ResourceType(ValueType t, Type* concrete) : GenericType(t, concrete) {}
-
-        virtual std::string toString() const override {
-            return "ResourceType<" + Type::valueTypeToString(_type) + "<" + concrete()->toString() + ">>";
-        }
-
-        virtual bool isResourceType() const override {
-            return true;
-        }
-
-        virtual bool is(const Type* other) const override {
-            if ( !GenericType::is(other) ) {
-                return false;
-            }
-
-            return other->isResourceType();
-        }
-    };
-
-    class EnumerationType : public GenericType {
-    public:
-        EnumerationType(ValueType t, Type* concrete) : GenericType(t, concrete) {}
-
-        virtual std::string toString() const override {
-            return "EnumerationType<" + Type::valueTypeToString(_type) + "<" + concrete()->toString() + ">>";
-        }
-
-        virtual bool isEnumerationType() const override {
-            return true;
-        }
-
-        virtual bool is(const Type* other) const override {
-            if ( !GenericType::is(other) ) {
-                return false;
-            }
-
-            return other->isEnumerationType();
-        }
     };
 }
 }

@@ -33,7 +33,7 @@ namespace Lang {
         prologueScope->addFunction("zero2", zero2Type, zero2Position);
 
         // fileContents(string)
-        ResourceType* stringResource = new ResourceType(TRESOURCE, primitiveString);
+        GenericType* stringResource = GenericType::of(TRESOURCE, primitiveString);
         FunctionType* fileContentsType = FunctionType::of(stringResource);
         fileContentsType->addArgument(primitiveString);
         ProloguePosition* fileContentsPosition = new ProloguePosition("fileContents");

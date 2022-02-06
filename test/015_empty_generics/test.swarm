@@ -1,0 +1,5 @@
+enumerable<number> a = [] of number;
+enumerable<bool> b = [] of bool;
+map<number> c = {} of number;
+map<string> d = {} of string;
+enumerable<bool> e = [!true, false];
