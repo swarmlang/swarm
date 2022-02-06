@@ -20,6 +20,7 @@ namespace Lang {
         TERROR,         // special error type (internal use only)
         TFUNCTION,      // functions
         TUNIT,          // statement return type
+        TRESOURCE,
     };
 
     /** All possible kinds of types. */
@@ -262,6 +263,8 @@ namespace Lang {
 
     class ResourceType : public GenericType {
     public:
+        ResourceType(ValueType t, Type* concrete) : GenericType(t, concrete) {}
+
         virtual std::string toString() const override {
             return "ResourceType<" + Type::valueTypeToString(_type) + "<" + concrete()->toString() + ">>";
         }

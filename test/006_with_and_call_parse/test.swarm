@@ -1,5 +1,4 @@
-with random() as myRandom {
+with fileContents("test.json") as contents {
     zero();
-    zero2(myRandom, myRandom);
 }
 

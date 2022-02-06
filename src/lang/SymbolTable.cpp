@@ -7,6 +7,7 @@ namespace Lang {
     ScopeTable* ScopeTable::prologue() {
         ScopeTable* prologueScope = new swarmc::Lang::ScopeTable();
         PrimitiveType* primitiveNumber = PrimitiveType::of(ValueType::TNUM);
+        PrimitiveType* primitiveString = PrimitiveType::of(ValueType::TSTRING);
 
         // random()
         FunctionType* randomType = FunctionType::of(primitiveNumber);
@@ -30,6 +31,13 @@ namespace Lang {
         zero2Type->addArgument(primitiveNumber);
         ProloguePosition* zero2Position = new ProloguePosition("zero2");
         prologueScope->addFunction("zero2", zero2Type, zero2Position);
+
+        // fileContents(string)
+        ResourceType* stringResource = new ResourceType(TRESOURCE, primitiveString);
+        FunctionType* fileContentsType = FunctionType::of(stringResource);
+        fileContentsType->addArgument(primitiveString);
+        ProloguePosition* fileContentsPosition = new ProloguePosition("fileContents");
+        prologueScope->addFunction("fileContents", fileContentsType, fileContentsPosition);
 
         return prologueScope;
     }
