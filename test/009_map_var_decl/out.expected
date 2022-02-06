@@ -3,6 +3,6 @@ ProgramNode<#body: 1>
     MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
     MapNode<#body: 1>
       MapStatementNode<id: abc>
-        NumberLiteralExpressionNode<#value: 8>
+        NumberLiteralExpressionNode<#value: 123.000000>
 [32m[SUCCESS] [0mParsed input program.
 [0m
