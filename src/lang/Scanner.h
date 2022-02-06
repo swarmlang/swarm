@@ -41,7 +41,8 @@ namespace Lang {
             size_t length = static_cast<size_t>(yyleng);
             Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
-            yylval->lexeme = new StringLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn), yytext.substr(1, yytext.size() - 1));
+            std::string text(yytext);
+            yylval->lexeme = new StringLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn), text.substr(1, text.size() - 2));
             colNum += length;
             return tagIn;
         }

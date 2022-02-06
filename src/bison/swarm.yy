@@ -47,6 +47,8 @@
     swarmc::Lang::Token*                lexeme;
     swarmc::Lang::ProgramNode*          transProgram;
     swarmc::Lang::IDToken*              transIDToken;
+    swarmc::Lang::StringLiteralToken*   transStringToken;
+    swarmc::Lang::NumberLiteralToken*   transNumberToken;
     swarmc::Lang::StatementNode*        transStatement;
     swarmc::Lang::IdentifierNode*       transID;
     swarmc::Lang::ExpressionNode*       transExpression;
@@ -81,8 +83,8 @@
 %token <transToken>      STRING
 %token <transToken>      NUMBER
 %token <transToken>      BOOL
-%token <transToken>      NUMBERLITERAL
-%token <transToken>      STRINGLITERAL
+%token <transNumberToken> NUMBERLITERAL
+%token <transStringToken> STRINGLITERAL
 %token <transToken>      ENUMERABLE
 %token <transToken>      MAP
 %token <transToken>      IF

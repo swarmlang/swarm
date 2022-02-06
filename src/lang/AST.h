@@ -1070,7 +1070,7 @@ namespace Lang {
         }
 
         std::string toString() const override {
-            return "StringLiteralExpressionNode<#value: " + _value + ">";
+            return "StringLiteralExpressionNode<#value: '" + _value + "'>";
         }
 
         std::string value() {
