@@ -1,0 +1,4 @@
+bool a = true;
+string b = "some string";
+
+bool c = a || b;
