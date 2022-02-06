@@ -1,1 +1,2 @@
-[Type Error] [l: 3, c: 1] Condition for if statement not boolean T<TSTRING>.
+[1m[31m[Type Error] [0m[1m[l: 3, c: 1] [0mCondition for if statement not boolean T<TSTRING>.
+[0m

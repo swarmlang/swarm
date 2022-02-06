@@ -1,1 +1,2 @@
-[Type Error] [l: 4, c: 10] Invalid type T<TSTRING> of right-hand operand to expression (expected: T<TBOOL>).
+[1m[31m[Type Error] [0m[1m[l: 4, c: 10] [0mInvalid type T<TSTRING> of right-hand operand to expression (expected: T<TBOOL>).
+[0m
