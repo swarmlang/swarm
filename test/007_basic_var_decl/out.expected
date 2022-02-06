@@ -23,4 +23,5 @@ ProgramNode<#body: 6>
       MapNode<#body: 1>
         MapStatementNode<id: abc>
           StringLiteralExpressionNode<#value: '123'>
-[SUCCESS] Parsed input program.
+[32m[SUCCESS] [0mParsed input program.
+[0m

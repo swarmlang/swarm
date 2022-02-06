@@ -2,6 +2,7 @@ ProgramNode<#body: 2>
   VariableDeclarationNode<name: myEnum>
     EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM>>
     EnumerationLiteralExpressionNode<#actuals: 1>
-      NumberLiteralExpressionNode<#value: 0.000000>
+      NumberLiteralExpressionNode<#value: 1.000000>
   EnumerationStatement<e: myEnum, as: myItem, #body: 0>
-[SUCCESS] Parsed input program.
+[32m[SUCCESS] [0mParsed input program.
+[0m
