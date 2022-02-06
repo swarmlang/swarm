@@ -54,6 +54,38 @@ namespace Lang {
         std::string _identifier;
     };
 
+    /**
+     * Token class representing an string literal.
+     */
+    class StringLiteralToken : public Token {
+    public:
+        StringLiteralToken(Position* pos, int kind, std::string display, std::string value) : Token(pos, kind, display), _value(value) {};
+
+        /** Get the string literal content of this token. */
+        std::string value() const {
+            return _value;
+        }
+    protected:
+        std::string _value;
+    };
+
+    /**
+     * Token class representing an number literal.
+     */
+    class NumberLiteralToken : public Token {
+    public:
+        NumberLiteralToken(Position* pos, int kind, std::string display, double value) : Token(pos, kind, display), _value(value) {};
+
+        /** Get the double representation of number literal content of this token. */
+        double value() const {
+            return _value;
+        }
+    protected:
+        double _value;
+    };
+
+
+
 }
 }
 

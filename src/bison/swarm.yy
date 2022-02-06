@@ -342,14 +342,11 @@ term :
     }
 
     | STRINGLITERAL {
-        std::string str = $1->toString();
-        $$ = new StringLiteralExpressionNode($1->position(), str.substr(1, str.size()-1));
+        $$ = new StringLiteralExpressionNode($1->position(), $1->value());
     }
 
     | NUMBERLITERAL {
-        std::string str = $1->toString();
-        double num = ::atof(str.c_str());
-        $$ = new NumberLiteralExpressionNode($1->position(), num);
+        $$ = new NumberLiteralExpressionNode($1->position(), $1->value());
     }
 
     | TRUE {

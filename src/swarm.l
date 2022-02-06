@@ -114,7 +114,7 @@ bool {
 }
 
 [0-9]+([.][0-9]+)? {
-	return makeBareToken(TokenKind::NUMBERLITERAL);
+	return makeNumberLiteralToken();
 }
 
 enumerable {
@@ -202,7 +202,7 @@ false {
 }
 
 (\"{STRELT}*\") {
-	return makeBareToken(TokenKind::STRINGLITERAL);
+	return makeStringLiteralToken();
 }
 
 \n|(\r\n) {

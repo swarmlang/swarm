@@ -36,6 +36,26 @@ namespace Lang {
             return tagIn;
         }
 
+        int makeStringLiteralToken() {
+            int tagIn = Parser::token::STRINGLITERAL;
+            size_t length = static_cast<size_t>(yyleng);
+            Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+
+            yylval->lexeme = new StringLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn), yytext.substr(1, yytext.size() - 1));
+            colNum += length;
+            return tagIn;
+        }
+
+        int makeNumberLiteralToken() {
+            int tagIn = Parser::token::NUMBERLITERAL;
+            size_t length = static_cast<size_t>(yyleng);
+            Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+
+            yylval->lexeme = new NumberLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn), std::stod(yytext));
+            colNum += length;
+            return tagIn;
+        }
+
         int makeIDToken() {
             int tagIn = Parser::token::ID;
             size_t length = static_cast<size_t>(yyleng);
