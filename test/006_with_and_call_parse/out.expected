@@ -1,10 +1,6 @@
 ProgramNode<#body: 1>
-  WithStatement<r: CallExpressionNode<id: random, #args: 0>, as: myRandom>
+  WithStatement<r: CallExpressionNode<id: fileContents, #args: 1>, as: contents>
     ExpressionStatementNode<CallExpressionNode<id: zero, #args: 0>>
       CallExpressionNode<id: zero, #args: 0>
-    ExpressionStatementNode<CallExpressionNode<id: zero2, #args: 2>>
-      CallExpressionNode<id: zero2, #args: 2>
-        IdentifierNode<name: myRandom>
-        IdentifierNode<name: myRandom>
 [32m[SUCCESS] [0mParsed input program.
 [0m
