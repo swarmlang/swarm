@@ -10,12 +10,18 @@ ProgramNode<#body: 6>
     BoolLiteralNode<of: 1>
   VariableDeclarationNode<name: d>
     EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL>>
-    EnumerationLiteralExpressionNode<#actuals: 0>
+    EnumerationLiteralExpressionNode<#actuals: 1>
+      BoolLiteralNode<of: 1>
   VariableDeclarationNode<name: e>
     MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
-    MapNode<#body: 0>
+    MapNode<#body: 1>
+      MapStatementNode<id: abc>
+        NumberLiteralExpressionNode<#value: 8>
   VariableDeclarationNode<name: f>
     EnumerableTypeNode<of: MapTypeNode<of: PrimitiveTypeNode<of: TSTRING>>>
-    MapNode<#body: 0>
+    EnumerationLiteralExpressionNode<#actuals: 1>
+      MapNode<#body: 1>
+        MapStatementNode<id: abc>
+          StringLiteralExpressionNode<#value: 41>
 [32m[SUCCESS] [0mParsed input program.
 [0m

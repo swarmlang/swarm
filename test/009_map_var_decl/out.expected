@@ -1,6 +1,8 @@
 ProgramNode<#body: 1>
   VariableDeclarationNode<name: myM>
     MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
-    MapNode<#body: 0>
+    MapNode<#body: 1>
+      MapStatementNode<id: abc>
+        NumberLiteralExpressionNode<#value: 8>
 [32m[SUCCESS] [0mParsed input program.
 [0m

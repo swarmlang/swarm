@@ -1,7 +1,7 @@
 string a = "";
 number b = zero();
 bool c = true;
-enumerable<bool> d = [];
-map<number> e = {};
-enumerable<map<string>> f = {};
+enumerable<bool> d = [true];
+map<number> e = {abc: 123};
+enumerable<map<string>> f = [{abc: "123"}];
 

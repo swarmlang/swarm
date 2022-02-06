@@ -382,6 +382,7 @@ namespace Lang {
             return false;
         }
 
+        Console::get()->debug("Variable: " + _id->toString() + ", Value: " + _value->toString());
         const Type* typeOfValue = types->getTypeOf(_value);
         if ( !_type->type()->is(typeOfValue) ) {
             Reporting::typeError(
