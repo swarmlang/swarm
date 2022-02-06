@@ -1,0 +1,7 @@
+if (true) {
+    bool myTrue = true;
+}
+
+while (true) {
+    number myNum = 2;
+}
