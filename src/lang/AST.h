@@ -1070,7 +1070,7 @@ namespace Lang {
         }
 
         std::string toString() const override {
-            return "StringLiteralExpressionNode<#value: " + value() + ">";
+            return "StringLiteralExpressionNode<#value: " + _value + ">";
         }
 
         std::string value() {
@@ -1095,7 +1095,7 @@ namespace Lang {
         }
 
         std::string toString() const override {
-            return "NumberLiteralExpressionNode<#value: " + value() + ">";
+            return "NumberLiteralExpressionNode<#value: " + std::to_string(_value) + ">";
         }
 
         double value() const {
