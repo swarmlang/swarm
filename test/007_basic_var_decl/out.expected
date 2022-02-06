@@ -1,7 +1,7 @@
 ProgramNode<#body: 6>
   VariableDeclarationNode<name: a>
     PrimitiveTypeNode<of: TSTRING>
-    StringLiteralExpressionNode<#value: 41>
+    StringLiteralExpressionNode<#value: ''>
   VariableDeclarationNode<name: b>
     PrimitiveTypeNode<of: TNUM>
     CallExpressionNode<id: zero, #args: 0>
@@ -16,12 +16,11 @@ ProgramNode<#body: 6>
     MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
     MapNode<#body: 1>
       MapStatementNode<id: abc>
-        NumberLiteralExpressionNode<#value: 8>
+        NumberLiteralExpressionNode<#value: 123.000000>
   VariableDeclarationNode<name: f>
     EnumerableTypeNode<of: MapTypeNode<of: PrimitiveTypeNode<of: TSTRING>>>
     EnumerationLiteralExpressionNode<#actuals: 1>
       MapNode<#body: 1>
         MapStatementNode<id: abc>
-          StringLiteralExpressionNode<#value: 41>
-[32m[SUCCESS] [0mParsed input program.
-[0m
+          StringLiteralExpressionNode<#value: '123'>
+[SUCCESS] Parsed input program.
