@@ -561,12 +561,23 @@ namespace Lang {
         }
 
         const Type* condType = types->getTypeOf(_condition);
-        if ( condType->is(PrimitiveType::of(TBOOL))) {
+        if ( !condType->is(PrimitiveType::of(TBOOL))) {
             Reporting::typeError(
                 position(),
-                "Condition for if loop not boolean " + condType->toString() + "."
+                "Condition for if statement not boolean " + condType->toString() + "."
             );
+
+            return false;
         }
+
+        for ( auto stmt : *_body ) {
+            if ( !stmt->typeAnalysis(types) ) {
+                return false;
+            }
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        return true;
     }
 
     bool WhileStatement::typeAnalysis(TypeTable* types) {
@@ -575,12 +586,167 @@ namespace Lang {
         }
 
         const Type* condType = types->getTypeOf(_condition);
-        if ( condType->is(PrimitiveType::of(TBOOL))) {
+        if ( !condType->is(PrimitiveType::of(TBOOL))) {
             Reporting::typeError(
                 position(),
                 "Condition for while loop not boolean " + condType->toString() + "."
             );
+
+            return false;
         }
+
+        for ( auto stmt : *_body ) {
+            if ( !stmt->typeAnalysis(types) ) {
+                return false;
+            }
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        return true;
+    }
+
+    bool StringLiteralExpressionNode::typeAnalysis(TypeTable* types) {
+        types->setTypeOf(this, PrimitiveType::of(TSTRING));
+        return true;
+    }
+
+    bool NumberLiteralExpressionNode::typeAnalysis(TypeTable* types) {
+        types->setTypeOf(this, PrimitiveType::of(TNUM));
+        return true;
+    }
+
+    bool EnumerationStatement::typeAnalysis(TypeTable* types) {
+        if ( !_enumerable->typeAnalysis(types) ) {
+            return false;
+        }
+
+        const Type* enumType = _enumerable->symbol()->type();
+        if ( !enumType->isGenericType() ) {
+            Reporting::typeError(
+                position(),
+                "Attempted to enumerate invalid value"
+            );
+        }
+
+        GenericType* genericType = (GenericType*) enumType;
+        const Type* concreteType = genericType->concrete();
+        types->setTypeOf(_local, concreteType);
+
+        if ( !_enumerable->typeAnalysis(types) ) {
+            return false;
+        }
+
+        for ( auto stmt : *_body ) {
+            if ( !stmt->typeAnalysis(types) ) {
+                return false;
+            }
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        return true;
+        
+        // TODO - more specific types for lists extending generic type
+    }
+
+    bool WithStatement::typeAnalysis(TypeTable* types) {
+        if ( !_resource->typeAnalysis(types) ) {
+            return false;
+        }
+
+        const Type* type = types->getTypeOf(_resource);
+        if ( type == nullptr || !type->isResourceType() ) {
+            Reporting::typeError(
+                position(),
+                "Attempted to gather invalid resource type"
+            );
+
+            return false;
+        }
+
+        ResourceType* resourceType = (ResourceType*) type;
+        types->setTypeOf(_local, resourceType->concrete());
+
+        for ( auto stmt : *_body ) {
+            if ( !stmt->typeAnalysis(types) ) {
+                return false;
+            }
+        }
+
+        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        return true;
+    }
+
+    bool EnumerationLiteralExpressionNode::typeAnalysis(TypeTable* types) {
+        if ( _actuals->size() < 1 ) {
+            // TODO what do?
+        }
+
+        size_t idx = 0;
+        bool hadFirst = false;
+        const Type* innerType = nullptr;
+        for ( auto exp : *_actuals ) {
+            if ( !exp->typeAnalysis(types) ) {
+                return false;
+            }
+
+            const Type* expType = types->getTypeOf(exp);
+            if ( !hadFirst ) {
+                innerType = expType;
+            } else if ( !expType->is(innerType) ) {
+                Reporting::typeError(
+                    position(),
+                    "Invalid entry in enumerable at position " + std::to_string(idx) + ". Expected: " + innerType->toString() + "; Found: " + expType->toString()
+                );
+                return false;
+            }
+
+            idx += 1;
+        }
+
+        EnumerationType* type = new EnumerationType(TENUMERABLE, (Type*) innerType);
+        types->setTypeOf(this, type);
+        return true;
+    }
+
+    bool MapNode::typeAnalysis(TypeTable* types) {
+        if ( _body->size() < 1 ) {
+            // TODO what do?
+        }
+
+        size_t idx = 0;
+        bool hadFirst = false;
+        const Type* innerType = nullptr;
+        for ( auto stmt : *_body ) {
+            if ( !stmt->typeAnalysis(types) ) {
+                return false;
+            }
+
+            const Type* stmtType = types->getTypeOf(stmt);
+            if ( !hadFirst ) {
+                innerType = stmtType;
+            } else if ( !stmtType->is(innerType) ) {
+                Reporting::typeError(
+                    position(),
+                    "Invalid entry in map at position " + std::to_string(idx) + ". Expected: " + innerType->toString() + "; Found: " + stmtType->toString()
+                );
+                return false;
+            }
+
+            idx += 1;
+        }
+
+        GenericType* type = GenericType::of(TMAP, (Type*) innerType);
+        types->setTypeOf(this, type);
+        return true;
+    }
+
+    bool MapStatementNode::typeAnalysis(TypeTable* types) {
+        if ( !_value->typeAnalysis(types) ) {
+            return false;
+        }
+
+        types->setTypeOf(this, types->getTypeOf(_value));
+        return true;
     }
 }
 }

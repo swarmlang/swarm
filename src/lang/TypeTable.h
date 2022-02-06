@@ -28,6 +28,8 @@ namespace Lang {
             if ( type == nullptr ) {
                 throw Errors::SwarmError("Unable to determine type for node");
             }
+
+            return type;
         }
 
         std::string toString() const override {

@@ -133,7 +133,7 @@ namespace Lang {
 
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override = 0;
     };
 
 
@@ -778,7 +778,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override = 0;
 
         ExpressionNode* exp() const {
             return _exp;
@@ -820,7 +820,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
 
         ExpressionList* actuals() const {
             return _actuals;
@@ -861,7 +861,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override = 0;
 
         StatementList* body() const {
             return _body;
@@ -888,6 +888,8 @@ namespace Lang {
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
+
+        virtual bool typeAnalysis(TypeTable* types) override;
 
         IdentifierNode* enumerable() const {
             return _enumerable;
@@ -919,6 +921,8 @@ namespace Lang {
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
+
+        virtual bool typeAnalysis(TypeTable* types) override;
 
         ExpressionNode* resource() const {
             return _resource;
@@ -1005,7 +1009,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
 
         /**
          * Get the identifier for the key of this entry.
@@ -1045,7 +1049,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
-        virtual bool typeAnalysis(TypeTable* types) override { return true; }
+        virtual bool typeAnalysis(TypeTable* types) override;
 
         MapBody* body() const {
             return _body;
@@ -1075,6 +1079,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
+        virtual bool typeAnalysis(TypeTable* types) override;
     protected:
         std::string _value;
     };
@@ -1099,6 +1104,7 @@ namespace Lang {
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
+        virtual bool typeAnalysis(TypeTable* types) override;
     protected:
         double _value;
     };
