@@ -1,0 +1,2 @@
+[Type Error] [l: 2, c: 1] Attempted to assign value of type T<TSTRING> to lval of type T<TBOOL>.
+
