@@ -1,17 +1,2 @@
-if (true) {
-    bool myTrue = true;
-}
-
-while (true) {
-    number myNum = 2;
-}
-
-if (true || false) {
-    string a = "simple or";
-}
-
-bool someCond = true && false;
-
-if (someCond) {
-    string b = "variable check";
-}
+bool a = true;
+a = "some string";

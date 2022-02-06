@@ -1,4 +1,4 @@
-ProgramNode<#body: 2>
+ProgramNode<#body: 5>
   IfStatement<f: if BoolLiteralNode<of: 1> then, #body: 1>
     VariableDeclarationNode<name: myTrue>
       PrimitiveTypeNode<of: TBOOL>
@@ -7,5 +7,17 @@ ProgramNode<#body: 2>
     VariableDeclarationNode<name: myNum>
       PrimitiveTypeNode<of: TNUM>
       NumberLiteralExpressionNode<#value: 2.000000>
-[32m[SUCCESS] [0mParsed input program.
-[0m
+  IfStatement<f: if OrNode<> then, #body: 1>
+    VariableDeclarationNode<name: a>
+      PrimitiveTypeNode<of: TSTRING>
+      StringLiteralExpressionNode<#value: 'simple or'>
+  VariableDeclarationNode<name: someCond>
+    PrimitiveTypeNode<of: TBOOL>
+    AndNode<>
+      BoolLiteralNode<of: 1>
+      BoolLiteralNode<of: 0>
+  IfStatement<f: if IdentifierNode<name: someCond> then, #body: 1>
+    VariableDeclarationNode<name: b>
+      PrimitiveTypeNode<of: TSTRING>
+      StringLiteralExpressionNode<#value: 'variable check'>
+[SUCCESS] Parsed input program.

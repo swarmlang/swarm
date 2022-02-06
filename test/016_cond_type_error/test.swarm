@@ -1,5 +1,5 @@
 string cond = "some string";
 
 if (cond) {
-    cond = "?"
+    cond = "?";
 }
