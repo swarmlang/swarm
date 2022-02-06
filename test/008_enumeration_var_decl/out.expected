@@ -2,8 +2,8 @@ ProgramNode<#body: 1>
   VariableDeclarationNode<name: myE>
     EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM>>
     EnumerationLiteralExpressionNode<#actuals: 3>
-      NumberLiteralExpressionNode<#value: 8>
-      NumberLiteralExpressionNode<#value: 8>
-      NumberLiteralExpressionNode<#value: 8>
+      NumberLiteralExpressionNode<#value: 1.000000>
+      NumberLiteralExpressionNode<#value: 2.000000>
+      NumberLiteralExpressionNode<#value: 3.000000>
 [32m[SUCCESS] [0mParsed input program.
 [0m

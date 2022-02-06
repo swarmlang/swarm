@@ -6,6 +6,6 @@ ProgramNode<#body: 2>
   WhileStatement<w: while BoolLiteralNode<of: 1> then, #body: 1>
     VariableDeclarationNode<name: myNum>
       PrimitiveTypeNode<of: TNUM>
-      NumberLiteralExpressionNode<#value: 0.000000>
+      NumberLiteralExpressionNode<#value: 2.000000>
 [32m[SUCCESS] [0mParsed input program.
 [0m

@@ -1,25 +1,25 @@
 ProgramNode<#body: 4>
   VariableDeclarationNode<name: myNum>
     PrimitiveTypeNode<of: TNUM>
-    NumberLiteralExpressionNode<#value: 8>
+    NumberLiteralExpressionNode<#value: 2.000000>
   VariableDeclarationNode<name: myNum2>
     PrimitiveTypeNode<of: TNUM>
     AddNode<>
-      NumberLiteralExpressionNode<#value: 8>
+      NumberLiteralExpressionNode<#value: 1.000000>
       IdentifierNode<name: myNum>
   ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: myNum>>>
     AssignExpressionNode<lval: IdentifierNode<name: myNum>>
       SubtractNode<>
         MultiplyNode<>
-          NumberLiteralExpressionNode<#value: 8>
-          NumberLiteralExpressionNode<#value: 8>
-        NumberLiteralExpressionNode<#value: 8>
+          NumberLiteralExpressionNode<#value: 3.000000>
+          NumberLiteralExpressionNode<#value: 4.000000>
+        NumberLiteralExpressionNode<#value: 2.000000>
   ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: myNum2>>>
     AssignExpressionNode<lval: IdentifierNode<name: myNum2>>
       SubtractNode<>
         IdentifierNode<name: myNum>
         AddNode<>
-          NumberLiteralExpressionNode<#value: 8>
-          NumberLiteralExpressionNode<#value: 8>
+          NumberLiteralExpressionNode<#value: 1.000000>
+          NumberLiteralExpressionNode<#value: 3.000000>
 [32m[SUCCESS] [0mParsed input program.
 [0m
