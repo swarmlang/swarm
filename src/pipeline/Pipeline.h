@@ -10,6 +10,7 @@
 #include "../bison/grammar.hh"
 #include "../lang/AST.h"
 #include "../serialization/SerializeWalk.h"
+#include "../serialization/DeSerializeWalk.h"
 
 namespace swarmc {
 
@@ -90,6 +91,12 @@ namespace swarmc {
             Serialization::SerializeWalk walk;
             std::string json = walk.toJSON(_root);
             out << json;
+        }
+
+        void targetDeSerialOutput(std::ostream& out) {
+            Serialization::DeSerializeWalk walk;
+            Lang::ASTNode* tree = walk.deserialize(_input);
+            tree->printTree(out);
         }
 
     protected:

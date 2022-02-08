@@ -26,9 +26,11 @@ protected:
     bool flagParseAndStop = false;
     bool flagOutputParse = false;
     bool flagOutputSerialize = false;
+    bool flagOutputDeSerialize = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;
+    std::string flagOutputDeSerializeTo;
     std::string inputFile;
     std::istream* _input = nullptr;
 
@@ -36,6 +38,7 @@ protected:
     int debugOutputParse();
     int debugParseAndStop();
     int debugOutputSerialize();
+    int debugOutputDeSerialize();
 };
 
 

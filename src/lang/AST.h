@@ -11,6 +11,9 @@
 #include "TypeTable.h"
 
 namespace swarmc {
+namespace Serialization {
+    class DeSerializeWalk;
+}
 namespace Lang {
 
     class StatementNode;
@@ -53,6 +56,10 @@ namespace Lang {
 
         virtual std::string getName() const = 0;
 
+        virtual bool isStatement() const {
+            return false;
+        }
+
         virtual bool isExpression() const {
             return false;
         }
@@ -62,6 +69,10 @@ namespace Lang {
         }
 
         virtual bool isLVal() const {
+            return false;
+        }
+
+        virtual bool isType() const {
             return false;
         }
 
@@ -134,6 +145,11 @@ namespace Lang {
     public:
         StatementNode(Position* pos) : ASTNode(pos) {}
         virtual ~StatementNode() {}
+
+        virtual bool isStatement() const {
+            return true;
+        }
+
     };
 
 
@@ -236,6 +252,7 @@ namespace Lang {
     protected:
         std::string _name;
         SemanticSymbol* _symbol = nullptr;
+        friend class Serialization::DeSerializeWalk;
     };
 
 
@@ -253,6 +270,10 @@ namespace Lang {
         virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual bool isType() const {
+            return true;
+        }
     };
 
 

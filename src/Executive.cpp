@@ -51,6 +51,13 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( flagOutputDeSerialize ) {
+        int deserializeResult = debugOutputDeSerialize();
+        if ( deserializeResult != 0 ) {
+            result = deserializeResult;
+        }
+    }
+
     delete console;
     if ( _input != nullptr ) delete _input;
     return result;
@@ -118,6 +125,19 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputSerialize = true;
             flagOutputSerializeTo = outfile;
             skipOne = true;
+        } else if ( arg == "--dbg-output-deserialize-to" ) {
+            if ( i+1 >= params.size() ) {
+                console->error("Missing required parameter for --dbg-output-deserialize-to. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            std::string outfile = params.at(i+1);
+            console->debug("DeSerialized AST output file: " + outfile);
+
+            flagOutputDeSerialize = true;
+            flagOutputDeSerializeTo = outfile;
+            skipOne = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -183,6 +203,11 @@ void Executive::printUsage() {
         ->line("                                      If the output file is \"--\", will write to stdout.")
         ->line();
     
+    console->bold()->print("  --dbg-output-deserialize-to <OUTFILE>  :  ", true)
+        ->line("Parse the input and output the deserialized AST to the specified file.")
+        ->line("                                      If the output file is \"--\", will write to stdout.")
+        ->line();
+
     // Output in debugging mode only:
     console->debug()
             ->line("Built with debugging enabled.")
@@ -257,7 +282,7 @@ int Executive::debugOutputSerialize() {
     } else {
         std::ofstream outfile(flagOutputSerializeTo);
         if ( outfile.bad() ) {
-            console->error("Could not open parse output file for writing: " + flagOutputSerializeTo);
+            console->error("Could not open serialize output file for writing: " + flagOutputSerializeTo);
             return 1;
         }
 
@@ -271,5 +296,31 @@ int Executive::debugOutputSerialize() {
     }
 
     console->success("Serialized input program.");
+    return 0;
+}
+
+int Executive::debugOutputDeSerialize() {
+    swarmc::Pipeline pipeline(_input);
+    std::ostream* stream = nullptr;
+
+    if ( flagOutputDeSerializeTo == "--" ) {
+        stream = &std::cout;
+    } else {
+        std::ofstream outfile(flagOutputDeSerializeTo);
+        if ( outfile.bad() ) {
+            console->error("Could not open deserialize output file for writing: " + flagOutputDeSerializeTo);
+            return 1;
+        }
+
+        stream = &outfile;
+    }
+    
+    try {
+        pipeline.targetDeSerialOutput(*stream);
+    } catch (swarmc::Errors::ParseError& e) {
+        return e.exitCode;
+    }
+
+    console->success("Deserialized input program.");
     return 0;
 }
