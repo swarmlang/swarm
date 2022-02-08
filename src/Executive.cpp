@@ -255,9 +255,9 @@ int Executive::debugOutputSerialize() {
     if ( flagOutputSerializeTo == "--" ) {
         stream = &std::cout;
     } else {
-        std::ofstream outfile(flagOutputParseTo);
+        std::ofstream outfile(flagOutputSerializeTo);
         if ( outfile.bad() ) {
-            console->error("Could not open parse output file for writing: " + flagOutputParseTo);
+            console->error("Could not open parse output file for writing: " + flagOutputSerializeTo);
             return 1;
         }
 
