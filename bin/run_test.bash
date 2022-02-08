@@ -10,6 +10,7 @@ TEST_DIR="$(realpath test/$1)"
 RUN_DIR="$(realpath run_tests/$1)"
 export SWARMC="$(realpath ./swarmc)"
 export TESTSWARM="$(realpath $TEST_DIR/test.swarm)"
+export TESTJSON="$(realpath $TEST_DIR/test.json)"
 
 "${TEST_DIR}/run" > "$RUN_DIR/out" 2> "$RUN_DIR/err"
 
