@@ -57,6 +57,10 @@ namespace Lang {
             return false;
         }
 
+        virtual bool isValue() const {
+            return false;
+        }
+
     private:
         Position* _pos = nullptr;
         ScopeTable* _scope = nullptr;
@@ -338,6 +342,10 @@ namespace Lang {
         /** Get the value of the literal expression. */
         virtual bool value() const {
             return _val;
+        }
+
+        virtual bool isValue() const override {
+            return true;
         }
 
     private:
@@ -836,6 +844,10 @@ namespace Lang {
             return _actuals;
         }
 
+        virtual bool isValue() const override {
+            return true;
+        }
+
     protected:
         ExpressionList* _actuals;
         TypeNode* _disambiguationType = nullptr;
@@ -1067,6 +1079,10 @@ namespace Lang {
             return _body;
         }
 
+        virtual bool isValue() const override {
+            return true;
+        }
+
     protected:
         MapBody* _body;
         TypeNode* _disambiguationType;
@@ -1088,6 +1104,10 @@ namespace Lang {
 
         std::string value() {
             return _value;
+        }
+
+        virtual bool isValue() const override {
+            return true;
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
@@ -1113,6 +1133,10 @@ namespace Lang {
 
         double value() const {
             return _value;
+        }
+
+        virtual bool isValue() const override {
+            return true;
         }
 
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
