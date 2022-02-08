@@ -53,6 +53,10 @@ namespace Lang {
 
         virtual std::string getName() const = 0;
 
+        virtual bool isExpression() const {
+            return false;
+        }
+
     private:
         Position* _pos = nullptr;
         ScopeTable* _scope = nullptr;
@@ -134,6 +138,10 @@ namespace Lang {
         virtual void printTree(std::ostream& out, std::string prefix = "") const override;
 
         virtual bool typeAnalysis(TypeTable* types) override = 0;
+
+        virtual bool isExpression() const override {
+            return true;
+        }
     };
 
 
