@@ -61,6 +61,10 @@ namespace Lang {
             return false;
         }
 
+        virtual bool isLVal() const {
+            return false;
+        }
+
     private:
         Position* _pos = nullptr;
         ScopeTable* _scope = nullptr;
@@ -199,6 +203,10 @@ namespace Lang {
     public:
         LValNode(Position* pos) : ExpressionNode(pos) {}
         virtual ~LValNode() {}
+
+        virtual bool isLVal() const {
+            return true;
+        }
     };
 
 
