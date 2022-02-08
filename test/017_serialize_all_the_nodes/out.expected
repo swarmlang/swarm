@@ -698,9 +698,9 @@
                             },
                             "symbol": {
                                 "declaredAt": {
-                                    "endCol": 42,
+                                    "endCol": 47,
                                     "endLine": 17,
-                                    "startCol": 35,
+                                    "startCol": 40,
                                     "startLine": 17
                                 },
                                 "kind": 0,
@@ -724,16 +724,16 @@
                 "astNodeName": "IdentifierNode",
                 "name": "aString",
                 "position": {
-                    "endCol": 42,
+                    "endCol": 47,
                     "endLine": 17,
-                    "startCol": 35,
+                    "startCol": 40,
                     "startLine": 17
                 },
                 "symbol": {
                     "declaredAt": {
-                        "endCol": 42,
+                        "endCol": 47,
                         "endLine": 17,
-                        "startCol": 35,
+                        "startCol": 40,
                         "startLine": 17
                     },
                     "kind": 0,
@@ -753,14 +753,33 @@
             "resource": {
                 "arguments": [
                     {
-                        "astNodeName": "StringLiteralExpressionNode",
+                        "astNodeName": "ConcatenateNode",
+                        "left": {
+                            "astNodeName": "StringLiteralExpressionNode",
+                            "position": {
+                                "endCol": 26,
+                                "endLine": 17,
+                                "startCol": 19,
+                                "startLine": 17
+                            },
+                            "value": "input"
+                        },
                         "position": {
-                            "endCol": 30,
+                            "endCol": 35,
                             "endLine": 17,
                             "startCol": 19,
                             "startLine": 17
                         },
-                        "value": "input.txt"
+                        "right": {
+                            "astNodeName": "StringLiteralExpressionNode",
+                            "position": {
+                                "endCol": 35,
+                                "endLine": 17,
+                                "startCol": 29,
+                                "startLine": 17
+                            },
+                            "value": ".txt"
+                        }
                     }
                 ],
                 "astNodeName": "CallExpressionNode",
@@ -800,7 +819,7 @@
                     }
                 },
                 "position": {
-                    "endCol": 31,
+                    "endCol": 36,
                     "endLine": 17,
                     "startCol": 6,
                     "startLine": 17
