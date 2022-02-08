@@ -41,8 +41,8 @@ public:
         return inst;
     }
 private:
-    RefPool<T>* _pool = nullptr;
     T* _item = nullptr;
+    RefPool<T>* _pool = nullptr;
     int instances = 0;
     void release();
 };
