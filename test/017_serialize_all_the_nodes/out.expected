@@ -470,6 +470,91 @@
                                 "startCol": 9,
                                 "startLine": 11
                             }
+                        },
+                        {
+                            "astNodeName": "ExpressionStatementNode",
+                            "expression": {
+                                "astNodeName": "AddAssignExpressionNode",
+                                "dest": {
+                                    "astNodeName": "IdentifierNode",
+                                    "name": "n",
+                                    "position": {
+                                        "endCol": 10,
+                                        "endLine": 12,
+                                        "startCol": 9,
+                                        "startLine": 12
+                                    },
+                                    "symbol": {
+                                        "declaredAt": {
+                                            "endCol": 13,
+                                            "endLine": 7,
+                                            "startCol": 1,
+                                            "startLine": 7
+                                        },
+                                        "kind": 0,
+                                        "name": "n",
+                                        "type": {
+                                            "valueType": 1
+                                        },
+                                        "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
+                                    }
+                                },
+                                "position": {
+                                    "endCol": 15,
+                                    "endLine": 12,
+                                    "startCol": 9,
+                                    "startLine": 12
+                                },
+                                "value": {
+                                    "astNodeName": "AddNode",
+                                    "left": {
+                                        "astNodeName": "IdentifierNode",
+                                        "name": "n",
+                                        "position": {
+                                            "endCol": 10,
+                                            "endLine": 12,
+                                            "startCol": 9,
+                                            "startLine": 12
+                                        },
+                                        "symbol": {
+                                            "declaredAt": {
+                                                "endCol": 13,
+                                                "endLine": 7,
+                                                "startCol": 1,
+                                                "startLine": 7
+                                            },
+                                            "kind": 0,
+                                            "name": "n",
+                                            "type": {
+                                                "valueType": 1
+                                            },
+                                            "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
+                                        }
+                                    },
+                                    "position": {
+                                        "endCol": 15,
+                                        "endLine": 12,
+                                        "startCol": 9,
+                                        "startLine": 12
+                                    },
+                                    "right": {
+                                        "astNodeName": "NumberLiteralExpressionNode",
+                                        "position": {
+                                            "endCol": 15,
+                                            "endLine": 12,
+                                            "startCol": 14,
+                                            "startLine": 12
+                                        },
+                                        "value": 2.0
+                                    }
+                                }
+                            },
+                            "position": {
+                                "endCol": 16,
+                                "endLine": 12,
+                                "startCol": 9,
+                                "startLine": 12
+                            }
                         }
                     ],
                     "condition": {
@@ -517,7 +602,7 @@
                     },
                     "position": {
                         "endCol": 6,
-                        "endLine": 12,
+                        "endLine": 13,
                         "startCol": 5,
                         "startLine": 10
                     }
@@ -529,16 +614,16 @@
                         "name": "b",
                         "position": {
                             "endCol": 11,
-                            "endLine": 14,
+                            "endLine": 15,
                             "startCol": 10,
-                            "startLine": 14
+                            "startLine": 15
                         },
                         "symbol": {
                             "declaredAt": {
                                 "endCol": 19,
-                                "endLine": 14,
+                                "endLine": 15,
                                 "startCol": 5,
-                                "startLine": 14
+                                "startLine": 15
                             },
                             "kind": 0,
                             "name": "b",
@@ -550,17 +635,17 @@
                     },
                     "position": {
                         "endCol": 19,
-                        "endLine": 14,
+                        "endLine": 15,
                         "startCol": 5,
-                        "startLine": 14
+                        "startLine": 15
                     },
                     "typeNode": {
                         "astNodeName": "PrimitiveTypeNode",
                         "position": {
                             "endCol": 9,
-                            "endLine": 14,
+                            "endLine": 15,
                             "startCol": 5,
-                            "startLine": 14
+                            "startLine": 15
                         },
                         "type": {
                             "valueType": 2
@@ -571,9 +656,9 @@
                         "name": "aBool",
                         "position": {
                             "endCol": 19,
-                            "endLine": 14,
+                            "endLine": 15,
                             "startCol": 14,
-                            "startLine": 14
+                            "startLine": 15
                         },
                         "symbol": {
                             "declaredAt": {
@@ -645,7 +730,7 @@
             },
             "position": {
                 "endCol": 2,
-                "endLine": 15,
+                "endLine": 16,
                 "startCol": 1,
                 "startLine": 9
             }
@@ -662,9 +747,9 @@
                             "name": "s",
                             "position": {
                                 "endCol": 6,
-                                "endLine": 18,
+                                "endLine": 19,
                                 "startCol": 5,
-                                "startLine": 18
+                                "startLine": 19
                             },
                             "symbol": {
                                 "declaredAt": {
@@ -683,25 +768,25 @@
                         },
                         "position": {
                             "endCol": 16,
-                            "endLine": 18,
+                            "endLine": 19,
                             "startCol": 5,
-                            "startLine": 18
+                            "startLine": 19
                         },
                         "value": {
                             "astNodeName": "IdentifierNode",
                             "name": "aString",
                             "position": {
                                 "endCol": 16,
-                                "endLine": 18,
+                                "endLine": 19,
                                 "startCol": 9,
-                                "startLine": 18
+                                "startLine": 19
                             },
                             "symbol": {
                                 "declaredAt": {
                                     "endCol": 47,
-                                    "endLine": 17,
+                                    "endLine": 18,
                                     "startCol": 40,
-                                    "startLine": 17
+                                    "startLine": 18
                                 },
                                 "kind": 0,
                                 "name": "aString",
@@ -714,9 +799,9 @@
                     },
                     "position": {
                         "endCol": 17,
-                        "endLine": 18,
+                        "endLine": 19,
                         "startCol": 5,
-                        "startLine": 18
+                        "startLine": 19
                     }
                 }
             ],
@@ -725,16 +810,16 @@
                 "name": "aString",
                 "position": {
                     "endCol": 47,
-                    "endLine": 17,
+                    "endLine": 18,
                     "startCol": 40,
-                    "startLine": 17
+                    "startLine": 18
                 },
                 "symbol": {
                     "declaredAt": {
                         "endCol": 47,
-                        "endLine": 17,
+                        "endLine": 18,
                         "startCol": 40,
-                        "startLine": 17
+                        "startLine": 18
                     },
                     "kind": 0,
                     "name": "aString",
@@ -746,9 +831,9 @@
             },
             "position": {
                 "endCol": 2,
-                "endLine": 19,
+                "endLine": 20,
                 "startCol": 1,
-                "startLine": 17
+                "startLine": 18
             },
             "resource": {
                 "arguments": [
@@ -758,25 +843,25 @@
                             "astNodeName": "StringLiteralExpressionNode",
                             "position": {
                                 "endCol": 26,
-                                "endLine": 17,
+                                "endLine": 18,
                                 "startCol": 19,
-                                "startLine": 17
+                                "startLine": 18
                             },
                             "value": "input"
                         },
                         "position": {
                             "endCol": 35,
-                            "endLine": 17,
+                            "endLine": 18,
                             "startCol": 19,
-                            "startLine": 17
+                            "startLine": 18
                         },
                         "right": {
                             "astNodeName": "StringLiteralExpressionNode",
                             "position": {
                                 "endCol": 35,
-                                "endLine": 17,
+                                "endLine": 18,
                                 "startCol": 29,
-                                "startLine": 17
+                                "startLine": 18
                             },
                             "value": ".txt"
                         }
@@ -788,9 +873,9 @@
                     "name": "fileContents",
                     "position": {
                         "endCol": 18,
-                        "endLine": 17,
+                        "endLine": 18,
                         "startCol": 6,
-                        "startLine": 17
+                        "startLine": 18
                     },
                     "symbol": {
                         "declaredAt": {
@@ -820,9 +905,9 @@
                 },
                 "position": {
                     "endCol": 36,
-                    "endLine": 17,
+                    "endLine": 18,
                     "startCol": 6,
-                    "startLine": 17
+                    "startLine": 18
                 }
             }
         }
