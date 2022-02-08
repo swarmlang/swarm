@@ -4,6 +4,7 @@
 #include <string>
 #include "shared/util/Console.h"
 #include "lang/Position.h"
+#include "errors/SwarmError.h"
 
 namespace swarmc {
 

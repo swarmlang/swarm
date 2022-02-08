@@ -253,7 +253,8 @@ namespace Lang {
         Position* pos = _local->position();
         Type* type = nullptr;
 
-        // FIXME: type of local depends on the type of the expression
+        // Note that the type of the local depends on the type of the expression,
+        // since it is implicitly defined. This is handled in typeAnalysis.
 
         // Start a new scope in the body and add the local
         symbols->enter();
@@ -382,7 +383,6 @@ namespace Lang {
             return false;
         }
 
-        Console::get()->debug("Variable: " + _id->toString() + ", Value: " + _value->toString());
         const Type* typeOfValue = types->getTypeOf(_value);
         if ( !_type->type()->is(typeOfValue) ) {
             Reporting::typeError(
@@ -485,8 +485,6 @@ namespace Lang {
 
         const Type* actualLeftType = types->getTypeOf(_left);
         const Type* actualRightType = types->getTypeOf(_right);
-
-        console->debug("Typing PureBinaryExpressionNode for " + getName());
 
         if ( !leftType()->is(actualLeftType) ) {
             Reporting::typeError(
@@ -645,8 +643,6 @@ namespace Lang {
 
         types->setTypeOf(this, PrimitiveType::of(TUNIT));
         return true;
-        
-        // TODO - more specific types for lists extending generic type
     }
 
     bool WithStatement::typeAnalysis(TypeTable* types) {
@@ -666,6 +662,7 @@ namespace Lang {
 
         GenericType* resourceType = (GenericType*) type;
         types->setTypeOf(_local, resourceType->concrete());
+        _local->symbol()->_type = resourceType->concrete();  // local is implicitly defined, so need to set its type
 
         for ( auto stmt : *_body ) {
             if ( !stmt->typeAnalysis(types) ) {

@@ -252,7 +252,7 @@ int Executive::debugOutputSerialize() {
     swarmc::Pipeline pipeline(_input);
     std::ostream* stream = nullptr;
 
-    if ( flagOutputParseTo == "--" ) {
+    if ( flagOutputSerializeTo == "--" ) {
         stream = &std::cout;
     } else {
         std::ofstream outfile(flagOutputParseTo);

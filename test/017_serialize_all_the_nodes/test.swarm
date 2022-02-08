@@ -1,0 +1,19 @@
+
+enumerable<string> e1 = [] of string;
+enumerable<bool> e2 = [true, false];
+map<string> m1 = {key1: "value1", key2: "value2"};
+map<number> m2 = {} of number;
+string s = "fubar";
+number n = 0;
+
+enumerate e2 as aBool {
+    if ( aBool && true ) {
+        n = 1 + 4;
+    }
+
+    bool b = aBool;
+}
+
+with fileContents("input.txt") as aString {
+    s = aString;
+}

@@ -1,0 +1,818 @@
+{
+    "astNodeName": "ProgramNode",
+    "body": [
+        {
+            "astNodeName": "VariableDeclarationNode",
+            "identifier": {
+                "astNodeName": "IdentifierNode",
+                "name": "e1",
+                "position": {
+                    "endCol": 22,
+                    "endLine": 2,
+                    "startCol": 20,
+                    "startLine": 2
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 37,
+                        "endLine": 2,
+                        "startCol": 1,
+                        "startLine": 2
+                    },
+                    "kind": 0,
+                    "name": "e1",
+                    "type": {
+                        "concrete": {
+                            "valueType": 0
+                        },
+                        "valueType": 3
+                    },
+                    "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
+                }
+            },
+            "position": {
+                "endCol": 37,
+                "endLine": 2,
+                "startCol": 1,
+                "startLine": 2
+            },
+            "typeNode": {
+                "astNodeName": "EnumerableTypeNode",
+                "position": {
+                    "endCol": 19,
+                    "endLine": 2,
+                    "startCol": 1,
+                    "startLine": 2
+                },
+                "type": {
+                    "concrete": {
+                        "valueType": 0
+                    },
+                    "valueType": 3
+                }
+            },
+            "value": {
+                "astNodeName": "EnumerationLiteralExpressionNode",
+                "position": {
+                    "endCol": 37,
+                    "endLine": 2,
+                    "startCol": 25,
+                    "startLine": 2
+                }
+            }
+        },
+        {
+            "astNodeName": "VariableDeclarationNode",
+            "identifier": {
+                "astNodeName": "IdentifierNode",
+                "name": "e2",
+                "position": {
+                    "endCol": 20,
+                    "endLine": 3,
+                    "startCol": 18,
+                    "startLine": 3
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 36,
+                        "endLine": 3,
+                        "startCol": 1,
+                        "startLine": 3
+                    },
+                    "kind": 0,
+                    "name": "e2",
+                    "type": {
+                        "concrete": {
+                            "valueType": 2
+                        },
+                        "valueType": 3
+                    },
+                    "uuid": "0245bfec-242e-4c68-9ed8-9d759d74c250"
+                }
+            },
+            "position": {
+                "endCol": 36,
+                "endLine": 3,
+                "startCol": 1,
+                "startLine": 3
+            },
+            "typeNode": {
+                "astNodeName": "EnumerableTypeNode",
+                "position": {
+                    "endCol": 17,
+                    "endLine": 3,
+                    "startCol": 1,
+                    "startLine": 3
+                },
+                "type": {
+                    "concrete": {
+                        "valueType": 2
+                    },
+                    "valueType": 3
+                }
+            },
+            "value": {
+                "astNodeName": "EnumerationLiteralExpressionNode",
+                "position": {
+                    "endCol": 36,
+                    "endLine": 3,
+                    "startCol": 23,
+                    "startLine": 3
+                }
+            }
+        },
+        {
+            "astNodeName": "VariableDeclarationNode",
+            "identifier": {
+                "astNodeName": "IdentifierNode",
+                "name": "m1",
+                "position": {
+                    "endCol": 15,
+                    "endLine": 4,
+                    "startCol": 13,
+                    "startLine": 4
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 50,
+                        "endLine": 4,
+                        "startCol": 1,
+                        "startLine": 4
+                    },
+                    "kind": 0,
+                    "name": "m1",
+                    "type": {
+                        "concrete": {
+                            "valueType": 0
+                        },
+                        "valueType": 4
+                    },
+                    "uuid": "126b1f95-3201-4afc-855e-f38bb1541f78"
+                }
+            },
+            "position": {
+                "endCol": 50,
+                "endLine": 4,
+                "startCol": 1,
+                "startLine": 4
+            },
+            "typeNode": {
+                "astNodeName": "MapTypeNode",
+                "position": {
+                    "endCol": 12,
+                    "endLine": 4,
+                    "startCol": 1,
+                    "startLine": 4
+                },
+                "type": {
+                    "concrete": {
+                        "valueType": 0
+                    },
+                    "valueType": 4
+                }
+            },
+            "value": {
+                "astNodeName": "MapNode",
+                "body": [
+                    {
+                        "astNodeName": "MapStatementNode",
+                        "mapStatementIdentifier": "key1",
+                        "position": {
+                            "endCol": 33,
+                            "endLine": 4,
+                            "startCol": 19,
+                            "startLine": 4
+                        },
+                        "value": {
+                            "astNodeName": "StringLiteralExpressionNode",
+                            "position": {
+                                "endCol": 33,
+                                "endLine": 4,
+                                "startCol": 25,
+                                "startLine": 4
+                            },
+                            "value": "value1"
+                        }
+                    },
+                    {
+                        "astNodeName": "MapStatementNode",
+                        "mapStatementIdentifier": "key2",
+                        "position": {
+                            "endCol": 49,
+                            "endLine": 4,
+                            "startCol": 35,
+                            "startLine": 4
+                        },
+                        "value": {
+                            "astNodeName": "StringLiteralExpressionNode",
+                            "position": {
+                                "endCol": 49,
+                                "endLine": 4,
+                                "startCol": 41,
+                                "startLine": 4
+                            },
+                            "value": "value2"
+                        }
+                    }
+                ],
+                "position": {
+                    "endCol": 50,
+                    "endLine": 4,
+                    "startCol": 18,
+                    "startLine": 4
+                }
+            }
+        },
+        {
+            "astNodeName": "VariableDeclarationNode",
+            "identifier": {
+                "astNodeName": "IdentifierNode",
+                "name": "m2",
+                "position": {
+                    "endCol": 15,
+                    "endLine": 5,
+                    "startCol": 13,
+                    "startLine": 5
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 30,
+                        "endLine": 5,
+                        "startCol": 1,
+                        "startLine": 5
+                    },
+                    "kind": 0,
+                    "name": "m2",
+                    "type": {
+                        "concrete": {
+                            "valueType": 1
+                        },
+                        "valueType": 4
+                    },
+                    "uuid": "261297a8-5efc-43c0-9a45-1b5cc0c663bc"
+                }
+            },
+            "position": {
+                "endCol": 30,
+                "endLine": 5,
+                "startCol": 1,
+                "startLine": 5
+            },
+            "typeNode": {
+                "astNodeName": "MapTypeNode",
+                "position": {
+                    "endCol": 12,
+                    "endLine": 5,
+                    "startCol": 1,
+                    "startLine": 5
+                },
+                "type": {
+                    "concrete": {
+                        "valueType": 1
+                    },
+                    "valueType": 4
+                }
+            },
+            "value": {
+                "astNodeName": "MapNode",
+                "body": [],
+                "position": {
+                    "endCol": 30,
+                    "endLine": 5,
+                    "startCol": 18,
+                    "startLine": 5
+                }
+            }
+        },
+        {
+            "astNodeName": "VariableDeclarationNode",
+            "identifier": {
+                "astNodeName": "IdentifierNode",
+                "name": "s",
+                "position": {
+                    "endCol": 9,
+                    "endLine": 6,
+                    "startCol": 8,
+                    "startLine": 6
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 19,
+                        "endLine": 6,
+                        "startCol": 1,
+                        "startLine": 6
+                    },
+                    "kind": 0,
+                    "name": "s",
+                    "type": {
+                        "valueType": 0
+                    },
+                    "uuid": "22bce82c-4b50-41b9-b3d0-25f99814e916"
+                }
+            },
+            "position": {
+                "endCol": 19,
+                "endLine": 6,
+                "startCol": 1,
+                "startLine": 6
+            },
+            "typeNode": {
+                "astNodeName": "PrimitiveTypeNode",
+                "position": {
+                    "endCol": 7,
+                    "endLine": 6,
+                    "startCol": 1,
+                    "startLine": 6
+                },
+                "type": {
+                    "valueType": 0
+                }
+            },
+            "value": {
+                "astNodeName": "StringLiteralExpressionNode",
+                "position": {
+                    "endCol": 19,
+                    "endLine": 6,
+                    "startCol": 12,
+                    "startLine": 6
+                },
+                "value": "fubar"
+            }
+        },
+        {
+            "astNodeName": "VariableDeclarationNode",
+            "identifier": {
+                "astNodeName": "IdentifierNode",
+                "name": "n",
+                "position": {
+                    "endCol": 9,
+                    "endLine": 7,
+                    "startCol": 8,
+                    "startLine": 7
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 13,
+                        "endLine": 7,
+                        "startCol": 1,
+                        "startLine": 7
+                    },
+                    "kind": 0,
+                    "name": "n",
+                    "type": {
+                        "valueType": 1
+                    },
+                    "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
+                }
+            },
+            "position": {
+                "endCol": 13,
+                "endLine": 7,
+                "startCol": 1,
+                "startLine": 7
+            },
+            "typeNode": {
+                "astNodeName": "PrimitiveTypeNode",
+                "position": {
+                    "endCol": 7,
+                    "endLine": 7,
+                    "startCol": 1,
+                    "startLine": 7
+                },
+                "type": {
+                    "valueType": 1
+                }
+            },
+            "value": {
+                "astNodeName": "NumberLiteralExpressionNode",
+                "position": {
+                    "endCol": 13,
+                    "endLine": 7,
+                    "startCol": 12,
+                    "startLine": 7
+                },
+                "value": 0.0
+            }
+        },
+        {
+            "astNodeName": "EnumerationStatement",
+            "body": [
+                {
+                    "astNodeName": "IfStatement",
+                    "body": [
+                        {
+                            "astNodeName": "ExpressionStatementNode",
+                            "expression": {
+                                "astNodeName": "AssignExpressionNode",
+                                "dest": {
+                                    "astNodeName": "IdentifierNode",
+                                    "name": "n",
+                                    "position": {
+                                        "endCol": 10,
+                                        "endLine": 11,
+                                        "startCol": 9,
+                                        "startLine": 11
+                                    },
+                                    "symbol": {
+                                        "declaredAt": {
+                                            "endCol": 13,
+                                            "endLine": 7,
+                                            "startCol": 1,
+                                            "startLine": 7
+                                        },
+                                        "kind": 0,
+                                        "name": "n",
+                                        "type": {
+                                            "valueType": 1
+                                        },
+                                        "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
+                                    }
+                                },
+                                "position": {
+                                    "endCol": 18,
+                                    "endLine": 11,
+                                    "startCol": 9,
+                                    "startLine": 11
+                                },
+                                "value": {
+                                    "astNodeName": "AddNode",
+                                    "left": {
+                                        "astNodeName": "NumberLiteralExpressionNode",
+                                        "position": {
+                                            "endCol": 14,
+                                            "endLine": 11,
+                                            "startCol": 13,
+                                            "startLine": 11
+                                        },
+                                        "value": 1.0
+                                    },
+                                    "position": {
+                                        "endCol": 18,
+                                        "endLine": 11,
+                                        "startCol": 13,
+                                        "startLine": 11
+                                    },
+                                    "right": {
+                                        "astNodeName": "NumberLiteralExpressionNode",
+                                        "position": {
+                                            "endCol": 18,
+                                            "endLine": 11,
+                                            "startCol": 17,
+                                            "startLine": 11
+                                        },
+                                        "value": 4.0
+                                    }
+                                }
+                            },
+                            "position": {
+                                "endCol": 19,
+                                "endLine": 11,
+                                "startCol": 9,
+                                "startLine": 11
+                            }
+                        }
+                    ],
+                    "condition": {
+                        "astNodeName": "AndNode",
+                        "left": {
+                            "astNodeName": "IdentifierNode",
+                            "name": "aBool",
+                            "position": {
+                                "endCol": 15,
+                                "endLine": 10,
+                                "startCol": 10,
+                                "startLine": 10
+                            },
+                            "symbol": {
+                                "declaredAt": {
+                                    "endCol": 22,
+                                    "endLine": 9,
+                                    "startCol": 17,
+                                    "startLine": 9
+                                },
+                                "kind": 0,
+                                "name": "aBool",
+                                "type": {
+                                    "valueType": 2
+                                },
+                                "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
+                            }
+                        },
+                        "position": {
+                            "endCol": 23,
+                            "endLine": 10,
+                            "startCol": 10,
+                            "startLine": 10
+                        },
+                        "right": {
+                            "astNodeName": "BooleanLiteralExpressionNode",
+                            "position": {
+                                "endCol": 23,
+                                "endLine": 10,
+                                "startCol": 19,
+                                "startLine": 10
+                            },
+                            "value": true
+                        }
+                    },
+                    "position": {
+                        "endCol": 6,
+                        "endLine": 12,
+                        "startCol": 5,
+                        "startLine": 10
+                    }
+                },
+                {
+                    "astNodeName": "VariableDeclarationNode",
+                    "identifier": {
+                        "astNodeName": "IdentifierNode",
+                        "name": "b",
+                        "position": {
+                            "endCol": 11,
+                            "endLine": 14,
+                            "startCol": 10,
+                            "startLine": 14
+                        },
+                        "symbol": {
+                            "declaredAt": {
+                                "endCol": 19,
+                                "endLine": 14,
+                                "startCol": 5,
+                                "startLine": 14
+                            },
+                            "kind": 0,
+                            "name": "b",
+                            "type": {
+                                "valueType": 2
+                            },
+                            "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                        }
+                    },
+                    "position": {
+                        "endCol": 19,
+                        "endLine": 14,
+                        "startCol": 5,
+                        "startLine": 14
+                    },
+                    "typeNode": {
+                        "astNodeName": "PrimitiveTypeNode",
+                        "position": {
+                            "endCol": 9,
+                            "endLine": 14,
+                            "startCol": 5,
+                            "startLine": 14
+                        },
+                        "type": {
+                            "valueType": 2
+                        }
+                    },
+                    "value": {
+                        "astNodeName": "IdentifierNode",
+                        "name": "aBool",
+                        "position": {
+                            "endCol": 19,
+                            "endLine": 14,
+                            "startCol": 14,
+                            "startLine": 14
+                        },
+                        "symbol": {
+                            "declaredAt": {
+                                "endCol": 22,
+                                "endLine": 9,
+                                "startCol": 17,
+                                "startLine": 9
+                            },
+                            "kind": 0,
+                            "name": "aBool",
+                            "type": {
+                                "valueType": 2
+                            },
+                            "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
+                        }
+                    }
+                }
+            ],
+            "enumerable": {
+                "astNodeName": "IdentifierNode",
+                "name": "e2",
+                "position": {
+                    "endCol": 13,
+                    "endLine": 9,
+                    "startCol": 11,
+                    "startLine": 9
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 36,
+                        "endLine": 3,
+                        "startCol": 1,
+                        "startLine": 3
+                    },
+                    "kind": 0,
+                    "name": "e2",
+                    "type": {
+                        "concrete": {
+                            "valueType": 2
+                        },
+                        "valueType": 3
+                    },
+                    "uuid": "0245bfec-242e-4c68-9ed8-9d759d74c250"
+                }
+            },
+            "local": {
+                "astNodeName": "IdentifierNode",
+                "name": "aBool",
+                "position": {
+                    "endCol": 22,
+                    "endLine": 9,
+                    "startCol": 17,
+                    "startLine": 9
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 22,
+                        "endLine": 9,
+                        "startCol": 17,
+                        "startLine": 9
+                    },
+                    "kind": 0,
+                    "name": "aBool",
+                    "type": {
+                        "valueType": 2
+                    },
+                    "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
+                }
+            },
+            "position": {
+                "endCol": 2,
+                "endLine": 15,
+                "startCol": 1,
+                "startLine": 9
+            }
+        },
+        {
+            "astNodeName": "WithStatement",
+            "body": [
+                {
+                    "astNodeName": "ExpressionStatementNode",
+                    "expression": {
+                        "astNodeName": "AssignExpressionNode",
+                        "dest": {
+                            "astNodeName": "IdentifierNode",
+                            "name": "s",
+                            "position": {
+                                "endCol": 6,
+                                "endLine": 18,
+                                "startCol": 5,
+                                "startLine": 18
+                            },
+                            "symbol": {
+                                "declaredAt": {
+                                    "endCol": 19,
+                                    "endLine": 6,
+                                    "startCol": 1,
+                                    "startLine": 6
+                                },
+                                "kind": 0,
+                                "name": "s",
+                                "type": {
+                                    "valueType": 0
+                                },
+                                "uuid": "22bce82c-4b50-41b9-b3d0-25f99814e916"
+                            }
+                        },
+                        "position": {
+                            "endCol": 16,
+                            "endLine": 18,
+                            "startCol": 5,
+                            "startLine": 18
+                        },
+                        "value": {
+                            "astNodeName": "IdentifierNode",
+                            "name": "aString",
+                            "position": {
+                                "endCol": 16,
+                                "endLine": 18,
+                                "startCol": 9,
+                                "startLine": 18
+                            },
+                            "symbol": {
+                                "declaredAt": {
+                                    "endCol": 42,
+                                    "endLine": 17,
+                                    "startCol": 35,
+                                    "startLine": 17
+                                },
+                                "kind": 0,
+                                "name": "aString",
+                                "type": {
+                                    "valueType": 0
+                                },
+                                "uuid": "87c9e931-156d-49b0-964e-69aa8e799c05"
+                            }
+                        }
+                    },
+                    "position": {
+                        "endCol": 17,
+                        "endLine": 18,
+                        "startCol": 5,
+                        "startLine": 18
+                    }
+                }
+            ],
+            "local": {
+                "astNodeName": "IdentifierNode",
+                "name": "aString",
+                "position": {
+                    "endCol": 42,
+                    "endLine": 17,
+                    "startCol": 35,
+                    "startLine": 17
+                },
+                "symbol": {
+                    "declaredAt": {
+                        "endCol": 42,
+                        "endLine": 17,
+                        "startCol": 35,
+                        "startLine": 17
+                    },
+                    "kind": 0,
+                    "name": "aString",
+                    "type": {
+                        "valueType": 0
+                    },
+                    "uuid": "87c9e931-156d-49b0-964e-69aa8e799c05"
+                }
+            },
+            "position": {
+                "endCol": 2,
+                "endLine": 19,
+                "startCol": 1,
+                "startLine": 17
+            },
+            "resource": {
+                "arguments": [
+                    {
+                        "astNodeName": "StringLiteralExpressionNode",
+                        "position": {
+                            "endCol": 30,
+                            "endLine": 17,
+                            "startCol": 19,
+                            "startLine": 17
+                        },
+                        "value": "input.txt"
+                    }
+                ],
+                "astNodeName": "CallExpressionNode",
+                "identifier": {
+                    "astNodeName": "IdentifierNode",
+                    "name": "fileContents",
+                    "position": {
+                        "endCol": 18,
+                        "endLine": 17,
+                        "startCol": 6,
+                        "startLine": 17
+                    },
+                    "symbol": {
+                        "declaredAt": {
+                            "endCol": 0,
+                            "endLine": 0,
+                            "startCol": 0,
+                            "startLine": 0
+                        },
+                        "kind": 1,
+                        "name": "fileContents",
+                        "type": {
+                            "arguments": [
+                                {
+                                    "valueType": 0
+                                }
+                            ],
+                            "return": {
+                                "concrete": {
+                                    "valueType": 0
+                                },
+                                "valueType": 8
+                            },
+                            "valueType": 6
+                        },
+                        "uuid": "ca2adfa5-5144-4111-8a4f-f3ba9b3bbe1a"
+                    }
+                },
+                "position": {
+                    "endCol": 31,
+                    "endLine": 17,
+                    "startCol": 6,
+                    "startLine": 17
+                }
+            }
+        }
+    ],
+    "position": {
+        "endCol": 0,
+        "endLine": 0,
+        "startCol": 0,
+        "startLine": 0
+    }
+}[32m[SUCCESS] [0mSerialized input program.
+[0m

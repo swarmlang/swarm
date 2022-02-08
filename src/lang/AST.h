@@ -626,9 +626,7 @@ namespace Lang {
     /** AST node referencing addition of two values. */
     class AddNode final : public PureNumberBinaryExpressionNode {
     public:
-        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {
-            console->debug("Created AddNode: " + left->toString() + right->toString());
-        }
+        AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
         virtual std::string getName() const override {
             return "AddNode";

@@ -13,6 +13,8 @@
 namespace swarmc {
 namespace Lang {
 
+    class WithStatement;
+
     /** Enum of the various possible things that a name may reference. */
     enum SemanticSymbolKind {
         VARIABLE,
@@ -59,6 +61,8 @@ namespace Lang {
         std::string _name;
         const Type* _type;
         const Position* _declaredAt;
+
+        friend class WithStatement;
     };
 
 
