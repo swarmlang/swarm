@@ -452,7 +452,7 @@
                                     }
                                 },
                                 "position": {
-                                    "endCol": 18,
+                                    "endCol": 19,
                                     "endLine": 11,
                                     "startCol": 9,
                                     "startLine": 11
@@ -470,25 +470,34 @@
                                         "value": 1.0
                                     },
                                     "position": {
-                                        "endCol": 18,
+                                        "endCol": 19,
                                         "endLine": 11,
                                         "startCol": 13,
                                         "startLine": 11
                                     },
                                     "right": {
-                                        "astNodeName": "NumberLiteralExpressionNode",
+                                        "astNodeName": "NegativeExpressionNode",
+                                        "expression": {
+                                            "astNodeName": "NumberLiteralExpressionNode",
+                                            "position": {
+                                                "endCol": 19,
+                                                "endLine": 11,
+                                                "startCol": 18,
+                                                "startLine": 11
+                                            },
+                                            "value": 4.0
+                                        },
                                         "position": {
-                                            "endCol": 18,
+                                            "endCol": 19,
                                             "endLine": 11,
                                             "startCol": 17,
                                             "startLine": 11
-                                        },
-                                        "value": 4.0
+                                        }
                                     }
                                 }
                             },
                             "position": {
-                                "endCol": 19,
+                                "endCol": 20,
                                 "endLine": 11,
                                 "startCol": 9,
                                 "startLine": 11

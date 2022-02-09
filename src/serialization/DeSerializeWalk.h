@@ -253,6 +253,12 @@ namespace Serialization {
             return new ConcatenateNode(pos, (ExpressionNode*) left, (ExpressionNode*) right);
         }
 
+        virtual NegativeExpressionNode* walkNegativeExpressionNode(nlohmann::json expjson, Position* pos) {
+            ASTNode* exp = walk(expjson);
+            assert(exp->isExpression());
+            return new NegativeExpressionNode(pos, (ExpressionNode*) exp);
+        }
+
         virtual NotNode* walkNotNode(nlohmann::json expjson, Position* pos) {
             ASTNode* exp = walk(expjson);
             assert(exp->isExpression());
@@ -408,6 +414,7 @@ namespace Serialization {
             else if ( name == "ModulusNode" ) return walkModulusNode(prog["left"],prog["right"],pos);
             else if ( name == "PowerNode" ) return walkPowerNode(prog["left"],prog["right"],pos);
             else if ( name == "ConcatenateNode" ) return walkConcatenateNode(prog["left"],prog["right"],pos);
+            else if ( name == "NegativeExpressionNode" ) return walkNegativeExpressionNode(prog["expression"],pos);
             else if ( name == "NotNode" ) return walkNotNode(prog["expression"],pos);
             else if ( name == "EnumerationLiteralExpressionNode" ) return walkEnumerationLiteralExpressionNode(prog["actuals"],pos);
             else if ( name == "EnumerationStatement" ) return walkEnumerationStatement(prog["enumerable"],prog["local"],prog["body"],pos);

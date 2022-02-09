@@ -8,7 +8,7 @@ number n = 0;
 
 enumerate e2 as aBool {
     if ( aBool && true ) {
-        n = 1 + 4;
+        n = 1 + -4;
         n += 2;
     }
 

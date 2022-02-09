@@ -122,6 +122,13 @@
 %type <transMapStatement>   mapStatement
 %type <transMapStatements>  mapStatements
 
+%left OR
+%left AND
+%nonassoc EQUAL NOTEQUAL
+%left SUBTRACT ADD
+%left MULTIPLY DIVIDE MODULUS
+%left POWER
+
 %%
 
 program :
@@ -278,42 +285,42 @@ expression :
         $$ = new MapNode(pos, $2);
     }
 
-    | term EQUAL term {
+    | expression EQUAL expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new EqualsNode(pos, $1, $3);
     }
 
-    | term NOTEQUAL term {
+    | expression NOTEQUAL expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new NotEqualsNode(pos, $1, $3);
     }
 
-    | term ADD term {
+    | expression ADD expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AddNode(pos, $1, $3);
     }
 
-    | term SUBTRACT term {
+    | expression SUBTRACT expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new SubtractNode(pos, $1, $3);
     }
 
-    | term MULTIPLY term {
+    | expression MULTIPLY expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new MultiplyNode(pos, $1, $3);
     }
 
-    | term DIVIDE term {
+    | expression DIVIDE expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new DivideNode(pos, $1, $3);
     }
 
-    | term MODULUS term {
+    | expression MODULUS expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new ModulusNode(pos, $1, $3);
     }
 
-    | term POWER term {
+    | expression POWER expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new PowerNode(pos, $1, $3);
     }
@@ -323,14 +330,19 @@ expression :
         $$ = new ConcatenateNode(pos, $1, $3);
     }
 
-    | term OR term {
+    | expression OR expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new OrNode(pos, $1, $3);
     }
 
-    | term AND term {
+    | expression AND expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AndNode(pos, $1, $3);
+    }
+
+    | SUBTRACT term {
+        Position* pos = new Position($1->position(), $2->position());
+        $$ = new NegativeExpressionNode(pos,$2);
     }
 
     | NOT term {

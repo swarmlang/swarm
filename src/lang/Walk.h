@@ -37,6 +37,7 @@ namespace Lang {
             if ( node->getName() == "ModulusNode" ) return walkModulusNode((ModulusNode*) node);
             if ( node->getName() == "PowerNode" ) return walkPowerNode((PowerNode*) node);
             if ( node->getName() == "ConcatenateNode" ) return walkConcatenateNode((ConcatenateNode*) node);
+            if ( node->getName() == "NegativeExpressionNode" ) return walkNegativeExpressionNode((NegativeExpressionNode*) node);
             if ( node->getName() == "NotNode" ) return walkNotNode((NotNode*) node);
             if ( node->getName() == "EnumerationLiteralExpressionNode" ) return walkEnumerationLiteralExpressionNode((EnumerationLiteralExpressionNode*) node);
             if ( node->getName() == "EnumerationStatement" ) return walkEnumerationStatement((EnumerationStatement*) node);
@@ -74,6 +75,7 @@ namespace Lang {
         virtual TReturn walkModulusNode(ModulusNode* node) = 0;
         virtual TReturn walkPowerNode(PowerNode* node) = 0;
         virtual TReturn walkConcatenateNode(ConcatenateNode* node) = 0;
+        virtual TReturn walkNegativeExpressionNode(NegativeExpressionNode* node) = 0;
         virtual TReturn walkNotNode(NotNode* node) = 0;
         virtual TReturn walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) = 0;
         virtual TReturn walkEnumerationStatement(EnumerationStatement* node) = 0;

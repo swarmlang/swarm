@@ -29,12 +29,11 @@ ProgramNode<#body: 8>
         AssignExpressionNode<lval: IdentifierNode<name: n>>
           AddNode<>
             NumberLiteralExpressionNode<#value: 1.000000>
-            NumberLiteralExpressionNode<#value: 4.000000>
+            NegativeExpressionNode<>
+              NumberLiteralExpressionNode<#value: 4.000000>
       ExpressionStatementNode<AddAssignExpressionNode<lval: IdentifierNode<name: n>>>
         AddAssignExpressionNode<lval: IdentifierNode<name: n>>
-          AddNode<>
-            IdentifierNode<name: n>
-            NumberLiteralExpressionNode<#value: 2.000000>
+          NumberLiteralExpressionNode<#value: 2.000000>
     VariableDeclarationNode<name: b>
       PrimitiveTypeNode<of: TBOOL>
       IdentifierNode<name: aBool>

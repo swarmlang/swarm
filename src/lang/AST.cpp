@@ -751,6 +751,25 @@ namespace Lang {
         return true;
     }
 
+    bool NegativeExpressionNode::typeAnalysis(TypeTable* types) {
+        if ( !_exp->typeAnalysis(types) ) {
+            return false;
+        }
+
+        const Type* numType = PrimitiveType::of(TNUM);
+        const Type* expType = types->getTypeOf(_exp);
+        if ( !expType->is(numType) ) {
+            Reporting::typeError(
+                position(),
+                "Attempted to perform numeric negation on invalid type. Expected: " + numType->toString() + "; actual: " + expType->toString()
+            );
+            return false;
+        }
+
+        types->setTypeOf(this, numType);
+        return true;
+    }
+
     bool NotNode::typeAnalysis(TypeTable* types) {
         if ( !_exp->typeAnalysis(types) ) {
             return false;

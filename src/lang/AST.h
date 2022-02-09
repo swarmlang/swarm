@@ -822,6 +822,21 @@ namespace Lang {
         ExpressionNode* _exp;
     };
 
+    /** AST node referencing numeric negation of an expression */
+    class NegativeExpressionNode final : public UnaryExpressionNode {
+    public:
+        NegativeExpressionNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
+    
+        virtual std::string getName() const override {
+            return "NegativeExpressionNode";
+        }
+
+        virtual std::string toString() const override {
+            return "NegativeExpressionNode<>";
+        }
+
+        virtual bool typeAnalysis(TypeTable* types) override;    
+    };
 
     /** AST node referencing boolean negation of an expression. */
     class NotNode final : public UnaryExpressionNode {

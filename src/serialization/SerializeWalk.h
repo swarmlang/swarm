@@ -244,6 +244,14 @@ namespace Serialization {
             return obj;
         }
 
+        virtual nlohmann::json* walkNegativeExpressionNode(NegativeExpressionNode* node) {
+            nlohmann::json* obj = getJSON();
+
+            (*obj)["expression"] = *walk(node->exp());
+
+            return obj;
+        }
+
         virtual nlohmann::json* walkNotNode(NotNode* node) {
             nlohmann::json* obj = getJSON();
 
