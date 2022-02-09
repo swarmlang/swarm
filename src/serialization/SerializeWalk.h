@@ -260,6 +260,8 @@ namespace Serialization {
                 actuals->push_back(*walk(actual));
             }
 
+            (*obj)["actuals"] = *actuals;
+
             return obj;
         }
 

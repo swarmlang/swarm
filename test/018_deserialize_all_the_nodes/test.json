@@ -529,14 +529,47 @@
                                     "startLine": 12
                                 },
                                 "value": {
-                                    "astNodeName": "NumberLiteralExpressionNode",
+                                    "astNodeName": "AddNode",
+                                    "left": {
+                                        "astNodeName": "IdentifierNode",
+                                        "name": "n",
+                                        "position": {
+                                            "endCol": 10,
+                                            "endLine": 12,
+                                            "startCol": 9,
+                                            "startLine": 12
+                                        },
+                                        "symbol": {
+                                            "declaredAt": {
+                                                "endCol": 13,
+                                                "endLine": 7,
+                                                "startCol": 1,
+                                                "startLine": 7
+                                            },
+                                            "kind": 0,
+                                            "name": "n",
+                                            "type": {
+                                                "valueType": 1
+                                            },
+                                            "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
+                                        }
+                                    },
                                     "position": {
                                         "endCol": 15,
                                         "endLine": 12,
-                                        "startCol": 14,
+                                        "startCol": 9,
                                         "startLine": 12
                                     },
-                                    "value": 2.0
+                                    "right": {
+                                        "astNodeName": "NumberLiteralExpressionNode",
+                                        "position": {
+                                            "endCol": 15,
+                                            "endLine": 12,
+                                            "startCol": 14,
+                                            "startLine": 12
+                                        },
+                                        "value": 2.0
+                                    }
                                 }
                             },
                             "position": {
@@ -908,5 +941,4 @@
         "startCol": 0,
         "startLine": 0
     }
-}[32m[SUCCESS] [0mSerialized input program.
-[0m
+}

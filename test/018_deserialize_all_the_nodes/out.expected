@@ -1,0 +1,46 @@
+ProgramNode<#body: 8>
+  VariableDeclarationNode<name: e1>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TSTRING>>
+    EnumerationLiteralExpressionNode<#actuals: 0>
+  VariableDeclarationNode<name: e2>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL>>
+    EnumerationLiteralExpressionNode<#actuals: 2>
+      BoolLiteralNode<of: 1>
+      BoolLiteralNode<of: 0>
+  VariableDeclarationNode<name: m1>
+    MapTypeNode<of: PrimitiveTypeNode<of: TSTRING>>
+    MapNode<#body: 2>
+      MapStatementNode<id: key1>
+        StringLiteralExpressionNode<#value: 'value1'>
+      MapStatementNode<id: key2>
+        StringLiteralExpressionNode<#value: 'value2'>
+  VariableDeclarationNode<name: m2>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    MapNode<#body: 0>
+  VariableDeclarationNode<name: s>
+    PrimitiveTypeNode<of: TSTRING>
+    StringLiteralExpressionNode<#value: 'fubar'>
+  VariableDeclarationNode<name: n>
+    PrimitiveTypeNode<of: TNUM>
+    NumberLiteralExpressionNode<#value: 0.000000>
+  EnumerationStatement<e: e2, as: aBool, #body: 2>
+    IfStatement<f: if AndNode<> then, #body: 2>
+      ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: n>>>
+        AssignExpressionNode<lval: IdentifierNode<name: n>>
+          AddNode<>
+            NumberLiteralExpressionNode<#value: 1.000000>
+            NumberLiteralExpressionNode<#value: 4.000000>
+      ExpressionStatementNode<AddAssignExpressionNode<lval: IdentifierNode<name: n>>>
+        AddAssignExpressionNode<lval: IdentifierNode<name: n>>
+          AddNode<>
+            IdentifierNode<name: n>
+            NumberLiteralExpressionNode<#value: 2.000000>
+    VariableDeclarationNode<name: b>
+      PrimitiveTypeNode<of: TBOOL>
+      IdentifierNode<name: aBool>
+  WithStatement<r: CallExpressionNode<id: fileContents, #args: 1>, as: aString>
+    ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: s>>>
+      AssignExpressionNode<lval: IdentifierNode<name: s>>
+        IdentifierNode<name: aString>
+[32m[SUCCESS] [0mDeserialized input program.
+[0m

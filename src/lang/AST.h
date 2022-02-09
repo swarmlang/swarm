@@ -686,11 +686,7 @@ namespace Lang {
     class AddAssignExpressionNode final : public AssignExpressionNode {
     public:
         AddAssignExpressionNode(Position* pos, LValNode* dest, ExpressionNode* value) : 
-            AssignExpressionNode(
-                pos, 
-                dest, 
-                new AddNode(pos, dest, value)
-            ) {}
+            AssignExpressionNode(pos, dest, value) {}
         virtual ~AddAssignExpressionNode() {}
 
         virtual std::string getName() const override {
@@ -736,11 +732,7 @@ namespace Lang {
     class MultiplyAssignExpressionNode final : public AssignExpressionNode {
     public:
         MultiplyAssignExpressionNode(Position* pos, LValNode* dest, ExpressionNode* value) :
-            AssignExpressionNode(
-                pos, 
-                dest, 
-                new MultiplyNode(pos, dest, value)
-            ) {}
+            AssignExpressionNode(pos, dest, value) {}
         virtual ~MultiplyAssignExpressionNode() {}
 
         virtual std::string getName() const override {
