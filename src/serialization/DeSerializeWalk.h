@@ -50,11 +50,15 @@ namespace Serialization {
                 symjson["declaredAt"]["endLine"],
                 symjson["declaredAt"]["startCol"],
                 symjson["declaredAt"]["endCol"]);
+            SemanticSymbol* sym;
             if (type->isFunctionType()) {
-                return new FunctionSymbol(name,(FunctionType*) type,pos);
+                sym = new FunctionSymbol(name,(FunctionType*) type,pos);
+                
             } else {
-                return new VariableSymbol(name,type,pos);
+                sym = new VariableSymbol(name,type,pos);
             }
+            sym->_uuid = uuid;
+            return  sym;
         }
 
         virtual IdentifierNode* walkIdentifierNode(std::string name, nlohmann::json symjson, Position* pos) {

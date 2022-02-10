@@ -11,6 +11,9 @@
 #include "Type.h"
 
 namespace swarmc {
+namespace Serialization {
+    class DeSerializeWalk;
+}
 namespace Lang {
 
     class WithStatement;
@@ -63,6 +66,7 @@ namespace Lang {
         const Position* _declaredAt;
 
         friend class WithStatement;
+        friend class Serialization::DeSerializeWalk;
     };
 
 
