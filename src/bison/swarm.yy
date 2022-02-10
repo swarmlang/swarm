@@ -122,6 +122,7 @@
 %type <transMapStatement>   mapStatement
 %type <transMapStatements>  mapStatements
 
+%left CAT
 %left OR
 %left AND
 %nonassoc EQUAL NOTEQUAL
@@ -325,7 +326,7 @@ expression :
         $$ = new PowerNode(pos, $1, $3);
     }
 
-    | term CAT term {
+    | expression CAT expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new ConcatenateNode(pos, $1, $3);
     }
