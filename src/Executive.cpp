@@ -221,16 +221,16 @@ int Executive::debugOutputTokens() {
     if ( flagOutputTokensTo == "--" ) {
         stream = &std::cout;
     } else {
-        std::ofstream outfile(flagOutputTokensTo);
-        if ( outfile.bad() ) {
+        stream = new std::ofstream(flagOutputTokensTo);
+        if ( stream->bad() ) {
             console->error("Could not open token output file for writing: " + flagOutputTokensTo);
+            delete stream;
             return 1;
         }
-
-        stream = &outfile;
     }
 
     pipeline.targetTokenRepresentation(*stream);
+    if ( stream != &std::cout ) delete stream;
     return 0;
 }
 
@@ -241,13 +241,12 @@ int Executive::debugOutputParse() {
     if ( flagOutputParseTo == "--" ) {
         stream = &std::cout;
     } else {
-        std::ofstream outfile(flagOutputParseTo);
-        if ( outfile.bad() ) {
+        stream = new std::ofstream(flagOutputParseTo);
+        if ( stream->bad() ) {
             console->error("Could not open parse output file for writing: " + flagOutputParseTo);
+            delete stream;
             return 1;
         }
-
-        stream = &outfile;
     }
 
     try {
@@ -257,6 +256,7 @@ int Executive::debugOutputParse() {
     }
 
     console->success("Parsed input program.");
+    if ( stream != &std::cout ) delete stream;
     return 0;
 }
 
@@ -280,13 +280,12 @@ int Executive::debugOutputSerialize() {
     if ( flagOutputSerializeTo == "--" ) {
         stream = &std::cout;
     } else {
-        std::ofstream outfile(flagOutputSerializeTo);
-        if ( outfile.bad() ) {
+        stream = new std::ofstream(flagOutputSerializeTo);
+        if ( stream->bad() ) {
             console->error("Could not open serialize output file for writing: " + flagOutputSerializeTo);
+            delete stream;
             return 1;
         }
-
-        stream = &outfile;
     }
     
     try {
@@ -296,6 +295,7 @@ int Executive::debugOutputSerialize() {
     }
 
     console->success("Serialized input program.");
+    if ( stream != &std::cout ) delete stream;
     return 0;
 }
 
@@ -306,13 +306,12 @@ int Executive::debugOutputDeSerialize() {
     if ( flagOutputDeSerializeTo == "--" ) {
         stream = &std::cout;
     } else {
-        std::ofstream outfile(flagOutputDeSerializeTo);
-        if ( outfile.bad() ) {
+        stream = new std::ofstream(flagOutputDeSerializeTo);
+        if ( stream->bad() ) {
             console->error("Could not open deserialize output file for writing: " + flagOutputDeSerializeTo);
+            delete stream;
             return 1;
         }
-
-        stream = &outfile;
     }
     
     try {
@@ -322,5 +321,6 @@ int Executive::debugOutputDeSerialize() {
     }
 
     console->success("Deserialized input program.");
+    if ( stream != &std::cout ) delete stream;
     return 0;
 }
