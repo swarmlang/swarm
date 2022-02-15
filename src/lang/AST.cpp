@@ -49,12 +49,30 @@ namespace Lang {
         return mapNode->getKey(_end);
     }
 
-    void EnumerableAccessNode::setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) {
+    void EnumerableAccessNode::setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) {
+        // Get the lval we are keying into
+        auto node = _path->getValue(store);
 
+        // This should be caught by the type-checker, but anyway
+        assert(node->isValue() && node->getName() == "EnumerationLiteralExpressionNode");
+        assert(value->isValue());
+
+        auto enumNode = (EnumerationLiteralExpressionNode*) node;
+
+        size_t idx = _index->value();  // fixme invalid cast?
+        enumNode->setIndex(idx, value);  // todo handle exception here
     }
 
     ExpressionNode* EnumerableAccessNode::getValue(Runtime::ISymbolValueStore* store) {
-        return nullptr;
+        // Get the lval we are keying into
+        auto node = _path->getValue(store);
+
+        // This should be caught by the type-checker, but anyway
+        assert(node->isValue() && node->getName() == "EnumerationLiteralExpressionNode");
+
+        auto enumNode = (EnumerationLiteralExpressionNode*) node;
+        size_t idx = _index->value();  // fixme invalid cast?
+        return enumNode->getIndex(idx);
     }
 
     /************* PRINT TREE *************/

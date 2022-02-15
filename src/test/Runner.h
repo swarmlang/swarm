@@ -5,6 +5,7 @@
 #include "Test.h"
 #include "021_map_node_accesses.h"
 #include "022_local_store_lval.h"
+#include "023_enum_node_accesses.h"
 
 namespace swarmc {
 namespace Test {
@@ -21,6 +22,9 @@ namespace Test {
                 return test.run();
             } else if ( name == "022_local_store_lval" ) {
                 LocalStoreLValTest test;
+                return test.run();
+            } else if ( name == "023_enum_node_accesses" ) {
+                EnumNodeAccessesTest test;
                 return test.run();
             }
 

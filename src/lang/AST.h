@@ -943,6 +943,44 @@ namespace Lang {
             return true;
         }
 
+        virtual bool isEmpty() const {
+            return _actuals->empty();
+        }
+
+        virtual bool hasIndex(size_t idx) const {
+            return idx < _actuals->size();
+        }
+
+        virtual ExpressionNode* getIndex(size_t idx) const {
+            if ( !hasIndex(idx) ) {
+                // todo raise exception
+            }
+
+            return _actuals->at(idx);
+        }
+
+        virtual void setIndex(size_t idx, ExpressionNode* value) {
+            if ( !hasIndex(idx) ) {
+                // todo raise exception
+            }
+
+            assert(value->isValue());
+            _actuals->at(idx) = value;
+        }
+
+        virtual void push(ExpressionNode* value) {
+            assert(value->isValue());
+            _actuals->push_back(value);
+        }
+
+        virtual void pop() {
+            if ( isEmpty() ) {
+                // todo raise exception
+            }
+
+            _actuals->pop_back();
+        }
+
     protected:
         ExpressionList* _actuals;
         TypeNode* _disambiguationType = nullptr;
