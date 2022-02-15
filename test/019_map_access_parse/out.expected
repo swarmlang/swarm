@@ -1,0 +1,25 @@
+ProgramNode<#body: 4>
+  VariableDeclarationNode<name: myMap>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    MapNode<#body: 3>
+      MapStatementNode<id: a>
+        NumberLiteralExpressionNode<#value: 1.000000>
+      MapStatementNode<id: b>
+        NumberLiteralExpressionNode<#value: 2.000000>
+      MapStatementNode<id: c>
+        NumberLiteralExpressionNode<#value: 3.000000>
+  VariableDeclarationNode<name: myMap2>
+    MapTypeNode<of: MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>>
+    MapNode<#body: 2>
+      MapStatementNode<id: a>
+        IdentifierNode<name: myMap>
+      MapStatementNode<id: b>
+        IdentifierNode<name: myMap>
+  ExpressionStatementNode<AssignExpressionNode<lval: MapAccessNode<path: IdentifierNode<name: myMap> id: a>>>
+    AssignExpressionNode<lval: MapAccessNode<path: IdentifierNode<name: myMap> id: a>>
+      NumberLiteralExpressionNode<#value: 4.000000>
+  ExpressionStatementNode<AssignExpressionNode<lval: MapAccessNode<path: MapAccessNode<path: IdentifierNode<name: myMap2> id: b> id: c>>>
+    AssignExpressionNode<lval: MapAccessNode<path: MapAccessNode<path: IdentifierNode<name: myMap2> id: b> id: c>>
+      NumberLiteralExpressionNode<#value: 3.000000>
+[32m[SUCCESS] [0mParsed input program.
+[0m

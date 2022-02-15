@@ -19,6 +19,7 @@ namespace Lang {
     class StatementNode;
     class ExpressionNode;
     class MapStatementNode;
+    class LValNode;
 
     using StatementList = std::vector<StatementNode*>;
     using ExpressionList = std::vector<ExpressionNode*>;
@@ -255,6 +256,37 @@ namespace Lang {
         friend class Serialization::DeSerializeWalk;
     };
 
+    /** Node for accessing data from a map */
+    class MapAccessNode : public LValNode {
+    public:
+        MapAccessNode(Position* pos, LValNode* path, IdentifierNode* end) : LValNode(pos), _path(path), _end(end) {}
+        virtual ~MapAccessNode() {}
+
+        virtual void printTree(std::ostream& out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
+
+        virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual std::string getName() const override {
+            return "MapAccessNode";
+        }
+
+        virtual std::string toString() const override {
+            return "MapAccessNode<path: " + _path->toString() + " id: " + _end->name() + ">";
+        }
+
+        LValNode* path() const {
+            return _path;
+        }
+
+        IdentifierNode* end() const {
+            return _end;
+        }
+    private:
+        LValNode* _path;
+        IdentifierNode* _end;
+    };
 
     /** Base class for AST nodes referencing types. */
     class TypeNode : public ASTNode {

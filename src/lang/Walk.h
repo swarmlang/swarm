@@ -18,6 +18,7 @@ namespace Lang {
             if ( node->getName() == "ProgramNode" ) return walkProgramNode((ProgramNode*) node);
             if ( node->getName() == "ExpressionStatementNode" ) return walkExpressionStatementNode((ExpressionStatementNode*) node);
             if ( node->getName() == "IdentifierNode" ) return walkIdentifierNode((IdentifierNode*) node);
+            if ( node->getName() == "MapAccessNode" ) return walkMapAccessNode((MapAccessNode*) node);
             if ( node->getName() == "PrimitiveTypeNode" ) return walkPrimitiveTypeNode((PrimitiveTypeNode*) node);
             if ( node->getName() == "EnumerableTypeNode" ) return walkEnumerableTypeNode((EnumerableTypeNode*) node);
             if ( node->getName() == "MapTypeNode" ) return walkMapTypeNode((MapTypeNode*) node);
@@ -56,6 +57,7 @@ namespace Lang {
         virtual TReturn walkProgramNode(ProgramNode* node) = 0;
         virtual TReturn walkExpressionStatementNode(ExpressionStatementNode* node) = 0;
         virtual TReturn walkIdentifierNode(IdentifierNode* node) = 0;
+        virtual TReturn walkMapAccessNode(MapAccessNode* node) = 0;
         virtual TReturn walkPrimitiveTypeNode(PrimitiveTypeNode* node) = 0;
         virtual TReturn walkEnumerableTypeNode(EnumerableTypeNode* node) = 0;
         virtual TReturn walkMapTypeNode(MapTypeNode* node) = 0;

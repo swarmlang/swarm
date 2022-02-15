@@ -1,0 +1,5 @@
+map<number> myMap = {a: 1, b: 2, c: 3};
+map<map<number>> myMap2 = {a: myMap, b: myMap};
+
+myMap[a] = 4;
+myMap2[b][c] = 3;

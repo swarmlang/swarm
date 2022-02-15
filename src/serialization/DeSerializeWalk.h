@@ -67,6 +67,17 @@ namespace Serialization {
             return identifier;
         }
 
+        virtual MapAccessNode* walkMapAccessNode(std::string end, nlohmann::json endposjson, nlohmann::json pathjson, Position* pos) {
+            ASTNode* path = walk(pathjson);
+            assert(path->isLVal());         
+            Position* endpos = new Position(
+                endposjson["startLine"],
+                endposjson["endLine"],
+                endposjson["startCol"],
+                endposjson["endCol"]);
+            return new MapAccessNode(pos, (LValNode*) path, new IdentifierNode(endpos, end));
+        }
+
         virtual PrimitiveTypeNode* walkPrimitiveTypeNode(ValueType type, Position* pos) {
             return new PrimitiveTypeNode(pos, PrimitiveType::of(type));
         }
@@ -399,6 +410,7 @@ namespace Serialization {
             if ( name == "ProgramNode" ) return walkProgramNode(prog["body"],pos);
             else if ( name == "ExpressionStatementNode" ) return walkExpressionStatementNode(prog["expression"],pos);
             else if ( name == "IdentifierNode" ) return walkIdentifierNode(prog["name"],prog["symbol"],pos);
+            else if ( name == "MapAccessNode" ) return walkMapAccessNode(prog["end"],prog["end_pos"],prog["path"],pos);
             else if ( name == "PrimitiveTypeNode" ) return walkPrimitiveTypeNode(prog["type"]["valueType"],pos);
             else if ( name == "EnumerableTypeNode" ) return walkEnumerableTypeNode(prog["type"],pos);
             else if ( name == "MapTypeNode" ) return walkMapTypeNode(prog["type"],pos);

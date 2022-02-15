@@ -51,6 +51,7 @@
     swarmc::Lang::NumberLiteralToken*   transNumberToken;
     swarmc::Lang::StatementNode*        transStatement;
     swarmc::Lang::IdentifierNode*       transID;
+    swarmc::Lang::LValNode*             transLVal;
     swarmc::Lang::ExpressionNode*       transExpression;
     swarmc::Lang::AssignExpressionNode* transAssignExpression;
     swarmc::Lang::CallExpressionNode*   transCallExpression;
@@ -112,6 +113,7 @@
 %type <transProgram>        statements
 %type <transStatement>      statement
 %type <transID>             id
+%type <transLVal>           lval
 %type <transExpression>     expression
 %type <transExpression>     term
 %type <transAssignExpression> assignment
@@ -207,22 +209,31 @@ declaration :
 
 
 assignment :
-    id ASSIGN expression {
+    lval ASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AssignExpressionNode(pos, $1, $3);
     }
 
-    | id ADDASSIGN expression {
+    | lval ADDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AddAssignExpressionNode(pos, $1, $3);
     }
 
-    | id MULTIPLYASSIGN expression {
+    | lval MULTIPLYASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new MultiplyAssignExpressionNode(pos, $1, $3);
     }
 
 
+lval :
+    id {
+        $$ = $1;
+    }
+
+    | lval LBRACKET id RBRACKET {
+        Position* pos = new Position($1->position(), $4->position());
+        $$ = new MapAccessNode(pos, $1, $3);
+    }
 
 id :
     ID {
@@ -358,7 +369,7 @@ term :
         $$ = $1;
     }
 
-    | id {
+    | lval {
         $$ = $1;
     }
 

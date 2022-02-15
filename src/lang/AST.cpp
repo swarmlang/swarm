@@ -30,6 +30,11 @@ namespace Lang {
         _exp->printTree(out, prefix + SWARMC_SPACE);
     }
 
+    void MapAccessNode::printTree(std::ostream &out, std::string prefix) const {
+        out << prefix << toString() << std::endl;
+        _path->printTree(out, prefix + SWARMC_SPACE);
+    }
+
     void TypeNode::printTree(std::ostream &out, std::string prefix) const {
         out << prefix << toString() << std::endl;
     }
@@ -128,6 +133,10 @@ namespace Lang {
         }
 
         return true;
+    }
+
+    bool MapAccessNode::nameAnalysis(SymbolTable* symbols) {
+        return _path->nameAnalysis(symbols);
     }
 
     bool TypeNode::nameAnalysis(SymbolTable* symbols) {
@@ -361,6 +370,25 @@ namespace Lang {
         }
 
         types->setTypeOf(this, _symbol->type());
+        return true;
+    }
+
+    bool MapAccessNode::typeAnalysis(TypeTable* types) {
+        bool pathresult = _path->typeAnalysis(types);
+        if ( !pathresult ) {
+            return false;
+        }
+
+        const Type* typeLVal = types->getTypeOf(_path);
+        if ( !typeLVal->isGenericType() ) {
+            Reporting::typeError(
+                position(),
+                "Invalid map access: " + _end->name()
+            );
+            return false;
+        }
+
+        types->setTypeOf(this, ((GenericType*) typeLVal)->concrete());
         return true;
     }
 

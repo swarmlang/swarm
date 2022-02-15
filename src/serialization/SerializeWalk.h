@@ -80,6 +80,16 @@ namespace Serialization {
             return obj;
         }
 
+        virtual nlohmann::json* walkMapAccessNode(MapAccessNode* node) {
+            nlohmann::json* obj = getJSON();
+
+            (*obj)["path"] = *walk(node->path());
+            (*obj)["end"] = node->end()->name();
+            (*obj)["end_pos"] = *walkPosition(node->end()->position());
+
+            return obj;
+        }
+
         virtual nlohmann::json* walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
             nlohmann::json* obj = getJSON();
 
