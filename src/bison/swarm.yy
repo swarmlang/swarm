@@ -10,6 +10,7 @@
 
 %code requires{
 	#include <list>
+    #include <float.h>
     #include "../shared/util/Console.h"
 	#include "../lang/Token.h"
    	#include "../lang/AST.h"
@@ -260,13 +261,13 @@ lval :
 
     | lval LBRACKET NUMBERLITERAL RBRACKET {
         Position* pos = new Position($1->position(), $4->position());
-        if ($3->value() != (int)$3->value()) {
+        if ($3->value() != (int)$3->value() || $3->value() < 0 || $3->value() > DBL_MAX) {
             Reporting::parseError(
                 $3->position(),
                 "Invalid Enumerable index: " + std::to_string($3->value()));
             throw swarmc::Errors::ParseError(1);
         }
-        auto index = new IntegerLiteralExpressionNode($3->position(), (int)$3->value());
+        auto index = new IntegerLiteralExpressionNode($3->position(), (size_t)$3->value());
         $$ = new EnumerableAccessNode(pos, $1, index);
     }
 

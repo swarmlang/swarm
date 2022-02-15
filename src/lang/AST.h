@@ -376,7 +376,7 @@ namespace Lang {
         }
 
         virtual Type* type() const override {
-            return GenericType::of(TENUMERABLE, _concrete->type());
+            return GenericType::of(ValueType::TENUMERABLE, _concrete->type());
         }
 
         virtual std::string toString() const override {
@@ -396,7 +396,7 @@ namespace Lang {
         }
 
         virtual Type* type() const override {
-            return GenericType::of(TMAP, _concrete->type());
+            return GenericType::of(ValueType::TMAP, _concrete->type());
         }
 
         virtual std::string toString() const override {
@@ -611,15 +611,15 @@ namespace Lang {
         virtual ~PureBooleanBinaryExpressionNode() {}
 
         virtual const Type* leftType() const override {
-            return PrimitiveType::of(TBOOL);
+            return PrimitiveType::of(ValueType::TBOOL);
         }
 
         virtual const Type* rightType() const override {
-            return PrimitiveType::of(TBOOL);
+            return PrimitiveType::of(ValueType::TBOOL);
         }
 
         virtual const Type* resultType() const override {
-            return PrimitiveType::of(TBOOL);
+            return PrimitiveType::of(ValueType::TBOOL);
         }
     };
 
@@ -631,15 +631,15 @@ namespace Lang {
         virtual ~PureNumberBinaryExpressionNode() {}
 
         virtual const Type* leftType() const override {
-            return PrimitiveType::of(TNUM);
+            return PrimitiveType::of(ValueType::TNUM);
         }
 
         virtual const Type* rightType() const override {
-            return PrimitiveType::of(TNUM);
+            return PrimitiveType::of(ValueType::TNUM);
         }
 
         virtual const Type* resultType() const override {
-            return PrimitiveType::of(TNUM);
+            return PrimitiveType::of(ValueType::TNUM);
         }
     };
 
@@ -651,15 +651,15 @@ namespace Lang {
         virtual ~PureStringBinaryExpressionNode() {}
 
         virtual const Type* leftType() const override {
-            return PrimitiveType::of(TSTRING);
+            return PrimitiveType::of(ValueType::TSTRING);
         }
 
         virtual const Type* rightType() const override {
-            return PrimitiveType::of(TSTRING);
+            return PrimitiveType::of(ValueType::TSTRING);
         }
 
         virtual const Type* resultType() const override {
-            return PrimitiveType::of(TSTRING);
+            return PrimitiveType::of(ValueType::TSTRING);
         }
     };
 
@@ -1333,7 +1333,7 @@ namespace Lang {
     /** AST node representing integer literals */
     class IntegerLiteralExpressionNode final : public NumberLiteralExpressionNode {
         public:
-        IntegerLiteralExpressionNode(Position* pos, int value) : NumberLiteralExpressionNode(pos, value) {}
+        IntegerLiteralExpressionNode(Position* pos, size_t value) : NumberLiteralExpressionNode(pos, value) {}
         virtual ~IntegerLiteralExpressionNode() {}
 
         virtual std::string getName() const override {
@@ -1341,11 +1341,11 @@ namespace Lang {
         }
 
         std::string toString() const override {
-            return "IntegerLiteralExpressionNode<#value: " + std::to_string((int)_value) + ">";
+            return "IntegerLiteralExpressionNode<#value: " + std::to_string((size_t)_value) + ">";
         }
 
         int value() const {
-            return (int) _value;
+            return (size_t) _value;
         }
     };
 

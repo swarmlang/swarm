@@ -11,8 +11,8 @@ namespace swarmc {
 namespace Lang {
 
     /** All possible value types in the language. */
-    enum ValueType {
-        TSTRING = 0,    // strings
+    enum class ValueType {
+        TSTRING,    // strings
         TNUM,           // numbers
         TBOOL,          // booleans
         TENUMERABLE,    // enumeration lists
@@ -24,10 +24,17 @@ namespace Lang {
     };
 
     /** All possible kinds of types. */
-    enum TypeKind {
-        KPRIMITIVE = 0, // primitive value
+    enum class TypeKind {
+        KPRIMITIVE, // primitive value
         KGENERIC,       // single-parametric type
         KFUNCTION,      // callable (...D)->R function
+    };
+
+    enum class SharedKind {
+        SSHARED,
+        SUNSHARED,  // 
+        SLITERAL,   // Undecided shared value for literals
+        SNONE,      // Invalid shared value
     };
 
     /** Base class for type instances. */
@@ -101,13 +108,13 @@ namespace Lang {
 
         virtual bool is(const Type* other) const override {
             return (
-                other->kind() == KPRIMITIVE
+                other->kind() == TypeKind::KPRIMITIVE
                 && other->valueType() == _type
             );
         }
 
         virtual TypeKind kind() const override {
-            return KPRIMITIVE;
+            return TypeKind::KPRIMITIVE;
         }
 
         virtual bool isPrimitiveType() const override {
@@ -134,11 +141,11 @@ namespace Lang {
         }
 
         virtual TypeKind kind() const override {
-            return KGENERIC;
+            return TypeKind::KGENERIC;
         }
 
         virtual bool is(const Type* other) const override {
-            if ( other->kind() != KGENERIC ) {
+            if ( other->kind() != TypeKind::KGENERIC ) {
                 return false;
             }
 
@@ -191,11 +198,11 @@ namespace Lang {
         }
 
         virtual TypeKind kind() const override {
-            return KFUNCTION;
+            return TypeKind::KFUNCTION;
         }
 
         virtual bool is(const Type* other) const override {
-            if ( other->kind() != KFUNCTION ) {
+            if ( other->kind() != TypeKind::KFUNCTION ) {
                 return false;
             }
 
@@ -247,7 +254,7 @@ namespace Lang {
         }
 
     protected:
-        FunctionType(Type* returnType) : Type(TFUNCTION), _return(returnType) {}
+        FunctionType(Type* returnType) : Type(ValueType::TFUNCTION), _return(returnType) {}
         std::vector<Type*> _args;
         Type* _return;
         bool _builtin = false;
