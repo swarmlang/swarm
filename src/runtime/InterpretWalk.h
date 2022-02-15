@@ -6,6 +6,7 @@
 #include "../errors/SwarmError.h"
 #include "../lang/AST.h"
 #include "../lang/Walk.h"
+#include "LocalSymbolValueStore.h"
 
 using namespace swarmc::Lang;
 
@@ -13,6 +14,14 @@ namespace swarmc {
 namespace Runtime {
 
     class InterpretWalk : public Lang::Walk<ASTNode*> {
+    public:
+        InterpretWalk() : Lang::Walk<ASTNode*>() {
+            _local = new LocalSymbolValueStore;
+        }
+
+    protected:
+        LocalSymbolValueStore* _local;
+
         virtual ASTNode* walkProgramNode(ProgramNode* node) {
             ASTNode* last = nullptr;
 
@@ -27,9 +36,17 @@ namespace Runtime {
             return walk(node->expression());
         }
 
-        virtual ASTNode* walkIdentifierNode(IdentifierNode* node) = 0;
+        virtual ASTNode* walkIdentifierNode(IdentifierNode* node) {
+            auto value = node->getValue(_local);
+            assert(value != nullptr);
+            return value;
+        }
 
-        virtual ASTNode* walkMapAccessNode(MapAccessNode* node) = 0;
+        virtual ASTNode* walkMapAccessNode(MapAccessNode* node) {
+            auto value = node->getValue(_local);
+            assert(value != nullptr);
+            return value;
+        }
 
         virtual ASTNode* walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
             return nullptr;
@@ -47,7 +64,14 @@ namespace Runtime {
             return node;
         }
 
-        virtual ASTNode* walkVariableDeclarationNode(VariableDeclarationNode* node) = 0;
+        virtual ASTNode* walkVariableDeclarationNode(VariableDeclarationNode* node) {
+            ASTNode* rval = walk(node->value());
+            assert(rval->isValue() && rval->isExpression());
+
+            auto value = (ExpressionNode*) rval;
+            node->id()->setValue(_local, value);
+            return new VariableDeclarationNode(nullptr, node->typeNode(), node->id(), value, node->shared());
+        }
 
         virtual ASTNode* walkCallExpressionNode(CallExpressionNode* node) = 0;
 
@@ -96,7 +120,17 @@ namespace Runtime {
             return new NumberLiteralExpressionNode(nullptr, leftNum->value() + rightNum->value());
         }
 
-        virtual ASTNode* walkAddAssignExpressionNode(AddAssignExpressionNode* node) = 0;
+        virtual ASTNode* walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
+            // get the value of the lval
+            // add to the value
+            // set the new value of the lval
+
+            auto lval = node->dest();
+            auto initialNode = lval->getValue(_local);
+            assert(initialNode->isValue() && initialNode->getName() == "NumberLiteralExpressionNode");
+
+            ASTNode* right = walk(node->value());
+        }
 
         virtual ASTNode* walkSubtractNode(SubtractNode* node) {
             ASTNode* left = walk(node->left());
@@ -204,7 +238,7 @@ namespace Runtime {
 
             for ( auto entry : *node->actuals() ) {
                 ASTNode* val = walk(entry);
-                assert(val->isExpression());
+                assert(val->isValue());
                 reduced->push_back((ExpressionNode*) val);
             }
 
@@ -270,9 +304,23 @@ namespace Runtime {
             return nullptr;
         }
 
-        virtual ASTNode* walkMapStatementNode(MapStatementNode* node) = 0;
+        virtual ASTNode* walkMapStatementNode(MapStatementNode* node) {
+            ASTNode* val = walk(node);
+            assert(val->isValue() && val->isExpression());
+            return new MapStatementNode(nullptr, node->id(), (ExpressionNode*) val);
+        }
 
-        virtual ASTNode* walkMapNode(MapNode* node) = 0;
+        virtual ASTNode* walkMapNode(MapNode* node) {
+            MapBody* reduced = new MapBody;
+
+            for ( auto entry : *node->body() ) {
+                ASTNode* val = walk(entry);
+                assert(val->getName() == "MapStatementNode");
+                reduced->push_back((MapStatementNode*) val);
+            }
+
+            return new MapNode(nullptr, reduced);
+        }
 
         virtual ASTNode* walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
             return node;
