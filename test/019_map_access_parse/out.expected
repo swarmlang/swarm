@@ -1,4 +1,4 @@
-ProgramNode<#body: 4>
+ProgramNode<#body: 5>
   VariableDeclarationNode<name: myMap>
     MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
     MapNode<#body: 3>
@@ -8,18 +8,29 @@ ProgramNode<#body: 4>
         NumberLiteralExpressionNode<#value: 2.000000>
       MapStatementNode<id: c>
         NumberLiteralExpressionNode<#value: 3.000000>
+  VariableDeclarationNode<name: myEnum>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    EnumerationLiteralExpressionNode<#actuals: 3>
+      NumberLiteralExpressionNode<#value: 5.000000>
+      NumberLiteralExpressionNode<#value: 7.000000>
+      NumberLiteralExpressionNode<#value: 9.000000>
   VariableDeclarationNode<name: myMap2>
-    MapTypeNode<of: MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>>
+    MapTypeNode<of: EnumerableTypeNode<of: MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>>>
     MapNode<#body: 2>
       MapStatementNode<id: a>
-        IdentifierNode<name: myMap>
+        EnumerationLiteralExpressionNode<#actuals: 1>
+          IdentifierNode<name: myMap>
       MapStatementNode<id: b>
-        IdentifierNode<name: myMap>
+        EnumerationLiteralExpressionNode<#actuals: 2>
+          IdentifierNode<name: myMap>
+          MapNode<#body: 1>
+            MapStatementNode<id: zoinks>
+              NumberLiteralExpressionNode<#value: 5.000000>
   ExpressionStatementNode<AssignExpressionNode<lval: MapAccessNode<path: IdentifierNode<name: myMap> id: a>>>
     AssignExpressionNode<lval: MapAccessNode<path: IdentifierNode<name: myMap> id: a>>
       NumberLiteralExpressionNode<#value: 4.000000>
-  ExpressionStatementNode<AssignExpressionNode<lval: MapAccessNode<path: MapAccessNode<path: IdentifierNode<name: myMap2> id: b> id: c>>>
-    AssignExpressionNode<lval: MapAccessNode<path: MapAccessNode<path: IdentifierNode<name: myMap2> id: b> id: c>>
-      NumberLiteralExpressionNode<#value: 3.000000>
+  ExpressionStatementNode<AssignExpressionNode<lval: MapAccessNode<path: EnumerableAccessNode<path: MapAccessNode<path: IdentifierNode<name: myMap2> id: b>, index: 0> id: c>>>
+    AssignExpressionNode<lval: MapAccessNode<path: EnumerableAccessNode<path: MapAccessNode<path: IdentifierNode<name: myMap2> id: b>, index: 0> id: c>>
+      NumberLiteralExpressionNode<#value: 6.000000>
 [32m[SUCCESS] [0mParsed input program.
 [0m

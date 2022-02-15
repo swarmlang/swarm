@@ -90,6 +90,15 @@ namespace Serialization {
             return obj;
         }
 
+        virtual nlohmann::json* walkEnumerableAccessNode(EnumerableAccessNode* node) {
+            nlohmann::json* obj = getJSON();
+
+            (*obj)["path"] = *walk(node->path());
+            (*obj)["index"] = *walk(node->index());
+
+            return obj;
+        }
+
         virtual nlohmann::json* walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
             nlohmann::json* obj = getJSON();
 

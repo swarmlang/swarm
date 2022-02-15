@@ -17,6 +17,13 @@ namespace swarmc {
                 ->line(message);
         }
 
+        static void parseError(const Lang::Position* pos, std::string message) {
+            Console::get()
+                ->bold()->color("red")->print("[Parse Error] ")->reset()
+                ->bold()->print(pos->start() + " ")->reset()
+                ->line(message);
+        }
+
         static void typeError(const Lang::Position* pos, std::string message) {
             Console::get()
                 ->bold()->color("red")->print("[Type Error] ")->reset()

@@ -72,6 +72,11 @@ namespace Lang {
         _path->printTree(out, prefix + SWARMC_SPACE);
     }
 
+    void EnumerableAccessNode::printTree(std::ostream &out, std::string prefix) const {
+        out << prefix << toString() << std::endl;
+        _path->printTree(out, prefix + SWARMC_SPACE);
+    }
+
     void TypeNode::printTree(std::ostream &out, std::string prefix) const {
         out << prefix << toString() << std::endl;
     }
@@ -173,6 +178,10 @@ namespace Lang {
     }
 
     bool MapAccessNode::nameAnalysis(SymbolTable* symbols) {
+        return _path->nameAnalysis(symbols);
+    }
+
+    bool EnumerableAccessNode::nameAnalysis(SymbolTable* symbols) {
         return _path->nameAnalysis(symbols);
     }
 
@@ -421,6 +430,25 @@ namespace Lang {
             Reporting::typeError(
                 position(),
                 "Invalid map access: " + _end->name()
+            );
+            return false;
+        }
+
+        types->setTypeOf(this, ((GenericType*) typeLVal)->concrete());
+        return true;
+    }
+
+    bool EnumerableAccessNode::typeAnalysis(TypeTable* types) {
+        bool pathresult = _path->typeAnalysis(types);
+        if ( !pathresult ) {
+            return false;
+        }
+
+        const Type* typeLVal = types->getTypeOf(_path);
+        if ( !typeLVal->isGenericType() ) {
+            Reporting::typeError(
+                position(),
+                "Invalid array access: " + std::to_string(_index->value())
             );
             return false;
         }

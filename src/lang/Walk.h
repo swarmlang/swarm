@@ -19,6 +19,7 @@ namespace Lang {
             if ( node->getName() == "ExpressionStatementNode" ) return walkExpressionStatementNode((ExpressionStatementNode*) node);
             if ( node->getName() == "IdentifierNode" ) return walkIdentifierNode((IdentifierNode*) node);
             if ( node->getName() == "MapAccessNode" ) return walkMapAccessNode((MapAccessNode*) node);
+            if ( node->getName() == "EnumerableAccessNode" ) return walkEnumerableAccessNode((EnumerableAccessNode*) node);
             if ( node->getName() == "PrimitiveTypeNode" ) return walkPrimitiveTypeNode((PrimitiveTypeNode*) node);
             if ( node->getName() == "EnumerableTypeNode" ) return walkEnumerableTypeNode((EnumerableTypeNode*) node);
             if ( node->getName() == "MapTypeNode" ) return walkMapTypeNode((MapTypeNode*) node);
@@ -50,6 +51,7 @@ namespace Lang {
             if ( node->getName() == "StringLiteralExpressionNode" ) return walkStringLiteralExpressionNode((StringLiteralExpressionNode*) node);
             if ( node->getName() == "AssignExpressionNode" ) return walkAssignExpressionNode((AssignExpressionNode*) node);
             if ( node->getName() == "NumberLiteralExpressionNode" ) return walkNumberLiteralExpressionNode((NumberLiteralExpressionNode*) node);
+            if ( node->getName() == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode((IntegerLiteralExpressionNode*) node);
 
             throw Errors::SwarmError("Invalid node type: " + node->getName());
         }
@@ -58,6 +60,7 @@ namespace Lang {
         virtual TReturn walkExpressionStatementNode(ExpressionStatementNode* node) = 0;
         virtual TReturn walkIdentifierNode(IdentifierNode* node) = 0;
         virtual TReturn walkMapAccessNode(MapAccessNode* node) = 0;
+        virtual TReturn walkEnumerableAccessNode(EnumerableAccessNode* node) = 0;
         virtual TReturn walkPrimitiveTypeNode(PrimitiveTypeNode* node) = 0;
         virtual TReturn walkEnumerableTypeNode(EnumerableTypeNode* node) = 0;
         virtual TReturn walkMapTypeNode(MapTypeNode* node) = 0;
@@ -89,6 +92,9 @@ namespace Lang {
         virtual TReturn walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) = 0;
         virtual TReturn walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) = 0;
         virtual TReturn walkAssignExpressionNode(AssignExpressionNode* node) = 0;
+        virtual TReturn walkIntegerLiteralExpressionNode(IntegerLiteralExpressionNode* node) {
+            return walkNumberLiteralExpressionNode(node);
+        }
 
         virtual std::string toString() const = 0;
     };

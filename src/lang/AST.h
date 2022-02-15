@@ -25,7 +25,7 @@ namespace Lang {
     class StatementNode;
     class ExpressionNode;
     class MapStatementNode;
-    class LValNode;
+    class IntegerLiteralExpressionNode;
 
     using StatementList = std::vector<StatementNode*>;
     using ExpressionList = std::vector<ExpressionNode*>;
@@ -1248,7 +1248,7 @@ namespace Lang {
     };
 
     /** AST node representing literal numbers. */
-    class NumberLiteralExpressionNode final : public ExpressionNode {
+    class NumberLiteralExpressionNode : public ExpressionNode {
     public:
         NumberLiteralExpressionNode(Position* pos, double value) : ExpressionNode(pos), _value(value) {}
         virtual ~NumberLiteralExpressionNode() {}
@@ -1274,6 +1274,60 @@ namespace Lang {
         virtual bool typeAnalysis(TypeTable* types) override;
     protected:
         double _value;
+    };
+
+
+    /** AST node representing integer literals */
+    class IntegerLiteralExpressionNode final : public NumberLiteralExpressionNode {
+        public:
+        IntegerLiteralExpressionNode(Position* pos, int value) : NumberLiteralExpressionNode(pos, value) {}
+        virtual ~IntegerLiteralExpressionNode() {}
+
+        virtual std::string getName() const override {
+            return "IntegerLiteralExpressionNode";
+        }
+
+        std::string toString() const override {
+            return "IntegerLiteralExpressionNode<#value: " + std::to_string((int)_value) + ">";
+        }
+
+        int value() const {
+            return (int) _value;
+        }
+    };
+
+    /** Node for accessing data from an array */
+    class EnumerableAccessNode : public LValNode {
+    public:
+        EnumerableAccessNode(Position* pos, LValNode* path, IntegerLiteralExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
+        virtual ~EnumerableAccessNode() {}
+
+        virtual void printTree(std::ostream &out, std::string prefix = "") const override;
+
+        virtual bool nameAnalysis(SymbolTable* symbols) override;
+
+        virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual std::string getName() const override {
+            return "EnumerableAccessNode";
+        }
+
+        virtual std::string toString() const override {
+            std::stringstream s;
+            s << "EnumerableAccessNode<path: " << _path->toString() << ", index: " << _index->value() << ">";
+            return s.str();
+        }
+
+        LValNode* path() const {
+            return _path;
+        }
+
+        IntegerLiteralExpressionNode* index() const {
+            return _index;
+        }
+    private:
+        LValNode* _path;
+        IntegerLiteralExpressionNode* _index;
     };
 
 }
