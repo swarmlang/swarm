@@ -53,6 +53,10 @@ namespace Runtime {
 
             return value;
         }
+
+        virtual std::string toString() const {
+            return "LocalSymbolValueStore<#symbols: " + std::to_string(_map->size()) + ">";
+        }
     };
 
 }

@@ -260,6 +260,10 @@ namespace Lang {
             return _symbol;
         }
 
+        void overrideSymbol(SemanticSymbol* sym) {
+            _symbol = sym;
+        }
+
         virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) override;
 
         virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
