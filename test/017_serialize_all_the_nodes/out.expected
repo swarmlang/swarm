@@ -21,6 +21,7 @@
                     },
                     "kind": 0,
                     "name": "e1",
+                    "shared": false,
                     "type": {
                         "concrete": {
                             "valueType": 0
@@ -36,6 +37,7 @@
                 "startCol": 1,
                 "startLine": 2
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "EnumerableTypeNode",
                 "position": {
@@ -82,6 +84,7 @@
                     },
                     "kind": 0,
                     "name": "e2",
+                    "shared": false,
                     "type": {
                         "concrete": {
                             "valueType": 2
@@ -97,6 +100,7 @@
                 "startCol": 1,
                 "startLine": 3
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "EnumerableTypeNode",
                 "position": {
@@ -164,6 +168,7 @@
                     },
                     "kind": 0,
                     "name": "m1",
+                    "shared": false,
                     "type": {
                         "concrete": {
                             "valueType": 0
@@ -179,6 +184,7 @@
                 "startCol": 1,
                 "startLine": 4
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "MapTypeNode",
                 "position": {
@@ -266,6 +272,7 @@
                     },
                     "kind": 0,
                     "name": "m2",
+                    "shared": false,
                     "type": {
                         "concrete": {
                             "valueType": 1
@@ -281,6 +288,7 @@
                 "startCol": 1,
                 "startLine": 5
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "MapTypeNode",
                 "position": {
@@ -327,6 +335,7 @@
                     },
                     "kind": 0,
                     "name": "s",
+                    "shared": false,
                     "type": {
                         "valueType": 0
                     },
@@ -339,6 +348,7 @@
                 "startCol": 1,
                 "startLine": 6
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "PrimitiveTypeNode",
                 "position": {
@@ -382,6 +392,7 @@
                     },
                     "kind": 0,
                     "name": "n",
+                    "shared": false,
                     "type": {
                         "valueType": 1
                     },
@@ -394,6 +405,7 @@
                 "startCol": 1,
                 "startLine": 7
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "PrimitiveTypeNode",
                 "position": {
@@ -445,6 +457,7 @@
                                         },
                                         "kind": 0,
                                         "name": "n",
+                                        "shared": false,
                                         "type": {
                                             "valueType": 1
                                         },
@@ -525,6 +538,7 @@
                                         },
                                         "kind": 0,
                                         "name": "n",
+                                        "shared": false,
                                         "type": {
                                             "valueType": 1
                                         },
@@ -576,6 +590,7 @@
                                 },
                                 "kind": 0,
                                 "name": "aBool",
+                                "shared": false,
                                 "type": {
                                     "valueType": 2
                                 },
@@ -626,6 +641,7 @@
                             },
                             "kind": 0,
                             "name": "b",
+                            "shared": false,
                             "type": {
                                 "valueType": 2
                             },
@@ -638,6 +654,7 @@
                         "startCol": 5,
                         "startLine": 15
                     },
+                    "shared": false,
                     "typeNode": {
                         "astNodeName": "PrimitiveTypeNode",
                         "position": {
@@ -668,6 +685,7 @@
                             },
                             "kind": 0,
                             "name": "aBool",
+                            "shared": false,
                             "type": {
                                 "valueType": 2
                             },
@@ -694,6 +712,7 @@
                     },
                     "kind": 0,
                     "name": "e2",
+                    "shared": false,
                     "type": {
                         "concrete": {
                             "valueType": 2
@@ -721,6 +740,7 @@
                     },
                     "kind": 0,
                     "name": "aBool",
+                    "shared": false,
                     "type": {
                         "valueType": 2
                     },
@@ -732,7 +752,8 @@
                 "endLine": 16,
                 "startCol": 1,
                 "startLine": 9
-            }
+            },
+            "shared": false
         },
         {
             "astNodeName": "WithStatement",
@@ -759,6 +780,7 @@
                                 },
                                 "kind": 0,
                                 "name": "s",
+                                "shared": false,
                                 "type": {
                                     "valueType": 0
                                 },
@@ -789,6 +811,7 @@
                                 },
                                 "kind": 0,
                                 "name": "aString",
+                                "shared": false,
                                 "type": {
                                     "valueType": 0
                                 },
@@ -822,6 +845,7 @@
                     },
                     "kind": 0,
                     "name": "aString",
+                    "shared": false,
                     "type": {
                         "valueType": 0
                     },
@@ -885,6 +909,7 @@
                         },
                         "kind": 1,
                         "name": "fileContents",
+                        "shared": false,
                         "type": {
                             "arguments": [
                                 {
@@ -908,7 +933,8 @@
                     "startCol": 6,
                     "startLine": 18
                 }
-            }
+            },
+            "shared": false
         }
     ],
     "position": {

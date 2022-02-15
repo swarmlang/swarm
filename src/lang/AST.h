@@ -453,8 +453,8 @@ namespace Lang {
          * @param id - the name of the variable
          * @param value - the initial value of the variable
          */
-        VariableDeclarationNode(Position* pos, TypeNode* type, IdentifierNode* id, ExpressionNode* value)
-            : DeclarationNode(pos), _type(type), _id(id), _value(value) {}
+        VariableDeclarationNode(Position* pos, TypeNode* type, IdentifierNode* id, ExpressionNode* value, bool shared)
+            : DeclarationNode(pos), _type(type), _id(id), _value(value), _shared(shared) {}
 
         virtual std::string getName() const override {
             return "VariableDeclarationNode";
@@ -484,10 +484,15 @@ namespace Lang {
             return _type;
         }
 
+        bool shared() const {
+            return _shared;
+        }
+
     protected:
         TypeNode* _type;
         IdentifierNode* _id;
         ExpressionNode* _value;
+        bool _shared;
     };
 
 
@@ -987,8 +992,8 @@ namespace Lang {
     /** AST node representing an enumeration block. */
     class EnumerationStatement final : public BlockStatementNode {
     public:
-        EnumerationStatement(Position* pos, IdentifierNode* enumerable, IdentifierNode* local)
-            : BlockStatementNode(pos), _enumerable(enumerable), _local(local) {}
+        EnumerationStatement(Position* pos, IdentifierNode* enumerable, IdentifierNode* local, bool shared)
+            : BlockStatementNode(pos), _enumerable(enumerable), _local(local), _shared(shared) {}
 
         virtual ~EnumerationStatement() {}
 
@@ -1011,17 +1016,22 @@ namespace Lang {
         IdentifierNode* local() const {
             return _local;
         }
+
+        bool shared() const {
+            return _shared;
+        }
     protected:
         IdentifierNode* _enumerable;
         IdentifierNode* _local;
+        bool _shared;
     };
 
 
     /** AST node representing a with-resource block. */
     class WithStatement final : public BlockStatementNode {
     public:
-        WithStatement(Position* pos, ExpressionNode* resource, IdentifierNode* local)
-            : BlockStatementNode(pos), _resource(resource), _local(local) {}
+        WithStatement(Position* pos, ExpressionNode* resource, IdentifierNode* local, bool shared)
+            : BlockStatementNode(pos), _resource(resource), _local(local), _shared(shared) {}
 
         virtual ~WithStatement() {}
 
@@ -1044,9 +1054,14 @@ namespace Lang {
         IdentifierNode* local() const {
             return _local;
         }
+
+        bool shared() const {
+            return _shared;
+        }
     protected:
         ExpressionNode* _resource;
         IdentifierNode* _local;
+        bool _shared;
     };
 
 

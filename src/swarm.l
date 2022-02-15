@@ -57,6 +57,10 @@ with {
 	return makeBareToken(TokenKind::WITH);
 }
 
+shared {
+	return makeBareToken(TokenKind::SHARED);
+}
+
 "{" {
 	return makeBareToken(TokenKind::LBRACE);
 }

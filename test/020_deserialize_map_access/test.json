@@ -21,6 +21,7 @@
                     },
                     "kind": 0,
                     "name": "myMap",
+                    "shared": false,
                     "type": {
                         "concrete": {
                             "valueType": 1
@@ -36,6 +37,7 @@
                 "startCol": 1,
                 "startLine": 1
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "MapTypeNode",
                 "position": {
@@ -143,6 +145,7 @@
                     },
                     "kind": 0,
                     "name": "myEnum",
+                    "shared": false,
                     "type": {
                         "concrete": {
                             "valueType": 1
@@ -158,6 +161,7 @@
                 "startCol": 1,
                 "startLine": 2
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "EnumerableTypeNode",
                 "position": {
@@ -235,6 +239,7 @@
                     },
                     "kind": 0,
                     "name": "myMap2",
+                    "shared": false,
                     "type": {
                         "concrete": {
                             "concrete": {
@@ -256,6 +261,7 @@
                 "startCol": 1,
                 "startLine": 3
             },
+            "shared": false,
             "typeNode": {
                 "astNodeName": "MapTypeNode",
                 "position": {
@@ -309,6 +315,7 @@
                                         },
                                         "kind": 0,
                                         "name": "myMap",
+                                        "shared": false,
                                         "type": {
                                             "concrete": {
                                                 "valueType": 1
@@ -357,6 +364,7 @@
                                         },
                                         "kind": 0,
                                         "name": "myMap",
+                                        "shared": false,
                                         "type": {
                                             "concrete": {
                                                 "valueType": 1
@@ -447,6 +455,7 @@
                             },
                             "kind": 0,
                             "name": "myMap",
+                            "shared": false,
                             "type": {
                                 "concrete": {
                                     "valueType": 1
@@ -539,6 +548,7 @@
                                     },
                                     "kind": 0,
                                     "name": "myMap2",
+                                    "shared": false,
                                     "type": {
                                         "concrete": {
                                             "concrete": {

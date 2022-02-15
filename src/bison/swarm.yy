@@ -109,6 +109,7 @@
 %token <transToken>      MODULUS
 %token <transToken>      POWER
 %token <transToken>      CAT
+%token <transToken>      SHARED
 
 /*    (attribute type)      (nonterminal)    */
 %type <transProgram>        program
@@ -159,15 +160,29 @@ statements :
 statement :
     ENUMERATE id AS id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $7->position());
-        EnumerationStatement* e = new EnumerationStatement(pos, $2, $4);
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, $4, false);
         e->assumeAndReduceStatements($6->reduceToStatements());
+        $$ = e;
+    }
+
+    | ENUMERATE id AS SHARED id LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $8->position());
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, true);
+        e->assumeAndReduceStatements($7->reduceToStatements());
         $$ = e;
     }
 
     | WITH term AS id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $7->position());
-        WithStatement* w = new WithStatement(pos, $2, $4);
+        WithStatement* w = new WithStatement(pos, $2, $4, false);
         w->assumeAndReduceStatements($6->reduceToStatements());
+        $$ = w;
+    }
+
+    | WITH term AS SHARED id LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $8->position());
+        WithStatement* w = new WithStatement(pos, $2, $5, true);
+        w->assumeAndReduceStatements($7->reduceToStatements());
         $$ = w;
     }
 
@@ -204,7 +219,13 @@ statement :
 declaration :
     type id ASSIGN expression {
         Position* pos = new Position($1->position(), $4->position());
-        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $1, $2, $4);
+        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $1, $2, $4, false);
+        $$ = var;
+    }
+
+    | SHARED type id ASSIGN expression {
+        Position* pos = new Position($1->position(), $5->position());
+        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5, true);
         $$ = var;
     }
 

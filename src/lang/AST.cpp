@@ -216,7 +216,7 @@ namespace Lang {
         bool valueResult = _value->nameAnalysis(symbols);
 
         // Add the declaration to the current scope
-        symbols->addVariable(name, type, position());
+        symbols->addVariable(name, _shared, type, position());
 
         // Call this to attach the Symbol to the IdentifierNode
         _id->nameAnalysis(symbols);
@@ -293,7 +293,7 @@ namespace Lang {
 
         // Start a new scope in the body and add the local
         symbols->enter();
-        symbols->addVariable(name, type, pos);
+        symbols->addVariable(name, _shared, type, pos);
 
         if ( !_local->nameAnalysis(symbols) ) {
             symbols->leave();
@@ -321,7 +321,7 @@ namespace Lang {
 
         // Start a new scope in the body and add the local
         symbols->enter();
-        symbols->addVariable(name, type, pos);
+        symbols->addVariable(name, _shared, type, pos);
 
         if ( !_local->nameAnalysis(symbols) ) {
             symbols->leave();

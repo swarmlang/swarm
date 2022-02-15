@@ -137,6 +137,7 @@ namespace Serialization {
             (*obj)["typeNode"] = *walk(node->typeNode());
             (*obj)["identifier"] = *walk(node->id());
             (*obj)["value"] = *walk(node->value());
+            (*obj)["shared"] = node->shared();
 
             return obj;
         }
@@ -297,6 +298,7 @@ namespace Serialization {
 
             (*obj)["enumerable"] = *walk(node->enumerable());
             (*obj)["local"] = *walk(node->local());
+            (*obj)["shared"] = node->shared();
 
             std::vector<nlohmann::json>* body = getVector();
             for ( auto stmt : *node->body() ) {
@@ -313,6 +315,7 @@ namespace Serialization {
 
             (*obj)["resource"] = *walk(node->resource());
             (*obj)["local"] = *walk(node->local());
+            (*obj)["shared"] = node->shared();
 
             std::vector<nlohmann::json>* body = getVector();
             for ( auto stmt : *node->body() ) {
@@ -419,6 +422,7 @@ namespace Serialization {
             (*obj)["uuid"] = sym->uuid();
             (*obj)["kind"] = sym->kind();
             (*obj)["type"] = *walkType(sym->type());
+            (*obj)["shared"] = sym->shared();
             (*obj)["declaredAt"] = *walkPosition(sym->declaredAt());
 
             return obj;
