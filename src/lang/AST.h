@@ -1325,6 +1325,10 @@ namespace Lang {
         IntegerLiteralExpressionNode* index() const {
             return _index;
         }
+
+        ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
+
+        void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) override;
     private:
         LValNode* _path;
         IntegerLiteralExpressionNode* _index;

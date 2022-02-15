@@ -49,6 +49,14 @@ namespace Lang {
         return mapNode->getKey(_end);
     }
 
+    void EnumerableAccessNode::setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) {
+
+    }
+
+    ExpressionNode* EnumerableAccessNode::getValue(Runtime::ISymbolValueStore* store) {
+        return nullptr;
+    }
+
     /************* PRINT TREE *************/
 
     void ProgramNode::printTree(std::ostream& out, std::string prefix) const {
