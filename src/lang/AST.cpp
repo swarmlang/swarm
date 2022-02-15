@@ -304,7 +304,7 @@ namespace Lang {
 
         // Try to look up the generic type of the enumerable
         const Type* enumType = _enumerable->symbol()->type();
-        if ( enumType->kind() == KGENERIC ) {
+        if ( enumType->kind() == TypeKind::KGENERIC ) {
             GenericType* enumGenericType = (GenericType*) enumType;
             type = enumGenericType->concrete();
         }
@@ -417,7 +417,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         return true;
     }
 
@@ -425,7 +425,7 @@ namespace Lang {
         bool expResult = _exp->typeAnalysis(types);
 
         if ( expResult ) {
-            types->setTypeOf(this, PrimitiveType::of(TUNIT));
+            types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         }
 
         return expResult;
@@ -484,12 +484,12 @@ namespace Lang {
     }
 
     bool TypeNode::typeAnalysis(TypeTable* types) {
-        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         return true;
     }
 
     bool BooleanLiteralExpressionNode::typeAnalysis(TypeTable* types) {
-        types->setTypeOf(this, PrimitiveType::of(TBOOL));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL));
         return true;
     }
 
@@ -512,7 +512,7 @@ namespace Lang {
             return false;
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         return true;
     }
 
@@ -536,7 +536,7 @@ namespace Lang {
             return false;
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         return true;
     }
 
@@ -555,7 +555,7 @@ namespace Lang {
 
         // Make sure the callee is actually a function type
         const Type* baseTypeOfCallee = types->getTypeOf(_id);
-        if ( baseTypeOfCallee->kind() != KFUNCTION ) {
+        if ( baseTypeOfCallee->kind() != TypeKind::KFUNCTION ) {
             Reporting::typeError(
                 position(),
                 "Attempted to call non-callable type " + baseTypeOfCallee->toString() + "."
@@ -646,7 +646,7 @@ namespace Lang {
             return false;
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TBOOL));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL));
         return true;
     }
 
@@ -669,7 +669,7 @@ namespace Lang {
             return false;
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TBOOL));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL));
         return true;
     }
 
@@ -679,7 +679,7 @@ namespace Lang {
         }
 
         const Type* condType = types->getTypeOf(_condition);
-        if ( !condType->is(PrimitiveType::of(TBOOL))) {
+        if ( !condType->is(PrimitiveType::of(ValueType::TBOOL))) {
             Reporting::typeError(
                 position(),
                 "Condition for if statement not boolean " + condType->toString() + "."
@@ -694,7 +694,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         return true;
     }
 
@@ -704,7 +704,7 @@ namespace Lang {
         }
 
         const Type* condType = types->getTypeOf(_condition);
-        if ( !condType->is(PrimitiveType::of(TBOOL))) {
+        if ( !condType->is(PrimitiveType::of(ValueType::TBOOL))) {
             Reporting::typeError(
                 position(),
                 "Condition for while loop not boolean " + condType->toString() + "."
@@ -719,17 +719,17 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         return true;
     }
 
     bool StringLiteralExpressionNode::typeAnalysis(TypeTable* types) {
-        types->setTypeOf(this, PrimitiveType::of(TSTRING));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TSTRING));
         return true;
     }
 
     bool NumberLiteralExpressionNode::typeAnalysis(TypeTable* types) {
-        types->setTypeOf(this, PrimitiveType::of(TNUM));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TNUM));
         return true;
     }
 
@@ -760,7 +760,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         return true;
     }
 
@@ -770,10 +770,10 @@ namespace Lang {
         }
 
         const Type* type = types->getTypeOf(_resource);
-        if ( type == nullptr || !type->isGenericType() || type->valueType() != TRESOURCE ) {
+        if ( type == nullptr || !type->isGenericType() || type->valueType() != ValueType::TRESOURCE ) {
             Reporting::typeError(
                 position(),
-                "Expected TRESOURCE, found: " + (type == nullptr ? "none" : type->toString())
+                "Expected ValueType::TRESOURCE, found: " + (type == nullptr ? "none" : type->toString())
             );
 
             return false;
@@ -789,7 +789,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
         return true;
     }
 
@@ -822,7 +822,7 @@ namespace Lang {
             idx += 1;
         }
 
-        GenericType* type = GenericType::of(TENUMERABLE, (Type*) innerType);
+        GenericType* type = GenericType::of(ValueType::TENUMERABLE, (Type*) innerType);
         types->setTypeOf(this, type);
         return true;
     }
@@ -856,7 +856,7 @@ namespace Lang {
             idx += 1;
         }
 
-        GenericType* type = GenericType::of(TMAP, (Type*) innerType);
+        GenericType* type = GenericType::of(ValueType::TMAP, (Type*) innerType);
         types->setTypeOf(this, type);
         return true;
     }
@@ -875,7 +875,7 @@ namespace Lang {
             return false;
         }
 
-        const Type* numType = PrimitiveType::of(TNUM);
+        const Type* numType = PrimitiveType::of(ValueType::TNUM);
         const Type* expType = types->getTypeOf(_exp);
         if ( !expType->is(numType) ) {
             Reporting::typeError(
@@ -894,7 +894,7 @@ namespace Lang {
             return false;
         }
 
-        const Type* boolType = PrimitiveType::of(TBOOL);
+        const Type* boolType = PrimitiveType::of(ValueType::TBOOL);
         const Type* expType = types->getTypeOf(_exp);
         if ( !expType->is(boolType) ) {
             Reporting::typeError(
