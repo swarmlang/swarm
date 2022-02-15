@@ -29,6 +29,8 @@ namespace Runtime {
 
         virtual ASTNode* walkIdentifierNode(IdentifierNode* node) = 0;
 
+        virtual ASTNode* walkMapAccessNode(MapAccessNode* node) = 0;
+
         virtual ASTNode* walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
             return nullptr;
         }
