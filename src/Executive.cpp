@@ -5,6 +5,7 @@
 #include "Executive.h"
 #include "pipeline/Pipeline.h"
 #include "errors/ParseError.h"
+#include "test/Runner.h"
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
@@ -22,6 +23,10 @@ int Executive::run(int argc, char **argv) {
     int result = 0;
 
     console->debug("Got input file: " + inputFile);
+
+    if ( flagRunTest ) {
+        return runTest();
+    }
 
     if ( flagOutputTokens ) {
         int lexResult = debugOutputTokens();
@@ -69,6 +74,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
     bool failed = false;
     bool usage = false;
     bool gotInputFile = false;
+    bool noInputFile = false;
 
     bool skipOne = false;
     for ( size_t i = 0; i < params.size(); i += 1 ) {
@@ -138,6 +144,21 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputDeSerialize = true;
             flagOutputDeSerializeTo = outfile;
             skipOne = true;
+        } else if ( arg == "--run-test" ) {
+            if ( i+1 >= params.size() ) {
+                console->error("Missing required parameter for --run-test. Pass --hlp for more info.");
+                failed = true;
+                continue;
+            }
+
+
+            std::string name = params.at(i+1);
+            console->debug("Will run test: " + name);
+
+            flagRunTest = true;
+            flagRunTestName = name;
+            skipOne = true;
+            noInputFile = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -151,7 +172,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         }
     }
 
-    if ( !failed && !gotInputFile ) {
+    if ( !failed && !(gotInputFile || noInputFile) ) {
         console->error("Missing input file argument. Pass --help for more info.");
         failed = true;
     }
@@ -206,6 +227,10 @@ void Executive::printUsage() {
     console->bold()->print("  --dbg-output-deserialize-to <OUTFILE>  :  ", true)
         ->line("Parse the input and output the deserialized AST to the specified file.")
         ->line("                                      If the output file is \"--\", will write to stdout.")
+        ->line();
+
+    console->bold()->print("  --run-test <NAME>  :  ", true)
+        ->line("Run the C++-based test with the given name.")
         ->line();
 
     // Output in debugging mode only:
@@ -323,4 +348,16 @@ int Executive::debugOutputDeSerialize() {
     console->success("Deserialized input program.");
     if ( stream != &std::cout ) delete stream;
     return 0;
+}
+
+int Executive::runTest() {
+    swarmc::Test::Runner runner;
+    bool result = runner.run(flagRunTestName);
+    if ( result ) {
+        console->success("Test passed: " + flagRunTestName);
+        return 0;
+    }
+
+    console->error("Test failed: " + flagRunTestName);
+    return 1;
 }
