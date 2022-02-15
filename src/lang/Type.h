@@ -47,6 +47,8 @@ namespace Lang {
         /** Determines whether a type is equivalent to this one. */
         virtual bool is(const Type* other) const = 0;
 
+        virtual Type* copy() const = 0;
+
         /** Get the ValueType of this class. */
         virtual ValueType valueType() const {
             return _type;
@@ -113,6 +115,10 @@ namespace Lang {
         virtual bool isPrimitiveType() const override {
             return true;
         }
+
+        virtual PrimitiveType* copy() const override {
+            return new PrimitiveType(_type);
+        }
     private:
         PrimitiveType(ValueType t) : Type(t) {
             if ( !Type::isPrimitiveValueType(t) ) {
@@ -157,6 +163,10 @@ namespace Lang {
 
         virtual bool isGenericType() const override {
             return true;
+        }
+
+        virtual GenericType* copy() const override {
+            return new GenericType(_type, _concrete->copy());
         }
     protected:
         GenericType(ValueType t, Type* concrete) : Type(t), _concrete(concrete) {}
@@ -244,6 +254,17 @@ namespace Lang {
 
         virtual bool isFunctionType() const override {
             return true;
+        }
+
+        virtual FunctionType* copy() const override {
+            auto copy = new FunctionType(_return->copy());
+            copy->_builtin = _builtin;
+
+            for ( auto arg : _args ) {
+                copy->addArgument(arg->copy());
+            }
+
+            return copy;
         }
 
     protected:
