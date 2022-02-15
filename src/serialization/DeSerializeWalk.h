@@ -78,6 +78,14 @@ namespace Serialization {
             return new MapAccessNode(pos, (LValNode*) path, new IdentifierNode(endpos, end));
         }
 
+        virtual EnumerableAccessNode* walkEnumerableAccessNode(nlohmann::json pathjson, nlohmann::json indexjson, Position* pos) {
+            ASTNode* path = walk(pathjson);
+            assert(path->isLVal());
+            ASTNode* index = walk(indexjson);
+            assert(index->getName() == "IntegerLiteralExpressionNode");
+            return new EnumerableAccessNode(pos, (LValNode*) path, (IntegerLiteralExpressionNode*) index);
+        }
+
         virtual PrimitiveTypeNode* walkPrimitiveTypeNode(ValueType type, Position* pos) {
             return new PrimitiveTypeNode(pos, PrimitiveType::of(type));
         }
@@ -393,6 +401,10 @@ namespace Serialization {
             return new AssignExpressionNode(pos,(LValNode*) dest,(ExpressionNode*) val);
         }
 
+        virtual IntegerLiteralExpressionNode* walkIntegerLiteralExpressionNode(double value, Position* pos) {
+            return new IntegerLiteralExpressionNode(pos, (int)value);
+        }
+
         std::string inputToString(std::istream& input) {
             std::string output, temp;
             while (input >> temp) output += temp;
@@ -411,6 +423,7 @@ namespace Serialization {
             else if ( name == "ExpressionStatementNode" ) return walkExpressionStatementNode(prog["expression"],pos);
             else if ( name == "IdentifierNode" ) return walkIdentifierNode(prog["name"],prog["symbol"],pos);
             else if ( name == "MapAccessNode" ) return walkMapAccessNode(prog["end"],prog["end_pos"],prog["path"],pos);
+            else if ( name == "EnumerableAccessNode" ) return walkEnumerableAccessNode(prog["path"],prog["index"],pos);
             else if ( name == "PrimitiveTypeNode" ) return walkPrimitiveTypeNode(prog["type"]["valueType"],pos);
             else if ( name == "EnumerableTypeNode" ) return walkEnumerableTypeNode(prog["type"],pos);
             else if ( name == "MapTypeNode" ) return walkMapTypeNode(prog["type"],pos);
@@ -442,6 +455,7 @@ namespace Serialization {
             else if ( name == "StringLiteralExpressionNode" ) return walkStringLiteralExpressionNode(prog["value"],pos);
             else if ( name == "NumberLiteralExpressionNode" ) return walkNumberLiteralExpressionNode(prog["value"],pos);
             else if ( name == "AssignExpressionNode" ) return walkAssignExpressionNode(prog["dest"],prog["value"],pos);
+            else if ( name == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode(prog["value"],pos);
             assert(false);
         }
     

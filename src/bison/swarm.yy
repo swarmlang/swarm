@@ -14,6 +14,8 @@
 	#include "../lang/Token.h"
    	#include "../lang/AST.h"
    	#include "../lang/Type.h"
+    #include "../Reporting.h"
+    #include "../errors/ParseError.h"
 	namespace swarmc::Lang {
 		class Scanner;
 	}
@@ -233,6 +235,18 @@ lval :
     | lval LBRACKET id RBRACKET {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new MapAccessNode(pos, $1, $3);
+    }
+
+    | lval LBRACKET NUMBERLITERAL RBRACKET {
+        Position* pos = new Position($1->position(), $4->position());
+        if ($3->value() != (int)$3->value()) {
+            Reporting::parseError(
+                $3->position(),
+                "Invalid Enumerable index: " + std::to_string($3->value()));
+            throw swarmc::Errors::ParseError(1);
+        }
+        auto index = new IntegerLiteralExpressionNode($3->position(), (int)$3->value());
+        $$ = new EnumerableAccessNode(pos, $1, index);
     }
 
 id :
