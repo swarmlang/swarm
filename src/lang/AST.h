@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <ostream>
+#include <assert.h>
 #include "../shared/IStringable.h"
 #include "../shared/util/Console.h"
 #include "Position.h"
@@ -14,6 +15,11 @@ namespace swarmc {
 namespace Serialization {
     class DeSerializeWalk;
 }
+
+namespace Runtime {
+    class ISymbolValueStore;
+}
+
 namespace Lang {
 
     class StatementNode;
@@ -224,6 +230,10 @@ namespace Lang {
         virtual bool isLVal() const {
             return true;
         }
+
+        virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) = 0;
+
+        virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) = 0;
     };
 
 
@@ -250,6 +260,10 @@ namespace Lang {
             return _symbol;
         }
 
+        virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) override;
+
+        virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
+
     protected:
         std::string _name;
         SemanticSymbol* _symbol = nullptr;
@@ -257,7 +271,7 @@ namespace Lang {
     };
 
     /** Node for accessing data from a map */
-    class MapAccessNode : public LValNode {
+    class MapAccessNode final : public LValNode {
     public:
         MapAccessNode(Position* pos, LValNode* path, IdentifierNode* end) : LValNode(pos), _path(path), _end(end) {}
         virtual ~MapAccessNode() {}
@@ -283,6 +297,10 @@ namespace Lang {
         IdentifierNode* end() const {
             return _end;
         }
+
+        virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) override;
+
+        virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
     private:
         LValNode* _path;
         IdentifierNode* _end;
@@ -1116,6 +1134,11 @@ namespace Lang {
             return _value;
         }
 
+        void setValue(ExpressionNode* value) {
+            assert(value->isValue());
+            _value = value;
+        }
+
     protected:
         IdentifierNode* _id;
         ExpressionNode* _value;
@@ -1151,9 +1174,44 @@ namespace Lang {
             return true;
         }
 
+        virtual bool hasKey(IdentifierNode* name) const {
+            return getBodyNode(name) != nullptr;
+        }
+
+        virtual ExpressionNode* getKey(IdentifierNode* name) const {
+            auto node = getBodyNode(name);
+            if ( node != nullptr ) {
+                return node->value();
+            }
+
+            return nullptr;
+        }
+
+        virtual void setKey(IdentifierNode* name, ExpressionNode* value) {
+            assert(value->isValue());
+
+            auto node = getBodyNode(name);
+            if ( node == nullptr ) {
+                node = new MapStatementNode(nullptr, name, value);
+                _body->push_back(node);
+            }
+
+            node->setValue(value);
+        }
+
     protected:
         MapBody* _body;
         TypeNode* _disambiguationType;
+
+        virtual MapStatementNode* getBodyNode(IdentifierNode* name) const {
+            for ( auto stmt : *_body ) {
+                if ( stmt->id()->name() == name->name() ) {
+                    return stmt;
+                }
+            }
+
+            return nullptr;
+        }
     };
 
     /** AST node representing literal strings. */

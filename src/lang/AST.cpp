@@ -1,6 +1,8 @@
 #include <string>
 #include <ostream>
+#include <assert.h>
 #include "AST.h"
+#include "../runtime/ISymbolValueStore.h"
 #include "SymbolTable.h"
 #include "../Reporting.h"
 #include "Type.h"
@@ -11,6 +13,41 @@
 
 namespace swarmc {
 namespace Lang {
+
+    /************* VALUE ACCESSORS ********/
+    void IdentifierNode::setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) {
+        assert(value->isValue());
+        store->setValue(_symbol, value);
+    }
+
+    ExpressionNode* IdentifierNode::getValue(Runtime::ISymbolValueStore* store) {
+        auto value = store->getValue(_symbol);
+        assert(value == nullptr || value->isValue());
+        return value;
+    }
+
+    void MapAccessNode::setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) {
+        // Get the lval we are keying into
+        auto node = _path->getValue(store);
+
+        // This should be caught by the type-checker, but anyway:
+        assert(node->isValue() && node->getName() == "MapNode");
+        assert(value->isValue());
+
+        auto mapNode = (MapNode*) node;
+        mapNode->setKey(_end, value);
+    }
+
+    ExpressionNode* MapAccessNode::getValue(Runtime::ISymbolValueStore* store) {
+        // Get the lval we are keying into
+        auto node = _path->getValue(store);
+
+        // This should be caught by the type-checker, but anyway
+        assert(node->isValue() && node->getName() == "MapNode");
+
+        auto mapNode = (MapNode*) node;
+        return mapNode->getKey(_end);
+    }
 
     /************* PRINT TREE *************/
 

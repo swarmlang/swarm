@@ -1,0 +1,3 @@
+#!/bin/bash -e
+
+$SWARMC --run-test 021_map_node_accesses

@@ -6,6 +6,8 @@
 #include <sstream>
 #include "../shared/IStringable.h"
 
+// TODO: create RuntimePosition class w/ trace?
+
 namespace swarmc {
 namespace Lang {
 
