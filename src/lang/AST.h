@@ -926,6 +926,10 @@ namespace Lang {
             return "NumericComparisonExpressionNode<type: " + comparisonTypeToString() + ">";
         }
 
+        NumberComparisonType comparisonType() const {
+            return _comparisonType;
+        }
+
         std::string comparisonTypeToString() const {
             if ( _comparisonType == NumberComparisonType::LESS_THAN ) return "LESS_THAN";
             if ( _comparisonType == NumberComparisonType::LESS_THAN_OR_EQUAL ) return "LESS_THAN_OR_EQUAL";
