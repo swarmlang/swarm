@@ -798,9 +798,20 @@ namespace Lang {
             return false;
         }
 
-        GenericType* resourceType = (GenericType*) type;
-        types->setTypeOf(_local, resourceType->concrete());
-        _local->symbol()->_type = resourceType->concrete();  // local is implicitly defined, so need to set its type
+        Type* localType = ((GenericType*) type)->concrete();
+
+        if ( localType->isPrimitiveType() ) {
+            localType = PrimitiveType::of(localType->valueType(), _shared);
+        } else if ( localType->isGenericType() ) {
+            localType = localType->copy();
+            localType->setShared(_shared);
+        } else if ( localType->isFunctionType() ) {
+            localType = localType->copy();
+            localType->setShared(_shared);
+        }
+
+        types->setTypeOf(_local, localType);
+        _local->symbol()->_type = localType;  // local is implicitly defined, so need to set its type
 
         for ( auto stmt : *_body ) {
             if ( !stmt->typeAnalysis(types) ) {
