@@ -9,6 +9,7 @@
 #include "../lang/Scanner.h"
 #include "../bison/grammar.hh"
 #include "../lang/AST.h"
+#include "../lang/Walk/NameAnalysisWalk.h"
 #include "../serialization/SerializeWalk.h"
 #include "../serialization/DeSerializeWalk.h"
 #include "../runtime/InterpretWalk.h"
@@ -62,7 +63,8 @@ namespace swarmc {
         Lang::ProgramNode* targetASTSymbolic() {
             targetASTRaw();
 
-            bool nameAnalysisResult = _root->nameAnalysis();
+            Lang::Walk::NameAnalysisWalk nA;
+            bool nameAnalysisResult = nA.walk(_root);
             if ( !nameAnalysisResult ) {
                 throw Errors::ParseError();
             }

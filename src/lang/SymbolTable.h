@@ -181,6 +181,7 @@ namespace Lang {
                 throw new std::runtime_error("Attempted to pop non-existent scope.");
             }
 
+            delete _scopes->front();
             _scopes->pop_front();
         }
 

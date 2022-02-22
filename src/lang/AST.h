@@ -12,6 +12,7 @@
 #include "TypeTable.h"
 
 namespace swarmc {
+
 namespace Serialization {
     class DeSerializeWalk;
 }
@@ -21,6 +22,9 @@ namespace Runtime {
 }
 
 namespace Lang {
+namespace Walk {
+    class NameAnalysisWalk;
+}
 
     class StatementNode;
     class ExpressionNode;
@@ -45,12 +49,6 @@ namespace Lang {
 
         /** Print this node and its subtree. */
         virtual void printTree(std::ostream& out);
-
-        /**
-         * Perform name analysis on this node and its subtree.
-         * @return false if name analysis failed
-         */
-        virtual bool nameAnalysis(SymbolTable* symbols) = 0;
 
         /**
          * Perform type analysis on this node and its subtree.
@@ -126,14 +124,6 @@ namespace Lang {
             return "ProgramNode<#body: " + std::to_string(_body->size()) + ">";
         }
 
-        /**
-         * Helper that instantiates a new SymbolTable and starts name analysis.
-         * @returns true if all names were valid
-         */
-        virtual bool nameAnalysis();
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
-
         virtual bool typeAnalysis(TypeTable* types) override;
         
         virtual bool typeAnalysis() {
@@ -187,7 +177,6 @@ namespace Lang {
         UnitNode(Position* pos) : ExpressionNode(pos) {}
 
         virtual bool typeAnalysis(TypeTable*) override { return true; }
-        virtual bool nameAnalysis(SymbolTable*) override { return true; }
 
         virtual UnitNode* copy() const override {
             return new UnitNode(position()->copy());
@@ -246,8 +235,6 @@ namespace Lang {
             return _exp;
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
-
         virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual ExpressionStatementNode* copy() const override {
@@ -293,8 +280,6 @@ namespace Lang {
             return "IdentifierNode<name: " + _name + ">";
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
-
         virtual bool typeAnalysis(TypeTable* types) override;
 
         /** Get the semantic symbol associated with this identifier in its scope. */
@@ -331,6 +316,7 @@ namespace Lang {
         std::string _name;
         SemanticSymbol* _symbol = nullptr;
 
+        friend class Walk::NameAnalysisWalk;
         friend class Serialization::DeSerializeWalk;
     };
 
@@ -339,8 +325,6 @@ namespace Lang {
     public:
         MapAccessNode(Position* pos, LValNode* path, IdentifierNode* end) : LValNode(pos), _path(path), _end(end) {}
         virtual ~MapAccessNode() {}
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -390,8 +374,6 @@ namespace Lang {
 
         /** Get the Type instance this node describes. */
         virtual Type* type() const = 0;
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -525,8 +507,6 @@ namespace Lang {
             return "BoolLiteralNode<of: " + std::to_string(_val) + ">";
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
-
         virtual bool typeAnalysis(TypeTable* types) override;
 
         /** Get the value of the literal expression. */
@@ -582,8 +562,6 @@ namespace Lang {
             return "VariableDeclarationNode<name: " + _id->name() + ">";
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
-
         virtual bool typeAnalysis(TypeTable* types) override;
 
         IdentifierNode* id() const {
@@ -623,8 +601,6 @@ namespace Lang {
         virtual std::string toString() const override {
             return "AssignExpressionNode<lval: " + _dest->toString() + ">";
         }
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -668,8 +644,6 @@ namespace Lang {
             return "CallExpressionNode<id: " + _id->name() + ", #args: " + std::to_string(_args->size()) + ">";
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
-
         virtual bool typeAnalysis(TypeTable* types) override;
 
         IdentifierNode* id() const {
@@ -706,8 +680,6 @@ namespace Lang {
     public:
         BinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : ExpressionNode(pos), _left(left), _right(right) {}
         virtual ~BinaryExpressionNode() {}
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         ExpressionNode* left() const {
             return _left;
@@ -1128,8 +1100,6 @@ namespace Lang {
     public:
         UnaryExpressionNode(Position* pos, ExpressionNode* exp) : ExpressionNode(pos), _exp(exp) {}
         virtual ~UnaryExpressionNode() {}
-        
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override = 0;
 
@@ -1205,8 +1175,6 @@ namespace Lang {
         virtual std::string getName() const override {
             return "EnumerationLiteralExpressionNode";
         }
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -1301,8 +1269,6 @@ namespace Lang {
             delete body;
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
-
         virtual bool typeAnalysis(TypeTable* types) override = 0;
 
         StatementList* body() const {
@@ -1337,8 +1303,6 @@ namespace Lang {
             return "EnumerationStatement<e: " + _enumerable->name() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
-
         virtual bool typeAnalysis(TypeTable* types) override;
 
         IdentifierNode* enumerable() const {
@@ -1358,6 +1322,8 @@ namespace Lang {
         IdentifierNode* _enumerable;
         IdentifierNode* _local;
         bool _shared;
+
+        friend class Walk::NameAnalysisWalk;
     };
 
 
@@ -1376,8 +1342,6 @@ namespace Lang {
         virtual std::string toString() const override {
             return "WithStatement<r: " + _resource->toString() + ", as: " + _local->name() + ">";
         }
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -1417,7 +1381,6 @@ namespace Lang {
             return "IfStatement<f: if " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
         virtual bool typeAnalysis(TypeTable* types) override;
 
         ExpressionNode* condition() const {
@@ -1450,7 +1413,6 @@ namespace Lang {
             return "WhileStatement<w: while " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
         virtual bool typeAnalysis(TypeTable* types) override;
 
         ExpressionNode* condition() const {
@@ -1480,8 +1442,6 @@ namespace Lang {
         virtual std::string toString() const override {
             return "MapStatementNode<id: " + _id->name() + ">";
         }
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -1528,8 +1488,6 @@ namespace Lang {
         std::string toString() const override {
             return "MapNode<#body: " + std::to_string(_body->size()) + ">";
         }
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -1615,8 +1573,6 @@ namespace Lang {
             return true;
         }
 
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
-
         virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual StringLiteralExpressionNode* copy() const override {
@@ -1651,8 +1607,6 @@ namespace Lang {
         virtual bool isValue() const override {
             return true;
         }
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
@@ -1696,8 +1650,6 @@ namespace Lang {
     public:
         EnumerableAccessNode(Position* pos, LValNode* path, IntegerLiteralExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
         virtual ~EnumerableAccessNode() {}
-
-        virtual bool nameAnalysis(SymbolTable* symbols) override;
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
