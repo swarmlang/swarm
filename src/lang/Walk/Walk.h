@@ -8,6 +8,7 @@
 
 namespace swarmc {
 namespace Lang {
+namespace Walk {
 
     template <typename TReturn>
     class Walk : public IStringable, public IUsesConsole {
@@ -103,6 +104,7 @@ namespace Lang {
         virtual std::string toString() const = 0;
     };
 
+}
 }
 }
 

@@ -7,7 +7,7 @@
 #include "../shared/RefPool.h"
 #include "../lang/Type.h"
 #include "../lang/AST.h"
-#include "../lang/Walk.h"
+#include "../lang/Walk/Walk.h"
 
 namespace swarmc {
 namespace Serialization {
@@ -17,16 +17,16 @@ namespace Serialization {
     /**
      * An AST walk that serializes the AST to a JSON object.
      */
-    class SerializeWalk : public Lang::Walk<nlohmann::json*> {
+    class SerializeWalk : public Lang::Walk::Walk<nlohmann::json*> {
     public:
-        SerializeWalk() : Lang::Walk<nlohmann::json*>() {}
+        SerializeWalk() : Lang::Walk::Walk<nlohmann::json*>() {}
 
         virtual std::string toJSON(ASTNode* node) {
             return walk(node)->dump(4);
         }
 
         virtual nlohmann::json* walk(ASTNode* node) {
-            nlohmann::json* obj = Lang::Walk<nlohmann::json*>::walk(node);
+            nlohmann::json* obj = Lang::Walk::Walk<nlohmann::json*>::walk(node);
             (*obj)["position"] = *walkPosition(node->position());
             (*obj)["astNodeName"] = node->getName();
 

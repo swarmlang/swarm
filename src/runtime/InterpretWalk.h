@@ -5,7 +5,7 @@
 #include <math.h>
 #include "../errors/SwarmError.h"
 #include "../lang/AST.h"
-#include "../lang/Walk.h"
+#include "../lang/Walk/Walk.h"
 #include "LocalSymbolValueStore.h"
 
 // Note: in the future, we'll need to add a RuntimePosition or similar.
@@ -16,9 +16,9 @@ using namespace swarmc::Lang;
 namespace swarmc {
 namespace Runtime {
 
-    class InterpretWalk final : public Lang::Walk<ASTNode*> {
+    class InterpretWalk final : public Lang::Walk::Walk<ASTNode*> {
     public:
-        InterpretWalk() : Lang::Walk<ASTNode*>() {
+        InterpretWalk() : Lang::Walk::Walk<ASTNode*>() {
             _local = new LocalSymbolValueStore;
         }
 
