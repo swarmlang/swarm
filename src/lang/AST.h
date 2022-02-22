@@ -13,10 +13,6 @@
 
 namespace swarmc {
 
-namespace Serialization {
-    class DeSerializeWalk;
-}
-
 namespace Runtime {
     class ISymbolValueStore;
 }
@@ -24,6 +20,8 @@ namespace Runtime {
 namespace Lang {
 namespace Walk {
     class NameAnalysisWalk;
+    class TypeAnalysisWalk;
+    class DeSerializeWalk;
 }
 
     class StatementNode;
@@ -46,15 +44,6 @@ namespace Walk {
         virtual std::string toString() const = 0;
 
         virtual ASTNode* copy() const = 0;
-
-        /** Print this node and its subtree. */
-        virtual void printTree(std::ostream& out);
-
-        /**
-         * Perform type analysis on this node and its subtree.
-         * @return false if type analysis failed
-         */
-        virtual bool typeAnalysis(TypeTable* types) = 0;
 
         /** Get the node's Position instance. */
         virtual Position* position() const {
@@ -124,13 +113,6 @@ namespace Walk {
             return "ProgramNode<#body: " + std::to_string(_body->size()) + ">";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-        
-        virtual bool typeAnalysis() {
-            TypeTable* types = new TypeTable();
-            return typeAnalysis(types);
-        }
-
         virtual ProgramNode* copy() const override;
 
     protected:
@@ -159,8 +141,6 @@ namespace Walk {
         ExpressionNode(Position* pos) : ASTNode(pos) {}
         virtual ~ExpressionNode() {}
 
-        virtual bool typeAnalysis(TypeTable* types) override = 0;
-
         virtual bool isExpression() const override {
             return true;
         }
@@ -175,8 +155,6 @@ namespace Walk {
     class UnitNode final : public ExpressionNode {
     public:
         UnitNode(Position* pos) : ExpressionNode(pos) {}
-
-        virtual bool typeAnalysis(TypeTable*) override { return true; }
 
         virtual UnitNode* copy() const override {
             return new UnitNode(position()->copy());
@@ -235,8 +213,6 @@ namespace Walk {
             return _exp;
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-
         virtual ExpressionStatementNode* copy() const override {
             return new ExpressionStatementNode(position()->copy(), _exp->copy());
         }
@@ -280,8 +256,6 @@ namespace Walk {
             return "IdentifierNode<name: " + _name + ">";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-
         /** Get the semantic symbol associated with this identifier in its scope. */
         SemanticSymbol* symbol() const {
             return _symbol;
@@ -317,7 +291,8 @@ namespace Walk {
         SemanticSymbol* _symbol = nullptr;
 
         friend class Walk::NameAnalysisWalk;
-        friend class Serialization::DeSerializeWalk;
+        friend class Walk::TypeAnalysisWalk;
+        friend class Walk::DeSerializeWalk;
     };
 
     /** Node for accessing data from a map */
@@ -325,8 +300,6 @@ namespace Walk {
     public:
         MapAccessNode(Position* pos, LValNode* path, IdentifierNode* end) : LValNode(pos), _path(path), _end(end) {}
         virtual ~MapAccessNode() {}
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual std::string getName() const override {
             return "MapAccessNode";
@@ -374,8 +347,6 @@ namespace Walk {
 
         /** Get the Type instance this node describes. */
         virtual Type* type() const = 0;
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual bool isType() const {
             return true;
@@ -507,8 +478,6 @@ namespace Walk {
             return "BoolLiteralNode<of: " + std::to_string(_val) + ">";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-
         /** Get the value of the literal expression. */
         virtual bool value() const {
             return _val;
@@ -562,8 +531,6 @@ namespace Walk {
             return "VariableDeclarationNode<name: " + _id->name() + ">";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-
         IdentifierNode* id() const {
             return _id;
         }
@@ -601,8 +568,6 @@ namespace Walk {
         virtual std::string toString() const override {
             return "AssignExpressionNode<lval: " + _dest->toString() + ">";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual std::string getName() const override {
             return "AssignExpressionNode";
@@ -643,8 +608,6 @@ namespace Walk {
         virtual std::string toString() const override {
             return "CallExpressionNode<id: " + _id->name() + ", #args: " + std::to_string(_args->size()) + ">";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         IdentifierNode* id() const {
             return _id;
@@ -701,8 +664,6 @@ namespace Walk {
     public:
         PureBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
         virtual ~PureBinaryExpressionNode() {}
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual const Type* leftType() const = 0;
 
@@ -831,8 +792,6 @@ namespace Walk {
             return "EqualsNode";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-
         virtual std::string toString() const override {
             return "EqualsNode<>";
         }
@@ -907,8 +866,6 @@ namespace Walk {
         virtual std::string getName() const override {
             return "NotEqualsNode";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual std::string toString() const override {
             return "NotEqualsNode<>";
@@ -1101,8 +1058,6 @@ namespace Walk {
         UnaryExpressionNode(Position* pos, ExpressionNode* exp) : ExpressionNode(pos), _exp(exp) {}
         virtual ~UnaryExpressionNode() {}
 
-        virtual bool typeAnalysis(TypeTable* types) override = 0;
-
         ExpressionNode* exp() const {
             return _exp;
         }
@@ -1125,8 +1080,6 @@ namespace Walk {
             return "NegativeExpressionNode<>";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-
         virtual NegativeExpressionNode* copy() const override {
             return new NegativeExpressionNode(position()->copy(), _exp->copy());
         }
@@ -1148,8 +1101,6 @@ namespace Walk {
         virtual std::string toString() const override {
             return "NotNode<>";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual NotNode* copy() const override {
             return new NotNode(position()->copy(), _exp->copy());
@@ -1175,8 +1126,6 @@ namespace Walk {
         virtual std::string getName() const override {
             return "EnumerationLiteralExpressionNode";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         ExpressionList* actuals() const {
             return _actuals;
@@ -1240,6 +1189,8 @@ namespace Walk {
     protected:
         ExpressionList* _actuals;
         TypeNode* _disambiguationType = nullptr;
+
+        friend class Walk::TypeAnalysisWalk;
     };
 
 
@@ -1268,8 +1219,6 @@ namespace Walk {
 
             delete body;
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override = 0;
 
         StatementList* body() const {
             return _body;
@@ -1302,8 +1251,6 @@ namespace Walk {
         virtual std::string toString() const override {
             return "EnumerationStatement<e: " + _enumerable->name() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         IdentifierNode* enumerable() const {
             return _enumerable;
@@ -1343,8 +1290,6 @@ namespace Walk {
             return "WithStatement<r: " + _resource->toString() + ", as: " + _local->name() + ">";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-
         ExpressionNode* resource() const {
             return _resource;
         }
@@ -1362,6 +1307,8 @@ namespace Walk {
         ExpressionNode* _resource;
         IdentifierNode* _local;
         bool _shared;
+
+        friend class Walk::TypeAnalysisWalk;
     };
 
 
@@ -1380,8 +1327,6 @@ namespace Walk {
         virtual std::string toString() const override {
             return "IfStatement<f: if " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         ExpressionNode* condition() const {
             return _condition;
@@ -1413,8 +1358,6 @@ namespace Walk {
             return "WhileStatement<w: while " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;
-
         ExpressionNode* condition() const {
             return _condition;
         }
@@ -1442,8 +1385,6 @@ namespace Walk {
         virtual std::string toString() const override {
             return "MapStatementNode<id: " + _id->name() + ">";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         /**
          * Get the identifier for the key of this entry.
@@ -1488,8 +1429,6 @@ namespace Walk {
         std::string toString() const override {
             return "MapNode<#body: " + std::to_string(_body->size()) + ">";
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         MapBody* body() const {
             return _body;
@@ -1549,6 +1488,8 @@ namespace Walk {
 
             return nullptr;
         }
+
+        friend class Walk::TypeAnalysisWalk;
     };
 
     /** AST node representing literal strings. */
@@ -1572,8 +1513,6 @@ namespace Walk {
         virtual bool isValue() const override {
             return true;
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual StringLiteralExpressionNode* copy() const override {
             return new StringLiteralExpressionNode(position()->copy(), _value);
@@ -1607,8 +1546,6 @@ namespace Walk {
         virtual bool isValue() const override {
             return true;
         }
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual NumberLiteralExpressionNode* copy() const override {
             return new NumberLiteralExpressionNode(position()->copy(), _value);
@@ -1650,8 +1587,6 @@ namespace Walk {
     public:
         EnumerableAccessNode(Position* pos, LValNode* path, IntegerLiteralExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
         virtual ~EnumerableAccessNode() {}
-
-        virtual bool typeAnalysis(TypeTable* types) override;
 
         virtual std::string getName() const override {
             return "EnumerableAccessNode";

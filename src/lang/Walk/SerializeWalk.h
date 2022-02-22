@@ -7,10 +7,11 @@
 #include "../shared/RefPool.h"
 #include "../lang/Type.h"
 #include "../lang/AST.h"
-#include "../lang/Walk/Walk.h"
+#include "Walk.h"
 
 namespace swarmc {
-namespace Serialization {
+namespace Lang {
+namespace Walk {
 
     using namespace Lang;
 
@@ -487,6 +488,7 @@ namespace Serialization {
         }
     };
 
+}
 }
 }
 

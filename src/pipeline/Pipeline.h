@@ -9,9 +9,11 @@
 #include "../lang/Scanner.h"
 #include "../bison/grammar.hh"
 #include "../lang/AST.h"
+#include "../lang/Walk/PrintWalk.h"
 #include "../lang/Walk/NameAnalysisWalk.h"
-#include "../serialization/SerializeWalk.h"
-#include "../serialization/DeSerializeWalk.h"
+#include "../lang/Walk/TypeAnalysisWalk.h"
+#include "../lang/Walk/SerializeWalk.h"
+#include "../lang/Walk/DeSerializeWalk.h"
 #include "../runtime/InterpretWalk.h"
 
 namespace swarmc {
@@ -75,7 +77,8 @@ namespace swarmc {
         Lang::ProgramNode* targetASTSymbolicTyped() {
             targetASTSymbolic();
 
-            bool typeAnalysisResult = _root->typeAnalysis();
+            Lang::Walk::TypeAnalysisWalk tA;
+            bool typeAnalysisResult = tA.walk(_root);
             if ( !typeAnalysisResult ) {
                 throw Errors::ParseError();
             }
@@ -85,21 +88,21 @@ namespace swarmc {
 
         void targetASTRepresentation(std::ostream& out) {
             targetASTSymbolicTyped();
-            _root->printTree(out);
+            Lang::Walk::PrintWalk pW(out, _root);
         }
 
         void targetSerialOutput(std::ostream& out) {
             targetASTSymbolicTyped();
 
-            Serialization::SerializeWalk walk;
+            Lang::Walk::SerializeWalk walk;
             std::string json = walk.toJSON(_root);
             out << json;
         }
 
         void targetDeSerialOutput(std::ostream& out) {
-            Serialization::DeSerializeWalk walk;
+            Lang::Walk::DeSerializeWalk walk;
             Lang::ASTNode* tree = walk.deserialize(_input);
-            tree->printTree(out);
+            Lang::Walk::PrintWalk pW(out, tree);
         }
 
         Lang::ASTNode* targetEvaluateLocally() {

@@ -7,8 +7,8 @@
 #include "../lang/AST.h"
 
 namespace swarmc {
-namespace Serialization {
-    using namespace Lang;
+namespace Lang {
+namespace Walk {
 
     using JSONList = std::vector<nlohmann::json>;
 
@@ -482,6 +482,7 @@ namespace Serialization {
     private:
         std::unordered_map<std::string,SemanticSymbol*> _uuidList;
     };
+}
 }
 }
 
