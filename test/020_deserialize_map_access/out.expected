@@ -1,6 +1,6 @@
 ProgramNode<#body: 5>
   VariableDeclarationNode<name: myMap>
-    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM, shared: false>, shared: false>
     MapNode<#body: 3>
       MapStatementNode<id: a>
         NumberLiteralExpressionNode<#value: 1.000000>
@@ -9,13 +9,13 @@ ProgramNode<#body: 5>
       MapStatementNode<id: c>
         NumberLiteralExpressionNode<#value: 3.000000>
   VariableDeclarationNode<name: myEnum>
-    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM, shared: false>, shared: false>
     EnumerationLiteralExpressionNode<#actuals: 3>
       NumberLiteralExpressionNode<#value: 5.000000>
       NumberLiteralExpressionNode<#value: 7.000000>
       NumberLiteralExpressionNode<#value: 9.000000>
   VariableDeclarationNode<name: myMap2>
-    MapTypeNode<of: EnumerableTypeNode<of: MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>>>
+    MapTypeNode<of: EnumerableTypeNode<of: MapTypeNode<of: PrimitiveTypeNode<of: TNUM, shared: false>, shared: false>, shared: false>, shared: false>
     MapNode<#body: 2>
       MapStatementNode<id: a>
         EnumerationLiteralExpressionNode<#actuals: 1>

@@ -1,6 +1,6 @@
 ProgramNode<#body: 1>
   VariableDeclarationNode<name: myM>
-    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM, shared: false>, shared: false>
     MapNode<#body: 1>
       MapStatementNode<id: abc>
         NumberLiteralExpressionNode<#value: 123.000000>

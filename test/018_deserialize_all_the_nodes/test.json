@@ -21,11 +21,12 @@
                     },
                     "kind": 0,
                     "name": "e1",
-                    "shared": false,
                     "type": {
                         "concrete": {
+                            "shared": false,
                             "valueType": 0
                         },
+                        "shared": false,
                         "valueType": 3
                     },
                     "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
@@ -37,7 +38,6 @@
                 "startCol": 1,
                 "startLine": 2
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "EnumerableTypeNode",
                 "position": {
@@ -48,8 +48,10 @@
                 },
                 "type": {
                     "concrete": {
+                        "shared": false,
                         "valueType": 0
                     },
+                    "shared": false,
                     "valueType": 3
                 }
             },
@@ -84,11 +86,12 @@
                     },
                     "kind": 0,
                     "name": "e2",
-                    "shared": false,
                     "type": {
                         "concrete": {
+                            "shared": false,
                             "valueType": 2
                         },
+                        "shared": false,
                         "valueType": 3
                     },
                     "uuid": "0245bfec-242e-4c68-9ed8-9d759d74c250"
@@ -100,7 +103,6 @@
                 "startCol": 1,
                 "startLine": 3
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "EnumerableTypeNode",
                 "position": {
@@ -111,8 +113,10 @@
                 },
                 "type": {
                     "concrete": {
+                        "shared": false,
                         "valueType": 2
                     },
+                    "shared": false,
                     "valueType": 3
                 }
             },
@@ -168,11 +172,12 @@
                     },
                     "kind": 0,
                     "name": "m1",
-                    "shared": false,
                     "type": {
                         "concrete": {
+                            "shared": false,
                             "valueType": 0
                         },
+                        "shared": false,
                         "valueType": 4
                     },
                     "uuid": "126b1f95-3201-4afc-855e-f38bb1541f78"
@@ -184,7 +189,6 @@
                 "startCol": 1,
                 "startLine": 4
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "MapTypeNode",
                 "position": {
@@ -195,8 +199,10 @@
                 },
                 "type": {
                     "concrete": {
+                        "shared": false,
                         "valueType": 0
                     },
+                    "shared": false,
                     "valueType": 4
                 }
             },
@@ -272,11 +278,12 @@
                     },
                     "kind": 0,
                     "name": "m2",
-                    "shared": false,
                     "type": {
                         "concrete": {
+                            "shared": false,
                             "valueType": 1
                         },
+                        "shared": false,
                         "valueType": 4
                     },
                     "uuid": "261297a8-5efc-43c0-9a45-1b5cc0c663bc"
@@ -288,7 +295,6 @@
                 "startCol": 1,
                 "startLine": 5
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "MapTypeNode",
                 "position": {
@@ -299,8 +305,10 @@
                 },
                 "type": {
                     "concrete": {
+                        "shared": false,
                         "valueType": 1
                     },
+                    "shared": false,
                     "valueType": 4
                 }
             },
@@ -335,8 +343,8 @@
                     },
                     "kind": 0,
                     "name": "s",
-                    "shared": false,
                     "type": {
+                        "shared": false,
                         "valueType": 0
                     },
                     "uuid": "22bce82c-4b50-41b9-b3d0-25f99814e916"
@@ -348,7 +356,6 @@
                 "startCol": 1,
                 "startLine": 6
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "PrimitiveTypeNode",
                 "position": {
@@ -358,6 +365,7 @@
                     "startLine": 6
                 },
                 "type": {
+                    "shared": false,
                     "valueType": 0
                 }
             },
@@ -392,8 +400,8 @@
                     },
                     "kind": 0,
                     "name": "n",
-                    "shared": false,
                     "type": {
+                        "shared": false,
                         "valueType": 1
                     },
                     "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
@@ -405,7 +413,6 @@
                 "startCol": 1,
                 "startLine": 7
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "PrimitiveTypeNode",
                 "position": {
@@ -415,6 +422,7 @@
                     "startLine": 7
                 },
                 "type": {
+                    "shared": false,
                     "valueType": 1
                 }
             },
@@ -457,8 +465,8 @@
                                         },
                                         "kind": 0,
                                         "name": "n",
-                                        "shared": false,
                                         "type": {
+                                            "shared": false,
                                             "valueType": 1
                                         },
                                         "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
@@ -538,8 +546,8 @@
                                         },
                                         "kind": 0,
                                         "name": "n",
-                                        "shared": false,
                                         "type": {
+                                            "shared": false,
                                             "valueType": 1
                                         },
                                         "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
@@ -590,8 +598,8 @@
                                 },
                                 "kind": 0,
                                 "name": "aBool",
-                                "shared": false,
                                 "type": {
+                                    "shared": false,
                                     "valueType": 2
                                 },
                                 "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
@@ -641,8 +649,8 @@
                             },
                             "kind": 0,
                             "name": "b",
-                            "shared": false,
                             "type": {
+                                "shared": false,
                                 "valueType": 2
                             },
                             "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
@@ -654,7 +662,6 @@
                         "startCol": 5,
                         "startLine": 15
                     },
-                    "shared": false,
                     "typeNode": {
                         "astNodeName": "PrimitiveTypeNode",
                         "position": {
@@ -664,6 +671,7 @@
                             "startLine": 15
                         },
                         "type": {
+                            "shared": false,
                             "valueType": 2
                         }
                     },
@@ -685,8 +693,8 @@
                             },
                             "kind": 0,
                             "name": "aBool",
-                            "shared": false,
                             "type": {
+                                "shared": false,
                                 "valueType": 2
                             },
                             "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
@@ -712,11 +720,12 @@
                     },
                     "kind": 0,
                     "name": "e2",
-                    "shared": false,
                     "type": {
                         "concrete": {
+                            "shared": false,
                             "valueType": 2
                         },
+                        "shared": false,
                         "valueType": 3
                     },
                     "uuid": "0245bfec-242e-4c68-9ed8-9d759d74c250"
@@ -740,8 +749,8 @@
                     },
                     "kind": 0,
                     "name": "aBool",
-                    "shared": false,
                     "type": {
+                        "shared": false,
                         "valueType": 2
                     },
                     "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
@@ -752,8 +761,7 @@
                 "endLine": 16,
                 "startCol": 1,
                 "startLine": 9
-            },
-            "shared": false
+            }
         },
         {
             "astNodeName": "WithStatement",
@@ -780,8 +788,8 @@
                                 },
                                 "kind": 0,
                                 "name": "s",
-                                "shared": false,
                                 "type": {
+                                    "shared": false,
                                     "valueType": 0
                                 },
                                 "uuid": "22bce82c-4b50-41b9-b3d0-25f99814e916"
@@ -811,8 +819,8 @@
                                 },
                                 "kind": 0,
                                 "name": "aString",
-                                "shared": false,
                                 "type": {
+                                    "shared": false,
                                     "valueType": 0
                                 },
                                 "uuid": "87c9e931-156d-49b0-964e-69aa8e799c05"
@@ -845,8 +853,8 @@
                     },
                     "kind": 0,
                     "name": "aString",
-                    "shared": false,
                     "type": {
+                        "shared": false,
                         "valueType": 0
                     },
                     "uuid": "87c9e931-156d-49b0-964e-69aa8e799c05"
@@ -909,19 +917,22 @@
                         },
                         "kind": 1,
                         "name": "fileContents",
-                        "shared": false,
                         "type": {
                             "arguments": [
                                 {
+                                    "shared": false,
                                     "valueType": 0
                                 }
                             ],
                             "return": {
                                 "concrete": {
+                                    "shared": false,
                                     "valueType": 0
                                 },
+                                "shared": false,
                                 "valueType": 8
                             },
+                            "shared": false,
                             "valueType": 6
                         },
                         "uuid": "ca2adfa5-5144-4111-8a4f-f3ba9b3bbe1a"
@@ -933,8 +944,7 @@
                     "startCol": 6,
                     "startLine": 18
                 }
-            },
-            "shared": false
+            }
         }
     ],
     "position": {

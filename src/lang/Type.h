@@ -30,13 +30,6 @@ namespace Lang {
         KFUNCTION,      // callable (...D)->R function
     };
 
-    enum class SharedKind {
-        SSHARED,
-        SUNSHARED,  // 
-        SLITERAL,   // Undecided shared value for literals
-        SNONE,      // Invalid shared value
-    };
-
     /** Base class for type instances. */
     class Type : public IStringable {
     public:
@@ -76,9 +69,18 @@ namespace Lang {
             return false;
         }
 
+        virtual bool shared() const {
+            return _shared;
+        }
+
+        virtual void setShared(bool shared) {
+            _shared = shared;
+        }
+
     protected:
-        Type(ValueType t) : _type(t) {}
+        Type(ValueType t) : _type(t), _shared(false) {}
         ValueType _type;
+        bool _shared;
     };
 
     /** Type class of primitive types. */
@@ -88,18 +90,31 @@ namespace Lang {
         /**
          * Get the PrimitiveType instance for a given ValueType.
          *
-         * @example PrimitiveType::of(ValueType::TSTRING);
+         * @example PrimitiveType::of(ValueType::TSTRING, true);
          */
-        static PrimitiveType* of(ValueType t) {
+        static PrimitiveType* of(ValueType t, bool shared = false) {
             static std::map<ValueType, PrimitiveType*> instances;
+            static std::map<ValueType, PrimitiveType*> sharedInstances;
 
-            auto i = instances.find(t);
-            if ( i != instances.end() ) {
-                return i->second;
+            if ( shared ) {
+                auto i = sharedInstances.find(t);
+                if ( i != sharedInstances.end() ) {
+                    return i->second;
+                }
+            } else {
+                auto i = instances.find(t);
+                if ( i != instances.end() ) {
+                    return i->second;
+                }
             }
 
-            PrimitiveType* instance = new PrimitiveType(t);
-            instances.insert(std::pair<ValueType, PrimitiveType*>(t, instance));
+            PrimitiveType* instance = new PrimitiveType(t, shared);
+
+            if ( shared ) {
+                sharedInstances.insert(std::pair<ValueType, PrimitiveType*>(t, instance));
+            } else {
+                instances.insert(std::pair<ValueType, PrimitiveType*>(t, instance));
+            }
             return instance;
         }
 
@@ -124,13 +139,18 @@ namespace Lang {
         }
 
         virtual PrimitiveType* copy() const override {
-            return new PrimitiveType(_type);
+            return PrimitiveType::of(valueType(), _shared);
+        }
+
+        virtual void setShared(bool shared) {
+            throw Errors::SwarmError("Attempt to reassign PrimitiveType sharedness");
         }
     private:
-        PrimitiveType(ValueType t) : Type(t) {
+        PrimitiveType(ValueType t, bool shared) : Type(t) {
             if ( !Type::isPrimitiveValueType(t) ) {
                 throw Errors::InvalidPrimitiveTypeInstantiationError();
             }
+            _shared = shared;
         }
     };
 
@@ -139,7 +159,7 @@ namespace Lang {
     class GenericType : public Type {
     public:
         static GenericType* of(ValueType t, Type* concrete) {
-            return new GenericType(t, concrete);
+            return new GenericType(t, concrete, concrete->shared());
         }
 
         virtual std::string toString() const override {
@@ -173,10 +193,21 @@ namespace Lang {
         }
 
         virtual GenericType* copy() const override {
-            return new GenericType(_type, _concrete->copy());
+            return new GenericType(_type, _concrete->copy(), _shared);
+        }
+
+        virtual void setShared(bool shared) {
+            _shared = shared;
+            if ( _concrete->isPrimitiveType() ) {
+                _concrete = PrimitiveType::of(_concrete->valueType(), shared);
+            } else {
+                _concrete->setShared(shared);
+            }
         }
     protected:
-        GenericType(ValueType t, Type* concrete) : Type(t), _concrete(concrete) {}
+        GenericType(ValueType t, Type* concrete, bool shared) : Type(t), _concrete(concrete) {
+            setShared(shared);
+        }
         Type* _concrete;
     };
 
@@ -184,8 +215,8 @@ namespace Lang {
     /** Base class for callable function types with multiple domain types and a single range type. */
     class FunctionType : public Type {
     public:
-        static FunctionType* of(Type* returnType) {
-            return new FunctionType(returnType);
+        static FunctionType* of(Type* returnType, bool shared) {
+            return new FunctionType(returnType, shared);
         }
 
         virtual std::string toString() const override {
@@ -264,7 +295,7 @@ namespace Lang {
         }
 
         virtual FunctionType* copy() const override {
-            auto copy = new FunctionType(_return->copy());
+            auto copy = new FunctionType(_return->copy(), _shared);
             copy->_builtin = _builtin;
 
             for ( auto arg : _args ) {
@@ -275,7 +306,9 @@ namespace Lang {
         }
 
     protected:
-        FunctionType(Type* returnType) : Type(ValueType::TFUNCTION), _return(returnType) {}
+        FunctionType(Type* returnType, bool shared) : Type(ValueType::TFUNCTION), _return(returnType) {
+            setShared(shared);
+        }
         std::vector<Type*> _args;
         Type* _return;
         bool _builtin = false;

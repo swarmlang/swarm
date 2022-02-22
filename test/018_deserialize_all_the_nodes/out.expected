@@ -1,27 +1,27 @@
 ProgramNode<#body: 8>
   VariableDeclarationNode<name: e1>
-    EnumerableTypeNode<of: PrimitiveTypeNode<of: TSTRING>>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TSTRING, shared: false>, shared: false>
     EnumerationLiteralExpressionNode<#actuals: 0>
   VariableDeclarationNode<name: e2>
-    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL>>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL, shared: false>, shared: false>
     EnumerationLiteralExpressionNode<#actuals: 2>
       BoolLiteralNode<of: 1>
       BoolLiteralNode<of: 0>
   VariableDeclarationNode<name: m1>
-    MapTypeNode<of: PrimitiveTypeNode<of: TSTRING>>
+    MapTypeNode<of: PrimitiveTypeNode<of: TSTRING, shared: false>, shared: false>
     MapNode<#body: 2>
       MapStatementNode<id: key1>
         StringLiteralExpressionNode<#value: 'value1'>
       MapStatementNode<id: key2>
         StringLiteralExpressionNode<#value: 'value2'>
   VariableDeclarationNode<name: m2>
-    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM, shared: false>, shared: false>
     MapNode<#body: 0>
   VariableDeclarationNode<name: s>
-    PrimitiveTypeNode<of: TSTRING>
+    PrimitiveTypeNode<of: TSTRING, shared: false>
     StringLiteralExpressionNode<#value: 'fubar'>
   VariableDeclarationNode<name: n>
-    PrimitiveTypeNode<of: TNUM>
+    PrimitiveTypeNode<of: TNUM, shared: false>
     NumberLiteralExpressionNode<#value: 0.000000>
   EnumerationStatement<e: e2, as: aBool, #body: 2>
     IfStatement<f: if AndNode<> then, #body: 2>
@@ -35,7 +35,7 @@ ProgramNode<#body: 8>
         AddAssignExpressionNode<lval: IdentifierNode<name: n>>
           NumberLiteralExpressionNode<#value: 2.000000>
     VariableDeclarationNode<name: b>
-      PrimitiveTypeNode<of: TBOOL>
+      PrimitiveTypeNode<of: TBOOL, shared: false>
       IdentifierNode<name: aBool>
   WithStatement<r: CallExpressionNode<id: fileContents, #args: 1>, as: aString>
     ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: s>>>

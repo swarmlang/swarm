@@ -1,13 +1,13 @@
 ProgramNode<#body: 3>
   VariableDeclarationNode<name: myTrue>
-    PrimitiveTypeNode<of: TBOOL>
+    PrimitiveTypeNode<of: TBOOL, shared: false>
     AndNode<>
       OrNode<>
         BoolLiteralNode<of: 1>
         BoolLiteralNode<of: 0>
       BoolLiteralNode<of: 1>
   VariableDeclarationNode<name: myFalse>
-    PrimitiveTypeNode<of: TBOOL>
+    PrimitiveTypeNode<of: TBOOL, shared: false>
     OrNode<>
       BoolLiteralNode<of: 0>
       AndNode<>

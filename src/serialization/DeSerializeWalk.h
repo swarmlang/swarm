@@ -45,7 +45,6 @@ namespace Serialization {
             if (loc != _uuidList.end()) return loc->second;
             std::string name = symjson["name"];
             Type* type = walkType(symjson["type"]);
-            bool shared = symjson["shared"];
             Position* pos = new Position(
                 symjson["declaredAt"]["startLine"],
                 symjson["declaredAt"]["endLine"],
@@ -56,7 +55,7 @@ namespace Serialization {
                 sym = new FunctionSymbol(name,(FunctionType*) type,pos);
                 
             } else {
-                sym = new VariableSymbol(name,shared,type,pos);
+                sym = new VariableSymbol(name,type,pos);
             }
             sym->_uuid = uuid;
             return  sym;
@@ -95,7 +94,7 @@ namespace Serialization {
             ValueType t = (ValueType) typejson["valueType"];
             if ( t == ValueType::TFUNCTION ) {
                 Type* ret = walkType(typejson["return"]);
-                FunctionType* fn = FunctionType::of(ret);
+                FunctionType* fn = FunctionType::of(ret, typejson["shared"]);
                 for ( auto arg : typejson["arguments"] ) {
                     fn->addArgument(walkType(arg));
                 }
@@ -144,7 +143,7 @@ namespace Serialization {
             return new BooleanLiteralExpressionNode(pos,val);
         }
 
-        virtual VariableDeclarationNode* walkVariableDeclarationNode(nlohmann::json typejson, nlohmann::json idjson, bool shared, nlohmann::json valjson, Position* pos) {
+        virtual VariableDeclarationNode* walkVariableDeclarationNode(nlohmann::json typejson, nlohmann::json idjson, nlohmann::json valjson, Position* pos) {
             ASTNode* type = walk(typejson);
             console->debug("Got Var Type!");
             ASTNode* identifier = walk(idjson);
@@ -156,8 +155,7 @@ namespace Serialization {
                 pos,
                 (TypeNode*) type,
                 (IdentifierNode*) identifier,
-                (ExpressionNode*) value,
-                shared
+                (ExpressionNode*) value
             );
             return vdn;
         }
@@ -302,7 +300,7 @@ namespace Serialization {
             return new EnumerationLiteralExpressionNode(pos,actuals);
         }
 
-        virtual EnumerationStatement* walkEnumerationStatement(nlohmann::json enumjson, nlohmann::json localjson, bool shared, JSONList body,Position* pos) {
+        virtual EnumerationStatement* walkEnumerationStatement(nlohmann::json enumjson, nlohmann::json localjson, JSONList body,Position* pos) {
             ASTNode* enumerable = walk(enumjson);
             ASTNode* local = walk(localjson);
             assert(enumerable->getName() == "IdentifierNode");
@@ -312,7 +310,7 @@ namespace Serialization {
                 pos,
                 (IdentifierNode*) enumerable,
                 (IdentifierNode*) local,
-                shared);
+                false);
             
             for (auto stmt : body) {
                 ASTNode* s = walk(stmt);
@@ -323,13 +321,13 @@ namespace Serialization {
             return es;
         }
 
-        virtual WithStatement* walkWithStatement(JSONList body, nlohmann::json localjson, bool shared, nlohmann::json resjson, Position* pos) {
+        virtual WithStatement* walkWithStatement(JSONList body, nlohmann::json localjson, nlohmann::json resjson, Position* pos) {
             ASTNode* local = walk(localjson);
             ASTNode* res = walk(resjson);
             assert(local->getName() == "IdentifierNode");
             assert(res->isExpression());
 
-            WithStatement* with = new WithStatement(pos,(ExpressionNode*) res,(IdentifierNode*) local, shared);
+            WithStatement* with = new WithStatement(pos,(ExpressionNode*) res,(IdentifierNode*) local, false);
 
             for (auto stmt : body) {
                 ASTNode* s = walk(stmt);
@@ -431,7 +429,7 @@ namespace Serialization {
             else if ( name == "EnumerableTypeNode" ) return walkEnumerableTypeNode(prog["type"],pos);
             else if ( name == "MapTypeNode" ) return walkMapTypeNode(prog["type"],pos);
             else if ( name == "BooleanLiteralExpressionNode" ) return walkBooleanLiteralExpressionNode(prog["value"],pos);
-            else if ( name == "VariableDeclarationNode" ) return walkVariableDeclarationNode(prog["typeNode"],prog["identifier"],prog["shared"],prog["value"],pos);
+            else if ( name == "VariableDeclarationNode" ) return walkVariableDeclarationNode(prog["typeNode"],prog["identifier"],prog["value"],pos);
             else if ( name == "CallExpressionNode" ) return walkCallExpressionNode(prog["identifier"],prog["arguments"],pos);
             else if ( name == "AndNode" ) return walkAndNode(prog["left"],prog["right"],pos);
             else if ( name == "OrNode" ) return walkOrNode(prog["left"],prog["right"],pos);
@@ -449,8 +447,8 @@ namespace Serialization {
             else if ( name == "NegativeExpressionNode" ) return walkNegativeExpressionNode(prog["expression"],pos);
             else if ( name == "NotNode" ) return walkNotNode(prog["expression"],pos);
             else if ( name == "EnumerationLiteralExpressionNode" ) return walkEnumerationLiteralExpressionNode(prog["actuals"],pos);
-            else if ( name == "EnumerationStatement" ) return walkEnumerationStatement(prog["enumerable"],prog["local"],prog["shared"],prog["body"],pos);
-            else if ( name == "WithStatement" ) return walkWithStatement(prog["body"],prog["local"],prog["shared"],prog["resource"],pos);
+            else if ( name == "EnumerationStatement" ) return walkEnumerationStatement(prog["enumerable"],prog["local"],prog["body"],pos);
+            else if ( name == "WithStatement" ) return walkWithStatement(prog["body"],prog["local"],prog["resource"],pos);
             else if ( name == "IfStatement" ) return walkIfStatement(prog["body"],prog["condition"],pos);
             else if ( name == "WhileStatement" ) return walkWhileStatement(prog["body"],prog["condition"],pos);
             else if ( name == "MapStatementNode" ) return walkMapStatementNode(prog["mapStatementIdentifier"],prog["value"],pos);

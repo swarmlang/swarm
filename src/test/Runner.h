@@ -6,6 +6,7 @@
 #include "021_map_node_accesses.h"
 #include "022_local_store_lval.h"
 #include "023_enum_node_accesses.h"
+#include "024_shared_variables.h"
 
 namespace swarmc {
 namespace Test {
@@ -25,6 +26,9 @@ namespace Test {
                 return test.run();
             } else if ( name == "023_enum_node_accesses" ) {
                 EnumNodeAccessesTest test;
+                return test.run();
+            } else if ( name == "024_shared_variables" ) {
+                SharedVariablesTest test;
                 return test.run();
             }
 

@@ -1,6 +1,6 @@
 ProgramNode<#body: 2>
   VariableDeclarationNode<name: myEnum>
-    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM, shared: false>, shared: false>
     EnumerationLiteralExpressionNode<#actuals: 1>
       NumberLiteralExpressionNode<#value: 1.000000>
   EnumerationStatement<e: myEnum, as: myItem, #body: 0>

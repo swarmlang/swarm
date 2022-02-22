@@ -220,13 +220,14 @@ statement :
 declaration :
     type id ASSIGN expression {
         Position* pos = new Position($1->position(), $4->position());
-        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $1, $2, $4, false);
+        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $1, $2, $4);
         $$ = var;
     }
 
     | SHARED type id ASSIGN expression {
         Position* pos = new Position($1->position(), $5->position());
-        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5, true);
+        $2->setShared(true);
+        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5);
         $$ = var;
     }
 

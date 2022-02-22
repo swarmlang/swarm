@@ -234,7 +234,7 @@ namespace Lang {
         bool valueResult = _value->nameAnalysis(symbols);
 
         // Add the declaration to the current scope
-        symbols->addVariable(name, _shared, type, position());
+        symbols->addVariable(name, type, position());
 
         // Call this to attach the Symbol to the IdentifierNode
         _id->nameAnalysis(symbols);
@@ -307,11 +307,21 @@ namespace Lang {
         if ( enumType->kind() == TypeKind::KGENERIC ) {
             GenericType* enumGenericType = (GenericType*) enumType;
             type = enumGenericType->concrete();
+
+            if ( type->isPrimitiveType() ) {
+                type = PrimitiveType::of(type->valueType(), _shared);
+            } else if ( type->isGenericType() ) {
+                type = type->copy();
+                type->setShared(_shared);
+            } else if ( type->isFunctionType() ) {
+                type = type->copy();
+                type->setShared(_shared);
+            }
         }
 
         // Start a new scope in the body and add the local
         symbols->enter();
-        symbols->addVariable(name, _shared, type, pos);
+        symbols->addVariable(name, type, pos);
 
         if ( !_local->nameAnalysis(symbols) ) {
             symbols->leave();
@@ -339,7 +349,7 @@ namespace Lang {
 
         // Start a new scope in the body and add the local
         symbols->enter();
-        symbols->addVariable(name, _shared, type, pos);
+        symbols->addVariable(name, type, pos);
 
         if ( !_local->nameAnalysis(symbols) ) {
             symbols->leave();
@@ -417,7 +427,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         return true;
     }
 
@@ -425,7 +435,7 @@ namespace Lang {
         bool expResult = _exp->typeAnalysis(types);
 
         if ( expResult ) {
-            types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+            types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         }
 
         return expResult;
@@ -484,12 +494,12 @@ namespace Lang {
     }
 
     bool TypeNode::typeAnalysis(TypeTable* types) {
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         return true;
     }
 
     bool BooleanLiteralExpressionNode::typeAnalysis(TypeTable* types) {
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL, false));
         return true;
     }
 
@@ -512,7 +522,7 @@ namespace Lang {
             return false;
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         return true;
     }
 
@@ -536,7 +546,7 @@ namespace Lang {
             return false;
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         return true;
     }
 
@@ -646,7 +656,7 @@ namespace Lang {
             return false;
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL, false));
         return true;
     }
 
@@ -669,7 +679,7 @@ namespace Lang {
             return false;
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TBOOL, false));
         return true;
     }
 
@@ -679,7 +689,7 @@ namespace Lang {
         }
 
         const Type* condType = types->getTypeOf(_condition);
-        if ( !condType->is(PrimitiveType::of(ValueType::TBOOL))) {
+        if ( !condType->is(PrimitiveType::of(ValueType::TBOOL, false))) {
             Reporting::typeError(
                 position(),
                 "Condition for if statement not boolean " + condType->toString() + "."
@@ -694,7 +704,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         return true;
     }
 
@@ -719,7 +729,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         return true;
     }
 
@@ -747,7 +757,7 @@ namespace Lang {
         }
 
         GenericType* genericType = (GenericType*) enumType;
-        const Type* concreteType = genericType->concrete();
+        Type* concreteType = genericType->concrete();
         types->setTypeOf(_local, concreteType);
 
         if ( !_enumerable->typeAnalysis(types) ) {
@@ -760,7 +770,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         return true;
     }
 
@@ -789,7 +799,7 @@ namespace Lang {
             }
         }
 
-        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT));
+        types->setTypeOf(this, PrimitiveType::of(ValueType::TUNIT, false));
         return true;
     }
 

@@ -1,24 +1,24 @@
 ProgramNode<#body: 5>
   IfStatement<f: if BoolLiteralNode<of: 1> then, #body: 1>
     VariableDeclarationNode<name: myTrue>
-      PrimitiveTypeNode<of: TBOOL>
+      PrimitiveTypeNode<of: TBOOL, shared: false>
       BoolLiteralNode<of: 1>
   WhileStatement<w: while BoolLiteralNode<of: 1> then, #body: 1>
     VariableDeclarationNode<name: myNum>
-      PrimitiveTypeNode<of: TNUM>
+      PrimitiveTypeNode<of: TNUM, shared: false>
       NumberLiteralExpressionNode<#value: 2.000000>
   IfStatement<f: if OrNode<> then, #body: 1>
     VariableDeclarationNode<name: a>
-      PrimitiveTypeNode<of: TSTRING>
+      PrimitiveTypeNode<of: TSTRING, shared: false>
       StringLiteralExpressionNode<#value: 'simple or'>
   VariableDeclarationNode<name: someCond>
-    PrimitiveTypeNode<of: TBOOL>
+    PrimitiveTypeNode<of: TBOOL, shared: false>
     AndNode<>
       BoolLiteralNode<of: 1>
       BoolLiteralNode<of: 0>
   IfStatement<f: if IdentifierNode<name: someCond> then, #body: 1>
     VariableDeclarationNode<name: b>
-      PrimitiveTypeNode<of: TSTRING>
+      PrimitiveTypeNode<of: TSTRING, shared: false>
       StringLiteralExpressionNode<#value: 'variable check'>
 [32m[SUCCESS] [0mParsed input program.
 [0m

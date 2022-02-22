@@ -19,7 +19,7 @@ namespace Lang {
     class WithStatement;
 
     /** Enum of the various possible things that a name may reference. */
-    enum SemanticSymbolKind {
+    enum class SemanticSymbolKind {
         VARIABLE,
         FUNCTION,
     };
@@ -28,16 +28,12 @@ namespace Lang {
     /** Base class for names identified in code. */
     class SemanticSymbol : public IStringable {
     public:
-        SemanticSymbol(std::string name, const Type* type, const Position* declaredAt) : _name(name), _shared(false), _type(type), _declaredAt(declaredAt) {
-            _uuid = util::uuid4();
-        }
-
-        SemanticSymbol(std::string name, bool shared, const Type* type, const Position* declaredAt) : _name(name), _shared(shared), _type(type), _declaredAt(declaredAt) {
+        SemanticSymbol(std::string name, const Type* type, const Position* declaredAt) : _name(name), _type(type), _declaredAt(declaredAt) {
             _uuid = util::uuid4();
         }
 
         virtual std::string toString() const {
-            return "SemanticSymbol<name: " + _name + ", shared: " + std::to_string(_shared) + ", type: " + _type->toString() + ", declaredAt: " + _declaredAt->start() + ", uuid: " + _uuid + ">";
+            return "SemanticSymbol<name: " + _name + ", type: " + _type->toString() + ", declaredAt: " + _declaredAt->start() + ", uuid: " + _uuid + ">";
         }
 
         /** The user-given name of the symbol. */
@@ -65,13 +61,12 @@ namespace Lang {
 
         /** Get the shared flag of this symbol */
         virtual bool shared() const {
-            return _shared;
+            return _type->shared();
         }
 
     protected:
         std::string _uuid;
         std::string _name;
-        bool _shared;
         const Type* _type;
         const Position* _declaredAt;
 
@@ -84,10 +79,9 @@ namespace Lang {
     class VariableSymbol : public SemanticSymbol {
     public:
         VariableSymbol(std::string name, const Type* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
-        VariableSymbol(std::string name, bool shared, const Type* type, const Position* declaredAt) : SemanticSymbol(name, shared, type, declaredAt) {}
-
+        
         virtual SemanticSymbolKind kind() const override {
-            return VARIABLE;
+            return SemanticSymbolKind::VARIABLE;
         }
     };
 
@@ -95,10 +89,10 @@ namespace Lang {
     /** Semantic symbol implementation for names referencing variables. */
     class FunctionSymbol : public SemanticSymbol {
     public:
-        FunctionSymbol(std::string name, const FunctionType* type, const Position* declaredAt) : SemanticSymbol(name, false, type, declaredAt) {}
+        FunctionSymbol(std::string name, const FunctionType* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
 
         virtual SemanticSymbolKind kind() const override {
-            return FUNCTION;
+            return SemanticSymbolKind::FUNCTION;
         }
     };
 
@@ -142,11 +136,6 @@ namespace Lang {
         /** Add a new variable to this scope. */
         void addVariable(std::string name, Type* type, const Position* declaredAt) {
             insert(new VariableSymbol(name, type, declaredAt));
-        }
-
-        /** Add a new variable to this scope. */
-        void addVariable(std::string name, bool shared, Type* type, const Position* declaredAt) {
-            insert(new VariableSymbol(name, shared, type, declaredAt));
         }
 
         /** Add a new function to this scope. */
@@ -225,11 +214,6 @@ namespace Lang {
         /** Add a new variable to the current scope. */
         void addVariable(std::string name, Type* type, const Position* declaredAt) {
             return current()->addVariable(name, type, declaredAt);
-        }
-
-        /** Add a new variable to the current scope. */
-        void addVariable(std::string name, bool shared, Type* type, const Position* declaredAt) {
-            return current()->addVariable(name, shared, type, declaredAt);
         }
 
         /** Add a new function to the current scope. */

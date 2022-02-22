@@ -1,18 +1,18 @@
 ProgramNode<#body: 5>
   VariableDeclarationNode<name: a>
-    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TNUM, shared: false>, shared: false>
     EnumerationLiteralExpressionNode<#actuals: 0>
   VariableDeclarationNode<name: b>
-    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL>>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL, shared: false>, shared: false>
     EnumerationLiteralExpressionNode<#actuals: 0>
   VariableDeclarationNode<name: c>
-    MapTypeNode<of: PrimitiveTypeNode<of: TNUM>>
+    MapTypeNode<of: PrimitiveTypeNode<of: TNUM, shared: false>, shared: false>
     MapNode<#body: 0>
   VariableDeclarationNode<name: d>
-    MapTypeNode<of: PrimitiveTypeNode<of: TSTRING>>
+    MapTypeNode<of: PrimitiveTypeNode<of: TSTRING, shared: false>, shared: false>
     MapNode<#body: 0>
   VariableDeclarationNode<name: e>
-    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL>>
+    EnumerableTypeNode<of: PrimitiveTypeNode<of: TBOOL, shared: false>, shared: false>
     EnumerationLiteralExpressionNode<#actuals: 2>
       NotNode<>
         BoolLiteralNode<of: 1>

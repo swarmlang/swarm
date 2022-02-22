@@ -64,7 +64,7 @@ namespace Lang {
             return "UNKNOWN";
         }
 
-        static std::string semanticSymbolKindToString(int kind) {
+        static std::string semanticSymbolKindToString(SemanticSymbolKind kind) {
             if (kind == SemanticSymbolKind::VARIABLE) return "VARIABLE";
             
             return "UNKNOWN";

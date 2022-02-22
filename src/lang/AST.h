@@ -234,6 +234,8 @@ namespace Lang {
         virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) = 0;
 
         virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) = 0;
+
+        virtual bool shared() const = 0;
     };
 
 
@@ -268,9 +270,17 @@ namespace Lang {
 
         virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
 
+        virtual bool shared() const override {
+            if (_symbol == nullptr) {
+                throw Errors::SwarmError("Attempt to get sharedness of symbolless identifier: " + _name);
+            }
+            return _symbol->type()->shared();
+        }
+
     protected:
         std::string _name;
         SemanticSymbol* _symbol = nullptr;
+
         friend class Serialization::DeSerializeWalk;
     };
 
@@ -305,6 +315,10 @@ namespace Lang {
         virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) override;
 
         virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
+
+        virtual bool shared() const override {
+            return _path->shared();
+        }
     private:
         LValNode* _path;
         IdentifierNode* _end;
@@ -328,6 +342,8 @@ namespace Lang {
         virtual bool isType() const {
             return true;
         }
+
+        virtual void setShared(bool shared) = 0;
     };
 
 
@@ -342,11 +358,18 @@ namespace Lang {
         }
 
         virtual std::string toString() const override {
-            return "PrimitiveTypeNode<of: " + Type::valueTypeToString(_t->valueType()) + ">";
+            std::stringstream s;
+            s << "PrimitiveTypeNode<of: " << Type::valueTypeToString(_t->valueType())
+              << ", shared: " << (_t->shared() ? "true>" : "false>");
+            return s.str();
         }
 
         virtual Type* type() const override {
             return _t;
+        }
+
+        virtual void setShared(bool shared) override {
+            _t = PrimitiveType::of(_t->valueType(), shared);
         }
 
     protected:
@@ -360,8 +383,14 @@ namespace Lang {
         GenericTypeNode(Position* pos, TypeNode* concrete) : TypeNode(pos), _concrete(concrete) {}
         virtual ~GenericTypeNode() {}
 
+        virtual void setShared(bool shared) override {
+            _shared = shared;    
+            _concrete->setShared(shared);  
+        }
+
     protected:
         TypeNode* _concrete;
+        bool _shared;
     };
 
 
@@ -380,7 +409,10 @@ namespace Lang {
         }
 
         virtual std::string toString() const override {
-            return "EnumerableTypeNode<of: " + _concrete->toString() + ">";
+            std::stringstream s;
+            s << "EnumerableTypeNode<of: " << _concrete->toString() 
+                << ", shared: " << (type()->shared() ? "true>" : "false>");
+            return s.str();
         }
     };
 
@@ -400,7 +432,10 @@ namespace Lang {
         }
 
         virtual std::string toString() const override {
-            return "MapTypeNode<of: " + _concrete->toString() + ">";
+            std::stringstream s;
+            s << "MapTypeNode<of: " << _concrete->toString() 
+                << ", shared: " << (type()->shared() ? "true>" : "false>");
+            return s.str();
         }
     };
 
@@ -453,8 +488,8 @@ namespace Lang {
          * @param id - the name of the variable
          * @param value - the initial value of the variable
          */
-        VariableDeclarationNode(Position* pos, TypeNode* type, IdentifierNode* id, ExpressionNode* value, bool shared)
-            : DeclarationNode(pos), _type(type), _id(id), _value(value), _shared(shared) {}
+        VariableDeclarationNode(Position* pos, TypeNode* type, IdentifierNode* id, ExpressionNode* value)
+            : DeclarationNode(pos), _type(type), _id(id), _value(value) {}
 
         virtual std::string getName() const override {
             return "VariableDeclarationNode";
@@ -484,15 +519,10 @@ namespace Lang {
             return _type;
         }
 
-        bool shared() const {
-            return _shared;
-        }
-
     protected:
         TypeNode* _type;
         IdentifierNode* _id;
         ExpressionNode* _value;
-        bool _shared;
     };
 
 
@@ -611,15 +641,15 @@ namespace Lang {
         virtual ~PureBooleanBinaryExpressionNode() {}
 
         virtual const Type* leftType() const override {
-            return PrimitiveType::of(ValueType::TBOOL);
+            return PrimitiveType::of(ValueType::TBOOL, false);
         }
 
         virtual const Type* rightType() const override {
-            return PrimitiveType::of(ValueType::TBOOL);
+            return PrimitiveType::of(ValueType::TBOOL, false);
         }
 
         virtual const Type* resultType() const override {
-            return PrimitiveType::of(ValueType::TBOOL);
+            return PrimitiveType::of(ValueType::TBOOL, false);
         }
     };
 
@@ -631,15 +661,15 @@ namespace Lang {
         virtual ~PureNumberBinaryExpressionNode() {}
 
         virtual const Type* leftType() const override {
-            return PrimitiveType::of(ValueType::TNUM);
+            return PrimitiveType::of(ValueType::TNUM, false);
         }
 
         virtual const Type* rightType() const override {
-            return PrimitiveType::of(ValueType::TNUM);
+            return PrimitiveType::of(ValueType::TNUM, false);
         }
 
         virtual const Type* resultType() const override {
-            return PrimitiveType::of(ValueType::TNUM);
+            return PrimitiveType::of(ValueType::TNUM, false);
         }
     };
 
@@ -651,15 +681,15 @@ namespace Lang {
         virtual ~PureStringBinaryExpressionNode() {}
 
         virtual const Type* leftType() const override {
-            return PrimitiveType::of(ValueType::TSTRING);
+            return PrimitiveType::of(ValueType::TSTRING, false);
         }
 
         virtual const Type* rightType() const override {
-            return PrimitiveType::of(ValueType::TSTRING);
+            return PrimitiveType::of(ValueType::TSTRING, false);
         }
 
         virtual const Type* resultType() const override {
-            return PrimitiveType::of(ValueType::TSTRING);
+            return PrimitiveType::of(ValueType::TSTRING, false);
         }
     };
 
@@ -1054,10 +1084,6 @@ namespace Lang {
         IdentifierNode* local() const {
             return _local;
         }
-
-        bool shared() const {
-            return _shared;
-        }
     protected:
         IdentifierNode* _enumerable;
         IdentifierNode* _local;
@@ -1091,10 +1117,6 @@ namespace Lang {
 
         IdentifierNode* local() const {
             return _local;
-        }
-
-        bool shared() const {
-            return _shared;
         }
     protected:
         ExpressionNode* _resource;
@@ -1382,6 +1404,10 @@ namespace Lang {
         ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
 
         void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) override;
+
+        virtual bool shared() const override {
+            return _path->shared();
+        }
     private:
         LValNode* _path;
         IntegerLiteralExpressionNode* _index;

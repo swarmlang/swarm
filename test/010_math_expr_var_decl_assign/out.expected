@@ -1,9 +1,9 @@
 ProgramNode<#body: 4>
   VariableDeclarationNode<name: myNum>
-    PrimitiveTypeNode<of: TNUM>
+    PrimitiveTypeNode<of: TNUM, shared: false>
     NumberLiteralExpressionNode<#value: 2.000000>
   VariableDeclarationNode<name: myNum2>
-    PrimitiveTypeNode<of: TNUM>
+    PrimitiveTypeNode<of: TNUM, shared: false>
     AddNode<>
       NumberLiteralExpressionNode<#value: 1.000000>
       IdentifierNode<name: myNum>
