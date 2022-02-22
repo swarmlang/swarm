@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-$SWARMC --dbg-output-serialize-to -- $TESTSWARM
+$SWARMC --dbg-use-d-guid --dbg-output-serialize-to -- $TESTSWARM
