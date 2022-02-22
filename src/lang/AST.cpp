@@ -6,6 +6,7 @@
 #include "SymbolTable.h"
 #include "../Reporting.h"
 #include "Type.h"
+#include "Walk/PrintWalk.h"
 
 #ifndef SWARMC_SPACE
 #define SWARMC_SPACE "  "
@@ -21,6 +22,10 @@ namespace Lang {
         }
 
         return other;
+    }
+
+    void ASTNode::printTree(std::ostream& out) {
+        Walk::PrintWalk pw(out, this);
     }
 
     /************* VALUE ACCESSORS ********/
@@ -83,95 +88,6 @@ namespace Lang {
         size_t idx = _index->value();  // fixme invalid cast?
         return enumNode->getIndex(idx);
     }
-
-    /************* PRINT TREE *************/
-
-    void ProgramNode::printTree(std::ostream& out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        for ( auto stmt : *_body ) {
-            stmt->printTree(out, prefix + SWARMC_SPACE);
-        }
-    }
-
-    void ExpressionNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-    }
-
-    void ExpressionStatementNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        _exp->printTree(out, prefix + SWARMC_SPACE);
-    }
-
-    void MapAccessNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        _path->printTree(out, prefix + SWARMC_SPACE);
-    }
-
-    void EnumerableAccessNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        _path->printTree(out, prefix + SWARMC_SPACE);
-    }
-
-    void TypeNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-    }
-
-    void VariableDeclarationNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        _type->printTree(out, prefix + SWARMC_SPACE);
-        _value->printTree(out, prefix + SWARMC_SPACE);
-    }
-
-    void AssignExpressionNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        _value->printTree(out, prefix + SWARMC_SPACE);
-    }
-
-    void CallExpressionNode::printTree(std::ostream& out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        for ( auto exp : *_args ) {
-            exp->printTree(out, prefix + SWARMC_SPACE);
-        }
-    }
-
-    void BinaryExpressionNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        _left->printTree(out, prefix + SWARMC_SPACE);
-        _right->printTree(out, prefix + SWARMC_SPACE);
-    }
-
-    void UnaryExpressionNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        _exp->printTree(out, prefix + SWARMC_SPACE);
-    }
-
-    void EnumerationLiteralExpressionNode::printTree(std::ostream& out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        for ( auto exp : *_actuals ) {
-            exp->printTree(out, prefix + SWARMC_SPACE);
-        }
-    }
-
-    void BlockStatementNode::printTree(std::ostream& out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        for ( auto stmt : *_body ) {
-            stmt->printTree(out, prefix + SWARMC_SPACE);
-        }
-    }
-
-    void MapStatementNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        _value->printTree(out, prefix + SWARMC_SPACE);
-    }
-
-    void MapNode::printTree(std::ostream &out, std::string prefix) const {
-        out << prefix << toString() << std::endl;
-        for ( auto entry : *_body ) {
-            entry->printTree(out, prefix + SWARMC_SPACE);
-        }
-    }
-
-
 
     /************* NAME ANALYSIS *************/
 

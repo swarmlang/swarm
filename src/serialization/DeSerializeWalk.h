@@ -5,7 +5,6 @@
 #include "../../lib/json.hpp"
 #include "../shared/util/Console.h"
 #include "../lang/AST.h"
-#include "../lang/Walk.h"
 
 namespace swarmc {
 namespace Serialization {
