@@ -1,4 +1,4 @@
-ProgramNode<#body: 8>
+ProgramNode<#body: 9>
   VariableDeclarationNode<name: e1>
     EnumerableTypeNode<of: PrimitiveTypeNode<of: TSTRING, shared: false>, shared: false>
     EnumerationLiteralExpressionNode<#actuals: 0>
@@ -37,6 +37,10 @@ ProgramNode<#body: 8>
     VariableDeclarationNode<name: b>
       PrimitiveTypeNode<of: TBOOL, shared: false>
       IdentifierNode<name: aBool>
+  IfStatement<f: if OrNode<> then, #body: 1>
+    ExpressionStatementNode<CallExpressionNode<id: log, #args: 1>>
+      CallExpressionNode<id: log, #args: 1>
+        StringLiteralExpressionNode<#value: 'bodyhere'>
   WithStatement<r: CallExpressionNode<id: fileContents, #args: 1>, as: aString>
     ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: s>>>
       AssignExpressionNode<lval: IdentifierNode<name: s>>

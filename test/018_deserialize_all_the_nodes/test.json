@@ -764,6 +764,289 @@
             }
         },
         {
+            "astNodeName": "IfStatement",
+            "body": [
+                {
+                    "astNodeName": "ExpressionStatementNode",
+                    "expression": {
+                        "arguments": [
+                            {
+                                "astNodeName": "StringLiteralExpressionNode",
+                                "position": {
+                                    "endCol": 20,
+                                    "endLine": 19,
+                                    "startCol": 9,
+                                    "startLine": 19
+                                },
+                                "value": "body here"
+                            }
+                        ],
+                        "astNodeName": "CallExpressionNode",
+                        "identifier": {
+                            "astNodeName": "IdentifierNode",
+                            "name": "log",
+                            "position": {
+                                "endCol": 8,
+                                "endLine": 19,
+                                "startCol": 5,
+                                "startLine": 19
+                            },
+                            "symbol": {
+                                "declaredAt": {
+                                    "endCol": 0,
+                                    "endLine": 0,
+                                    "startCol": 0,
+                                    "startLine": 0
+                                },
+                                "kind": 1,
+                                "name": "log",
+                                "type": {
+                                    "arguments": [
+                                        {
+                                            "shared": false,
+                                            "valueType": 0
+                                        }
+                                    ],
+                                    "return": {
+                                        "shared": false,
+                                        "valueType": 7
+                                    },
+                                    "shared": false,
+                                    "valueType": 6
+                                },
+                                "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
+                            }
+                        },
+                        "position": {
+                            "endCol": 21,
+                            "endLine": 19,
+                            "startCol": 5,
+                            "startLine": 19
+                        }
+                    },
+                    "position": {
+                        "endCol": 22,
+                        "endLine": 19,
+                        "startCol": 5,
+                        "startLine": 19
+                    }
+                }
+            ],
+            "condition": {
+                "astNodeName": "OrNode",
+                "left": {
+                    "astNodeName": "OrNode",
+                    "left": {
+                        "astNodeName": "OrNode",
+                        "left": {
+                            "astNodeName": "NumericComparisonExpressionNode",
+                            "comparisonType": "LESS_THAN",
+                            "left": {
+                                "astNodeName": "IdentifierNode",
+                                "name": "n",
+                                "position": {
+                                    "endCol": 7,
+                                    "endLine": 18,
+                                    "startCol": 6,
+                                    "startLine": 18
+                                },
+                                "symbol": {
+                                    "declaredAt": {
+                                        "endCol": 13,
+                                        "endLine": 7,
+                                        "startCol": 1,
+                                        "startLine": 7
+                                    },
+                                    "kind": 0,
+                                    "name": "n",
+                                    "type": {
+                                        "shared": false,
+                                        "valueType": 1
+                                    },
+                                    "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                                }
+                            },
+                            "position": {
+                                "endCol": 11,
+                                "endLine": 18,
+                                "startCol": 6,
+                                "startLine": 18
+                            },
+                            "right": {
+                                "astNodeName": "NumberLiteralExpressionNode",
+                                "position": {
+                                    "endCol": 11,
+                                    "endLine": 18,
+                                    "startCol": 10,
+                                    "startLine": 18
+                                },
+                                "value": 1.0
+                            }
+                        },
+                        "position": {
+                            "endCol": 20,
+                            "endLine": 18,
+                            "startCol": 6,
+                            "startLine": 18
+                        },
+                        "right": {
+                            "astNodeName": "NumericComparisonExpressionNode",
+                            "comparisonType": "GREATER_THAN",
+                            "left": {
+                                "astNodeName": "IdentifierNode",
+                                "name": "n",
+                                "position": {
+                                    "endCol": 16,
+                                    "endLine": 18,
+                                    "startCol": 15,
+                                    "startLine": 18
+                                },
+                                "symbol": {
+                                    "declaredAt": {
+                                        "endCol": 13,
+                                        "endLine": 7,
+                                        "startCol": 1,
+                                        "startLine": 7
+                                    },
+                                    "kind": 0,
+                                    "name": "n",
+                                    "type": {
+                                        "shared": false,
+                                        "valueType": 1
+                                    },
+                                    "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                                }
+                            },
+                            "position": {
+                                "endCol": 20,
+                                "endLine": 18,
+                                "startCol": 15,
+                                "startLine": 18
+                            },
+                            "right": {
+                                "astNodeName": "NumberLiteralExpressionNode",
+                                "position": {
+                                    "endCol": 20,
+                                    "endLine": 18,
+                                    "startCol": 19,
+                                    "startLine": 18
+                                },
+                                "value": 2.0
+                            }
+                        }
+                    },
+                    "position": {
+                        "endCol": 30,
+                        "endLine": 18,
+                        "startCol": 6,
+                        "startLine": 18
+                    },
+                    "right": {
+                        "astNodeName": "NumericComparisonExpressionNode",
+                        "comparisonType": "LESS_THAN_OR_EQUAL",
+                        "left": {
+                            "astNodeName": "IdentifierNode",
+                            "name": "n",
+                            "position": {
+                                "endCol": 25,
+                                "endLine": 18,
+                                "startCol": 24,
+                                "startLine": 18
+                            },
+                            "symbol": {
+                                "declaredAt": {
+                                    "endCol": 13,
+                                    "endLine": 7,
+                                    "startCol": 1,
+                                    "startLine": 7
+                                },
+                                "kind": 0,
+                                "name": "n",
+                                "type": {
+                                    "shared": false,
+                                    "valueType": 1
+                                },
+                                "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                            }
+                        },
+                        "position": {
+                            "endCol": 30,
+                            "endLine": 18,
+                            "startCol": 24,
+                            "startLine": 18
+                        },
+                        "right": {
+                            "astNodeName": "NumberLiteralExpressionNode",
+                            "position": {
+                                "endCol": 30,
+                                "endLine": 18,
+                                "startCol": 29,
+                                "startLine": 18
+                            },
+                            "value": 3.0
+                        }
+                    }
+                },
+                "position": {
+                    "endCol": 40,
+                    "endLine": 18,
+                    "startCol": 6,
+                    "startLine": 18
+                },
+                "right": {
+                    "astNodeName": "NumericComparisonExpressionNode",
+                    "comparisonType": "GREATER_THAN_OR_EQUAL",
+                    "left": {
+                        "astNodeName": "IdentifierNode",
+                        "name": "n",
+                        "position": {
+                            "endCol": 35,
+                            "endLine": 18,
+                            "startCol": 34,
+                            "startLine": 18
+                        },
+                        "symbol": {
+                            "declaredAt": {
+                                "endCol": 13,
+                                "endLine": 7,
+                                "startCol": 1,
+                                "startLine": 7
+                            },
+                            "kind": 0,
+                            "name": "n",
+                            "type": {
+                                "shared": false,
+                                "valueType": 1
+                            },
+                            "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                        }
+                    },
+                    "position": {
+                        "endCol": 40,
+                        "endLine": 18,
+                        "startCol": 34,
+                        "startLine": 18
+                    },
+                    "right": {
+                        "astNodeName": "NumberLiteralExpressionNode",
+                        "position": {
+                            "endCol": 40,
+                            "endLine": 18,
+                            "startCol": 39,
+                            "startLine": 18
+                        },
+                        "value": 4.0
+                    }
+                }
+            },
+            "position": {
+                "endCol": 2,
+                "endLine": 20,
+                "startCol": 1,
+                "startLine": 18
+            }
+        },
+        {
             "astNodeName": "WithStatement",
             "body": [
                 {

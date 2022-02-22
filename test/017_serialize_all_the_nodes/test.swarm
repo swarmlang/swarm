@@ -15,6 +15,10 @@ enumerate e2 as aBool {
     bool b = aBool;
 }
 
+if ( n < 1 || n > 2 || n <= 3 || n >= 4 ) {
+    log("body here");
+}
+
 with fileContents("input" . ".txt") as aString {
     s = aString;
 }
