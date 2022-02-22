@@ -1,4 +1,4 @@
 with fileContents("test.json") as contents {
-    zero();
+    min(0, 1);
 }
 

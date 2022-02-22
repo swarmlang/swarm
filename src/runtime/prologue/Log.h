@@ -8,9 +8,9 @@ namespace swarmc {
 namespace Runtime {
 namespace Prologue {
 
-    class LogFunction final : public IPrologueFunction {
+    class Log final : public IPrologueFunction {
     public:
-        LogFunction() : IPrologueFunction("log") {}
+        Log() : IPrologueFunction("log") {}
 
         ExpressionNode* call(ExpressionList *args) override {
             auto str = (StringLiteralExpressionNode*) args->at(0);
@@ -26,9 +26,9 @@ namespace Prologue {
     };
 
 
-    class LogErrorFunction final : public IPrologueFunction {
+    class LogError final : public IPrologueFunction {
     public:
-        LogErrorFunction() : IPrologueFunction("logError") {}
+        LogError() : IPrologueFunction("logError") {}
 
         ExpressionNode* call(ExpressionList *args) override {
             auto str = (StringLiteralExpressionNode*) args->at(0);

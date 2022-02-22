@@ -2,6 +2,7 @@
 #define SWARM_IPROLOGUEFUNCTION_H
 
 #include "../../shared/IStringable.h"
+#include "../../lang/SymbolTable.h"
 #include "../../lang/AST.h"
 
 using namespace swarmc::Lang;
@@ -12,6 +13,10 @@ namespace Prologue {
 
     class IPrologueFunction : public IStringable {
     public:
+        static IPrologueFunction* resolveByName(std::string);
+
+        static void buildScope(Lang::ScopeTable*);
+
         IPrologueFunction(std::string name) : _name(name) {}
 
         virtual bool validateCall(const ExpressionList* args) const {
@@ -38,6 +43,10 @@ namespace Prologue {
 
         virtual std::string toString() const {
             return "Prologue<" + _name + ">";
+        }
+
+        virtual Position* position() const {
+            return getNewPosition();
         }
     protected:
         std::string _name;

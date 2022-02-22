@@ -1,6 +1,8 @@
 ProgramNode<#body: 1>
   WithStatement<r: CallExpressionNode<id: fileContents, #args: 1>, as: contents>
-    ExpressionStatementNode<CallExpressionNode<id: zero, #args: 0>>
-      CallExpressionNode<id: zero, #args: 0>
+    ExpressionStatementNode<CallExpressionNode<id: min, #args: 2>>
+      CallExpressionNode<id: min, #args: 2>
+        NumberLiteralExpressionNode<#value: 0.000000>
+        NumberLiteralExpressionNode<#value: 1.000000>
 [32m[SUCCESS] [0mParsed input program.
 [0m

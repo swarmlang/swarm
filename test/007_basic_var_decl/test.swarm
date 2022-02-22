@@ -1,5 +1,5 @@
 string a = "";
-number b = zero();
+number b = min(0, 0);
 bool c = true;
 enumerable<bool> d = [true];
 map<number> e = {abc: 123};

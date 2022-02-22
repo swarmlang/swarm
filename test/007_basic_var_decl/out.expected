@@ -4,7 +4,9 @@ ProgramNode<#body: 6>
     StringLiteralExpressionNode<#value: ''>
   VariableDeclarationNode<name: b>
     PrimitiveTypeNode<of: TNUM, shared: false>
-    CallExpressionNode<id: zero, #args: 0>
+    CallExpressionNode<id: min, #args: 2>
+      NumberLiteralExpressionNode<#value: 0.000000>
+      NumberLiteralExpressionNode<#value: 0.000000>
   VariableDeclarationNode<name: c>
     PrimitiveTypeNode<of: TBOOL, shared: false>
     BoolLiteralNode<of: 1>
