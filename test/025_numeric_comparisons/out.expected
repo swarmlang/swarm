@@ -1,0 +1,25 @@
+ProgramNode<#body: 6>
+  VariableDeclarationNode<name: i>
+    PrimitiveTypeNode<of: TNUM, shared: false>
+    NumberLiteralExpressionNode<#value: 0.000000>
+  VariableDeclarationNode<name: j>
+    PrimitiveTypeNode<of: TNUM, shared: false>
+    NumberLiteralExpressionNode<#value: 2.000000>
+  IfStatement<f: if NumericComparisonExpressionNode<type: LESS_THAN> then, #body: 1>
+    ExpressionStatementNode<CallExpressionNode<id: log, #args: 1>>
+      CallExpressionNode<id: log, #args: 1>
+        StringLiteralExpressionNode<#value: 'i < j'>
+  IfStatement<f: if NumericComparisonExpressionNode<type: GREATER_THAN> then, #body: 1>
+    ExpressionStatementNode<CallExpressionNode<id: log, #args: 1>>
+      CallExpressionNode<id: log, #args: 1>
+        StringLiteralExpressionNode<#value: 'i > j'>
+  WhileStatement<w: while NumericComparisonExpressionNode<type: GREATER_THAN_OR_EQUAL> then, #body: 1>
+    ExpressionStatementNode<CallExpressionNode<id: log, #args: 1>>
+      CallExpressionNode<id: log, #args: 1>
+        StringLiteralExpressionNode<#value: 'while i >= j'>
+  WhileStatement<w: while NotNode<> then, #body: 1>
+    ExpressionStatementNode<CallExpressionNode<id: log, #args: 1>>
+      CallExpressionNode<id: log, #args: 1>
+        StringLiteralExpressionNode<#value: 'while ! i <= j'>
+[32m[SUCCESS] [0mParsed input program.
+[0m

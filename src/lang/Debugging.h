@@ -60,6 +60,8 @@ namespace Lang {
             if (kind == Parser::token::MODULUS) return "MODULUS";
             if (kind == Parser::token::POWER) return "POWER";
             if (kind == Parser::token::CAT) return "CAT";
+            if (kind == Parser::token::LARROWEQUALS) return "LARROWEQUALS";
+            if (kind == Parser::token::RARROWEQUALS) return "RARROWEQUALS";
             
             return "UNKNOWN";
         }

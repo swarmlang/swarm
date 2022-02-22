@@ -1,0 +1,18 @@
+number i = 0;
+number j = 2;
+
+if ( i < j ) {
+	log("i < j");
+}
+
+if ( i > j ) {
+	log("i > j");
+}
+
+while ( i >= j ) {
+	log("while i >= j");
+}
+
+while ( !(i <= j) ) {
+	log("while ! i <= j");
+}

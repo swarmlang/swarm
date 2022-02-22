@@ -276,6 +276,20 @@ namespace Serialization {
             return new ConcatenateNode(pos, (ExpressionNode*) left, (ExpressionNode*) right);
         }
 
+        virtual NumericComparisonExpressionNode* walkNumericComparisonExpressionNode(nlohmann::json leftjson, nlohmann::json rightjson, std::string comparisonType, Position* pos) {
+            ASTNode* left = walk(leftjson);
+            ASTNode* right = walk(rightjson);
+            assert(left->isExpression());
+            assert(right->isExpression());
+
+            auto compType = NumberComparisonType::LESS_THAN;
+            if ( comparisonType == "LESS_THAN_OR_EQUAL" ) compType = Lang::NumberComparisonType::LESS_THAN_OR_EQUAL;
+            if ( comparisonType == "GREATER_THAN" ) compType = Lang::NumberComparisonType::GREATER_THAN;
+            if ( comparisonType == "GREATER_THAN_OR_EQUAL" ) compType = Lang::NumberComparisonType::GREATER_THAN_OR_EQUAL;
+
+            return new NumericComparisonExpressionNode(pos, compType, (ExpressionNode*) left, (ExpressionNode*) right);
+        }
+
         virtual NegativeExpressionNode* walkNegativeExpressionNode(nlohmann::json expjson, Position* pos) {
             ASTNode* exp = walk(expjson);
             assert(exp->isExpression());
@@ -462,6 +476,7 @@ namespace Serialization {
             else if ( name == "AssignExpressionNode" ) return walkAssignExpressionNode(prog["dest"],prog["value"],pos);
             else if ( name == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode(prog["value"],pos);
             else if ( name == "UnitNode" ) return walkUnitNode(pos);
+            else if ( name == "NumericComparisonExpressionNode" ) return walkNumericComparisonExpressionNode(prog["left"], prog["right"], prog["comparisonType"], pos);
             assert(false);
         }
     

@@ -85,6 +85,14 @@ shared {
 	return makeBareToken(TokenKind::RARROW);
 }
 
+"<=" {
+	return makeBareToken(TokenKind::LARROWEQUALS);
+}
+
+">=" {
+	return makeBareToken(TokenKind::RARROWEQUALS);
+}
+
 "[" {
 	return makeBareToken(TokenKind::LBRACKET);
 }

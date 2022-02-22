@@ -48,7 +48,7 @@ namespace Lang {
 
         // logError(string)
         FunctionType* logErrorType = FunctionType::of(primitiveUnit, false);
-        logType->addArgument(primitiveString);
+        logErrorType->addArgument(primitiveString);
         ProloguePosition* logErrorPosition = new ProloguePosition("logError");
         prologueScope->addFunction("logError", logErrorType, logErrorPosition);
 

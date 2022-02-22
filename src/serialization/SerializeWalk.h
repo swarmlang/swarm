@@ -254,6 +254,16 @@ namespace Serialization {
             return obj;
         }
 
+        virtual nlohmann::json* walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
+            nlohmann::json* obj = getJSON();
+
+            (*obj)["left"] = *walk(node->left());
+            (*obj)["right"] = *walk(node->right());
+            (*obj)["comparisonType"] = node->comparisonTypeToString();
+
+            return obj;
+        }
+
         virtual nlohmann::json* walkConcatenateNode(ConcatenateNode* node) {
             nlohmann::json* obj = getJSON();
 

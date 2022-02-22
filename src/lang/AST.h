@@ -889,6 +889,54 @@ namespace Lang {
     };
 
 
+    enum class NumberComparisonType {
+        LESS_THAN,
+        LESS_THAN_OR_EQUAL,
+        GREATER_THAN,
+        GREATER_THAN_OR_EQUAL,
+    };
+
+
+    /** Node type for >, >=, <, <= numeric comparisons. */
+    class NumericComparisonExpressionNode final : public PureBinaryExpressionNode {
+    public:
+        NumericComparisonExpressionNode(Position* pos, NumberComparisonType comparisonType, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right), _comparisonType(comparisonType) {}
+
+        const Type* leftType() const override {
+            return PrimitiveType::of(ValueType::TNUM);
+        }
+
+        const Type* rightType() const override {
+            return PrimitiveType::of(ValueType::TNUM);
+        }
+
+        const Type* resultType() const override {
+            return PrimitiveType::of(ValueType::TBOOL);
+        }
+
+        PureBinaryExpressionNode* copy() const override {
+            return new NumericComparisonExpressionNode(position()->copy(), _comparisonType, _left->copy(), _right->copy());
+        }
+
+        std::string getName() const {
+            return "NumericComparisonExpressionNode";
+        }
+
+        std::string toString() const {
+            return "NumericComparisonExpressionNode<type: " + comparisonTypeToString() + ">";
+        }
+
+        std::string comparisonTypeToString() const {
+            if ( _comparisonType == NumberComparisonType::LESS_THAN ) return "LESS_THAN";
+            if ( _comparisonType == NumberComparisonType::LESS_THAN_OR_EQUAL ) return "LESS_THAN_OR_EQUAL";
+            if ( _comparisonType == NumberComparisonType::GREATER_THAN ) return "GREATER_THAN";
+            return "GREATER_THAN_OR_EQUAL";
+        }
+    protected:
+        NumberComparisonType _comparisonType;
+    };
+
+
     /** AST node referencing inequality comparison of two expressions. */
     class NotEqualsNode final : public BinaryExpressionNode {
     public:

@@ -81,6 +81,8 @@
 %token <transToken>      RBRACKET
 %token <transToken>      LARROW
 %token <transToken>      RARROW
+%token <transToken>      LARROWEQUALS
+%token <transToken>      RARROWEQUALS
 %token <transToken>      SEMICOLON
 %token <transToken>      COLON
 %token <transToken>      COMMA
@@ -387,6 +389,26 @@ expression :
     | expression AND expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AndNode(pos, $1, $3);
+    }
+
+    | term LARROW term {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::LESS_THAN, $1, $3);
+    }
+
+    | term RARROW term {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::GREATER_THAN, $1, $3);
+    }
+
+    | term LARROWEQUALS term {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::LESS_THAN_OR_EQUAL, $1, $3);
+    }
+
+    | term RARROWEQUALS term {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::GREATER_THAN_OR_EQUAL, $1, $3);
     }
 
     | SUBTRACT term {

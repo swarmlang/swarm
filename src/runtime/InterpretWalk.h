@@ -263,6 +263,10 @@ namespace Runtime {
             return new StringLiteralExpressionNode(nullptr, leftStr->value() + rightStr->value());
         }
 
+        virtual ASTNode* walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
+            return nullptr;  // TODO implement this
+        }
+
         virtual ASTNode* walkNotNode(NotNode* node) {
             ASTNode* val = walk(node);
             assert(val->getName() == "BooleanLiteralExpressionNode");
