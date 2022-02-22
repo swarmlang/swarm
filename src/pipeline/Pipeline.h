@@ -11,6 +11,7 @@
 #include "../lang/AST.h"
 #include "../serialization/SerializeWalk.h"
 #include "../serialization/DeSerializeWalk.h"
+#include "../runtime/InterpretWalk.h"
 
 namespace swarmc {
 
@@ -97,6 +98,12 @@ namespace swarmc {
             Serialization::DeSerializeWalk walk;
             Lang::ASTNode* tree = walk.deserialize(_input);
             tree->printTree(out);
+        }
+
+        Lang::ASTNode* targetEvaluateLocally() {
+            targetASTSymbolicTyped();
+            Runtime::InterpretWalk interp;
+            return interp.walk(_root);
         }
 
     protected:

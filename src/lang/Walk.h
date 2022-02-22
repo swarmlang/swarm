@@ -52,6 +52,7 @@ namespace Lang {
             if ( node->getName() == "AssignExpressionNode" ) return walkAssignExpressionNode((AssignExpressionNode*) node);
             if ( node->getName() == "NumberLiteralExpressionNode" ) return walkNumberLiteralExpressionNode((NumberLiteralExpressionNode*) node);
             if ( node->getName() == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode((IntegerLiteralExpressionNode*) node);
+            if ( node->getName() == "UnitNode" ) return walkUnitNode((UnitNode*) node);
 
             throw Errors::SwarmError("Invalid node type: " + node->getName());
         }
@@ -92,6 +93,7 @@ namespace Lang {
         virtual TReturn walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) = 0;
         virtual TReturn walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) = 0;
         virtual TReturn walkAssignExpressionNode(AssignExpressionNode* node) = 0;
+        virtual TReturn walkUnitNode(UnitNode* node) = 0;
         virtual TReturn walkIntegerLiteralExpressionNode(IntegerLiteralExpressionNode* node) {
             return walkNumberLiteralExpressionNode(node);
         }

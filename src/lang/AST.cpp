@@ -14,6 +14,15 @@
 namespace swarmc {
 namespace Lang {
 
+    ProgramNode* ProgramNode::copy() const  {
+        auto other = new ProgramNode;
+        for ( auto stmt : *_body ) {
+            other->pushStatement(stmt->copy());
+        }
+
+        return other;
+    }
+
     /************* VALUE ACCESSORS ********/
     void IdentifierNode::setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) {
         assert(value->isValue());

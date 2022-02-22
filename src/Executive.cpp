@@ -63,6 +63,13 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( flagInterpretLocally ) {
+        int interpretResult = interpretLocally();
+        if ( interpretResult != 0 ) {
+            result = interpretResult;
+        }
+    }
+
     delete console;
     if ( _input != nullptr ) delete _input;
     return result;
@@ -146,7 +153,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             skipOne = true;
         } else if ( arg == "--run-test" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --run-test. Pass --hlp for more info.");
+                console->error("Missing required parameter for --run-test. Pass --help for more info.");
                 failed = true;
                 continue;
             }
@@ -159,6 +166,19 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagRunTestName = name;
             skipOne = true;
             noInputFile = true;
+        } else if ( arg == "--locally" ) {
+            flagInterpretLocally = true;
+            console->debug("Will interpret locally.");
+        } else if ( arg == "--output-to" ) {
+            if ( i+1 >= params.size() ) {
+                console->error("Missing required parameter for --run-test. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            std::string name = params.at(i+1);
+            console->debug("Will output results to: " + name);
+            outputResultTo = name;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -205,33 +225,44 @@ void Executive::printUsage() {
         ->line("Show usage information and exit.")
         ->line();
 
-    console->bold()->print("  --dbg-output-tokens-to <OUTFILE>  :  ", true)
-        ->line("Lex the input and output the tokens to the specified file.")
-        ->line("                                       If the output file is \"--\", will write to stdout.")
+    console->bold()->print("  --locally  :  ", true)
+        ->line("Evaluate the given Swarm program without connecting to remote executors.")
         ->line();
 
-    console->bold()->print("  --dbg-parse  :  ", true)
-        ->line("Lex and parse the input, then stop.")
-        ->line();
-    
-    console->bold()->print("  --dbg-output-parse-to <OUTFILE>  :  ", true)
-        ->line("Parse the input and output the AST to the specified file.")
-        ->line("                                      If the output file is \"--\", will write to stdout.")
-        ->line();
-
-    console->bold()->print("  --dbg-output-serialize-to <OUTFILE>  :  ", true)
-        ->line("Parse the input and output the serialized AST to the specified file.")
-        ->line("                                      If the output file is \"--\", will write to stdout.")
-        ->line();
-    
-    console->bold()->print("  --dbg-output-deserialize-to <OUTFILE>  :  ", true)
-        ->line("Parse the input and output the deserialized AST to the specified file.")
-        ->line("                                      If the output file is \"--\", will write to stdout.")
+    console->bold()->print("  --output-to <OUTFILE>  :  ", true)
+        ->line("Print the result of the evaluation to the given file.")
+        ->line("                                       If the output file is \"--\", will write to stdout (default).")
         ->line();
 
     console->bold()->print("  --run-test <NAME>  :  ", true)
         ->line("Run the C++-based test with the given name.")
         ->line();
+
+    console->debug();
+        console->bold()->print("  --dbg-output-tokens-to <OUTFILE>  :  ", true)
+            ->line("Lex the input and output the tokens to the specified file.")
+            ->line("                                       If the output file is \"--\", will write to stdout.")
+            ->line();
+
+        console->bold()->print("  --dbg-parse  :  ", true)
+            ->line("Lex and parse the input, then stop.")
+            ->line();
+
+        console->bold()->print("  --dbg-output-parse-to <OUTFILE>  :  ", true)
+            ->line("Parse the input and output the AST to the specified file.")
+            ->line("                                      If the output file is \"--\", will write to stdout.")
+            ->line();
+
+        console->bold()->print("  --dbg-output-serialize-to <OUTFILE>  :  ", true)
+            ->line("Parse the input and output the serialized AST to the specified file.")
+            ->line("                                      If the output file is \"--\", will write to stdout.")
+            ->line();
+
+        console->bold()->print("  --dbg-output-deserialize-to <OUTFILE>  :  ", true)
+            ->line("Parse the input and output the deserialized AST to the specified file.")
+            ->line("                                      If the output file is \"--\", will write to stdout.")
+            ->line();
+    console->end();
 
     // Output in debugging mode only:
     console->debug()
@@ -359,5 +390,11 @@ int Executive::runTest() {
     }
 
     console->error("Test failed: " + flagRunTestName);
+    return 1;
+}
+
+int Executive::interpretLocally() {
+    swarmc::Pipeline pipeline(_input);
+    swarmc::Lang::ASTNode* result = pipeline.targetEvaluateLocally();
     return 1;
 }

@@ -41,6 +41,8 @@ namespace Lang {
         /** Implements IStringable. */
         virtual std::string toString() const = 0;
 
+        virtual ASTNode* copy() const = 0;
+
         /** Print this node and its subtree. */
         virtual void printTree(std::ostream& out, std::string prefix = "") const = 0;
 
@@ -141,6 +143,8 @@ namespace Lang {
             return typeAnalysis(types);
         }
 
+        virtual ProgramNode* copy() const override;
+
     protected:
         /** The statements that comprise the program. */
         StatementList* _body;
@@ -157,6 +161,7 @@ namespace Lang {
             return true;
         }
 
+        virtual StatementNode* copy() const override = 0;
     };
 
 
@@ -173,6 +178,36 @@ namespace Lang {
         virtual bool isExpression() const override {
             return true;
         }
+
+        virtual ExpressionNode* copy() const override = 0;
+
+        virtual const Type* type() const = 0;
+    };
+
+
+    /** Non-source node representing the UNIT type instance. */
+    class UnitNode final : public ExpressionNode {
+    public:
+        UnitNode(Position* pos) : ExpressionNode(pos) {}
+
+        virtual bool typeAnalysis(TypeTable*) override { return true; }
+        virtual bool nameAnalysis(SymbolTable*) override { return true; }
+
+        virtual UnitNode* copy() const override {
+            return new UnitNode(position()->copy());
+        }
+
+        virtual const Type* type() const {
+            return PrimitiveType::of(ValueType::TUNIT);
+        }
+
+        virtual std::string toString() const {
+            return "UnitNode<>";
+        }
+
+        virtual std::string getName() const {
+            return "UnitNode";
+        }
     };
 
 
@@ -186,6 +221,7 @@ namespace Lang {
     public:
         StatementExpressionNode(Position* pos) : ExpressionNode(pos) {}
         virtual ~StatementExpressionNode() {}
+        virtual StatementExpressionNode* copy() const override = 0;
     };
 
 
@@ -216,6 +252,10 @@ namespace Lang {
 
         virtual bool typeAnalysis(TypeTable* types) override;
 
+        virtual ExpressionStatementNode* copy() const override {
+            return new ExpressionStatementNode(position()->copy(), _exp->copy());
+        }
+
     protected:
         StatementExpressionNode* _exp;
     };
@@ -236,6 +276,8 @@ namespace Lang {
         virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) = 0;
 
         virtual bool shared() const = 0;
+
+        virtual LValNode* copy() const override = 0;
     };
 
 
@@ -275,6 +317,16 @@ namespace Lang {
                 throw Errors::SwarmError("Attempt to get sharedness of symbolless identifier: " + _name);
             }
             return _symbol->type()->shared();
+        }
+
+        virtual IdentifierNode* copy() const override {
+            auto other = new IdentifierNode(position()->copy(), _name);
+            other->_symbol = _symbol;
+            return other;
+        }
+
+        virtual const Type* type() const override {
+            return _symbol->type();
         }
 
     protected:
@@ -319,6 +371,16 @@ namespace Lang {
         virtual bool shared() const override {
             return _path->shared();
         }
+
+        virtual MapAccessNode* copy() const override {
+            return new MapAccessNode(position()->copy(), _path->copy(), _end->copy());
+        }
+
+        virtual const Type* type() const override {
+            auto pathType = _path->type();
+            assert(pathType->isGenericType());
+            return ((GenericType*) pathType)->concrete();
+        }
     private:
         LValNode* _path;
         IdentifierNode* _end;
@@ -344,6 +406,8 @@ namespace Lang {
         }
 
         virtual void setShared(bool shared) = 0;
+
+        virtual TypeNode* copy() const override = 0;
     };
 
 
@@ -372,6 +436,10 @@ namespace Lang {
             _t = PrimitiveType::of(_t->valueType(), shared);
         }
 
+        virtual PrimitiveTypeNode* copy() const override {
+            return new PrimitiveTypeNode(position()->copy(), _t);
+        }
+
     protected:
         PrimitiveType* _t;
     };
@@ -387,6 +455,8 @@ namespace Lang {
             _shared = shared;    
             _concrete->setShared(shared);  
         }
+
+        virtual GenericTypeNode* copy() const override = 0;
 
     protected:
         TypeNode* _concrete;
@@ -414,6 +484,10 @@ namespace Lang {
                 << ", shared: " << (type()->shared() ? "true>" : "false>");
             return s.str();
         }
+
+        virtual EnumerableTypeNode* copy() const override {
+            return new EnumerableTypeNode(position()->copy(), _concrete->copy());
+        }
     };
 
 
@@ -436,6 +510,10 @@ namespace Lang {
             s << "MapTypeNode<of: " << _concrete->toString() 
                 << ", shared: " << (type()->shared() ? "true>" : "false>");
             return s.str();
+        }
+
+        virtual MapTypeNode* copy() const override {
+            return new MapTypeNode(position()->copy(), _concrete->copy());
         }
     };
 
@@ -466,6 +544,14 @@ namespace Lang {
             return true;
         }
 
+        virtual BooleanLiteralExpressionNode* copy() const override {
+            return new BooleanLiteralExpressionNode(position()->copy(), _val);
+        }
+
+        virtual const Type* type() const override {
+            return PrimitiveType::of(ValueType::TBOOL);
+        }
+
     private:
         const bool _val;
     };
@@ -476,6 +562,7 @@ namespace Lang {
     public:
         DeclarationNode(Position* pos) : StatementNode(pos) {}
         virtual ~DeclarationNode() {}
+        virtual DeclarationNode* copy() const override = 0;
     };
 
 
@@ -519,6 +606,15 @@ namespace Lang {
             return _type;
         }
 
+        virtual VariableDeclarationNode* copy() const override {
+            return new VariableDeclarationNode(
+                position()->copy(),
+                _type->copy(),
+                _id->copy(),
+                _value->copy()
+            );
+        }
+
     protected:
         TypeNode* _type;
         IdentifierNode* _id;
@@ -552,6 +648,14 @@ namespace Lang {
 
         virtual ExpressionNode* value() const {
             return _value;
+        }
+
+        virtual AssignExpressionNode* copy() const override {
+            return new AssignExpressionNode(position()->copy(), _dest->copy(), _value->copy());
+        }
+
+        virtual const Type* type() const override {
+            return _value->type();
         }
 
     protected:
@@ -588,6 +692,21 @@ namespace Lang {
             return _args;
         }
 
+        virtual CallExpressionNode* copy() const override {
+            auto args = new std::vector<ExpressionNode*>;
+            for ( auto arg : *_args ) {
+                args->push_back(arg->copy());
+            }
+
+            return new CallExpressionNode(position()->copy(), _id->copy(), args);
+        }
+
+        virtual const Type* type() const override {
+            auto fnType = _id->type();
+            assert(fnType->isFunctionType());
+            return ((FunctionType*) fnType)->returnType();
+        }
+
     protected:
         IdentifierNode* _id;
         std::vector<ExpressionNode*>* _args;
@@ -611,6 +730,8 @@ namespace Lang {
         ExpressionNode* right() const {
             return _right;
         }
+
+        virtual BinaryExpressionNode* copy() const override = 0;
     protected:
         ExpressionNode* _left;
         ExpressionNode* _right;
@@ -631,6 +752,11 @@ namespace Lang {
 
         virtual const Type* resultType() const = 0;
 
+        virtual PureBinaryExpressionNode* copy() const override = 0;
+
+        virtual const Type* type() const override {
+            return resultType();
+        }
     };
 
 
@@ -651,6 +777,8 @@ namespace Lang {
         virtual const Type* resultType() const override {
             return PrimitiveType::of(ValueType::TBOOL, false);
         }
+
+        virtual PureBooleanBinaryExpressionNode* copy() const override = 0;
     };
 
 
@@ -671,6 +799,8 @@ namespace Lang {
         virtual const Type* resultType() const override {
             return PrimitiveType::of(ValueType::TNUM, false);
         }
+
+        virtual PureNumberBinaryExpressionNode* copy() const override = 0;
     };
 
 
@@ -691,6 +821,8 @@ namespace Lang {
         virtual const Type* resultType() const override {
             return PrimitiveType::of(ValueType::TSTRING, false);
         }
+
+        virtual PureStringBinaryExpressionNode* copy() const override = 0;
     };
 
 
@@ -706,6 +838,10 @@ namespace Lang {
         virtual std::string toString() const override {
             return "AndNode<>";
         }
+
+        virtual AndNode* copy() const override {
+            return new AndNode(position()->copy(), _left->copy(), _right->copy());
+        }
     };
 
 
@@ -720,6 +856,10 @@ namespace Lang {
 
         virtual std::string toString() const override {
             return "OrNode<>";
+        }
+
+        virtual OrNode* copy() const override {
+            return new OrNode(position()->copy(), _left->copy(), _right->copy());
         }
     };
 
@@ -738,6 +878,14 @@ namespace Lang {
         virtual std::string toString() const override {
             return "EqualsNode<>";
         }
+
+        virtual EqualsNode* copy() const override {
+            return new EqualsNode(position()->copy(), _left->copy(), _right->copy());
+        }
+
+        virtual const Type* type() const override {
+            return PrimitiveType::of(ValueType::TBOOL);
+        }
     };
 
 
@@ -755,6 +903,14 @@ namespace Lang {
         virtual std::string toString() const override {
             return "NotEqualsNode<>";
         }
+
+        virtual NotEqualsNode* copy() const override {
+            return new NotEqualsNode(position()->copy(), _left->copy(), _right->copy());
+        }
+
+        virtual const Type* type() const override {
+            return PrimitiveType::of(ValueType::TBOOL);
+        }
     };
 
     /** AST node referencing addition of two values. */
@@ -768,6 +924,10 @@ namespace Lang {
 
         virtual std::string toString() const override {
             return "AddNode<>";
+        }
+
+        virtual AddNode* copy() const override {
+            return new AddNode(position()->copy(), _left->copy(), _right->copy());
         }
     };
 
@@ -785,6 +945,10 @@ namespace Lang {
         virtual std::string toString() const override {
             return "AddAssignExpressionNode<lval: " + _dest->toString() + ">";
         }
+
+        virtual AddAssignExpressionNode* copy() const override {
+            return new AddAssignExpressionNode(position()->copy(), _dest->copy(), _value->copy());
+        }
     };
 
     /** AST node referencing subtraction of two values. */
@@ -798,6 +962,10 @@ namespace Lang {
 
         virtual std::string toString() const override {
             return "SubtractNode<>";
+        }
+
+        virtual SubtractNode* copy() const override {
+            return new SubtractNode(position()->copy(), _left->copy(), _right->copy());
         }
     };
 
@@ -813,6 +981,10 @@ namespace Lang {
 
         virtual std::string toString() const override {
             return "MultiplyNode<>";
+        }
+
+        virtual MultiplyNode* copy() const override {
+            return new MultiplyNode(position()->copy(), _left->copy(), _right->copy());
         }
     };
 
@@ -831,6 +1003,10 @@ namespace Lang {
         virtual std::string toString() const override {
             return "MultiplyAssignExpressionNode<lval: " + _dest->toString() + ">";
         }
+
+        virtual MultiplyAssignExpressionNode* copy() const override {
+            return new MultiplyAssignExpressionNode(position()->copy(), _dest->copy(), _value->copy());
+        }
     };
 
 
@@ -845,6 +1021,10 @@ namespace Lang {
 
         virtual std::string toString() const override {
             return "DivideNode<>";
+        }
+
+        virtual DivideNode* copy() const override {
+            return new DivideNode(position()->copy(), _left->copy(), _right->copy());
         }
     };
 
@@ -861,6 +1041,10 @@ namespace Lang {
         virtual std::string toString() const override {
             return "ModulusNode<>";
         }
+
+        virtual ModulusNode* copy() const override {
+            return new ModulusNode(position()->copy(), _left->copy(), _right->copy());
+        }
     };
 
 
@@ -876,6 +1060,10 @@ namespace Lang {
         virtual std::string toString() const override {
             return "PowerNode<>";
         }
+
+        virtual PowerNode* copy() const override {
+            return new PowerNode(position()->copy(), _left->copy(), _right->copy());
+        }
     };
 
 
@@ -890,6 +1078,10 @@ namespace Lang {
 
         virtual std::string toString() const override {
             return "ConcatenateNode<>";
+        }
+
+        virtual ConcatenateNode* copy() const override {
+            return new ConcatenateNode(position()->copy(), _left->copy(), _right->copy());
         }
     };
 
@@ -907,6 +1099,8 @@ namespace Lang {
         ExpressionNode* exp() const {
             return _exp;
         }
+
+        virtual UnaryExpressionNode* copy() const override = 0;
     protected:
         ExpressionNode* _exp;
     };
@@ -924,7 +1118,15 @@ namespace Lang {
             return "NegativeExpressionNode<>";
         }
 
-        virtual bool typeAnalysis(TypeTable* types) override;    
+        virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual NegativeExpressionNode* copy() const override {
+            return new NegativeExpressionNode(position()->copy(), _exp->copy());
+        }
+
+        virtual const Type* type() const override {
+            return PrimitiveType::of(ValueType::TNUM);
+        }
     };
 
     /** AST node referencing boolean negation of an expression. */
@@ -941,6 +1143,14 @@ namespace Lang {
         }
 
         virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual NotNode* copy() const override {
+            return new NotNode(position()->copy(), _exp->copy());
+        }
+
+        virtual const Type* type() const override {
+            return PrimitiveType::of(ValueType::TBOOL);
+        }
     };
 
 
@@ -1011,6 +1221,19 @@ namespace Lang {
             _actuals->pop_back();
         }
 
+        virtual EnumerationLiteralExpressionNode* copy() const override {
+            auto type = _disambiguationType == nullptr ? nullptr : _disambiguationType->copy();
+            auto actuals = new ExpressionList;
+            for ( auto actual : *_actuals ) actuals->push_back(actual->copy());
+
+            return new EnumerationLiteralExpressionNode(position()->copy(), actuals, type);
+        }
+
+        virtual const Type* type() const override {
+            assert(_disambiguationType != nullptr || !_actuals->empty());
+            return (_disambiguationType == nullptr) ? _actuals->at(0)->type() : _disambiguationType->type();
+        }
+
     protected:
         ExpressionList* _actuals;
         TypeNode* _disambiguationType = nullptr;
@@ -1052,6 +1275,14 @@ namespace Lang {
         StatementList* body() const {
             return _body;
         }
+
+        StatementList* copyBody() const {
+            auto other = new StatementList;
+            for ( auto stmt : *body() ) other->push_back(stmt->copy());
+            return other;
+        }
+
+        virtual BlockStatementNode* copy() const override = 0;
     protected:
         StatementList* _body;
     };
@@ -1083,6 +1314,12 @@ namespace Lang {
 
         IdentifierNode* local() const {
             return _local;
+        }
+
+        virtual EnumerationStatement* copy() const override {
+            auto other = new EnumerationStatement(position()->copy(), _enumerable->copy(), _local->copy(), _shared);
+            other->assumeAndReduceStatements(copyBody());
+            return other;
         }
     protected:
         IdentifierNode* _enumerable;
@@ -1118,6 +1355,12 @@ namespace Lang {
         IdentifierNode* local() const {
             return _local;
         }
+
+        virtual WithStatement* copy() const override {
+            auto other = new WithStatement(position()->copy(), _resource->copy(), _local->copy(), _shared);
+            other->assumeAndReduceStatements(copyBody());
+            return other;
+        }
     protected:
         ExpressionNode* _resource;
         IdentifierNode* _local;
@@ -1147,6 +1390,12 @@ namespace Lang {
         ExpressionNode* condition() const {
             return _condition;
         }
+
+        virtual IfStatement* copy() const override {
+            auto other = new IfStatement(position()->copy(), _condition->copy());
+            other->assumeAndReduceStatements(copyBody());
+            return other;
+        }
     protected:
         ExpressionNode* _condition;
     };
@@ -1173,6 +1422,12 @@ namespace Lang {
 
         ExpressionNode* condition() const {
             return _condition;
+        }
+
+        virtual WhileStatement* copy() const override {
+            auto other = new WhileStatement(position()->copy(), _condition->copy());
+            other->assumeAndReduceStatements(copyBody());
+            return other;
         }
     protected:
         ExpressionNode* _condition;
@@ -1216,6 +1471,10 @@ namespace Lang {
         void setValue(ExpressionNode* value) {
             assert(value->isValue());
             _value = value;
+        }
+
+        virtual MapStatementNode* copy() const override {
+            return new MapStatementNode(position()->copy(), _id->copy(), _value->copy());
         }
 
     protected:
@@ -1278,6 +1537,18 @@ namespace Lang {
             node->setValue(value);
         }
 
+        virtual MapNode* copy() const override {
+            auto type = _disambiguationType == nullptr ? nullptr : _disambiguationType->copy();
+            auto body = new MapBody;
+            for ( auto entry : *_body ) body->push_back(entry->copy());
+            return new MapNode(position()->copy(), body, type);
+        }
+
+        virtual const Type* type() const override {
+            assert(_disambiguationType != nullptr || !_body->empty());
+            return (_disambiguationType == nullptr) ? _body->at(0)->value()->type() : _disambiguationType->type();
+        }
+
     protected:
         MapBody* _body;
         TypeNode* _disambiguationType;
@@ -1318,6 +1589,14 @@ namespace Lang {
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
         virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual StringLiteralExpressionNode* copy() const override {
+            return new StringLiteralExpressionNode(position()->copy(), _value);
+        }
+
+        virtual const Type* type() const override {
+            return PrimitiveType::of(ValueType::TSTRING);
+        }
     protected:
         std::string _value;
     };
@@ -1347,6 +1626,14 @@ namespace Lang {
         virtual bool nameAnalysis(SymbolTable* symbols) override { return true; }
 
         virtual bool typeAnalysis(TypeTable* types) override;
+
+        virtual NumberLiteralExpressionNode* copy() const override {
+            return new NumberLiteralExpressionNode(position()->copy(), _value);
+        }
+
+        virtual const Type* type() const override {
+            return PrimitiveType::of(ValueType::TNUM);
+        }
     protected:
         double _value;
     };
@@ -1369,10 +1656,14 @@ namespace Lang {
         int value() const {
             return (size_t) _value;
         }
+
+        virtual IntegerLiteralExpressionNode* copy() const override {
+            return new IntegerLiteralExpressionNode(position()->copy(), _value);
+        }
     };
 
     /** Node for accessing data from an array */
-    class EnumerableAccessNode : public LValNode {
+    class EnumerableAccessNode final : public LValNode {
     public:
         EnumerableAccessNode(Position* pos, LValNode* path, IntegerLiteralExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
         virtual ~EnumerableAccessNode() {}
@@ -1407,6 +1698,16 @@ namespace Lang {
 
         virtual bool shared() const override {
             return _path->shared();
+        }
+
+        virtual EnumerableAccessNode* copy() const override {
+            return new EnumerableAccessNode(position()->copy(), _path->copy(), _index->copy());
+        }
+
+        virtual const Type* type() const override {
+            auto baseType = _path->type();
+            assert(baseType->isGenericType());
+            return ((GenericType*) baseType)->concrete();
         }
     private:
         LValNode* _path;

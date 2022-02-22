@@ -406,6 +406,10 @@ namespace Serialization {
             return new IntegerLiteralExpressionNode(pos, (int)value);
         }
 
+        virtual UnitNode* walkUnitNode(Position* pos) {
+            return new UnitNode(pos);
+        }
+
         std::string inputToString(std::istream& input) {
             std::string output, temp;
             while (input >> temp) output += temp;
@@ -457,6 +461,7 @@ namespace Serialization {
             else if ( name == "NumberLiteralExpressionNode" ) return walkNumberLiteralExpressionNode(prog["value"],pos);
             else if ( name == "AssignExpressionNode" ) return walkAssignExpressionNode(prog["dest"],prog["value"],pos);
             else if ( name == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode(prog["value"],pos);
+            else if ( name == "UnitNode" ) return walkUnitNode(pos);
             assert(false);
         }
     

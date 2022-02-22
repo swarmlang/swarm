@@ -13,10 +13,14 @@ using namespace swarmc::Lang;
 namespace swarmc {
 namespace Runtime {
 
-    class InterpretWalk : public Lang::Walk<ASTNode*> {
+    class InterpretWalk final : public Lang::Walk<ASTNode*> {
     public:
         InterpretWalk() : Lang::Walk<ASTNode*>() {
             _local = new LocalSymbolValueStore;
+        }
+
+        virtual std::string toString() const {
+            return "InterpretWalk<locals>";
         }
 
     protected:
@@ -68,12 +72,16 @@ namespace Runtime {
             ASTNode* rval = walk(node->value());
             assert(rval->isValue() && rval->isExpression());
 
+            // FIXME handle sharedness in copy
             auto value = (ExpressionNode*) rval;
             node->id()->setValue(_local, value);
-            return new VariableDeclarationNode(nullptr, node->typeNode(), node->id(), value, node->shared());
+            return new VariableDeclarationNode(nullptr, node->typeNode(), node->id(), value);
         }
 
-        virtual ASTNode* walkCallExpressionNode(CallExpressionNode* node) = 0;
+        virtual ASTNode* walkCallExpressionNode(CallExpressionNode* node) {
+            // FIXME implement this
+            return nullptr;
+        }
 
         virtual ASTNode* walkAndNode(AndNode* node) {
             ASTNode* left = walk(node->left());
@@ -101,9 +109,15 @@ namespace Runtime {
             return new BooleanLiteralExpressionNode(nullptr, leftBool->value() || rightBool->value());
         }
 
-        virtual ASTNode* walkEqualsNode(EqualsNode* node) = 0;
+        virtual ASTNode* walkEqualsNode(EqualsNode* node) {
+            // FIXME implement this
+            return new BooleanLiteralExpressionNode(nullptr, false);
+        }
 
-        virtual ASTNode* walkNotEqualsNode(NotEqualsNode* node) = 0;
+        virtual ASTNode* walkNotEqualsNode(NotEqualsNode* node) {
+            // FIXME implement this
+            return new BooleanLiteralExpressionNode(nullptr, false);
+        }
 
         virtual ASTNode* walkAddNode(AddNode* node) {
             ASTNode* left = walk(node->left());
@@ -121,15 +135,22 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
-            // get the value of the lval
-            // add to the value
-            // set the new value of the lval
-
+            // Get the current value of the lval
             auto lval = node->dest();
             auto initialNode = lval->getValue(_local);
             assert(initialNode->isValue() && initialNode->getName() == "NumberLiteralExpressionNode");
 
+            // Get the amount we're adding to it
             ASTNode* right = walk(node->value());
+            assert(right->isValue() && right->getName() == "NumberLiteralExpressionNode");
+            auto addValue = (NumberLiteralExpressionNode*) right;
+
+            // Perform the addition in Swarm
+            ASTNode* result = walk(new AddNode(nullptr, initialNode, addValue));
+            assert(result->isValue() && result->getName() == "NumberLiteralExpressionNode");
+
+            // Assign and return the result
+            return assign(lval, (NumberLiteralExpressionNode*) result);
         }
 
         virtual ASTNode* walkSubtractNode(SubtractNode* node) {
@@ -162,7 +183,24 @@ namespace Runtime {
             return new NumberLiteralExpressionNode(nullptr, leftNum->value() * rightNum->value());
         }
 
-        virtual ASTNode* walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) = 0;
+        virtual ASTNode* walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
+            // Get the current value of the lval
+            auto lval = node->dest();
+            auto initialNode = lval->getValue(_local);
+            assert(initialNode->isValue() && initialNode->getName() == "NumberLiteralExpressionNode");
+
+            // Get the amount we're adding to it
+            ASTNode* right = walk(node->value());
+            assert(right->isValue() && right->getName() == "NumberLiteralExpressionNode");
+            auto addValue = (NumberLiteralExpressionNode*) right;
+
+            // Perform the addition in Swarm
+            ASTNode* result = walk(new MultiplyNode(nullptr, initialNode, addValue));
+            assert(result->isValue() && result->getName() == "NumberLiteralExpressionNode");
+
+            // Assign and return the result
+            return assign(lval, (NumberLiteralExpressionNode*) result);
+        }
 
         virtual ASTNode* walkDivideNode(DivideNode* node) {
             ASTNode* left = walk(node->left());
@@ -233,6 +271,12 @@ namespace Runtime {
             return new BooleanLiteralExpressionNode(nullptr, !boolVal->value());
         }
 
+        virtual ASTNode* walkNegativeExpressionNode(NegativeExpressionNode* node) override {
+            ASTNode* val = walk(node->exp());
+            assert(val->isValue() && val->getName() == "NumberLiteralExpressionNode");
+            return new NumberLiteralExpressionNode(nullptr, -(((NumberLiteralExpressionNode*) val)->value()));
+        }
+
         virtual ASTNode* walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
             ExpressionList* reduced = new ExpressionList;
 
@@ -250,8 +294,10 @@ namespace Runtime {
             assert(val->getName() == "EnumerationLiteralExpressionNode");
             EnumerationLiteralExpressionNode* enumVal = (EnumerationLiteralExpressionNode*) val;
 
-            for ( auto val : *enumVal->actuals() ) {
-                // TODO bind local to value
+            IdentifierNode* local = node->local();  // TODO account for sharedness
+
+            for ( auto entry : *enumVal->actuals() ) {
+                assign(local, entry);
 
                 for ( auto stmt : *node->body() ) {
                     walk(stmt);
@@ -262,7 +308,7 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkWithStatement(WithStatement* node) {
-            ASTNode* resource = walk(node->resource());
+//            ASTNode* resource = walk(node->resource());
             // TODO bind local to value
 
             for ( auto stmt : *node->body() ) {
@@ -330,7 +376,29 @@ namespace Runtime {
             return node;
         }
 
-        virtual ASTNode* walkAssignExpressionNode(AssignExpressionNode* node) = 0;
+        virtual ASTNode* walkAssignExpressionNode(AssignExpressionNode* node) {
+            LValNode* lval = node->dest();
+            ASTNode* rvalNode = walk(node->value());
+            assert(rvalNode->isExpression() && rvalNode->isValue());
+            ExpressionNode* rval = (ExpressionNode*) rvalNode;
+
+            return assign(lval, rval);
+        }
+
+        virtual ExpressionNode* assign(LValNode* lval, ExpressionNode* rval) {
+            // TODO get shared status and copy if necessary
+            if ( rval->type()->isPrimitiveType() ) rval = rval->copy();
+            lval->setValue(_local, rval);
+            return rval;
+        }
+
+        virtual ASTNode* walkEnumerableAccessNode(EnumerableAccessNode* node) override {
+            return node->getValue(_local);
+        }
+
+        virtual ASTNode* walkUnitNode(UnitNode* node) override {
+            return node;
+        }
     };
 
 }

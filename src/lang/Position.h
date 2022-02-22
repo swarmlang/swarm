@@ -64,6 +64,10 @@ namespace Lang {
             return _endCol;
         }
 
+        virtual Position* copy() const {
+            return new Position(_startLine, _endLine, _startCol, _endCol);
+        }
+
     protected:
         size_t _startLine;
         size_t _endLine;
@@ -87,6 +91,10 @@ namespace Lang {
 
         virtual std::string toString() const override {
             return "[Prologue Definition: " + _symbolName + "]";
+        }
+
+        virtual ProloguePosition* copy() const override {
+            return new ProloguePosition(_symbolName);
         }
 
     protected:

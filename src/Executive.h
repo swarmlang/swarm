@@ -27,12 +27,14 @@ protected:
     bool flagOutputParse = false;
     bool flagOutputSerialize = false;
     bool flagOutputDeSerialize = false;
+    bool flagInterpretLocally = false;
     bool flagRunTest = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;
     std::string flagOutputDeSerializeTo;
     std::string flagRunTestName;
+    std::string outputResultTo = "--";
     std::string inputFile;
     std::istream* _input = nullptr;
 
@@ -42,6 +44,7 @@ protected:
     int debugOutputSerialize();
     int debugOutputDeSerialize();
     int runTest();
+    int interpretLocally();
 };
 
 

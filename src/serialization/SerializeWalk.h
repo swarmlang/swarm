@@ -401,6 +401,10 @@ namespace Serialization {
             return obj;
         }
 
+        virtual nlohmann::json* walkUnitNode(UnitNode *node) {
+            return getJSON();
+        }
+
         virtual nlohmann::json* walkPosition(const Position* pos) {
             nlohmann::json* obj = getJSON();
 
