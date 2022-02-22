@@ -215,7 +215,7 @@ namespace Lang {
     /** Base class for callable function types with multiple domain types and a single range type. */
     class FunctionType : public Type {
     public:
-        static FunctionType* of(Type* returnType, bool shared) {
+        static FunctionType* of(Type* returnType, bool shared = false) {
             return new FunctionType(returnType, shared);
         }
 
