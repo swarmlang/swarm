@@ -10,8 +10,15 @@ namespace util {
     static std::uniform_int_distribution<> distribution(0, 15);
     static std::uniform_int_distribution<> distribution2(8, 11);
 
+    static size_t DETERMINISTIC_UUID_LAST = 0;
+    static bool USE_DETERMINISTIC_UUIDS = false;
+
     /** Adapted from https://stackoverflow.com/questions/24365331, modified to use mersenne x64 */
     inline std::string uuid4() {
+        if ( USE_DETERMINISTIC_UUIDS ) {
+            return "d-guid-" + std::to_string(DETERMINISTIC_UUID_LAST++);
+        }
+
         std::stringstream s;
         int i;
 

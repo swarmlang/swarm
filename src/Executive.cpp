@@ -179,6 +179,8 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             std::string name = params.at(i+1);
             console->debug("Will output results to: " + name);
             outputResultTo = name;
+        } else if ( arg == "--dbg-use-d-guid" ) {
+            util::USE_DETERMINISTIC_UUIDS = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -261,6 +263,10 @@ void Executive::printUsage() {
         console->bold()->print("  --dbg-output-deserialize-to <OUTFILE>  :  ", true)
             ->line("Parse the input and output the deserialized AST to the specified file.")
             ->line("                                      If the output file is \"--\", will write to stdout.")
+            ->line();
+
+        console->bold()->print("  --dbg-use-d-guid  :  ", true)
+            ->line("Use deterministic UUIDs (for test output).")
             ->line();
     console->end();
 
