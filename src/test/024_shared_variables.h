@@ -17,7 +17,8 @@ namespace Test {
         bool run() override {
             return (varDeclTest() 
                     && accessTest() 
-                    && enumStatement());
+                    && enumStatement()
+                    && withStatement());
         }
 
         bool varDeclTest() {
@@ -109,33 +110,21 @@ namespace Test {
         bool withStatement() {
             std::stringstream program;
 
-            program << "enumerable<number> e1 = [69,420,69420];\n"
-                    << "shared enumerable<string> e2 = [\"a\",\"b\",\"c\"];\n"
-                    << "with e1 as funnynums {\n"
+            program << "with fileContents(\"file.txt\") as contents {\n"
                     << "}\n"
-                    << "with e1 as shared funniernums {\n"
-                    << "}\n"
-                    << "with e2 as strs {\n"
-                    << "}\n"
-                    << "with e2 as shared sstrs {\n"
+                    << "with fileContents(\"file.txt\") as shared contents {\n"
                     << "}\n";
 
             Pipeline pipeline(&program);
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
-            assert(pgNode->body()->at(2)->getName() == "WithStatement");
-            assert(pgNode->body()->at(3)->getName() == "WithStatement");
-            assert(pgNode->body()->at(4)->getName() == "WithStatement");
-            assert(pgNode->body()->at(5)->getName() == "WithStatement");
-            Lang::WithStatement* stmt1 = (Lang::WithStatement*) pgNode->body()->at(2);
-            Lang::WithStatement* stmt2 = (Lang::WithStatement*) pgNode->body()->at(3);
-            Lang::WithStatement* stmt3 = (Lang::WithStatement*) pgNode->body()->at(4);
-            Lang::WithStatement* stmt4 = (Lang::WithStatement*) pgNode->body()->at(5);
+            assert(pgNode->body()->at(0)->getName() == "WithStatement");
+            assert(pgNode->body()->at(1)->getName() == "WithStatement");
+            Lang::WithStatement* stmt1 = (Lang::WithStatement*) pgNode->body()->at(0);
+            Lang::WithStatement* stmt2 = (Lang::WithStatement*) pgNode->body()->at(1);
         
             assert(stmt1->local()->shared() == false);
             assert(stmt2->local()->shared() == true);
-            assert(stmt3->local()->shared() == false);
-            assert(stmt4->local()->shared() == true);
 
             return true;
         }
