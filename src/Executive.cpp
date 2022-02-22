@@ -394,7 +394,11 @@ int Executive::runTest() {
 }
 
 int Executive::interpretLocally() {
-    swarmc::Pipeline pipeline(_input);
-    swarmc::Lang::ASTNode* result = pipeline.targetEvaluateLocally();
-    return 1;
+    try {
+        swarmc::Pipeline pipeline(_input);
+        pipeline.targetEvaluateLocally();
+        return 0;
+    } catch (...) {
+        return 1;
+    }
 }

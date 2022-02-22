@@ -9,6 +9,7 @@ namespace Lang {
         PrimitiveType* primitiveNumber = PrimitiveType::of(ValueType::TNUM);
         PrimitiveType* primitiveString = PrimitiveType::of(ValueType::TSTRING);
         PrimitiveType* primitiveUnit = PrimitiveType::of(ValueType::TUNIT);
+        PrimitiveType* primitiveBool = PrimitiveType::of(ValueType::TBOOL);
 
         // random()
         FunctionType* randomType = FunctionType::of(primitiveNumber, false);
@@ -51,6 +52,18 @@ namespace Lang {
         logErrorType->addArgument(primitiveString);
         ProloguePosition* logErrorPosition = new ProloguePosition("logError");
         prologueScope->addFunction("logError", logErrorType, logErrorPosition);
+
+        // numberToString(number)
+        FunctionType* numberToStringType = FunctionType::of(primitiveString, false);
+        numberToStringType->addArgument(primitiveNumber);
+        ProloguePosition* numberToStringPosition = new ProloguePosition("numberToString");
+        prologueScope->addFunction("numberToString", numberToStringType, numberToStringPosition);
+
+        // boolToString(boolean)
+        FunctionType* boolToStringType = FunctionType::of(primitiveString, false);
+        boolToStringType->addArgument(primitiveBool);
+        ProloguePosition* boolToStringPosition = new ProloguePosition("boolToString");
+        prologueScope->addFunction("boolToString", boolToStringType, boolToStringPosition);
 
         return prologueScope;
     }
