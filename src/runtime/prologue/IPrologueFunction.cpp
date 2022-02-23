@@ -23,26 +23,26 @@ IPrologueFunction* IPrologueFunction::resolveByName(std::string name) {
 
 void IPrologueFunction::buildScope(Lang::ScopeTable* table) {
     Random random;
-    table->addFunction(random.name(), (FunctionType*) random.type()->copy(), random.position()->copy());
+    table->addPrologueFunction(random.name(), (FunctionType*) random.type()->copy(), random.position()->copy());
 
     Log log;
-    table->addFunction(log.name(), (FunctionType*) log.type()->copy(), log.position()->copy());
+    table->addPrologueFunction(log.name(), (FunctionType*) log.type()->copy(), log.position()->copy());
 
     LogError logError;
-    table->addFunction(logError.name(), (FunctionType*) logError.type()->copy(), logError.position()->copy());
+    table->addPrologueFunction(logError.name(), (FunctionType*) logError.type()->copy(), logError.position()->copy());
 
     NumberToString numberToString;
-    table->addFunction(numberToString.name(), (FunctionType*) numberToString.type()->copy(), numberToString.position()->copy());
+    table->addPrologueFunction(numberToString.name(), (FunctionType*) numberToString.type()->copy(), numberToString.position()->copy());
 
     BoolToString boolToString;
-    table->addFunction(boolToString.name(), (FunctionType*) boolToString.type()->copy(), boolToString.position()->copy());
+    table->addPrologueFunction(boolToString.name(), (FunctionType*) boolToString.type()->copy(), boolToString.position()->copy());
 
     Min min;
-    table->addFunction(min.name(), (FunctionType*) min.type()->copy(), min.position()->copy());
+    table->addPrologueFunction(min.name(), (FunctionType*) min.type()->copy(), min.position()->copy());
 
     Max max;
-    table->addFunction(max.name(), (FunctionType*) max.type()->copy(), max.position()->copy());
+    table->addPrologueFunction(max.name(), (FunctionType*) max.type()->copy(), max.position()->copy());
 
     FileContents fileContents;
-    table->addFunction(fileContents.name(), (FunctionType*) fileContents.type()->copy(), fileContents.position()->copy());
+    table->addPrologueFunction(fileContents.name(), (FunctionType*) fileContents.type()->copy(), fileContents.position()->copy());
 }

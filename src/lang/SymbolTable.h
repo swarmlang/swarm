@@ -65,6 +65,10 @@ namespace Walk {
             return _type->shared();
         }
 
+        virtual bool isPrologue() const {
+            return false;
+        }
+
     protected:
         std::string _uuid;
         std::string _name;
@@ -95,6 +99,15 @@ namespace Walk {
         virtual SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::FUNCTION;
         }
+    };
+
+
+    /** Semantic symbol implementation for names referencing variables. */
+    class PrologueFunctionSymbol : public FunctionSymbol {
+    public:
+        PrologueFunctionSymbol(std::string name, const FunctionType* type, const Position* declaredAt) : FunctionSymbol(name, type, declaredAt) {}
+
+        virtual bool isPrologue() const override { return true; }
     };
 
 
@@ -142,6 +155,11 @@ namespace Walk {
         /** Add a new function to this scope. */
         void addFunction(std::string name, FunctionType* type, const Position* declaredAt) {
             insert(new FunctionSymbol(name, type, declaredAt));
+        }
+
+        /** Add a new function to this scope as if it were from the Prologue. */
+        void addPrologueFunction(std::string name, FunctionType* type, const Position* declaredAt) {
+            insert(new PrologueFunctionSymbol(name, type, declaredAt));
         }
 
         virtual std::string toString() const {

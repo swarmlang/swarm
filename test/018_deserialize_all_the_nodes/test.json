@@ -19,6 +19,7 @@
                         "startCol": 1,
                         "startLine": 2
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "e1",
                     "type": {
@@ -29,7 +30,7 @@
                         "shared": false,
                         "valueType": 3
                     },
-                    "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
+                    "uuid": "d-guid-8"
                 }
             },
             "position": {
@@ -84,6 +85,7 @@
                         "startCol": 1,
                         "startLine": 3
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "e2",
                     "type": {
@@ -94,7 +96,7 @@
                         "shared": false,
                         "valueType": 3
                     },
-                    "uuid": "0245bfec-242e-4c68-9ed8-9d759d74c250"
+                    "uuid": "d-guid-9"
                 }
             },
             "position": {
@@ -170,6 +172,7 @@
                         "startCol": 1,
                         "startLine": 4
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "m1",
                     "type": {
@@ -180,7 +183,7 @@
                         "shared": false,
                         "valueType": 4
                     },
-                    "uuid": "126b1f95-3201-4afc-855e-f38bb1541f78"
+                    "uuid": "d-guid-10"
                 }
             },
             "position": {
@@ -276,6 +279,7 @@
                         "startCol": 1,
                         "startLine": 5
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "m2",
                     "type": {
@@ -286,7 +290,7 @@
                         "shared": false,
                         "valueType": 4
                     },
-                    "uuid": "261297a8-5efc-43c0-9a45-1b5cc0c663bc"
+                    "uuid": "d-guid-11"
                 }
             },
             "position": {
@@ -341,13 +345,14 @@
                         "startCol": 1,
                         "startLine": 6
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "s",
                     "type": {
                         "shared": false,
                         "valueType": 0
                     },
-                    "uuid": "22bce82c-4b50-41b9-b3d0-25f99814e916"
+                    "uuid": "d-guid-12"
                 }
             },
             "position": {
@@ -398,13 +403,14 @@
                         "startCol": 1,
                         "startLine": 7
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "n",
                     "type": {
                         "shared": false,
                         "valueType": 1
                     },
-                    "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
+                    "uuid": "d-guid-13"
                 }
             },
             "position": {
@@ -463,13 +469,14 @@
                                             "startCol": 1,
                                             "startLine": 7
                                         },
+                                        "isPrologue": false,
                                         "kind": 0,
                                         "name": "n",
                                         "type": {
                                             "shared": false,
                                             "valueType": 1
                                         },
-                                        "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
+                                        "uuid": "d-guid-13"
                                     }
                                 },
                                 "position": {
@@ -544,13 +551,14 @@
                                             "startCol": 1,
                                             "startLine": 7
                                         },
+                                        "isPrologue": false,
                                         "kind": 0,
                                         "name": "n",
                                         "type": {
                                             "shared": false,
                                             "valueType": 1
                                         },
-                                        "uuid": "915286c0-800b-4115-a3a4-837935b699fb"
+                                        "uuid": "d-guid-13"
                                     }
                                 },
                                 "position": {
@@ -596,13 +604,14 @@
                                     "startCol": 17,
                                     "startLine": 9
                                 },
+                                "isPrologue": false,
                                 "kind": 0,
                                 "name": "aBool",
                                 "type": {
                                     "shared": false,
                                     "valueType": 2
                                 },
-                                "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
+                                "uuid": "d-guid-14"
                             }
                         },
                         "position": {
@@ -647,13 +656,14 @@
                                 "startCol": 5,
                                 "startLine": 15
                             },
+                            "isPrologue": false,
                             "kind": 0,
                             "name": "b",
                             "type": {
                                 "shared": false,
                                 "valueType": 2
                             },
-                            "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                            "uuid": "d-guid-15"
                         }
                     },
                     "position": {
@@ -691,13 +701,14 @@
                                 "startCol": 17,
                                 "startLine": 9
                             },
+                            "isPrologue": false,
                             "kind": 0,
                             "name": "aBool",
                             "type": {
                                 "shared": false,
                                 "valueType": 2
                             },
-                            "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
+                            "uuid": "d-guid-14"
                         }
                     }
                 }
@@ -718,6 +729,7 @@
                         "startCol": 1,
                         "startLine": 3
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "e2",
                     "type": {
@@ -728,7 +740,7 @@
                         "shared": false,
                         "valueType": 3
                     },
-                    "uuid": "0245bfec-242e-4c68-9ed8-9d759d74c250"
+                    "uuid": "d-guid-9"
                 }
             },
             "local": {
@@ -747,13 +759,14 @@
                         "startCol": 17,
                         "startLine": 9
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "aBool",
                     "type": {
                         "shared": false,
                         "valueType": 2
                     },
-                    "uuid": "3813a21f-9fce-412f-85e7-3c88459ba4ce"
+                    "uuid": "d-guid-14"
                 }
             },
             "position": {
@@ -798,6 +811,7 @@
                                     "startCol": 0,
                                     "startLine": 0
                                 },
+                                "isPrologue": true,
                                 "kind": 1,
                                 "name": "log",
                                 "type": {
@@ -814,7 +828,7 @@
                                     "shared": false,
                                     "valueType": 6
                                 },
-                                "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
+                                "uuid": "d-guid-1"
                             }
                         },
                         "position": {
@@ -857,13 +871,14 @@
                                         "startCol": 1,
                                         "startLine": 7
                                     },
+                                    "isPrologue": false,
                                     "kind": 0,
                                     "name": "n",
                                     "type": {
                                         "shared": false,
                                         "valueType": 1
                                     },
-                                    "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                                    "uuid": "d-guid-13"
                                 }
                             },
                             "position": {
@@ -908,13 +923,14 @@
                                         "startCol": 1,
                                         "startLine": 7
                                     },
+                                    "isPrologue": false,
                                     "kind": 0,
                                     "name": "n",
                                     "type": {
                                         "shared": false,
                                         "valueType": 1
                                     },
-                                    "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                                    "uuid": "d-guid-13"
                                 }
                             },
                             "position": {
@@ -960,13 +976,14 @@
                                     "startCol": 1,
                                     "startLine": 7
                                 },
+                                "isPrologue": false,
                                 "kind": 0,
                                 "name": "n",
                                 "type": {
                                     "shared": false,
                                     "valueType": 1
                                 },
-                                "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                                "uuid": "d-guid-13"
                             }
                         },
                         "position": {
@@ -1012,13 +1029,14 @@
                                 "startCol": 1,
                                 "startLine": 7
                             },
+                            "isPrologue": false,
                             "kind": 0,
                             "name": "n",
                             "type": {
                                 "shared": false,
                                 "valueType": 1
                             },
-                            "uuid": "fecb5a0e-8058-4d6f-9d0b-24cf63fd494e"
+                            "uuid": "d-guid-13"
                         }
                     },
                     "position": {
@@ -1058,9 +1076,9 @@
                             "name": "s",
                             "position": {
                                 "endCol": 6,
-                                "endLine": 19,
+                                "endLine": 23,
                                 "startCol": 5,
-                                "startLine": 19
+                                "startLine": 23
                             },
                             "symbol": {
                                 "declaredAt": {
@@ -1069,52 +1087,54 @@
                                     "startCol": 1,
                                     "startLine": 6
                                 },
+                                "isPrologue": false,
                                 "kind": 0,
                                 "name": "s",
                                 "type": {
                                     "shared": false,
                                     "valueType": 0
                                 },
-                                "uuid": "22bce82c-4b50-41b9-b3d0-25f99814e916"
+                                "uuid": "d-guid-12"
                             }
                         },
                         "position": {
                             "endCol": 16,
-                            "endLine": 19,
+                            "endLine": 23,
                             "startCol": 5,
-                            "startLine": 19
+                            "startLine": 23
                         },
                         "value": {
                             "astNodeName": "IdentifierNode",
                             "name": "aString",
                             "position": {
                                 "endCol": 16,
-                                "endLine": 19,
+                                "endLine": 23,
                                 "startCol": 9,
-                                "startLine": 19
+                                "startLine": 23
                             },
                             "symbol": {
                                 "declaredAt": {
                                     "endCol": 47,
-                                    "endLine": 18,
+                                    "endLine": 22,
                                     "startCol": 40,
-                                    "startLine": 18
+                                    "startLine": 22
                                 },
+                                "isPrologue": false,
                                 "kind": 0,
                                 "name": "aString",
                                 "type": {
                                     "shared": false,
                                     "valueType": 0
                                 },
-                                "uuid": "87c9e931-156d-49b0-964e-69aa8e799c05"
+                                "uuid": "d-guid-16"
                             }
                         }
                     },
                     "position": {
                         "endCol": 17,
-                        "endLine": 19,
+                        "endLine": 23,
                         "startCol": 5,
-                        "startLine": 19
+                        "startLine": 23
                     }
                 }
             ],
@@ -1123,31 +1143,32 @@
                 "name": "aString",
                 "position": {
                     "endCol": 47,
-                    "endLine": 18,
+                    "endLine": 22,
                     "startCol": 40,
-                    "startLine": 18
+                    "startLine": 22
                 },
                 "symbol": {
                     "declaredAt": {
                         "endCol": 47,
-                        "endLine": 18,
+                        "endLine": 22,
                         "startCol": 40,
-                        "startLine": 18
+                        "startLine": 22
                     },
+                    "isPrologue": false,
                     "kind": 0,
                     "name": "aString",
                     "type": {
                         "shared": false,
                         "valueType": 0
                     },
-                    "uuid": "87c9e931-156d-49b0-964e-69aa8e799c05"
+                    "uuid": "d-guid-16"
                 }
             },
             "position": {
                 "endCol": 2,
-                "endLine": 20,
+                "endLine": 24,
                 "startCol": 1,
-                "startLine": 18
+                "startLine": 22
             },
             "resource": {
                 "arguments": [
@@ -1157,25 +1178,25 @@
                             "astNodeName": "StringLiteralExpressionNode",
                             "position": {
                                 "endCol": 26,
-                                "endLine": 18,
+                                "endLine": 22,
                                 "startCol": 19,
-                                "startLine": 18
+                                "startLine": 22
                             },
                             "value": "input"
                         },
                         "position": {
                             "endCol": 35,
-                            "endLine": 18,
+                            "endLine": 22,
                             "startCol": 19,
-                            "startLine": 18
+                            "startLine": 22
                         },
                         "right": {
                             "astNodeName": "StringLiteralExpressionNode",
                             "position": {
                                 "endCol": 35,
-                                "endLine": 18,
+                                "endLine": 22,
                                 "startCol": 29,
-                                "startLine": 18
+                                "startLine": 22
                             },
                             "value": ".txt"
                         }
@@ -1187,9 +1208,9 @@
                     "name": "fileContents",
                     "position": {
                         "endCol": 18,
-                        "endLine": 18,
+                        "endLine": 22,
                         "startCol": 6,
-                        "startLine": 18
+                        "startLine": 22
                     },
                     "symbol": {
                         "declaredAt": {
@@ -1198,6 +1219,7 @@
                             "startCol": 0,
                             "startLine": 0
                         },
+                        "isPrologue": true,
                         "kind": 1,
                         "name": "fileContents",
                         "type": {
@@ -1218,14 +1240,14 @@
                             "shared": false,
                             "valueType": 6
                         },
-                        "uuid": "ca2adfa5-5144-4111-8a4f-f3ba9b3bbe1a"
+                        "uuid": "d-guid-7"
                     }
                 },
                 "position": {
                     "endCol": 36,
-                    "endLine": 18,
+                    "endLine": 22,
                     "startCol": 6,
-                    "startLine": 18
+                    "startLine": 22
                 }
             }
         }

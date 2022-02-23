@@ -433,6 +433,7 @@ namespace Walk {
             (*obj)["name"] = sym->name();
             (*obj)["uuid"] = sym->uuid();
             (*obj)["kind"] = sym->kind();
+            (*obj)["isPrologue"] = sym->isPrologue();
             (*obj)["type"] = *walkType(sym->type());
             (*obj)["declaredAt"] = *walkPosition(sym->declaredAt());
 

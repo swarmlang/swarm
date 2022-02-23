@@ -50,9 +50,10 @@ namespace Walk {
                 symjson["declaredAt"]["startCol"],
                 symjson["declaredAt"]["endCol"]);
             SemanticSymbol* sym;
-            if (type->isFunctionType()) {
+            if (type->isFunctionType() && symjson["isPrologue"] ) {
+                sym = new PrologueFunctionSymbol(name,(FunctionType*) type,pos);
+            } else if (type->isFunctionType()) {
                 sym = new FunctionSymbol(name,(FunctionType*) type,pos);
-                
             } else {
                 sym = new VariableSymbol(name,type,pos);
             }
