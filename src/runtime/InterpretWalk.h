@@ -346,7 +346,7 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkEnumerationStatement(EnumerationStatement* node) {
-            ASTNode* val = walk(node);
+            ASTNode* val = walk(node->enumerable());
             assert(val->getName() == "EnumerationLiteralExpressionNode");
             EnumerationLiteralExpressionNode* enumVal = (EnumerationLiteralExpressionNode*) val;
 
