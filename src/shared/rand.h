@@ -8,8 +8,8 @@ double randomDouble() {
     static std::random_device rd;
     static std::default_random_engine eng(rd());
     static std::uniform_real_distribution<double> distribution(
-        std::numeric_limits<double>::max(),
-        std::numeric_limits<double>::min()
+        1,
+        0
     );
 
     return distribution(eng);

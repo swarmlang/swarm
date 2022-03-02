@@ -7,6 +7,7 @@
 #include "../lang/AST.h"
 #include "../lang/Walk/Walk.h"
 #include "LocalSymbolValueStore.h"
+#include "prologue/IPrologueFunction.h"
 
 // Note: in the future, we'll need to add a RuntimePosition or similar.
 //       Right now, positions are copied from the node being evaluated. - GM
@@ -82,8 +83,24 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkCallExpressionNode(CallExpressionNode* node) {
-            // FIXME implement this
-            return nullptr;
+            auto resolvedArgs = new ExpressionList;
+            for ( auto arg : *node->args() ) {
+                auto resolved = walk(arg);
+                assert(resolved->isExpression());
+                resolvedArgs->push_back((ExpressionNode*) resolved);
+            }
+
+            if ( node->id()->symbol()->isPrologue() ) {
+                // We're trying to call a built-in prologue function. Right now, we inject these
+                // artificially so we don't have to serialize them with the AST.
+                auto fn = Prologue::IPrologueFunction::resolveByName(node->id()->symbol()->name());
+                assert(fn != nullptr);
+                assert(fn->validateCall(resolvedArgs));
+
+                return fn->call(resolvedArgs);
+            }
+
+            throw Errors::SwarmError("Unable to invoke invalid non-Prologue function symbol: " + node->id()->toString());
         }
 
         virtual ASTNode* walkAndNode(AndNode* node) {
@@ -113,13 +130,29 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkEqualsNode(EqualsNode* node) {
-            // FIXME implement this
-            return new BooleanLiteralExpressionNode(node->position()->copy(), false);
+            auto left = walk(node->left());
+            auto right = walk(node->right());
+
+            assert(left->isExpression() && right->isExpression());
+
+            auto leftExp = (ExpressionNode*) left;
+            auto rightExp = (ExpressionNode*) right;
+
+            bool equal = leftExp->type()->is(rightExp->type()) && leftExp->equals(rightExp);
+            return new BooleanLiteralExpressionNode(node->position()->copy(), equal);
         }
 
         virtual ASTNode* walkNotEqualsNode(NotEqualsNode* node) {
-            // FIXME implement this
-            return new BooleanLiteralExpressionNode(node->position()->copy(), false);
+            auto left = walk(node->left());
+            auto right = walk(node->right());
+
+            assert(left->isExpression() && right->isExpression());
+
+            auto leftExp = (ExpressionNode*) left;
+            auto rightExp = (ExpressionNode*) right;
+
+            bool equal = leftExp->type()->is(rightExp->type()) && leftExp->equals(rightExp);
+            return new BooleanLiteralExpressionNode(node->position()->copy(), !equal);
         }
 
         virtual ASTNode* walkAddNode(AddNode* node) {
@@ -309,7 +342,7 @@ namespace Runtime {
                 reduced->push_back((ExpressionNode*) val);
             }
 
-            return new EnumerationLiteralExpressionNode(node->position()->copy(), reduced);
+            return new EnumerationLiteralExpressionNode(node->position()->copy(), reduced, node->_disambiguationType);
         }
 
         virtual ASTNode* walkEnumerationStatement(EnumerationStatement* node) {
@@ -374,7 +407,7 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkMapStatementNode(MapStatementNode* node) {
-            ASTNode* val = walk(node);
+            ASTNode* val = walk(node->value());
             assert(val->isValue() && val->isExpression());
             return new MapStatementNode(node->position()->copy(), node->id(), (ExpressionNode*) val);
         }

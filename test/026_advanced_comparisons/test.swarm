@@ -1,0 +1,81 @@
+map<number> base = {
+	a: 3.14,
+	b: 6.28,
+	c: 2 * 6.28
+};
+
+map<number> same = {
+	c: 12.56,
+	b: 6.28,
+	a: 3.14
+};
+
+map<number> wrongKeys = {
+	a: 3.14,
+	b: 6.28,
+	q: 12.56
+};
+
+map<number> partialKeys = {
+	a: 3.14,
+	c: 12.56
+};
+
+map<number> wrongValues = {
+	a: 3.14,
+	b: 6.28,
+	c: 1.23
+};
+
+if ( base == same ) {
+	log("base == same");
+}
+
+if ( base == wrongKeys ) {
+	log("base == wrongKeys");
+}
+
+if ( base == partialKeys ) {
+	log("base == partialKeys");
+}
+
+if ( base == wrongValues ) {
+	log("base == wrongValues");
+}
+
+if ( partialKeys == ({ a: 3.14, c: 12.56 }) ) {
+	log("expression match");
+}
+
+enumerable<bool> boolBase = [true, true, false, true];
+enumerable<bool> empty = [] of bool;
+enumerable<bool> wrongOrder = [true, false, true, true];
+enumerable<bool> wrongSize = [true, true, false];
+
+if ( boolBase == ([true, true, false, true]) ) {
+	log("boolBase == expression");
+}
+
+if ( boolBase == empty ) {
+	log("boolBase == empty");
+}
+
+if ( boolBase == wrongOrder ) {
+	log("boolBase == wrongOrder");
+}
+
+if ( boolBase == wrongSize ) {
+	log("boolBase == wrongSize");
+}
+
+if ( ([] of bool) == ([] of bool) ) {
+	log("empty == empty");
+}
+
+if ( 33 == 12.1 ) {
+	log("33 == 12.1");
+}
+
+if ( base[a] == 3.14 ) {
+	log("base[a] == 3.14");
+}

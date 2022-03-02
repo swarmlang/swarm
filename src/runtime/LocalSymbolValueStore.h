@@ -5,6 +5,7 @@
 #include <assert.h>
 #include "ISymbolValueStore.h"
 #include "../errors/FreeSymbolError.h"
+#include "../shared/util/Console.h"
 
 namespace swarmc {
 namespace Runtime {
@@ -12,12 +13,12 @@ namespace Runtime {
     /**
      * A symbol value store implementation that records values in an in-memory map.
      */
-    class LocalSymbolValueStore : public ISymbolValueStore {
+    class LocalSymbolValueStore : public ISymbolValueStore, public IUsesConsole {
     protected:
         /** The internal symbol -> value mapping. */
         std::map<Lang::SemanticSymbol*, Lang::ExpressionNode*>* _map;
     public:
-        LocalSymbolValueStore() : ISymbolValueStore() {
+        LocalSymbolValueStore() : ISymbolValueStore(), IUsesConsole() {
             _map = new std::map<Lang::SemanticSymbol*, Lang::ExpressionNode*>();
         }
 
@@ -31,6 +32,7 @@ namespace Runtime {
                 _map->erase(symbol);
             }
 
+            console->debug("Set: " + symbol->name() + ", Value: " + value->toString());
             _map->insert(std::pair<Lang::SemanticSymbol*, Lang::ExpressionNode*>(symbol, value));
         }
 

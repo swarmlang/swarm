@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <ostream>
+#include <algorithm>
 #include <assert.h>
 #include "../shared/IStringable.h"
 #include "../shared/util/Console.h"
@@ -15,6 +16,7 @@ namespace swarmc {
 
 namespace Runtime {
     class ISymbolValueStore;
+    class InterpretWalk;
 }
 
 namespace Lang {
@@ -148,6 +150,10 @@ namespace Walk {
         virtual ExpressionNode* copy() const override = 0;
 
         virtual const Type* type() const = 0;
+
+        virtual bool equals(const ExpressionNode* other) const {
+            throw Errors::SwarmError("Attempted to determine equality of non-value expressions: " + getName() + " == " + other->getName());
+        }
     };
 
 
@@ -162,6 +168,10 @@ namespace Walk {
 
         virtual const Type* type() const {
             return PrimitiveType::of(ValueType::TUNIT);
+        }
+
+        bool equals(const ExpressionNode* other) const override {
+            return other->getName() == "UnitNode" && other->type()->is(type());
         }
 
         virtual std::string toString() const {
@@ -271,8 +281,9 @@ namespace Walk {
 
         virtual bool shared() const override {
             if (_symbol == nullptr) {
-                throw Errors::SwarmError("Attempt to get sharedness of symbolless identifier: " + _name);
+                throw Errors::SwarmError("Attempt to get sharedness of symbol-less identifier: " + _name);
             }
+
             return _symbol->type()->shared();
         }
 
@@ -493,6 +504,13 @@ namespace Walk {
 
         virtual const Type* type() const override {
             return PrimitiveType::of(ValueType::TBOOL);
+        }
+
+        virtual bool equals(const ExpressionNode* other) const {
+            return (
+                other->getName() == getName()
+                && ((BooleanLiteralExpressionNode*) other)->value() == value()
+            );
         }
 
     private:
@@ -1186,11 +1204,33 @@ namespace Walk {
             return (_disambiguationType == nullptr) ? _actuals->at(0)->type() : _disambiguationType->type();
         }
 
+        virtual bool equals(const ExpressionNode* other) const override {
+            if ( other->getName() != "EnumerationLiteralExpressionNode" ) {
+                return false;
+            }
+
+            auto otherEnum = (EnumerationLiteralExpressionNode*) other;
+            if ( _actuals->size() != otherEnum->_actuals->size() ) {
+                return false;
+            }
+
+            for ( size_t i = 0; i < _actuals->size(); i += 1 ) {
+                auto entry = _actuals->at(i);
+                auto otherEntry = otherEnum->_actuals->at(i);
+                if ( !entry->equals(otherEntry) ) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
     protected:
         ExpressionList* _actuals;
         TypeNode* _disambiguationType = nullptr;
 
         friend class Walk::TypeAnalysisWalk;
+        friend class Runtime::InterpretWalk;
     };
 
 
@@ -1475,6 +1515,42 @@ namespace Walk {
             return (_disambiguationType == nullptr) ? _body->at(0)->value()->type() : _disambiguationType->type();
         }
 
+        bool equals(const ExpressionNode* other) const override {
+            if ( other->getName() != getName() ) return false;
+            auto otherMap = (MapNode*) other;
+
+            if ( otherMap->_body->size() != _body->size() ) return false;
+
+            // Make sure both sides have all the same keys
+            std::vector<std::string> keys;
+            for ( auto entry : *_body ) {
+                keys.push_back(entry->id()->name());
+            }
+            std::sort(keys.begin(), keys.end());
+
+            std::vector<std::string> otherKeys;
+            for ( auto entry : *otherMap->_body ) {
+                otherKeys.push_back(entry->id()->name());
+            }
+            std::sort(otherKeys.begin(), otherKeys.end());
+
+            for ( size_t i = 0; i < keys.size(); i += 1 ) {
+                if ( keys[i] != otherKeys[i] ) {
+                    return false;
+                }
+            }
+
+            // Make sure all the keys have all the same values
+            for ( auto node : *_body ) {
+                auto otherNode = otherMap->getBodyNode(node->id());
+                if ( !node->value()->equals(otherNode->value()) ) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
     protected:
         MapBody* _body;
         TypeNode* _disambiguationType;
@@ -1521,6 +1597,13 @@ namespace Walk {
         virtual const Type* type() const override {
             return PrimitiveType::of(ValueType::TSTRING);
         }
+
+        bool equals(const ExpressionNode* other) const override {
+            return (
+                other->getName() == getName()
+                && ((StringLiteralExpressionNode*) other)->value() == _value
+            );
+        }
     protected:
         std::string _value;
     };
@@ -1553,6 +1636,13 @@ namespace Walk {
 
         virtual const Type* type() const override {
             return PrimitiveType::of(ValueType::TNUM);
+        }
+
+        bool equals(const ExpressionNode* other) const override {
+            return (
+                other->getName() == getName()
+                && ((NumberLiteralExpressionNode*) other)->value() == _value
+            );
         }
     protected:
         double _value;
