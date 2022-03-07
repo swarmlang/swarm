@@ -1,0 +1,16 @@
+enumerable<enumerable<number>> matrix = randomMatrix(25, 5000);
+
+number minimum = 0.3;
+number maximum = 0.7;
+
+enumerate matrix as row {
+    number count = 0;
+    enumerate row as entry {
+        if ( entry > minimum && entry < maximum ) {
+            count += 1;
+        }
+    }
+
+    log("Count: " . numberToString(count));
+}
+
