@@ -1,0 +1,21 @@
+number piReal = 3.14159;
+enumerable<number> ranks = [0, 1, 2, 3, 4];
+number n = 100000;
+
+shared number piApprox = 0;
+enumerate ranks as rank {
+    log("Rank: " . numberToString(rank));
+    number h = 1 / n;
+    number s = 0;
+    number i = rank + 1;
+    while ( i < (n + 1) ) {
+        number x = h * (i - 0.5);
+        s += 4 / (1 + (x^2));
+        i += 5;
+    }
+
+    piApprox += s * h;
+}
+
+log("Approx Pi: " . numberToString(piApprox));
+log("Error: " . numberToString(piReal - piApprox));
