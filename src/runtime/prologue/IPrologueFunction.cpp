@@ -11,6 +11,8 @@ using namespace swarmc::Runtime::Prologue;
 
 IPrologueFunction* IPrologueFunction::resolveByName(std::string name) {
     if ( name == "random" ) return new Random;
+    if ( name == "randomVector" ) return new RandomVector;
+    if ( name == "randomMatrix" ) return new RandomMatrix;
     if ( name == "log" ) return new Log;
     if ( name == "logError" ) return new LogError;
     if ( name == "numberToString" ) return new NumberToString;
@@ -26,6 +28,12 @@ IPrologueFunction* IPrologueFunction::resolveByName(std::string name) {
 void IPrologueFunction::buildScope(Lang::ScopeTable* table) {
     Random random;
     table->addPrologueFunction(random.name(), (FunctionType*) random.type()->copy(), random.position()->copy());
+
+    RandomVector randomVector;
+    table->addPrologueFunction(randomVector.name(), (FunctionType*) randomVector.type()->copy(), randomVector.position()->copy());
+
+    RandomMatrix randomMatrix;
+    table->addPrologueFunction(randomMatrix.name(), (FunctionType*) randomMatrix.type()->copy(), randomMatrix.position()->copy());
 
     Log log;
     table->addPrologueFunction(log.name(), (FunctionType*) log.type()->copy(), log.position()->copy());

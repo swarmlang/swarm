@@ -22,6 +22,64 @@ namespace Prologue {
         }
     };
 
+    class RandomVector : public IPrologueFunction {
+    public:
+        RandomVector() : IPrologueFunction("randomVector") {}
+
+        ExpressionNode* call(ExpressionList* args) override {
+            auto node = new EnumerationLiteralExpressionNode(getNewPosition(), new ExpressionList);
+            auto nEntries = (NumberLiteralExpressionNode*) args->at(0);
+            if ( nEntries <= 0 ) return node;
+
+            for ( size_t i = 0; i < nEntries->value(); i += 1 ) {
+                node->push(new NumberLiteralExpressionNode(getNewPosition(), randomDouble()));
+            }
+
+            return node;
+        }
+
+        const FunctionType* type() const override {
+            auto ft = FunctionType::of(GenericType::of(ValueType::TENUMERABLE, PrimitiveType::of(ValueType::TNUM)));
+            ft->addArgument(PrimitiveType::of(ValueType::TNUM));
+            return ft;
+        }
+    };
+
+    class RandomMatrix : public IPrologueFunction {
+    public:
+        RandomMatrix() : IPrologueFunction("randomMatrix") {}
+
+        ExpressionNode* call(ExpressionList* args) override {
+            auto node = new EnumerationLiteralExpressionNode(getNewPosition(), new ExpressionList);
+            auto nRows = (NumberLiteralExpressionNode*) args->at(0);
+            auto nCols = (NumberLiteralExpressionNode*) args->at(1);
+            if ( nRows <= 0 ) return node;
+
+            for ( size_t row = 0; row < nRows->value(); row += 1 ) {
+                auto rowNode = new EnumerationLiteralExpressionNode(getNewPosition(), new ExpressionList);
+                if ( nCols <= 0 ) {
+                    node->push(rowNode);
+                    continue;
+                }
+
+                for ( size_t col = 0; col < nCols->value(); col += 1 ) {
+                    rowNode->push(new NumberLiteralExpressionNode(getNewPosition(), randomDouble()));
+                }
+
+                node->push(rowNode);
+            }
+
+            return node;
+        }
+
+        const FunctionType* type() const override {
+            auto ft = FunctionType::of(GenericType::of(ValueType::TENUMERABLE, GenericType::of(ValueType::TENUMERABLE, PrimitiveType::of(ValueType::TNUM))));
+            ft->addArgument(PrimitiveType::of(ValueType::TNUM));
+            ft->addArgument(PrimitiveType::of(ValueType::TNUM));
+            return ft;
+        }
+    };
+
 }
 }
 }
