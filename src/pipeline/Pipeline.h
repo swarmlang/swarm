@@ -105,7 +105,7 @@ namespace swarmc {
             Lang::Walk::PrintWalk pW(out, tree);
         }
 
-        Lang::ASTNode* targetEvaluateLocally() {
+        Lang::ASTNode* targetEvaluate() {
             targetASTSymbolicTyped();
             Runtime::InterpretWalk interp;
             return interp.walk(_root);

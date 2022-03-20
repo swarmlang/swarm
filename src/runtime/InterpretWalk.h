@@ -24,6 +24,8 @@ namespace Runtime {
         InterpretWalk() : Lang::Walk::Walk<ASTNode*>() {
             _local = new LocalSymbolValueStore;
 
+            Console::get()->debug("Creating new InterpretWalk!");
+
             if ( Configuration::FORCE_LOCAL ) {
                 _shared = new LocalSymbolValueStore;
             } else {
@@ -88,10 +90,12 @@ namespace Runtime {
             ASTNode* rval = walk(node->value());
             assert(rval->isValue() && rval->isExpression());
 
-            // FIXME handle sharedness in copy
-            auto value = (ExpressionNode*) rval;
-            node->id()->setValue(_local, value);
-            return new VariableDeclarationNode(node->position()->copy(), node->typeNode(), node->id(), value);
+            auto store = getStore(node->id()->symbol());
+            return store->withLockedSymbol<VariableDeclarationNode*>(node->id()->symbol(), [node, rval, store]() mutable {
+                auto value = (ExpressionNode*) rval;
+                node->id()->setValue(store, value);
+                return new VariableDeclarationNode(node->position()->copy(), node->typeNode(), node->id(), value);
+            });
         }
 
         virtual ASTNode* walkCallExpressionNode(CallExpressionNode* node) {

@@ -17,6 +17,7 @@ public:
     Executive() : IUsesConsole() {};
 
     int run(int argc, char **argv);
+    void cleanup();
     bool parseArgs(std::vector<std::string>&);
     void printUsage();
 
@@ -44,7 +45,7 @@ protected:
     int debugOutputSerialize();
     int debugOutputDeSerialize();
     int runTest();
-    int interpretLocally();
+    int interpret();
 };
 
 

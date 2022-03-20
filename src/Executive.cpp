@@ -8,6 +8,7 @@
 #include "pipeline/Pipeline.h"
 #include "errors/ParseError.h"
 #include "test/Runner.h"
+#include "runtime/queue/Waiter.h"
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
@@ -68,16 +69,19 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
-    if ( flagInterpretLocally ) {
-        int interpretResult = interpretLocally();
-        if ( interpretResult != 0 ) {
-            result = interpretResult;
-        }
+    int interpretResult = interpret();
+    if ( interpretResult != 0 ) {
+        result = interpretResult;
     }
 
     delete console;
     if ( _input != nullptr ) delete _input;
     return result;
+}
+
+void Executive::cleanup() {
+    Configuration::THREAD_EXIT = true;
+    swarmc::Runtime::Waiter::join();
 }
 
 // Parse the command line arguments and set up class properties
@@ -405,10 +409,10 @@ int Executive::runTest() {
     return 1;
 }
 
-int Executive::interpretLocally() {
+int Executive::interpret() {
     try {
         swarmc::Pipeline pipeline(_input);
-        pipeline.targetEvaluateLocally();
+        pipeline.targetEvaluate();
         return 0;
     } catch (...) {
         return 1;

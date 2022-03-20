@@ -1,0 +1,51 @@
+shared number n1 = 3;
+shared number n2 = 1;
+number n3 = -2;
+
+shared bool b1 = true;
+shared bool b2 = false || false;
+bool b3 = true && true;
+
+shared string s1 = "Hello, ";
+shared string s2 = "World!";
+string s3 = "!!";
+
+shared enumerable<string> e1 = ["a", "b", "c"];
+enumerable<string> e2 = ["a", "b", "c"];
+enumerable<string> e3 = e1;
+enumerable<string> e4 = [s1, s2, s3, e1[1], e2[1], e3[1]];
+
+log(boolToString(e1 == e2));
+log(boolToString(e2 == ["a", "b", "c"]));
+log(boolToString(e1 == ["a", "b", "c"]));
+
+shared map<string> m1 = {
+	entry1: "Hello, ",
+	entry2: "World!",
+	entry3: s3,
+	entry4: e4[3]
+};
+
+map<string> m2 = {
+	entry1: "Hello, ",
+	entry2: "World!",
+	entry3: "!!",
+	entry4: "b"
+};
+
+log(boolToString(m1 == m2));
+
+number test1 = (n1 + n3) + (n2 + n3) + (n1 + n2);
+log(numberToString(test1));
+shared number test2 = (n1 + n3) + (n2 + n3) + (n1 + n2);
+log(numberToString(test2));
+
+bool test3 = (b1 && b2) || (b1 && b3) || (b2 && b3);
+log(boolToString(test3));
+shared bool test4 = (b1 && b2) || (b1 && b3) || (b2 && b3);
+log(boolToString(test4));
+
+string test5 = (s1 . s2) . (s1 . s3) . (s2 . s3);
+log(test5);
+shared string test6 = (s1 . s2) . (s1 . s3) . (s2 . s3);
+log(test6);

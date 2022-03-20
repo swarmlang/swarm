@@ -6,13 +6,13 @@
 #include <ctime>
 #include <map>
 #include "../Configuration.h"
-#include "../../lib/redlock-cpp/redlock.h"
 #include "../shared/util/Console.h"
 #include "ISymbolValueStore.h"
 #include "../errors/FreeSymbolError.h"
 #include "../lang/Walk/SerializeWalk.h"
 #include "../lang/Walk/DeSerializeWalk.h"
 #include "queue/ExecutionQueue.h"
+#include "queue/Lock.h"
 
 namespace swarmc {
 namespace Runtime {
@@ -23,11 +23,10 @@ namespace Runtime {
 
         ~SharedSymbolValueStore() {
             delete _locks;
-            delete _lockCounts;
         }
 
         virtual std::string toString() const {
-            return "SharedSymbolValueStore<#locks: " + std::to_string(_locks->size()) + ">";
+            return "SharedSymbolValueStore<>";
         }
 
         virtual void setValue(Lang::SemanticSymbol* symbol, Lang::ExpressionNode* value) override {
@@ -58,59 +57,26 @@ namespace Runtime {
         }
 
         bool tryLockSymbol(Lang::SemanticSymbol* symbol) override {
-            auto pos = _locks->find(symbol->uuid());
-            if ( pos != _locks->end() ) {
-                // We already hold this lock.
-                _lockCounts->at(symbol->uuid()) += 1;
-                return true;
-            }
-
-            CLock* symbolLock = new CLock();
-            bool acquired = getRedlock()->Lock(lockKey(symbol->uuid()).c_str(), 86400000, *symbolLock);
-            if ( acquired ) {
-                _locks->insert(std::pair<std::string, CLock*>(symbol->uuid(), symbolLock));
-                _lockCounts->insert(std::pair<std::string, size_t>(symbol->uuid(), 1));
-            }
-
-            return acquired;
+            console->debug("Trying to lock symbol: " + symbol->toString());
+            return _locks->get(lockKey(symbol->uuid()))->tryToAcquire();
         }
 
         void lockSymbol(Lang::SemanticSymbol* symbol) override {
-            while ( !tryLockSymbol(symbol) ) {
-                usleep(Configuration::LOCK_SLEEP_uS);
-            }
+            _locks->get(lockKey(symbol->uuid()))->acquire();
         }
 
         void unlockSymbol(Lang::SemanticSymbol* symbol) override {
-            auto pos = _locks->find(symbol->uuid());
-            if ( pos == _locks->end() ) {
+            auto lock = _locks->get(lockKey(symbol->uuid()));
+            if ( !lock->held() ) {
                 console->warn("Tried to free lock not held by current store for symbol: " + symbol->toString());
                 return;
             }
 
-            _lockCounts->at(symbol->uuid()) -= 1;
-            if ( _lockCounts->at(symbol->uuid()) < 1 ) {
-                CLock* symbolLock = pos->second;
-                getRedlock()->Unlock(*symbolLock);
-                _locks->erase(symbol->uuid());
-                _lockCounts->erase(symbol->uuid());
-            }
+            lock->release();
         }
 
     protected:
-        static CRedLock* _redlock;
-
-        std::map<std::string, CLock*>* _locks = new std::map<std::string, CLock*>();
-        std::map<std::string, size_t>* _lockCounts = new std::map<std::string, size_t>();
-
-        static CRedLock* getRedlock() {
-            if ( _redlock == nullptr ) {
-                _redlock = new CRedLock();
-                _redlock->AddServerUrl(Configuration::REDIS_HOST.c_str(), Configuration::REDIS_PORT);
-            }
-
-            return _redlock;
-        }
+        LockManager* _locks = new LockManager;
 
         static std::string symbolKey(const std::string& uuid) {
             return Configuration::REDIS_PREFIX + "semantic_symbol_value_" + uuid;

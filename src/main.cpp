@@ -2,6 +2,8 @@
 
 int main(int argc, char** argv) {
     Executive executive;
-    return executive.run(argc, argv);
+    auto code = executive.run(argc, argv);
+    executive.cleanup();
+    return code;
 }
 

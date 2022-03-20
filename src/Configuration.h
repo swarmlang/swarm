@@ -14,6 +14,9 @@ public:
 
     static int QUEUE_SLEEP_uS;
     static int LOCK_SLEEP_uS;
+    static int WAITER_SLEEP_uS;
+
+    static bool THREAD_EXIT;
 };
 
 #endif //SWARM_CONFIGURATION_H

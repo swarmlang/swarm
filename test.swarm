@@ -1,0 +1,6 @@
+number a = 3.14;
+shared number b = 2;
+
+number c = a + b;
+log(numberToString(c));
+

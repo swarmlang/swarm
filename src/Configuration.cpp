@@ -14,3 +14,6 @@ std::string Configuration::REDIS_PREFIX = "swarm_";
 
 int Configuration::QUEUE_SLEEP_uS = 10000;
 int Configuration::LOCK_SLEEP_uS = 10000;
+int Configuration::WAITER_SLEEP_uS = 10000;
+
+bool Configuration::THREAD_EXIT = false;

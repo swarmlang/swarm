@@ -1,72 +1,62 @@
 #ifndef SWARM_WAITER_H
 #define SWARM_WAITER_H
 
-#include <pthread.h>
-#include <stdlib.h>
 #include <string>
 #include <map>
+#include <thread>
+#include <mutex>
+#include <utility>
+#include <sw/redis++/redis++.h>
 
 namespace swarmc {
 namespace Runtime {
-    void* waiterThread(std::string id);
-
-    /*struct threadArgs {
-        int tid;
-        int inc;
-        int loop;
-    } threadArgs;*/
 
     class Waiter {
     public:
         static std::map<std::string, Waiter*>* instances;
 
-        Waiter(std::string id): _id(id) {}
-
-        void wait() {
-
+        static void join() {
+            if ( _createdSubscriber ) {
+                _thread->join();
+            }
         }
 
+        explicit Waiter(std::string id): _id(std::move(id)) {}
+
+        void wait();
+
         void start() {
-            acquire();
+            std::unique_lock<std::mutex> lock(_mutex);
             _started = true;
-            release();
         }
 
         void finish() {
-            acquire();
+            std::unique_lock<std::mutex> lock(_mutex);
             _terminated = true;
-            release();
         }
 
         bool started() {
-            acquire();
-            bool val = _started;
-            release();
-            return val;
+            std::unique_lock<std::mutex> lock(_mutex);
+            return _started;
         }
 
         bool finished() {
-            acquire();
-            bool val = _terminated;
-            release();
-            return val;
+            std::unique_lock<std::mutex> lock(_mutex);
+            return _terminated;
         }
 
         std::string id() const {
             return _id;
         }
-    private:
 
-        void acquire() {
-            pthread_mutex_lock(&this->_access);
-        }
-
-        void release() {
-            pthread_mutex_unlock(&this->_access);
-        }
+    protected:
+        static bool _createdSubscriber;
+        static sw::redis::Subscriber _subscriber;
+        static void createSubscriber();
+        static std::thread* _thread;
 
         std::string _id;
-        pthread_mutex_t _access;
+        std::mutex _mutex;
         bool _terminated = false;
         bool _started = false;
     };

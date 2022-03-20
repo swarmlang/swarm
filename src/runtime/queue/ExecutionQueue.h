@@ -20,6 +20,7 @@ namespace swarmc {
 namespace Runtime {
 
     class SharedSymbolValueStore;
+    class Lock;
 
     using namespace sw::redis;
 
@@ -62,6 +63,7 @@ namespace Runtime {
         void updateStatus(const std::string& jobId, JobStatus status) {
             console->debug("Setting status of job " + jobId + " to " + statusString(status));
             getRedis()->set(statusKey(jobId), std::to_string((char) status));
+            getRedis()->publish(statusChannel(jobId), statusString(status));
         }
 
         Lang::ASTNode* evaluate(Lang::ASTNode* node) {
@@ -131,34 +133,7 @@ namespace Runtime {
             return *reason;
         }
 
-        bool workOnce() {
-            // Pop job ID from queue
-            auto nextJob = getRedis()->lpop(queueKey());
-
-            // If job exists, load AST node (else return false)
-            if ( !nextJob ) return false;
-            std::string jobId = *nextJob;
-            console->debug("Popped job for execution: " + jobId);
-
-            // Update status to running
-            updateStatus(jobId, JobStatus::RUNNING);
-
-            // Evaluate AST node - TODO
-            try {
-
-                updateStatus(jobId, JobStatus::SUCCESS);
-            } catch (const std::exception& e) {
-                updateStatus(jobId, JobStatus::FAILURE);
-                getRedis()->set(failReasonKey(jobId), e.what());
-                console->debug("Failed to execute job " + jobId + "; exception:  " + e.what());
-            } catch (...) {
-                updateStatus(jobId, JobStatus::FAILURE);
-                getRedis()->set(failReasonKey(jobId), "Caught unknown exception");
-                console->debug("Failed to execute job " + jobId + "; unknown exception");
-            }
-
-            return true;
-        }
+        bool workOnce();
 
         void workUntil(Ref<Waiter>* waiterRef) {
             auto waiter = waiterRef->get();
@@ -209,6 +184,10 @@ namespace Runtime {
             return Configuration::REDIS_PREFIX + "job_status_" + jobId;
         }
 
+        static std::string statusChannel(const std::string& jobId) {
+            return Configuration::REDIS_PREFIX + "job_status_channel_" + jobId;
+        }
+
         static std::string payloadKey(const std::string& jobId) {
             return Configuration::REDIS_PREFIX + "job_payload_" + jobId;
         }
@@ -226,6 +205,8 @@ namespace Runtime {
         }
 
         friend class SharedSymbolValueStore;
+        friend class Waiter;
+        friend class Lock;
     };
 
 }
