@@ -61,6 +61,14 @@ shared {
 	return makeBareToken(TokenKind::SHARED);
 }
 
+continue {
+	return makeBareToken(TokenKind::CONTINUE);
+}
+
+break {
+	return makeBareToken(TokenKind::BREAK);
+}
+
 "{" {
 	return makeBareToken(TokenKind::LBRACE);
 }

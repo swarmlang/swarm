@@ -2,6 +2,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <chrono>
 #include "Executive.h"
 #include "pipeline/Pipeline.h"
 #include "errors/ParseError.h"
@@ -12,6 +13,8 @@ int Executive::run(int argc, char **argv) {
 #ifdef SWARM_DEBUG
         console->verbose();
 #endif
+    auto epoch = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+    util::generator.seed(epoch);
 
     std::vector<std::string> params(argv + 1, argv + argc);
 

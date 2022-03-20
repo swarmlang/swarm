@@ -10,11 +10,11 @@ namespace swarmc {
 namespace Runtime {
     void* waiterThread(std::string id);
 
-    struct threadArgs {
+    /*struct threadArgs {
         int tid;
         int inc;
         int loop;
-    } threadArgs;
+    } threadArgs;*/
 
     class Waiter {
     public:

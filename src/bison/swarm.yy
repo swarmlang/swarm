@@ -98,6 +98,8 @@
 %token <transToken>      WHILE
 %token <transToken>      TRUE
 %token <transToken>      FALSE
+%token <transToken>      CONTINUE
+%token <transToken>      BREAK
 %token <transToken>      AND
 %token <transToken>      OR
 %token <transToken>      NOT

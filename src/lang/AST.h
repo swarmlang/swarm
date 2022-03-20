@@ -137,6 +137,26 @@ namespace Walk {
     };
 
 
+
+    class ContinueNode final : public StatementNode {
+    public:
+        ContinueNode(Position* pos) : StatementNode(pos) {}
+        virtual ~ContinueNode() {}
+
+        std::string toString() const override {
+            return "ContinueNode<>";
+        }
+
+        std::string getName() const override {
+            return "ContinueNode";
+        }
+
+        virtual ContinueNode* copy() const override {
+            return new ContinueNode(position()->copy());
+        }
+    };
+
+
     /** AST node representing code that evaluates to a value. */
     class ExpressionNode : public ASTNode {
     public:
