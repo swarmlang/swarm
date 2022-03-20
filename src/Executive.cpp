@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include "Configuration.h"
 #include "Executive.h"
 #include "pipeline/Pipeline.h"
 #include "errors/ParseError.h"
@@ -10,9 +11,10 @@
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
-#ifdef SWARM_DEBUG
+    if ( Configuration::DEBUG ) {
         console->verbose();
-#endif
+    }
+
     auto epoch = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
     util::generator.seed(epoch);
 
@@ -171,6 +173,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             noInputFile = true;
         } else if ( arg == "--locally" ) {
             flagInterpretLocally = true;
+            Configuration::FORCE_LOCAL = true;
             console->debug("Will interpret locally.");
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {

@@ -59,6 +59,14 @@ namespace Runtime {
         virtual std::string toString() const {
             return "LocalSymbolValueStore<#symbols: " + std::to_string(_map->size()) + ">";
         }
+
+        bool tryLockSymbol(Lang::SemanticSymbol* symbol) override {
+            return true;
+        }
+
+        void lockSymbol(Lang::SemanticSymbol* symbol) override {}
+
+        void unlockSymbol(Lang::SemanticSymbol* symbol) override {}
     };
 
 }

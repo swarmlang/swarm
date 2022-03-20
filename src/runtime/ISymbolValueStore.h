@@ -1,6 +1,7 @@
 #ifndef SWARM_ISYMBOLVALUESTORE_H
 #define SWARM_ISYMBOLVALUESTORE_H
 
+#include <functional>
 #include "../shared/IStringable.h"
 #include "../lang/SymbolTable.h"
 #include "../lang/AST.h"
@@ -23,6 +24,26 @@ namespace Runtime {
 
         /** Get the value of the symbol in the store. Throws FreeSymbolError if none is found. */
         virtual Lang::ExpressionNode* getValue(Lang::SemanticSymbol* symbol) = 0;
+
+        virtual bool tryLockSymbol(Lang::SemanticSymbol* symbol) = 0;
+
+        virtual void lockSymbol(Lang::SemanticSymbol* symbol) = 0;
+
+        virtual void unlockSymbol(Lang::SemanticSymbol* symbol) = 0;
+
+        template <typename TReturn>
+        TReturn withLockedSymbol(Lang::SemanticSymbol* symbol, const std::function<TReturn()>& callback) {
+            lockSymbol(symbol);
+
+            try {
+                TReturn val = callback();
+                unlockSymbol(symbol);
+                return val;
+            } catch (...) {
+                unlockSymbol(symbol);
+                throw;
+            }
+        }
     };
 
 }

@@ -3,10 +3,12 @@
 
 #include <assert.h>
 #include <math.h>
+#include "../Configuration.h"
 #include "../errors/SwarmError.h"
 #include "../lang/AST.h"
 #include "../lang/Walk/Walk.h"
 #include "LocalSymbolValueStore.h"
+#include "SharedSymbolValueStore.h"
 #include "prologue/IPrologueFunction.h"
 
 // Note: in the future, we'll need to add a RuntimePosition or similar.
@@ -21,6 +23,12 @@ namespace Runtime {
     public:
         InterpretWalk() : Lang::Walk::Walk<ASTNode*>() {
             _local = new LocalSymbolValueStore;
+
+            if ( Configuration::FORCE_LOCAL ) {
+                _shared = new LocalSymbolValueStore;
+            } else {
+                _shared = new SharedSymbolValueStore;
+            }
         }
 
         virtual std::string toString() const {
@@ -28,7 +36,8 @@ namespace Runtime {
         }
 
     protected:
-        LocalSymbolValueStore* _local;
+        ISymbolValueStore* _local;
+        ISymbolValueStore* _shared;
 
         virtual ASTNode* walkProgramNode(ProgramNode* node) {
             ASTNode* last = nullptr;
@@ -45,9 +54,12 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkIdentifierNode(IdentifierNode* node) {
-            auto value = node->getValue(_local);
-            assert(value != nullptr);
-            return value;
+            auto store = getStore(node->symbol());
+            ExpressionNode* value = nullptr;
+
+            return store->withLockedSymbol<ExpressionNode*>(node->symbol(), [store, node, value]() mutable {
+                return node->getValue(store);
+            });
         }
 
         virtual ASTNode* walkMapAccessNode(MapAccessNode* node) {
@@ -173,20 +185,24 @@ namespace Runtime {
         virtual ASTNode* walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
             // Get the current value of the lval
             auto lval = node->dest();
-            auto initialNode = lval->getValue(_local);
-            assert(initialNode->isValue() && initialNode->getName() == "NumberLiteralExpressionNode");
+            auto store = getStore(lval->lockable());
 
-            // Get the amount we're adding to it
-            ASTNode* right = walk(node->value());
-            assert(right->isValue() && right->getName() == "NumberLiteralExpressionNode");
-            auto addValue = (NumberLiteralExpressionNode*) right;
+            return store->withLockedSymbol<ExpressionNode*>(lval->lockable(), [this, node, lval, store]() mutable {
+                auto initialNode = lval->getValue(store);
+                assert(initialNode->isValue() && initialNode->getName() == "NumberLiteralExpressionNode");
 
-            // Perform the addition in Swarm
-            ASTNode* result = walk(new AddNode(node->position()->copy(), initialNode, addValue));
-            assert(result->isValue() && result->getName() == "NumberLiteralExpressionNode");
+                // Get the amount we're adding to it
+                ASTNode* right = walk(node->value());
+                assert(right->isValue() && right->getName() == "NumberLiteralExpressionNode");
+                auto addValue = (NumberLiteralExpressionNode*) right;
 
-            // Assign and return the result
-            return assign(lval, (NumberLiteralExpressionNode*) result);
+                // Perform the addition in Swarm
+                ASTNode* result = walk(new AddNode(node->position()->copy(), initialNode, addValue));
+                assert(result->isValue() && result->getName() == "NumberLiteralExpressionNode");
+
+                // Assign and return the result
+                return assign(lval, (NumberLiteralExpressionNode*) result);
+            });
         }
 
         virtual ASTNode* walkSubtractNode(SubtractNode* node) {
@@ -222,20 +238,24 @@ namespace Runtime {
         virtual ASTNode* walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
             // Get the current value of the lval
             auto lval = node->dest();
-            auto initialNode = lval->getValue(_local);
-            assert(initialNode->isValue() && initialNode->getName() == "NumberLiteralExpressionNode");
+            auto store = getStore(lval->lockable());
 
-            // Get the amount we're adding to it
-            ASTNode* right = walk(node->value());
-            assert(right->isValue() && right->getName() == "NumberLiteralExpressionNode");
-            auto addValue = (NumberLiteralExpressionNode*) right;
+            return store->withLockedSymbol<ExpressionNode*>(lval->lockable(), [this, node, lval, store]() mutable {
+                auto initialNode = lval->getValue(store);
+                assert(initialNode->isValue() && initialNode->getName() == "NumberLiteralExpressionNode");
 
-            // Perform the addition in Swarm
-            ASTNode* result = walk(new MultiplyNode(node->position()->copy(), initialNode, addValue));
-            assert(result->isValue() && result->getName() == "NumberLiteralExpressionNode");
+                // Get the amount we're adding to it
+                ASTNode* right = walk(node->value());
+                assert(right->isValue() && right->getName() == "NumberLiteralExpressionNode");
+                auto addValue = (NumberLiteralExpressionNode*) right;
 
-            // Assign and return the result
-            return assign(lval, (NumberLiteralExpressionNode*) result);
+                // Perform the addition in Swarm
+                ASTNode* result = walk(new MultiplyNode(node->position()->copy(), initialNode, addValue));
+                assert(result->isValue() && result->getName() == "NumberLiteralExpressionNode");
+
+                // Assign and return the result
+                return assign(lval, (NumberLiteralExpressionNode*) result);
+            });
         }
 
         virtual ASTNode* walkDivideNode(DivideNode* node) {
@@ -434,26 +454,42 @@ namespace Runtime {
 
         virtual ASTNode* walkAssignExpressionNode(AssignExpressionNode* node) {
             LValNode* lval = node->dest();
-            ASTNode* rvalNode = walk(node->value());
-            assert(rvalNode->isExpression() && rvalNode->isValue());
-            ExpressionNode* rval = (ExpressionNode*) rvalNode;
-
-            return assign(lval, rval);
+            return getStore(lval->lockable())
+                ->withLockedSymbol<ExpressionNode*>(lval->lockable(), [this, node, lval]() mutable {
+                    ASTNode* rvalNode = walk(node->value());
+                    assert(rvalNode->isExpression() && rvalNode->isValue());
+                    auto rval = (ExpressionNode*) rvalNode;
+                    return assign(lval, rval);
+                });
         }
 
         virtual ExpressionNode* assign(LValNode* lval, ExpressionNode* rval) {
-            // TODO get shared status and copy if necessary
-            if ( rval->type()->isPrimitiveType() ) rval = rval->copy();
-            lval->setValue(_local, rval);
-            return rval;
+            auto store = getStore(lval->lockable());
+
+            return store->withLockedSymbol<ExpressionNode*>(lval->lockable(), [lval, rval, store]() mutable {
+                if ( rval->type()->isPrimitiveType() ) rval = rval->copy();
+                lval->setValue(store, rval);
+                return rval;
+            });
         }
 
         virtual ASTNode* walkEnumerableAccessNode(EnumerableAccessNode* node) override {
-            return node->getValue(_local);
+            auto store = getStore(node->lockable());
+            return store->withLockedSymbol<ExpressionNode*>(node->lockable(), [node, store]() mutable {
+                return node->getValue(store);
+            });
         }
 
         virtual ASTNode* walkUnitNode(UnitNode* node) override {
             return node;
+        }
+
+        virtual ISymbolValueStore* getStore(SemanticSymbol* symbol) {
+            if ( symbol->shared() ) {
+                return _shared;
+            }
+
+            return _local;
         }
     };
 

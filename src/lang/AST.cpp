@@ -59,6 +59,10 @@ namespace Lang {
         return mapNode->getKey(_end);
     }
 
+    SemanticSymbol* MapAccessNode::lockable() const {
+        return _path->lockable();
+    }
+
     void EnumerableAccessNode::setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) {
         // Get the lval we are keying into
         auto node = _path->getValue(store);
@@ -83,6 +87,10 @@ namespace Lang {
         auto enumNode = (EnumerationLiteralExpressionNode*) node;
         size_t idx = _index->value();  // fixme invalid cast?
         return enumNode->getIndex(idx);
+    }
+
+    SemanticSymbol* EnumerableAccessNode::lockable() const {
+        return _path->lockable();
     }
 
 }

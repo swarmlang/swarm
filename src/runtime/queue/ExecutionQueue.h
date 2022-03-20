@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <sstream>
 #include <sw/redis++/redis++.h>
+#include "../../Configuration.h"
 #include "../../shared/IStringable.h"
 #include "../../shared/util/Console.h"
 #include "../../shared/uuid.h"
@@ -17,6 +18,8 @@
 
 namespace swarmc {
 namespace Runtime {
+
+    class SharedSymbolValueStore;
 
     using namespace sw::redis;
 
@@ -165,7 +168,7 @@ namespace Runtime {
                 if ( !workOnce() ) {
                     // No job was executed. Sleep for a bit to prevent CPU hogging
                     console->debug("No jobs found to execute. Sleeping...");
-                    usleep(10000);  // 10 ms; might need to tune this
+                    usleep(Configuration::QUEUE_SLEEP_uS);
                 }
             }
 
@@ -180,8 +183,8 @@ namespace Runtime {
                 Console::get()->debug("Connecting to Redis...");
 
                 ConnectionOptions opts;
-                opts.host = "127.0.0.1";  // FIXME allow dynamic configuration
-                opts.port = 6379;
+                opts.host = Configuration::REDIS_HOST;
+                opts.port = Configuration::REDIS_PORT;
                 opts.socket_timeout = std::chrono::milliseconds(0);
 
                 _redis = new Redis(opts);
@@ -203,24 +206,26 @@ namespace Runtime {
         }
 
         static std::string statusKey(const std::string& jobId) {
-            return "swarm_job_status_" + jobId;
+            return Configuration::REDIS_PREFIX + "job_status_" + jobId;
         }
 
         static std::string payloadKey(const std::string& jobId) {
-            return "swarm_job_payload_" + jobId;
+            return Configuration::REDIS_PREFIX + "job_payload_" + jobId;
         }
 
         static std::string resultKey(const std::string& jobId) {
-            return "swarm_job_result_" + jobId;
+            return Configuration::REDIS_PREFIX + "job_result_" + jobId;
         }
 
         static std::string failReasonKey(const std::string& jobId) {
-            return "swarm_job_fail_reason_" + jobId;
+            return Configuration::REDIS_PREFIX + "job_fail_reason_" + jobId;
         }
 
         static std::string queueKey() {
-            return "swarm_job_queue";
+            return Configuration::REDIS_PREFIX + "job_queue";
         }
+
+        friend class SharedSymbolValueStore;
     };
 
 }

@@ -268,6 +268,8 @@ namespace Walk {
 
         virtual bool shared() const = 0;
 
+        virtual SemanticSymbol* lockable() const = 0;
+
         virtual LValNode* copy() const override = 0;
     };
 
@@ -289,6 +291,10 @@ namespace Walk {
         /** Get the semantic symbol associated with this identifier in its scope. */
         SemanticSymbol* symbol() const {
             return _symbol;
+        }
+
+        SemanticSymbol* lockable() const override {
+            return symbol();
         }
 
         void overrideSymbol(SemanticSymbol* sym) {
@@ -351,6 +357,8 @@ namespace Walk {
         virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) override;
 
         virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
+
+        SemanticSymbol* lockable() const override;
 
         virtual bool shared() const override {
             return _path->shared();
@@ -1573,7 +1581,7 @@ namespace Walk {
 
     protected:
         MapBody* _body;
-        TypeNode* _disambiguationType;
+        TypeNode* _disambiguationType = nullptr;
 
         virtual MapStatementNode* getBodyNode(IdentifierNode* name) const {
             for ( auto stmt : *_body ) {
@@ -1719,6 +1727,8 @@ namespace Walk {
         ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
 
         void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) override;
+
+        SemanticSymbol* lockable() const override;
 
         virtual bool shared() const override {
             return _path->shared();
