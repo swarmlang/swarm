@@ -28,8 +28,8 @@ protected:
     bool flagOutputParse = false;
     bool flagOutputSerialize = false;
     bool flagOutputDeSerialize = false;
-    bool flagInterpretLocally = false;
     bool flagRunTest = false;
+    bool flagClearQueue = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;

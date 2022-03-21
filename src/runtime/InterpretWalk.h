@@ -52,13 +52,11 @@ namespace Runtime {
         ExecutionQueue* _queue;
 
         virtual ASTNode* walkProgramNode(ProgramNode* node) {
-            ASTNode* last = nullptr;
-
             for ( auto stmt : *node->body() ) {
-                last = walk(stmt);
+                walk(stmt);
             }
 
-            return last;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkExpressionStatementNode(ExpressionStatementNode* node) {
@@ -85,15 +83,15 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
-            return nullptr;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkEnumerableTypeNode(EnumerableTypeNode* node) {
-            return nullptr;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkMapTypeNode(MapTypeNode* node) {
-            return nullptr;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {
@@ -432,7 +430,7 @@ namespace Runtime {
                 }
             }
 
-            return nullptr;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
@@ -440,7 +438,7 @@ namespace Runtime {
                 walk(stmt);
             }
 
-            return nullptr;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkWithStatement(WithStatement* node) {
@@ -451,7 +449,7 @@ namespace Runtime {
                 walk(stmt);
             }
 
-            return nullptr;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkIfStatement(IfStatement* node) {
@@ -465,7 +463,7 @@ namespace Runtime {
                 }
             }
 
-            return nullptr;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkWhileStatement(WhileStatement* node) {
@@ -483,7 +481,7 @@ namespace Runtime {
                 condVal = (BooleanLiteralExpressionNode*) cond;
             }
 
-            return nullptr;
+            return new UnitNode(node->position()->copy());
         }
 
         virtual ASTNode* walkMapStatementNode(MapStatementNode* node) {

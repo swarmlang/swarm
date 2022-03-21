@@ -29,7 +29,10 @@ void Waiter::createSubscriber() {
 
             // Try to find a Waiter we have for that ID
             auto result = instances->find(jobId);
-            if ( result == instances->end() ) return;
+            if ( result == instances->end() ) {
+                Console::get()->debug("No waiter for job ID: " + jobId);
+                return;
+            }
 
             // If we have one, mark it finished if the status is a final state
             Waiter* waiter = result->second;
@@ -37,6 +40,7 @@ void Waiter::createSubscriber() {
                 message == ExecutionQueue::statusString(JobStatus::SUCCESS)
                 || message == ExecutionQueue::statusString(JobStatus::FAILURE)
             ) {
+                Console::get()->debug("Notifying waiter of job execution finish.");
                 waiter->finish();
                 instances->erase(jobId);
             }
@@ -44,6 +48,7 @@ void Waiter::createSubscriber() {
 
         _thread = new std::thread([]() mutable {
             while ( !Configuration::THREAD_EXIT ) {
+                Console::get()->debug("Consuming subscriber.");
                 _subscriber.consume();
                 std::this_thread::sleep_for(std::chrono::microseconds(Configuration::WAITER_SLEEP_uS));
             }

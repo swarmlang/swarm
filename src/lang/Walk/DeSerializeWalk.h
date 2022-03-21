@@ -53,8 +53,7 @@ namespace Walk {
 
         ASTNode* walk(nlohmann::json prog) {
             std::string name = prog["astNodeName"];
-            console->debug("Walking "+name);
-            Position* pos = new Position(
+            auto pos = new Position(
                     prog["position"]["startLine"],
                     prog["position"]["endLine"],
                     prog["position"]["startCol"],

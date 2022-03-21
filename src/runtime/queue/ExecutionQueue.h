@@ -50,6 +50,20 @@ namespace Runtime {
             return "UNKNOWN";
         }
 
+        static void forceClearQueue() {
+            while ( true ) {
+                auto result = getRedis()->lpop(queueKey());
+                if ( !result ) break;
+
+                auto jobId = *result;
+
+                getRedis()->del(payloadKey(jobId));
+                getRedis()->del(localsKey(jobId));
+                getRedis()->del(statusKey(jobId));
+                getRedis()->del(resultKey(jobId));
+            }
+        }
+
         JobStatus getStatus(const std::string& jobId) {
             auto status = getRedis()->get(statusKey(jobId));
 
@@ -57,7 +71,11 @@ namespace Runtime {
                 return (JobStatus) std::stoi(*status);
             }
 
-            console->debug("Unable to retrieve status of job ID: " + jobId);
+            console->warn("Unable to retrieve status of job ID: " + jobId);
+            console->debug([jobId]() {
+                throw Errors::QueueExecutionError("Unable to retrieve status of job ID: " + jobId);
+            });
+
             return JobStatus::UNKNOWN;
         }
 

@@ -133,6 +133,14 @@ Console* Console::debug(std::string text) {
     return this;
 }
 
+Console* Console::debug(const std::function<void()>& fn) {
+    if ( _debug ) {
+        fn();
+    }
+
+    return this;
+}
+
 Console* Console::debug() {
     _debug_capture = true;
     return this;

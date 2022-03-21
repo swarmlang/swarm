@@ -4,3 +4,5 @@ enumerate strs as str {
     log(str);
 }
 
+log("All done!");
+

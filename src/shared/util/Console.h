@@ -1,6 +1,7 @@
 #ifndef SWARMC_CONSOLE_H
 #define SWARMC_CONSOLE_H
 
+#include <functional>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -119,6 +120,7 @@ public:
     Console* success(std::string text);
     Console* debug(std::string text);
     Console* debug();
+    Console* debug(const std::function<void()>&);
     Console* end();
 
     bool isDebug();

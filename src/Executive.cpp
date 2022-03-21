@@ -9,6 +9,7 @@
 #include "errors/ParseError.h"
 #include "test/Runner.h"
 #include "runtime/queue/Waiter.h"
+#include "runtime/queue/ExecutionQueue.h"
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
@@ -29,6 +30,11 @@ int Executive::run(int argc, char **argv) {
     int result = 0;
 
     console->debug("Got input file: " + inputFile);
+
+    if ( flagClearQueue ) {
+        swarmc::Runtime::ExecutionQueue::forceClearQueue();
+        console->success("Force cleared queue.");
+    }
 
     if ( flagRunTest ) {
         return runTest();
@@ -176,9 +182,11 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             skipOne = true;
             noInputFile = true;
         } else if ( arg == "--locally" ) {
-            flagInterpretLocally = true;
             Configuration::FORCE_LOCAL = true;
             console->debug("Will interpret locally.");
+        } else if ( arg == "--clear-queue" ) {
+            flagClearQueue = true;
+            console->debug("Will force-clear queue.");
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --run-test. Pass --help for more info.");
@@ -239,6 +247,10 @@ void Executive::printUsage() {
 
     console->bold()->print("  --locally  :  ", true)
         ->line("Evaluate the given Swarm program without connecting to remote executors.")
+        ->line();
+
+    console->bold()->print("  --clear-queue  :  ", true)
+        ->line("Force clear any jobs in the Redis queue.")
         ->line();
 
     console->bold()->print("  --output-to <OUTFILE>  :  ", true)
