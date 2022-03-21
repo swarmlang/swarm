@@ -335,6 +335,18 @@ namespace Walk {
             return es;
         }
 
+        virtual CapturedBlockStatementNode* walkCapturedBlockStatementNode(JSONList body, Position* pos) {
+            auto block = new CapturedBlockStatementNode(pos);
+
+            for ( auto stmt : body ) {
+                ASTNode* s = walk(stmt);
+                assert(s->isStatement());
+                block->pushStatement((StatementNode*) s);
+            }
+
+            return block;
+        }
+
         virtual WithStatement* walkWithStatement(JSONList body, nlohmann::json localjson, nlohmann::json resjson, Position* pos) {
             ASTNode* local = walk(localjson);
             ASTNode* res = walk(resjson);
@@ -477,6 +489,7 @@ namespace Walk {
             else if ( name == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode(prog["value"],pos);
             else if ( name == "UnitNode" ) return walkUnitNode(pos);
             else if ( name == "NumericComparisonExpressionNode" ) return walkNumericComparisonExpressionNode(prog["left"], prog["right"], prog["comparisonType"], pos);
+            else if ( name == "CapturedBlockStatementNode" ) return walkCapturedBlockStatementNode(prog["body"], pos);
             assert(false);
         }
     

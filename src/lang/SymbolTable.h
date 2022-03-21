@@ -84,7 +84,7 @@ namespace Walk {
     class VariableSymbol : public SemanticSymbol {
     public:
         VariableSymbol(std::string name, const Type* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
-        
+
         virtual SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::VARIABLE;
         }

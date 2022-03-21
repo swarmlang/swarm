@@ -75,20 +75,50 @@ namespace Runtime {
             workUntil(waiterRef);
 
             // Make sure it evaluated successfully
-            auto status = getStatus(waiter->get()->id());
+            auto status = getStatus(waiter->id());
             if ( status == JobStatus::FAILURE ) {
-                throw Errors::QueueExecutionError(getFailureReason(waiter->get()->id()));
+                throw Errors::QueueExecutionError(getFailureReason(waiter->id()));
             } else if ( status == JobStatus::UNKNOWN ) {
                 throw Errors::QueueExecutionError("Job status transitioned to UNKNOWN.");
             }
 
             // Get the result and return it
-            auto result = getResult(waiter->get()->id());
+            auto result = getResult(waiter->id());
             delete waiter;
             return result;
         }
 
-        Ref<Waiter>* queue(Lang::ASTNode* node) {
+        void bulkEvaluate(Lang::StatementList* nodes) {
+            auto waiterRefs = new std::vector<RefInstance<Waiter>*>;
+
+            // Queue all of the nodes to be evaluated
+            for ( auto node : *nodes ) {
+                waiterRefs->push_back(queue(node));
+            }
+
+            // Wait for all of the nodes to finish evaluating
+            for ( auto ref : *waiterRefs ) {
+                auto waiter = ref->get();
+
+                // Do background work until the job finishes
+                workUntil(ref);
+
+                // Make sure it evaluated successfully
+                auto status = getStatus(waiter->id());
+                if ( status == JobStatus::FAILURE ) {
+                    throw Errors::QueueExecutionError(getFailureReason(waiter->id()));
+                } else if ( status == JobStatus::UNKNOWN ) {
+                    throw Errors::QueueExecutionError("Job status transitioned to UNKNOWN.");
+                }
+
+                // Drop the ref
+                delete waiter;
+            }
+
+            delete waiterRefs;
+        }
+
+        RefInstance<Waiter>* queue(Lang::ASTNode* node) {
             std::string jobId = util::uuid4();
 
             // Push node to queue
@@ -104,10 +134,9 @@ namespace Runtime {
 
             auto waiterInst = waiterRef->get();
             waiterInst->get()->wait();
-            delete waiterInst;
 
             // Return ref to waiter
-            return waiterRef;
+            return waiterInst;
         }
 
         Lang::ASTNode* getResult(const std::string& jobId) {
@@ -135,11 +164,11 @@ namespace Runtime {
 
         bool workOnce();
 
-        void workUntil(Ref<Waiter>* waiterRef) {
+        void workUntil(RefInstance<Waiter>* waiterRef) {
             auto waiter = waiterRef->get();
 
-            console->debug("Starting work cycle while waiting for job ID: " + waiter->get()->id());
-            while ( !waiter->get()->finished() ) {
+            console->debug("Starting work cycle while waiting for job ID: " + waiter->id());
+            while ( !waiter->finished() ) {
                 if ( !workOnce() ) {
                     // No job was executed. Sleep for a bit to prevent CPU hogging
                     console->debug("No jobs found to execute. Sleeping...");
@@ -150,7 +179,7 @@ namespace Runtime {
             delete waiter;
         }
     protected:
-        RefPool<Waiter>* _waiterPool;
+        RefPool<Waiter>* _waiterPool = new RefPool<Waiter>;
         static Redis* _redis;
 
         static Redis* getRedis() {

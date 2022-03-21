@@ -1,6 +1,6 @@
-number a = 3.14;
-shared number b = 2;
+enumerable<string> strs = ["Hello", "World", "Of", "Strings"];
 
-number c = a + b;
-log(numberToString(c));
+enumerate strs as str {
+    log(str);
+}
 

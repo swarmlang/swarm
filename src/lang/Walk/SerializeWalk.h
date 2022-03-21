@@ -319,6 +319,18 @@ namespace Walk {
             return obj;
         }
 
+        virtual nlohmann::json* walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
+            nlohmann::json* obj = getJSON();
+
+            std::vector<nlohmann::json>* body = getVector();
+            for ( auto stmt : *node->body() ) {
+                body->push_back(*walk(stmt));
+            }
+
+            (*obj)["body"] = *body;
+            return obj;
+        }
+
         virtual nlohmann::json* walkWithStatement(WithStatement* node) {
             nlohmann::json* obj = getJSON();
 

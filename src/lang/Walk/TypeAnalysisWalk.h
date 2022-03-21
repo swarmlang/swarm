@@ -381,6 +381,17 @@ protected:
         return true;
     }
 
+    virtual bool walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
+        for ( auto stmt : *node->body() ) {
+            if ( !walk(stmt) ) {
+                return false;
+            }
+        }
+
+        _types->setTypeOf(node, PrimitiveType::of(ValueType::TUNIT, false));
+        return true;
+    }
+
     virtual bool walkEnumerationStatement(EnumerationStatement* node) {
         if ( !walk(node->enumerable()) ) {
             return false;

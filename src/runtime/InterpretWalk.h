@@ -7,9 +7,13 @@
 #include "../errors/SwarmError.h"
 #include "../lang/AST.h"
 #include "../lang/Walk/Walk.h"
+#include "../lang/Walk/NameAnalysisWalk.h"
+#include "../lang/Walk/SymbolScrubWalk.h"
 #include "LocalSymbolValueStore.h"
 #include "SharedSymbolValueStore.h"
 #include "prologue/IPrologueFunction.h"
+#include "queue/Waiter.h"
+#include "queue/ExecutionQueue.h"
 
 // Note: in the future, we'll need to add a RuntimePosition or similar.
 //       Right now, positions are copied from the node being evaluated. - GM
@@ -40,6 +44,7 @@ namespace Runtime {
     protected:
         ISymbolValueStore* _local;
         ISymbolValueStore* _shared;
+        ExecutionQueue* _queue = new ExecutionQueue;
 
         virtual ASTNode* walkProgramNode(ProgramNode* node) {
             ASTNode* last = nullptr;
@@ -65,9 +70,13 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkMapAccessNode(MapAccessNode* node) {
-            auto value = node->getValue(_local);
-            assert(value != nullptr);
-            return value;
+            auto store = getStore(node->lockable());
+
+            return store->withLockedSymbol<ExpressionNode*>(node->lockable(), [this, node, store]() mutable {
+                auto value = node->getValue(store);
+                assert(value != nullptr);
+                return value;
+            });
         }
 
         virtual ASTNode* walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
@@ -374,14 +383,56 @@ namespace Runtime {
             assert(val->getName() == "EnumerationLiteralExpressionNode");
             EnumerationLiteralExpressionNode* enumVal = (EnumerationLiteralExpressionNode*) val;
 
-            IdentifierNode* local = node->local();  // TODO account for sharedness
+            if ( Configuration::FORCE_LOCAL ) {
+                IdentifierNode* local = node->local();
+                for ( auto entry : *enumVal->actuals() ) {
+                    assign(local, entry);
 
-            for ( auto entry : *enumVal->actuals() ) {
-                assign(local, entry);
-
-                for ( auto stmt : *node->body() ) {
-                    walk(stmt);
+                    for ( auto stmt : *node->body() ) {
+                        walk(stmt);
+                    }
                 }
+            } else {
+                size_t limit = Configuration::ENUMERATION_UNROLLING_LIMIT;
+                auto actuals = *enumVal->actuals();
+
+                size_t batches = actuals.size() / limit + (actuals.size() % limit != 0);
+                size_t i = 0;
+                for ( size_t batch_i = 1; batch_i <= batches; batch_i += 1 ) {
+                    StatementList list;
+
+                    for ( ; i < (limit * batch_i) && i < actuals.size(); i += 1 ) {
+                        auto runBlock = new CapturedBlockStatementNode(node->position()->copy());
+
+                        auto decl = new VariableDeclarationNode(
+                            node->position()->copy(),
+                            TypeNode::newForType(node->local()->type()->copy()),
+                            node->local()->copy(),
+                            actuals[i]->copy()
+                        );
+
+                        runBlock->pushStatement(decl);
+                        runBlock->assumeAndReduceStatements(node->copyBody());
+
+                        Lang::Walk::SymbolScrubWalk scrub(node->local()->symbol());
+                        scrub.walk(runBlock);
+
+                        Lang::Walk::NameAnalysisWalk nameAnalysis;
+                        assert(nameAnalysis.walk(runBlock));
+
+                        list.push_back(runBlock);
+                    }
+
+                    _queue->bulkEvaluate(&list);
+                }
+            }
+
+            return nullptr;
+        }
+
+        virtual ASTNode* walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
+            for ( auto stmt : *node->body() ) {
+                walk(stmt);
             }
 
             return nullptr;

@@ -24,6 +24,7 @@ namespace Walk {
     class NameAnalysisWalk;
     class TypeAnalysisWalk;
     class DeSerializeWalk;
+    class SymbolScrubWalk;
 }
 
     class StatementNode;
@@ -330,6 +331,7 @@ namespace Walk {
         friend class Walk::NameAnalysisWalk;
         friend class Walk::TypeAnalysisWalk;
         friend class Walk::DeSerializeWalk;
+        friend class Walk::SymbolScrubWalk;
     };
 
     /** Node for accessing data from a map */
@@ -381,6 +383,8 @@ namespace Walk {
     /** Base class for AST nodes referencing types. */
     class TypeNode : public ASTNode {
     public:
+        static TypeNode* newForType(Type* type);
+
         TypeNode(Position* pos) : ASTNode(pos) {}
         virtual ~TypeNode() {}
 
@@ -1269,7 +1273,13 @@ namespace Walk {
             _body = new StatementList();
         }
 
-        virtual ~BlockStatementNode() {}
+        virtual ~BlockStatementNode() {
+            for ( auto stmt : *_body ) {
+                delete stmt;
+            }
+
+            delete _body;
+        }
 
         /** Push a new statement to the end of the body. */
         void pushStatement(StatementNode* statement) {
@@ -1301,6 +1311,29 @@ namespace Walk {
         virtual BlockStatementNode* copy() const override = 0;
     protected:
         StatementList* _body;
+    };
+
+
+    /** Internal node used by the runtime. Represents a single block of statements. */
+    class CapturedBlockStatementNode final : public BlockStatementNode {
+    public:
+        CapturedBlockStatementNode(Position* pos) : BlockStatementNode(pos) {}
+
+        virtual ~CapturedBlockStatementNode() {}
+
+        virtual std::string getName() const override {
+            return "CapturedBlockStatementNode";
+        }
+
+        virtual std::string toString() const override {
+            return "CapturedBlockStatementNode<>";
+        }
+
+        virtual CapturedBlockStatementNode* copy() const override {
+            auto other = new CapturedBlockStatementNode(position()->copy());
+            other->assumeAndReduceStatements(copyBody());
+            return other;
+        }
     };
 
 
@@ -1339,6 +1372,7 @@ namespace Walk {
         bool _shared;
 
         friend class Walk::NameAnalysisWalk;
+        friend class Walk::SymbolScrubWalk;
     };
 
 

@@ -16,6 +16,8 @@ public:
     static int LOCK_SLEEP_uS;
     static int WAITER_SLEEP_uS;
 
+    static size_t ENUMERATION_UNROLLING_LIMIT;
+
     static bool THREAD_EXIT;
 };
 

@@ -67,7 +67,7 @@ public:
     }
 
     Ref<T>* alloc(T* item) {
-        Ref<T>* ref = new Ref<T>(item, this);
+        auto* ref = new Ref<T>(item, this);
         refs->push_back(ref);
         return ref;
     }

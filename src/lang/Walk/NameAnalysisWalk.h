@@ -37,6 +37,10 @@ protected:
     }
 
     virtual bool walkIdentifierNode(IdentifierNode* node) {
+        if ( node->_symbol != nullptr ) {
+            return true;
+        }
+
         std::string name = node->name();
         node->_symbol = _symbols->lookup(name);
 
@@ -73,6 +77,10 @@ protected:
     }
 
     virtual bool walkVariableDeclarationNode(VariableDeclarationNode* node) {
+        if ( node->id()->symbol() != nullptr ) {
+            return true;
+        }
+
         std::string name = node->id()->name();
         Type* type = node->typeNode()->type();
 
@@ -139,6 +147,7 @@ protected:
     }
 
     virtual bool walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
+        if ( !walk(node->value()) ) return false;
         return walkAssignExpressionNode(node);
     }
 
@@ -155,6 +164,7 @@ protected:
     }
 
     virtual bool walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
+        if ( !walk(node->value()) ) return false;
         return walkAssignExpressionNode(node);
     }
 
@@ -217,39 +227,47 @@ protected:
 
         // Need to register the block-local variable
         // Its type is implicit as the generic type of the enumerable
-        std::string name = node->local()->name();
-        Position* pos = node->local()->position();
-        Type* type = nullptr;
+        bool inScope = false;
+        if ( node->local()->symbol() == nullptr ) {
+            std::string name = node->local()->name();
+            Position* pos = node->local()->position();
+            Type* type = nullptr;
 
-        // Try to look up the generic type of the enumerable
-        const Type* enumType = node->enumerable()->symbol()->type();
-        if ( enumType->kind() == TypeKind::KGENERIC ) {
-            GenericType* enumGenericType = (GenericType*) enumType;
-            type = enumGenericType->concrete();
+            // Try to look up the generic type of the enumerable
+            const Type* enumType = node->enumerable()->symbol()->type();
+            if ( enumType->kind() == TypeKind::KGENERIC ) {
+                GenericType* enumGenericType = (GenericType*) enumType;
+                type = enumGenericType->concrete();
 
-            if ( type->isPrimitiveType() ) {
-                type = PrimitiveType::of(type->valueType(), node->_shared);
-            } else if ( type->isGenericType() ) {
-                type = type->copy();
-                type->setShared(node->_shared);
-            } else if ( type->isFunctionType() ) {
-                type = type->copy();
-                type->setShared(node->_shared);
+                if ( type->isPrimitiveType() ) {
+                    type = PrimitiveType::of(type->valueType(), node->_shared);
+                } else if ( type->isGenericType() ) {
+                    type = type->copy();
+                    type->setShared(node->_shared);
+                } else if ( type->isFunctionType() ) {
+                    type = type->copy();
+                    type->setShared(node->_shared);
+                }
+            }
+
+            // Start a new scope in the body and add the local
+            _symbols->enter();
+            inScope = true;
+            _symbols->addVariable(name, type, pos);
+
+            if ( !walk(node->local()) ) {
+                _symbols->leave();
+                return false;
             }
         }
 
-        // Start a new scope in the body and add the local
-        _symbols->enter();
-        _symbols->addVariable(name, type, pos);
-
-        if ( !walk(node->local()) ) {
-            _symbols->leave();
-            return false;
-        }
-
         bool bodyResult = walkBlockStatementNode(node);
-        _symbols->leave();
+        if ( inScope ) _symbols->leave();
         return bodyResult;
+    }
+
+    virtual bool walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
+        return walkBlockStatementNode(node);
     }
 
     virtual bool walkWithStatement(WithStatement* node) {
@@ -259,24 +277,28 @@ protected:
 
         // need to register the block-local variable
         // Its type is implicit as the result of the expression
-        std::string name = node->local()->name();
-        Position* pos = node->local()->position();
-        Type* type = nullptr;
+        bool inScope = false;
+        if ( node->local()->symbol() == nullptr ) {
+            std::string name = node->local()->name();
+            Position* pos = node->local()->position();
+            Type* type = nullptr;
 
-        // Note that the type of the local depends on the type of the expression,
-        // since it is implicitly defined. This is handled in typeAnalysis.
+            // Note that the type of the local depends on the type of the expression,
+            // since it is implicitly defined. This is handled in typeAnalysis.
 
-        // Start a new scope in the body and add the local
-        _symbols->enter();
-        _symbols->addVariable(name, type, pos);
+            // Start a new scope in the body and add the local
+            _symbols->enter();
+            inScope = true;
+            _symbols->addVariable(name, type, pos);
 
-        if ( !walk(node->local()) ) {
-            _symbols->leave();
-            return false;
+            if ( !walk(node->local()) ) {
+                _symbols->leave();
+                return false;
+            }
         }
 
         bool bodyResult = walkBlockStatementNode(node);
-        _symbols->leave();
+        if ( inScope ) _symbols->leave();
         return bodyResult;
     }
 

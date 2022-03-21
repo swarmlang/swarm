@@ -16,4 +16,6 @@ int Configuration::QUEUE_SLEEP_uS = 10000;
 int Configuration::LOCK_SLEEP_uS = 10000;
 int Configuration::WAITER_SLEEP_uS = 10000;
 
+size_t Configuration::ENUMERATION_UNROLLING_LIMIT = 200;
+
 bool Configuration::THREAD_EXIT = false;
