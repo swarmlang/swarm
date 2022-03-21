@@ -26,10 +26,20 @@ namespace Runtime {
             delete _map;
         }
 
+        virtual std::string serialize();
+
+        virtual void deserialize(std::string payload);
+
         virtual void setValue(Lang::SemanticSymbol* symbol, Lang::ExpressionNode* value) override {
-            auto search = _map->find(symbol);
-            if ( search != _map->end() ) {
-                _map->erase(symbol);
+            auto iterator = _map->begin();
+            while ( iterator != _map->end() ) {
+                auto potentialSymbol = iterator->first;
+                if ( potentialSymbol->uuid() == symbol->uuid() ) {
+                    _map->erase(potentialSymbol);
+                    break;
+                }
+
+                iterator++;
             }
 
             console->debug("Set: " + symbol->name() + ", Value: " + value->toString());
@@ -39,9 +49,14 @@ namespace Runtime {
         virtual Lang::ExpressionNode* tryGetValue(Lang::SemanticSymbol* symbol) override {
             assert(symbol != nullptr);
 
-            auto search = _map->find(symbol);
-            if ( search != _map->end() ) {
-                return search->second;
+            auto iterator = _map->begin();
+            while ( iterator != _map->end() ) {
+                auto potentialSymbol = iterator->first;
+                if ( potentialSymbol->uuid() == symbol->uuid() ) {
+                    return iterator->second;
+                }
+
+                iterator++;
             }
 
             return nullptr;

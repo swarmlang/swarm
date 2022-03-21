@@ -26,6 +26,10 @@ namespace Walk {
             return walk(node)->dump(4);
         }
 
+        virtual std::string semanticSymbolToJSON(SemanticSymbol* symbol) {
+            return walkSemanticSymbol(symbol)->dump(4);
+        }
+
         virtual nlohmann::json* walk(ASTNode* node) {
             nlohmann::json* obj = Lang::Walk::Walk<nlohmann::json*>::walk(node);
             (*obj)["position"] = *walkPosition(node->position());
@@ -36,6 +40,19 @@ namespace Walk {
 
         virtual std::string toString() const {
             return "SerializeWalk<>";
+        }
+
+        virtual nlohmann::json* walkSemanticSymbol(SemanticSymbol* sym) {
+            nlohmann::json* obj = getJSON();
+
+            (*obj)["name"] = sym->name();
+            (*obj)["uuid"] = sym->uuid();
+            (*obj)["kind"] = sym->kind();
+            (*obj)["isPrologue"] = sym->isPrologue();
+            (*obj)["type"] = *walkType(sym->type());
+            (*obj)["declaredAt"] = *walkPosition(sym->declaredAt());
+
+            return obj;
         }
 
     protected:
@@ -435,19 +452,6 @@ namespace Walk {
             (*obj)["endLine"] = pos->endLine();
             (*obj)["startCol"] = pos->startCol();
             (*obj)["endCol"] = pos->endCol();
-
-            return obj;
-        }
-
-        virtual nlohmann::json* walkSemanticSymbol(SemanticSymbol* sym) {
-            nlohmann::json* obj = getJSON();
-
-            (*obj)["name"] = sym->name();
-            (*obj)["uuid"] = sym->uuid();
-            (*obj)["kind"] = sym->kind();
-            (*obj)["isPrologue"] = sym->isPrologue();
-            (*obj)["type"] = *walkType(sym->type());
-            (*obj)["declaredAt"] = *walkPosition(sym->declaredAt());
 
             return obj;
         }

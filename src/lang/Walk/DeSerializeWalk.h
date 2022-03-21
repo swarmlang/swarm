@@ -21,6 +21,87 @@ namespace Walk {
             auto program = nlohmann::json::parse(strinput);
             return walk(program);
         }
+
+        virtual SemanticSymbol* deserializeSemanticSymbol(std::istream* input) {
+            std::string strinput = inputToString(*input);
+            auto symbol = nlohmann::json::parse(strinput);
+            return walkSymbol(symbol);
+        }
+
+        virtual SemanticSymbol* walkSymbol(nlohmann::json symjson) {
+            std::string uuid = symjson["uuid"];
+            auto loc = _uuidList.find(uuid);
+            if (loc != _uuidList.end()) return loc->second;
+            std::string name = symjson["name"];
+            Type* type = walkType(symjson["type"]);
+            Position* pos = new Position(
+                    symjson["declaredAt"]["startLine"],
+                    symjson["declaredAt"]["endLine"],
+                    symjson["declaredAt"]["startCol"],
+                    symjson["declaredAt"]["endCol"]);
+            SemanticSymbol* sym;
+            if (type->isFunctionType() && symjson["isPrologue"] ) {
+                sym = new PrologueFunctionSymbol(name,(FunctionType*) type,pos);
+            } else if (type->isFunctionType()) {
+                sym = new FunctionSymbol(name,(FunctionType*) type,pos);
+            } else {
+                sym = new VariableSymbol(name,type,pos);
+            }
+            sym->_uuid = uuid;
+            return  sym;
+        }
+
+        ASTNode* walk(nlohmann::json prog) {
+            std::string name = prog["astNodeName"];
+            console->debug("Walking "+name);
+            Position* pos = new Position(
+                    prog["position"]["startLine"],
+                    prog["position"]["endLine"],
+                    prog["position"]["startCol"],
+                    prog["position"]["endCol"]);
+            if ( name == "ProgramNode" ) return walkProgramNode(prog["body"],pos);
+            else if ( name == "ExpressionStatementNode" ) return walkExpressionStatementNode(prog["expression"],pos);
+            else if ( name == "IdentifierNode" ) return walkIdentifierNode(prog["name"],prog["symbol"],pos);
+            else if ( name == "MapAccessNode" ) return walkMapAccessNode(prog["end"],prog["end_pos"],prog["path"],pos);
+            else if ( name == "EnumerableAccessNode" ) return walkEnumerableAccessNode(prog["path"],prog["index"],pos);
+            else if ( name == "PrimitiveTypeNode" ) return walkPrimitiveTypeNode(prog["type"]["valueType"],pos);
+            else if ( name == "EnumerableTypeNode" ) return walkEnumerableTypeNode(prog["type"],pos);
+            else if ( name == "MapTypeNode" ) return walkMapTypeNode(prog["type"],pos);
+            else if ( name == "BooleanLiteralExpressionNode" ) return walkBooleanLiteralExpressionNode(prog["value"],pos);
+            else if ( name == "VariableDeclarationNode" ) return walkVariableDeclarationNode(prog["typeNode"],prog["identifier"],prog["value"],pos);
+            else if ( name == "CallExpressionNode" ) return walkCallExpressionNode(prog["identifier"],prog["arguments"],pos);
+            else if ( name == "AndNode" ) return walkAndNode(prog["left"],prog["right"],pos);
+            else if ( name == "OrNode" ) return walkOrNode(prog["left"],prog["right"],pos);
+            else if ( name == "EqualsNode" ) return walkEqualsNode(prog["left"],prog["right"],pos);
+            else if ( name == "NotEqualsNode" ) return walkNotEqualsNode(prog["left"],prog["right"],pos);
+            else if ( name == "AddNode" ) return walkAddNode(prog["left"],prog["right"],pos);
+            else if ( name == "AddAssignExpressionNode" ) return walkAddAssignExpressionNode(prog["dest"],prog["value"],pos);
+            else if ( name == "SubtractNode" ) return walkSubtractNode(prog["left"],prog["right"],pos);
+            else if ( name == "MultiplyNode" ) return walkMultiplyNode(prog["left"],prog["right"],pos);
+            else if ( name == "MultiplyAssignExpressionNode" ) return walkMultiplyAssignExpressionNode(prog["dest"],prog["value"],pos);
+            else if ( name == "DivideNode" ) return walkDivideNode(prog["left"],prog["right"],pos);
+            else if ( name == "ModulusNode" ) return walkModulusNode(prog["left"],prog["right"],pos);
+            else if ( name == "PowerNode" ) return walkPowerNode(prog["left"],prog["right"],pos);
+            else if ( name == "ConcatenateNode" ) return walkConcatenateNode(prog["left"],prog["right"],pos);
+            else if ( name == "NegativeExpressionNode" ) return walkNegativeExpressionNode(prog["expression"],pos);
+            else if ( name == "NotNode" ) return walkNotNode(prog["expression"],pos);
+            else if ( name == "EnumerationLiteralExpressionNode" ) return walkEnumerationLiteralExpressionNode(prog["actuals"],pos);
+            else if ( name == "EnumerationStatement" ) return walkEnumerationStatement(prog["enumerable"],prog["local"],prog["body"],pos);
+            else if ( name == "WithStatement" ) return walkWithStatement(prog["body"],prog["local"],prog["resource"],pos);
+            else if ( name == "IfStatement" ) return walkIfStatement(prog["body"],prog["condition"],pos);
+            else if ( name == "WhileStatement" ) return walkWhileStatement(prog["body"],prog["condition"],pos);
+            else if ( name == "MapStatementNode" ) return walkMapStatementNode(prog["mapStatementIdentifier"],prog["value"],pos);
+            else if ( name == "MapNode" ) return walkMapNode(prog["body"],pos);
+            else if ( name == "StringLiteralExpressionNode" ) return walkStringLiteralExpressionNode(prog["value"],pos);
+            else if ( name == "NumberLiteralExpressionNode" ) return walkNumberLiteralExpressionNode(prog["value"],pos);
+            else if ( name == "AssignExpressionNode" ) return walkAssignExpressionNode(prog["dest"],prog["value"],pos);
+            else if ( name == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode(prog["value"],pos);
+            else if ( name == "UnitNode" ) return walkUnitNode(pos);
+            else if ( name == "NumericComparisonExpressionNode" ) return walkNumericComparisonExpressionNode(prog["left"], prog["right"], prog["comparisonType"], pos);
+            else if ( name == "CapturedBlockStatementNode" ) return walkCapturedBlockStatementNode(prog["body"], pos);
+            assert(false);
+        }
+
     protected:
         virtual ProgramNode* walkProgramNode(JSONList body, Position* pos) {
             ProgramNode* prog = new ProgramNode();
@@ -38,28 +119,6 @@ namespace Walk {
             return new ExpressionStatementNode(pos,(StatementExpressionNode*) expression);
         }
 
-        virtual SemanticSymbol* walkSymbol(nlohmann::json symjson) {
-            std::string uuid = symjson["uuid"];
-            auto loc = _uuidList.find(uuid);
-            if (loc != _uuidList.end()) return loc->second;
-            std::string name = symjson["name"];
-            Type* type = walkType(symjson["type"]);
-            Position* pos = new Position(
-                symjson["declaredAt"]["startLine"],
-                symjson["declaredAt"]["endLine"],
-                symjson["declaredAt"]["startCol"],
-                symjson["declaredAt"]["endCol"]);
-            SemanticSymbol* sym;
-            if (type->isFunctionType() && symjson["isPrologue"] ) {
-                sym = new PrologueFunctionSymbol(name,(FunctionType*) type,pos);
-            } else if (type->isFunctionType()) {
-                sym = new FunctionSymbol(name,(FunctionType*) type,pos);
-            } else {
-                sym = new VariableSymbol(name,type,pos);
-            }
-            sym->_uuid = uuid;
-            return  sym;
-        }
 
         virtual IdentifierNode* walkIdentifierNode(std::string name, nlohmann::json symjson, Position* pos) {
             IdentifierNode* identifier = new IdentifierNode(pos,name);
@@ -442,57 +501,6 @@ namespace Walk {
             return output;
         }
 
-        ASTNode* walk(nlohmann::json prog) {
-            std::string name = prog["astNodeName"];
-            console->debug("Walking "+name);
-            Position* pos = new Position(
-                prog["position"]["startLine"],
-                prog["position"]["endLine"],
-                prog["position"]["startCol"],
-                prog["position"]["endCol"]);
-            if ( name == "ProgramNode" ) return walkProgramNode(prog["body"],pos);
-            else if ( name == "ExpressionStatementNode" ) return walkExpressionStatementNode(prog["expression"],pos);
-            else if ( name == "IdentifierNode" ) return walkIdentifierNode(prog["name"],prog["symbol"],pos);
-            else if ( name == "MapAccessNode" ) return walkMapAccessNode(prog["end"],prog["end_pos"],prog["path"],pos);
-            else if ( name == "EnumerableAccessNode" ) return walkEnumerableAccessNode(prog["path"],prog["index"],pos);
-            else if ( name == "PrimitiveTypeNode" ) return walkPrimitiveTypeNode(prog["type"]["valueType"],pos);
-            else if ( name == "EnumerableTypeNode" ) return walkEnumerableTypeNode(prog["type"],pos);
-            else if ( name == "MapTypeNode" ) return walkMapTypeNode(prog["type"],pos);
-            else if ( name == "BooleanLiteralExpressionNode" ) return walkBooleanLiteralExpressionNode(prog["value"],pos);
-            else if ( name == "VariableDeclarationNode" ) return walkVariableDeclarationNode(prog["typeNode"],prog["identifier"],prog["value"],pos);
-            else if ( name == "CallExpressionNode" ) return walkCallExpressionNode(prog["identifier"],prog["arguments"],pos);
-            else if ( name == "AndNode" ) return walkAndNode(prog["left"],prog["right"],pos);
-            else if ( name == "OrNode" ) return walkOrNode(prog["left"],prog["right"],pos);
-            else if ( name == "EqualsNode" ) return walkEqualsNode(prog["left"],prog["right"],pos);
-            else if ( name == "NotEqualsNode" ) return walkNotEqualsNode(prog["left"],prog["right"],pos);
-            else if ( name == "AddNode" ) return walkAddNode(prog["left"],prog["right"],pos);
-            else if ( name == "AddAssignExpressionNode" ) return walkAddAssignExpressionNode(prog["dest"],prog["value"],pos);
-            else if ( name == "SubtractNode" ) return walkSubtractNode(prog["left"],prog["right"],pos);
-            else if ( name == "MultiplyNode" ) return walkMultiplyNode(prog["left"],prog["right"],pos);
-            else if ( name == "MultiplyAssignExpressionNode" ) return walkMultiplyAssignExpressionNode(prog["dest"],prog["value"],pos);
-            else if ( name == "DivideNode" ) return walkDivideNode(prog["left"],prog["right"],pos);
-            else if ( name == "ModulusNode" ) return walkModulusNode(prog["left"],prog["right"],pos);
-            else if ( name == "PowerNode" ) return walkPowerNode(prog["left"],prog["right"],pos);
-            else if ( name == "ConcatenateNode" ) return walkConcatenateNode(prog["left"],prog["right"],pos);
-            else if ( name == "NegativeExpressionNode" ) return walkNegativeExpressionNode(prog["expression"],pos);
-            else if ( name == "NotNode" ) return walkNotNode(prog["expression"],pos);
-            else if ( name == "EnumerationLiteralExpressionNode" ) return walkEnumerationLiteralExpressionNode(prog["actuals"],pos);
-            else if ( name == "EnumerationStatement" ) return walkEnumerationStatement(prog["enumerable"],prog["local"],prog["body"],pos);
-            else if ( name == "WithStatement" ) return walkWithStatement(prog["body"],prog["local"],prog["resource"],pos);
-            else if ( name == "IfStatement" ) return walkIfStatement(prog["body"],prog["condition"],pos);
-            else if ( name == "WhileStatement" ) return walkWhileStatement(prog["body"],prog["condition"],pos);
-            else if ( name == "MapStatementNode" ) return walkMapStatementNode(prog["mapStatementIdentifier"],prog["value"],pos);
-            else if ( name == "MapNode" ) return walkMapNode(prog["body"],pos);
-            else if ( name == "StringLiteralExpressionNode" ) return walkStringLiteralExpressionNode(prog["value"],pos);
-            else if ( name == "NumberLiteralExpressionNode" ) return walkNumberLiteralExpressionNode(prog["value"],pos);
-            else if ( name == "AssignExpressionNode" ) return walkAssignExpressionNode(prog["dest"],prog["value"],pos);
-            else if ( name == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode(prog["value"],pos);
-            else if ( name == "UnitNode" ) return walkUnitNode(pos);
-            else if ( name == "NumericComparisonExpressionNode" ) return walkNumericComparisonExpressionNode(prog["left"], prog["right"], prog["comparisonType"], pos);
-            else if ( name == "CapturedBlockStatementNode" ) return walkCapturedBlockStatementNode(prog["body"], pos);
-            assert(false);
-        }
-    
     private:
         std::unordered_map<std::string,SemanticSymbol*> _uuidList;
     };

@@ -3,6 +3,7 @@
 
 #include <cassert>
 #include "Test.h"
+#include "../runtime/LocalSymbolValueStore.h"
 #include "../runtime/queue/ExecutionQueue.h"
 #include "../shared/uuid.h"
 
@@ -17,7 +18,8 @@ namespace Test {
         }
 
         void testStatusTracking() {
-            Runtime::ExecutionQueue eq;
+            Runtime::LocalSymbolValueStore local;
+            Runtime::ExecutionQueue eq(&local);
 
             auto jobId = util::uuid4();
             assert(eq.getStatus(jobId) == Runtime::JobStatus::UNKNOWN);

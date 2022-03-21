@@ -27,6 +27,7 @@ namespace Runtime {
     public:
         InterpretWalk() : Lang::Walk::Walk<ASTNode*>() {
             _local = new LocalSymbolValueStore;
+            _queue = new ExecutionQueue(_local);
 
             Console::get()->debug("Creating new InterpretWalk!");
 
@@ -37,14 +38,18 @@ namespace Runtime {
             }
         }
 
+        LocalSymbolValueStore* locals() const {
+            return _local;
+        }
+
         virtual std::string toString() const {
             return "InterpretWalk<locals>";
         }
 
     protected:
-        ISymbolValueStore* _local;
+        LocalSymbolValueStore* _local;
         ISymbolValueStore* _shared;
-        ExecutionQueue* _queue = new ExecutionQueue;
+        ExecutionQueue* _queue;
 
         virtual ASTNode* walkProgramNode(ProgramNode* node) {
             ASTNode* last = nullptr;

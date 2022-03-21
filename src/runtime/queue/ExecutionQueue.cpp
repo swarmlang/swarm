@@ -15,8 +15,8 @@ bool swarmc::Runtime::ExecutionQueue::workOnce() {
     // Update status to running
     updateStatus(jobId, JobStatus::RUNNING);
 
-    // Evaluate AST node - TODO
     try {
+        // Pull the AST from Redis and deserialize it
         auto payload = getRedis()->get(payloadKey(jobId));
         if ( !payload ) {
             throw Errors::QueueExecutionError("Unable to load payload for job ID: " + jobId);
@@ -26,9 +26,19 @@ bool swarmc::Runtime::ExecutionQueue::workOnce() {
         std::istringstream ijson(*payload);
         ASTNode* node = deserialize.deserialize(&ijson);
 
-        InterpretWalk interpreter;  // FIXME gonna need to set up the local store too
+        // Pull the locals from Redis and deserialize them
+        auto localsPayload = getRedis()->get(localsKey(jobId));
+        if ( !localsPayload ) {
+            throw Errors::QueueExecutionError("Unalbe to load local environment for job ID: " + jobId);
+        }
+
+        InterpretWalk interpreter;
+        interpreter.locals()->deserialize(*localsPayload);
+
+        // Evaluate the program tree
         ASTNode* result = interpreter.walk(node);
 
+        // Serialize the result and push it back into redis
         Walk::SerializeWalk serialize;
         std::string resultJson = serialize.toJSON(result);
 

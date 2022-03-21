@@ -14,6 +14,7 @@
 #include "../../lang/AST.h"
 #include "../../lang/Walk/SerializeWalk.h"
 #include "../../lang/Walk/DeSerializeWalk.h"
+#include "../LocalSymbolValueStore.h"
 #include "Waiter.h"
 
 namespace swarmc {
@@ -34,7 +35,7 @@ namespace Runtime {
 
     class ExecutionQueue : public IStringable, public IUsesConsole {
     public:
-        ExecutionQueue() : IUsesConsole() {}
+        ExecutionQueue(LocalSymbolValueStore* local) : IUsesConsole(), _local(local) {}
         virtual ~ExecutionQueue() {}
 
         std::string toString() const override {
@@ -124,9 +125,19 @@ namespace Runtime {
             // Push node to queue
             console->debug("Pushing node to queue as job " + jobId + ": " + node->toString());
             Lang::Walk::SerializeWalk serialize;
+
+            // Push the program tree into Redis
             auto payload = serialize.toJSON(node);
             getRedis()->set(payloadKey(jobId), payload);
+
+            // Set the default status
             updateStatus(jobId, JobStatus::PENDING);
+
+            // Push the program's locals into Redis
+            auto localsPayload = _local->serialize();
+            getRedis()->set(localsKey(jobId), localsPayload);
+
+            // Push the jobId onto the queue so it can be executed
             getRedis()->rpush(queueKey(), jobId);
 
             // Get new waiter and start it
@@ -179,6 +190,7 @@ namespace Runtime {
             delete waiter;
         }
     protected:
+        LocalSymbolValueStore* _local;
         RefPool<Waiter>* _waiterPool = new RefPool<Waiter>;
         static Redis* _redis;
 
@@ -223,6 +235,10 @@ namespace Runtime {
 
         static std::string resultKey(const std::string& jobId) {
             return Configuration::REDIS_PREFIX + "job_result_" + jobId;
+        }
+
+        static std::string localsKey(const std::string& jobId) {
+            return Configuration::REDIS_PREFIX + "job_locals_" + jobId;
         }
 
         static std::string failReasonKey(const std::string& jobId) {
