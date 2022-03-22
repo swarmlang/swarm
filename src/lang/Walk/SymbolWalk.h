@@ -62,7 +62,12 @@ protected:
     }
 
     virtual SymbolMap* walkVariableDeclarationNode(VariableDeclarationNode* node) {
-        return walk(node->id());
+        SymbolMap* leftMap = walk(node->id());
+        SymbolMap* rightMap = walk(node->value());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkCallExpressionNode(CallExpressionNode* node) {
@@ -231,7 +236,7 @@ protected:
     }
 
     virtual SymbolMap* walkIfStatement(IfStatement* node) {
-        SymbolMap* map = new SymbolMap();
+        SymbolMap* map = walk(node->condition());
 
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
@@ -243,7 +248,7 @@ protected:
     }
 
     virtual SymbolMap* walkWhileStatement(WhileStatement* node) {
-        SymbolMap* map = new SymbolMap();
+        SymbolMap* map = walk(node->condition());
 
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
