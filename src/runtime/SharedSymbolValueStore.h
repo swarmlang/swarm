@@ -50,6 +50,7 @@ namespace Runtime {
         virtual Lang::ExpressionNode* getValue(Lang::SemanticSymbol* symbol) override {
             auto value = tryGetValue(symbol);
             if ( value == nullptr ) {
+                console->error("[shared] invalid access of free symbol: " + symbol->toString());
                 throw Errors::FreeSymbolError(symbol->name());
             }
 

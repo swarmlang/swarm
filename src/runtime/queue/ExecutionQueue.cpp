@@ -34,7 +34,7 @@ bool swarmc::Runtime::ExecutionQueue::workOnce() {
         // Pull the locals from Redis and deserialize them
         auto localsPayload = getRedis()->get(localsKey(jobId));
         if ( !localsPayload ) {
-            throw Errors::QueueExecutionError("Unalbe to load local environment for job ID: " + jobId);
+            throw Errors::QueueExecutionError("Unable to load local environment for job ID: " + jobId);
         }
 
         InterpretWalk interpreter;

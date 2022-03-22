@@ -43,7 +43,7 @@ namespace Runtime {
                 iterator++;
             }
 
-            console->debug("Set: " + symbol->name() + ", Value: " + value->toString());
+//            console->debug("Set: " + symbol->name() + ", Value: " + value->toString());
             _map->insert(std::pair<Lang::SemanticSymbol*, Lang::ExpressionNode*>(symbol, value));
         }
 
@@ -66,6 +66,7 @@ namespace Runtime {
         virtual Lang::ExpressionNode* getValue(Lang::SemanticSymbol* symbol) override {
             auto value = tryGetValue(symbol);
             if ( value == nullptr ) {
+                console->error("[local] invalid access of free symbol: " + symbol->toString());
                 throw Errors::FreeSymbolError(symbol->name());
             }
 

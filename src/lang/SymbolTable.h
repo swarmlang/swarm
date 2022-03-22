@@ -5,6 +5,7 @@
 #include <iostream>
 #include <list>
 #include <stdexcept>
+#include "../shared/util/Console.h"
 #include "../shared/IStringable.h"
 #include "../shared/uuid.h"
 #include "Position.h"
@@ -121,7 +122,7 @@ namespace Walk {
         }
 
         /** Try to find a symbol in scope by name. Returns nullptr if none exists. */
-        SemanticSymbol* lookup(std::string name) {
+        SemanticSymbol* lookup(const std::string& name) {
             auto found = _symbols->find(name);
             if ( found == _symbols->end() ) {
                 return nullptr;
@@ -223,6 +224,7 @@ namespace Walk {
                 }
             }
 
+            Console::get()->debug("Unable to find symbol in table for identifier: " + name);
             return nullptr;
         }
 

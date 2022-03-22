@@ -78,7 +78,7 @@ protected:
 
     virtual bool walkVariableDeclarationNode(VariableDeclarationNode* node) {
         if ( node->id()->symbol() != nullptr ) {
-            return true;
+            return walk(node->value());
         }
 
         std::string name = node->id()->name();
@@ -236,7 +236,7 @@ protected:
             // Try to look up the generic type of the enumerable
             const Type* enumType = node->enumerable()->symbol()->type();
             if ( enumType->kind() == TypeKind::KGENERIC ) {
-                GenericType* enumGenericType = (GenericType*) enumType;
+                auto enumGenericType = (GenericType*) enumType;
                 type = enumGenericType->concrete();
 
                 if ( type->isPrimitiveType() ) {
@@ -255,10 +255,15 @@ protected:
             inScope = true;
             _symbols->addVariable(name, type, pos);
 
-            if ( !walk(node->local()) ) {
-                _symbols->leave();
-                return false;
-            }
+//            if ( !walk(node->local()) ) {
+//                _symbols->leave();
+//                return false;
+//            }
+        }
+
+        if ( !walk(node->local()) ) {  // FIXME did this need to be moved?
+            if ( inScope ) _symbols->leave();
+            return false;
         }
 
         bool bodyResult = walkBlockStatementNode(node);
@@ -291,10 +296,15 @@ protected:
             inScope = true;
             _symbols->addVariable(name, type, pos);
 
-            if ( !walk(node->local()) ) {
-                _symbols->leave();
-                return false;
-            }
+//            if ( !walk(node->local()) ) {
+//                _symbols->leave();
+//                return false;
+//            }
+        }
+
+        if ( !walk(node->local()) ) {  // FIXME did this need to be moved?
+            if ( inScope ) _symbols->leave();
+            return false;
         }
 
         bool bodyResult = walkBlockStatementNode(node);

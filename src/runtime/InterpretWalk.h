@@ -384,7 +384,7 @@ namespace Runtime {
         virtual ASTNode* walkEnumerationStatement(EnumerationStatement* node) {
             ASTNode* val = walk(node->enumerable());
             assert(val->getName() == "EnumerationLiteralExpressionNode");
-            EnumerationLiteralExpressionNode* enumVal = (EnumerationLiteralExpressionNode*) val;
+            auto enumVal = (EnumerationLiteralExpressionNode*) val;
 
             if ( Configuration::FORCE_LOCAL ) {
                 IdentifierNode* local = node->local();

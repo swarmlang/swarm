@@ -53,6 +53,8 @@ protected:
         if ( node->id()->symbol() != nullptr && node->id()->symbol()->uuid() == _symbol->uuid() ) {
             node->id()->_symbol = nullptr;
         }
+
+        walk(node->value());
     }
 
     virtual void walkCallExpressionNode(CallExpressionNode* node) {
