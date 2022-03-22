@@ -21,7 +21,7 @@ protected:
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
             map->insert(m->begin(), m->end());
-            //delete m;
+            delete m;
         }
 
         return map;
@@ -66,12 +66,21 @@ protected:
         SymbolMap* rightMap = walk(node->value());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
 
     virtual SymbolMap* walkCallExpressionNode(CallExpressionNode* node) {
-        return new SymbolMap();
+        SymbolMap* map = new SymbolMap();
+
+        for (auto i : *node->args()) {
+            SymbolMap* m = walk(i);
+            map->insert(m->begin(), m->end());
+            delete m;
+        }
+
+        return map;
     }
 
     virtual SymbolMap* walkAndNode(AndNode* node) {
@@ -79,6 +88,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -88,6 +98,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -97,6 +108,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -106,6 +118,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -115,6 +128,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -124,6 +138,7 @@ protected:
         SymbolMap* rightMap = walk(node->value());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -133,6 +148,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -142,6 +158,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -151,6 +168,7 @@ protected:
         SymbolMap* rightMap = walk(node->value());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -160,6 +178,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -169,6 +188,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -178,6 +198,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -187,6 +208,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -205,7 +227,7 @@ protected:
         for (auto i : *node->actuals()) {
             SymbolMap* m = walk(i);
             map->insert(m->begin(), m->end());
-            // delete m
+            delete m;
         }
 
         return map;
@@ -217,7 +239,7 @@ protected:
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
             map->insert(m->begin(), m->end());
-            //delete m;
+            delete m;
         }
 
         return map;
@@ -229,7 +251,7 @@ protected:
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
             map->insert(m->begin(), m->end());
-            //delete m;
+            delete m;
         }
 
         return map;
@@ -241,7 +263,7 @@ protected:
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
             map->insert(m->begin(), m->end());
-            //delete m;
+            delete m;
         }
 
         return map;
@@ -253,7 +275,7 @@ protected:
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
             map->insert(m->begin(), m->end());
-            //delete m;
+            delete m;
         }
 
         return map;
@@ -269,7 +291,7 @@ protected:
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
             map->insert(m->begin(), m->end());
-            //delete m;
+            delete m;
         }
 
         return map;
@@ -288,6 +310,7 @@ protected:
         SymbolMap* rightMap = walk(node->value());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -301,6 +324,7 @@ protected:
         SymbolMap* rightMap = walk(node->right());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
 
         return leftMap;
     }
@@ -311,7 +335,7 @@ protected:
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
             map->insert(m->begin(), m->end());
-            //delete m;
+            delete m;
         }
 
         return map;
