@@ -131,7 +131,7 @@ namespace Runtime {
                 }
 
                 // Drop the ref
-                delete waiter;
+                delete ref;
             }
 
             delete waiterRefs;
@@ -197,7 +197,15 @@ namespace Runtime {
             auto waiter = waiterRef->get();
 
             console->debug("Starting work cycle while waiting for job ID: " + waiter->id());
+//            while ( true ) {
+//                auto status = getStatus(waiter->id());
+//                if ( status == JobStatus::FAILURE || status == JobStatus::SUCCESS ) {
+//                    waiter->finish();
+//                    break;
+//                }
+
             while ( !waiter->finished() ) {
+
                 if ( !workOnce() ) {
                     // No job was executed. Sleep for a bit to prevent CPU hogging
                     console->debug("No jobs found to execute. Sleeping...");
@@ -205,7 +213,7 @@ namespace Runtime {
                 }
             }
 
-            delete waiter;
+//            delete waiter;
         }
     protected:
         LocalSymbolValueStore* _local;
