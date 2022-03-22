@@ -197,15 +197,14 @@ namespace Runtime {
             auto waiter = waiterRef->get();
 
             console->debug("Starting work cycle while waiting for job ID: " + waiter->id());
-//            while ( true ) {
-//                auto status = getStatus(waiter->id());
-//                if ( status == JobStatus::FAILURE || status == JobStatus::SUCCESS ) {
-//                    waiter->finish();
-//                    break;
-//                }
+            while ( true ) {
+                auto status = getStatus(waiter->id());
+                if ( status == JobStatus::FAILURE || status == JobStatus::SUCCESS ) {
+                    waiter->finish();
+                    break;
+                }
 
-            while ( !waiter->finished() ) {
-
+//            while ( !waiter->finished() ) {
                 if ( !workOnce() ) {
                     // No job was executed. Sleep for a bit to prevent CPU hogging
                     console->debug("No jobs found to execute. Sleeping...");
