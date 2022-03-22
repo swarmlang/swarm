@@ -6,19 +6,25 @@
 
 using namespace swarmc::Runtime;
 
-std::string LocalSymbolValueStore::serialize() {
+std::string LocalSymbolValueStore::serialize(Lang::Walk::SymbolMap* symbols) {
     nlohmann::json json;
     Lang::Walk::SerializeWalk serialize;
     std::vector<std::pair<nlohmann::json, nlohmann::json>> entries;
 
-    auto iter = _map->begin();
-    while ( iter != _map->end() ) {
-        auto symbol = iter->first;
-        auto expression = iter->second;
+    console->debug("Symbols: " + std::to_string(symbols->size()));
+    console->debug("Map: " + std::to_string(_map->size()));
 
-        auto symbolJson = serialize.walkSemanticSymbol(symbol);
-        auto exprJson = serialize.walk(expression);
-        entries.push_back({*symbolJson, *exprJson});
+    auto iter = symbols->begin();
+    while ( iter != symbols->end() ) {
+        std::string uuid = iter->first;
+
+        auto expression = tryGetValue(iter->second);
+        if (expression != nullptr) {
+            auto symbolJson = serialize.walkSemanticSymbol(iter->second);
+            auto exprJson = serialize.walk(expression);
+            entries.push_back({*symbolJson, *exprJson});
+        }
+
         iter++;
     }
 

@@ -1,11 +1,13 @@
 #ifndef SWARM_030_LOCAL_SYMBOL_SERIALIZE_H
 #define SWARM_030_LOCAL_SYMBOL_SERIALIZE_H
 
+#include <sstream>
 #include "Test.h"
 #include "../shared/uuid.h"
 #include "../shared/util/Console.h"
 #include "../lang/SymbolTable.h"
 #include "../lang/AST.h"
+#include "../lang/Walk/SymbolWalk.h"
 #include "../runtime/LocalSymbolValueStore.h"
 
 namespace swarmc {
@@ -15,93 +17,44 @@ namespace Test {
     public:
         bool run() override {
             util::USE_DETERMINISTIC_UUIDS = true;
-            std::string expectedSerial = R"END({
-    "entries": [
-        [
-            {
-                "declaredAt": {
-                    "endCol": 1,
-                    "endLine": 1,
-                    "startCol": 1,
-                    "startLine": 1
-                },
-                "isPrologue": false,
-                "kind": 0,
-                "name": "testSymbol1",
-                "type": {
-                    "shared": false,
-                    "valueType": 0
-                },
-                "uuid": "d-guid-0"
-            },
-            {
-                "astNodeName": "StringLiteralExpressionNode",
-                "position": {
-                    "endCol": 1,
-                    "endLine": 1,
-                    "startCol": 1,
-                    "startLine": 1
-                },
-                "value": "string 1"
-            }
-        ],
-        [
-            {
-                "declaredAt": {
-                    "endCol": 1,
-                    "endLine": 1,
-                    "startCol": 1,
-                    "startLine": 1
-                },
-                "isPrologue": false,
-                "kind": 0,
-                "name": "testSymbol2",
-                "type": {
-                    "shared": false,
-                    "valueType": 1
-                },
-                "uuid": "d-guid-1"
-            },
-            {
-                "astNodeName": "NumberLiteralExpressionNode",
-                "position": {
-                    "endCol": 1,
-                    "endLine": 1,
-                    "startCol": 1,
-                    "startLine": 1
-                },
-                "value": 3.14
-            }
-        ]
-    ]
-})END";
+            std::stringstream input;
+            input << "number pi = 3.14;\nstring str = \"string 1\";\nnumber n = pi * 3;\n";
+
+            Pipeline pipeline(&input);
+
+            Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
             Runtime::LocalSymbolValueStore locals;
+            Lang::Walk::SymbolWalk walk;
 
-            Lang::Position p(1, 1, 1, 1);
+            assert(pgNode->body()->at(0)->getName() == "VariableDeclarationNode");
+            assert(pgNode->body()->at(1)->getName() == "VariableDeclarationNode");
+            assert(pgNode->body()->at(2)->getName() == "VariableDeclarationNode");
 
-            Lang::VariableSymbol sym1("testSymbol1", Lang::PrimitiveType::of(Lang::ValueType::TSTRING), &p);
-            Lang::VariableSymbol sym2("testSymbol2", Lang::PrimitiveType::of(Lang::ValueType::TNUM), &p);
+            VariableDeclarationNode* assign1 = (VariableDeclarationNode*)pgNode->body()->at(0);
+            VariableDeclarationNode* assign2 = (VariableDeclarationNode*)pgNode->body()->at(1);
+            VariableDeclarationNode* assign3 = (VariableDeclarationNode*)pgNode->body()->at(2);
 
-            Lang::StringLiteralExpressionNode str1(&p, "string 1");
-            Lang::NumberLiteralExpressionNode num1(&p, 3.14);
+            NumberLiteralExpressionNode nvalue(assign3->value()->position(), 9.42);
 
-            locals.setValue(&sym1, &str1);
-            locals.setValue(&sym2, &num1);
+            locals.setValue(assign1->id()->symbol(), assign1->value());
+            locals.setValue(assign2->id()->symbol(), assign2->value());
+            locals.setValue(assign3->id()->symbol(), &nvalue);
 
-            std::string serial = locals.serialize();
-            assert(serial == expectedSerial);
+            std::string serial = locals.serialize(walk.walk(pgNode));
+            console->debug(serial);
 
             Runtime::LocalSymbolValueStore locals2;
             locals2.deserialize(serial);
 
             Console::get()->debug()
-                ->info(locals.getValue(&sym1)->toString())
-                ->info(locals2.getValue(&sym1)->toString())
+                ->info(locals.getValue(assign1->id()->symbol())->toString())
+                ->info(locals2.getValue(assign1->id()->symbol())->toString())
                 ->end();
 
-            assert(locals2.getValue(&sym1)->equals(locals.getValue(&sym1)));
-            assert(locals2.getValue(&sym2)->equals(locals.getValue(&sym2)));
+            assert(locals2.getValue(assign1->id()->symbol())->equals(locals.getValue(assign1->id()->symbol())));
+            assert(locals2.getValue(assign2->id()->symbol())->equals(locals.getValue(assign2->id()->symbol())));
+            assert(locals2.getValue(assign3->id()->symbol())->equals(locals.getValue(assign3->id()->symbol())));
 
             return true;
         }

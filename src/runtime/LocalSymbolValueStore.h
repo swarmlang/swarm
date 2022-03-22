@@ -6,6 +6,7 @@
 #include "ISymbolValueStore.h"
 #include "../errors/FreeSymbolError.h"
 #include "../shared/util/Console.h"
+#include "../lang/Walk/SymbolWalk.h"
 
 namespace swarmc {
 namespace Runtime {
@@ -26,7 +27,7 @@ namespace Runtime {
             delete _map;
         }
 
-        virtual std::string serialize();
+        virtual std::string serialize(Lang::Walk::SymbolMap* symbols);
 
         virtual void deserialize(std::string payload);
 

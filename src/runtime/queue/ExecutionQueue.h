@@ -14,6 +14,7 @@
 #include "../../lang/AST.h"
 #include "../../lang/Walk/SerializeWalk.h"
 #include "../../lang/Walk/DeSerializeWalk.h"
+#include "../../lang/Walk/SymbolWalk.h"
 #include "../LocalSymbolValueStore.h"
 #include "Waiter.h"
 
@@ -143,6 +144,7 @@ namespace Runtime {
             // Push node to queue
             console->debug("Pushing node to queue as job " + jobId + ": " + node->toString());
             Lang::Walk::SerializeWalk serialize;
+            Lang::Walk::SymbolWalk symbol;
 
             // Push the program tree into Redis
             auto payload = serialize.toJSON(node);
@@ -152,7 +154,7 @@ namespace Runtime {
             updateStatus(jobId, JobStatus::PENDING);
 
             // Push the program's locals into Redis
-            auto localsPayload = _local->serialize();
+            auto localsPayload = _local->serialize(symbol.walk(node));
             getRedis()->set(localsKey(jobId), localsPayload);
 
             // Push the jobId onto the queue so it can be executed

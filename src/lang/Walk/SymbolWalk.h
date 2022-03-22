@@ -28,7 +28,7 @@ protected:
     }
 
     virtual SymbolMap* walkExpressionStatementNode(ExpressionStatementNode* node) {
-        return new SymbolMap();
+        return walk(node->expression());
     }
 
     virtual SymbolMap* walkIdentifierNode(IdentifierNode* node) {
@@ -70,67 +70,140 @@ protected:
     }
 
     virtual SymbolMap* walkAndNode(AndNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkOrNode(OrNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkEqualsNode(EqualsNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkNotEqualsNode(NotEqualsNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkAddNode(AddNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->dest());
+        SymbolMap* rightMap = walk(node->value());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkSubtractNode(SubtractNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkMultiplyNode(MultiplyNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->dest());
+        SymbolMap* rightMap = walk(node->value());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkDivideNode(DivideNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkModulusNode(ModulusNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkPowerNode(PowerNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkConcatenateNode(ConcatenateNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkNegativeExpressionNode(NegativeExpressionNode* node) {
-        return new SymbolMap();
+        return walk(node->exp());
     }
 
     virtual SymbolMap* walkNotNode(NotNode* node) {
-        return new SymbolMap();
+        return walk(node->exp());
     }
 
     virtual SymbolMap* walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
-        return new SymbolMap();
+        SymbolMap* map = new SymbolMap();
+
+        for (auto i : *node->actuals()) {
+            SymbolMap* m = walk(i);
+            map->insert(m->begin(), m->end());
+            // delete m
+        }
+
+        return map;
     }
 
     virtual SymbolMap* walkEnumerationStatement(EnumerationStatement* node) {
@@ -182,11 +255,19 @@ protected:
     }
 
     virtual SymbolMap* walkMapStatementNode(MapStatementNode* node) {
-        return new SymbolMap();
+        return walk(node->value());
     }
 
     virtual SymbolMap* walkMapNode(MapNode* node) {
-        return new SymbolMap();
+        SymbolMap* map = new SymbolMap();
+
+        for (auto i : *node->body()) {
+            SymbolMap* m = walk(i);
+            map->insert(m->begin(), m->end());
+            //delete m;
+        }
+
+        return map;
     }
 
     virtual SymbolMap* walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
@@ -198,7 +279,12 @@ protected:
     }
 
     virtual SymbolMap* walkAssignExpressionNode(AssignExpressionNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->dest());
+        SymbolMap* rightMap = walk(node->value());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkUnitNode(UnitNode* node) {
@@ -206,7 +292,12 @@ protected:
     }
 
     virtual SymbolMap* walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
-        return new SymbolMap();
+        SymbolMap* leftMap = walk(node->left());
+        SymbolMap* rightMap = walk(node->right());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
