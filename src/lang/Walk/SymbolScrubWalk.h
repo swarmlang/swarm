@@ -24,7 +24,7 @@ protected:
     }
 
     virtual void walkExpressionStatementNode(ExpressionStatementNode* node) {
-        return walk(node->exp());
+        return walk(node->expression());
     }
 
     virtual void walkIdentifierNode(IdentifierNode* node) {

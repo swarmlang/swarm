@@ -28,7 +28,7 @@ protected:
     }
 
     virtual bool walkExpressionStatementNode(ExpressionStatementNode* node) {
-        bool expResult = walk(node->exp());
+        bool expResult = walk(node->expression());
 
         if ( expResult ) {
             _types->setTypeOf(node, PrimitiveType::of(ValueType::TUNIT, false));

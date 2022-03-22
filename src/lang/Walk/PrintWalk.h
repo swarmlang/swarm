@@ -31,7 +31,7 @@ protected:
     virtual void walkExpressionStatementNode(ExpressionStatementNode* node) {
         _out << _prefix << node->toString() << std::endl;
         push_space();
-        walk(node->exp());
+        walk(node->expression());
         pop_space();
     }
 

@@ -33,7 +33,7 @@ protected:
     }
 
     virtual bool walkExpressionStatementNode(ExpressionStatementNode* node) {
-        return walk(node->exp());
+        return walk(node->expression());
     }
 
     virtual bool walkIdentifierNode(IdentifierNode* node) {

@@ -240,10 +240,6 @@ namespace Walk {
             return _exp;
         }
 
-        StatementExpressionNode* exp() const {
-            return _exp;
-        }
-
         virtual ExpressionStatementNode* copy() const override {
             return new ExpressionStatementNode(position()->copy(), _exp->copy());
         }

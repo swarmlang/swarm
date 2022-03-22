@@ -9,6 +9,7 @@
 #include "024_shared_variables.h"
 #include "028_redis_basics.h"
 #include "030_local_symbol_serialize.h"
+#include "031_symbol_walk.h"
 
 namespace swarmc {
 namespace Test {
@@ -37,6 +38,9 @@ namespace Test {
                 return test.run();
             } else if ( name == "030_local_symbol_serialize" ) {
                 LocalSymbolSerialize test;
+                return test.run();
+            } else if ( name == "031_symbol_walk" ) {
+                SymbolWalkTest test;
                 return test.run();
             }
 
