@@ -203,7 +203,6 @@ namespace Walk {
 
         virtual VariableDeclarationNode* walkVariableDeclarationNode(nlohmann::json typejson, nlohmann::json idjson, nlohmann::json valjson, Position* pos) {
             ASTNode* type = walk(typejson);
-            console->debug("Got Var Type!");
             ASTNode* identifier = walk(idjson);
             ASTNode* value = walk(valjson);
             assert(type->isType());

@@ -15,9 +15,9 @@ std::thread* Waiter::_thread = nullptr;
 bool Waiter::_createdSubscriber = false;
 
 void Waiter::createSubscriber() {
-    if ( !_createdSubscriber ) {
-        _subscriber.on_message([](std::string channel, std::string message) {
-            Console::get()->debug("Incoming message on channel: " + channel);
+    if ( false && !_createdSubscriber ) {
+        _subscriber.on_message([](const std::string& channel, const std::string& message) {
+            Console::get()->debug("Incoming message on channel: " + channel + " (" + message + ")");
 
             // Make sure the channel is for one of the jobs we are waiting on
             std::string prefix = Configuration::REDIS_PREFIX + "job_status_channel_";
@@ -50,6 +50,7 @@ void Waiter::createSubscriber() {
             while ( !Configuration::THREAD_EXIT ) {
                 Console::get()->debug("Consuming subscriber.");
                 _subscriber.consume();
+                Console::get()->debug("Sleeping subscriber.");
                 std::this_thread::sleep_for(std::chrono::microseconds(Configuration::WAITER_SLEEP_uS));
             }
         });
@@ -61,8 +62,8 @@ void Waiter::createSubscriber() {
 void Waiter::wait() {
     if ( !started() ) {
         start();
-        createSubscriber();
+//        createSubscriber();
         instances->insert(std::pair<std::string, Waiter*>(_id, this));
-        _subscriber.subscribe({ExecutionQueue::statusChannel(_id)});
+//        _subscriber.subscribe({ExecutionQueue::statusChannel(_id)});
     }
 }

@@ -22,8 +22,6 @@ namespace Test {
             Runtime::ExecutionQueue eq(&local);
 
             auto jobId = util::uuid4();
-            assert(eq.getStatus(jobId) == Runtime::JobStatus::UNKNOWN);
-
             eq.updateStatus(jobId, Runtime::JobStatus::FAILURE);
             assert(eq.getStatus(jobId) == Runtime::JobStatus::FAILURE);
         }
