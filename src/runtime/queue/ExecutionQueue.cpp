@@ -3,6 +3,11 @@
 
 sw::redis::Redis* swarmc::Runtime::ExecutionQueue::_redis = nullptr;
 
+void swarmc::Runtime::executionQueueSignalHandler(int) {
+    Console::get()->info("Exiting...");
+    Configuration::THREAD_EXIT = true;
+}
+
 bool swarmc::Runtime::ExecutionQueue::workOnce() {
     // Pop job ID from queue
     auto nextJob = getRedis()->lpop(queueKey());

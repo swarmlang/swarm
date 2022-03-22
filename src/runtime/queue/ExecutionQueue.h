@@ -1,6 +1,8 @@
 #ifndef SWARM_EXECUTIONQUEUE_H
 #define SWARM_EXECUTIONQUEUE_H
 
+#include <cstdlib>
+#include <csignal>
 #include <unistd.h>
 #include <sstream>
 #include <sw/redis++/redis++.h>
@@ -33,6 +35,8 @@ namespace Runtime {
         FAILURE = 'f',
         UNKNOWN = 'u'
     };
+
+    void executionQueueSignalHandler(int);
 
     class ExecutionQueue : public IStringable, public IUsesConsole {
     public:
@@ -194,6 +198,19 @@ namespace Runtime {
         }
 
         bool workOnce();
+
+        void workForever() {
+            console->info("Starting queue worker...");
+            signal(SIGINT, executionQueueSignalHandler);
+
+            while ( !Configuration::THREAD_EXIT ) {
+                if ( !workOnce() ) {
+                    // No job was executed. Sleep for a bit to prevent CPU hogging
+                    console->debug("No jobs found to execute. Sleeping...");
+                    usleep(Configuration::QUEUE_SLEEP_uS);
+                }
+            }
+        }
 
         void workUntil(RefInstance<Waiter>* waiterRef) {
             auto waiter = waiterRef->get();

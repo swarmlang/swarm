@@ -36,6 +36,12 @@ int Executive::run(int argc, char **argv) {
         console->success("Force cleared queue.");
     }
 
+    if ( flagWorkQueue ) {
+        swarmc::Runtime::ExecutionQueue eq(nullptr);
+        eq.workForever();
+        return 0;
+    }
+
     if ( flagRunTest ) {
         return runTest();
     }
@@ -187,6 +193,10 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         } else if ( arg == "--clear-queue" ) {
             flagClearQueue = true;
             console->debug("Will force-clear queue.");
+        } else if ( arg == "--work-queue" ) {
+            flagWorkQueue = true;
+            noInputFile = true;
+            console->debug("Will work queue jobs.");
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --run-test. Pass --help for more info.");
@@ -251,6 +261,10 @@ void Executive::printUsage() {
 
     console->bold()->print("  --clear-queue  :  ", true)
         ->line("Force clear any jobs in the Redis queue.")
+        ->line();
+
+    console->bold()->print("  --work-queue  :  ", true)
+        ->line("Listen for and execute jobs in the Redis queue.")
         ->line();
 
     console->bold()->print("  --output-to <OUTFILE>  :  ", true)
