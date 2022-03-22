@@ -30,6 +30,7 @@ protected:
     bool flagOutputDeSerialize = false;
     bool flagRunTest = false;
     bool flagClearQueue = false;
+    bool flagWorkQueue = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;
