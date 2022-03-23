@@ -21,11 +21,12 @@
                     },
                     "kind": 0,
                     "name": "myMap",
-                    "shared": false,
                     "type": {
                         "concrete": {
+                            "shared": false,
                             "valueType": 1
                         },
+                        "shared": false,
                         "valueType": 4
                     },
                     "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
@@ -37,7 +38,6 @@
                 "startCol": 1,
                 "startLine": 1
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "MapTypeNode",
                 "position": {
@@ -48,8 +48,10 @@
                 },
                 "type": {
                     "concrete": {
+                        "shared": false,
                         "valueType": 1
                     },
+                    "shared": false,
                     "valueType": 4
                 }
             },
@@ -145,11 +147,12 @@
                     },
                     "kind": 0,
                     "name": "myEnum",
-                    "shared": false,
                     "type": {
                         "concrete": {
+                            "shared": false,
                             "valueType": 1
                         },
+                        "shared": false,
                         "valueType": 3
                     },
                     "uuid": "0245bfec-242e-4c68-9ed8-9d759d74c250"
@@ -161,7 +164,6 @@
                 "startCol": 1,
                 "startLine": 2
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "EnumerableTypeNode",
                 "position": {
@@ -172,8 +174,10 @@
                 },
                 "type": {
                     "concrete": {
+                        "shared": false,
                         "valueType": 1
                     },
+                    "shared": false,
                     "valueType": 3
                 }
             },
@@ -239,17 +243,20 @@
                     },
                     "kind": 0,
                     "name": "myMap2",
-                    "shared": false,
                     "type": {
                         "concrete": {
                             "concrete": {
                                 "concrete": {
+                                    "shared": false,
                                     "valueType": 1
                                 },
+                                "shared": false,
                                 "valueType": 4
                             },
+                            "shared": false,
                             "valueType": 3
                         },
+                        "shared": false,
                         "valueType": 4
                     },
                     "uuid": "126b1f95-3201-4afc-855e-f38bb1541f78"
@@ -261,7 +268,6 @@
                 "startCol": 1,
                 "startLine": 3
             },
-            "shared": false,
             "typeNode": {
                 "astNodeName": "MapTypeNode",
                 "position": {
@@ -274,12 +280,16 @@
                     "concrete": {
                         "concrete": {
                             "concrete": {
+                                "shared": false,
                                 "valueType": 1
                             },
+                            "shared": false,
                             "valueType": 4
                         },
+                        "shared": false,
                         "valueType": 3
                     },
+                    "shared": false,
                     "valueType": 4
                 }
             },
@@ -315,11 +325,12 @@
                                         },
                                         "kind": 0,
                                         "name": "myMap",
-                                        "shared": false,
                                         "type": {
                                             "concrete": {
+                                                "shared": false,
                                                 "valueType": 1
                                             },
+                                            "shared": false,
                                             "valueType": 4
                                         },
                                         "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
@@ -364,11 +375,12 @@
                                         },
                                         "kind": 0,
                                         "name": "myMap",
-                                        "shared": false,
                                         "type": {
                                             "concrete": {
+                                                "shared": false,
                                                 "valueType": 1
                                             },
+                                            "shared": false,
                                             "valueType": 4
                                         },
                                         "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
@@ -455,11 +467,12 @@
                             },
                             "kind": 0,
                             "name": "myMap",
-                            "shared": false,
                             "type": {
                                 "concrete": {
+                                    "shared": false,
                                     "valueType": 1
                                 },
+                                "shared": false,
                                 "valueType": 4
                             },
                             "uuid": "04954bd1-e9c9-4ff8-bb61-d5c3e7db5a9d"
@@ -548,17 +561,20 @@
                                     },
                                     "kind": 0,
                                     "name": "myMap2",
-                                    "shared": false,
                                     "type": {
                                         "concrete": {
                                             "concrete": {
                                                 "concrete": {
+                                                    "shared": false,
                                                     "valueType": 1
                                                 },
+                                                "shared": false,
                                                 "valueType": 4
                                             },
+                                            "shared": false,
                                             "valueType": 3
                                         },
+                                        "shared": false,
                                         "valueType": 4
                                     },
                                     "uuid": "126b1f95-3201-4afc-855e-f38bb1541f78"

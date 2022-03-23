@@ -166,7 +166,7 @@ namespace Walk {
                 return GenericType::of(t, concrete);
             }
             else {
-                return PrimitiveType::of(t);
+                return PrimitiveType::of(t, typejson["shared"]);
             }
             assert(false);
         }
