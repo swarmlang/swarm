@@ -1,5 +1,6 @@
 number piReal = 3.14159;
-enumerable<number> ranks = range(1, 5, 1);
+number nJobs = 8;
+enumerable<number> ranks = range(1, nJobs, 1);
 number n = 100000;
 
 shared number piApprox = 0;
@@ -11,7 +12,7 @@ enumerate ranks as rank {
     while ( i < (n + 1) ) {
         number x = h * (i - 0.5);
         s += 4 / (1 + (x^2));
-        i += 5;
+        i += nJobs;
     }
 
     piApprox += s * h;
