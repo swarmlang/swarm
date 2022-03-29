@@ -212,16 +212,23 @@ namespace Runtime {
             }
         }
 
+        void checkWaiter(RefInstance<Waiter>* waiterRef) {
+            auto status = getStatus(waiterRef->get()->id());
+            if ( status == JobStatus::FAILURE || status == JobStatus::SUCCESS ) {
+                waiterRef->get()->finish();
+            }
+        }
+
         void workUntil(RefInstance<Waiter>* waiterRef) {
             auto waiter = waiterRef->get();
 
             console->debug("Starting work cycle while waiting for job ID: " + waiter->id());
             while ( true ) {
-                auto status = getStatus(waiter->id());
-                if ( status == JobStatus::FAILURE || status == JobStatus::SUCCESS ) {
-                    waiter->finish();
+                checkWaiter(waiterRef);
+                if ( waiter->finished() ) {
                     break;
                 }
+
 
 //            while ( !waiter->finished() ) {
                 if ( !workOnce() ) {
