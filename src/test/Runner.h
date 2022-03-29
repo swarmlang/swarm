@@ -10,6 +10,7 @@
 #include "028_redis_basics.h"
 #include "030_local_symbol_serialize.h"
 #include "031_symbol_walk.h"
+#include "032_job_worker_filters.h"
 
 namespace swarmc {
 namespace Test {
@@ -41,6 +42,9 @@ namespace Test {
                 return test.run();
             } else if ( name == "031_symbol_walk" ) {
                 SymbolWalkTest test;
+                return test.run();
+            } else if ( name == "032_job_worker_filters" ) {
+                JobWorkerFiltersTest test;
                 return test.run();
             }
 

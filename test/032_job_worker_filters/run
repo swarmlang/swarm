@@ -1,0 +1,3 @@
+#!/bin/bash -e
+
+$SWARMC --run-test 032_job_worker_filters

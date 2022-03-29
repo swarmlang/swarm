@@ -90,9 +90,9 @@ namespace Runtime {
             getRedis()->publish(statusChannel(jobId), statusString(status));
         }
 
-        Lang::ASTNode* evaluate(Lang::ASTNode* node) {
+        Lang::ASTNode* evaluate(Lang::ASTNode* node, std::map<std::string, std::string> filters) {
             // Push the job onto the queue
-            auto waiterRef = queue(node);
+            auto waiterRef = queue(node, filters);
             auto waiter = waiterRef->get();
 
             // Do background work until the job finishes
@@ -112,12 +112,12 @@ namespace Runtime {
             return result;
         }
 
-        void bulkEvaluate(Lang::StatementList* nodes) {
+        void bulkEvaluate(Lang::StatementList* nodes, std::map<std::string, std::string> filters) {
             auto waiterRefs = new std::vector<RefInstance<Waiter>*>;
 
             // Queue all of the nodes to be evaluated
             for ( auto node : *nodes ) {
-                waiterRefs->push_back(queue(node));
+                waiterRefs->push_back(queue(node, filters));
             }
 
             // Wait for all of the nodes to finish evaluating
@@ -142,7 +142,7 @@ namespace Runtime {
             delete waiterRefs;
         }
 
-        RefInstance<Waiter>* queue(Lang::ASTNode* node) {
+        RefInstance<Waiter>* queue(Lang::ASTNode* node, std::map<std::string, std::string> filters) {
             std::string jobId = util::uuid4();
 
             // Push node to queue
@@ -153,6 +153,10 @@ namespace Runtime {
             // Push the program tree into Redis
             auto payload = serialize.toJSON(node);
             getRedis()->set(payloadKey(jobId), payload);
+
+            // Push the filters into Redis
+            auto jobFilters = nlohmann::json(filters).dump(4);
+            getRedis()->set(filterKey(jobId), jobFilters);
 
             // Set the default status
             updateStatus(jobId, JobStatus::PENDING);
@@ -282,6 +286,10 @@ namespace Runtime {
 
         static std::string payloadKey(const std::string& jobId) {
             return Configuration::REDIS_PREFIX + "job_payload_" + jobId;
+        }
+
+        static std::string filterKey(const std::string& jobId) {
+            return Configuration::REDIS_PREFIX + "job_filter_" + jobId;
         }
 
         static std::string resultKey(const std::string& jobId) {

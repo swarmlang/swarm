@@ -38,6 +38,7 @@ int Executive::run(int argc, char **argv) {
 
     if ( flagWorkQueue ) {
         swarmc::Runtime::ExecutionQueue eq(nullptr);
+        parseFilters();
         eq.workForever();
         return 0;
     }
@@ -194,6 +195,11 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagClearQueue = true;
             console->debug("Will force-clear queue.");
         } else if ( arg == "--work-queue" ) {
+
+            std::string filterfile = params.at(i+1);
+            console->debug("Filter file: " + filterfile);
+
+            flagFilterFile = filterfile;
             flagWorkQueue = true;
             noInputFile = true;
             console->debug("Will work queue jobs.");
@@ -232,14 +238,16 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
     }
 
     /** Try to alloc and open the input file. */
-    _input = new std::ifstream(inputFile);
-    if ( _input->bad() ) {
-        console->error("Could not open input file: " + inputFile);
+    if ( !noInputFile ) {
+        _input = new std::ifstream(inputFile);
+        if ( _input->bad() ) {
+            console->error("Could not open input file: " + inputFile);
 
-        delete _input;
-        _input = nullptr;
+            delete _input;
+            _input = nullptr;
 
-        failed = true;
+            failed = true;
+        }
     }
 
     return !failed && !usage;
@@ -263,8 +271,8 @@ void Executive::printUsage() {
         ->line("Force clear any jobs in the Redis queue.")
         ->line();
 
-    console->bold()->print("  --work-queue  :  ", true)
-        ->line("Listen for and execute jobs in the Redis queue.")
+    console->bold()->print("  --work-queue <FILTERS> :  ", true)
+        ->line("Listen for and execute jobs in the Redis queue, with the filters from the given file. ")
         ->line();
 
     console->bold()->print("  --output-to <OUTFILE>  :  ", true)
@@ -433,6 +441,15 @@ int Executive::runTest() {
 
     console->error("Test failed: " + flagRunTestName);
     return 1;
+}
+
+int Executive::parseFilters() {
+    std::string filters, temp;
+    std::ifstream input = std::ifstream(flagFilterFile);
+    while (input >> temp) filters += temp;
+
+    Configuration::QUEUE_FILTERS = nlohmann::json::parse(filters);
+    return 0;
 }
 
 int Executive::interpret() {

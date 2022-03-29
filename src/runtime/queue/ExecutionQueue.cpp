@@ -17,6 +17,38 @@ bool swarmc::Runtime::ExecutionQueue::workOnce() {
     std::string jobId = *nextJob;
     console->debug("Popped job for execution: " + jobId);
 
+    bool flagsGood = true;
+    auto filters = getRedis()->get(filterKey(jobId));
+    if ( !filters ) return false;
+    std::map<std::string, std::string> filterMap = nlohmann::json::parse(*filters);
+
+    console->debug("Job Filters:");
+    for (auto f : filterMap) {
+        console->debug(f.first + ": " + f.second);
+    }
+
+    console->debug("Worker Filters: ");
+    for (auto f : Configuration::QUEUE_FILTERS) {
+        console->debug(f.first + ": " + f.second);
+    }
+
+    for (auto filter : filterMap) {
+        auto worker = Configuration::QUEUE_FILTERS.find(filter.first);
+        if ( worker == Configuration::QUEUE_FILTERS.end() ) {
+            flagsGood = false;
+            break;
+        }
+        if ( worker->second != filter.second ) {
+            flagsGood = false;
+            break;
+        }
+    }
+
+    if ( !flagsGood ) {
+        getRedis()->rpush(queueKey(), jobId);
+        return false;
+    }
+
     // Update status to running
     updateStatus(jobId, JobStatus::RUNNING);
 

@@ -19,3 +19,5 @@ int Configuration::WAITER_SLEEP_uS = 1000;
 size_t Configuration::ENUMERATION_UNROLLING_LIMIT = 200;
 
 bool Configuration::THREAD_EXIT = false;
+
+std::map<std::string, std::string> Configuration::QUEUE_FILTERS;

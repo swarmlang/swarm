@@ -37,6 +37,7 @@ protected:
     std::string flagOutputDeSerializeTo;
     std::string flagRunTestName;
     std::string outputResultTo = "--";
+    std::string flagFilterFile;
     std::string inputFile;
     std::istream* _input = nullptr;
 
@@ -46,6 +47,7 @@ protected:
     int debugOutputSerialize();
     int debugOutputDeSerialize();
     int runTest();
+    int parseFilters();
     int interpret();
 };
 

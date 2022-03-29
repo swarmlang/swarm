@@ -11,9 +11,6 @@ std::string LocalSymbolValueStore::serialize(Lang::Walk::SymbolMap* symbols) {
     Lang::Walk::SerializeWalk serialize;
     std::vector<std::pair<nlohmann::json, nlohmann::json>> entries;
 
-    console->debug("Symbols: " + std::to_string(symbols->size()));
-    console->debug("Map: " + std::to_string(_map->size()));
-
     auto iter = symbols->begin();
     while ( iter != symbols->end() ) {
         std::string uuid = iter->first;

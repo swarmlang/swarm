@@ -2,6 +2,7 @@
 #define SWARM_CONFIGURATION_H
 
 #include <string>
+#include <map>
 
 class Configuration {
 public:
@@ -19,6 +20,7 @@ public:
     static size_t ENUMERATION_UNROLLING_LIMIT;
 
     static bool THREAD_EXIT;
+    static std::map<std::string, std::string> QUEUE_FILTERS;
 };
 
 #endif //SWARM_CONFIGURATION_H

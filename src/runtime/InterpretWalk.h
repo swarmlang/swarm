@@ -426,7 +426,8 @@ namespace Runtime {
                         list.push_back(runBlock);
                     }
 
-                    _queue->bulkEvaluate(&list);
+                    // FIXME: pass in filters
+                    _queue->bulkEvaluate(&list, std::map<std::string, std::string>());
                 }
             }
 
