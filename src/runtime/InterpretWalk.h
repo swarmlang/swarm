@@ -359,9 +359,9 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkNotNode(NotNode* node) {
-            ASTNode* val = walk(node);
+            ASTNode* val = walk(node->exp());
             assert(val->getName() == "BooleanLiteralExpressionNode");
-            BooleanLiteralExpressionNode* boolVal = (BooleanLiteralExpressionNode*) val;
+            auto boolVal = (BooleanLiteralExpressionNode*) val;
 
             return new BooleanLiteralExpressionNode(node->position()->copy(), !boolVal->value());
         }
