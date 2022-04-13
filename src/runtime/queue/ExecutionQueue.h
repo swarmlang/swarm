@@ -90,9 +90,9 @@ namespace Runtime {
             getRedis()->publish(statusChannel(jobId), statusString(status));
         }
 
-        Lang::ASTNode* evaluate(Lang::ASTNode* node, std::map<std::string, std::string> filters) {
+        Lang::ASTNode* evaluate(Lang::ASTNode* node) {
             // Push the job onto the queue
-            auto waiterRef = queue(node, filters);
+            auto waiterRef = queue(node);
             auto waiter = waiterRef->get();
 
             // Do background work until the job finishes
@@ -112,12 +112,12 @@ namespace Runtime {
             return result;
         }
 
-        void bulkEvaluate(Lang::StatementList* nodes, std::map<std::string, std::string> filters) {
+        void bulkEvaluate(Lang::StatementList* nodes) {
             auto waiterRefs = new std::vector<RefInstance<Waiter>*>;
 
             // Queue all of the nodes to be evaluated
             for ( auto node : *nodes ) {
-                waiterRefs->push_back(queue(node, filters));
+                waiterRefs->push_back(queue(node));
             }
 
             // Wait for all of the nodes to finish evaluating
@@ -142,7 +142,7 @@ namespace Runtime {
             delete waiterRefs;
         }
 
-        RefInstance<Waiter>* queue(Lang::ASTNode* node, std::map<std::string, std::string> filters) {
+        RefInstance<Waiter>* queue(Lang::ASTNode* node) {
             std::string jobId = util::uuid4();
 
             // Push node to queue
@@ -155,7 +155,7 @@ namespace Runtime {
             getRedis()->set(payloadKey(jobId), payload);
 
             // Push the filters into Redis
-            auto jobFilters = nlohmann::json(filters).dump(4);
+            auto jobFilters = nlohmann::json(_local->filters()).dump(4);
             getRedis()->set(filterKey(jobId), jobFilters);
 
             // Set the default status
@@ -211,7 +211,11 @@ namespace Runtime {
                 if ( !workOnce() ) {
                     // No job was executed. Sleep for a bit to prevent CPU hogging
                     console->debug("No jobs found to execute. Sleeping...");
-                    usleep(Configuration::QUEUE_SLEEP_uS);
+                    if ( Configuration::DEBUG ) {
+                        usleep(Configuration::DEBUG_QUEUE_SLEEP_uS);
+                    } else {
+                        usleep(Configuration::QUEUE_SLEEP_uS);
+                    }
                 }
             }
         }
@@ -238,7 +242,11 @@ namespace Runtime {
                 if ( !workOnce() ) {
                     // No job was executed. Sleep for a bit to prevent CPU hogging
                     console->debug("No jobs found to execute. Sleeping...");
-                    usleep(Configuration::QUEUE_SLEEP_uS);
+                    if ( Configuration::DEBUG ) {
+                        usleep(Configuration::DEBUG_QUEUE_SLEEP_uS);
+                    } else {
+                        usleep(Configuration::QUEUE_SLEEP_uS);
+                    }
                 }
             }
 

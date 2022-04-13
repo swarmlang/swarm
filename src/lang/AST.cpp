@@ -7,6 +7,7 @@
 #include "../Reporting.h"
 #include "Type.h"
 #include "Walk/PrintWalk.h"
+#include "../runtime/InterpretWalk.h"
 
 #ifndef SWARMC_SPACE
 #define SWARMC_SPACE "  "
@@ -109,6 +110,27 @@ namespace Lang {
         }
 
         throw Errors::SwarmError("Unable to reconstruct type node for type: " + type->toString());
+    }
+
+    void TagResourceNode::open(Runtime::InterpretWalk* interpreter) {
+        auto previousResult = interpreter->_local->_filters.find(_key);
+        _hasPrevious = previousResult != interpreter->_local->_filters.end();
+        _previous = _hasPrevious ? previousResult->second : "";
+
+        interpreter->_local->_filters[_key] = _value;
+        _opened = true;
+    }
+
+    void TagResourceNode::close(Runtime::InterpretWalk* interpreter) {
+        if ( _hasPrevious ) {
+            interpreter->_local->_filters[_key] = _previous;
+        } else {
+            interpreter->_local->_filters.erase(_key);
+        }
+
+        _hasPrevious = false;
+        _previous = "";
+        _opened = false;
     }
 
 }

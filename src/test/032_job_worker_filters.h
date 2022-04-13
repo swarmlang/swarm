@@ -36,7 +36,7 @@ namespace Test {
 
             Runtime::ExecutionQueue e(&locals);
 
-            auto waiter = e.queue(&exp, filters1);
+            auto waiter = e.queue(&exp);
             e.workOnce();
             e.checkWaiter(waiter);
             assert(!waiter->get()->finished());
@@ -46,7 +46,7 @@ namespace Test {
             e.checkWaiter(waiter);
             assert(waiter->get()->finished());
 
-            waiter = e.queue(&exp, filters2);
+            waiter = e.queue(&exp);
             e.workOnce();
             e.checkWaiter(waiter);
             assert(!waiter->get()->finished());

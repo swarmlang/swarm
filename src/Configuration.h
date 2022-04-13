@@ -9,11 +9,12 @@ public:
     static bool DEBUG;
     static bool FORCE_LOCAL;
 
-    static std::string REDIS_HOST;
+    inline static const std::string REDIS_HOST = "localhost";
     static int REDIS_PORT;
-    static std::string REDIS_PREFIX;
+    inline static const std::string REDIS_PREFIX = "swarm_";
 
     static int QUEUE_SLEEP_uS;
+    static int DEBUG_QUEUE_SLEEP_uS;
     static int LOCK_SLEEP_uS;
     static int WAITER_SLEEP_uS;
 

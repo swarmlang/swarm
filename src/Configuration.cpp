@@ -8,11 +8,10 @@
 
 bool Configuration::FORCE_LOCAL = false;
 
-std::string Configuration::REDIS_HOST = "127.0.0.1";
 int Configuration::REDIS_PORT = 6379;
-std::string Configuration::REDIS_PREFIX = "swarm_";
 
 int Configuration::QUEUE_SLEEP_uS = 1000;
+int Configuration::DEBUG_QUEUE_SLEEP_uS = 1000000;
 int Configuration::LOCK_SLEEP_uS = 1000;
 int Configuration::WAITER_SLEEP_uS = 1000;
 

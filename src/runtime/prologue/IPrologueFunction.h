@@ -1,6 +1,8 @@
 #ifndef SWARM_IPROLOGUEFUNCTION_H
 #define SWARM_IPROLOGUEFUNCTION_H
 
+#include <utility>
+
 #include "../../shared/IStringable.h"
 #include "../../lang/SymbolTable.h"
 #include "../../lang/AST.h"
@@ -17,7 +19,7 @@ namespace Prologue {
 
         static void buildScope(Lang::ScopeTable*);
 
-        IPrologueFunction(std::string name) : _name(name) {}
+        explicit IPrologueFunction(std::string name) : _name(name) {}
 
         virtual bool validateCall(const ExpressionList* args) const {
             auto fnType = type();

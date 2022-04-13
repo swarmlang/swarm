@@ -503,6 +503,16 @@ namespace Walk {
 
             return obj;
         }
+
+        virtual nlohmann::json* walkTagResourceNode(TagResourceNode* node) {
+            nlohmann::json* obj = getJSON();
+
+            (*obj)["key"] = node->keyString();
+            (*obj)["value"] = node->valueString();
+            (*obj)["opened"] = node->isOpened();
+
+            return obj;
+        }
     };
 
 }

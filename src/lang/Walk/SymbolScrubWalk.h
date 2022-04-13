@@ -210,6 +210,8 @@ protected:
         walk(node->right());
     }
 
+    virtual void walkTagResourceNode(TagResourceNode* node) {}
+
     virtual std::string toString() const {
         return "SymbolScrubWalk<>";
     }

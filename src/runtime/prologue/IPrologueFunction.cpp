@@ -6,6 +6,7 @@
 #include "MinMax.h"
 #include "File.h"
 #include "Range.h"
+#include "Tag.h"
 
 using namespace swarmc::Runtime::Prologue;
 
@@ -21,6 +22,7 @@ IPrologueFunction* IPrologueFunction::resolveByName(std::string name) {
     if ( name == "max" ) return new Max;
     if ( name == "fileContents" ) return new FileContents;
     if ( name == "range" ) return new Range;
+    if ( name == "tag" ) return new Tag;
 
     throw Errors::SwarmError("Invalid Prologue function: " + name);
 }
@@ -58,4 +60,7 @@ void IPrologueFunction::buildScope(Lang::ScopeTable* table) {
 
     Range range;
     table->addPrologueFunction(range.name(), (FunctionType*) range.type()->copy(), range.position()->copy());
+
+    Tag tag;
+    table->addPrologueFunction(tag.name(), (FunctionType*) tag.type()->copy(), tag.position()->copy());
 }

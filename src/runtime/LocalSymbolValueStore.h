@@ -2,13 +2,17 @@
 #define SWARM_LOCALSYMBOLVALUESTORE_H
 
 #include <vector>
-#include <assert.h>
+#include <cassert>
 #include "ISymbolValueStore.h"
 #include "../errors/FreeSymbolError.h"
 #include "../shared/util/Console.h"
 #include "../lang/Walk/SymbolWalk.h"
 
 namespace swarmc {
+namespace Lang {
+    class TagResourceNode;
+}
+
 namespace Runtime {
 
     /**
@@ -16,8 +20,11 @@ namespace Runtime {
      */
     class LocalSymbolValueStore : public ISymbolValueStore, public IUsesConsole {
     protected:
+        friend class Lang::TagResourceNode;
+
         /** The internal symbol -> value mapping. */
         std::map<Lang::SemanticSymbol*, Lang::ExpressionNode*>* _map;
+        std::map<std::string, std::string> _filters;
     public:
         LocalSymbolValueStore() : ISymbolValueStore(), IUsesConsole() {
             _map = new std::map<Lang::SemanticSymbol*, Lang::ExpressionNode*>();
@@ -25,6 +32,10 @@ namespace Runtime {
 
         virtual ~LocalSymbolValueStore() {
             delete _map;
+        }
+
+        virtual std::map<std::string, std::string> filters() const {
+            return _filters;
         }
 
         virtual std::string serialize(Lang::Walk::SymbolMap* symbols);

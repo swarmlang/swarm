@@ -15,7 +15,7 @@ namespace Runtime {
 
     class Lock : public IStringable {
     public:
-        Lock(std::string name, LockManager* manager) : _name(std::move(name)), _manager(manager) {}
+        Lock(std::string name, LockManager* manager) : _name(name), _manager(manager) {}
         virtual ~Lock() {}
 
         bool tryToAcquire();

@@ -26,14 +26,17 @@ std::string LocalSymbolValueStore::serialize(Lang::Walk::SymbolMap* symbols) {
     }
 
     json["entries"] = entries;
+    json["filters"] = _filters;
     return json.dump(4);
 }
 
 void LocalSymbolValueStore::deserialize(std::string payload) {
     Lang::Walk::DeSerializeWalk deserialize;
-    std::vector<std::pair<nlohmann::json, nlohmann::json>> entries = nlohmann::json::parse(payload)["entries"];
+    auto parsedPayload = nlohmann::json::parse(payload);
+    std::vector<std::pair<nlohmann::json, nlohmann::json>> entries = parsedPayload["entries"];
+    _filters = parsedPayload["filters"];
 
-    for ( auto entry : entries ) {
+    for ( const auto& entry : entries ) {
         Lang::SemanticSymbol* symbol = deserialize.walkSymbol(entry.first);
         auto expression = deserialize.walk(entry.second);
         assert(expression->isExpression());

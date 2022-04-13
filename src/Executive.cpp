@@ -254,7 +254,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
 }
 
 void Executive::printUsage() {
-    console->bold()->print("swarmc")->reset()->line(" - compiler for the swarm language");
+    console->bold()->print("swarmc")->reset()->line(" - compiler/interpreter for the swarm language");
     console->bold()->print("USAGE: ")->reset()->line("swarmc [...OPTIONS] <INPUT FILE>");
     console->line();
     console->bold()->line("OPTIONS:");
@@ -313,6 +313,14 @@ void Executive::printUsage() {
             ->line("Use deterministic UUIDs (for test output).")
             ->line();
     console->end();
+
+    console->bold()->line("FILTERS:")
+        ->line("Workers can have key-value filters applied to them so that tagged code regions can be")
+        ->line("selectively executed on nodes matching the appropriate filters.")
+        ->line()
+        ->line("To do this, pass the path to a JSON file containing an object of string-string mappings to")
+        ->line("the --work-queue flag.")
+        ->line();
 
     // Output in debugging mode only:
     console->debug()
@@ -453,6 +461,12 @@ int Executive::parseFilters() {
 }
 
 int Executive::interpret() {
+    if ( Configuration::DEBUG ) {
+        swarmc::Pipeline pipeline(_input);
+        pipeline.targetEvaluate();
+        return 0;
+    }
+
     try {
         swarmc::Pipeline pipeline(_input);
         pipeline.targetEvaluate();

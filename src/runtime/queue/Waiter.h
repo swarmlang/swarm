@@ -21,7 +21,7 @@ namespace Runtime {
             }
         }
 
-        explicit Waiter(std::string id): _id(std::move(id)) {}
+        explicit Waiter(std::string id): _id(id) {}
 
         void wait();
 

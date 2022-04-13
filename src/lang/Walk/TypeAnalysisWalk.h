@@ -425,6 +425,7 @@ protected:
         }
 
         const Type* type = _types->getTypeOf(node->resource());
+        if ( !type->isGenericType() ) console->debug("type is not generic");
         if ( type == nullptr || !type->isGenericType() || type->valueType() != ValueType::TRESOURCE ) {
             Reporting::typeError(
                 node->position(),
@@ -593,6 +594,11 @@ protected:
 
     virtual bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
         return walkPureBinaryExpression(node);
+    }
+
+    virtual bool walkTagResourceNode(TagResourceNode* node) {
+        _types->setTypeOf(node, node->type());
+        return true;
     }
 
     virtual std::string toString() const {

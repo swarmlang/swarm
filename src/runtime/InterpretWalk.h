@@ -1,8 +1,11 @@
 #ifndef SWARMC_INTERPRETWALK_H
 #define SWARMC_INTERPRETWALK_H
 
-#include <assert.h>
-#include <math.h>
+#include <cassert>
+#include <cmath>
+#include <map>
+#include <string>
+#include <functional>
 #include "../Configuration.h"
 #include "../errors/SwarmError.h"
 #include "../lang/AST.h"
@@ -47,6 +50,8 @@ namespace Runtime {
         }
 
     protected:
+        friend class Lang::TagResourceNode;
+
         LocalSymbolValueStore* _local;
         ISymbolValueStore* _shared;
         ExecutionQueue* _queue;
@@ -65,9 +70,7 @@ namespace Runtime {
 
         virtual ASTNode* walkIdentifierNode(IdentifierNode* node) {
             auto store = getStore(node->symbol());
-            ExpressionNode* value = nullptr;
-
-            return store->withLockedSymbol<ExpressionNode*>(node->symbol(), [store, node, value]() mutable {
+            return store->withLockedSymbol<ExpressionNode*>(node->symbol(), [store, node]() mutable {
                 return node->getValue(store);
             });
         }
@@ -75,7 +78,7 @@ namespace Runtime {
         virtual ASTNode* walkMapAccessNode(MapAccessNode* node) {
             auto store = getStore(node->lockable());
 
-            return store->withLockedSymbol<ExpressionNode*>(node->lockable(), [this, node, store]() mutable {
+            return store->withLockedSymbol<ExpressionNode*>(node->lockable(), [node, store]() mutable {
                 auto value = node->getValue(store);
                 assert(value != nullptr);
                 return value;
@@ -426,8 +429,7 @@ namespace Runtime {
                         list.push_back(runBlock);
                     }
 
-                    // FIXME: pass in filters
-                    _queue->bulkEvaluate(&list, std::map<std::string, std::string>());
+                    _queue->bulkEvaluate(&list);
                 }
             }
 
@@ -443,13 +445,24 @@ namespace Runtime {
         }
 
         virtual ASTNode* walkWithStatement(WithStatement* node) {
-//            ASTNode* resource = walk(node->resource());
-            // TODO bind local to value
+            ASTNode* resource = walk(node->resource());
+            assert(resource->isResource());
 
+            auto resourceNode = (PrologueResourceNode*) resource;
+            resourceNode->open(this);
+
+            auto runBlock = new CapturedBlockStatementNode(node->position()->copy());
             for ( auto stmt : *node->body() ) {
-                walk(stmt);
+                runBlock->pushStatement(stmt);
             }
 
+            if ( Configuration::FORCE_LOCAL ) {
+                walk(runBlock);
+            } else {
+                _queue->evaluate(runBlock);
+            }
+
+            resourceNode->close(this);
             return new UnitNode(node->position()->copy());
         }
 
@@ -541,6 +554,10 @@ namespace Runtime {
 
         virtual ASTNode* walkUnitNode(UnitNode* node) override {
             return node;
+        }
+
+        virtual ASTNode* walkTagResourceNode(TagResourceNode* node) override {
+            return node->value();
         }
 
         virtual ISymbolValueStore* getStore(SemanticSymbol* symbol) {

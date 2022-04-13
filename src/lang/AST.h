@@ -17,6 +17,10 @@ namespace swarmc {
 namespace Runtime {
     class ISymbolValueStore;
     class InterpretWalk;
+
+    namespace Prologue {
+        class IPrologueResource;
+    }
 }
 
 namespace Lang {
@@ -56,6 +60,10 @@ namespace Walk {
         virtual std::string getName() const = 0;
 
         virtual bool isStatement() const {
+            return false;
+        }
+
+        virtual bool isResource() const {
             return false;
         }
 
@@ -1625,6 +1633,89 @@ namespace Walk {
 
         friend class Walk::TypeAnalysisWalk;
     };
+
+
+    /** Value containing a prologue resource reference. */
+    class PrologueResourceNode : public ExpressionNode {
+    public:
+        PrologueResourceNode(Position* pos) : ExpressionNode(pos) {}
+        virtual ~PrologueResourceNode() {}
+
+        virtual void open(Runtime::InterpretWalk*) = 0;
+
+        virtual void close(Runtime::InterpretWalk*) = 0;
+
+        virtual ExpressionNode* value() = 0;
+
+        virtual bool isOpened() const {
+            return _opened;
+        }
+
+        virtual bool isValue() const override {
+            return true;
+        }
+
+        virtual bool isResource() const override {
+            return true;
+        }
+
+        bool equals(const ExpressionNode* other) const override {
+            return (
+                other->getName() == getName()
+                && ((PrologueResourceNode*) other)->type()->is(type())
+            );
+        }
+
+    protected:
+        bool _opened = false;
+    };
+
+
+    class TagResourceNode final : public PrologueResourceNode {
+    public:
+        TagResourceNode(Position* pos, std::string key, std::string value) : PrologueResourceNode(pos), _key(key), _value(value) {}
+
+        virtual ~TagResourceNode() {}
+
+        virtual void open(Runtime::InterpretWalk*);
+
+        virtual void close(Runtime::InterpretWalk*);
+
+        std::string keyString() const {
+            return _key;
+        }
+
+        std::string valueString() const {
+            return _value;
+        }
+
+        virtual std::string getName() const override {
+            return "TagResourceNode";
+        }
+
+        std::string toString() const override {
+            return "TagResourceNode<key: " + _key + ", value: " + _value + ">";
+        }
+
+        ExpressionNode* value() override {
+            return new UnitNode(position());
+        }
+
+        TagResourceNode* copy() const override {
+            return new TagResourceNode(position()->copy(), _key, _value);
+        }
+
+        virtual const Type* type() const override {
+            return GenericType::of(ValueType::TRESOURCE, PrimitiveType::of(ValueType::TUNIT));
+        }
+
+    protected:
+        std::string _key;
+        std::string _value;
+        std::string _previous = "";
+        bool _hasPrevious = false;
+    };
+
 
     /** AST node representing literal strings. */
     class StringLiteralExpressionNode final : public ExpressionNode {

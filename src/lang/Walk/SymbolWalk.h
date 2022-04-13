@@ -341,6 +341,10 @@ protected:
         return map;
     }
 
+    virtual SymbolMap* walkTagResourceNode(TagResourceNode* node) {
+        return new SymbolMap();
+    }
+
     std::string toString() const override {
         return "SymbolWalk<>";
     }

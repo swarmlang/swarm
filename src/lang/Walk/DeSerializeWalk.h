@@ -98,6 +98,7 @@ namespace Walk {
             else if ( name == "UnitNode" ) return walkUnitNode(pos);
             else if ( name == "NumericComparisonExpressionNode" ) return walkNumericComparisonExpressionNode(prog["left"], prog["right"], prog["comparisonType"], pos);
             else if ( name == "CapturedBlockStatementNode" ) return walkCapturedBlockStatementNode(prog["body"], pos);
+            else if ( name == "TagResourceNode" ) return walkTagResourceNode(prog["key"], prog["value"], pos);
             assert(false);
         }
 
@@ -491,6 +492,10 @@ namespace Walk {
 
         virtual UnitNode* walkUnitNode(Position* pos) {
             return new UnitNode(pos);
+        }
+
+        virtual TagResourceNode* walkTagResourceNode(std::string key, std::string value, Position* pos) {
+            return new TagResourceNode(pos, key, value);
         }
 
         std::string inputToString(std::istream& input) {
