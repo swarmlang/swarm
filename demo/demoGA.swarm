@@ -7,8 +7,8 @@ enumerate community as populations {
     number running = 0;
 
     enumerate pop as member {
-        member = random()
-        running += 4 + 2 * member + 2 * math.sin(20*member) - 4 * member*member;
+        member = random();
+        running += 4 + 2 * member + 2 * sin(20*member) - 4 * member*member;
     }
 
     number max = 100;
@@ -19,8 +19,8 @@ enumerate community as populations {
         number size = 5;
         number member = 0;
         while (member < 5) {
-            r = random();
-            if (r < (4 + 2 * pop[member] + 2 * math.sin(20*pop[member]) - 4 * pop[member]*pop[member])/tf) {
+            number r = random();
+            if (r < (4 + 2 * pop[member] + 2 * sin(20*pop[member]) - 4 * pop[member]*pop[member])/tf) {
                 r = random();
                 if (r < 0.3) {
                     pop[member] -= 0.01;
@@ -37,12 +37,13 @@ enumerate community as populations {
             } else {
                 pop[member] = random();
             }
-            running += 4 + 2 * pop[member] + 2 * math.sin(20*pop[member]) - 4 * pop[member]*pop[member];
+            running += 4 + 2 * pop[member] + 2 * sin(20*pop[member]) - 4 * pop[member]*pop[member];
+            member += 1;
         }
         i += 1;
     }
     enumerate pop as member {
-       log(numberToString(4 + 2 * pop + 2 * math.sin(20*pop) - 4 * pop*pop));
+       log(numberToString(4 + 2 * pop + 2 * sin(20*pop) - 4 * pop*pop));
     }
 }
 
