@@ -2,51 +2,36 @@ number nJobs = 5;
 enumerable<number> community = range(1, nJobs, 1);
 enumerate community as populations {
     enumerable<number> pop = [0, 0, 0, 0, 0];
-    number tf = 0;
-    number running = 0;
 
     enumerate pop as member {
-        member = random();
-        running += 4 + 2 * member + 2 * sin(20*member) - 4 * member*member;
-    }
-
-    number max = 100;
-    number i = 0;
-    while (i < 100) {
-        tf = running;
-        running = 0;
-        number size = 5;
-        number member = 0;
-        while (member < 5) {
+	member = random();
+        number running = 4 + 2 * member + 2 * sin(20*member) - 4 * member*member;
+    	number i = 0;
+    	while (i < 1000) {
             number r = random();
-            bool myCond = (r < ((4 + 2 * (pop[member]) + 2 * sin(20*(pop[member])) - 4 * (pop[member])*(pop[member]))/tf));
-            if ( myCond ) {
+            bool myCond = (r < ((4 + 2 * (member) + 2 * sin(20*(member)) - 4 * (member)*(member))/running));
+	    if ( myCond ) {
                 r = random();
                 if (r < 0.3) {
-                    pop[member] += (0 - 0.01);
+                    member += (0 - 0.001);
                 }
                 if (r < 0.6) {
-                    pop[member] += 0.01;
+                    member += 0.001;
                 }
-                if (pop[member] < 0) {
-                    pop[member] = 0;
+                if (member < 0) {
+                    member = 0;
                 }
-                if (pop[member] > 1) {
-                    pop[member] = 1;
+                if (member > 1) {
+                    member = 1;
                 }
             }
 
             if ( !myCond ) {
-                pop[member] = random();
+                member = random();
             }
-            running += 4 + 2 * pop[member] + 2 * sin(20*pop[member]) - 4 * pop[member]*pop[member];
-            member += 1;
-        }
-        i += 1;
-    }
-    log("Before last printer...");
-    enumerate pop as member {
-       log(numberToString(4 + 2 * member + 2 * sin(20*member) - 4 * member*member));
+            i += 1;
+	}
+        log("Local Max: " . numberToString(4 + 2 * member + 2 * sin(20*member) - 4 * member*member));
     }
 }
 
