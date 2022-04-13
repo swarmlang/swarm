@@ -7,6 +7,7 @@
 #include "Range.h"
 #include "Tag.h"
 #include "Shell.h"
+#include "Trig.h"
 
 using namespace swarmc::Runtime::Prologue;
 
@@ -24,6 +25,7 @@ IPrologueFunction* IPrologueFunction::resolveByName(std::string name) {
     if ( name == "range" ) return new Range;
     if ( name == "tag" ) return new Tag;
     if ( name == "shell" ) return new Shell;
+    if ( name == "sin" ) return new Sin;
 
     throw Errors::SwarmError("Invalid Prologue function: " + name);
 }
@@ -67,4 +69,7 @@ void IPrologueFunction::buildScope(Lang::ScopeTable* table) {
 
     Shell shell;
     table->addPrologueFunction(shell.name(), (FunctionType*) shell.type()->copy(), shell.position()->copy());
+
+    Sin sin;
+    table->addPrologueFunction(sin.name(), (FunctionType*) sin.type()->copy(), sin.position()->copy());
 }
