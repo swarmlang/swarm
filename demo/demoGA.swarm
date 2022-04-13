@@ -1,0 +1,48 @@
+number nJobs = 5;
+enumerable<number> community = range(1, nJobs, 1);
+enumerate community as populations {
+    enumerable<number> pop = [0, 0, 0, 0, 0];
+    enumerable<number> fit_roulette = [0, 0, 0, 0, 0];
+    number tf = 0;
+    number running = 0;
+
+    enumerate pop as member {
+        member = random()
+        running += 4 + 2 * member + 2 * math.sin(20*member) - 4 * member*member
+    }
+
+    number max = 100;
+    number i = 0;
+    while (i < 100) {
+        tf = running;
+        running = 0;
+        number size = 5;
+        number member = 0;
+        while (member < 5) {
+            r = random()
+            if r < (4 + 2 * pop[member] + 2 * math.sin(20*pop[member]) - 4 * pop[member]*pop[member])/tf:
+                r = random()
+                if (r < 0.3) { # 0.3 x-epsilon
+                    pop[member] -= 0.01
+                }
+                if (r < 0.6) { #0.3 x+epsilon
+                    pop[member] += 0.01
+                }
+                if (pop[member] < 0) {
+                    pop[member] = 0;
+                }
+                if (pop[member] > 1) {
+                    pop[member] = 1;
+                }
+            else{
+                pop[member] = random()
+            }
+            running += 4 + 2 * pop[member] + 2 * math.sin(20*pop[member]) - 4 * pop[member]*pop[member]
+        }
+        i += 1;
+    }
+    enumerate pop as member {
+       log(4 + 2 * pop + 2 * math.sin(20*pop) - 4 * pop*pop)
+    }
+}
+
