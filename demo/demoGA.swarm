@@ -1,22 +1,23 @@
 number nJobs = 5;
+number res = 0.0005;
 enumerable<number> community = range(1, nJobs, 1);
 enumerate community as populations {
     enumerable<number> pop = [0, 0, 0, 0, 0];
 
     enumerate pop as member {
-	member = random();
+    member = random();
         number running = 4 + 2 * member + 2 * sin(20*member) - 4 * member*member;
-    	number i = 0;
-    	while (i < 1000) {
+        number i = 0;
+        while (i < 10000) {
             number r = random();
             bool myCond = (r < ((4 + 2 * (member) + 2 * sin(20*(member)) - 4 * (member)*(member))/running));
-	    if ( myCond ) {
+        if ( myCond ) {
                 r = random();
                 if (r < 0.3) {
-                    member += (0 - 0.001);
+                    member += -res;
                 }
                 if (r < 0.6) {
-                    member += 0.001;
+                    member += res;
                 }
                 if (member < 0) {
                     member = 0;
@@ -30,7 +31,7 @@ enumerate community as populations {
                 member = random();
             }
             i += 1;
-	}
+    }
         log("Local Max: " . numberToString(4 + 2 * member + 2 * sin(20*member) - 4 * member*member));
     }
 }
