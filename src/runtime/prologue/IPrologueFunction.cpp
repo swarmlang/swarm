@@ -1,5 +1,4 @@
 #include "IPrologueFunction.h"
-#include "../../errors/SwarmError.h"
 #include "Random.h"
 #include "Log.h"
 #include "ToString.h"
@@ -7,6 +6,7 @@
 #include "File.h"
 #include "Range.h"
 #include "Tag.h"
+#include "Shell.h"
 
 using namespace swarmc::Runtime::Prologue;
 
@@ -23,6 +23,7 @@ IPrologueFunction* IPrologueFunction::resolveByName(std::string name) {
     if ( name == "fileContents" ) return new FileContents;
     if ( name == "range" ) return new Range;
     if ( name == "tag" ) return new Tag;
+    if ( name == "shell" ) return new Shell;
 
     throw Errors::SwarmError("Invalid Prologue function: " + name);
 }
@@ -63,4 +64,7 @@ void IPrologueFunction::buildScope(Lang::ScopeTable* table) {
 
     Tag tag;
     table->addPrologueFunction(tag.name(), (FunctionType*) tag.type()->copy(), tag.position()->copy());
+
+    Shell shell;
+    table->addPrologueFunction(shell.name(), (FunctionType*) shell.type()->copy(), shell.position()->copy());
 }

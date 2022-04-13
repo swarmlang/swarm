@@ -4,6 +4,7 @@
 #include <utility>
 
 #include "../../shared/IStringable.h"
+#include "../../shared/util/Console.h"
 #include "../../lang/SymbolTable.h"
 #include "../../lang/AST.h"
 
@@ -13,13 +14,13 @@ namespace swarmc {
 namespace Runtime {
 namespace Prologue {
 
-    class IPrologueFunction : public IStringable {
+    class IPrologueFunction : public IStringable, public IUsesConsole {
     public:
         static IPrologueFunction* resolveByName(std::string);
 
         static void buildScope(Lang::ScopeTable*);
 
-        explicit IPrologueFunction(std::string name) : _name(name) {}
+        explicit IPrologueFunction(std::string name) : IUsesConsole(), _name(std::move(name)) {}
 
         virtual bool validateCall(const ExpressionList* args) const {
             auto fnType = type();

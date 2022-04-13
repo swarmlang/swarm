@@ -1,8 +1,3 @@
-enumerable<string> strs = ["Hello", "World", "Of", "Strings"];
-
-enumerate strs as str {
-    log(str);
-}
-
-log("All done!");
+shell("touch fubar.txt");
+log("Done!");
 
