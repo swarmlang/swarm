@@ -1,0 +1,7 @@
+enumerable<number> nums = range(0, 9, 1);
+enumerate nums as num {
+    log("My number is: " . numberToString(num));
+}
+
+
+

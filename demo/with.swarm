@@ -1,0 +1,11 @@
+string country = "US";
+with tag("country", country) as _ {
+    log("This code is executing on a node in " . country);
+}
+
+
+
+
+
+
+

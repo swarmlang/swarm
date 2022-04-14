@@ -13,15 +13,15 @@ class SwarmLexer(RegexLexer):
 
     tokens = {
         'root' : [
-            (u'(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)', bygroups(Keyword)),
+            (u'(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)', bygroups(Name.Function)),
             (u'(enumerate|with|while|if|as)', bygroups(Keyword)),
-            (u'(number|bool|map|string|enumerable)', bygroups(Keyword)),
-            (u'(\\b[a-zA-Z_][a-zA-Z0-9_]*)', bygroups(Keyword)),
+            (u'(number|bool|map|string|enumerable)', bygroups(Keyword.Type)),
+            (u'(\\b[a-zA-Z_][a-zA-Z0-9_]*)', bygroups(Name.Variable)),
             (u'(\\b\\d+\\.\\d+)', bygroups(Number)),
             (u'(\\b\\d+)', bygroups(Number)),
             (u'(\\{)', bygroups(Punctuation), 'main__1'),
-            (u'(;|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)', bygroups(Punctuation)),
-            (u'(\\\")', bygroups(Punctuation), 'main__2'),
+            (u'(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)', bygroups(Punctuation)),
+            (u'(\\\")', bygroups(String), 'main__2'),
             (u'(\\()', bygroups(Punctuation), 'main__3'),
             (u'(//.*)', bygroups(Comment)),
             (u'([^\\s\\n\\r])', bygroups(Generic.Error)),
@@ -29,15 +29,15 @@ class SwarmLexer(RegexLexer):
             ('.', String),
         ],
         'main__1' : [
-            (u'(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)', bygroups(Keyword)),
+            (u'(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)', bygroups(Name.Function)),
             (u'(enumerate|with|while|if|as)', bygroups(Keyword)),
-            (u'(number|bool|map|string|enumerable)', bygroups(Keyword)),
-            (u'(\\b[a-zA-Z_][a-zA-Z0-9_]*)', bygroups(Keyword)),
+            (u'(number|bool|map|string|enumerable)', bygroups(Keyword.Type)),
+            (u'(\\b[a-zA-Z_][a-zA-Z0-9_]*)', bygroups(Name.Variable)),
             (u'(\\b\\d+\\.\\d+)', bygroups(Number)),
             (u'(\\b\\d+)', bygroups(Number)),
             (u'(\\{)', bygroups(Punctuation), 'main__1'),
-            (u'(;|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)', bygroups(Punctuation)),
-            (u'(\\\")', bygroups(Punctuation), 'main__2'),
+            (u'(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)', bygroups(Punctuation)),
+            (u'(\\\")', bygroups(String), 'main__2'),
             (u'(\\()', bygroups(Punctuation), 'main__3'),
             (u'(//.*)', bygroups(Comment)),
             (u'([^\\s\\n\\r])', bygroups(Generic.Error)),
@@ -49,15 +49,15 @@ class SwarmLexer(RegexLexer):
             ('.', String),
         ],
         'main__3' : [
-            (u'(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)', bygroups(Keyword)),
+            (u'(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)', bygroups(Name.Function)),
             (u'(enumerate|with|while|if|as)', bygroups(Keyword)),
-            (u'(number|bool|map|string|enumerable)', bygroups(Keyword)),
-            (u'(\\b[a-zA-Z_][a-zA-Z0-9_]*)', bygroups(Keyword)),
+            (u'(number|bool|map|string|enumerable)', bygroups(Keyword.Type)),
+            (u'(\\b[a-zA-Z_][a-zA-Z0-9_]*)', bygroups(Name.Variable)),
             (u'(\\b\\d+\\.\\d+)', bygroups(Number)),
             (u'(\\b\\d+)', bygroups(Number)),
             (u'(\\{)', bygroups(Punctuation), 'main__1'),
-            (u'(;|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)', bygroups(Punctuation)),
-            (u'(\\\")', bygroups(Punctuation), 'main__2'),
+            (u'(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)', bygroups(Punctuation)),
+            (u'(\\\")', bygroups(String), 'main__2'),
             (u'(\\()', bygroups(Punctuation), 'main__3'),
             (u'(//.*)', bygroups(Comment)),
             (u'([^\\s\\n\\r])', bygroups(Generic.Error)),
@@ -65,5 +65,4 @@ class SwarmLexer(RegexLexer):
             ('.', String),
         ]
     }
-
 
