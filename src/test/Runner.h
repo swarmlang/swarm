@@ -4,13 +4,9 @@
 #include <string>
 #include "Test.h"
 #include "021_map_node_accesses.h"
-#include "022_local_store_lval.h"
 #include "023_enum_node_accesses.h"
 #include "024_shared_variables.h"
-#include "028_redis_basics.h"
-#include "030_local_symbol_serialize.h"
 #include "031_symbol_walk.h"
-#include "032_job_worker_filters.h"
 
 namespace swarmc {
 namespace Test {
@@ -25,26 +21,14 @@ namespace Test {
             if ( name == "021_map_node_accesses" ) {
                 MapNodeAccessesTest test;
                 return test.run();
-            } else if ( name == "022_local_store_lval" ) {
-                LocalStoreLValTest test;
-                return test.run();
             } else if ( name == "023_enum_node_accesses" ) {
                 EnumNodeAccessesTest test;
                 return test.run();
             } else if ( name == "024_shared_variables" ) {
                 SharedVariablesTest test;
                 return test.run();
-            } else if ( name == "028_redis_basics" ) {
-                RedisBasicsTest test;
-                return test.run();
-            } else if ( name == "030_local_symbol_serialize" ) {
-                LocalSymbolSerialize test;
-                return test.run();
             } else if ( name == "031_symbol_walk" ) {
                 SymbolWalkTest test;
-                return test.run();
-            } else if ( name == "032_job_worker_filters" ) {
-                JobWorkerFiltersTest test;
                 return test.run();
             }
 

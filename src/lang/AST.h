@@ -14,15 +14,6 @@
 
 namespace swarmc {
 
-namespace Runtime {
-    class ISymbolValueStore;
-    class InterpretWalk;
-
-    namespace Prologue {
-        class IPrologueResource;
-    }
-}
-
 namespace Lang {
 namespace Walk {
     class NameAnalysisWalk;
@@ -267,10 +258,6 @@ namespace Walk {
             return true;
         }
 
-        virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) = 0;
-
-        virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) = 0;
-
         virtual bool shared() const = 0;
 
         virtual SemanticSymbol* lockable() const = 0;
@@ -305,10 +292,6 @@ namespace Walk {
         void overrideSymbol(SemanticSymbol* sym) {
             _symbol = sym;
         }
-
-        virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) override;
-
-        virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
 
         virtual bool shared() const override {
             if (_symbol == nullptr) {
@@ -359,10 +342,6 @@ namespace Walk {
         IdentifierNode* end() const {
             return _end;
         }
-
-        virtual void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* value) override;
-
-        virtual ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
 
         SemanticSymbol* lockable() const override;
 
@@ -1266,7 +1245,6 @@ namespace Walk {
         TypeNode* _disambiguationType = nullptr;
 
         friend class Walk::TypeAnalysisWalk;
-        friend class Runtime::InterpretWalk;
     };
 
 
@@ -1641,10 +1619,6 @@ namespace Walk {
         PrologueResourceNode(Position* pos) : ExpressionNode(pos) {}
         virtual ~PrologueResourceNode() {}
 
-        virtual void open(Runtime::InterpretWalk*) = 0;
-
-        virtual void close(Runtime::InterpretWalk*) = 0;
-
         virtual ExpressionNode* value() = 0;
 
         virtual bool isOpened() const {
@@ -1676,10 +1650,6 @@ namespace Walk {
         TagResourceNode(Position* pos, std::string key, std::string value) : PrologueResourceNode(pos), _key(key), _value(value) {}
 
         virtual ~TagResourceNode() {}
-
-        virtual void open(Runtime::InterpretWalk*);
-
-        virtual void close(Runtime::InterpretWalk*);
 
         std::string keyString() const {
             return _key;
@@ -1844,10 +1814,6 @@ namespace Walk {
         IntegerLiteralExpressionNode* index() const {
             return _index;
         }
-
-        ExpressionNode* getValue(Runtime::ISymbolValueStore* store) override;
-
-        void setValue(Runtime::ISymbolValueStore* store, ExpressionNode* node) override;
 
         SemanticSymbol* lockable() const override;
 

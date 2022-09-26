@@ -1,0 +1,13 @@
+- setup docker container for builds
+- fix memory leaks
+- lexing & parsing for functions
+- types as values
+- not dogshit test suite
+- ability to call external bindings from vm
+- module system / import system
+- abstract redis
+- design the virtual ISA
+- pass to convert AST to ISA
+- ast optimization pass
+- assembly optimization pass
+- VM runtime

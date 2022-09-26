@@ -8,8 +8,6 @@
 #include "pipeline/Pipeline.h"
 #include "errors/ParseError.h"
 #include "test/Runner.h"
-#include "runtime/queue/Waiter.h"
-#include "runtime/queue/ExecutionQueue.h"
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
@@ -30,18 +28,6 @@ int Executive::run(int argc, char **argv) {
     int result = 0;
 
     console->debug("Got input file: " + inputFile);
-
-    if ( flagClearQueue ) {
-        swarmc::Runtime::ExecutionQueue::forceClearQueue();
-        console->success("Force cleared queue.");
-    }
-
-    if ( flagWorkQueue ) {
-        swarmc::Runtime::ExecutionQueue eq(nullptr);
-        parseFilters();
-        eq.workForever();
-        return 0;
-    }
 
     if ( flagRunTest ) {
         return runTest();
@@ -94,7 +80,6 @@ int Executive::run(int argc, char **argv) {
 
 void Executive::cleanup() {
     Configuration::THREAD_EXIT = true;
-    swarmc::Runtime::Waiter::join();
 }
 
 // Parse the command line arguments and set up class properties
@@ -191,18 +176,6 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         } else if ( arg == "--locally" ) {
             Configuration::FORCE_LOCAL = true;
             console->debug("Will interpret locally.");
-        } else if ( arg == "--clear-queue" ) {
-            flagClearQueue = true;
-            console->debug("Will force-clear queue.");
-        } else if ( arg == "--work-queue" ) {
-
-            std::string filterfile = params.at(i+1);
-            console->debug("Filter file: " + filterfile);
-
-            flagFilterFile = filterfile;
-            flagWorkQueue = true;
-            noInputFile = true;
-            console->debug("Will work queue jobs.");
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --run-test. Pass --help for more info.");
@@ -461,17 +434,6 @@ int Executive::parseFilters() {
 }
 
 int Executive::interpret() {
-    if ( Configuration::DEBUG ) {
-        swarmc::Pipeline pipeline(_input);
-        pipeline.targetEvaluate();
-        return 0;
-    }
-
-    try {
-        swarmc::Pipeline pipeline(_input);
-        pipeline.targetEvaluate();
-        return 0;
-    } catch (...) {
-        return 1;
-    }
+    console->error("Not implemented.");
+    return 1;
 }
