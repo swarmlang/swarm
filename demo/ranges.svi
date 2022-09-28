@@ -1,0 +1,46 @@
+$l:tmatrix_inner <- call p:ENUM p:NUMBER
+$l:tmatrix_outer <- call p:ENUM $l:tmatrix
+
+$l:tmp_matrixcall <- call f:RANDOM_MATRIX 25
+$l:matrix <- call $l:tmp_matrixcall 5000
+
+$l:minimum <- 0.3
+$l:maximum <- 0.7
+
+beginfn f:MATRIX_INNER_INC_COUNT p:VOID
+	$s:count <- plus $s:count 1
+return
+
+beginfn f:MATRIX_INNER p:VOID
+	fnparam p:NUMBER $l:entry
+	scopeof $l:entryGtMinimum
+	scopeof $l:entryLtMaximum
+	scopeof $l:entryGtMinLtMax
+
+	$l:entryGtMinimum <- gt $l:entry $l:minimum
+	$l:entryLtMaximum <- lt $l:entry $l:maximum
+	$l:entryGtMinLtMax <- and $l:entryGtMinimum $l:entryLtMaximum
+
+	callif $l:entryGtMinLtMax f:MATRIX_INNER_INC_COUNT
+return
+
+beginfn f:MATRIX_OUTER p:VOID
+	fnparam $l:tmatrix_inner $l:row
+	scopeof $s:count
+	scopeof $l:message
+	scopeof $l:stringcount
+
+	$s:count <- 0
+
+	enumerate p:NUMBER $l:row f:MATRIX_INNER
+
+	$l:stringcount <- call f:NUMBER_TO_STRING $s:count
+	$l:message <- strconcat "Count: " $l:stringcount
+	out $l:message
+return
+
+beginfn f:MAIN p:VOID
+	enumerate $l:tmatrix_inner $l:matrix f:MATRIX_OUTER
+return
+
+call f:MAIN

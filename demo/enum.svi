@@ -1,0 +1,20 @@
+
+$l:nums <- call f:RANGE 0
+$l:nums <- call $l:nums 9
+$l:nums <- call $l:nums 1
+
+beginfn f:ENUM_INNER p:VOID
+	fnparam p:NUMBER $l:num
+	scopeof $l:numstring
+	scopeof $l:message
+
+	$l:numstring <- call f:NUMBER_TO_STRING $l:num
+	$l:message <- strconcat "My number is: " $l:numstring
+	out $l:message
+return
+
+beginfn f:MAIN p:VOID
+	enumerate p:NUMBER $l:nums f:ENUM_INNER
+return
+
+call f:MAIN

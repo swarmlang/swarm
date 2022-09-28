@@ -10,4 +10,5 @@
 - pass to convert AST to ISA
 - ast optimization pass
 - assembly optimization pass
+  - `X += -Y` can be optimized in the assembly
 - VM runtime

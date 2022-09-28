@@ -16,6 +16,16 @@ The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job
 
 `val` - A literal value.
 
+- Primitive types
+  - `p:TYPE`
+  - `p:VOID`
+  - `p:NUMBER`
+  - `p:STRING`
+  - `p:BOOLEAN`
+  - `call p:MAP $lloc` - map whose values are of type `$lloc`
+  - `call p:ENUM $lloc` - an enum whose values are of type `$lloc`
+  - `call p:LAMBDA0 $lloc` - a function taking 0 parameters and returning type `$lloc`
+  - `call (call p:LAMBDA $lloc1) $lloc2` - a function taking a parameter of type `$lloc2` and returning type `$lloc1`
 - Special locations
   - `$l:STDOUT` - standard output on the local executor
   - `$l:STDERR` - standard error on the local executor
@@ -27,14 +37,16 @@ The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job
     - Equivalent to `streampush $s:STDERR $lloc`
 - Function operations
   - `beginfn f:NAME $lloc` - starts a function body with return type `$lloc`
-  - `fnparam $lloc $loc` - a parameter to the function of type `$lloc` to be stored in `$loc`
+  - `fnparam $lloc` - a parameter to the function of type `$lloc`
   - `return $lloc` - ends the function call, returning the value `$lloc`
+  - `curry f:NAME $lloc` - bundle a parameter with a function w/o calling it (e.g `curry ((a, b) => a + b) 1  => ((b) => (1, b) => 1+b)`)
   - `call f:NAME` - call `f:NAME`
   - `call $lloc` - call the function at `$lloc`
   - `call f:NAME $lloc2` - call `f:NAME` with the parameter `$lloc2`
   - `call $lloc1 $lloc2` - call the function at `$lloc1` with the parameter `$lloc2`
   - `callif $lloc ...` - behaves like `call ...` if `$lloc` is valued as `true`
   - `callelse $lloc ...` - behaves like `call ...` if `$lloc` is valued as `false`
+  - `pushcall{,if,else} ...` - behaves like the call derivatives, but pushes the execution of the function onto the work queue
 - Stream operations
   - `streaminit $lloc1 $lloc2` - create an empty stream of type `$lloc1` at `$lloc2`
   - `streampush $lloc1 $lloc2` - push the value `$lloc2` onto the stream `$lloc1`
@@ -48,6 +60,8 @@ The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job
   - `lock $s:NAME` - acquires an exclusive lock on the given shared storage variable
   - `unlock $s:NAME` - releases a held lock on the given shared storage variable
   - `equal $lloc1 $lloc2` - determine whether two values are the same
+  - `scopeof $loc` - creates a new shadow of `$loc` unique to the current scope. Useful for functions
+    - NOTE: Variables created with `fnparam` are automatically `scopeof`
 - Type operations
   - `typeof $lloc`
   - `compatible $lloc $lloc`
@@ -59,18 +73,21 @@ The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job
   - `nor $lloc1 $lloc2` - boolean NOR of `$lloc1` and `$lloc2`
   - `not $lloc` - boolean negation of `$lloc`
 - Map operations
-  - `mapinit $lloc1 $lloc2` - create an empty map of type `$lloc1` at `$lloc2`
+  - `mapinit $lloc` - create an empty map of type `$lloc`
   - `mapset $lloc1 $lloc2 $lloc3` - set the key `$lloc2` to the value `$lloc3` in the map at `$lloc1`
   - `mapget $lloc1 $lloc2` - get the value of the key `$lloc2` from the map `$lloc1`
   - `maplength $lloc` - get the number of entries in the map at `$lloc`
   - `mapkeys $lloc1 $lloc2` - stores an enum of the keys of the map `$lloc1` at `$lloc2`
 - Enumeration operations
-  - `enuminit $lloc1 $lloc2` - create an empty enum of type `$lloc1` at `$lloc2`
+  - `enuminit $lloc1` - create an empty enum of type `$lloc1`
   - `enumappend $lloc1 $lloc2` - append the value at `$lloc2` to the enum at `$lloc1`
   - `enumprepend $lloc1 $lloc2` - prepend the value at `$lloc2` to the enum at `$lloc1`
   - `enumlength $lloc` - number of entries in enum at `$lloc`
   - `enumget $lloc1 $lloc2` - get the value of the `$lloc2`-th entry of the enum at `$lloc1`
   - `enumset $lloc1 $lloc2 $lloc3` - set the value of the `$lloc2`-th entry of the enum at `$lloc1` to `$lloc3`
+  - `enumerate $lloc1 $lloc2 $lloc3` - syntactic sugar for `f:ENUMERATE`
+    - Async enumeration over the elements of the enum `$lloc2`, which are of type `$lloc1`, calling the function `$lloc3`
+    - `$lloc3` must take, as its only parameter, an element of type `$lloc1`
 - String operations
   - `strconcat $lloc1 $lloc2` - concat string `$lloc2` onto the end of `$lloc1`
   - `strlength $lloc` - get the length of the string `$lloc`
@@ -81,8 +98,65 @@ The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job
   - `minus $lloc1 $lloc2` - subtract `$lloc2` from `$lloc1`
   - `times $lloc1 $lloc2` - multiply `$lloc1` by `$lloc2`
   - `divide $lloc1 $lloc2` - divide `$lloc1` by `$lloc2`
+  - `power $lloc1 $lloc2` - `$lloc1` to the power of `$lloc2`
   - `mod $lloc1 $lloc2` - modulo `$lloc1` by `$lloc2`
   - `neg $lloc1` - negate `$lloc1`
+  - `gt $lloc1 $lloc2` - check if `$lloc1` is greater than `$lloc2`
+  - `gte $lloc1 $lloc2` - check if `$lloc1` is greater than or equal to `$lloc2`
+  - `lt $lloc1 $lloc2` - check if `$lloc1` is less than `$lloc2`
+  - `lte $lloc1 $lloc2` - check if `$lloc1` is less than or equal to `$lloc2`
+- Loop operations
+  - `while $lloc1 $lloc2` - while `$lloc1` is true, call the parameterless function `$lloc2`
+- Resource operations
+  - `with $lloc1 $lloc2` - execute the function at `$lloc2` in the resource `$lloc1`
+    - `$lloc2` must take as a parameter the yield type of the resource `$lloc1`
+
+### Standard Library
+
+- String functions
+  - `f:NUMBER_TO_STRING n` - converts a number to a string
+  - `f:BOOLEAN_TO_STRING b` - converts a boolean to a string
+  - `f:SIN n`/`f:COS n`/`f:TAN n` - the mathematical sine, cosine, and tangent functions
+  - `f:RANDOM`/`f:RANDOM_VECTOR n`/`f:RANDOM_MATRIX m n` - get a random number, enum of random numbers of length n, or matrix of random numbers of size m by n
+  - `f:RANGE n m s` - get an enum of the range of numbers from n to m with step size s
+  - `f:ENUMERATE t e c` - performs `pushcall`s of `c` on the elements of `e` which are of type `t`
+
+```txt
+beginfn f:ENUMERATE_INNER p:VOID
+	scopeof $l:entry
+	$l:entry <- enumget $l:enum $l:entryi
+
+	pushcall $l:callee $l:entry
+
+	$l:entryi <- add $l:entryi 1
+	$l:entryi_lt_entrylen <- lt $l:entryi $l:entrylen
+return
+
+beginfn f:ENUMERATE p:VOID
+	fnparam p:TYPE $l:tenumof
+
+	scopeof $l:tenum
+	$l:tenum <- call p:ENUM $l:tenumof
+
+	fnparam $l:tenum $l:enum
+
+	scopeof $l:tcallee
+	$l:tcallee <- call p:LAMBDA p:VOID
+	$l:tcallee <- call $l:tcallee $l:tenumof
+
+	fnparam $l:tcallee $l:callee
+
+	scopeof $l:entryi
+	scopeof $l:entrylen
+	scopeof $l:entryi_lt_entrylen
+
+	$l:entryi <- 0
+	$l:entrylen <- enumlength $l:enum
+	$l:entryi_lt_entrylen <- lt $l:entryi $l:entrylen
+
+	while $l:entryi_lt_entrylen f:ENUMERATE_INNER
+return
+```
 
 ### Examples
 

@@ -1,0 +1,21 @@
+$l:country <- "US"
+
+$l:tag <- call f:TAG "country"
+$l:tag <- call $l:tag $l:country
+
+scopeof $l:ttag
+$l:ttag <- typeof $l:tag
+
+beginfn f:WITH_TAG_COUNTRY_COUNTRY p:VOID
+	fnparam $l:ttag $l:hole1
+
+	scopeof $l:message
+	$l:message <- strconcat "This code is executing on a node in " $l:country
+	out $l:message
+return
+
+begin f:MAIN p:VOID
+	with $l:tag f:WITH_TAG_COUNTRY_COUNTRY
+return
+
+call f:MAIN

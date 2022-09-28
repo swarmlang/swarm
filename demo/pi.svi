@@ -1,0 +1,78 @@
+$l:pi_real <- 3.14159
+
+$l:n_jobs <- 8
+
+$l:ranks <- call f:RANGE 1
+$l:ranks <- call $l:ranks $l:n_jobs
+$l:ranks <- call $l:ranks 1
+
+$l:n <- 100000
+
+$s:pi_approx <- 0
+
+beginfn f:WHILE_INNER p:VOID
+	scopeof $l:x
+	scopeof $l:sdiff
+
+	$l:x <- minus $l:i 0.5
+	$l:x <- times $l:h $l:x
+
+	$l:sdiff <- power $l:x 2
+	$l:sdiff <- plus 1 $l:sdiff
+	$l:sdiff <- divide 4 $l:sdiff
+
+	$l:s <- plus $l:s $l:sdiff
+	$l:i <- plus $l:i $l:n_jobs
+
+	$l:nplus1 <- plus $l:n 1
+	$l:i_lt_nplus1 <- lt $l:i $l:nplus1
+return
+
+beginfn f:ENUM_INNER p:VOID
+	fnparam p:NUMBER $l:rank
+	scopeof $l:rankstring
+	scopeof $l:message
+	scopeof $l:h
+	scopeof $l:s
+	scopeof $l:i
+	scopeof $l:i_lt_nplus1
+	scopeof $l:nplus1
+	scopeof $l:pi_approx_diff
+
+	$l:rankstring <- call f:NUMBER_TO_STRING $l:rank
+	$l:message <- strconcat "Rank: " $l:rankstring
+	out $l:message
+
+	$l:h <- divide 1 $l:n
+	$l:s <- 0
+	$l:i <- $l:rank
+
+	$l:nplus1 <- plus $l:n 1
+	$l:i_lt_nplus1 <- lt $l:i $l:nplus1
+
+	while $l:i_lt_nplus1 f:WHILE_INNER
+
+	$l:pi_approx_diff <- times $l:s $l:h
+	$s:pi_approx <- $s:pi_approx + $l:pi_approx_diff
+return
+
+beginfn f:MAIN p:VOID
+	scopeof $l:pi_approx_string
+	scopeof $l:pi_error
+	scopeof $l:pi_error_string
+	scopeof $l:message1
+	scopeof $l:message2
+
+	enumerate p:NUMBER $l:ranks f:ENUM_INNER
+
+	$l:pi_approx_string <- call f:NUMBER_TO_STRING $s:pi_approx
+	$l:message1 <- strconcat "Approx Pi: " $l:pi_approx_string
+	out $l:message1
+
+	$l:pi_error <- minus $l:pi_real $s:pi_approx
+	$l:pi_error_string <- call f:NUMBER_TO_STRING $s:pi_error
+	$l:message2 <- strconcat "Error: " $l:pi_error_string
+	out $l:message2
+return
+
+call f:MAIN

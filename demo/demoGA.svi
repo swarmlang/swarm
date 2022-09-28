@@ -1,0 +1,160 @@
+$l:n_jobs <- 5
+
+$l:res <- 0.0005
+
+$l:community <- call f:RANGE 1
+$l:community <- call $l:community $l:n_jobs
+$l:community <- call $l:community 1
+
+beginfn f:IF_R_LT_03 p:VOID
+	scopeof $l:restmp
+	$l:restmp <- neg $l:res
+	$l:member <- plus $l:member $l:restmp
+return
+
+beginfn f:IF_R_LT_06 p:VOID
+	$l:member <- plus $l:member $l:res
+return
+
+beginfn f:IF_MEMBER_LT_0 p:VOID
+	$l:member <- 0
+return
+
+beginfn f:IF_MEMBER_GT_1 p:VOID
+	$l:member <- 1
+return
+
+beginfn f:IF_MYCOND p:VOID
+	scopeof $l:r_lt_03
+	scopeof $l:r_lt_06
+	scopeof $l:member_lt_0
+	scopeof $l:member_gt_1
+
+	$l:r <- call f:RANDOM
+
+	$l:r_lt_03 <- lt $l:r 0.3
+	callif $l:r_lt_03 f:IF_R_LT_03
+
+	$l:r_lt_06 <- lt $l:r 0.6
+	callif $l:r_lt_06 f:IF_R_LT_06
+
+	$l:member_lt_0 <- lt $l:member 0
+	callif $l:member_lt_0 f:IF_MEMBER_LT_0
+
+	$l:member_gt_1 <- gt $l:member 1
+	callif $l:member_gt_1 f:IF_MEMBER_GT_1
+return
+
+beginfn f:IF_NOT_MYCOND p:VOID
+	$l:member <- call f:RANDOM
+return
+
+beginfn f:WHILE_I_LT_10000 p:VOID
+	scopeof $l:r
+	scopeof $l:my_cond
+
+	$l:r <- call f:RANDOM
+
+	scopeof $l:my_cond_tmp1
+	$l:my_cond_tmp1 <- times 2 $l:member
+
+	scopeof $l:my_cond_tmp2
+	$l:my_cond_tmp2 <- times 20 $l:member
+	$l:my_cond_tmp2 <- call f:SIN $l:my_cond_tmp2
+	$l:my_cond_tmp2 <- times 2 $l:my_cond_tmp2
+
+	scopeof $l:my_cond_tmp3
+	$l:my_cond_tmp3 <- times 4 $l:member
+	$l:my_cond_tmp3 <- times $l:my_cond_tmp3 $l:member
+
+	scopeof $l:my_cond_tmp4
+	$l:my_cond_tmp4 <- plus 4 $l:my_cond_tmp1
+	$l:my_cond_tmp4 <- plus $l:my_cond_tmp4 $l:my_cond_tmp2
+	$l:my_cond_tmp4 <- minus $l:my_cond_tmp4 $l:my_cond_tmp3
+
+	scopeof $l:my_cond_tmp5
+	$l:my_cond_tmp5 <- divide $l:my_cond_tmp4 $l:running
+
+	$l:my_cond <- lt $l:r $l:my_cond_tmp5
+	callif $f:my_cond f:IF_MYCOND
+	callelse $f:my_cond f:IF_NOT_MYCOND
+
+	$l:i <- plus $l:i 1
+	$l:i_lt_10000 <- lt $l:i 10000
+return
+
+beginfn f:ENUM_POP_AS_MEMBER p:VOID
+	fnparam p:NUMBER $l:member
+	$l:member <- call f:RANDOM
+
+	scopeof $l:running
+	scopeof $l:i
+	scopeof $l:i_lt_10000
+
+	scopeof $l:running_tmp1
+	$l:running_tmp1 <- times 20 $l:member
+	$l:running_tmp1 <- call f:SIN $l:running_tmp1
+	$l:running_tmp1 <- times 2 $l:running_tmp1
+
+	scopeof $l:running_tmp2
+	$l:running_tmp2 <- times 2 $l:member
+
+	scopeof $l:running_tmp3
+	$l:running_tmp3 <- times 4 $l:member
+	$l:running_tmp3 <- times $l:running_tmp3 $l:member
+
+	$l:running <- plus 4 $l:running_tmp1
+	$l:running <- plus $l:running $l:running_tmp2
+	$l:running <- minus $l:running $l:running_tmp3
+
+	$l:i <- 0
+	$l:i_lt_10000 <- lt $l:i 10000
+
+	while $l:i_lt_10000 f:WHILE_I_LT_10000
+
+	scopeof $l:local_max
+
+	scopeof $l:local_max_tmp1
+	$l:local_max_tmp1 <- times 20 $l:member
+	$l:local_max_tmp1 <- call f:SIN $l:local_max_tmp1
+	$l:local_max_tmp1 <- times 2 $l:local_max_tmp1
+
+	scopeof $l:local_max_tmp2
+	$l:local_max_tmp2 <- times 2 $l:member
+
+	scopeof $l:local_max_tmp3
+	$l:local_max_tmp3 <- times 4 $l:member
+	$l:local_max_tmp3 <- times $l:local_max_tmp3 $l:member
+
+	$l:local_max <- plus 4 $l:local_max_tmp2
+	$l:local_max <- plus $l:local_max $l:local_max_tmp1
+	$l:local_max <- minus $l:local_max $l:local_max_tmp3
+
+	scopeof $l:local_max_string
+	$l:local_max_string <- call f:NUMBER_TO_STRING $l:local_max
+
+	scopeof $l:message
+	$l:message <- strconcat "Local Max: " $l:local_max_string
+	out $l:message
+return
+
+beginfn f:ENUM_COMMUNITY_AS_POPULATIONS p:VOID
+	fnparam p:NUMBER $l:populations
+
+	scopeof $l:pop
+	$l:tpop <- call p:ENUM p:NUMBER
+	$l:pop <- enuminit $l:tpop
+	enumappend $l:pop 0
+	enumappend $l:pop 0
+	enumappend $l:pop 0
+	enumappend $l:pop 0
+	enumappend $l:pop 0
+
+	enumerate p:NUMBER $l:pop f:ENUM_POP_AS_MEMBER
+return
+
+beginfn f:MAIN p:VOID
+	enumerate p:NUMBER $l:community $f:ENUM_COMMUNITY_AS_POPULATIONS
+return
+
+call f:MAIN
