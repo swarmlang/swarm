@@ -117,10 +117,21 @@ The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job
 IDENTIFIER ::= alphanumeric names with underscores, not starting w/ a digit
 LITERAL ::= a decimal number | a string literal | true | false
 LOCATION ::= $l:IDENTIFIER | $s:IDENTIFIER
-PRIMITIVE ::= p:STRING | p:NUMBER | p:ENUM | p:MAP | p:BOOLEAN
+PRIMITIVE ::= p:STRING | p:NUMBER | p:ENUM | p:MAP | p:BOOLEAN | p:VOID | p:TYPE | p:LAMBDA0 | p:LAMBDA
 FUNCTION ::= f:IDENTIFIER
 LLOC ::= PRIMITIVE | FUNCTION | LOCATION | LITERAL
 LLOCS ::= LLOC | LLOC LLOCS
+OPERATION ::= out | err | beginfn | fnparam | return | curry
+              | call | callif | callelse | pushcall | pushcallif | pushcallelse
+              | streaminit | streampush | streampop | streamclose | streamempty
+              | typify | lock | unlock | equal | scopeof | typeof | compatible
+              | and | or | xor | nand | nor | not
+              | mapinit | mapset | mapget | maplength | mapkeys
+              | enuminit | enumappend | enumprepend | enumlength | enumget | enumerate
+              | strconcat | strlength | strslice
+              | plus | minus | times | divide | power | mod | neg
+              | gt | gte | lt | lte
+              | while | with
 OPER ::= OPERATION LLOCS
 RVAL ::= OPER | LLOC
 ASSIGN ::= LOCATION <- RVAL
