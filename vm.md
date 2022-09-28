@@ -111,6 +111,23 @@ The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job
   - `with $lloc1 $lloc2` - execute the function at `$lloc2` in the resource `$lloc1`
     - `$lloc2` must take as a parameter the yield type of the resource `$lloc1`
 
+### Grammar
+
+```txt
+IDENTIFIER ::= alphanumeric names with underscores, not starting w/ a digit
+LITERAL ::= a decimal number | a string literal | true | false
+LOCATION ::= $l:IDENTIFIER | $s:IDENTIFIER
+PRIMITIVE ::= p:STRING | p:NUMBER | p:ENUM | p:MAP | p:BOOLEAN
+FUNCTION ::= f:IDENTIFIER
+LLOC ::= PRIMITIVE | FUNCTION | LOCATION | LITERAL
+LLOCS ::= LLOC | LLOC LLOCS
+OPER ::= OPERATION LLOCS
+RVAL ::= OPER | LLOC
+ASSIGN ::= LOCATION <- RVAL
+INST ::= ASSIGN | OPER
+SVI ::= INST EOF | INST \n INSTS
+```
+
 ### Standard Library
 
 - String functions
