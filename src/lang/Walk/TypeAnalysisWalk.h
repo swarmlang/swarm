@@ -277,20 +277,12 @@ protected:
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
-        return walkAssignExpressionNode(node);
-    }
-
     virtual bool walkSubtractNode(SubtractNode* node) {
         return walkPureBinaryExpression(node);
     }
 
     virtual bool walkMultiplyNode(MultiplyNode* node) {
         return walkPureBinaryExpression(node);
-    }
-
-    virtual bool walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
-        return walkAssignExpressionNode(node);
     }
 
     virtual bool walkDivideNode(DivideNode* node) {
@@ -589,6 +581,11 @@ protected:
 
     virtual bool walkUnitNode(UnitNode* node) {
         _types->setTypeOf(node, PrimitiveType::of(ValueType::TUNIT));
+        return true;
+    }
+
+    virtual bool walkFunctionNode(FunctionNode* node) {
+        // IMPLEMENT ME
         return true;
     }
 

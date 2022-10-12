@@ -219,10 +219,6 @@ namespace Walk {
             return obj;
         }
 
-        virtual nlohmann::json* walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
-            return walkAssignExpressionNode(node);
-        }
-
         virtual nlohmann::json* walkSubtractNode(SubtractNode* node) {
             nlohmann::json* obj = getJSON();
 
@@ -239,10 +235,6 @@ namespace Walk {
             (*obj)["right"] = *walk(node->right());
 
             return obj;
-        }
-
-        virtual nlohmann::json* walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
-            return walkAssignExpressionNode(node);
         }
 
         virtual nlohmann::json* walkDivideNode(DivideNode* node) {
@@ -443,6 +435,30 @@ namespace Walk {
 
         virtual nlohmann::json* walkUnitNode(UnitNode *node) {
             return getJSON();
+        }
+
+        virtual nlohmann::json* walkFunctionNode(FunctionNode* node) {
+            nlohmann::json* obj = getJSON();
+
+            std::vector<nlohmann::json>* formals = getVector();
+            for ( auto formal : *node->formals() ) {
+                auto f = getVector();
+                f->push_back(*walk(formal.first));
+                f->push_back(*walkIdentifierNode(formal.second));
+                //TODO: figure this out lmao
+                //formals->push_back(f);
+            }
+
+            (*obj)["formals"] = *formals;
+
+            std::vector<nlohmann::json>* body = getVector();
+            for ( auto stmt : *node->body() ) {
+                body->push_back(*walk(stmt));
+            }
+
+            (*obj)["body"] = *body;
+
+            return obj;
         }
 
         virtual nlohmann::json* walkPosition(const Position* pos) {
