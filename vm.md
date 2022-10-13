@@ -2,7 +2,18 @@
 
 The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job queue, and an ISA for operating on them.
 
+**Definitions:**
+- SVI - **S**warm **V**M **I**nstructions
+- job - a chunk of SVI executed in its own context
+- job context - the set of local variables available to a job
+
 ## Storage
+
+The VM defines 2 tiers of storage: local storage (`$l:...`) and shared storage (`$s:...`).
+
+Local storage is cloned for each job context (i.e. if a job modifies a local variable, that variable is NOT changed for other jobs or the parent context.)
+
+Shared storage is global across all jobs that have access to a location.
 
 ## Job Queue
 
