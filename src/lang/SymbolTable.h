@@ -30,7 +30,7 @@ namespace Walk {
     /** Base class for names identified in code. */
     class SemanticSymbol : public IStringable {
     public:
-        SemanticSymbol(std::string name, const Type* type, const Position* declaredAt) : _name(name), _type(type), _declaredAt(declaredAt) {
+        SemanticSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : _name(name), _type(type), _declaredAt(declaredAt) {
             _uuid = util::uuid4();
         }
 
@@ -47,7 +47,7 @@ namespace Walk {
         virtual SemanticSymbolKind kind() const = 0;
 
         /** The type of the symbol. */
-        virtual const Type* type() const {
+        virtual const Type::Type* type() const {
             return _type;
         }
 
@@ -73,7 +73,7 @@ namespace Walk {
     protected:
         std::string _uuid;
         std::string _name;
-        const Type* _type;
+        const Type::Type* _type;
         const Position* _declaredAt;
 
         friend class Walk::TypeAnalysisWalk;
@@ -84,7 +84,7 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class VariableSymbol : public SemanticSymbol {
     public:
-        VariableSymbol(std::string name, const Type* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
+        VariableSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
 
         virtual SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::VARIABLE;
@@ -95,7 +95,7 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class FunctionSymbol : public SemanticSymbol {
     public:
-        FunctionSymbol(std::string name, const FunctionType* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
+        FunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
 
         virtual SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::FUNCTION;
@@ -106,7 +106,7 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class PrologueFunctionSymbol : public FunctionSymbol {
     public:
-        PrologueFunctionSymbol(std::string name, const FunctionType* type, const Position* declaredAt) : FunctionSymbol(name, type, declaredAt) {}
+        PrologueFunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : FunctionSymbol(name, type, declaredAt) {}
 
         virtual bool isPrologue() const override { return true; }
     };
@@ -149,17 +149,17 @@ namespace Walk {
         }
 
         /** Add a new variable to this scope. */
-        void addVariable(std::string name, Type* type, const Position* declaredAt) {
+        void addVariable(std::string name, const Type::Type* type, const Position* declaredAt) {
             insert(new VariableSymbol(name, type, declaredAt));
         }
 
         /** Add a new function to this scope. */
-        void addFunction(std::string name, FunctionType* type, const Position* declaredAt) {
+        void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
             insert(new FunctionSymbol(name, type, declaredAt));
         }
 
         /** Add a new function to this scope as if it were from the Prologue. */
-        void addPrologueFunction(std::string name, FunctionType* type, const Position* declaredAt) {
+        void addPrologueFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
             insert(new PrologueFunctionSymbol(name, type, declaredAt));
         }
 
@@ -234,12 +234,12 @@ namespace Walk {
         }
 
         /** Add a new variable to the current scope. */
-        void addVariable(std::string name, Type* type, const Position* declaredAt) {
+        void addVariable(std::string name, const Type::Type* type, const Position* declaredAt) {
             return current()->addVariable(name, type, declaredAt);
         }
 
         /** Add a new function to the current scope. */
-        void addFunction(std::string name, FunctionType* type, const Position* declaredAt) {
+        void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
             return current()->addFunction(name, type, declaredAt);
         }
 

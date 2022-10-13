@@ -60,15 +60,7 @@ protected:
         return walk(node->path());
     }
 
-    virtual bool walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
-        return true;
-    }
-
-    virtual bool walkEnumerableTypeNode(EnumerableTypeNode* node) {
-        return true;
-    }
-
-    virtual bool walkMapTypeNode(MapTypeNode* node) {
+    virtual bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
         return true;
     }
 
@@ -82,7 +74,7 @@ protected:
         }
 
         std::string name = node->id()->name();
-        Type* type = node->typeNode()->type();
+        const Type::Type* type = node->typeNode()->type();
 
         // Make sure the name isn't already declared in this scope
         if ( _symbols->isClashing(name) ) {
@@ -221,23 +213,13 @@ protected:
         if ( node->local()->symbol() == nullptr ) {
             std::string name = node->local()->name();
             Position* pos = node->local()->position();
-            Type* type = nullptr;
+            const Type::Type* type = nullptr;
 
             // Try to look up the generic type of the enumerable
-            const Type* enumType = node->enumerable()->symbol()->type();
-            if ( enumType->kind() == TypeKind::KGENERIC ) {
-                auto enumGenericType = (GenericType*) enumType;
-                type = enumGenericType->concrete();
-
-                if ( type->isPrimitiveType() ) {
-                    type = PrimitiveType::of(type->valueType(), node->_shared);
-                } else if ( type->isGenericType() ) {
-                    type = type->copy();
-                    type->setShared(node->_shared);
-                } else if ( type->isFunctionType() ) {
-                    type = type->copy();
-                    type->setShared(node->_shared);
-                }
+            const Type::Type* enumType = node->enumerable()->symbol()->type();
+            if ( enumType->intrinsic() == Type::Intrinsic::ENUMERABLE ) {
+                auto enumGenericType = (Type::Enumerable*) enumType;
+                type = enumGenericType->values()->copy();
             }
 
             // Start a new scope in the body and add the local
@@ -276,7 +258,7 @@ protected:
         if ( node->local()->symbol() == nullptr ) {
             std::string name = node->local()->name();
             Position* pos = node->local()->position();
-            Type* type = nullptr;
+            Type::Type* type = nullptr;
 
             // Note that the type of the local depends on the type of the expression,
             // since it is implicitly defined. This is handled in typeAnalysis.
@@ -364,7 +346,7 @@ protected:
     virtual bool walkFunctionNode(FunctionNode* node) {
         for ( auto formal : *node->formals() ) {
             std::string name = formal.second->name();
-            Type* type = formal.first->type();
+            const Type::Type* type = formal.first->type();
 
             // Make sure the name isn't already declared in this scope
             if ( _symbols->isClashing(name) ) {

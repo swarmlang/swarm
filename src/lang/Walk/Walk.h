@@ -21,9 +21,7 @@ namespace Walk {
             if ( node->getName() == "IdentifierNode" ) return walkIdentifierNode((IdentifierNode*) node);
             if ( node->getName() == "MapAccessNode" ) return walkMapAccessNode((MapAccessNode*) node);
             if ( node->getName() == "EnumerableAccessNode" ) return walkEnumerableAccessNode((EnumerableAccessNode*) node);
-            if ( node->getName() == "PrimitiveTypeNode" ) return walkPrimitiveTypeNode((PrimitiveTypeNode*) node);
-            if ( node->getName() == "EnumerableTypeNode" ) return walkEnumerableTypeNode((EnumerableTypeNode*) node);
-            if ( node->getName() == "MapTypeNode" ) return walkMapTypeNode((MapTypeNode*) node);
+            if ( node->getName() == "TypeLiteral" ) return walkTypeLiteral((TypeLiteral*) node);
             if ( node->getName() == "BooleanLiteralExpressionNode" ) return walkBooleanLiteralExpressionNode((BooleanLiteralExpressionNode*) node);
             if ( node->getName() == "VariableDeclarationNode" ) return walkVariableDeclarationNode((VariableDeclarationNode*) node);
             if ( node->getName() == "CallExpressionNode" ) return walkCallExpressionNode((CallExpressionNode*) node);
@@ -65,9 +63,7 @@ namespace Walk {
         virtual TReturn walkIdentifierNode(IdentifierNode* node) = 0;
         virtual TReturn walkMapAccessNode(MapAccessNode* node) = 0;
         virtual TReturn walkEnumerableAccessNode(EnumerableAccessNode* node) = 0;
-        virtual TReturn walkPrimitiveTypeNode(PrimitiveTypeNode* node) = 0;
-        virtual TReturn walkEnumerableTypeNode(EnumerableTypeNode* node) = 0;
-        virtual TReturn walkMapTypeNode(MapTypeNode* node) = 0;
+        virtual TReturn walkTypeLiteral(TypeLiteral* node) = 0;
         virtual TReturn walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) = 0;
         virtual TReturn walkVariableDeclarationNode(VariableDeclarationNode* node) = 0;
         virtual TReturn walkCallExpressionNode(CallExpressionNode* node) = 0;

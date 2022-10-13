@@ -11,7 +11,7 @@ namespace Lang {
 
     class ASTNode;
 
-    using TypeMap = std::map<const ASTNode*, const Type*>;
+    using TypeMap = std::map<const ASTNode*, const Type::Type*>;
 
     class TypeTable : public IStringable {
     public:
@@ -19,12 +19,12 @@ namespace Lang {
 
         virtual ~TypeTable() {}
 
-        void setTypeOf(const ASTNode* node, const Type* type) {
+        void setTypeOf(const ASTNode* node, const Type::Type* type) {
             _map[node] = type;
         }
 
-        const Type* getTypeOf(const ASTNode* node) {
-            const Type* type = _map[node];
+        const Type::Type* getTypeOf(const ASTNode* node) {
+            const Type::Type* type = _map[node];
             if ( type == nullptr ) {
                 throw Errors::SwarmError("Unable to determine type for node");
             }

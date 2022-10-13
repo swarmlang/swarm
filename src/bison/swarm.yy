@@ -58,10 +58,10 @@
     swarmc::Lang::ExpressionNode*       transExpression;
     swarmc::Lang::AssignExpressionNode* transAssignExpression;
     swarmc::Lang::CallExpressionNode*   transCallExpression;
-    swarmc::Lang::TypeNode*             transType;
+    swarmc::Lang::TypeLiteral*          transType;
     swarmc::Lang::DeclarationNode*      transDeclaration;
     swarmc::Lang::MapStatementNode*     transMapStatement;
-    std::vector<std::pair<TypeNode*, IdentifierNode*>>*  transFormals;
+    std::vector<std::pair<TypeLiteral*, IdentifierNode*>>*  transFormals;
     std::vector<swarmc::Lang::MapStatementNode*>* transMapStatements;
     std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
 }
@@ -243,7 +243,7 @@ declaration :
         Position* pos = new Position($1->position(), $12->position());
 
         // TODO: type
-        TypeNode* t = nullptr;
+        TypeLiteral* t = nullptr;
 
         FunctionNode* fn = new FunctionNode($10->position(), $8, $5);
         fn->assumeAndReduceStatements($11->reduceToStatements());
@@ -302,28 +302,28 @@ id :
 
 type :
     STRING {
-        PrimitiveType* t = PrimitiveType::of(ValueType::TSTRING);
-        $$ = new PrimitiveTypeNode($1->position(), t);
+        auto t = Type::Primitive::of(Type::Intrinsic::STRING);
+        $$ = new TypeLiteral($1->position(), t);
     }
 
     | NUMBER {
-        PrimitiveType* t = PrimitiveType::of(ValueType::TNUM);
-        $$ = new PrimitiveTypeNode($1->position(), t);
+        auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
+        $$ = new TypeLiteral($1->position(), t);
     }
 
     | BOOL {
-        PrimitiveType* t = PrimitiveType::of(ValueType::TBOOL);
-        $$ = new PrimitiveTypeNode($1->position(), t);
+        auto t = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+        $$ = new TypeLiteral($1->position(), t);
     }
 
     | ENUMERABLE LARROW type RARROW {
         Position* pos = new Position($1->position(), $4->position());
-        $$ = new EnumerableTypeNode(pos, $3);
+        $$ = new TypeLiteral(pos, $3->value());
     }
 
     | MAP LARROW type RARROW {
         Position* pos = new Position($1->position(), $4->position());
-        $$ = new MapTypeNode(pos, $3);
+        $$ = new TypeLiteral(pos, $3->value());
     }
 
     | LPAREN type ARROW type RPAREN {
@@ -496,14 +496,14 @@ actuals :
 
 formals :
     id COLON type {
-        $$ = new std::vector<std::pair<TypeNode*, IdentifierNode*>>();
-        auto t = std::pair<TypeNode*, IdentifierNode*>($3, $1);
+        $$ = new std::vector<std::pair<TypeLiteral*, IdentifierNode*>>();
+        auto t = std::pair<TypeLiteral*, IdentifierNode*>($3, $1);
         $$->push_back(t);
     }
 
     | formals COMMA id COLON type {
         $$ = $1;
-        auto t = std::pair<TypeNode*, IdentifierNode*>($5, $3);
+        auto t = std::pair<TypeLiteral*, IdentifierNode*>($5, $3);
         $$->push_back(t);
     }
 

@@ -9,309 +9,322 @@
 
 namespace swarmc {
 namespace Lang {
+    class TypeLiteral;
+}
 
-    /** All possible value types in the language. */
-    enum class ValueType {
-        TSTRING,    // strings
-        TNUM,           // numbers
-        TBOOL,          // booleans
-        TENUMERABLE,    // enumeration lists
-        TMAP,           // maps
-        TERROR,         // special error type (internal use only)
-        TFUNCTION,      // functions
-        TUNIT,          // statement return type
-        TRESOURCE,
+namespace Type {
+
+    enum class Intrinsic {
+        STRING,
+        NUMBER,
+        BOOLEAN,
+        ERROR,
+        VOID,
+        UNIT,
+        TYPE,
+        MAP,
+        ENUMERABLE,
+        LAMBDA0,
+        LAMBDA1,
+        RESOURCE,
+        AMBIGUOUS,
+        CONTRADICTION,
     };
 
-    /** All possible kinds of types. */
-    enum class TypeKind {
-        KPRIMITIVE, // primitive value
-        KGENERIC,       // single-parametric type
-        KFUNCTION,      // callable (...D)->R function
-    };
-
-    /** Base class for type instances. */
     class Type : public IStringable {
     public:
-        virtual ~Type() {}
+        static std::string intrinsicString(Intrinsic intrinsic) {
+            if ( intrinsic == Intrinsic::STRING ) return "STRING";
+            if ( intrinsic == Intrinsic::NUMBER ) return "NUMBER";
+            if ( intrinsic == Intrinsic::BOOLEAN ) return "BOOLEAN";
+            if ( intrinsic == Intrinsic::ERROR ) return "ERROR";
+            if ( intrinsic == Intrinsic::VOID ) return "VOID";
+            if ( intrinsic == Intrinsic::UNIT ) return "UNIT";
+            if ( intrinsic == Intrinsic::TYPE ) return "TYPE";
+            if ( intrinsic == Intrinsic::MAP ) return "MAP";
+            if ( intrinsic == Intrinsic::ENUMERABLE ) return "ENUMERABLE";
+            if ( intrinsic == Intrinsic::LAMBDA0 ) return "LAMBDA0";
+            if ( intrinsic == Intrinsic::LAMBDA1 ) return "LAMBDA1";
+            if ( intrinsic == Intrinsic::RESOURCE ) return "RESOURCE";
+            if ( intrinsic == Intrinsic::AMBIGUOUS ) return "AMBIGUOUS";
+            return "CONTRADICTION";
+        }
 
-        /** Returns true if the given ValueType is a primitive type. */
-        static bool isPrimitiveValueType(ValueType t);
-
-        /** Get the string representation of the given ValueType. */
-        static std::string valueTypeToString(ValueType t);
-
-        /** Implements IStringable. */
-        virtual std::string toString() const = 0;
-
-        /** Determines whether a type is equivalent to this one. */
-        virtual bool is(const Type* other) const = 0;
+        ~Type() override = default;
 
         virtual Type* copy() const = 0;
 
-        /** Get the ValueType of this class. */
-        virtual ValueType valueType() const {
-            return _type;
+        virtual Intrinsic intrinsic() const {
+            return Intrinsic::CONTRADICTION;
         }
 
-        /** Get the type-kind of this type. */
-        virtual TypeKind kind() const = 0;
-
-        virtual bool isPrimitiveType() const {
-            return false;
+        bool isCallable() const {
+            return intrinsic() == Intrinsic::LAMBDA0 || intrinsic() == Intrinsic::LAMBDA1;
         }
 
-        virtual bool isGenericType() const {
-            return false;
-        }
-
-        virtual bool isFunctionType() const {
-            return false;
+        bool isIntrinsic() const {
+            return intrinsic() != Intrinsic::CONTRADICTION;
         }
 
         virtual bool shared() const {
             return _shared;
         }
 
-        virtual void setShared(bool shared) {
-            _shared = shared;
-        }
+        virtual bool isAssignableTo(const Type* other) const = 0;
 
     protected:
-        Type(ValueType t) : _type(t), _shared(false) {}
-        ValueType _type;
-        bool _shared;
+        bool _shared = false;
+
+        friend class Lang::TypeLiteral;
     };
 
-    /** Type class of primitive types. */
-    class PrimitiveType : public Type {
+    class Primitive : public Type {
     public:
-
-        /**
-         * Get the PrimitiveType instance for a given ValueType.
-         *
-         * @example PrimitiveType::of(ValueType::TSTRING, true);
-         */
-        static PrimitiveType* of(ValueType t, bool shared = false) {
-            static std::map<ValueType, PrimitiveType*> instances;
-            static std::map<ValueType, PrimitiveType*> sharedInstances;
-
-            if ( shared ) {
-                auto i = sharedInstances.find(t);
-                if ( i != sharedInstances.end() ) {
-                    return i->second;
-                }
-            } else {
-                auto i = instances.find(t);
-                if ( i != instances.end() ) {
-                    return i->second;
-                }
-            }
-
-            PrimitiveType* instance = new PrimitiveType(t, shared);
-
-            if ( shared ) {
-                sharedInstances.insert(std::pair<ValueType, PrimitiveType*>(t, instance));
-            } else {
-                instances.insert(std::pair<ValueType, PrimitiveType*>(t, instance));
-            }
-            return instance;
+        static Primitive* of(Intrinsic intrinsic) {
+            return new Primitive(intrinsic);
         }
 
-        /** Implements IStringable. */
-        virtual std::string toString() const override {
-            return "T<" + Type::valueTypeToString(_type) + ">";
-        }
-
-        virtual bool is(const Type* other) const override {
+        static bool isPrimitive(Intrinsic intrinsic) {
             return (
-                other->kind() == TypeKind::KPRIMITIVE
-                && other->valueType() == _type
+                intrinsic == Intrinsic::STRING
+                || intrinsic == Intrinsic::NUMBER
+                || intrinsic == Intrinsic::BOOLEAN
+                || intrinsic == Intrinsic::ERROR
+                || intrinsic == Intrinsic::VOID
+                || intrinsic == Intrinsic::UNIT
+                || intrinsic == Intrinsic::TYPE
             );
         }
 
-        virtual TypeKind kind() const override {
-            return TypeKind::KPRIMITIVE;
+        explicit Primitive(Intrinsic intrinsic) : _intrinsic(intrinsic) {}
+
+        Primitive* copy() const override {
+            auto inst = Primitive::of(_intrinsic);
+            inst->_shared = shared();
+            return inst;
         }
 
-        virtual bool isPrimitiveType() const override {
+        Intrinsic intrinsic() const override {
+            if ( !isPrimitive(_intrinsic) ) {
+                return Intrinsic::CONTRADICTION;
+            }
+
+            return _intrinsic;
+        }
+
+        bool isAssignableTo(const Type* other) const override {
+            if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
+            if ( !Primitive::isPrimitive(other->intrinsic()) ) return false;
+            return other->intrinsic() == intrinsic();
+        }
+
+        std::string toString() const override {
+            return "Primitive<" + intrinsicString(_intrinsic) + ">";
+        }
+    protected:
+        Intrinsic _intrinsic;
+    };
+
+    class Ambiguous : public Type {
+    public:
+        static Ambiguous* of() {
+            return new Ambiguous();
+        }
+
+        Intrinsic intrinsic() const override {
+            return Intrinsic::AMBIGUOUS;
+        }
+
+        std::string toString() const override {
+            return Type::intrinsicString(intrinsic());
+        }
+
+        bool isAssignableTo(const Type* other) const override {
             return true;
         }
 
-        virtual PrimitiveType* copy() const override {
-            return PrimitiveType::of(valueType(), _shared);
-        }
-
-        virtual void setShared(bool shared) {
-            throw Errors::SwarmError("Attempt to reassign PrimitiveType sharedness");
-        }
-    private:
-        PrimitiveType(ValueType t, bool shared) : Type(t) {
-            if ( !Type::isPrimitiveValueType(t) ) {
-                throw Errors::InvalidPrimitiveTypeInstantiationError();
-            }
-            _shared = shared;
+        Ambiguous* copy() const override {
+            return Ambiguous::of();
         }
     };
 
-
-    /** Base class for types that accept another type as a parameter. */
-    class GenericType : public Type {
+    class Map : public Type {
     public:
-        static GenericType* of(ValueType t, Type* concrete) {
-            return new GenericType(t, concrete, concrete->shared());
+        explicit Map(const Type* values) : _values(values) {}
+
+        Intrinsic intrinsic() const override {
+            return Intrinsic::MAP;
         }
 
-        virtual std::string toString() const override {
-            return "T<" + Type::valueTypeToString(_type) + "<" + _concrete->toString() + ">>";
+        const Type* values() const {
+            return _values;
         }
 
-        virtual TypeKind kind() const override {
-            return TypeKind::KGENERIC;
+        Map* copy() const override {
+            auto inst = new Map(_values->copy());
+            inst->_shared = shared();
+            return inst;
         }
 
-        virtual bool is(const Type* other) const override {
-            if ( other->kind() != TypeKind::KGENERIC ) {
-                return false;
-            }
-
-            // We know this is a generic now.
-            GenericType* otherGeneric = (GenericType*) other;
-            return (
-                otherGeneric->valueType() == _type
-                && otherGeneric->_concrete->is(_concrete)
-            );
+        bool isAssignableTo(const Type* other) const override {
+            if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
+            if ( other->intrinsic() != Intrinsic::MAP ) return false;
+            return _values->isAssignableTo(((Map*) other)->values());
         }
 
-        /** Get the Type of the parameter type. */
-        Type* concrete() const {
-            return _concrete;
-        }
-
-        virtual bool isGenericType() const override {
-            return true;
-        }
-
-        virtual GenericType* copy() const override {
-            return new GenericType(_type, _concrete->copy(), _shared);
-        }
-
-        virtual void setShared(bool shared) {
-            _shared = shared;
-            if ( _concrete->isPrimitiveType() ) {
-                _concrete = PrimitiveType::of(_concrete->valueType(), shared);
-            } else {
-                _concrete->setShared(shared);
-            }
+        std::string toString() const override {
+            return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
     protected:
-        GenericType(ValueType t, Type* concrete, bool shared) : Type(t), _concrete(concrete) {
-            setShared(shared);
-        }
-        Type* _concrete;
+        const Type* _values;
     };
 
-
-    /** Base class for callable function types with multiple domain types and a single range type. */
-    class FunctionType : public Type {
+    class Enumerable : public Type {
     public:
-        static FunctionType* of(Type* returnType, bool shared = false) {
-            return new FunctionType(returnType, shared);
+        explicit Enumerable(const Type* values) : _values(values) {}
+
+        Intrinsic intrinsic() const override {
+            return Intrinsic::ENUMERABLE;
         }
 
-        virtual std::string toString() const override {
-            std::stringstream s;
-            s << "T<(";
-            bool first = false;
-
-            for (auto arg : _args) {
-                if ( !first ) {
-                    s << ", ";
-                } else {
-                    first = false;
-                }
-
-                s << arg->toString();
-            }
-
-            s << ") -> " << _return->toString();
-            return s.str();
+        const Type* values() const {
+            return _values;
         }
 
-        virtual TypeKind kind() const override {
-            return TypeKind::KFUNCTION;
+        Enumerable* copy() const override {
+            auto inst = new Enumerable(_values->copy());
+            inst->_shared = shared();
+            return inst;
         }
 
-        virtual bool is(const Type* other) const override {
-            if ( other->kind() != TypeKind::KFUNCTION ) {
-                return false;
-            }
-
-            // We know this is a function type.
-            FunctionType* otherFunction = (FunctionType*) other;
-
-            // Check return type and arg count
-            if (
-                (otherFunction->_args.size() != _args.size())
-                || !otherFunction->_return->is(_return)
-            ) return false;
-
-            // Check arg types
-            for ( size_t i = 0; i < _args.size(); i += 1 ) {
-                if ( !_args[i]->is(otherFunction->_args[i]) ) {
-                    return false;
-                }
-            }
-
-            return true;
+        bool isAssignableTo(const Type* other) const override {
+            if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
+            if ( other->intrinsic() != Intrinsic::ENUMERABLE ) return false;
+            return _values->isAssignableTo(((Enumerable*) other)->values());
         }
 
-        /** Returns true if this type is provided by the runtime environment. */
-        bool isBuiltin() const {
-            return _builtin;
+        std::string toString() const override {
+            return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
+        }
+    protected:
+        const Type* _values;
+    };
+
+    class Resource : public Type {
+    public:
+        explicit Resource(Type* yields) : _yields(yields) {}
+
+        Intrinsic intrinsic() const override {
+            return Intrinsic::RESOURCE;
         }
 
-        /** Add an argument to the function's signature. */
-        void addArgument(Type* arg) {
-            _args.push_back(arg);
+        const Type* yields() const {
+            return _yields;
         }
 
-        const Type* returnType() const {
-            return _return;
+        Resource* copy() const override {
+            auto inst = new Resource(_yields->copy());
+            inst->_shared = shared();
+            return inst;
         }
 
-        std::vector<Type*>* getArgumentTypes() const {
-            std::vector<Type*>* types = new std::vector<Type*>();
-
-            for ( auto type : _args ) {
-                types->push_back(type);
-            }
-
-            return types;
+        bool isAssignableTo(const Type* other) const override {
+            if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
+            if ( other->intrinsic() != Intrinsic::RESOURCE ) return false;
+            return _yields->isAssignableTo(((Resource*) other)->yields());
         }
 
-        virtual bool isFunctionType() const override {
-            return true;
+        std::string toString() const override {
+            return Type::intrinsicString(intrinsic()) + "<" + _yields->toString() + ">";
+        }
+    protected:
+        Type* _yields;
+    };
+
+    class Lambda : public Type {
+    public:
+        explicit Lambda(Type* returns): _returns(returns) {}
+
+        const Type* returns() const {
+            return _returns;
         }
 
-        virtual FunctionType* copy() const override {
-            auto copy = new FunctionType(_return->copy(), _shared);
-            copy->_builtin = _builtin;
-
-            for ( auto arg : _args ) {
-                copy->addArgument(arg->copy());
-            }
-
-            return copy;
+        virtual std::vector<const Type*> params() const {
+            return {};
         }
 
     protected:
-        FunctionType(Type* returnType, bool shared) : Type(ValueType::TFUNCTION), _return(returnType) {
-            setShared(shared);
+        Type* _returns;
+    };
+
+    class Lambda0 : public Lambda {
+    public:
+        explicit Lambda0(Type* returns) : Lambda(returns) {}
+
+        Intrinsic intrinsic() const override {
+            return Intrinsic::LAMBDA0;
         }
-        std::vector<Type*> _args;
-        Type* _return;
-        bool _builtin = false;
+
+        Lambda0* copy() const override {
+            auto inst = new Lambda0(_returns->copy());
+            inst->_shared = shared();
+            return inst;
+        }
+
+        bool isAssignableTo(const Type* other) const {
+            if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
+            if ( other->intrinsic() != Intrinsic::LAMBDA0 ) return false;
+            return _returns->isAssignableTo(((Lambda0*) other)->returns());
+        }
+
+        std::string toString() const override {
+            return ":: " + _returns->toString();
+        }
+    };
+
+    class Lambda1 : public Lambda {
+    public:
+        explicit Lambda1(Type* param, Type* returns) : Lambda(returns), _param(param) {}
+
+        Intrinsic intrinsic() const override {
+            return Intrinsic::LAMBDA1;
+        }
+
+        const Type* param() const {
+            return _param;
+        }
+
+        Lambda1* copy() const override {
+            auto inst = new Lambda1(_param->copy(), _returns->copy());
+            inst->_shared = shared();
+            return inst;
+        }
+
+        bool isAssignableTo(const Type* other) const {
+            if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
+            if ( other->intrinsic() != Intrinsic::LAMBDA1 ) return false;
+            return _returns->isAssignableTo(((Lambda1*) other)->returns()) && _param->isAssignableTo(((Lambda1*) other)->param());
+        }
+
+        std::string toString() const override {
+            return _param->toString() + " :: " + _returns->toString();
+        }
+
+        std::vector<const Type*> params() const override {
+            std::vector<const Type*> p = {_param};
+
+            if ( returns()->intrinsic() == Intrinsic::LAMBDA1 ) {
+                auto curried = ((Lambda1*) returns())->params();
+                for ( auto subp : curried ) {
+                    p.push_back(subp);
+                }
+            }
+
+            return p;
+        }
+
+    protected:
+        Type* _param;
     };
 }
 }

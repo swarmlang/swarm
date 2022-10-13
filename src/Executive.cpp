@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <chrono>
+#include "../lib/json.hpp"
 #include "Configuration.h"
 #include "Executive.h"
 #include "pipeline/Pipeline.h"
@@ -51,20 +52,6 @@ int Executive::run(int argc, char **argv) {
         int parseResult = debugParseAndStop();
         if ( parseResult != 0 ) {
             result = parseResult;
-        }
-    }
-
-    if ( flagOutputSerialize ) {
-        int serializeResult = debugOutputSerialize();
-        if ( serializeResult != 0 ) {
-            result = serializeResult;
-        }
-    }
-
-    if ( flagOutputDeSerialize ) {
-        int deserializeResult = debugOutputDeSerialize();
-        if ( deserializeResult != 0 ) {
-            result = deserializeResult;
         }
     }
 
@@ -131,32 +118,6 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
 
             flagOutputParse = true;
             flagOutputParseTo = outfile;
-            skipOne = true;
-        } else if ( arg == "--dbg-output-serialize-to" ) {
-            if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --dbg-output-serialize-to. Pass --help for more info.");
-                failed = true;
-                continue;
-            }
-
-            std::string outfile = params.at(i+1);
-            console->debug("Serialized AST output file: " + outfile);
-
-            flagOutputSerialize = true;
-            flagOutputSerializeTo = outfile;
-            skipOne = true;
-        } else if ( arg == "--dbg-output-deserialize-to" ) {
-            if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --dbg-output-deserialize-to. Pass --help for more info.");
-                failed = true;
-                continue;
-            }
-
-            std::string outfile = params.at(i+1);
-            console->debug("DeSerialized AST output file: " + outfile);
-
-            flagOutputDeSerialize = true;
-            flagOutputDeSerializeTo = outfile;
             skipOne = true;
         } else if ( arg == "--run-test" ) {
             if ( i+1 >= params.size() ) {
@@ -272,16 +233,6 @@ void Executive::printUsage() {
             ->line("                                      If the output file is \"--\", will write to stdout.")
             ->line();
 
-        console->bold()->print("  --dbg-output-serialize-to <OUTFILE>  :  ", true)
-            ->line("Parse the input and output the serialized AST to the specified file.")
-            ->line("                                      If the output file is \"--\", will write to stdout.")
-            ->line();
-
-        console->bold()->print("  --dbg-output-deserialize-to <OUTFILE>  :  ", true)
-            ->line("Parse the input and output the deserialized AST to the specified file.")
-            ->line("                                      If the output file is \"--\", will write to stdout.")
-            ->line();
-
         console->bold()->print("  --dbg-use-d-guid  :  ", true)
             ->line("Use deterministic UUIDs (for test output).")
             ->line();
@@ -357,58 +308,6 @@ int Executive::debugParseAndStop() {
     }
 
     console->success("Parsed input program.");
-    return 0;
-}
-
-int Executive::debugOutputSerialize() {
-    swarmc::Pipeline pipeline(_input);
-    std::ostream* stream = nullptr;
-
-    if ( flagOutputSerializeTo == "--" ) {
-        stream = &std::cout;
-    } else {
-        stream = new std::ofstream(flagOutputSerializeTo);
-        if ( stream->bad() ) {
-            console->error("Could not open serialize output file for writing: " + flagOutputSerializeTo);
-            delete stream;
-            return 1;
-        }
-    }
-    
-    try {
-        pipeline.targetSerialOutput(*stream);
-    } catch (swarmc::Errors::ParseError& e) {
-        return e.exitCode;
-    }
-
-    console->success("Serialized input program.");
-    if ( stream != &std::cout ) delete stream;
-    return 0;
-}
-
-int Executive::debugOutputDeSerialize() {
-    swarmc::Pipeline pipeline(_input);
-    std::ostream* stream = nullptr;
-
-    if ( flagOutputDeSerializeTo == "--" ) {
-        stream = &std::cout;
-    } else {
-        stream = new std::ofstream(flagOutputDeSerializeTo);
-        if ( stream->bad() ) {
-            console->error("Could not open deserialize output file for writing: " + flagOutputDeSerializeTo);
-            delete stream;
-            return 1;
-        }
-    }
-    
-    try {
-        pipeline.targetDeSerialOutput(*stream);
-    } catch (swarmc::Errors::ParseError& e) {
-        return e.exitCode;
-    }
-
-    console->success("Deserialized input program.");
-    if ( stream != &std::cout ) delete stream;
     return 0;
 }
 

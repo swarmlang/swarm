@@ -53,15 +53,7 @@ protected:
         pop_space();
     }
 
-    virtual void walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
-    virtual void walkEnumerableTypeNode(EnumerableTypeNode* node) {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
-    virtual void walkMapTypeNode(MapTypeNode* node) {
+    virtual void walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
         _out << _prefix << node->toString() << std::endl;
     }
 

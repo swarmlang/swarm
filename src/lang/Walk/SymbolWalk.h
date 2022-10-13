@@ -45,15 +45,7 @@ protected:
         return walk(node->path());
     }
 
-    virtual SymbolMap* walkPrimitiveTypeNode(PrimitiveTypeNode* node) {
-        return new SymbolMap();
-    }
-
-    virtual SymbolMap* walkEnumerableTypeNode(EnumerableTypeNode* node) {
-        return new SymbolMap();
-    }
-
-    virtual SymbolMap* walkMapTypeNode(MapTypeNode* node) {
+    virtual SymbolMap* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
         return new SymbolMap();
     }
 

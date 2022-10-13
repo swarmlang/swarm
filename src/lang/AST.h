@@ -4,7 +4,7 @@
 #include <vector>
 #include <ostream>
 #include <algorithm>
-#include <assert.h>
+#include <cassert>
 #include "../shared/IStringable.h"
 #include "../shared/util/Console.h"
 #include "Position.h"
@@ -12,9 +12,7 @@
 #include "SymbolTable.h"
 #include "TypeTable.h"
 
-namespace swarmc {
-
-namespace Lang {
+namespace swarmc::Lang {
 namespace Walk {
     class NameAnalysisWalk;
     class TypeAnalysisWalk;
@@ -26,20 +24,20 @@ namespace Walk {
     class ExpressionNode;
     class MapStatementNode;
     class IntegerLiteralExpressionNode;
-    class TypeNode;
+    class TypeLiteral;
     class IdentifierNode;
 
     using StatementList = std::vector<StatementNode*>;
     using ExpressionList = std::vector<ExpressionNode*>;
     using MapBody = std::vector<MapStatementNode*>;
-    using FormalList = std::vector<std::pair<TypeNode*, IdentifierNode*>>;
+    using FormalList = std::vector<std::pair<TypeLiteral*, IdentifierNode*>>;
 
     /** Base class for all AST nodes. */
     class ASTNode : public IStringable, public IUsesConsole {
     public:
-        ASTNode(Position* pos) : IUsesConsole(), _pos(pos) {};
+        explicit ASTNode(Position* pos) : IUsesConsole(), _pos(pos) {};
 
-        virtual ~ASTNode() {}
+        ~ASTNode() override = default;
 
         /** Implements IStringable. */
         virtual std::string toString() const = 0;
@@ -215,11 +213,7 @@ namespace Walk {
 
         virtual ExpressionNode* copy() const override = 0;
 
-        virtual const Type* type() const = 0;
-
-        virtual bool equals(const ExpressionNode* other) const {
-            throw Errors::SwarmError("Attempted to determine equality of non-value expressions: " + getName() + " == " + other->getName());
-        }
+        virtual const Type::Type* type() const = 0;
     };
 
 
@@ -232,12 +226,8 @@ namespace Walk {
             return new UnitNode(position()->copy());
         }
 
-        virtual const Type* type() const {
-            return PrimitiveType::of(ValueType::TUNIT);
-        }
-
-        bool equals(const ExpressionNode* other) const override {
-            return other->getName() == "UnitNode" && other->type()->is(type());
+        virtual const Type::Type* type() const {
+            return Type::Primitive::of(Type::Intrinsic::UNIT);
         }
 
         virtual std::string toString() const {
@@ -353,7 +343,7 @@ namespace Walk {
             return other;
         }
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             return _symbol->type();
         }
 
@@ -399,25 +389,56 @@ namespace Walk {
             return new MapAccessNode(position()->copy(), _path->copy(), _end->copy());
         }
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             auto pathType = _path->type();
-            assert(pathType->isGenericType());
-            return ((GenericType*) pathType)->concrete();
+            assert(pathType->intrinsic() == Type::Intrinsic::MAP);
+            return ((Type::Map*) pathType)->values();
         }
     private:
         LValNode* _path;
         IdentifierNode* _end;
     };
 
+    class TypeLiteral final : public ExpressionNode {
+    public:
+        TypeLiteral(Position* pos, swarmc::Type::Type* type) : ExpressionNode(pos), _type(type) {}
+
+        TypeLiteral* copy() const override {
+            return new TypeLiteral(position()->copy(), _type);
+        }
+
+        std::string getName() const override {
+            return "TypeLiteral";
+        }
+
+        const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::TYPE);
+        }
+
+        Type::Type* value() const {
+            return _type;
+        }
+
+        std::string toString() const override {
+            return "Type<" + _type->toString() + ">";
+        }
+
+        void setShared(bool shared) const {
+            _type->_shared = shared;
+        }
+    protected:
+        swarmc::Type::Type* _type;
+    };
+
     /** Base class for AST nodes referencing types. */
-    class TypeNode : public ASTNode {
+    /*class TypeNode : public ASTNode {
     public:
         static TypeNode* newForType(Type* type);
 
         TypeNode(Position* pos) : ASTNode(pos) {}
         virtual ~TypeNode() {}
 
-        /** Get the Type instance this node describes. */
+        *//** Get the Type instance this node describes. *//*
         virtual Type* type() const = 0;
 
         virtual bool isType() const {
@@ -427,11 +448,11 @@ namespace Walk {
         virtual void setShared(bool shared) = 0;
 
         virtual TypeNode* copy() const override = 0;
-    };
+    };*/
 
 
     /** AST node referencing a primitive type declaration. */
-    class PrimitiveTypeNode final : public TypeNode {
+    /*class PrimitiveTypeNode final : public TypeNode {
     public:
         PrimitiveTypeNode(Position* pos, PrimitiveType* t) : TypeNode(pos), _t(t) {}
         virtual ~PrimitiveTypeNode() {}
@@ -461,11 +482,11 @@ namespace Walk {
 
     protected:
         PrimitiveType* _t;
-    };
+    };*/
 
 
     /** Base class for TypeNodes that take a type-generic. */
-    class GenericTypeNode : public TypeNode {
+    /*class GenericTypeNode : public TypeNode {
     public:
         GenericTypeNode(Position* pos, TypeNode* concrete) : TypeNode(pos), _concrete(concrete) {}
         virtual ~GenericTypeNode() {}
@@ -480,11 +501,11 @@ namespace Walk {
     protected:
         TypeNode* _concrete;
         bool _shared;
-    };
+    };*/
 
 
     /** AST node referencing an enumerable type declaration. */
-    class EnumerableTypeNode final : public GenericTypeNode {
+    /*class EnumerableTypeNode final : public GenericTypeNode {
     public:
         EnumerableTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
         virtual ~EnumerableTypeNode() {}
@@ -507,11 +528,11 @@ namespace Walk {
         virtual EnumerableTypeNode* copy() const override {
             return new EnumerableTypeNode(position()->copy(), _concrete->copy());
         }
-    };
+    };*/
 
 
     /** AST node referencing a map type declaration. */
-    class MapTypeNode final : public GenericTypeNode {
+    /*class MapTypeNode final : public GenericTypeNode {
     public:
         MapTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
         virtual ~MapTypeNode() {}
@@ -534,7 +555,7 @@ namespace Walk {
         virtual MapTypeNode* copy() const override {
             return new MapTypeNode(position()->copy(), _concrete->copy());
         }
-    };
+    };*/
 
 
     /** AST node referencing a literal boolean value. */
@@ -563,15 +584,8 @@ namespace Walk {
             return new BooleanLiteralExpressionNode(position()->copy(), _val);
         }
 
-        virtual const Type* type() const override {
-            return PrimitiveType::of(ValueType::TBOOL);
-        }
-
-        virtual bool equals(const ExpressionNode* other) const {
-            return (
-                other->getName() == getName()
-                && ((BooleanLiteralExpressionNode*) other)->value() == value()
-            );
+        virtual const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
     private:
@@ -593,11 +607,11 @@ namespace Walk {
     public:
         /**
          * @param pos - the position of the code
-         * @param type - the TypeNode declaring the variable
+         * @param type - the TypeLiteral declaring the variable
          * @param id - the name of the variable
          * @param value - the initial value of the variable
          */
-        VariableDeclarationNode(Position* pos, TypeNode* type, IdentifierNode* id, ExpressionNode* value)
+        VariableDeclarationNode(Position* pos, TypeLiteral* type, IdentifierNode* id, ExpressionNode* value)
             : DeclarationNode(pos), _type(type), _id(id), _value(value) {}
 
         virtual std::string getName() const override {
@@ -618,7 +632,7 @@ namespace Walk {
             return _value;
         }
 
-        TypeNode* typeNode() const {
+        TypeLiteral* typeNode() const {
             return _type;
         }
 
@@ -632,7 +646,7 @@ namespace Walk {
         }
 
     protected:
-        TypeNode* _type;
+        TypeLiteral* _type;
         IdentifierNode* _id;
         ExpressionNode* _value;
     };
@@ -663,7 +677,7 @@ namespace Walk {
             return new AssignExpressionNode(position()->copy(), _dest->copy(), _value->copy());
         }
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             return _value->type();
         }
 
@@ -674,7 +688,7 @@ namespace Walk {
 
     class FunctionNode : public ExpressionNode, public StatementListWrapper {
     public:
-        FunctionNode(Position* pos, TypeNode* type, FormalList* formals) 
+        FunctionNode(Position* pos, TypeLiteral* type, FormalList* formals)
             : ExpressionNode(pos), _type(type), _formals(formals) {
         }
 
@@ -691,7 +705,7 @@ namespace Walk {
         virtual FunctionNode* copy() const override {
             auto formals = new FormalList();
             for ( auto f : *_formals ) {
-                formals->push_back(std::pair<TypeNode*, IdentifierNode*>(f.first->copy(), f.second->copy()));
+                formals->push_back(std::pair<TypeLiteral*, IdentifierNode*>(f.first->copy(), f.second->copy()));
             }
 
             auto fn = new FunctionNode(position()->copy(), _type->copy(), formals);
@@ -699,7 +713,7 @@ namespace Walk {
             return fn;
         }
 
-        TypeNode* typeNode() const {
+        TypeLiteral* typeNode() const {
             return _type;
         }
 
@@ -707,11 +721,11 @@ namespace Walk {
             return _formals;
         }
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             return _type->type();
         }
     protected:
-        TypeNode* _type;
+        TypeLiteral* _type;
         FormalList* _formals;
     };
 
@@ -746,10 +760,10 @@ namespace Walk {
             return new CallExpressionNode(position()->copy(), _id->copy(), args);
         }
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             auto fnType = _id->type();
-            assert(fnType->isFunctionType());
-            return ((FunctionType*) fnType)->returnType();
+            assert(fnType->intrinsic() == Type::Intrinsic::LAMBDA0 || fnType->intrinsic() == Type::Intrinsic::LAMBDA1);
+            return ((Type::Lambda*) fnType)->returns();
         }
 
     protected:
@@ -785,15 +799,15 @@ namespace Walk {
         PureBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
         virtual ~PureBinaryExpressionNode() {}
 
-        virtual const Type* leftType() const = 0;
+        virtual const Type::Type* leftType() const = 0;
 
-        virtual const Type* rightType() const = 0;
+        virtual const Type::Type* rightType() const = 0;
 
-        virtual const Type* resultType() const = 0;
+        virtual const Type::Type* resultType() const = 0;
 
         virtual PureBinaryExpressionNode* copy() const override = 0;
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             return resultType();
         }
     };
@@ -805,16 +819,16 @@ namespace Walk {
         PureBooleanBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
         virtual ~PureBooleanBinaryExpressionNode() {}
 
-        virtual const Type* leftType() const override {
-            return PrimitiveType::of(ValueType::TBOOL, false);
+        virtual const Type::Type* leftType() const override {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
-        virtual const Type* rightType() const override {
-            return PrimitiveType::of(ValueType::TBOOL, false);
+        virtual const Type::Type* rightType() const override {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
-        virtual const Type* resultType() const override {
-            return PrimitiveType::of(ValueType::TBOOL, false);
+        virtual const Type::Type* resultType() const override {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
         virtual PureBooleanBinaryExpressionNode* copy() const override = 0;
@@ -827,16 +841,16 @@ namespace Walk {
         PureNumberBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
         virtual ~PureNumberBinaryExpressionNode() {}
 
-        virtual const Type* leftType() const override {
-            return PrimitiveType::of(ValueType::TNUM, false);
+        virtual const Type::Type* leftType() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        virtual const Type* rightType() const override {
-            return PrimitiveType::of(ValueType::TNUM, false);
+        virtual const Type::Type* rightType() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        virtual const Type* resultType() const override {
-            return PrimitiveType::of(ValueType::TNUM, false);
+        virtual const Type::Type* resultType() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
         virtual PureNumberBinaryExpressionNode* copy() const override = 0;
@@ -849,16 +863,16 @@ namespace Walk {
         PureStringBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
         virtual ~PureStringBinaryExpressionNode() {}
 
-        virtual const Type* leftType() const override {
-            return PrimitiveType::of(ValueType::TSTRING, false);
+        virtual const Type::Type* leftType() const override {
+            return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
-        virtual const Type* rightType() const override {
-            return PrimitiveType::of(ValueType::TSTRING, false);
+        virtual const Type::Type* rightType() const override {
+            return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
-        virtual const Type* resultType() const override {
-            return PrimitiveType::of(ValueType::TSTRING, false);
+        virtual const Type::Type* resultType() const override {
+            return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
         virtual PureStringBinaryExpressionNode* copy() const override = 0;
@@ -920,8 +934,8 @@ namespace Walk {
             return new EqualsNode(position()->copy(), _left->copy(), _right->copy());
         }
 
-        virtual const Type* type() const override {
-            return PrimitiveType::of(ValueType::TBOOL);
+        virtual const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
     };
 
@@ -939,16 +953,16 @@ namespace Walk {
     public:
         NumericComparisonExpressionNode(Position* pos, NumberComparisonType comparisonType, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right), _comparisonType(comparisonType) {}
 
-        const Type* leftType() const override {
-            return PrimitiveType::of(ValueType::TNUM);
+        const Type::Type* leftType() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        const Type* rightType() const override {
-            return PrimitiveType::of(ValueType::TNUM);
+        const Type::Type* rightType() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        const Type* resultType() const override {
-            return PrimitiveType::of(ValueType::TBOOL);
+        const Type::Type* resultType() const override {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
         PureBinaryExpressionNode* copy() const override {
@@ -995,8 +1009,8 @@ namespace Walk {
             return new NotEqualsNode(position()->copy(), _left->copy(), _right->copy());
         }
 
-        virtual const Type* type() const override {
-            return PrimitiveType::of(ValueType::TBOOL);
+        virtual const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
     };
 
@@ -1162,8 +1176,8 @@ namespace Walk {
             return new NegativeExpressionNode(position()->copy(), _exp->copy());
         }
 
-        virtual const Type* type() const override {
-            return PrimitiveType::of(ValueType::TNUM);
+        virtual const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
     };
 
@@ -1184,8 +1198,8 @@ namespace Walk {
             return new NotNode(position()->copy(), _exp->copy());
         }
 
-        virtual const Type* type() const override {
-            return PrimitiveType::of(ValueType::TBOOL);
+        virtual const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
     };
 
@@ -1194,7 +1208,7 @@ namespace Walk {
     class EnumerationLiteralExpressionNode final : public ExpressionNode {
     public:
         EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals) : ExpressionNode(pos), _actuals(actuals) {}
-        EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals, TypeNode* disambiguationType) : ExpressionNode(pos), _actuals(actuals), _disambiguationType(disambiguationType) {}
+        EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals, TypeLiteral* disambiguationType) : ExpressionNode(pos), _actuals(actuals), _disambiguationType(disambiguationType) {}
         virtual ~EnumerationLiteralExpressionNode() {}
 
         std::string toString() const override {
@@ -1259,35 +1273,14 @@ namespace Walk {
             return new EnumerationLiteralExpressionNode(position()->copy(), actuals, type);
         }
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             assert(_disambiguationType != nullptr || !_actuals->empty());
             return (_disambiguationType == nullptr) ? _actuals->at(0)->type() : _disambiguationType->type();
         }
 
-        virtual bool equals(const ExpressionNode* other) const override {
-            if ( other->getName() != "EnumerationLiteralExpressionNode" ) {
-                return false;
-            }
-
-            auto otherEnum = (EnumerationLiteralExpressionNode*) other;
-            if ( _actuals->size() != otherEnum->_actuals->size() ) {
-                return false;
-            }
-
-            for ( size_t i = 0; i < _actuals->size(); i += 1 ) {
-                auto entry = _actuals->at(i);
-                auto otherEntry = otherEnum->_actuals->at(i);
-                if ( !entry->equals(otherEntry) ) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
     protected:
         ExpressionList* _actuals;
-        TypeNode* _disambiguationType = nullptr;
+        TypeLiteral* _disambiguationType = nullptr;
 
         friend class Walk::TypeAnalysisWalk;
     };
@@ -1511,7 +1504,7 @@ namespace Walk {
     class MapNode final : public ExpressionNode {
     public:
         MapNode(Position* pos, MapBody* body) : ExpressionNode(pos), _body(body) {}
-        MapNode(Position* pos, MapBody* body, TypeNode* disambiguationType) : ExpressionNode(pos), _body(body), _disambiguationType(disambiguationType) {}
+        MapNode(Position* pos, MapBody* body, TypeLiteral* disambiguationType) : ExpressionNode(pos), _body(body), _disambiguationType(disambiguationType) {}
         virtual ~MapNode() {}
 
         virtual std::string getName() const override {
@@ -1562,50 +1555,14 @@ namespace Walk {
             return new MapNode(position()->copy(), body, type);
         }
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             assert(_disambiguationType != nullptr || !_body->empty());
             return (_disambiguationType == nullptr) ? _body->at(0)->value()->type() : _disambiguationType->type();
         }
 
-        bool equals(const ExpressionNode* other) const override {
-            if ( other->getName() != getName() ) return false;
-            auto otherMap = (MapNode*) other;
-
-            if ( otherMap->_body->size() != _body->size() ) return false;
-
-            // Make sure both sides have all the same keys
-            std::vector<std::string> keys;
-            for ( auto entry : *_body ) {
-                keys.push_back(entry->id()->name());
-            }
-            std::sort(keys.begin(), keys.end());
-
-            std::vector<std::string> otherKeys;
-            for ( auto entry : *otherMap->_body ) {
-                otherKeys.push_back(entry->id()->name());
-            }
-            std::sort(otherKeys.begin(), otherKeys.end());
-
-            for ( size_t i = 0; i < keys.size(); i += 1 ) {
-                if ( keys[i] != otherKeys[i] ) {
-                    return false;
-                }
-            }
-
-            // Make sure all the keys have all the same values
-            for ( auto node : *_body ) {
-                auto otherNode = otherMap->getBodyNode(node->id());
-                if ( !node->value()->equals(otherNode->value()) ) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
     protected:
         MapBody* _body;
-        TypeNode* _disambiguationType = nullptr;
+        TypeLiteral* _disambiguationType = nullptr;
 
         virtual MapStatementNode* getBodyNode(IdentifierNode* name) const {
             for ( auto stmt : *_body ) {
@@ -1639,13 +1596,6 @@ namespace Walk {
 
         virtual bool isResource() const override {
             return true;
-        }
-
-        bool equals(const ExpressionNode* other) const override {
-            return (
-                other->getName() == getName()
-                && ((PrologueResourceNode*) other)->type()->is(type())
-            );
         }
 
     protected:
@@ -1683,8 +1633,8 @@ namespace Walk {
             return new TagResourceNode(position()->copy(), _key, _value);
         }
 
-        virtual const Type* type() const override {
-            return GenericType::of(ValueType::TRESOURCE, PrimitiveType::of(ValueType::TUNIT));
+        virtual const Type::Type* type() const override {
+            return new Type::Resource(Type::Primitive::of(Type::Intrinsic::UNIT));
         }
 
     protected:
@@ -1721,15 +1671,8 @@ namespace Walk {
             return new StringLiteralExpressionNode(position()->copy(), _value);
         }
 
-        virtual const Type* type() const override {
-            return PrimitiveType::of(ValueType::TSTRING);
-        }
-
-        bool equals(const ExpressionNode* other) const override {
-            return (
-                other->getName() == getName()
-                && ((StringLiteralExpressionNode*) other)->value() == _value
-            );
+        virtual const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::STRING);
         }
     protected:
         std::string _value;
@@ -1761,15 +1704,8 @@ namespace Walk {
             return new NumberLiteralExpressionNode(position()->copy(), _value);
         }
 
-        virtual const Type* type() const override {
-            return PrimitiveType::of(ValueType::TNUM);
-        }
-
-        bool equals(const ExpressionNode* other) const override {
-            return (
-                other->getName() == getName()
-                && ((NumberLiteralExpressionNode*) other)->value() == _value
-            );
+        virtual const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
     protected:
         double _value;
@@ -1833,17 +1769,16 @@ namespace Walk {
             return new EnumerableAccessNode(position()->copy(), _path->copy(), _index->copy());
         }
 
-        virtual const Type* type() const override {
+        virtual const Type::Type* type() const override {
             auto baseType = _path->type();
-            assert(baseType->isGenericType());
-            return ((GenericType*) baseType)->concrete();
+            assert(baseType->intrinsic() == Type::Intrinsic::ENUMERABLE);
+            return ((Type::Enumerable*) baseType)->values();
         }
     private:
         LValNode* _path;
         IntegerLiteralExpressionNode* _index;
     };
 
-}
 }
 
 

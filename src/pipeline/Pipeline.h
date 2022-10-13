@@ -12,8 +12,6 @@
 #include "../lang/Walk/PrintWalk.h"
 #include "../lang/Walk/NameAnalysisWalk.h"
 #include "../lang/Walk/TypeAnalysisWalk.h"
-#include "../lang/Walk/SerializeWalk.h"
-#include "../lang/Walk/DeSerializeWalk.h"
 
 namespace swarmc {
 
@@ -88,20 +86,6 @@ namespace swarmc {
         void targetASTRepresentation(std::ostream& out) {
             targetASTSymbolicTyped();
             Lang::Walk::PrintWalk pW(out, _root);
-        }
-
-        void targetSerialOutput(std::ostream& out) {
-            targetASTSymbolicTyped();
-
-            Lang::Walk::SerializeWalk walk;
-            std::string json = walk.toJSON(_root);
-            out << json;
-        }
-
-        void targetDeSerialOutput(std::ostream& out) {
-            Lang::Walk::DeSerializeWalk walk;
-            Lang::ASTNode* tree = walk.deserialize(_input);
-            Lang::Walk::PrintWalk pW(out, tree);
         }
 
     protected:

@@ -30,24 +30,5 @@ namespace Lang {
     SemanticSymbol* EnumerableAccessNode::lockable() const {
         return _path->lockable();
     }
-
-    TypeNode* TypeNode::newForType(Type* type) {
-        if ( type->isPrimitiveType() ) {
-            return new PrimitiveTypeNode(new ProloguePosition("VirtualType"), (PrimitiveType*) type);
-        }
-
-        if ( type->isGenericType() ) {
-            auto genericType = (GenericType*) type;
-
-            if ( type->valueType() == ValueType::TMAP ) {
-                return new MapTypeNode(new ProloguePosition("VirtualType"), newForType(genericType->concrete()));
-            } else if ( type->valueType() == ValueType::TENUMERABLE ) {
-                return new EnumerableTypeNode(new ProloguePosition("VirtualType"), newForType(genericType->concrete()));
-            }
-        }
-
-        throw Errors::SwarmError("Unable to reconstruct type node for type: " + type->toString());
-    }
-
 }
 }

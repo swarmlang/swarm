@@ -26,8 +26,6 @@ protected:
     bool flagOutputTokens = false;
     bool flagParseAndStop = false;
     bool flagOutputParse = false;
-    bool flagOutputSerialize = false;
-    bool flagOutputDeSerialize = false;
     bool flagRunTest = false;
     bool flagClearQueue = false;
     bool flagWorkQueue = false;
@@ -44,8 +42,6 @@ protected:
     int debugOutputTokens();
     int debugOutputParse();
     int debugParseAndStop();
-    int debugOutputSerialize();
-    int debugOutputDeSerialize();
     int runTest();
     int parseFilters();
     int interpret();
