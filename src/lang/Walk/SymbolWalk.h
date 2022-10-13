@@ -133,16 +133,6 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
-        SymbolMap* leftMap = walk(node->dest());
-        SymbolMap* rightMap = walk(node->value());
-
-        leftMap->insert(rightMap->begin(), rightMap->end());
-        delete rightMap;
-
-        return leftMap;
-    }
-
     virtual SymbolMap* walkSubtractNode(SubtractNode* node) {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
@@ -156,16 +146,6 @@ protected:
     virtual SymbolMap* walkMultiplyNode(MultiplyNode* node) {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
-
-        leftMap->insert(rightMap->begin(), rightMap->end());
-        delete rightMap;
-
-        return leftMap;
-    }
-
-    virtual SymbolMap* walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
-        SymbolMap* leftMap = walk(node->dest());
-        SymbolMap* rightMap = walk(node->value());
 
         leftMap->insert(rightMap->begin(), rightMap->end());
         delete rightMap;
@@ -317,6 +297,19 @@ protected:
 
     virtual SymbolMap* walkUnitNode(UnitNode* node) {
         return new SymbolMap();
+    }
+
+    virtual SymbolMap* walkFunctionNode(FunctionNode* node) {
+        // TODO: determine if I need to walk formals
+        SymbolMap* map = new SymbolMap();
+
+        for (auto i : *node->body()) {
+            SymbolMap* m = walk(i);
+            map->insert(m->begin(), m->end());
+            delete m;
+        }
+
+        return map;
     }
 
     virtual SymbolMap* walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {

@@ -26,10 +26,13 @@ namespace Walk {
     class ExpressionNode;
     class MapStatementNode;
     class IntegerLiteralExpressionNode;
+    class TypeNode;
+    class IdentifierNode;
 
     using StatementList = std::vector<StatementNode*>;
     using ExpressionList = std::vector<ExpressionNode*>;
     using MapBody = std::vector<MapStatementNode*>;
+    using FormalList = std::vector<std::pair<TypeNode*, IdentifierNode*>>;
 
     /** Base class for all AST nodes. */
     class ASTNode : public IStringable, public IUsesConsole {
@@ -136,7 +139,50 @@ namespace Walk {
         virtual StatementNode* copy() const override = 0;
     };
 
+     class StatementListWrapper {
+    public:
+        StatementListWrapper() {
+            _body = new StatementList();
+        }
 
+        virtual ~StatementListWrapper() {
+            for ( auto stmt : *_body ) {
+                delete stmt;
+            }
+
+            delete _body;
+        }
+
+        /** Push a new statement to the end of the body. */
+        void pushStatement(StatementNode* statement) {
+            _body->push_back(statement);
+        }
+
+        /**
+         * Given a list of statements, concatentate them onto the
+         * body and delete the original list container.
+         */
+        void assumeAndReduceStatements(StatementList* body) {
+            for ( auto statement : *body ) {
+                pushStatement(statement);
+            }
+
+            delete body;
+        }
+
+        StatementList* body() const {
+            return _body;
+        }
+
+        StatementList* copyBody() const {
+            auto other = new StatementList();
+            for ( auto stmt : *body() ) other->push_back(stmt->copy());
+            return other;
+        }
+
+    protected:
+        StatementList* _body;
+    };
 
     class ContinueNode final : public StatementNode {
     public:
@@ -591,7 +637,6 @@ namespace Walk {
         ExpressionNode* _value;
     };
 
-
     /** AST node representing an assignment of a value to an lval. */
     class AssignExpressionNode : public StatementExpressionNode {
     public:
@@ -627,6 +672,48 @@ namespace Walk {
         ExpressionNode* _value;
     };
 
+    class FunctionNode : public ExpressionNode, public StatementListWrapper {
+    public:
+        FunctionNode(Position* pos, TypeNode* type, FormalList* formals) 
+            : ExpressionNode(pos), _type(type), _formals(formals) {
+        }
+
+        virtual std::string getName() const override {
+            return "FunctionNode";
+        }
+
+        virtual ~FunctionNode() {}
+
+        virtual std::string toString() const override {
+            return "FunctionNode<type: " + _type->getName() + ">";
+        }
+
+        virtual FunctionNode* copy() const override {
+            auto formals = new FormalList();
+            for ( auto f : *_formals ) {
+                formals->push_back(std::pair<TypeNode*, IdentifierNode*>(f.first->copy(), f.second->copy()));
+            }
+
+            auto fn = new FunctionNode(position()->copy(), _type->copy(), formals);
+            fn->_body = copyBody();
+            return fn;
+        }
+
+        TypeNode* typeNode() const {
+            return _type;
+        }
+
+        FormalList* formals() const {
+            return _formals;
+        }
+
+        virtual const Type* type() const override {
+            return _type->type();
+        }
+    protected:
+        TypeNode* _type;
+        FormalList* _formals;
+    };
 
     /** AST node representing a call to a function. */
     class CallExpressionNode final : public StatementExpressionNode {
@@ -931,26 +1018,6 @@ namespace Walk {
         }
     };
 
-    /** AST node representing the addition of a value to the existing value of a lval. */
-    class AddAssignExpressionNode final : public AssignExpressionNode {
-    public:
-        AddAssignExpressionNode(Position* pos, LValNode* dest, ExpressionNode* value) : 
-            AssignExpressionNode(pos, dest, value) {}
-        virtual ~AddAssignExpressionNode() {}
-
-        virtual std::string getName() const override {
-            return "AddAssignExpressionNode";
-        }
-
-        virtual std::string toString() const override {
-            return "AddAssignExpressionNode<lval: " + _dest->toString() + ">";
-        }
-
-        virtual AddAssignExpressionNode* copy() const override {
-            return new AddAssignExpressionNode(position()->copy(), _dest->copy(), _value->copy());
-        }
-    };
-
     /** AST node referencing subtraction of two values. */
     class SubtractNode final : public PureNumberBinaryExpressionNode {
     public:
@@ -987,28 +1054,6 @@ namespace Walk {
             return new MultiplyNode(position()->copy(), _left->copy(), _right->copy());
         }
     };
-
-
-    /** AST node representing the multiplication of a value to the existing value of a lval. */
-    class MultiplyAssignExpressionNode final : public AssignExpressionNode {
-    public:
-        MultiplyAssignExpressionNode(Position* pos, LValNode* dest, ExpressionNode* value) :
-            AssignExpressionNode(pos, dest, value) {}
-        virtual ~MultiplyAssignExpressionNode() {}
-
-        virtual std::string getName() const override {
-            return "MultiplyAssignExpressionNode";
-        }
-
-        virtual std::string toString() const override {
-            return "MultiplyAssignExpressionNode<lval: " + _dest->toString() + ">";
-        }
-
-        virtual MultiplyAssignExpressionNode* copy() const override {
-            return new MultiplyAssignExpressionNode(position()->copy(), _dest->copy(), _value->copy());
-        }
-    };
-
 
     /** AST node referencing division of two values. */
     class DivideNode final : public PureNumberBinaryExpressionNode {
@@ -1249,50 +1294,13 @@ namespace Walk {
 
 
     /** Base class for AST nodes that contain a body of statements. */
-    class BlockStatementNode : public StatementNode {
+    class BlockStatementNode : public StatementNode, public StatementListWrapper {
     public:
-        BlockStatementNode(Position* pos) : StatementNode(pos) {
-            _body = new StatementList();
-        }
+        BlockStatementNode(Position* pos) : StatementNode(pos), StatementListWrapper() {}
 
-        virtual ~BlockStatementNode() {
-            for ( auto stmt : *_body ) {
-                delete stmt;
-            }
-
-            delete _body;
-        }
-
-        /** Push a new statement to the end of the body. */
-        void pushStatement(StatementNode* statement) {
-            _body->push_back(statement);
-        }
-
-        /**
-         * Given a list of statements, concatentate them onto the
-         * body and delete the original list container.
-         */
-        void assumeAndReduceStatements(StatementList* body) {
-            for ( auto statement : *body ) {
-                pushStatement(statement);
-            }
-
-            delete body;
-        }
-
-        StatementList* body() const {
-            return _body;
-        }
-
-        StatementList* copyBody() const {
-            auto other = new StatementList;
-            for ( auto stmt : *body() ) other->push_back(stmt->copy());
-            return other;
-        }
+        virtual ~BlockStatementNode() {}
 
         virtual BlockStatementNode* copy() const override = 0;
-    protected:
-        StatementList* _body;
     };
 
 

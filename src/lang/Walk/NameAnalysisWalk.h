@@ -146,11 +146,6 @@ protected:
         return leftResult && rightResult;
     }
 
-    virtual bool walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
-        if ( !walk(node->value()) ) return false;
-        return walkAssignExpressionNode(node);
-    }
-
     virtual bool walkSubtractNode(SubtractNode* node) {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
@@ -161,11 +156,6 @@ protected:
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
-    }
-
-    virtual bool walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
-        if ( !walk(node->value()) ) return false;
-        return walkAssignExpressionNode(node);
     }
 
     virtual bool walkDivideNode(DivideNode* node) {
@@ -368,6 +358,35 @@ protected:
     }
 
     virtual bool walkUnitNode(UnitNode* node) {
+        return true;
+    }
+
+    virtual bool walkFunctionNode(FunctionNode* node) {
+        for ( auto formal : *node->formals() ) {
+            std::string name = formal.second->name();
+            Type* type = formal.first->type();
+
+            // Make sure the name isn't already declared in this scope
+            if ( _symbols->isClashing(name) ) {
+                SemanticSymbol* existing = _symbols->lookup(name);
+                Reporting::nameError(node->position(), "Redeclaration of identifier \"" + name + "\" first declared at " + existing->declaredAt()->start() + ".");
+                return false;
+            }
+
+            // Add the declaration to the current scope
+            _symbols->addVariable(name, type, formal.second->position());
+
+            // TODO: determine if needed, probably is though
+            // Call this to attach the Symbol to the IdentifierNode
+            // walk(formal.second->id());
+        }
+
+        for ( auto stmt : *node->body() ) {
+            if ( !walk(stmt) ) {
+                return false;
+            }
+        }
+
         return true;
     }
 

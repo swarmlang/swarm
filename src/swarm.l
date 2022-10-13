@@ -125,6 +125,10 @@ break {
 	return makeBareToken(TokenKind::ASSIGN);
 }
 
+"->" {
+	return makeBareToken(TokenKind::ARROW);
+}
+
 string {
 	return makeBareToken(TokenKind::STRING);
 }
@@ -163,6 +167,10 @@ true {
 
 false {
 	return makeBareToken(TokenKind::FALSE);
+}
+
+fn {
+	return makeBareToken(TokenKind::FN);
 }
 
 "&&" {

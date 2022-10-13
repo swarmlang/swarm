@@ -32,10 +32,8 @@ namespace Walk {
             if ( node->getName() == "EqualsNode" ) return walkEqualsNode((EqualsNode*) node);
             if ( node->getName() == "NotEqualsNode" ) return walkNotEqualsNode((NotEqualsNode*) node);
             if ( node->getName() == "AddNode" ) return walkAddNode((AddNode*) node);
-            if ( node->getName() == "AddAssignExpressionNode" ) return walkAddAssignExpressionNode((AddAssignExpressionNode*) node);
             if ( node->getName() == "SubtractNode" ) return walkSubtractNode((SubtractNode*) node);
             if ( node->getName() == "MultiplyNode" ) return walkMultiplyNode((MultiplyNode*) node);
-            if ( node->getName() == "MultiplyAssignExpressionNode" ) return walkMultiplyAssignExpressionNode((MultiplyAssignExpressionNode*) node);
             if ( node->getName() == "DivideNode" ) return walkDivideNode((DivideNode*) node);
             if ( node->getName() == "ModulusNode" ) return walkModulusNode((ModulusNode*) node);
             if ( node->getName() == "PowerNode" ) return walkPowerNode((PowerNode*) node);
@@ -54,6 +52,7 @@ namespace Walk {
             if ( node->getName() == "NumberLiteralExpressionNode" ) return walkNumberLiteralExpressionNode((NumberLiteralExpressionNode*) node);
             if ( node->getName() == "IntegerLiteralExpressionNode" ) return walkIntegerLiteralExpressionNode((IntegerLiteralExpressionNode*) node);
             if ( node->getName() == "UnitNode" ) return walkUnitNode((UnitNode*) node);
+            if ( node->getName() == "FunctionNode" ) return walkFunctionNode((FunctionNode*) node);
             if ( node->getName() == "NumericComparisonExpressionNode" ) return walkNumericComparisonExpressionNode((NumericComparisonExpressionNode*) node);
             if ( node->getName() == "CapturedBlockStatementNode" ) return walkCapturedBlockStatementNode((CapturedBlockStatementNode*) node);
             if ( node->getName() == "TagResourceNode" ) return walkTagResourceNode((TagResourceNode*) node);
@@ -77,10 +76,8 @@ namespace Walk {
         virtual TReturn walkEqualsNode(EqualsNode* node) = 0;
         virtual TReturn walkNotEqualsNode(NotEqualsNode* node) = 0;
         virtual TReturn walkAddNode(AddNode* node) = 0;
-        virtual TReturn walkAddAssignExpressionNode(AddAssignExpressionNode* node) = 0;
         virtual TReturn walkSubtractNode(SubtractNode* node) = 0;
         virtual TReturn walkMultiplyNode(MultiplyNode* node) = 0;
-        virtual TReturn walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) = 0;
         virtual TReturn walkDivideNode(DivideNode* node) = 0;
         virtual TReturn walkModulusNode(ModulusNode* node) = 0;
         virtual TReturn walkPowerNode(PowerNode* node) = 0;
@@ -98,6 +95,7 @@ namespace Walk {
         virtual TReturn walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) = 0;
         virtual TReturn walkAssignExpressionNode(AssignExpressionNode* node) = 0;
         virtual TReturn walkUnitNode(UnitNode* node) = 0;
+        virtual TReturn walkFunctionNode(FunctionNode* node) = 0;
         virtual TReturn walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) = 0;
         virtual TReturn walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) = 0;
         virtual TReturn walkTagResourceNode(TagResourceNode* node) = 0;

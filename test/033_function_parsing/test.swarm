@@ -1,0 +1,4 @@
+
+fn testFunction = (arg1: number, arg2: (string->number)): number -> {
+    number a = 0;
+};

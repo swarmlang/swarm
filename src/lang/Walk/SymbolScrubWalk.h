@@ -90,11 +90,6 @@ protected:
         walk(node->right());
     }
 
-    virtual void walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
-        walk(node->value());
-        walkAssignExpressionNode(node);
-    }
-
     virtual void walkSubtractNode(SubtractNode* node) {
         walk(node->left());
         walk(node->right());
@@ -103,11 +98,6 @@ protected:
     virtual void walkMultiplyNode(MultiplyNode* node) {
         walk(node->left());
         walk(node->right());
-    }
-
-    virtual void walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
-        walk(node->value());
-        walkAssignExpressionNode(node);
     }
 
     virtual void walkDivideNode(DivideNode* node) {
@@ -204,6 +194,13 @@ protected:
     }
 
     virtual void walkUnitNode(UnitNode* node) {}
+
+    virtual void walkFunctionNode(FunctionNode* node) {
+        // TODO: determine if I need to scrub formals
+        for ( auto stmt : *node->body() ) {
+            walk(stmt);
+        }
+    }
 
     virtual void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
         walk(node->left());

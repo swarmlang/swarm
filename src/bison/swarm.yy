@@ -61,7 +61,8 @@
     swarmc::Lang::TypeNode*             transType;
     swarmc::Lang::DeclarationNode*      transDeclaration;
     swarmc::Lang::MapStatementNode*     transMapStatement;
-    std::vector<MapStatementNode*>*     transMapStatements;
+    std::vector<std::pair<TypeNode*, IdentifierNode*>>*  transFormals;
+    std::vector<swarmc::Lang::MapStatementNode*>* transMapStatements;
     std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
 }
 
@@ -115,6 +116,8 @@
 %token <transToken>      POWER
 %token <transToken>      CAT
 %token <transToken>      SHARED
+%token <transToken>      FN
+%token <transToken>      ARROW
 
 /*    (attribute type)      (nonterminal)    */
 %type <transProgram>        program
@@ -127,6 +130,7 @@
 %type <transAssignExpression> assignment
 %type <transCallExpression> callExpression
 %type <transExpressions>    actuals
+%type <transFormals>        formals
 %type <transType>           type
 %type <transDeclaration>    declaration
 %type <transMapStatement>   mapStatement
@@ -235,6 +239,17 @@ declaration :
         $$ = var;
     }
 
+    | FN id ASSIGN LPAREN formals RPAREN COLON type ARROW LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $12->position());
+
+        // TODO: type
+        TypeNode* t = nullptr;
+
+        FunctionNode* fn = new FunctionNode($10->position(), $8, $5);
+        fn->assumeAndReduceStatements($11->reduceToStatements());
+        $$ = new VariableDeclarationNode(pos, $8, $2, fn);
+    }
+
 
 
 assignment :
@@ -245,12 +260,14 @@ assignment :
 
     | lval ADDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new AddAssignExpressionNode(pos, $1, $3);
+        auto r = new AddNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
     }
 
     | lval MULTIPLYASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
-        $$ = new MultiplyAssignExpressionNode(pos, $1, $3);
+        auto r = new MultiplyNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
     }
 
 
@@ -307,6 +324,15 @@ type :
     | MAP LARROW type RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new MapTypeNode(pos, $3);
+    }
+
+    | LPAREN type ARROW type RPAREN {
+        // might not want this because it allows for using these kind of types with
+        // regular variable declarations (although maybe thats desired?)
+        // TODO: try to remove parenthesis if I can
+        Position* pos = new Position($1->position(), $3->position());
+        // FIXME: this is obviously wrong
+        $$ = $2;
     }
 
 
@@ -466,6 +492,19 @@ actuals :
     | actuals COMMA expression {
         $$ = $1;
         $$->push_back($3);
+    }
+
+formals :
+    id COLON type {
+        $$ = new std::vector<std::pair<TypeNode*, IdentifierNode*>>();
+        auto t = std::pair<TypeNode*, IdentifierNode*>($3, $1);
+        $$->push_back(t);
+    }
+
+    | formals COMMA id COLON type {
+        $$ = $1;
+        auto t = std::pair<TypeNode*, IdentifierNode*>($5, $3);
+        $$->push_back(t);
     }
 
 

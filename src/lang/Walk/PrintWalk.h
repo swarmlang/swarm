@@ -126,13 +126,6 @@ protected:
         pop_space();
     }
 
-    virtual void walkAddAssignExpressionNode(AddAssignExpressionNode* node) {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->value());
-        pop_space();
-    }
-
     virtual void walkSubtractNode(SubtractNode* node) {
         _out << _prefix << node->toString() << std::endl;
         push_space();
@@ -146,13 +139,6 @@ protected:
         push_space();
         walk(node->left());
         walk(node->right());
-        pop_space();
-    }
-
-    virtual void walkMultiplyAssignExpressionNode(MultiplyAssignExpressionNode* node) {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->value());
         pop_space();
     }
 
@@ -289,6 +275,15 @@ protected:
 
     virtual void walkUnitNode(UnitNode* node) {
         _out << _prefix << node->toString() << std::endl;
+    }
+
+    virtual void walkFunctionNode(FunctionNode* node) {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        for ( auto stmt : *node->body() ) {
+            walk(stmt);
+        }
+        pop_space();
     }
 
     virtual void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
