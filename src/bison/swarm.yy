@@ -61,6 +61,7 @@
     swarmc::Lang::TypeLiteral*          transType;
     swarmc::Lang::DeclarationNode*      transDeclaration;
     swarmc::Lang::MapStatementNode*     transMapStatement;
+    swarmc::Lang::FunctionNode*         transFunction;
     std::vector<std::pair<TypeLiteral*, IdentifierNode*>>*  transFormals;
     std::vector<swarmc::Lang::MapStatementNode*>* transMapStatements;
     std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
@@ -131,6 +132,7 @@
 %type <transCallExpression> callExpression
 %type <transExpressions>    actuals
 %type <transFormals>        formals
+%type <transFunction>       function
 %type <transType>           type
 %type <transDeclaration>    declaration
 %type <transMapStatement>   mapStatement
@@ -143,6 +145,7 @@
 %left SUBTRACT ADD
 %left MULTIPLY DIVIDE MODULUS
 %left POWER
+%right ARROW
 
 %%
 
@@ -239,15 +242,10 @@ declaration :
         $$ = var;
     }
 
-    | FN id ASSIGN LPAREN formals RPAREN COLON type ARROW LBRACE statements RBRACE {
-        Position* pos = new Position($1->position(), $12->position());
+    | FN id ASSIGN function {
+        Position* pos = new Position($1->position(), $4->position());
 
-        // TODO: type
-        TypeLiteral* t = nullptr;
-
-        FunctionNode* fn = new FunctionNode($10->position(), $8, $5);
-        fn->assumeAndReduceStatements($11->reduceToStatements());
-        $$ = new VariableDeclarationNode(pos, $8, $2, fn);
+        $$ = new VariableDeclarationNode(pos, $4->typeNode(), $2, $4);
     }
 
 
@@ -326,13 +324,38 @@ type :
         $$ = new TypeLiteral(pos, $3->value());
     }
 
-    | LPAREN type ARROW type RPAREN {
+    | type ARROW type {
         // might not want this because it allows for using these kind of types with
         // regular variable declarations (although maybe thats desired?)
-        // TODO: try to remove parenthesis if I can
+        
         Position* pos = new Position($1->position(), $3->position());
-        // FIXME: this is obviously wrong
-        $$ = $2;
+        $$ = new TypeLiteral(pos, new Type::Lambda1($1->value(), $3->value()));
+    }
+
+
+function :
+    LPAREN formals RPAREN COLON type ARROW LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $9->position());
+        Position* typepos = new Position($1->position(), $5->position());
+
+        Type::Type* t = $5->value();
+
+        for ( auto i = $2->rbegin(); i != $2->rend(); ++i ) {
+            t = new Type::Lambda1((*i).first->value(), t);
+        }
+
+        FunctionNode* fn = new FunctionNode(pos, new TypeLiteral(typepos, t), $2);
+        fn->assumeAndReduceStatements($8->reduceToStatements());
+        $$ = fn;
+    }
+
+    | LPAREN RPAREN COLON type ARROW LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $8->position());
+
+        FunctionNode* fn = new FunctionNode(
+            pos, new TypeLiteral($4->position(), new Type::Lambda0($4->value())), new FormalList());
+        fn->assumeAndReduceStatements($7->reduceToStatements());
+        $$ = fn;
     }
 
 
@@ -478,6 +501,14 @@ term :
 
     | LPAREN expression RPAREN {
         $$ = $2;
+    }
+
+    | function {
+        $$ = $1;
+    }
+
+    | type {
+        $$ = $1;
     }
 
 

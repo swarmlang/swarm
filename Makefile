@@ -29,7 +29,8 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall
 CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall -DSWARM_DEBUG
-LDFLAGS ?= -lredis++ -lhiredis -pthread
+#LDFLAGS ?= -lredis++ -lhiredis -pthread
+LDFLAGS ?= -pthread
 
 $(TARGET_EXEC): $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
 	$(EBIN) $@

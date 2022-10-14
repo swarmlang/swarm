@@ -360,7 +360,7 @@ protected:
 
             // TODO: determine if needed, probably is though
             // Call this to attach the Symbol to the IdentifierNode
-            // walk(formal.second->id());
+            walk(formal.second);
         }
 
         for ( auto stmt : *node->body() ) {

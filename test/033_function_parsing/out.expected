@@ -1,0 +1,14 @@
+ProgramNode<#body: 2>
+  VariableDeclarationNode<name: testFunction>
+    Type<Primitive<NUMBER> :: Primitive<NUMBER> :: Primitive<STRING> :: Primitive<NUMBER>>
+    FunctionNode<type: Type<Primitive<NUMBER> :: Primitive<NUMBER> :: Primitive<STRING> :: Primitive<NUMBER>>>
+      VariableDeclarationNode<name: a>
+        Type<Primitive<NUMBER>>
+        NumberLiteralExpressionNode<#value: 0.000000>
+  VariableDeclarationNode<name: test2>
+    Type<:: Primitive<STRING>>
+    FunctionNode<type: Type<:: Primitive<STRING>>>
+      VariableDeclarationNode<name: b>
+        Type<Primitive<STRING>>
+        StringLiteralExpressionNode<#value: 'test'>
+[32m[SUCCESS] [0mParsed input program.

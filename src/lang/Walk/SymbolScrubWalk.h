@@ -41,11 +41,13 @@ protected:
         return walk(node->path());
     }
 
-    virtual void walkPrimitiveTypeNode(PrimitiveTypeNode* node) {}
+    // virtual void walkPrimitiveTypeNode(PrimitiveTypeNode* node) {}
 
-    virtual void walkEnumerableTypeNode(EnumerableTypeNode* node) {}
+    // virtual void walkEnumerableTypeNode(EnumerableTypeNode* node) {}
 
-    virtual void walkMapTypeNode(MapTypeNode* node) {}
+    // virtual void walkMapTypeNode(MapTypeNode* node) {}
+
+    virtual void walkTypeLiteral(TypeLiteral* node) {}
 
     virtual void walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {}
 

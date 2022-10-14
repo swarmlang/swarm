@@ -699,7 +699,7 @@ namespace Walk {
         virtual ~FunctionNode() {}
 
         virtual std::string toString() const override {
-            return "FunctionNode<type: " + _type->getName() + ">";
+            return "FunctionNode<type: " + _type->toString() + ">";
         }
 
         virtual FunctionNode* copy() const override {

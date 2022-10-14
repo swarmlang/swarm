@@ -564,7 +564,7 @@ protected:
     }
 
     virtual bool walkFunctionNode(FunctionNode* node) {
-        // IMPLEMENT ME
+        _types->setTypeOf(node, node->type());
         return true;
     }
 
