@@ -292,14 +292,7 @@ protected:
     }
 
     // TODO: determine if I need to walk formals
-    virtual SymbolMap* walkOneLineFunctionNode(OneLineFunctionNode* node) {
-        SymbolMap* map = walk(node->body());
-
-        return map;
-    }
-
-    // TODO: determine if I need to walk formals
-    virtual SymbolMap* walkMultiLineFunctionNode(MultiLineFunctionNode* node) {
+    virtual SymbolMap* walkFunctionNode(FunctionNode* node) {
         SymbolMap* map = new SymbolMap();
 
         for (auto i : *node->body()) {

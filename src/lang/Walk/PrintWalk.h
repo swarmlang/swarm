@@ -269,14 +269,7 @@ protected:
         _out << _prefix << node->toString() << std::endl;
     }
 
-    virtual void walkOneLineFunctionNode(OneLineFunctionNode* node) {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->body());
-        pop_space();
-    }
-
-    virtual void walkMultiLineFunctionNode(MultiLineFunctionNode* node) {
+    virtual void walkFunctionNode(FunctionNode* node) {
         _out << _prefix << node->toString() << std::endl;
         push_space();
         for ( auto stmt : *node->body() ) {

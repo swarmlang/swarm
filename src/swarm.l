@@ -286,6 +286,19 @@ fn {
 	colNum += yyleng;
 }
 
+--.*\n {
+	lineNum++;
+}
+
+--\*([^*]|(\*[^-])|(\*-[^-]))*\*-- {
+	std::string s(yytext);
+	for (char c : s) {
+		if (c == '\n') {
+			lineNum++;
+		}
+	}
+}
+
 . {
 	Console::get()->error("Parse error, unexpected character");
 	exit(1);

@@ -238,6 +238,16 @@ statement :
         $$ = new ExpressionStatementNode(pos, $1);
     }
 
+    | RETURN SEMICOLON {
+        Position* pos = new Position($1->position(), $2->position());
+        $$ = new ReturnStatementNode(pos, nullptr);
+    }
+
+    | RETURN expression SEMICOLON {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new ReturnStatementNode(pos, $2);
+    }
+
 
 
 declaration :
@@ -368,6 +378,11 @@ type :
         $$ = new TypeLiteral($1->position(), t);
     }
 
+    | VOID {
+        auto t = Type::Primitive::of(Type::Intrinsic::VOID);
+        $$ = new TypeLiteral($1->position(), t);
+    }
+
     | ENUMERABLE LARROW type RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new TypeLiteral(pos, $3->value());
@@ -398,7 +413,7 @@ function :
             t = new Type::Lambda1((*i).first->value(), t);
         }
 
-        MultiLineFunctionNode* fn = new MultiLineFunctionNode(pos, new TypeLiteral(typepos, t), $2);
+        FunctionNode* fn = new FunctionNode(pos, new TypeLiteral(typepos, t), $2);
         fn->assumeAndReduceStatements($8->reduceToStatements());
         $$ = fn;
     }
@@ -406,7 +421,7 @@ function :
     | LPAREN RPAREN COLON type FNDEF LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
 
-        MultiLineFunctionNode* fn = new MultiLineFunctionNode(
+        FunctionNode* fn = new FunctionNode(
             pos, new TypeLiteral($4->position(), new Type::Lambda0($4->value())), new FormalList());
         fn->assumeAndReduceStatements($7->reduceToStatements());
         $$ = fn;
@@ -422,18 +437,21 @@ function :
             t = new Type::Lambda1((*i).first->value(), t);
         }
 
-        OneLineFunctionNode* fn = new OneLineFunctionNode(pos, new TypeLiteral(typepos, t), $2, $7);
+        FunctionNode* fn = new FunctionNode(pos, new TypeLiteral(typepos, t), $2);
+        auto retstmt = new StatementList();
+        retstmt->push_back(new ReturnStatementNode($7->position(), $7));
+        fn->assumeAndReduceStatements(retstmt);
         $$ = fn;
     }
 
     | LPAREN RPAREN COLON type FNDEF expressionF {
         Position* pos = new Position($1->position(), $6->position());
 
-        OneLineFunctionNode* fn = new OneLineFunctionNode(
-            pos, 
-            new TypeLiteral($4->position(), new Type::Lambda0($4->value())), 
-            new FormalList(),
-            $6);
+        FunctionNode* fn = new FunctionNode(
+            pos, new TypeLiteral($4->position(), new Type::Lambda0($4->value())), new FormalList());
+        auto retstmt = new StatementList();
+        retstmt->push_back(new ReturnStatementNode($6->position(), $6));
+        fn->assumeAndReduceStatements(retstmt);
         $$ = fn;
     }
 
