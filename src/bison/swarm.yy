@@ -149,6 +149,7 @@
 %type <transMapStatement>   mapStatement
 %type <transMapStatements>  mapStatements
 
+%precedence FNDEF
 %left CAT
 %left OR
 %left AND
@@ -157,7 +158,6 @@
 %left MULTIPLY DIVIDE MODULUS
 %left POWER
 %right ARROW
-%precedence FNDEF
 
 %%
 
