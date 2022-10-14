@@ -1,8 +1,8 @@
 
-fn testFunction = (arg1: number, arg2: number->string): number -> {
+fn testFunction = (arg1: number, arg2: number->string): number => {
     number a = 0;
 };
 
-fn test2 = (): string -> {
+fn test2 = (): string->number => {
     string b = "test";
 };

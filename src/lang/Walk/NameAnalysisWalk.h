@@ -343,7 +343,7 @@ protected:
         return true;
     }
 
-    virtual bool walkFunctionNode(FunctionNode* node) {
+    virtual bool walkOneLineFunctionNode(OneLineFunctionNode* node) {
         for ( auto formal : *node->formals() ) {
             std::string name = formal.second->name();
             const Type::Type* type = formal.first->type();
@@ -358,7 +358,32 @@ protected:
             // Add the declaration to the current scope
             _symbols->addVariable(name, type, formal.second->position());
 
-            // TODO: determine if needed, probably is though
+            // Call this to attach the Symbol to the IdentifierNode
+            walk(formal.second);
+        }
+
+        if ( !walk(node->body()) ) {
+            return false;
+        }
+
+        return true;
+    }
+
+    virtual bool walkMultiLineFunctionNode(MultiLineFunctionNode* node) {
+        for ( auto formal : *node->formals() ) {
+            std::string name = formal.second->name();
+            const Type::Type* type = formal.first->type();
+
+            // Make sure the name isn't already declared in this scope
+            if ( _symbols->isClashing(name) ) {
+                SemanticSymbol* existing = _symbols->lookup(name);
+                Reporting::nameError(node->position(), "Redeclaration of identifier \"" + name + "\" first declared at " + existing->declaredAt()->start() + ".");
+                return false;
+            }
+
+            // Add the declaration to the current scope
+            _symbols->addVariable(name, type, formal.second->position());
+
             // Call this to attach the Symbol to the IdentifierNode
             walk(formal.second);
         }

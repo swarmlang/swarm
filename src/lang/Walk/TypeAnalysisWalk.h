@@ -109,10 +109,11 @@ protected:
         }
 
         const Type::Type* typeOfValue = _types->getTypeOf(node->value());
-        if ( !node->typeNode()->type()->isAssignableTo(typeOfValue) ) {
+        if ( !node->typeNode()->value()->isAssignableTo(typeOfValue) ) {
+            
             Reporting::typeError(
                 node->position(),
-                "Attempted to initialize identifier of type " + node->typeNode()->type()->toString() + " with value of type " + typeOfValue->toString() + "."
+                "Attempted to initialize identifier of type " + node->typeNode()->value()->toString() + " with value of type " + typeOfValue->toString() + "."
             );
 
             return false;
@@ -563,7 +564,20 @@ protected:
         return true;
     }
 
-    virtual bool walkFunctionNode(FunctionNode* node) {
+    virtual bool walkOneLineFunctionNode(OneLineFunctionNode* node) {
+        if ( !walk(node->body()) ) return false;
+
+        _types->setTypeOf(node, node->type());
+        return true;
+    }
+
+    virtual bool walkMultiLineFunctionNode(MultiLineFunctionNode* node) {
+        for ( auto stmt : *node->body() ) {
+            if ( !walk(stmt) ) {
+                return false;
+            }
+        }
+
         _types->setTypeOf(node, node->type());
         return true;
     }

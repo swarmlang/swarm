@@ -197,7 +197,12 @@ protected:
 
     virtual void walkUnitNode(UnitNode* node) {}
 
-    virtual void walkFunctionNode(FunctionNode* node) {
+    virtual void walkOneLineFunctionNode(OneLineFunctionNode* node) {
+        // TODO: determine if I need to scrub formals
+        walk(node->body());
+    }
+
+    virtual void walkMultiLineFunctionNode(MultiLineFunctionNode* node) {
         // TODO: determine if I need to scrub formals
         for ( auto stmt : *node->body() ) {
             walk(stmt);

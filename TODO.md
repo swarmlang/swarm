@@ -1,9 +1,7 @@
 - setup docker container for builds
 - fix memory leaks
 - lexing & parsing for functions
-  - return statement
-  - add one-liner functions that dont require the brackets
-  - functions cannot currently return lambda types due to parsing error
+  - return statement (parsing and AST)
 - types as values
 - not dogshit test suite
 - ability to call external bindings from vm
@@ -15,3 +13,4 @@
 - assembly optimization pass
   - `X += -Y` can be optimized in the assembly
 - VM runtime
+- continue and break parsing?

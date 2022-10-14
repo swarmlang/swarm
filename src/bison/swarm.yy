@@ -92,6 +92,7 @@
 %token <transToken>      STRING
 %token <transToken>      NUMBER
 %token <transToken>      BOOL
+%token <transToken>      VOID
 %token <transNumberToken> NUMBERLITERAL
 %token <transStringToken> STRINGLITERAL
 %token <transToken>      ENUMERABLE
@@ -102,6 +103,7 @@
 %token <transToken>      FALSE
 %token <transToken>      CONTINUE
 %token <transToken>      BREAK
+%token <transToken>      RETURN
 %token <transToken>      AND
 %token <transToken>      OR
 %token <transToken>      NOT
@@ -113,12 +115,20 @@
 %token <transToken>      DIVIDE
 %token <transToken>      ADDASSIGN
 %token <transToken>      MULTIPLYASSIGN
+%token <transToken>      SUBTRACTASSIGN
+%token <transToken>      DIVIDEASSIGN
+%token <transToken>      MODULUSASSIGN
+%token <transToken>      POWERASSIGN
+%token <transToken>      CATASSIGN
+%token <transToken>      ANDASSIGN
+%token <transToken>      ORASSIGN
 %token <transToken>      MODULUS
 %token <transToken>      POWER
 %token <transToken>      CAT
 %token <transToken>      SHARED
 %token <transToken>      FN
 %token <transToken>      ARROW
+%token <transToken>      FNDEF
 
 /*    (attribute type)      (nonterminal)    */
 %type <transProgram>        program
@@ -127,6 +137,7 @@
 %type <transID>             id
 %type <transLVal>           lval
 %type <transExpression>     expression
+%type <transExpression>     expressionF
 %type <transExpression>     term
 %type <transAssignExpression> assignment
 %type <transCallExpression> callExpression
@@ -141,11 +152,12 @@
 %left CAT
 %left OR
 %left AND
-%nonassoc EQUAL NOTEQUAL
+%nonassoc EQUAL NOTEQUAL LARROW LARROWEQUALS RARROW RARROWEQUALS
 %left SUBTRACT ADD
 %left MULTIPLY DIVIDE MODULUS
 %left POWER
 %right ARROW
+%precedence FNDEF
 
 %%
 
@@ -268,6 +280,48 @@ assignment :
         $$ = new AssignExpressionNode(pos, $1, r);
     }
 
+    | lval SUBTRACTASSIGN expression {
+        Position* pos = new Position($1->position(), $3->position());
+        auto r = new SubtractNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
+    }
+
+    | lval DIVIDEASSIGN expression {
+        Position* pos = new Position($1->position(), $3->position());
+        auto r = new DivideNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
+    }
+
+    | lval MODULUSASSIGN expression {
+        Position* pos = new Position($1->position(), $3->position());
+        auto r = new ModulusNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
+    }
+
+    | lval POWERASSIGN expression {
+        Position* pos = new Position($1->position(), $3->position());
+        auto r = new PowerNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
+    }
+
+    | lval CATASSIGN expression {
+        Position* pos = new Position($1->position(), $3->position());
+        auto r = new ConcatenateNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
+    }
+
+    | lval ANDASSIGN expression {
+        Position* pos = new Position($1->position(), $3->position());
+        auto r = new AndNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
+    }
+
+    | lval ORASSIGN expression {
+        Position* pos = new Position($1->position(), $3->position());
+        auto r = new OrNode(pos, $1, $3);
+        $$ = new AssignExpressionNode(pos, $1, r);
+    }
+
 
 lval :
     id {
@@ -334,7 +388,7 @@ type :
 
 
 function :
-    LPAREN formals RPAREN COLON type ARROW LBRACE statements RBRACE {
+    LPAREN formals RPAREN COLON type FNDEF LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $9->position());
         Position* typepos = new Position($1->position(), $5->position());
 
@@ -344,23 +398,64 @@ function :
             t = new Type::Lambda1((*i).first->value(), t);
         }
 
-        FunctionNode* fn = new FunctionNode(pos, new TypeLiteral(typepos, t), $2);
+        MultiLineFunctionNode* fn = new MultiLineFunctionNode(pos, new TypeLiteral(typepos, t), $2);
         fn->assumeAndReduceStatements($8->reduceToStatements());
         $$ = fn;
     }
 
-    | LPAREN RPAREN COLON type ARROW LBRACE statements RBRACE {
+    | LPAREN RPAREN COLON type FNDEF LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
 
-        FunctionNode* fn = new FunctionNode(
+        MultiLineFunctionNode* fn = new MultiLineFunctionNode(
             pos, new TypeLiteral($4->position(), new Type::Lambda0($4->value())), new FormalList());
         fn->assumeAndReduceStatements($7->reduceToStatements());
+        $$ = fn;
+    }
+
+    | LPAREN formals RPAREN COLON type FNDEF expressionF {
+        Position* pos = new Position($1->position(), $7->position());
+        Position* typepos = new Position($1->position(), $5->position());
+
+        Type::Type* t = $5->value();
+
+        for ( auto i = $2->rbegin(); i != $2->rend(); ++i ) {
+            t = new Type::Lambda1((*i).first->value(), t);
+        }
+
+        OneLineFunctionNode* fn = new OneLineFunctionNode(pos, new TypeLiteral(typepos, t), $2, $7);
+        $$ = fn;
+    }
+
+    | LPAREN RPAREN COLON type FNDEF expressionF {
+        Position* pos = new Position($1->position(), $6->position());
+
+        OneLineFunctionNode* fn = new OneLineFunctionNode(
+            pos, 
+            new TypeLiteral($4->position(), new Type::Lambda0($4->value())), 
+            new FormalList(),
+            $6);
         $$ = fn;
     }
 
 
 
 expression :
+    LBRACE RBRACE OF type {
+        Position* pos = new Position($1->position(), $4->position());
+        std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
+        $$ = new MapNode(pos, body, $4);
+    }
+
+    | LBRACE mapStatements RBRACE {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new MapNode(pos, $2);
+    }
+
+    | expressionF {
+        $$ = $1;
+    }
+
+expressionF :
     term {
         $$ = $1;
     }
@@ -376,88 +471,77 @@ expression :
         $$ = new EnumerationLiteralExpressionNode(pos, $2);
     }
 
-    | LBRACE RBRACE OF type {
-        Position* pos = new Position($1->position(), $4->position());
-        std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
-        $$ = new MapNode(pos, body, $4);
-    }
-
-    | LBRACE mapStatements RBRACE {
-        Position* pos = new Position($1->position(), $3->position());
-        $$ = new MapNode(pos, $2);
-    }
-
-    | expression EQUAL expression {
+    | expressionF EQUAL expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new EqualsNode(pos, $1, $3);
     }
 
-    | expression NOTEQUAL expression {
+    | expressionF NOTEQUAL expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new NotEqualsNode(pos, $1, $3);
     }
 
-    | expression ADD expression {
+    | expressionF ADD expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AddNode(pos, $1, $3);
     }
 
-    | expression SUBTRACT expression {
+    | expressionF SUBTRACT expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new SubtractNode(pos, $1, $3);
     }
 
-    | expression MULTIPLY expression {
+    | expressionF MULTIPLY expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new MultiplyNode(pos, $1, $3);
     }
 
-    | expression DIVIDE expression {
+    | expressionF DIVIDE expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new DivideNode(pos, $1, $3);
     }
 
-    | expression MODULUS expression {
+    | expressionF MODULUS expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new ModulusNode(pos, $1, $3);
     }
 
-    | expression POWER expression {
+    | expressionF POWER expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new PowerNode(pos, $1, $3);
     }
 
-    | expression CAT expression {
+    | expressionF CAT expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new ConcatenateNode(pos, $1, $3);
     }
 
-    | expression OR expression {
+    | expressionF OR expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new OrNode(pos, $1, $3);
     }
 
-    | expression AND expression {
+    | expressionF AND expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AndNode(pos, $1, $3);
     }
 
-    | term LARROW term {
+    | expressionF LARROW expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::LESS_THAN, $1, $3);
     }
 
-    | term RARROW term {
+    | expressionF RARROW expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::GREATER_THAN, $1, $3);
     }
 
-    | term LARROWEQUALS term {
+    | expressionF LARROWEQUALS expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::LESS_THAN_OR_EQUAL, $1, $3);
     }
 
-    | term RARROWEQUALS term {
+    | expressionF RARROWEQUALS expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::GREATER_THAN_OR_EQUAL, $1, $3);
     }

@@ -69,6 +69,10 @@ break {
 	return makeBareToken(TokenKind::BREAK);
 }
 
+return {
+	return makeBareToken(TokenKind::RETURN);
+}
+
 "{" {
 	return makeBareToken(TokenKind::LBRACE);
 }
@@ -141,6 +145,10 @@ bool {
 	return makeBareToken(TokenKind::BOOL);
 }
 
+void {
+	return makeBareToken(TokenKind::VOID);
+}
+
 [0-9]+([.][0-9]+)? {
 	return makeNumberLiteralToken();
 }
@@ -171,6 +179,10 @@ false {
 
 fn {
 	return makeBareToken(TokenKind::FN);
+}
+
+"=>" {
+	return makeBareToken(TokenKind::FNDEF);
 }
 
 "&&" {
@@ -215,6 +227,34 @@ fn {
 
 "*=" {
 	return makeBareToken(TokenKind::MULTIPLYASSIGN);
+}
+
+"-=" {
+	return makeBareToken(TokenKind::SUBTRACTASSIGN);
+}
+
+"/=" {
+	return makeBareToken(TokenKind::DIVIDEASSIGN);
+}
+
+"%=" {
+	return makeBareToken(TokenKind::MODULUSASSIGN);
+}
+
+"^=" {
+	return makeBareToken(TokenKind::POWERASSIGN);
+}
+
+".=" {
+	return makeBareToken(TokenKind::CATASSIGN);
+}
+
+"&&=" {
+	return makeBareToken(TokenKind::ANDASSIGN);
+}
+
+"||=" {
+	return makeBareToken(TokenKind::ORASSIGN);
 }
 
 "%" {

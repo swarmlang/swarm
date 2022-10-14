@@ -38,6 +38,7 @@ namespace Lang {
             if (kind == Parser::token::STRING) return "STRING";
             if (kind == Parser::token::NUMBER) return "NUMBER";
             if (kind == Parser::token::BOOL) return "BOOL";
+            if (kind == Parser::token::VOID) return "VOID";
             if (kind == Parser::token::NUMBERLITERAL) return "NUMBERLITERAL";
             if (kind == Parser::token::STRINGLITERAL) return "STRINGLITERAL";
             if (kind == Parser::token::MAP) return "MAP";
@@ -46,6 +47,9 @@ namespace Lang {
             if (kind == Parser::token::WHILE) return "WHILE";
             if (kind == Parser::token::TRUE) return "TRUE";
             if (kind == Parser::token::FALSE) return "FALSE";
+            if (kind == Parser::token::CONTINUE) return "CONTINUE";
+            if (kind == Parser::token::BREAK) return "BREAK";
+            if (kind == Parser::token::RETURN) return "RETURN";
             if (kind == Parser::token::AND) return "AND";
             if (kind == Parser::token::OR) return "OR";
             if (kind == Parser::token::NOT) return "NOT";
@@ -57,6 +61,13 @@ namespace Lang {
             if (kind == Parser::token::DIVIDE) return "DIVIDE";
             if (kind == Parser::token::ADDASSIGN) return "ADDASSIGN";
             if (kind == Parser::token::MULTIPLYASSIGN) return "MULTIPLYASSIGN";
+            if (kind == Parser::token::SUBTRACTASSIGN) return "SUBTRACTASSIGN";
+            if (kind == Parser::token::DIVIDEASSIGN) return "DIVIDEASSIGN";
+            if (kind == Parser::token::MODULUSASSIGN) return "MODULUSASSIGN";
+            if (kind == Parser::token::POWERASSIGN) return "POWERASSIGN";
+            if (kind == Parser::token::CATASSIGN) return "CATASSIGN";
+            if (kind == Parser::token::ANDASSIGN) return "ANDASSIGN";
+            if (kind == Parser::token::ORASSIGN) return "ORASSIGN";
             if (kind == Parser::token::MODULUS) return "MODULUS";
             if (kind == Parser::token::POWER) return "POWER";
             if (kind == Parser::token::CAT) return "CAT";
@@ -64,6 +75,7 @@ namespace Lang {
             if (kind == Parser::token::RARROWEQUALS) return "RARROWEQUALS";
             if (kind == Parser::token::FN) return "FN";
             if (kind == Parser::token::ARROW) return "ARROW";
+            if (kind == Parser::token::FNDEF) return "FNDEF";
             
             return "UNKNOWN";
         }
