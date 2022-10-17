@@ -67,6 +67,14 @@ protected:
         }
     }
 
+    virtual void walkIIFExpressionNode(IIFExpressionNode* node) {
+        walk(node->expression());
+
+        for ( auto arg : *node->args() ) {
+            walk(arg);
+        }
+    }
+
     virtual void walkAndNode(AndNode* node) {
         walk(node->left());
         walk(node->right());
@@ -174,6 +182,20 @@ protected:
     virtual void walkWhileStatement(WhileStatement* node) {
         walk(node->condition());
         walkBlockStatementNode(node);
+    }
+
+    virtual void walkContinueNode(ContinueNode* node) {
+        return;
+    }
+
+    virtual void walkBreakNode(BreakNode* node) {
+        return;
+    }
+
+    virtual void walkReturnStatementNode(ReturnStatementNode* node) {
+        if ( node->value() != nullptr) {
+            walk(node->value());
+        }
     }
 
     virtual void walkMapStatementNode(MapStatementNode* node) {

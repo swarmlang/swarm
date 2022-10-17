@@ -74,7 +74,7 @@ protected:
         }
 
         std::string name = node->id()->name();
-        const Type::Type* type = node->typeNode()->type();
+        const Type::Type* type = node->typeNode()->value();
 
         // Make sure the name isn't already declared in this scope
         if ( _symbols->isClashing(name) ) {
@@ -96,6 +96,20 @@ protected:
 
     virtual bool walkCallExpressionNode(CallExpressionNode* node) {
         if ( !walk(node->id()) ) {
+            return false;
+        }
+
+        for ( auto arg : *node->args() ) {
+            if ( !walk(arg) ) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    virtual bool walkIIFExpressionNode(IIFExpressionNode* node) {
+        if ( !walk(node->expression()) ) {
             return false;
         }
 
@@ -216,7 +230,7 @@ protected:
             const Type::Type* type = nullptr;
 
             // Try to look up the generic type of the enumerable
-            const Type::Type* enumType = node->enumerable()->symbol()->type();
+            const Type::Type* enumType = node->enumerable()->type();
             if ( enumType->intrinsic() == Type::Intrinsic::ENUMERABLE ) {
                 auto enumGenericType = (Type::Enumerable*) enumType;
                 type = enumGenericType->values()->copy();
@@ -290,6 +304,22 @@ protected:
 
     virtual bool walkWhileStatement(WhileStatement* node) {
         return walk(node->condition()) && walkBlockStatementNode(node);
+    }
+
+    virtual bool walkContinueNode(ContinueNode* node) {
+        return true;
+    }
+
+    virtual bool walkBreakNode(BreakNode* node) {
+        return true;
+    }
+
+    virtual bool walkReturnStatementNode(ReturnStatementNode* node) {
+        if ( node->value() == nullptr ) {
+            return true;
+        }
+
+        return walk(node->value());
     }
 
     virtual bool walkMapStatementNode(MapStatementNode* node) {

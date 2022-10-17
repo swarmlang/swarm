@@ -75,6 +75,18 @@ protected:
         return map;
     }
 
+    virtual SymbolMap* walkIIFExpressionNode(IIFExpressionNode* node) {
+        SymbolMap* map = walk(node->expression());
+
+        for (auto i : *node->args()) {
+            SymbolMap* m = walk(i);
+            map->insert(m->begin(), m->end());
+            delete m;
+        }
+
+        return map;
+    }
+
     virtual SymbolMap* walkAndNode(AndNode* node) {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
@@ -251,6 +263,22 @@ protected:
         }
 
         return map;
+    }
+
+    virtual SymbolMap* walkContinueNode(ContinueNode* node) {
+        return new SymbolMap();
+    }
+
+    virtual SymbolMap* walkBreakNode(BreakNode* node) {
+        return new SymbolMap();
+    }
+
+    virtual SymbolMap* walkReturnStatementNode(ReturnStatementNode* node) {
+        if ( node->value() != nullptr ) {
+            return walk(node->value());
+        }
+
+        return new SymbolMap();
     }
 
     virtual SymbolMap* walkMapStatementNode(MapStatementNode* node) {

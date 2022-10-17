@@ -149,6 +149,14 @@ void {
 	return makeBareToken(TokenKind::VOID);
 }
 
+type {
+	return makeBareToken(TokenKind::TYPE);
+}
+
+resource {
+	return makeBareToken(TokenKind::RESOURCE);
+}
+
 [0-9]+([.][0-9]+)? {
 	return makeNumberLiteralToken();
 }
@@ -269,7 +277,7 @@ fn {
 	return makeBareToken(TokenKind::CAT);
 }
 
-({LETTER})({LETTER}|{DIGIT})* {
+({LETTER}|_)({LETTER}|{DIGIT}|_)* {
 	return makeIDToken();
 }
 

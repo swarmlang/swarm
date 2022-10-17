@@ -1,0 +1,2 @@
+[1m[31m[Type Error] [0m[1m[l: 39, c: 13] [0mInvalid return type. Expected: :: Primitive<VOID>; Found: VOID
+[0m

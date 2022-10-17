@@ -78,6 +78,15 @@ protected:
         pop_space();
     }
 
+    virtual void walkIIFExpressionNode(IIFExpressionNode* node) {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        for ( auto exp : *node->args() ) {
+            walk(exp);
+        }
+        pop_space();
+    }
+
     virtual void walkAndNode(AndNode* node) {
         _out << _prefix << node->toString() << std::endl;
         push_space();
@@ -232,6 +241,18 @@ protected:
             walk(stmt);
         }
         pop_space();
+    }
+
+    virtual void walkContinueNode(ContinueNode* node) {
+        _out << _prefix << node->toString() << std::endl;
+    }
+
+    virtual void walkBreakNode(BreakNode* node) {
+        _out << _prefix << node->toString() << std::endl;
+    }
+
+    virtual void walkReturnStatementNode(ReturnStatementNode* node) {
+        _out << _prefix << node->toString() << std::endl;
     }
 
     virtual void walkMapStatementNode(MapStatementNode* node) {

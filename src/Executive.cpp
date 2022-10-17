@@ -333,6 +333,5 @@ int Executive::parseFilters() {
 }
 
 int Executive::interpret() {
-    console->error("Not implemented.");
     return 1;
 }

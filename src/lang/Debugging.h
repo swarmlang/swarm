@@ -76,7 +76,10 @@ namespace Lang {
             if (kind == Parser::token::FN) return "FN";
             if (kind == Parser::token::ARROW) return "ARROW";
             if (kind == Parser::token::FNDEF) return "FNDEF";
-            
+            if (kind == Parser::token::OF) return "OF";
+            if (kind == Parser::token::TYPE) return "TYPE";
+            if (kind == Parser::token::RESOURCE) return "RESOURCE";
+
             return "UNKNOWN";
         }
 

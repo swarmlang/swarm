@@ -200,6 +200,24 @@ namespace Walk {
         }
     };
 
+    class BreakNode : public StatementNode {
+    public:
+        BreakNode(Position* pos) : StatementNode(pos) {}
+        virtual ~BreakNode() {}
+
+        std::string toString() const override {
+            return "BreakNode<>";
+        }
+
+        std::string getName() const override {
+            return "BreakNode";
+        }
+
+        virtual BreakNode* copy() const override {
+            return new BreakNode(position()->copy());
+        }
+    };
+
 
     /** AST node representing code that evaluates to a value. */
     class ExpressionNode : public ASTNode {
@@ -299,6 +317,8 @@ namespace Walk {
         virtual SemanticSymbol* lockable() const = 0;
 
         virtual LValNode* copy() const override = 0;
+
+        virtual const Type::Type* type() const = 0;
     };
 
 
@@ -420,6 +440,9 @@ namespace Walk {
         }
 
         std::string toString() const override {
+            if ( _type->shared() ) {
+                return "Type<SHARED "+ _type->toString() + ">";
+            }
             return "Type<" + _type->toString() + ">";
         }
 
@@ -688,9 +711,12 @@ namespace Walk {
 
     class ReturnStatementNode : public StatementNode {
     public:
-        ReturnStatementNode(Position* pos, ExpressionNode* value) : StatementNode(pos) {}
+        ReturnStatementNode(Position* pos, ExpressionNode* value) : StatementNode(pos), _value(value) {}
 
         virtual std::string toString() const override {
+            if (_value == nullptr) {
+                return "ReturnStatementNode<>";
+            }
             return "ReturnStatementNode<lval: " + _value->toString() + ">";
         }
 
@@ -702,7 +728,7 @@ namespace Walk {
             return new ReturnStatementNode(position()->copy(), _value->copy());
         }
 
-        const ExpressionNode* value() const {
+        ExpressionNode* value() const {
             return _value;
         }
     private:
@@ -791,6 +817,48 @@ namespace Walk {
 
     protected:
         IdentifierNode* _id;
+        std::vector<ExpressionNode*>* _args;
+    };
+
+    /** AST node representing a call to a function. */
+    class IIFExpressionNode final : public StatementExpressionNode {
+    public:
+        IIFExpressionNode(Position* pos, ExpressionNode* exp, std::vector<ExpressionNode*>* args) : StatementExpressionNode(pos), _expression(exp), _args(args) {}
+        virtual ~IIFExpressionNode() {}
+
+        virtual std::string getName() const override {
+            return "IIFExpressionNode";
+        }
+
+        virtual std::string toString() const override {
+            return "IIFExpressionNode<func: " + _expression->toString() + ", #args: " + std::to_string(_args->size()) + ">";
+        }
+
+        ExpressionNode* expression() const {
+            return _expression;
+        }
+
+        std::vector<ExpressionNode*>* args() const {
+            return _args;
+        }
+
+        virtual IIFExpressionNode* copy() const override {
+            auto args = new std::vector<ExpressionNode*>;
+            for ( auto arg : *_args ) {
+                args->push_back(arg->copy());
+            }
+
+            return new IIFExpressionNode(position()->copy(), _expression->copy(), args);
+        }
+
+        virtual const Type::Type* type() const override {
+            auto fnType = _expression->type();
+            assert(fnType->intrinsic() == Type::Intrinsic::LAMBDA0 || fnType->intrinsic() == Type::Intrinsic::LAMBDA1);
+            return ((Type::Lambda*) fnType)->returns();
+        }
+
+    protected:
+        ExpressionNode* _expression;
         std::vector<ExpressionNode*>* _args;
     };
 
@@ -1346,7 +1414,7 @@ namespace Walk {
     /** AST node representing an enumeration block. */
     class EnumerationStatement final : public BlockStatementNode {
     public:
-        EnumerationStatement(Position* pos, IdentifierNode* enumerable, IdentifierNode* local, bool shared)
+        EnumerationStatement(Position* pos, LValNode* enumerable, IdentifierNode* local, bool shared)
             : BlockStatementNode(pos), _enumerable(enumerable), _local(local), _shared(shared) {}
 
         virtual ~EnumerationStatement() {}
@@ -1356,10 +1424,10 @@ namespace Walk {
         }
 
         virtual std::string toString() const override {
-            return "EnumerationStatement<e: " + _enumerable->name() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
+            return "EnumerationStatement<e: " + _enumerable->toString() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
         }
 
-        IdentifierNode* enumerable() const {
+        LValNode* enumerable() const {
             return _enumerable;
         }
 
@@ -1373,7 +1441,7 @@ namespace Walk {
             return other;
         }
     protected:
-        IdentifierNode* _enumerable;
+        LValNode* _enumerable;
         IdentifierNode* _local;
         bool _shared;
 
@@ -1580,7 +1648,7 @@ namespace Walk {
 
         virtual const Type::Type* type() const override {
             assert(_disambiguationType != nullptr || !_body->empty());
-            return (_disambiguationType == nullptr) ? _body->at(0)->value()->type() : _disambiguationType->type();
+            return (_disambiguationType == nullptr) ? _body->at(0)->value()->type() : _disambiguationType->value();
         }
 
     protected:

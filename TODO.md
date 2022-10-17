@@ -1,7 +1,5 @@
 - setup docker container for builds
 - fix memory leaks
-- lexing & parsing for functions
-  - return statement (parsing and AST)
 - types as values
 - not dogshit test suite
 - ability to call external bindings from vm
@@ -13,4 +11,4 @@
 - assembly optimization pass
   - `X += -Y` can be optimized in the assembly
 - VM runtime
-- continue and break parsing?
+- maybe remove RESOURCE type from lexing (added so I could test WITH statements)

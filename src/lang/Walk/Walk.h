@@ -25,6 +25,7 @@ namespace Walk {
             if ( node->getName() == "BooleanLiteralExpressionNode" ) return walkBooleanLiteralExpressionNode((BooleanLiteralExpressionNode*) node);
             if ( node->getName() == "VariableDeclarationNode" ) return walkVariableDeclarationNode((VariableDeclarationNode*) node);
             if ( node->getName() == "CallExpressionNode" ) return walkCallExpressionNode((CallExpressionNode*) node);
+            if ( node->getName() == "IIFExpressionNode" ) return walkIIFExpressionNode((IIFExpressionNode*) node);
             if ( node->getName() == "AndNode" ) return walkAndNode((AndNode*) node);
             if ( node->getName() == "OrNode" ) return walkOrNode((OrNode*) node);
             if ( node->getName() == "EqualsNode" ) return walkEqualsNode((EqualsNode*) node);
@@ -43,6 +44,9 @@ namespace Walk {
             if ( node->getName() == "WithStatement" ) return walkWithStatement((WithStatement*) node);
             if ( node->getName() == "IfStatement" ) return walkIfStatement((IfStatement*) node);
             if ( node->getName() == "WhileStatement" ) return walkWhileStatement((WhileStatement*) node);
+            if ( node->getName() == "ContinueNode" ) return walkContinueNode((ContinueNode*) node);
+            if ( node->getName() == "BreakNode" ) return walkBreakNode((BreakNode*) node);
+            if ( node->getName() == "ReturnStatementNode" ) return walkReturnStatementNode((ReturnStatementNode*) node);
             if ( node->getName() == "MapStatementNode" ) return walkMapStatementNode((MapStatementNode*) node);
             if ( node->getName() == "MapNode" ) return walkMapNode((MapNode*) node);
             if ( node->getName() == "StringLiteralExpressionNode" ) return walkStringLiteralExpressionNode((StringLiteralExpressionNode*) node);
@@ -67,6 +71,7 @@ namespace Walk {
         virtual TReturn walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) = 0;
         virtual TReturn walkVariableDeclarationNode(VariableDeclarationNode* node) = 0;
         virtual TReturn walkCallExpressionNode(CallExpressionNode* node) = 0;
+        virtual TReturn walkIIFExpressionNode(IIFExpressionNode* node) = 0;
         virtual TReturn walkAndNode(AndNode* node) = 0;
         virtual TReturn walkOrNode(OrNode* node) = 0;
         virtual TReturn walkEqualsNode(EqualsNode* node) = 0;
@@ -85,6 +90,9 @@ namespace Walk {
         virtual TReturn walkWithStatement(WithStatement* node) = 0;
         virtual TReturn walkIfStatement(IfStatement* node) = 0;
         virtual TReturn walkWhileStatement(WhileStatement* node) = 0;
+        virtual TReturn walkContinueNode(ContinueNode* node) = 0;
+        virtual TReturn walkBreakNode(BreakNode* node) = 0;
+        virtual TReturn walkReturnStatementNode(ReturnStatementNode* node) = 0;
         virtual TReturn walkMapStatementNode(MapStatementNode* node) = 0;
         virtual TReturn walkMapNode(MapNode* node) = 0;
         virtual TReturn walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) = 0;

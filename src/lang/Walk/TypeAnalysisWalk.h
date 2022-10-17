@@ -1,6 +1,7 @@
 #ifndef SWARMC_TYPE_ANALYSIS_WALK_H
 #define SWARMC_TYPE_ANALYSIS_WALK_H
 
+#include <stack>
 #include "Walk.h"
 #include "../TypeTable.h"
 #include "../../Reporting.h"
@@ -11,9 +12,12 @@ namespace Walk {
 
 class TypeAnalysisWalk : public Walk<bool> {
 public:
-    TypeAnalysisWalk() : Walk<bool>(), _types(new TypeTable()) {}
+    TypeAnalysisWalk() : Walk<bool>(), _types(new TypeTable()), 
+        _funcTypes(new std::stack<const Type::Type*>()), _funcArgs(new std::stack<int>()) {}
     ~TypeAnalysisWalk() {
         delete _types;
+        delete _funcTypes;
+        delete _funcArgs;
     }
 protected:
     virtual bool walkProgramNode(ProgramNode* node) {
@@ -158,6 +162,12 @@ protected:
             return false;
         }
 
+        const Type::Type* nodeType = typeOfCallee;
+
+        if ( nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
+            nodeType = ((Type::Lambda*) nodeType)->returns();
+        }
+
         // Make sure the type of each argument matches
         for ( size_t i = 0; i < argTypes.size(); i += 1 ) {
             const Type::Type* expectedType = argTypes.at(i);
@@ -171,9 +181,59 @@ protected:
 
                 return false;
             }
+
+            assert(nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 || nodeType->intrinsic() == Type::Intrinsic::LAMBDA1);
+            nodeType = ((Type::Lambda*) nodeType)->returns();
         }
 
-        _types->setTypeOf(node, typeOfCallee->returns());
+        _types->setTypeOf(node, nodeType);
+        return true;
+    }
+
+    virtual bool walkIIFExpressionNode(IIFExpressionNode* node) {
+        if ( !walk(node->expression()) ) {
+            return false;
+        }
+
+        // Perform type analysis on the arguments
+        for ( auto arg : *node->args() ) {
+            if ( !walk(arg) ) {
+                return false;
+            }
+        }
+
+        if ( !node->expression()->type()->isCallable() ) {
+            return false;
+        }
+
+        const Type::Lambda* typeOfCallee = (Type::Lambda*) node->expression()->type();
+        auto argTypes = typeOfCallee->params();
+
+        const Type::Type* nodeType = typeOfCallee;
+
+        if ( nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
+            nodeType = ((Type::Lambda*) nodeType)->returns();
+        }
+
+        // Make sure the type of each argument matches
+        for ( size_t i = 0; i < argTypes.size(); i += 1 ) {
+            const Type::Type* expectedType = argTypes.at(i);
+            const Type::Type* actualType = _types->getTypeOf(node->args()->at(i));
+
+            if ( !actualType->isAssignableTo(expectedType) ) {
+                Reporting::typeError(
+                    node->position(),
+                    "Invalid argument of type " + actualType->toString() + " in position " + std::to_string(i) + " (expected: " + expectedType->toString() + ")."
+                );
+
+                return false;
+            }
+
+            assert(nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 || nodeType->intrinsic() == Type::Intrinsic::LAMBDA1);
+            nodeType = ((Type::Lambda*) nodeType)->returns();
+        }
+
+        _types->setTypeOf(node, nodeType);
         return true;
     }
 
@@ -336,7 +396,7 @@ protected:
         const Type::Type* innerType = nullptr;
 
         if ( node->_disambiguationType != nullptr ) {
-            innerType = node->_disambiguationType->type();
+            innerType = node->_disambiguationType->value();
             hadFirst = true;
         }
 
@@ -380,7 +440,7 @@ protected:
             return false;
         }
 
-        const Type::Type* enumType = node->enumerable()->symbol()->type();
+        const Type::Type* enumType = node->enumerable()->type();
         if ( enumType->intrinsic() != Type::Intrinsic::ENUMERABLE ) {
             Reporting::typeError(
                 node->position(),
@@ -411,7 +471,7 @@ protected:
         if ( type == nullptr || type->intrinsic() != Type::Intrinsic::RESOURCE ) {
             Reporting::typeError(
                 node->position(),
-                "Expected ValueType::TRESOURCE, found: " + (type == nullptr ? "none" : type->toString())
+                "Expected Intrinsic::RESOURCE, found: " + (type == nullptr ? "none" : type->toString())
             );
 
             return false;
@@ -482,6 +542,62 @@ protected:
         return true;
     }
 
+    virtual bool walkContinueNode(ContinueNode* node) {
+        return true;
+    }
+
+    virtual bool walkBreakNode(BreakNode* node) {
+        return true;
+    }
+
+    virtual bool walkReturnStatementNode(ReturnStatementNode* node) {
+        if ( _funcTypes->empty() ) {
+            Reporting::syntaxError(
+                node->position(),
+                "Found return statement outside of a function"
+            );
+            return false;
+        }
+
+        const Type::Type* funcType = _funcTypes->top();
+
+        if ( funcType->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
+            funcType = ((Type::Lambda*) funcType)->returns();
+        } else {
+            for ( int i = 0; i < _funcArgs->top(); i++ ) {
+                assert(funcType->intrinsic() == Type::Intrinsic::LAMBDA0 || funcType->intrinsic() == Type::Intrinsic::LAMBDA1);
+                funcType = ((Type::Lambda*) funcType)->returns();
+            }
+        }
+        
+        if ( node->value() == nullptr ) {
+            if ( funcType->intrinsic() != Type::Intrinsic::VOID ) {
+                Reporting::typeError(
+                    node->position(),
+                    "Invalid return type. Expected: " + funcType->toString() + "; Found: VOID"
+                );
+                return false;
+            }
+
+            return true;
+        }
+
+        if ( !walk(node->value()) ) {
+            return false;
+        }
+
+        auto retType = node->value()->type();
+
+        if ( !retType->isAssignableTo(funcType) ) {
+            Reporting::typeError(
+                node->position(),
+                "Invalid return type. Expected: " + funcType->toString() + "; Found: " + retType->toString()
+            );
+            return false;
+        }
+        return true;
+    }
+
     virtual bool walkMapStatementNode(MapStatementNode* node) {
         if ( !walk(node->value()) ) {
             return false;
@@ -497,7 +613,7 @@ protected:
         const Type::Type* innerType = nullptr;
 
         if ( node->_disambiguationType != nullptr ) {
-            innerType = node->_disambiguationType->type();
+            innerType = node->_disambiguationType->value();
             hadFirst = true;
         }
 
@@ -565,11 +681,15 @@ protected:
     }
 
     virtual bool walkFunctionNode(FunctionNode* node) {
+        _funcTypes->push(node->type());
+        _funcArgs->push(node->formals()->size());
         for ( auto stmt : *node->body() ) {
             if ( !walk(stmt) ) {
                 return false;
             }
         }
+        _funcTypes->pop();
+        _funcArgs->pop();
 
         _types->setTypeOf(node, node->type());
         return true;
@@ -589,6 +709,8 @@ protected:
     }
 private:
     TypeTable* _types;
+    std::stack<const Type::Type*>* _funcTypes;
+    std::stack<int>* _funcArgs;
 };
 
 }

@@ -1,0 +1,51 @@
+-- this test contains every token
+--*
+multiline * comment *- 
+ends *-*
+here
+*--
+
+enumerable<number> t1 =  [1,2,3];
+shared enumerable<enumerable<string>> t2 = [] of enumerable<string>;
+number t3 = 4;
+shared string t4 = "zoinks";
+map<number->type> t5 = {} of number->type;
+shared map<enumerable<number->string>> t6 = {
+    a: [(arg1: number): string => "hello"],
+    b: [(arg1: number): string => "goodbye", (arg1:number):string=>"zoinks"]
+};
+
+enumerate t6[b] as joe {
+    with tag("mama", "is a nice woman") as _ {
+
+    }
+}
+
+while (t3 > 0 && t3 >= -1 && t4 != "jinkies" && t3 < 5 && t3 <= 4) {
+    if (t3 == 2) {
+        continue;
+    }
+    if (t3 == 1) {
+        fn func = (): void => {
+            return;
+        }
+        shared fn func2 = (): bool => {
+            return !(true || false);
+        }
+
+        break;
+    }
+    t3 += 0.1;
+    t3 -= 1.1;
+    t3 *= 1;
+    t3 /= 1.0;
+    t3 ^= 1;
+    t3 %= 1;
+    t4 .= "s";
+}
+
+t3 = 1 + 2 - 3 / 4 % 1 ^ 5;
+bool t7 = true;
+t7 &&= false;
+t7 ||= true;
+t4 = t4 . t4;

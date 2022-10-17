@@ -1,0 +1,147 @@
+ProgramNode<#body: 21>
+  VariableDeclarationNode<name: tag>
+    Type<Primitive<STRING> :: Primitive<STRING> :: RESOURCE<Primitive<VOID>>>
+    FunctionNode<type: Type<Primitive<STRING> :: Primitive<STRING> :: RESOURCE<Primitive<VOID>>>>
+  VariableDeclarationNode<name: log>
+    Type<Primitive<STRING> :: Primitive<VOID>>
+    FunctionNode<type: Type<Primitive<STRING> :: Primitive<VOID>>>
+  VariableDeclarationNode<name: t1>
+    Type<ENUMERABLE<Primitive<NUMBER>>>
+    EnumerationLiteralExpressionNode<#actuals: 3>
+      NumberLiteralExpressionNode<#value: 1.000000>
+      NumberLiteralExpressionNode<#value: 2.000000>
+      NumberLiteralExpressionNode<#value: 3.000000>
+  VariableDeclarationNode<name: t2>
+    Type<SHARED ENUMERABLE<ENUMERABLE<Primitive<STRING>>>>
+    EnumerationLiteralExpressionNode<#actuals: 0>
+  VariableDeclarationNode<name: t3>
+    Type<Primitive<NUMBER>>
+    NumberLiteralExpressionNode<#value: 4.000000>
+  VariableDeclarationNode<name: t4>
+    Type<SHARED Primitive<STRING>>
+    StringLiteralExpressionNode<#value: 'zoinks'>
+  VariableDeclarationNode<name: t5>
+    Type<MAP<Primitive<NUMBER> :: Primitive<NUMBER>>>
+    MapNode<#body: 0>
+  VariableDeclarationNode<name: t6>
+    Type<SHARED MAP<ENUMERABLE<Primitive<NUMBER> :: Primitive<STRING>>>>
+    MapNode<#body: 2>
+      MapStatementNode<id: a>
+        EnumerationLiteralExpressionNode<#actuals: 1>
+          FunctionNode<type: Type<Primitive<NUMBER> :: Primitive<STRING>>>
+            ReturnStatementNode<lval: StringLiteralExpressionNode<#value: 'hello'>>
+      MapStatementNode<id: b>
+        EnumerationLiteralExpressionNode<#actuals: 2>
+          FunctionNode<type: Type<Primitive<NUMBER> :: Primitive<STRING>>>
+            ReturnStatementNode<lval: StringLiteralExpressionNode<#value: 'goodbye'>>
+          FunctionNode<type: Type<Primitive<NUMBER> :: Primitive<STRING>>>
+            ReturnStatementNode<lval: StringLiteralExpressionNode<#value: 'zoinks'>>
+  EnumerationStatement<e: MapAccessNode<path: IdentifierNode<name: t6> id: b>, as: joe, #body: 1>
+    WithStatement<r: CallExpressionNode<id: tag, #args: 2>, as: _>
+      ExpressionStatementNode<AssignExpressionNode<lval: EnumerableAccessNode<path: IdentifierNode<name: t1>, index: 1>>>
+        AssignExpressionNode<lval: EnumerableAccessNode<path: IdentifierNode<name: t1>, index: 1>>
+          NumberLiteralExpressionNode<#value: 4.000000>
+  EnumerationStatement<e: MapAccessNode<path: IdentifierNode<name: t6> id: b>, as: var, #body: 1>
+    WithStatement<r: CallExpressionNode<id: tag, #args: 2>, as: w>
+      ExpressionStatementNode<CallExpressionNode<id: log, #args: 1>>
+        CallExpressionNode<id: log, #args: 1>
+          StringLiteralExpressionNode<#value: 'string'>
+  WhileStatement<w: while AndNode<> then, #body: 9>
+    IfStatement<f: if EqualsNode<> then, #body: 1>
+      ContinueNode<>
+    IfStatement<f: if EqualsNode<> then, #body: 3>
+      VariableDeclarationNode<name: func>
+        Type<:: Primitive<VOID>>
+        FunctionNode<type: Type<:: Primitive<VOID>>>
+          ReturnStatementNode<>
+      VariableDeclarationNode<name: func2>
+        Type<SHARED :: Primitive<BOOLEAN>>
+        FunctionNode<type: Type<SHARED :: Primitive<BOOLEAN>>>
+          ReturnStatementNode<lval: NotNode<>>
+      BreakNode<>
+    ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t3>>>
+      AssignExpressionNode<lval: IdentifierNode<name: t3>>
+        AddNode<>
+          IdentifierNode<name: t3>
+          NumberLiteralExpressionNode<#value: 0.100000>
+    ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t3>>>
+      AssignExpressionNode<lval: IdentifierNode<name: t3>>
+        SubtractNode<>
+          IdentifierNode<name: t3>
+          NumberLiteralExpressionNode<#value: 1.100000>
+    ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t3>>>
+      AssignExpressionNode<lval: IdentifierNode<name: t3>>
+        MultiplyNode<>
+          IdentifierNode<name: t3>
+          NumberLiteralExpressionNode<#value: 1.000000>
+    ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t3>>>
+      AssignExpressionNode<lval: IdentifierNode<name: t3>>
+        DivideNode<>
+          IdentifierNode<name: t3>
+          NumberLiteralExpressionNode<#value: 1.000000>
+    ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t3>>>
+      AssignExpressionNode<lval: IdentifierNode<name: t3>>
+        PowerNode<>
+          IdentifierNode<name: t3>
+          NumberLiteralExpressionNode<#value: 1.000000>
+    ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t3>>>
+      AssignExpressionNode<lval: IdentifierNode<name: t3>>
+        ModulusNode<>
+          IdentifierNode<name: t3>
+          NumberLiteralExpressionNode<#value: 1.000000>
+    ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t4>>>
+      AssignExpressionNode<lval: IdentifierNode<name: t4>>
+        ConcatenateNode<>
+          IdentifierNode<name: t4>
+          StringLiteralExpressionNode<#value: 's'>
+  ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t3>>>
+    AssignExpressionNode<lval: IdentifierNode<name: t3>>
+      AddNode<>
+        NumberLiteralExpressionNode<#value: 1.000000>
+        ModulusNode<>
+          DivideNode<>
+            SubtractNode<>
+              NumberLiteralExpressionNode<#value: 2.000000>
+              NumberLiteralExpressionNode<#value: 3.000000>
+            NegativeExpressionNode<>
+              NumberLiteralExpressionNode<#value: 4.000000>
+          PowerNode<>
+            NumberLiteralExpressionNode<#value: 1.000000>
+            NumberLiteralExpressionNode<#value: 5.000000>
+  VariableDeclarationNode<name: t7>
+    Type<Primitive<BOOLEAN>>
+    BoolLiteralNode<of: 1>
+  ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t7>>>
+    AssignExpressionNode<lval: IdentifierNode<name: t7>>
+      AndNode<>
+        IdentifierNode<name: t7>
+        BoolLiteralNode<of: 0>
+  ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t7>>>
+    AssignExpressionNode<lval: IdentifierNode<name: t7>>
+      OrNode<>
+        IdentifierNode<name: t7>
+        BoolLiteralNode<of: 1>
+  ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t4>>>
+    AssignExpressionNode<lval: IdentifierNode<name: t4>>
+      ConcatenateNode<>
+        IdentifierNode<name: t4>
+        IdentifierNode<name: t4>
+  VariableDeclarationNode<name: t8>
+    Type<Primitive<NUMBER> :: Primitive<TYPE> :: Primitive<TYPE>>
+    FunctionNode<type: Type<Primitive<NUMBER> :: Primitive<TYPE> :: Primitive<TYPE>>>
+      ReturnStatementNode<lval: Type<Primitive<NUMBER>>>
+  VariableDeclarationNode<name: t9>
+    Type<SHARED :: Primitive<TYPE>>
+    FunctionNode<type: Type<SHARED :: Primitive<TYPE>>>
+      ReturnStatementNode<lval: Type<Primitive<NUMBER>>>
+  VariableDeclarationNode<name: t10>
+    Type<Primitive<TYPE>>
+    CallExpressionNode<id: t8, #args: 2>
+      NumberLiteralExpressionNode<#value: 6.000000>
+      Type<Primitive<TYPE>>
+  ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t10>>>
+    AssignExpressionNode<lval: IdentifierNode<name: t10>>
+      CallExpressionNode<id: t9, #args: 0>
+  ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t8>>>
+    AssignExpressionNode<lval: IdentifierNode<name: t8>>
+      IIFExpressionNode<func: FunctionNode<type: Type<:: Primitive<NUMBER> :: Primitive<TYPE> :: Primitive<TYPE>>>, #args: 0>

@@ -42,7 +42,7 @@ namespace Lang {
             Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
-            yylval->lexeme = new StringLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn), text.substr(1, text.size() - 2));
+            yylval->lexeme = new StringLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, text.substr(1, text.size() - 2));
             colNum += length;
             return tagIn;
         }
@@ -52,7 +52,8 @@ namespace Lang {
             size_t length = static_cast<size_t>(yyleng);
             Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
-            yylval->lexeme = new NumberLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn), std::stod(yytext));
+            std::string text(yytext);
+            yylval->lexeme = new NumberLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, std::stod(yytext));
             colNum += length;
             return tagIn;
         }
@@ -62,7 +63,8 @@ namespace Lang {
             size_t length = static_cast<size_t>(yyleng);
             Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
-            yylval->lexeme = new IDToken(pos, tagIn, Debugging::tokenKindToString(tagIn), yytext);
+            std::string text(yytext);
+            yylval->lexeme = new IDToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, yytext);
             colNum += length;
             return tagIn;
         }
