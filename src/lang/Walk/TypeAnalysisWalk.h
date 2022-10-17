@@ -564,14 +564,7 @@ protected:
         return true;
     }
 
-    virtual bool walkOneLineFunctionNode(OneLineFunctionNode* node) {
-        if ( !walk(node->body()) ) return false;
-
-        _types->setTypeOf(node, node->type());
-        return true;
-    }
-
-    virtual bool walkMultiLineFunctionNode(MultiLineFunctionNode* node) {
+    virtual bool walkFunctionNode(FunctionNode* node) {
         for ( auto stmt : *node->body() ) {
             if ( !walk(stmt) ) {
                 return false;

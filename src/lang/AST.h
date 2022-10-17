@@ -686,13 +686,44 @@ namespace Walk {
         ExpressionNode* _value;
     };
 
-    class FunctionNode : public ExpressionNode {
+    class ReturnStatementNode : public StatementNode {
+    public:
+        ReturnStatementNode(Position* pos, ExpressionNode* value) : StatementNode(pos) {}
+
+        virtual std::string toString() const override {
+            return "ReturnStatementNode<lval: " + _value->toString() + ">";
+        }
+
+        virtual std::string getName() const override {
+            return "ReturnStatementNode";
+        }
+
+        virtual ReturnStatementNode* copy() const override {
+            return new ReturnStatementNode(position()->copy(), _value->copy());
+        }
+
+        const ExpressionNode* value() const {
+            return _value;
+        }
+    private:
+        ExpressionNode* _value;
+    };
+
+    class FunctionNode : public ExpressionNode, public StatementListWrapper {
     public:
         FunctionNode(Position* pos, TypeLiteral* type, FormalList* formals)
             : ExpressionNode(pos), _type(type), _formals(formals) {
         }
 
         virtual ~FunctionNode() {}
+
+        virtual std::string getName() const override {
+            return "FunctionNode";
+        }
+
+        virtual std::string toString() const override {
+            return "FunctionNode<type: " + _type->toString() + ">";
+        }
 
         TypeLiteral* typeNode() const {
             return _type;
@@ -705,66 +736,20 @@ namespace Walk {
         virtual const Type::Type* type() const override {
             return _type->value();
         }
-    protected:
-        TypeLiteral* _type;
-        FormalList* _formals;
-    };
 
-    class OneLineFunctionNode : public FunctionNode {
-    public:
-        OneLineFunctionNode(Position* pos, TypeLiteral* type, FormalList* formals, ExpressionNode* body) 
-            : FunctionNode(pos, type, formals), _body(body) {} 
-
-        virtual std::string getName() const override {
-            return "OneLineFunctionNode";
-        }
-
-        virtual std::string toString() const override {
-            return "OneLineFunctionNode<type: " + _type->toString() + ">";
-        }
-
-        virtual OneLineFunctionNode* copy() const override {
+        virtual FunctionNode* copy() const override {
             auto formals = new FormalList();
             for ( auto f : *_formals ) {
                 formals->push_back(std::pair<TypeLiteral*, IdentifierNode*>(f.first->copy(), f.second->copy()));
             }
 
-            auto fn = new OneLineFunctionNode(position()->copy(), _type->copy(), formals, _body->copy());
-            return fn;
-        }
-
-        ExpressionNode* body() const {
-            return _body;
-        }
-
-    private:
-        ExpressionNode* _body;
-    };
-
-    class MultiLineFunctionNode : public FunctionNode, public StatementListWrapper {
-    public:
-        MultiLineFunctionNode(Position* pos, TypeLiteral* type, FormalList* formals) 
-            : FunctionNode(pos, type, formals) {}
-
-        virtual std::string getName() const override {
-            return "MultiLineFunctionNode";
-        }
-
-        virtual std::string toString() const override {
-            return "MultiLineFunctionNode<type: " + _type->toString() + ">";
-        }
-
-        virtual MultiLineFunctionNode* copy() const override {
-            auto formals = new FormalList();
-            for ( auto f : *_formals ) {
-                formals->push_back(std::pair<TypeLiteral*, IdentifierNode*>(f.first->copy(), f.second->copy()));
-            }
-
-            auto fn = new MultiLineFunctionNode(position()->copy(), _type->copy(), formals);
+            auto fn = new FunctionNode(position()->copy(), _type->copy(), formals);
             fn->_body = copyBody();
             return fn;
         }
-    private:
+    protected:
+        TypeLiteral* _type;
+        FormalList* _formals;
     };
 
     /** AST node representing a call to a function. */
