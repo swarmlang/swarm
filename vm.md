@@ -65,7 +65,7 @@ Shared storage is global across all jobs that have access to a location.
   - `streamclose $lloc` - end the stream at `$lloc`
   - `streamempty $lloc` - check if the stream at `$lloc` is empty
 - Storage operations
-  - `typify $loc` - specify the type of the given location explicitly
+  - `typify $loc $lloc` - specify the type of the given location explicitly
   - `$l:NAME <- $lloc` - assigns the value of `$lloc` to the local storage variable with name `NAME`
   - `$s:NAME <- $lloc` - assigns the value of `$lloc` to the shared storage variable with name `NAME`
   - `lock $s:NAME` - acquires an exclusive lock on the given shared storage variable
@@ -88,7 +88,7 @@ Shared storage is global across all jobs that have access to a location.
   - `mapset $lloc1 $lloc2 $lloc3` - set the key `$lloc2` to the value `$lloc3` in the map at `$lloc1`
   - `mapget $lloc1 $lloc2` - get the value of the key `$lloc2` from the map `$lloc1`
   - `maplength $lloc` - get the number of entries in the map at `$lloc`
-  - `mapkeys $lloc1 $lloc2` - stores an enum of the keys of the map `$lloc1` at `$lloc2`
+  - `mapkeys $lloc` - get an enum of the keys of the map at `$lloc`
 - Enumeration operations
   - `enuminit $lloc1` - create an empty enum of type `$lloc1`
   - `enumappend $lloc1 $lloc2` - append the value at `$lloc2` to the enum at `$lloc1`
