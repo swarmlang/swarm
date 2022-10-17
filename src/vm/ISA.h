@@ -1,0 +1,280 @@
+#ifndef SWARMVM_ISA
+#define SWARMVM_ISA
+
+#include <vector>
+#include "../shared/IStringable.h"
+#include "../lang/Type.h"
+
+/*
+ * This file describes the structure of the SVI IR.
+ * For implementation classes of each instruction, see the headers
+ * located under the `isa/` directory.
+ */
+
+namespace swarmc::ISA {
+
+    class Instruction;
+
+    using Instructions = std::vector<Instruction*>;
+
+    /** Unique identifiers for each instruction. */
+    enum class Tag {
+        BEGINFN,
+        FNPARAM,
+        RETURN0,
+        RETURN1,
+        CURRY,
+        CALL0,
+        CALL1,
+        CALLIF0,
+        CALLIF1,
+        CALLELSE0,
+        CALLELSE1,
+        PUSHCALL0,
+        PUSHCALL1,
+        PUSHCALLIF0,
+        PUSHCALLIF1,
+        PUSHCALLELSE0,
+        PUSHCALLELSE1,
+        OUT,
+        ERR,
+        STREAMINIT,
+        STREAMPUSH,
+        STREAMPOP,
+        STREAMCLOSE,
+        STREAMEMPTY,
+        TYPIFY,
+        ASSIGNVALUE,
+        ASSIGNEVAL,
+        LOCK,
+        UNLOCK,
+        EQUAL,
+        SCOPEOF,
+        TYPEOF,
+        COMPATIBLE,
+        AND,
+        OR,
+        XOR,
+        NAND,
+        NOR,
+        NOT,
+        MAPINIT,
+        MAPSET,
+        MAPGET,
+        MAPLENGTH,
+        MAPKEYS,
+        ENUMINIT,
+        ENUMAPPEND,
+        ENUMPREPEND,
+        ENUMLENGTH,
+        ENUMGET,
+        ENUMSET,
+        ENUMERATE,
+        STRCONCAT,
+        STRLENGTH,
+        STRSLICEFROM,
+        STRSLICEFROMTO,
+        PLUS,
+        MINUS,
+        TIMES,
+        DIVIDE,
+        POWER,
+        MOD,
+        NEG,
+        GT,
+        GTE,
+        LT,
+        LTE,
+        WHILE,
+        WITH,
+    };
+
+    /** Places where values can be stored. */
+    enum class Affinity {
+        LOCAL,
+        SHARED,
+        FUNCTION,
+    };
+
+
+    /** A reference is a construct that resolves to a value at runtime. */
+    class Reference : public IStringable {
+    public:
+        ~Reference() override = default;
+
+        virtual const Type::Type* type() const = 0;
+    };
+
+    /** A variable / A value in storage */
+    class LocationReference : public Reference {
+    public:
+        LocationReference(Affinity affinity, std::string name) : _affinity(affinity), _name(name) {}
+
+        static std::string affinityString(Affinity a) {
+            if ( a == Affinity::FUNCTION ) return "f";
+            if ( a == Affinity::LOCAL ) return "l";
+            if ( a == Affinity::SHARED ) return "s";
+            return "UNKNOWN";
+        }
+
+        std::string toString() const override {
+            return "Location<" + affinityString(_affinity) + ":" + _name + ">";
+        }
+
+        const Type::Type* type() const override {
+            // FIXME: will need to set/determine dynamically?
+            return Type::Primitive::of(Type::Intrinsic::AMBIGUOUS);
+        }
+
+    protected:
+        Affinity _affinity;
+        std::string _name;
+    };
+
+    /** A type literal */
+    class TypeReference : public Reference {
+    public:
+        TypeReference(const Type::Type* type) : _type(type) {}
+
+    protected:
+        const Type::Type* _type;
+    };
+
+    /** Helper class for literal values. */
+    template <typename T>
+    class LiteralReference : public Reference {
+    public:
+        LiteralReference(const T value) : _value(value) {}
+
+        virtual const T value() const {
+            return _value;
+        }
+    protected:
+        const T _value;
+    };
+
+    /** A literal string value */
+    class StringReference : public LiteralReference<std::string> {
+    public:
+        const Type::Type* type() const {
+            return Type::Primitive::of(Type::Intrinsic::STRING);
+        }
+    };
+
+    /** A literal number value */
+    class NumberReference : public LiteralReference<double> {
+    public:
+        NumberReference(double value) : LiteralReference<double>(value) {}
+
+        const Type::Type* type() const {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
+        }
+
+        std::string toString() const override {
+            return "NumberReference<" + std::to_string(_value) + ">";
+        }
+    };
+
+    /** A literal boolean value */
+    class BooleanReference : public LiteralReference<bool> {
+    public:
+        const Type::Type* type() const {
+            return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+        }
+    };
+
+
+    /** Base class for instructions which are executed in the VM */
+    class Instruction : public IStringable {
+    public:
+        Instruction(Tag tag) : _tag(tag) {}
+        ~Instruction() override = default;
+
+        static std::string tagName(Tag tag);
+
+        virtual Tag tag() const {
+            return _tag;
+        }
+
+    protected:
+        Tag _tag;
+    };
+
+    /** Class of instructions which take no parameters */
+    class NullaryInstruction : public Instruction {
+    public:
+        NullaryInstruction(Tag tag) : Instruction(tag) {}
+
+        std::string toString() const override {
+            return tagName(tag()) + "<>";
+        }
+    };
+
+    /** Class of instructions which take a single parameter */
+    template <typename TFirst>
+    class UnaryInstruction : public Instruction {
+    public:
+        UnaryInstruction(Tag tag, TFirst* first) : Instruction(tag), _first(first) {}
+
+        virtual TFirst* first() const {
+            return _first;
+        }
+
+        std::string toString() const override {
+            return tagName(tag()) + "<" + _first->toString() + ">";
+        }
+    protected:
+        TFirst* _first;
+    };
+
+    /** Class of instructions which take two parameters */
+    template <typename TFirst, typename TSecond>
+    class BinaryInstruction : public Instruction {
+    public:
+        BinaryInstruction(Tag tag, TFirst* first, TSecond* second) : Instruction(tag), _first(first), _second(second) {}
+
+        virtual TFirst* first() const {
+            return _first;
+        }
+
+        virtual TSecond* second() const {
+            return _second;
+        }
+
+        std::string toString() const override {
+            return tagName(tag()) + "<" + _first->toString() + ", " + _second->toString() + ">";
+        }
+    protected:
+        TFirst* _first;
+        TSecond* _second;
+    };
+
+    /** Class of instructions which take three parameters */
+    template <typename TFirst, typename TSecond, typename TThird>
+    class TrinaryInstruction : public Instruction {
+    public:
+        TrinaryInstruction(Tag tag, TFirst* first, TSecond* second, TThird* third) : Instruction(tag), _first(first), _second(second), _third(third) {}
+
+        virtual TFirst* first() const {
+            return _first;
+        }
+
+        virtual TSecond* second() const {
+            return _second;
+        }
+
+        virtual TThird* third() const {
+            return _third;
+        }
+
+        std::string toString() const override {
+            return tagName(tag()) + "<" + _first->toString() + ", " + _second->toString() + ", " + _third->toString() + ">";
+        }
+    protected:
+        TFirst* _first;
+        TSecond* _second;
+        TThird* _third;
+    };
+}
+
+#endif

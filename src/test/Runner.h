@@ -7,6 +7,7 @@
 #include "023_enum_node_accesses.h"
 #include "024_shared_variables.h"
 #include "031_symbol_walk.h"
+#include "034_basic_isa.h"
 
 namespace swarmc {
 namespace Test {
@@ -29,6 +30,9 @@ namespace Test {
                 return test.run();
             } else if ( name == "031_symbol_walk" ) {
                 SymbolWalkTest test;
+                return test.run();
+            } else if ( name == "034_basic_isa" ) {
+                BasicISATest test;
                 return test.run();
             }
 
