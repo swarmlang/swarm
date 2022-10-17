@@ -96,19 +96,35 @@ namespace swarmc::ISA {
         FUNCTION,
     };
 
+    enum class ReferenceTag {
+        LOCATION,
+        TYPE,
+        STRING,
+        NUMBER,
+        BOOLEAN,
+    };
+
 
     /** A reference is a construct that resolves to a value at runtime. */
     class Reference : public IStringable {
     public:
+        Reference(ReferenceTag tag) : _tag(tag) {}
         ~Reference() override = default;
 
         virtual const Type::Type* type() const = 0;
+
+        ReferenceTag tag() const {
+            return _tag;
+        }
+
+    protected:
+        ReferenceTag _tag;
     };
 
     /** A variable / A value in storage */
     class LocationReference : public Reference {
     public:
-        LocationReference(Affinity affinity, std::string name) : _affinity(affinity), _name(name) {}
+        LocationReference(Affinity affinity, std::string name) : Reference(ReferenceTag::LOCATION), _affinity(affinity), _name(name) {}
 
         static std::string affinityString(Affinity a) {
             if ( a == Affinity::FUNCTION ) return "f";
@@ -134,7 +150,7 @@ namespace swarmc::ISA {
     /** A type literal */
     class TypeReference : public Reference {
     public:
-        TypeReference(const Type::Type* type) : _type(type) {}
+        TypeReference(const Type::Type* type) : Reference(ReferenceTag::TYPE), _type(type) {}
 
     protected:
         const Type::Type* _type;
@@ -144,7 +160,7 @@ namespace swarmc::ISA {
     template <typename T>
     class LiteralReference : public Reference {
     public:
-        LiteralReference(const T value) : _value(value) {}
+        LiteralReference(ReferenceTag tag, const T value) : Reference(tag), _value(value) {}
 
         virtual const T value() const {
             return _value;
@@ -156,6 +172,8 @@ namespace swarmc::ISA {
     /** A literal string value */
     class StringReference : public LiteralReference<std::string> {
     public:
+        StringReference(std::string value) : LiteralReference<std::string>(ReferenceTag::STRING, value) {}
+
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
@@ -164,7 +182,7 @@ namespace swarmc::ISA {
     /** A literal number value */
     class NumberReference : public LiteralReference<double> {
     public:
-        NumberReference(double value) : LiteralReference<double>(value) {}
+        NumberReference(double value) : LiteralReference<double>(ReferenceTag::NUMBER, value) {}
 
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
@@ -178,6 +196,8 @@ namespace swarmc::ISA {
     /** A literal boolean value */
     class BooleanReference : public LiteralReference<bool> {
     public:
+        BooleanReference(bool value) : LiteralReference<bool>(ReferenceTag::BOOLEAN, value) {}
+
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }

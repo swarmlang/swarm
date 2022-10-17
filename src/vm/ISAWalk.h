@@ -13,6 +13,7 @@ namespace swarmc::ISA {
     class ISAWalk : public IStringable, public IUsesConsole {
     public:
         ISAWalk() : IUsesConsole() {}
+        virtual ~ISAWalk() = default;
 
         virtual std::vector<TReturn> walk(Instructions instructions) {
             std::vector<TReturn> returns;
