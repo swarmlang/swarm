@@ -84,9 +84,22 @@ protected:
         if ( typeLVal->intrinsic() != Type::Intrinsic::ENUMERABLE ) {
             Reporting::typeError(
                 node->position(),
-                "Invalid array access: " + std::to_string(node->index()->value())
+                "Invalid array access: " + node->path()->toString()
             );
             return false;
+        }
+
+        bool indexresult = walk(node->index());
+        if ( !indexresult ) {
+            return false;
+        }
+
+        const Type::Type* typeIndex = _types->getTypeOf(node->index());
+        if ( typeIndex->intrinsic() != Type::Intrinsic::NUMBER ) {
+            Reporting::typeError(
+                node->position(),
+                "Invalid index type: " + node->index()->type()->toString()
+            );
         }
 
         _types->setTypeOf(node, ((Type::Enumerable*) typeLVal)->values());

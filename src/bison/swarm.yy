@@ -386,22 +386,21 @@ lval :
         $$ = $1;
     }
 
-    | lval LBRACKET id RBRACKET {
+    | lval LBRACE id RBRACE {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new MapAccessNode(pos, $1, $3);
         delete $2; delete $4;
     }
 
-    | lval LBRACKET NUMBERLITERAL RBRACKET {
+    | lval LBRACKET expression RBRACKET {
         Position* pos = new Position($1->position(), $4->position());
-        if ($3->value() != (int)$3->value() || $3->value() < 0 || $3->value() > DBL_MAX) {
-            Reporting::parseError(
-                $3->position(),
-                "Invalid Enumerable index: " + std::to_string($3->value()));
-            throw swarmc::Errors::ParseError(1);
-        }
-        auto index = new IntegerLiteralExpressionNode($3->position(), (size_t)$3->value());
-        $$ = new EnumerableAccessNode(pos, $1, index);
+        // if ($3->value() != (int)$3->value() || $3->value() < 0 || $3->value() > DBL_MAX) {
+        //     Reporting::parseError(
+        //         $3->position(),
+        //         "Invalid Enumerable index: " + std::to_string($3->value()));
+        //     throw swarmc::Errors::ParseError(1);
+        // }
+        $$ = new EnumerableAccessNode(pos, $1, $3);
         delete $2; delete $4;
     }
 

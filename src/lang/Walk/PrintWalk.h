@@ -50,6 +50,7 @@ protected:
         _out << _prefix << node->toString() << std::endl;
         push_space();
         walk(node->path());
+        walk(node->index());
         pop_space();
     }
 

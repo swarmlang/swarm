@@ -1834,7 +1834,7 @@ namespace Walk {
     /** Node for accessing data from an array */
     class EnumerableAccessNode final : public LValNode {
     public:
-        EnumerableAccessNode(Position* pos, LValNode* path, IntegerLiteralExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
+        EnumerableAccessNode(Position* pos, LValNode* path, ExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
         virtual ~EnumerableAccessNode() {}
 
         virtual std::string getName() const override {
@@ -1843,7 +1843,7 @@ namespace Walk {
 
         virtual std::string toString() const override {
             std::stringstream s;
-            s << "EnumerableAccessNode<path: " << _path->toString() << ", index: " << _index->value() << ">";
+            s << "EnumerableAccessNode<path: " << _path->toString() << ", index: " << _index->toString() << ">";
             return s.str();
         }
 
@@ -1851,7 +1851,7 @@ namespace Walk {
             return _path;
         }
 
-        IntegerLiteralExpressionNode* index() const {
+        ExpressionNode* index() const {
             return _index;
         }
 
@@ -1872,7 +1872,7 @@ namespace Walk {
         }
     private:
         LValNode* _path;
-        IntegerLiteralExpressionNode* _index;
+        ExpressionNode* _index;
     };
 
 }
