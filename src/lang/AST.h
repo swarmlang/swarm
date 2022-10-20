@@ -1414,8 +1414,8 @@ namespace Walk {
     /** AST node representing an enumeration block. */
     class EnumerationStatement final : public BlockStatementNode {
     public:
-        EnumerationStatement(Position* pos, LValNode* enumerable, IdentifierNode* local, bool shared)
-            : BlockStatementNode(pos), _enumerable(enumerable), _local(local), _shared(shared) {}
+        EnumerationStatement(Position* pos, LValNode* enumerable, IdentifierNode* local, IdentifierNode* index, bool shared)
+            : BlockStatementNode(pos), _enumerable(enumerable), _local(local), _index(index), _shared(shared) {}
 
         virtual ~EnumerationStatement() {}
 
@@ -1435,14 +1435,19 @@ namespace Walk {
             return _local;
         }
 
+        IdentifierNode* index() const {
+            return _index;
+        }
+
         virtual EnumerationStatement* copy() const override {
-            auto other = new EnumerationStatement(position()->copy(), _enumerable->copy(), _local->copy(), _shared);
+            auto other = new EnumerationStatement(position()->copy(), _enumerable->copy(), 
+                _local->copy(), _index->copy(), _shared);
             other->assumeAndReduceStatements(copyBody());
             return other;
         }
     protected:
         LValNode* _enumerable;
-        IdentifierNode* _local;
+        IdentifierNode* _local, * _index;
         bool _shared;
 
         friend class Walk::NameAnalysisWalk;
@@ -1829,7 +1834,7 @@ namespace Walk {
     /** Node for accessing data from an array */
     class EnumerableAccessNode final : public LValNode {
     public:
-        EnumerableAccessNode(Position* pos, LValNode* path, IntegerLiteralExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
+        EnumerableAccessNode(Position* pos, LValNode* path, ExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
         virtual ~EnumerableAccessNode() {}
 
         virtual std::string getName() const override {
@@ -1838,7 +1843,7 @@ namespace Walk {
 
         virtual std::string toString() const override {
             std::stringstream s;
-            s << "EnumerableAccessNode<path: " << _path->toString() << ", index: " << _index->value() << ">";
+            s << "EnumerableAccessNode<path: " << _path->toString() << ", index: " << _index->toString() << ">";
             return s.str();
         }
 
@@ -1846,7 +1851,7 @@ namespace Walk {
             return _path;
         }
 
-        IntegerLiteralExpressionNode* index() const {
+        ExpressionNode* index() const {
             return _index;
         }
 
@@ -1867,7 +1872,7 @@ namespace Walk {
         }
     private:
         LValNode* _path;
-        IntegerLiteralExpressionNode* _index;
+        ExpressionNode* _index;
     };
 
 }

@@ -42,7 +42,13 @@ protected:
     }
 
     virtual SymbolMap* walkEnumerableAccessNode(EnumerableAccessNode* node) {
-        return walk(node->path());
+        SymbolMap* leftMap = walk(node->path());
+        SymbolMap* rightMap = walk(node->index());
+
+        leftMap->insert(rightMap->begin(), rightMap->end());
+        delete rightMap;
+
+        return leftMap;
     }
 
     virtual SymbolMap* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {

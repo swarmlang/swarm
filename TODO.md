@@ -4,11 +4,16 @@
 - not dogshit test suite
 - ability to call external bindings from vm
 - module system / import system
-- abstract redis
-- design the virtual ISA
+- write queue / store interfaces
+    - Redis implementation
+    - pthread implementation
+    - ...others?
 - pass to convert AST to ISA
 - ast optimization pass
 - assembly optimization pass
   - `X += -Y` can be optimized in the assembly
 - VM runtime
-- maybe remove RESOURCE type from lexing (added so I could test WITH statements)
+- remove RESOURCE type from lexing (added so I could test WITH statements)
+- Serialize ISA to SVI code
+- Parse ISA from SVI code
+- change map access back to [] (check for lval type in name analysis to avoid parsing conflict)

@@ -30,6 +30,18 @@ enumerate t6[b] as shared var {
     }
 }
 
+enumerate t6[b] as v, i {   
+}
+
+enumerate t6[b] as shared v, i {
+}
+
+enumerate t6[b] as v, shared i {
+}
+
+enumerate t6[b] as shared v, shared i {
+}
+
 while (t3 > 0 && t3 >= -1 && t4 != "jinkies" && t3 < 5 && t3 <= 4) {
     if (t3 == 2) {
         continue;

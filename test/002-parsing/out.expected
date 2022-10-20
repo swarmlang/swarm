@@ -1,4 +1,4 @@
-ProgramNode<#body: 21>
+ProgramNode<#body: 25>
   VariableDeclarationNode<name: tag>
     Type<Primitive<STRING> :: Primitive<STRING> :: RESOURCE<Primitive<VOID>>>
     FunctionNode<type: Type<Primitive<STRING> :: Primitive<STRING> :: RESOURCE<Primitive<VOID>>>>
@@ -46,6 +46,10 @@ ProgramNode<#body: 21>
       ExpressionStatementNode<CallExpressionNode<id: log, #args: 1>>
         CallExpressionNode<id: log, #args: 1>
           StringLiteralExpressionNode<#value: 'string'>
+  EnumerationStatement<e: MapAccessNode<path: IdentifierNode<name: t6> id: b>, as: v, #body: 0>
+  EnumerationStatement<e: MapAccessNode<path: IdentifierNode<name: t6> id: b>, as: v, #body: 0>
+  EnumerationStatement<e: MapAccessNode<path: IdentifierNode<name: t6> id: b>, as: v, #body: 0>
+  EnumerationStatement<e: MapAccessNode<path: IdentifierNode<name: t6> id: b>, as: v, #body: 0>
   WhileStatement<w: while AndNode<> then, #body: 9>
     IfStatement<f: if EqualsNode<> then, #body: 1>
       ContinueNode<>
@@ -145,3 +149,5 @@ ProgramNode<#body: 21>
   ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t8>>>
     AssignExpressionNode<lval: IdentifierNode<name: t8>>
       IIFExpressionNode<func: FunctionNode<type: Type<:: Primitive<NUMBER> :: Primitive<TYPE> :: Primitive<TYPE>>>, #args: 0>
+[32m[SUCCESS] [0mParsed input program.
+[0m

@@ -38,7 +38,8 @@ protected:
     }
 
     virtual void walkEnumerableAccessNode(EnumerableAccessNode* node) {
-        return walk(node->path());
+        walk(node->path());
+        walk(node->index());
     }
 
     // virtual void walkPrimitiveTypeNode(PrimitiveTypeNode* node) {}

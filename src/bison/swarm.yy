@@ -20,6 +20,15 @@
 	namespace swarmc::Lang {
 		class Scanner;
 	}
+    class Shared {
+    public:
+        Shared(swarmc::Lang::Position* pos, bool shared): _pos(pos), _shared(shared) {}
+        swarmc::Lang::Position* position() const { return _pos; }
+        bool shared() const { return _shared; }
+    private:
+        swarmc::Lang::Position* _pos;
+        bool _shared;
+    };
 
 # ifndef YY_NULLPTR
 #  if defined __cplusplus && 201103L <= __cplusplus
@@ -66,6 +75,7 @@
     std::vector<std::pair<TypeLiteral*, IdentifierNode*>>*  transFormals;
     std::vector<swarmc::Lang::MapStatementNode*>* transMapStatements;
     std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
+    Shared*                             transShared;
 }
 
 %define parse.assert
@@ -152,6 +162,7 @@
 %type <transDeclaration>    declaration
 %type <transMapStatement>   mapStatement
 %type <transMapStatements>  mapStatements
+%type <transShared>         shared
 
 %precedence FNDEF
 %left CAT
@@ -186,33 +197,28 @@ statements :
 
 
 statement :
-    ENUMERATE lval AS id LBRACE statements RBRACE {
-        Position* pos = new Position($1->position(), $7->position());
-        EnumerationStatement* e = new EnumerationStatement(pos, $2, $4, false);
-        e->assumeAndReduceStatements($6->reduceToStatements());
-        $$ = e;
-        delete $1; delete $3; delete $5; delete $7;
-    }
-
-    | ENUMERATE lval AS SHARED id LBRACE statements RBRACE {
+    ENUMERATE lval AS shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
-        EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, true);
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, nullptr, $4);
         e->assumeAndReduceStatements($7->reduceToStatements());
         $$ = e;
         delete $1; delete $3; delete $4; delete $6; delete $8;
     }
 
-    | WITH term AS id LBRACE statements RBRACE {
-        Position* pos = new Position($1->position(), $7->position());
-        WithStatement* w = new WithStatement(pos, $2, $4, false);
-        w->assumeAndReduceStatements($6->reduceToStatements());
-        $$ = w;
-        delete $1; delete $3; delete $5; delete $7;
+    | ENUMERATE lval AS shared id COMMA shared id LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $11->position());
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $8, $4->shared());
+        auto t = new TypeLiteral($8->position(), Type::Primitive::of(Type::Intrinsic::NUMBER));
+        t->setShared($7->shared());
+        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy(), $8->position()));
+        e->assumeAndReduceStatements($10->reduceToStatements());
+        $$ = e;
+        delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11; delete t;
     }
 
-    | WITH term AS SHARED id LBRACE statements RBRACE {
+    | WITH term AS shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
-        WithStatement* w = new WithStatement(pos, $2, $5, true);
+        WithStatement* w = new WithStatement(pos, $2, $5, $4->shared());
         w->assumeAndReduceStatements($7->reduceToStatements());
         $$ = w;
         delete $1; delete $3; delete $4; delete $6; delete $8;
@@ -275,33 +281,30 @@ statement :
         delete $1; delete $2;
     }
 
-
-
-declaration :
-    type id ASSIGN expression {
-        Position* pos = new Position($1->position(), $4->position());
-        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $1, $2, $4);
-        $$ = var;
-        delete $3;
+shared :
+    SHARED {
+        $$ = new Shared($1->position(), true);
+        delete $1;
     }
 
-    | SHARED type id ASSIGN expression {
-        Position* pos = new Position($1->position(), $5->position());
-        $2->setShared(true);
+    | %empty {
+        $$ = new Shared(nullptr, false);
+    }
+
+declaration :
+    shared type id ASSIGN expression {
+        auto p1 = $1->position() == nullptr ? $2->position() : $1->position();
+        Position* pos = new Position(p1, $5->position());
+        $2->setShared($1->shared());
         VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5);
         $$ = var;
         delete $1; delete $4;
     }
 
-    | FN id ASSIGN function {
-        Position* pos = new Position($1->position(), $4->position());
-        $$ = new VariableDeclarationNode(pos, $4->typeNode(), $2, $4);
-        delete $1; delete $3;
-    }
-
-    | SHARED FN id ASSIGN function {
-        Position* pos = new Position($1->position(), $5->position());
-        $5->typeNode()->setShared(true);
+    | shared FN id ASSIGN function {
+        auto p1 = $1->position() == nullptr ? $2->position() : $1->position();
+        Position* pos = new Position(p1, $5->position());
+        $5->typeNode()->setShared($1->shared());
         $$ = new VariableDeclarationNode(pos, $5->typeNode(), $3, $5);
         delete $1; delete $2; delete $4;
     }
@@ -383,22 +386,21 @@ lval :
         $$ = $1;
     }
 
-    | lval LBRACKET id RBRACKET {
+    | lval LBRACE id RBRACE {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new MapAccessNode(pos, $1, $3);
         delete $2; delete $4;
     }
 
-    | lval LBRACKET NUMBERLITERAL RBRACKET {
+    | lval LBRACKET expression RBRACKET {
         Position* pos = new Position($1->position(), $4->position());
-        if ($3->value() != (int)$3->value() || $3->value() < 0 || $3->value() > DBL_MAX) {
-            Reporting::parseError(
-                $3->position(),
-                "Invalid Enumerable index: " + std::to_string($3->value()));
-            throw swarmc::Errors::ParseError(1);
-        }
-        auto index = new IntegerLiteralExpressionNode($3->position(), (size_t)$3->value());
-        $$ = new EnumerableAccessNode(pos, $1, index);
+        // if ($3->value() != (int)$3->value() || $3->value() < 0 || $3->value() > DBL_MAX) {
+        //     Reporting::parseError(
+        //         $3->position(),
+        //         "Invalid Enumerable index: " + std::to_string($3->value()));
+        //     throw swarmc::Errors::ParseError(1);
+        // }
+        $$ = new EnumerableAccessNode(pos, $1, $3);
         delete $2; delete $4;
     }
 

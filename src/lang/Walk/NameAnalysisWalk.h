@@ -57,7 +57,7 @@ protected:
     }
 
     virtual bool walkEnumerableAccessNode(EnumerableAccessNode* node) {
-        return walk(node->path());
+        return walk(node->path()) && walk(node->index());
     }
 
     virtual bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
