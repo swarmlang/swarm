@@ -15,5 +15,5 @@
 - VM runtime
 - remove RESOURCE type from lexing (added so I could test WITH statements)
 - Serialize ISA to SVI code
-- Parse ISA from SVI code
 - change map access back to [] (check for lval type in name analysis to avoid parsing conflict)
+- some form of exception/error system (e.g. exceptions, error values, ...?)
