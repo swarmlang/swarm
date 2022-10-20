@@ -29,6 +29,7 @@ protected:
     bool flagRunTest = false;
     bool flagClearQueue = false;
     bool flagWorkQueue = false;
+    bool flagSVI = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;

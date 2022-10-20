@@ -14,9 +14,9 @@ namespace swarmc::ISA {
             returnType) {}
     };
 
-    class FunctionParam : public UnaryInstruction<Reference> {
+    class FunctionParam : public BinaryInstruction<Reference, LocationReference> {
     public:
-        FunctionParam(Reference* type) : UnaryInstruction<Reference>(Tag::FNPARAM, type) {}
+        FunctionParam(Reference* type, LocationReference* loc) : BinaryInstruction<Reference, LocationReference>(Tag::FNPARAM, type, loc) {}
     };
 
     class Return1 : public UnaryInstruction<Reference> {

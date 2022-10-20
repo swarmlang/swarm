@@ -94,6 +94,7 @@ namespace swarmc::ISA {
         LOCAL,
         SHARED,
         FUNCTION,
+        PRIMITIVE,
     };
 
     enum class ReferenceTag {
@@ -130,7 +131,16 @@ namespace swarmc::ISA {
             if ( a == Affinity::FUNCTION ) return "f";
             if ( a == Affinity::LOCAL ) return "l";
             if ( a == Affinity::SHARED ) return "s";
+            if ( a == Affinity::PRIMITIVE ) return "p";
             return "UNKNOWN";
+        }
+
+        Affinity affinity() const {
+            return _affinity;
+        }
+
+        std::string name() const {
+            return _name;
         }
 
         std::string toString() const override {
@@ -151,6 +161,14 @@ namespace swarmc::ISA {
     class TypeReference : public Reference {
     public:
         TypeReference(const Type::Type* type) : Reference(ReferenceTag::TYPE), _type(type) {}
+
+        std::string toString() const override {
+            return "TypeReference<" + _type->toString() + ">";
+        }
+
+        const Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::TYPE);
+        }
 
     protected:
         const Type::Type* _type;
@@ -173,6 +191,10 @@ namespace swarmc::ISA {
     class StringReference : public LiteralReference<std::string> {
     public:
         StringReference(std::string value) : LiteralReference<std::string>(ReferenceTag::STRING, value) {}
+
+        std::string toString() const override {
+            return "StringReference<" + _value + ">";
+        }
 
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::STRING);
@@ -197,6 +219,11 @@ namespace swarmc::ISA {
     class BooleanReference : public LiteralReference<bool> {
     public:
         BooleanReference(bool value) : LiteralReference<bool>(ReferenceTag::BOOLEAN, value) {}
+
+        std::string toString() const override {
+            std::string value = _value ? "true" : "false";
+            return "BooleanReference<" + value + ">";
+        }
 
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);

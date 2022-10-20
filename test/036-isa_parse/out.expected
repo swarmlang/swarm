@@ -1,0 +1,120 @@
+ASSIGNVALUE<Location<l:n_jobs>, NumberReference<5.000000>>
+ASSIGNVALUE<Location<l:res>, NumberReference<0.000500>>
+ASSIGNEVAL<Location<l:community>, CALL1<Location<f:RANGE>, NumberReference<1.000000>>>
+ASSIGNEVAL<Location<l:community>, CALL1<Location<l:community>, Location<l:n_jobs>>>
+ASSIGNEVAL<Location<l:community>, CALL1<Location<l:community>, NumberReference<1.000000>>>
+BEGINFN<Location<f:IF_R_LT_03>, TypeReference<Primitive<VOID>>>
+SCOPEOF<Location<l:restmp>>
+ASSIGNEVAL<Location<l:restmp>, NEG<Location<l:res>>>
+ASSIGNEVAL<Location<l:member>, PLUS<Location<l:member>, Location<l:restmp>>>
+RETURN0<>
+BEGINFN<Location<f:IF_R_LT_06>, TypeReference<Primitive<VOID>>>
+ASSIGNEVAL<Location<l:member>, PLUS<Location<l:member>, Location<l:res>>>
+RETURN0<>
+BEGINFN<Location<f:IF_MEMBER_LT_0>, TypeReference<Primitive<VOID>>>
+ASSIGNVALUE<Location<l:member>, NumberReference<0.000000>>
+RETURN0<>
+BEGINFN<Location<f:IF_MEMBER_GT_1>, TypeReference<Primitive<VOID>>>
+ASSIGNVALUE<Location<l:member>, NumberReference<1.000000>>
+RETURN0<>
+BEGINFN<Location<f:IF_MYCOND>, TypeReference<Primitive<VOID>>>
+SCOPEOF<Location<l:r_lt_03>>
+SCOPEOF<Location<l:r_lt_06>>
+SCOPEOF<Location<l:member_lt_0>>
+SCOPEOF<Location<l:member_gt_1>>
+ASSIGNEVAL<Location<l:r>, CALL0<Location<f:RANDOM>>>
+ASSIGNEVAL<Location<l:r_lt_03>, LT<Location<l:r>, NumberReference<0.300000>>>
+CALLIF0<Location<l:r_lt_03>, Location<f:IF_R_LT_03>>
+ASSIGNEVAL<Location<l:r_lt_06>, LT<Location<l:r>, NumberReference<0.600000>>>
+CALLIF0<Location<l:r_lt_06>, Location<f:IF_R_LT_06>>
+ASSIGNEVAL<Location<l:member_lt_0>, LT<Location<l:member>, NumberReference<0.000000>>>
+CALLIF0<Location<l:member_lt_0>, Location<f:IF_MEMBER_LT_0>>
+ASSIGNEVAL<Location<l:member_gt_1>, GT<Location<l:member>, NumberReference<1.000000>>>
+CALLIF0<Location<l:member_gt_1>, Location<f:IF_MEMBER_GT_1>>
+RETURN0<>
+BEGINFN<Location<f:IF_NOT_MYCOND>, TypeReference<Primitive<VOID>>>
+ASSIGNEVAL<Location<l:member>, CALL0<Location<f:RANDOM>>>
+RETURN0<>
+BEGINFN<Location<f:WHILE_I_LT_10000>, TypeReference<Primitive<VOID>>>
+SCOPEOF<Location<l:r>>
+SCOPEOF<Location<l:my_cond>>
+ASSIGNEVAL<Location<l:r>, CALL0<Location<f:RANDOM>>>
+SCOPEOF<Location<l:my_cond_tmp1>>
+ASSIGNEVAL<Location<l:my_cond_tmp1>, TIMES<NumberReference<2.000000>, Location<l:member>>>
+SCOPEOF<Location<l:my_cond_tmp2>>
+ASSIGNEVAL<Location<l:my_cond_tmp2>, TIMES<NumberReference<20.000000>, Location<l:member>>>
+ASSIGNEVAL<Location<l:my_cond_tmp2>, CALL1<Location<f:SIN>, Location<l:my_cond_tmp2>>>
+ASSIGNEVAL<Location<l:my_cond_tmp2>, TIMES<NumberReference<2.000000>, Location<l:my_cond_tmp2>>>
+SCOPEOF<Location<l:my_cond_tmp3>>
+ASSIGNEVAL<Location<l:my_cond_tmp3>, TIMES<NumberReference<4.000000>, Location<l:member>>>
+ASSIGNEVAL<Location<l:my_cond_tmp3>, TIMES<Location<l:my_cond_tmp3>, Location<l:member>>>
+SCOPEOF<Location<l:my_cond_tmp4>>
+ASSIGNEVAL<Location<l:my_cond_tmp4>, PLUS<NumberReference<4.000000>, Location<l:my_cond_tmp1>>>
+ASSIGNEVAL<Location<l:my_cond_tmp4>, PLUS<Location<l:my_cond_tmp4>, Location<l:my_cond_tmp2>>>
+ASSIGNEVAL<Location<l:my_cond_tmp4>, MINUS<Location<l:my_cond_tmp4>, Location<l:my_cond_tmp3>>>
+SCOPEOF<Location<l:my_cond_tmp5>>
+ASSIGNEVAL<Location<l:my_cond_tmp5>, DIVIDE<Location<l:my_cond_tmp4>, Location<l:running>>>
+ASSIGNEVAL<Location<l:my_cond>, LT<Location<l:r>, Location<l:my_cond_tmp5>>>
+CALLIF0<Location<f:my_cond>, Location<f:IF_MYCOND>>
+CALLELSE0<Location<f:my_cond>, Location<f:IF_NOT_MYCOND>>
+ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
+ASSIGNEVAL<Location<l:i_lt_10000>, LT<Location<l:i>, NumberReference<10000.000000>>>
+RETURN0<>
+BEGINFN<Location<f:ENUM_POP_AS_MEMBER>, TypeReference<Primitive<VOID>>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:member>>
+ASSIGNEVAL<Location<l:member>, CALL0<Location<f:RANDOM>>>
+SCOPEOF<Location<l:running>>
+SCOPEOF<Location<l:i>>
+SCOPEOF<Location<l:i_lt_10000>>
+SCOPEOF<Location<l:running_tmp1>>
+ASSIGNEVAL<Location<l:running_tmp1>, TIMES<NumberReference<20.000000>, Location<l:member>>>
+ASSIGNEVAL<Location<l:running_tmp1>, CALL1<Location<f:SIN>, Location<l:running_tmp1>>>
+ASSIGNEVAL<Location<l:running_tmp1>, TIMES<NumberReference<2.000000>, Location<l:running_tmp1>>>
+SCOPEOF<Location<l:running_tmp2>>
+ASSIGNEVAL<Location<l:running_tmp2>, TIMES<NumberReference<2.000000>, Location<l:member>>>
+SCOPEOF<Location<l:running_tmp3>>
+ASSIGNEVAL<Location<l:running_tmp3>, TIMES<NumberReference<4.000000>, Location<l:member>>>
+ASSIGNEVAL<Location<l:running_tmp3>, TIMES<Location<l:running_tmp3>, Location<l:member>>>
+ASSIGNEVAL<Location<l:running>, PLUS<NumberReference<4.000000>, Location<l:running_tmp1>>>
+ASSIGNEVAL<Location<l:running>, PLUS<Location<l:running>, Location<l:running_tmp2>>>
+ASSIGNEVAL<Location<l:running>, MINUS<Location<l:running>, Location<l:running_tmp3>>>
+ASSIGNVALUE<Location<l:i>, NumberReference<0.000000>>
+ASSIGNEVAL<Location<l:i_lt_10000>, LT<Location<l:i>, NumberReference<10000.000000>>>
+WHILE<Location<l:i_lt_10000>, Location<f:WHILE_I_LT_10000>>
+SCOPEOF<Location<l:local_max>>
+SCOPEOF<Location<l:local_max_tmp1>>
+ASSIGNEVAL<Location<l:local_max_tmp1>, TIMES<NumberReference<20.000000>, Location<l:member>>>
+ASSIGNEVAL<Location<l:local_max_tmp1>, CALL1<Location<f:SIN>, Location<l:local_max_tmp1>>>
+ASSIGNEVAL<Location<l:local_max_tmp1>, TIMES<NumberReference<2.000000>, Location<l:local_max_tmp1>>>
+SCOPEOF<Location<l:local_max_tmp2>>
+ASSIGNEVAL<Location<l:local_max_tmp2>, TIMES<NumberReference<2.000000>, Location<l:member>>>
+SCOPEOF<Location<l:local_max_tmp3>>
+ASSIGNEVAL<Location<l:local_max_tmp3>, TIMES<NumberReference<4.000000>, Location<l:member>>>
+ASSIGNEVAL<Location<l:local_max_tmp3>, TIMES<Location<l:local_max_tmp3>, Location<l:member>>>
+ASSIGNEVAL<Location<l:local_max>, PLUS<NumberReference<4.000000>, Location<l:local_max_tmp2>>>
+ASSIGNEVAL<Location<l:local_max>, PLUS<Location<l:local_max>, Location<l:local_max_tmp1>>>
+ASSIGNEVAL<Location<l:local_max>, MINUS<Location<l:local_max>, Location<l:local_max_tmp3>>>
+SCOPEOF<Location<l:local_max_string>>
+ASSIGNEVAL<Location<l:local_max_string>, CALL1<Location<f:NUMBER_TO_STRING>, Location<l:local_max>>>
+SCOPEOF<Location<l:message>>
+ASSIGNEVAL<Location<l:message>, STRCONCAT<StringReference<Local Max: >, Location<l:local_max_string>>>
+STREAMPUSH<Location<s:STDOUT>, Location<l:message>>
+RETURN0<>
+BEGINFN<Location<f:ENUM_COMMUNITY_AS_POPULATIONS>, TypeReference<Primitive<VOID>>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:populations>>
+SCOPEOF<Location<l:pop>>
+ASSIGNEVAL<Location<l:tpop>, CALL1<Location<p:ENUM>, TypeReference<Primitive<NUMBER>>>>
+ASSIGNEVAL<Location<l:pop>, ENUMINIT<Location<l:tpop>>>
+ENUMAPPEND<NumberReference<0.000000>, Location<l:pop>>
+ENUMAPPEND<NumberReference<0.000000>, Location<l:pop>>
+ENUMAPPEND<NumberReference<0.000000>, Location<l:pop>>
+ENUMAPPEND<NumberReference<0.000000>, Location<l:pop>>
+ENUMAPPEND<NumberReference<0.000000>, Location<l:pop>>
+ENUMERATE<TypeReference<Primitive<NUMBER>>, Location<l:pop>, Location<f:ENUM_POP_AS_MEMBER>>
+RETURN0<>
+BEGINFN<Location<f:MAIN>, TypeReference<Primitive<VOID>>>
+ENUMERATE<TypeReference<Primitive<NUMBER>>, Location<l:community>, Location<f:ENUM_COMMUNITY_AS_POPULATIONS>>
+RETURN0<>
+CALL0<Location<f:MAIN>>
+[32m[SUCCESS] [0mParsed input program.
+[0m

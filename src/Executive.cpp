@@ -9,6 +9,7 @@
 #include "pipeline/Pipeline.h"
 #include "errors/ParseError.h"
 #include "test/Runner.h"
+#include "vm/Pipeline.h"
 
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
@@ -149,6 +150,8 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             outputResultTo = name;
         } else if ( arg == "--dbg-use-d-guid" ) {
             util::USE_DETERMINISTIC_UUIDS = true;
+        } else if ( arg == "--svi" ) {
+            flagSVI = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -218,6 +221,10 @@ void Executive::printUsage() {
         ->line("Run the C++-based test with the given name.")
         ->line();
 
+    console->bold()->print("  --svi  :  ", true)
+        ->line("Read the input file as SVI code.")
+        ->line();
+
     console->debug();
         console->bold()->print("  --dbg-output-tokens-to <OUTFILE>  :  ", true)
             ->line("Lex the input and output the tokens to the specified file.")
@@ -253,7 +260,6 @@ void Executive::printUsage() {
 }
 
 int Executive::debugOutputTokens() {
-    swarmc::Pipeline pipeline(_input);
     std::ostream* stream = nullptr;
 
     if ( flagOutputTokensTo == "--" ) {
@@ -267,15 +273,20 @@ int Executive::debugOutputTokens() {
         }
     }
 
-    pipeline.targetTokenRepresentation(*stream);
+    if ( flagSVI ) {
+        swarmc::VM::Pipeline pipeline(_input);
+        pipeline.targetTokenRepresentation(*stream);
+    } else {
+        swarmc::Pipeline pipeline(_input);
+        pipeline.targetTokenRepresentation(*stream);
+    }
+
     if ( stream != &std::cout ) delete stream;
     return 0;
 }
 
 int Executive::debugOutputParse() {
-    swarmc::Pipeline pipeline(_input);
-    std::ostream* stream = nullptr;
-
+    std::ostream* stream;
     if ( flagOutputParseTo == "--" ) {
         stream = &std::cout;
     } else {
@@ -287,10 +298,21 @@ int Executive::debugOutputParse() {
         }
     }
 
-    try {
-        pipeline.targetASTRepresentation(*stream);
-    } catch (swarmc::Errors::ParseError& e) {
-        return e.exitCode;
+    if ( flagSVI ) {
+        try {
+            swarmc::VM::Pipeline pipeline(_input);
+            pipeline.targetISARepresentation(*stream);
+        } catch (swarmc::Errors::SwarmError& e) {
+            console->error(e.what());
+            return 1;
+        }
+    } else {
+        try {
+            swarmc::Pipeline pipeline(_input);
+            pipeline.targetASTRepresentation(*stream);
+        } catch (swarmc::Errors::ParseError& e) {
+            return e.exitCode;
+        }
     }
 
     console->success("Parsed input program.");

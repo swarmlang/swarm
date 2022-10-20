@@ -1,0 +1,9 @@
+$l:greeting <- "Hello, \"escaped,\" "
+$l:name <- "World"
+
+$l:msg <- strconcat $l:greeting $l:name
+$l:msg <- strconcat $l:msg "!
+
+-- From Swarm"
+
+out $l:msg

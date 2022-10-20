@@ -12,6 +12,7 @@
 #include "../lang/Walk/PrintWalk.h"
 #include "../lang/Walk/NameAnalysisWalk.h"
 #include "../lang/Walk/TypeAnalysisWalk.h"
+#include "../vm/ISAParser.h"
 
 namespace swarmc {
 

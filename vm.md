@@ -48,7 +48,7 @@ Shared storage is global across all jobs that have access to a location.
     - Equivalent to `streampush $s:STDERR $lloc`
 - Function operations
   - `beginfn f:NAME $lloc` - starts a function body with return type `$lloc`
-  - `fnparam $lloc` - a parameter to the function of type `$lloc`
+  - `fnparam $lloc $loc` - a parameter to the function of type `$lloc` which will be stored at `$loc`
   - `return $lloc` - ends the function call, returning the value `$lloc`
   - `curry f:NAME $lloc` - bundle a parameter with a function w/o calling it (e.g `curry ((a, b) => a + b) 1  => ((b) => (1, b) => 1+b)`)
   - `call f:NAME` - call `f:NAME`
