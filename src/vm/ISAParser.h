@@ -520,6 +520,34 @@ namespace swarmc::ISA {
                     parseLocationReference(instructionLeader, tokens, startAt+i+1)
                 ));
                 i += 2;
+            } else if ( instructionLeader == "pushexhandler" ) {
+                if ( countOperands(tokens, startAt+i) < 2 ) {
+                    is.push_back(new ISA::PushExceptionHandler1(
+                        parseLocationReference(instructionLeader, tokens, startAt+i)
+                    ));
+                    i += 1;
+                } else {
+                    is.push_back(new ISA::PushExceptionHandler2(
+                        parseLocationReference(instructionLeader, tokens, startAt+i),
+                        parseLocationReference(instructionLeader, tokens, startAt+i+1)
+                    ));
+                    i += 2;
+                }
+            } else if ( instructionLeader == "popexhandler" ) {
+                is.push_back(new ISA::PopExceptionHandler(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "raise" ) {
+                is.push_back(new ISA::Raise(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "resume" ) {
+                is.push_back(new ISA::Resume(
+                    parseLocationReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
             } else {
                 throw Errors::SwarmError("Malformed instruction: `" + instructionLeader + "` (unknown instruction tag)");
             }

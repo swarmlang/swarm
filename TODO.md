@@ -17,3 +17,4 @@
 - Serialize ISA to SVI code
 - change map access back to [] (check for lval type in name analysis to avoid parsing conflict)
 - some form of exception/error system (e.g. exceptions, error values, ...?)
+- FUTURE: separate fetch/execute/writeback threads for runtime

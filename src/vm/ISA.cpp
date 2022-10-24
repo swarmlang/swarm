@@ -71,6 +71,11 @@ namespace swarmc::ISA {
         if ( tag == Tag::LTE ) return "LTE";
         if ( tag == Tag::WHILE ) return "WHILE";
         if ( tag == Tag::WITH ) return "WITH";
+        if ( tag == Tag::PUSHEXHANDLER1 ) return "PUSHEXHANDLER1";
+        if ( tag == Tag::PUSHEXHANDLER2 ) return "PUSHEXHANDLER2";
+        if ( tag == Tag::POPEXHANDLER ) return "POPEXHANDLER";
+        if ( tag == Tag::RAISE ) return "RAISE";
+        if ( tag == Tag::RESUME ) return "RESUME";
         return "UNKNOWN";
     }
 

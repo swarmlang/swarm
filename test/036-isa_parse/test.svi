@@ -153,8 +153,28 @@ beginfn f:ENUM_COMMUNITY_AS_POPULATIONS p:VOID
 	enumerate p:NUMBER $l:pop f:ENUM_POP_AS_MEMBER
 return
 
+beginfn f:SKETCHY p:VOID
+	raise 1
+return
+
+beginfn f:MAIN_AFTER_SKETCHY p:VOID
+	out "Done!"
+return
+
+beginfn f:MAIN_EH p:VOID
+	fnparam p:NUMBER $l:EXCODE
+	out "Caught exception!"
+	resume f:MAIN_AFTER_SKETCHY
+return
+
 beginfn f:MAIN p:VOID
 	enumerate p:NUMBER $l:community $f:ENUM_COMMUNITY_AS_POPULATIONS
+
+	$l:MAIN_EH <- pushexhandler f:MAIN_EH
+	call f:SKETCHY
+	popexhandler $l:MAIN_EH
+
+	call f:MAIN_AFTER_SKETCHY
 return
 
 call f:MAIN

@@ -88,6 +88,11 @@ namespace swarmc::ISA {
             if ( inst->tag() == Tag::STRSLICEFROMTO ) return walkStringSliceFromTo((StringSliceFromTo*) inst);
             if ( inst->tag() == Tag::TYPEOF ) return walkTypeOf((TypeOf*) inst);
             if ( inst->tag() == Tag::COMPATIBLE ) return walkIsCompatible((IsCompatible*) inst);
+            if ( inst->tag() == Tag::PUSHEXHANDLER1 ) return walkPushExceptionHandler1((PushExceptionHandler1*) inst);
+            if ( inst->tag() == Tag::PUSHEXHANDLER2 ) return walkPushExceptionHandler2((PushExceptionHandler2*) inst);
+            if ( inst->tag() == Tag::POPEXHANDLER ) return walkPopExceptionHandler((PopExceptionHandler*) inst);
+            if ( inst->tag() == Tag::RAISE ) return walkRaise((Raise*) inst);
+            if ( inst->tag() == Tag::RESUME ) return walkResume((Resume*) inst);
 
             throw Errors::SwarmError("Invalid instruction tag: " + inst->toString());
         }
@@ -161,6 +166,11 @@ namespace swarmc::ISA {
         virtual TReturn walkStringSliceFromTo(StringSliceFromTo*) = 0;
         virtual TReturn walkTypeOf(TypeOf*) = 0;
         virtual TReturn walkIsCompatible(IsCompatible*) = 0;
+        virtual TReturn walkPushExceptionHandler1(PushExceptionHandler1*) = 0;
+        virtual TReturn walkPushExceptionHandler2(PushExceptionHandler2*) = 0;
+        virtual TReturn walkPopExceptionHandler(PopExceptionHandler*) = 0;
+        virtual TReturn walkRaise(Raise*) = 0;
+        virtual TReturn walkResume(Resume*) = 0;
     };
 
 }

@@ -1,0 +1,18 @@
+
+error DemoError {
+	RandomError
+}
+
+fn maybeRaise = (): number => {
+	if ( random() < 0.5 ) {
+		raise DemoError.RandomError;
+	}
+
+	return 3.14;
+}
+
+maybeRaise() catch (e: DemoError) {
+	log("Got an error: " + errorToString(e));
+}
+
+log("Done!");

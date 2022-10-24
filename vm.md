@@ -121,6 +121,17 @@ Shared storage is global across all jobs that have access to a location.
 - Resource operations
   - `with $lloc1 $lloc2` - execute the function at `$lloc2` in the resource `$lloc1`
     - `$lloc2` must take as a parameter the yield type of the resource `$lloc1`
+- Exceptions
+  - Exceptions are identified using unique integers. When an exception is raised, the first handler which accepts the
+    exception's code on the handler stack is called.
+  - The exception handler is responsible for calling into the correct point where execution should be resumed.
+  - `pushexhandler $lloc` - register the function `$lloc` as the handler for all exceptions raised in the current context
+    - Returns a `p:NUMBER` with the ID of the exception handler
+  - `pushexhandler $lloc1 $lloc2` - register the function `$lloc1` as the handler for all exceptions with the code `$lloc2` in the current context
+    - `$lloc2` can be either a static number or a function of type `p:NUMBER -> p:BOOLEAN`
+  - `popexhandler $lloc` - pop the exception handler with the ID `$lloc`
+  - `raise $lloc` - raise an exception with the code `$lloc`
+  - `resume $lloc` - call the function `$lloc` from the scope where the exception handler was registered
 
 ### Grammar
 
@@ -143,6 +154,7 @@ OPERATION ::= out | err | beginfn | fnparam | return | curry
               | plus | minus | times | divide | power | mod | neg
               | gt | gte | lt | lte
               | while | with
+              | pushexhandler | popexhandler | raise | resume
 OPER ::= OPERATION LLOCS
 RVAL ::= OPER | LLOC
 ASSIGN ::= LOCATION <- RVAL

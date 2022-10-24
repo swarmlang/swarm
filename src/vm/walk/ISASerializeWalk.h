@@ -287,6 +287,26 @@ namespace swarmc::ISA {
         std::string walkIsCompatible(IsCompatible* ic) override {
             return "compatible " + _rsw.walk(ic->first()) + " " + _rsw.walk(ic->second());
         }
+
+        std::string walkPushExceptionHandler1(PushExceptionHandler1* peh) override {
+            return "pushexhandler " + _rsw.walk(peh->first());
+        }
+
+        std::string walkPushExceptionHandler2(PushExceptionHandler2* peh) override {
+            return "pushexhandler " + _rsw.walk(peh->first()) + " " + _rsw.walk(peh->second());
+        }
+
+        std::string walkPopExceptionHandler(PopExceptionHandler* peh) override {
+            return "popexhandler " + _rsw.walk(peh->first());
+        }
+
+        std::string walkRaise(Raise* peh) override {
+            return "raise " + _rsw.walk(peh->first());
+        }
+
+        std::string walkResume(Resume* peh) override {
+            return "resume " + _rsw.walk(peh->first());
+        }
     };
 
 }

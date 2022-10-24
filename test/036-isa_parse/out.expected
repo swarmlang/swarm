@@ -112,8 +112,23 @@ ENUMAPPEND<NumberReference<0.000000>, Location<l:pop>>
 ENUMAPPEND<NumberReference<0.000000>, Location<l:pop>>
 ENUMERATE<TypeReference<Primitive<NUMBER>>, Location<l:pop>, Location<f:ENUM_POP_AS_MEMBER>>
 RETURN0<>
+BEGINFN<Location<f:SKETCHY>, TypeReference<Primitive<VOID>>>
+RAISE<NumberReference<1.000000>>
+RETURN0<>
+BEGINFN<Location<f:MAIN_AFTER_SKETCHY>, TypeReference<Primitive<VOID>>>
+STREAMPUSH<Location<s:STDOUT>, StringReference<Done!>>
+RETURN0<>
+BEGINFN<Location<f:MAIN_EH>, TypeReference<Primitive<VOID>>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:EXCODE>>
+STREAMPUSH<Location<s:STDOUT>, StringReference<Caught exception!>>
+RESUME<Location<f:MAIN_AFTER_SKETCHY>>
+RETURN0<>
 BEGINFN<Location<f:MAIN>, TypeReference<Primitive<VOID>>>
 ENUMERATE<TypeReference<Primitive<NUMBER>>, Location<l:community>, Location<f:ENUM_COMMUNITY_AS_POPULATIONS>>
+ASSIGNEVAL<Location<l:MAIN_EH>, PUSHEXHANDLER1<Location<f:MAIN_EH>>>
+CALL0<Location<f:SKETCHY>>
+POPEXHANDLER<Location<l:MAIN_EH>>
+CALL0<Location<f:MAIN_AFTER_SKETCHY>>
 RETURN0<>
 CALL0<Location<f:MAIN>>
 [32m[SUCCESS] [0mParsed input program.

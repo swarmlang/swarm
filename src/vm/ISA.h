@@ -87,6 +87,11 @@ namespace swarmc::ISA {
         LTE,
         WHILE,
         WITH,
+        PUSHEXHANDLER1,
+        PUSHEXHANDLER2,
+        POPEXHANDLER,
+        RAISE,
+        RESUME,
     };
 
     /** Places where values can be stored. */
