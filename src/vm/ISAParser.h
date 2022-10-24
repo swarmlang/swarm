@@ -26,9 +26,16 @@ namespace swarmc::ISA {
 
             bool hasEscape = false;
             bool hasString = false;
+            bool hasComment = false;
+            bool hasCommentLeader = false;
 
             for ( size_t i = 0; i < inputString.length(); i += 1 ) {
                 auto c = inputString.at(i);
+
+                // Ignore tokens w/in comments
+                if ( hasComment && c != '\n' ) {
+                    continue;
+                }
 
                 // If we have an escaped character, always include it in the token.
                 if ( hasEscape ) {
@@ -48,11 +55,31 @@ namespace swarmc::ISA {
                     continue;
                 }
 
+                // If we get an unescaped -, it may be the start of a comment
+                if ( !hasString && !hasCommentLeader && !hasComment && c == '-' ) {
+                    hasCommentLeader = true;
+                    continue;
+                }
+
+                // If we get a second unescaped -, begin a comment
+                if ( !hasString && hasCommentLeader && !hasComment && c == '-' ) {
+                    hasComment = true;
+                    continue;
+                }
+
+                // If we get something that is not a - after a comment leader,
+                if ( !hasString && hasCommentLeader && !hasComment && c != '-' ) {
+                    hasCommentLeader = false;
+                    token += '-';  // Account for the first - we skipped.
+                }
+
                 // Non-string/escaped spaces terminate tokens
                 if ( !hasString && (c == ' ' || c == '\t' || c == '\n') ) {
                     if ( !token.empty() ) tokens.push_back(token);
                     token = "";
                     hasEscape = false;
+                    hasCommentLeader = false;
+                    hasComment = false;
                     continue;
                 }
 

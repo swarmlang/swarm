@@ -1,0 +1,4 @@
+-- leading comment
+out "Hello, there..."
+-- this is a comment
+out "World!"
