@@ -148,6 +148,10 @@ namespace swarmc::ISA {
             return _name;
         }
 
+        std::string fqName() const {
+            return affinityString(_affinity) + ":" + _name;
+        }
+
         std::string toString() const override {
             return "Location<" + affinityString(_affinity) + ":" + _name + ">";
         }

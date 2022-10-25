@@ -93,6 +93,12 @@ namespace swarmc::ISA {
             if ( inst->tag() == Tag::POPEXHANDLER ) return walkPopExceptionHandler((PopExceptionHandler*) inst);
             if ( inst->tag() == Tag::RAISE ) return walkRaise((Raise*) inst);
             if ( inst->tag() == Tag::RESUME ) return walkResume((Resume*) inst);
+            if ( inst->tag() == Tag::AND ) return walkAnd((And*) inst);
+            if ( inst->tag() == Tag::OR ) return walkOr((Or*) inst);
+            if ( inst->tag() == Tag::XOR ) return walkXor((Xor*) inst);
+            if ( inst->tag() == Tag::NAND ) return walkNand((Nand*) inst);
+            if ( inst->tag() == Tag::NOR ) return walkNor((Nor*) inst);
+            if ( inst->tag() == Tag::NOT ) return walkNot((Not*) inst);
 
             throw Errors::SwarmError("Invalid instruction tag: " + inst->toString());
         }

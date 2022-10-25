@@ -19,3 +19,4 @@
 - some form of exception/error system (e.g. exceptions, error values, ...?)
 - FUTURE: separate fetch/execute/writeback threads for runtime
 - Support Position annotations in SVI for better error messages from the VM
+- Garbage collection / reference counting
