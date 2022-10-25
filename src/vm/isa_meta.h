@@ -15,6 +15,4 @@
 #include "isa/isa_strings.h"
 #include "isa/isa_types.h"
 
-#include "isa_helpers.h"
-
 #endif //SWARMVM_ISA_META

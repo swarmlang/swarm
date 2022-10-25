@@ -6,8 +6,7 @@
 #include "../vm/isa_meta.h"
 #include "../vm/walk/ISASerializeWalk.h"
 
-namespace swarmc {
-namespace Test {
+namespace swarmc::Test {
 
     class ISASerializationTest : public Test {
     public:
@@ -16,16 +15,19 @@ namespace Test {
         bool run() override {
             ISA::Instructions is = {
                 new ISA::AssignValue(
-                    ISA::local("a"),
-                    ISA::number(2)
+                    new ISA::LocationReference(ISA::Affinity::LOCAL, "a"),
+                    new ISA::NumberReference(2)
                 ),
                 new ISA::AssignValue(
-                    ISA::local("b"),
-                    ISA::number(3)
+                    new ISA::LocationReference(ISA::Affinity::LOCAL, "b"),
+                    new ISA::NumberReference(3)
                 ),
                 new ISA::AssignEval(
-                    ISA::local("isEq"),
-                    ISA::isEqual(ISA::local("a"), ISA::local("b"))
+                    new ISA::LocationReference(ISA::Affinity::LOCAL, "isEq"),
+                    new ISA::IsEqual(
+                        new ISA::LocationReference(ISA::Affinity::LOCAL, "a"),
+                        new ISA::LocationReference(ISA::Affinity::LOCAL, "b")
+                        )
                 )
             };
 
@@ -36,7 +38,6 @@ namespace Test {
         }
     };
 
-}
 }
 
 #endif
