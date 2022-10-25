@@ -21,6 +21,10 @@ namespace swarmc::ISA {
             return "FIXME:TYPE";  // FIXME
         }
 
+        std::string walkFunctionReference(swarmc::ISA::FunctionReference *) override {
+            return "FIXME:FUNCTION";  // FIXME
+        }
+
         std::string walkStringReference(StringReference* ref) override {
             std::string escaped = string_replace(string_replace(ref->value(), "\"", "\\\""), "\n", "\\\n");
             return "\"" + escaped + "\"";

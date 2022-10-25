@@ -4,6 +4,7 @@
 #include <vector>
 #include "../shared/IStringable.h"
 #include "../lang/Type.h"
+#include "runtime/runtime_functions.h"
 
 /*
  * This file describes the structure of the SVI IR.
@@ -108,6 +109,7 @@ namespace swarmc::ISA {
         STRING,
         NUMBER,
         BOOLEAN,
+        FUNCTION,
     };
 
 
@@ -180,6 +182,41 @@ namespace swarmc::ISA {
         Affinity _affinity;
         std::string _name;
         const Type::Type* _type = nullptr;
+    };
+
+    /** A function literal. */
+    class FunctionReference : public Reference {
+    public:
+        explicit FunctionReference(Runtime::IFunction* fn) : Reference(ReferenceTag::FUNCTION), _fn(fn) {}
+
+        std::string toString() const override {
+            return "FunctionReference<" + _fn->toString() + ">";
+        }
+
+        const Type::Type* type() const override {
+            auto params = _fn->paramTypes();
+            auto returnType = _fn->returnType();
+            if ( params.empty() ) {
+                return new Type::Lambda0(returnType);
+            }
+
+            Type::Lambda1* t = nullptr;
+            for ( auto it = params.rbegin(); it < params.rend(); ++it ) {
+                if ( t == nullptr ) {
+                    t = new Type::Lambda1(*it, returnType);
+                } else {
+                    t = new Type::Lambda1(*it, t);
+                }
+            }
+            return t;
+        }
+
+        Runtime::IFunction* fn() const {
+            return _fn;
+        }
+
+    protected:
+        Runtime::IFunction* _fn;
     };
 
     /** A type literal */

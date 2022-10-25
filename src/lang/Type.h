@@ -247,7 +247,7 @@ namespace Type {
 
     class Lambda : public Type {
     public:
-        explicit Lambda(Type* returns): _returns(returns) {}
+        explicit Lambda(const Type* returns): _returns(returns) {}
 
         const Type* returns() const {
             return _returns;
@@ -258,12 +258,12 @@ namespace Type {
         }
 
     protected:
-        Type* _returns;
+        const Type* _returns;
     };
 
     class Lambda0 : public Lambda {
     public:
-        explicit Lambda0(Type* returns) : Lambda(returns) {}
+        explicit Lambda0(const Type* returns) : Lambda(returns) {}
 
         Intrinsic intrinsic() const override {
             return Intrinsic::LAMBDA0;
@@ -288,7 +288,7 @@ namespace Type {
 
     class Lambda1 : public Lambda {
     public:
-        explicit Lambda1(Type* param, Type* returns) : Lambda(returns), _param(param) {}
+        explicit Lambda1(const Type* param, const Type* returns) : Lambda(returns), _param(param) {}
 
         Intrinsic intrinsic() const override {
             return Intrinsic::LAMBDA1;
@@ -328,7 +328,7 @@ namespace Type {
         }
 
     protected:
-        Type* _param;
+        const Type* _param;
     };
 }
 }
