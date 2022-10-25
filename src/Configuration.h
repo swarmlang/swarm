@@ -16,6 +16,7 @@ public:
     static int QUEUE_SLEEP_uS;
     static int DEBUG_QUEUE_SLEEP_uS;
     static int LOCK_SLEEP_uS;
+    static int LOCK_MAX_RETRIES;
     static int WAITER_SLEEP_uS;
 
     static size_t ENUMERATION_UNROLLING_LIMIT;

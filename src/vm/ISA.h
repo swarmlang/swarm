@@ -157,13 +157,29 @@ namespace swarmc::ISA {
         }
 
         const Type::Type* type() const override {
-            // FIXME: will need to set/determine dynamically?
-            return Type::Primitive::of(Type::Intrinsic::AMBIGUOUS);
+            if ( _type == nullptr )
+                return Type::Primitive::of(Type::Intrinsic::AMBIGUOUS);
+
+            return _type;
+        }
+
+        void setType(const Type::Type* t) {
+            _type = t;
+        }
+
+        virtual bool is(const LocationReference* other) const {
+            return (
+                other->affinity() == _affinity
+                && other->name() == _name
+                && other->type()->isAssignableTo(type())
+                && type()->isAssignableTo(other->type())
+            );
         }
 
     protected:
         Affinity _affinity;
         std::string _name;
+        const Type::Type* _type = nullptr;
     };
 
     /** A type literal */
@@ -177,6 +193,10 @@ namespace swarmc::ISA {
 
         const Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::TYPE);
+        }
+
+        const Type::Type* value() const {
+            return _type;
         }
 
     protected:

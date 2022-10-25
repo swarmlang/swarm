@@ -26,6 +26,20 @@ namespace swarmc::Runtime {
         return (BooleanReference*) ref;
     }
 
+    TypeReference* ExecuteWalk::ensureType(const Reference* ref) {
+        ensureType(ref, Type::Primitive::of(Type::Intrinsic::TYPE));
+        // FIXME: eventually, this should probably generate a runtime exception
+        assert(ref->tag() == ReferenceTag::TYPE);
+        return (TypeReference*) ref;
+    }
+
+    StringReference* ExecuteWalk::ensureString(const Reference* ref) {
+        ensureType(ref, Type::Primitive::of(Type::Intrinsic::STRING));
+        // FIXME: eventually, this should probably generate a runtime exception
+        assert(ref->tag() == ReferenceTag::STRING);
+        return (StringReference*) ref;
+    }
+
     Reference* ExecuteWalk::walkPlus(Plus* i) {
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
@@ -130,4 +144,132 @@ namespace swarmc::Runtime {
 
     // TODO: walkWhile
     // TODO: walkWith
+    // TODO: walkEnum*
+
+    Reference* ExecuteWalk::walkBeginFunction(BeginFunction* i) {
+        // Function definitions are read statically when the SVI is loaded into
+        // the virtual machine. Calls jump to the instruction _after_ a beginfn.
+        // So, we should never encounter this.
+        console->warn("Detected virtual execution across boundary of function body: " + i->toString());
+        return nullptr;
+    }
+
+    // TODO: walkFunctionParam
+    // TODO: walkReturn1
+    // TODO: walkReturn0
+    // TODO: walkCurry
+    // TODO: walkCall*
+    // TODO: walkPushCall*
+    // TODO: walkMap*
+
+    Reference* ExecuteWalk::walkTypify(Typify* i) {
+        auto loc = i->first();
+        auto type = ensureType(i->second());
+        _vm->typify(loc, type->value());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkAssignValue(AssignValue* i) {
+        auto loc = i->first();
+        auto value = i->second();
+
+        if ( loc->type()->isAmbiguous() ) {
+            loc->setType(value->type());
+        }
+
+        // FIXME: eventually, this needs to generate a runtime type error
+        assert(value->type()->isAssignableTo(loc->type()));
+
+        _vm->store(loc, value);
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkAssignEval(AssignEval* i) {
+        auto loc = i->first();
+        auto eval = i->second();
+
+        auto value = walkOne(eval);
+        if ( value == nullptr ) {
+            // FIXME: eventually, this should probably generate a runtime error
+            throw Errors::SwarmError("Attempted to assign result of an instruction which does not yield a value: " + eval->toString());
+        }
+
+        if ( loc->type()->isAmbiguous() ) {
+            loc->setType(value->type());
+        }
+
+        // FIXME: eventually, this needs to generate a runtime type error
+        assert(value->type()->isAssignableTo(loc->type()));
+
+        _vm->store(loc, value);
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkLock(Lock* i) {
+        _vm->lock(i->first());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkUnlock(Unlock* i) {
+        _vm->unlock(i->first());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkScopeOf(ScopeOf* i) {
+        _vm->shadow(i->first());
+        return nullptr;
+    }
+
+    // TODO: walkStream*
+    // TODO: walkOut
+    // TODO: walkErr
+
+    Reference* ExecuteWalk::walkStringConcat(StringConcat* i) {
+        auto lhs = ensureString(_vm->resolve(i->first()));
+        auto rhs = ensureString(_vm->resolve(i->second()));
+        return new StringReference(lhs->value() + rhs->value());
+    }
+
+    Reference* ExecuteWalk::walkStringLength(StringLength* i) {
+        auto opd = ensureString(_vm->resolve(i->first()));
+        return new NumberReference(opd->value().length());
+    }
+
+    Reference* ExecuteWalk::walkStringSliceFrom(StringSliceFrom* i) {
+        // FIXME: handle negative indices
+
+        auto str = ensureString(_vm->resolve(i->first()));
+        auto from = ensureNumber(_vm->resolve(i->second()));
+        return new StringReference(str->value().substr(from->value()));
+    }
+
+    Reference* ExecuteWalk::walkStringSliceFromTo(StringSliceFromTo* i) {
+        // FIXME: handle negative indices
+
+        auto str = ensureString(_vm->resolve(i->first()));
+        auto from = ensureNumber(_vm->resolve(i->second()));
+        auto to = ensureNumber(_vm->resolve(i->third()));
+        return new StringReference(str->value().substr(from->value(), to->value()));
+    }
+
+    Reference* ExecuteWalk::walkTypeOf(TypeOf* i) {
+        // FIXME: handle ambiguous type narrowing?
+
+        auto opd = _vm->resolve(i->first());
+        return new TypeReference(opd->type());
+    }
+
+    Reference* ExecuteWalk::walkIsCompatible(IsCompatible* i) {
+        // FIXME: handle ambiguous type narrowing?
+
+        auto lhs = _vm->resolve(i->first());
+        auto rhs = _vm->resolve(i->second());
+        return new BooleanReference(rhs->type()->isAssignableTo(lhs->type()));
+    }
+
+    // TODO: walkPushExceptionHandler1
+    // TODO: walkPushExceptionHandler2
+    // TODO: walkPopExceptionHandler
+    // TODO: walkRaise
+    // TODO: walkResume
 }

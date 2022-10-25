@@ -198,7 +198,7 @@ namespace Walk {
         /** Leave the current scope. */
         void leave() {
             if ( _scopes->empty() ) {
-                throw new std::runtime_error("Attempted to pop non-existent scope.");
+                throw std::runtime_error("Attempted to pop non-existent scope.");
             }
 
             delete _scopes->front();

@@ -21,3 +21,4 @@
 - FUTURE: separate fetch/execute/writeback threads for runtime
 - Support Position annotations in SVI for better error messages from the VM
 - Garbage collection / reference counting
+- More generic logging class that can centralize logs from workers?

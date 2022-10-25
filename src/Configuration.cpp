@@ -13,6 +13,7 @@ int Configuration::REDIS_PORT = 6379;
 int Configuration::QUEUE_SLEEP_uS = 1000;
 int Configuration::DEBUG_QUEUE_SLEEP_uS = 1000000;
 int Configuration::LOCK_SLEEP_uS = 1000;
+int Configuration::LOCK_MAX_RETRIES = 1000000;
 int Configuration::WAITER_SLEEP_uS = 1000;
 
 size_t Configuration::ENUMERATION_UNROLLING_LIMIT = 200;

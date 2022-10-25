@@ -66,6 +66,10 @@ namespace Type {
             return intrinsic() != Intrinsic::CONTRADICTION;
         }
 
+        bool isAmbiguous() const {
+            return intrinsic() == Intrinsic::AMBIGUOUS;
+        }
+
         virtual bool shared() const {
             return _shared;
         }
