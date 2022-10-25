@@ -2,6 +2,7 @@
 - fix memory leaks
 - types as values
 - not dogshit test suite
+  - fuzzy testing with American Fuzzy
 - ability to call external bindings from vm
 - module system / import system
 - write queue / store interfaces

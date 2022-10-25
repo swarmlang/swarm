@@ -1,0 +1,38 @@
+-- basic expression (should fail)
+number t1 = b + 4;
+
+-- basic vardecl with reference to itself (should fail)
+number t2 = t2 + 4;
+
+-- Call expression (identifier) (should fail)
+number t3 = funct3(3);
+
+-- Call expression (arguments) (should fail)
+fn funct4 = (arg1: number): number => 69;
+number t4 = funct4(b + 4);
+
+-- Attempt to use defined value whose definition had an error (should pass)
+number t5 = t1;
+
+-- Function uses argument in function body (should pass)
+fn funct6 = (arg1: number): number => arg1 + 5;
+
+-- Function with recursion (should pass)
+fn funct7 = (bound: number): number => {
+    if (bound <= 1) { return 1; }
+    return funct7(bound - 1) * bound;
+};
+
+-- IIFE args (pass and fail respectively)
+number t8 = ( (arg1:number):number => arg1 + 4 )(6);
+t8 = ((arg1:number):number => arg2 ^ 2)(8);
+
+-- enumeration literal (should fail)
+enumerable<number> t9 = [t8, 8, bad_value];
+
+-- map literals
+map<number> t10 = {
+    a: t8,
+    b: t9[0],
+    c: t9[bad_value]
+};

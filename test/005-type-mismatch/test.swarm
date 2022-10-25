@@ -1,0 +1,38 @@
+-- basic assignment (should fail)
+number t1 = "hello";
+
+-- basic binary expression (should fail)
+string t2 = t1 . " world";
+
+-- function args used wrong (should fail)
+fn funct3 = (arg1: string, arg2: number): number => {
+    number t3 = arg1;
+    return 4;
+};
+
+-- moldy return (should fail)
+return;
+
+-- bad return type (should fail)
+fn funct5_1 = (): void => {
+    return 69;
+};
+fn funct5_2 = (): number => {
+    return;
+};
+
+-- using recursion incorrectly (should fail)
+fn funct6 = (arg1: number): number => {
+    if (arg1 <= 1) { 
+        return 1; 
+    }
+    string t6_1 = funct6(arg1 - 1);
+    number t6_2 = funct6(t6_1);
+    return 4;
+};
+
+-- if stmt condition (should fail)
+if (6) {}
+
+-- while stmt condition (should fail)
+while ("hello") {}

@@ -1,2 +1,329 @@
-[1m[31m[Type Error] [0m[1m[l: 39, c: 13] [0mInvalid return type. Expected: :: Primitive<VOID>; Found: VOID
-[0m
+==260238== Memcheck, a memory error detector
+==260238== Copyright (C) 2002-2017, and GNU GPL'd, by Julian Seward et al.
+==260238== Using Valgrind-3.18.1 and LibVEX; rerun with -h for copyright info
+==260238== Command: ./swarmc --dbg-output-parse-to -- test/004-free-identifier/test.swarm
+==260238== 
+==260238== Invalid read of size 8
+==260238==    at 0x135662: swarmc::Lang::Walk::TypeAnalysisWalk::walkIdentifierNode(swarmc::Lang::IdentifierNode*) (TypeAnalysisWalk.h:45)
+==260238==    by 0x142AF5: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:21)
+==260238==    by 0x136F9A: swarmc::Lang::Walk::TypeAnalysisWalk::walkPureBinaryExpression(swarmc::Lang::PureBinaryExpressionNode*) (TypeAnalysisWalk.h:255)
+==260238==    by 0x137C69: swarmc::Lang::Walk::TypeAnalysisWalk::walkAddNode(swarmc::Lang::AddNode*) (TypeAnalysisWalk.h:341)
+==260238==    by 0x142FE5: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:33)
+==260238==    by 0x135D82: swarmc::Lang::Walk::TypeAnalysisWalk::walkVariableDeclarationNode(swarmc::Lang::VariableDeclarationNode*) (TypeAnalysisWalk.h:123)
+==260238==    by 0x142D02: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:26)
+==260238==    by 0x135548: swarmc::Lang::Walk::TypeAnalysisWalk::walkProgramNode(swarmc::Lang::ProgramNode*) (TypeAnalysisWalk.h:25)
+==260238==    by 0x142A23: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:19)
+==260238==    by 0x13AA98: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:78)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==  Address 0x0 is not stack'd, malloc'd or (recently) free'd
+==260238== 
+==260238== 
+==260238== Process terminating with default action of signal 11 (SIGSEGV)
+==260238==  Access not within mapped region at address 0x0
+==260238==    at 0x135662: swarmc::Lang::Walk::TypeAnalysisWalk::walkIdentifierNode(swarmc::Lang::IdentifierNode*) (TypeAnalysisWalk.h:45)
+==260238==    by 0x142AF5: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:21)
+==260238==    by 0x136F9A: swarmc::Lang::Walk::TypeAnalysisWalk::walkPureBinaryExpression(swarmc::Lang::PureBinaryExpressionNode*) (TypeAnalysisWalk.h:255)
+==260238==    by 0x137C69: swarmc::Lang::Walk::TypeAnalysisWalk::walkAddNode(swarmc::Lang::AddNode*) (TypeAnalysisWalk.h:341)
+==260238==    by 0x142FE5: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:33)
+==260238==    by 0x135D82: swarmc::Lang::Walk::TypeAnalysisWalk::walkVariableDeclarationNode(swarmc::Lang::VariableDeclarationNode*) (TypeAnalysisWalk.h:123)
+==260238==    by 0x142D02: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:26)
+==260238==    by 0x135548: swarmc::Lang::Walk::TypeAnalysisWalk::walkProgramNode(swarmc::Lang::ProgramNode*) (TypeAnalysisWalk.h:25)
+==260238==    by 0x142A23: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:19)
+==260238==    by 0x13AA98: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:78)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==  If you believe this happened as a result of a stack
+==260238==  overflow in your program's main thread (unlikely but
+==260238==  possible), you can try to increase the size of the
+==260238==  main thread stack using the --main-stacksize= flag.
+==260238==  The main thread stack size used in this run was 8388608.
+==260238== 
+==260238== HEAP SUMMARY:
+==260238==     in use at exit: 125,212 bytes in 366 blocks
+==260238==   total heap usage: 1,134 allocs, 768 frees, 158,516 bytes allocated
+==260238== 
+==260238== 40 bytes in 1 blocks are definitely lost in loss record 52 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186FBF: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:174)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 40 bytes in 1 blocks are definitely lost in loss record 53 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186E02: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:102)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 40 bytes in 1 blocks are definitely lost in loss record 54 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x1870EB: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:222)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 40 bytes in 1 blocks are definitely lost in loss record 55 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x187104: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:226)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 80 bytes in 2 blocks are definitely lost in loss record 103 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x121D02: swarmc::Lang::ProgramNode::ProgramNode() (AST.h:87)
+==260238==    by 0x175653: swarmc::Lang::Parser::parse() (swarm.yy:194)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 80 bytes in 2 blocks are definitely lost in loss record 104 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186D6C: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:78)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 80 bytes in 2 blocks are definitely lost in loss record 105 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186D53: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:74)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 80 bytes in 2 blocks are definitely lost in loss record 106 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186D85: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:82)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 120 bytes in 3 blocks are definitely lost in loss record 124 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x187023: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:190)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 120 bytes in 3 blocks are definitely lost in loss record 125 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x18703C: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:194)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 160 bytes in 4 blocks are definitely lost in loss record 128 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x1870D2: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:218)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 176 (96 direct, 80 indirect) bytes in 2 blocks are definitely lost in loss record 131 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x178028: swarmc::Lang::Parser::parse() (swarm.yy:424)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 240 bytes in 6 blocks are definitely lost in loss record 138 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186E7F: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:122)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 280 bytes in 7 blocks are definitely lost in loss record 141 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186D9E: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:86)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 280 bytes in 7 blocks are definitely lost in loss record 142 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186DB7: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:90)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 320 bytes in 8 blocks are definitely lost in loss record 144 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186EB1: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:130)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 360 (144 direct, 216 indirect) bytes in 3 blocks are definitely lost in loss record 148 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x11DEF6: swarmc::Lang::ScopeTable::ScopeTable() (SymbolTable.h:121)
+==260238==    by 0x12AF04: swarmc::Lang::SymbolTable::enter() (SymbolTable.h:193)
+==260238==    by 0x134C56: swarmc::Lang::Walk::NameAnalysisWalk::walkFunctionNode(swarmc::Lang::FunctionNode*) (NameAnalysisWalk.h:357)
+==260238==    by 0x1439ED: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:57)
+==260238==    by 0x1333FF: swarmc::Lang::Walk::NameAnalysisWalk::walkVariableDeclarationNode(swarmc::Lang::VariableDeclarationNode*) (NameAnalysisWalk.h:91)
+==260238==    by 0x142D02: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:26)
+==260238==    by 0x132D59: swarmc::Lang::Walk::NameAnalysisWalk::walkProgramNode(swarmc::Lang::ProgramNode*) (NameAnalysisWalk.h:25)
+==260238==    by 0x142A23: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:19)
+==260238==    by 0x13A99A: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:66)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238== 
+==260238== 400 bytes in 10 blocks are definitely lost in loss record 149 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x18B95F: swarmc::Lang::Scanner::makeBareToken(int) (Scanner.h:32)
+==260238==    by 0x186E66: swarmc::Lang::Scanner::yylex(swarmc::Lang::Parser::value_type*) (swarm.l:118)
+==260238==    by 0x17528F: swarmc::Lang::Parser::parse() (parser.cc:498)
+==260238==    by 0x13A8BA: swarmc::Pipeline::targetParse() (Pipeline.h:50)
+==260238==    by 0x13A8DC: swarmc::Pipeline::targetASTRaw() (Pipeline.h:54)
+==260238==    by 0x13A977: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:63)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 624 (48 direct, 576 indirect) bytes in 1 blocks are definitely lost in loss record 157 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x11DEF6: swarmc::Lang::ScopeTable::ScopeTable() (SymbolTable.h:121)
+==260238==    by 0x12AF04: swarmc::Lang::SymbolTable::enter() (SymbolTable.h:193)
+==260238==    by 0x132CF6: swarmc::Lang::Walk::NameAnalysisWalk::walkProgramNode(swarmc::Lang::ProgramNode*) (NameAnalysisWalk.h:22)
+==260238==    by 0x142A23: swarmc::Lang::Walk::Walk<bool>::walk(swarmc::Lang::ASTNode*) (Walk.h:19)
+==260238==    by 0x13A99A: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:66)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== 3,021 (24 direct, 2,997 indirect) bytes in 1 blocks are definitely lost in loss record 162 of 167
+==260238==    at 0x4849013: operator new(unsigned long) (in /usr/libexec/valgrind/vgpreload_memcheck-amd64-linux.so)
+==260238==    by 0x12AE49: swarmc::Lang::SymbolTable::SymbolTable() (SymbolTable.h:187)
+==260238==    by 0x132BD8: swarmc::Lang::Walk::NameAnalysisWalk::NameAnalysisWalk() (NameAnalysisWalk.h:14)
+==260238==    by 0x13A983: swarmc::Pipeline::targetASTSymbolic() (Pipeline.h:65)
+==260238==    by 0x13AA75: swarmc::Pipeline::targetASTSymbolicTyped() (Pipeline.h:75)
+==260238==    by 0x13AB74: swarmc::Pipeline::targetASTRepresentation(std::ostream&) (Pipeline.h:87)
+==260238==    by 0x128719: Executive::debugOutputParse() (Executive.cpp:291)
+==260238==    by 0x125982: Executive::run(int, char**) (Executive.cpp:45)
+==260238==    by 0x17461C: main (main.cpp:5)
+==260238== 
+==260238== LEAK SUMMARY:
+==260238==    definitely lost: 2,712 bytes in 67 blocks
+==260238==    indirectly lost: 3,869 bytes in 74 blocks
+==260238==      possibly lost: 0 bytes in 0 blocks
+==260238==    still reachable: 118,631 bytes in 225 blocks
+==260238==         suppressed: 0 bytes in 0 blocks
+==260238== Reachable blocks (those to which a pointer was found) are not shown.
+==260238== To see them, rerun with: --leak-check=full --show-leak-kinds=all
+==260238== 
+==260238== For lists of detected and suppressed errors, rerun with: -s
+==260238== ERROR SUMMARY: 21 errors from 21 contexts (suppressed: 0 from 0)

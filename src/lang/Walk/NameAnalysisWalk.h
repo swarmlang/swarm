@@ -17,19 +17,17 @@ public:
     }
 protected:
     virtual bool walkProgramNode(ProgramNode* node) {
+        bool flag = true;
         // Enter the global scope
         _symbols->enter();
 
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                _symbols->leave();
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
 
         // Exit the global scope
         _symbols->leave();
-        return true;
+        return flag;
     }
 
     virtual bool walkExpressionStatementNode(ExpressionStatementNode* node) {
@@ -57,7 +55,8 @@ protected:
     }
 
     virtual bool walkEnumerableAccessNode(EnumerableAccessNode* node) {
-        return walk(node->path()) && walk(node->index());
+        bool flag = walk(node->path());
+        return walk(node->index()) && flag;
     }
 
     virtual bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
@@ -83,11 +82,20 @@ protected:
             return false;
         }
 
-        // Check the RHS of the assignment
-        bool valueResult = walk(node->value());
+        bool valueResult = true;
+        if ( node->value()->getName() == "FunctionNode" ) {
+            // Add the declaration to the current scope
+            _symbols->addVariable(name, type, node->position());
 
-        // Add the declaration to the current scope
-        _symbols->addVariable(name, type, node->position());
+            // Check the RHS of the assignment
+            valueResult = walk(node->value());
+        } else {
+            // Check the RHS of the assignment
+            valueResult = walk(node->value());
+
+            // Add the declaration to the current scope
+            _symbols->addVariable(name, type, node->position());
+        }
 
         // Call this to attach the Symbol to the IdentifierNode
         walk(node->id());
@@ -95,31 +103,23 @@ protected:
     }
 
     virtual bool walkCallExpressionNode(CallExpressionNode* node) {
-        if ( !walk(node->id()) ) {
-            return false;
-        }
+        bool flag = walk(node->id());
 
         for ( auto arg : *node->args() ) {
-            if ( !walk(arg) ) {
-                return false;
-            }
+            flag = walk(arg) && flag;
         }
 
-        return true;
+        return flag;
     }
 
     virtual bool walkIIFExpressionNode(IIFExpressionNode* node) {
-        if ( !walk(node->expression()) ) {
-            return false;
-        }
+        bool flag = walk(node->expression());
 
         for ( auto arg : *node->args() ) {
-            if ( !walk(arg) ) {
-                return false;
-            }
+            flag = walk(arg) && flag;
         }
 
-        return true;
+        return flag;
     }
 
     virtual bool walkAndNode(AndNode* node) {
@@ -197,29 +197,27 @@ protected:
     }
 
     virtual bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
+        bool flag = true;
+        
         for ( auto actual : *node->actuals() ) {
-            if ( !walk(actual) ) {
-                return false;
-            }
+            flag = walk(actual) && flag;
         }
 
-        return true;
+        return flag;
     }
 
     virtual bool walkBlockStatementNode(BlockStatementNode* node) {
+        bool flag = true;
+
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
 
-        return true;
+        return flag;
     }
 
     virtual bool walkEnumerationStatement(EnumerationStatement* node) {
-        if ( !walk(node->enumerable()) ) {
-            return false;
-        }
+        bool flag = walk(node->enumerable());
 
         // Need to register the block-local variable
         // Its type is implicit as the generic type of the enumerable
@@ -240,21 +238,12 @@ protected:
             _symbols->enter();
             inScope = true;
             _symbols->addVariable(name, type, pos);
-
-//            if ( !walk(node->local()) ) {
-//                _symbols->leave();
-//                return false;
-//            }
         }
 
-        if ( !walk(node->local()) ) {  // FIXME did this need to be moved?
-            if ( inScope ) _symbols->leave();
-            return false;
-        }
-
-        bool bodyResult = walkBlockStatementNode(node);
+        flag = walk(node->local()) && flag;
+        flag = walkBlockStatementNode(node) && flag;
         if ( inScope ) _symbols->leave();
-        return bodyResult;
+        return flag;
     }
 
     virtual bool walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
@@ -262,9 +251,7 @@ protected:
     }
 
     virtual bool walkWithStatement(WithStatement* node) {
-        if ( !walk(node->resource()) ) {
-            return false;
-        }
+        bool flag = walk(node->resource());
 
         // need to register the block-local variable
         // Its type is implicit as the result of the expression
@@ -281,29 +268,22 @@ protected:
             _symbols->enter();
             inScope = true;
             _symbols->addVariable(name, type, pos);
-
-//            if ( !walk(node->local()) ) {
-//                _symbols->leave();
-//                return false;
-//            }
         }
 
-        if ( !walk(node->local()) ) {  // FIXME did this need to be moved?
-            if ( inScope ) _symbols->leave();
-            return false;
-        }
-
-        bool bodyResult = walkBlockStatementNode(node);
+        flag = walk(node->local()) && flag;
+        flag = walkBlockStatementNode(node) && flag;
         if ( inScope ) _symbols->leave();
-        return bodyResult;
+        return flag;
     }
 
     virtual bool walkIfStatement(IfStatement* node) {
-        return walk(node->condition()) && walkBlockStatementNode(node);
+        bool flag = walk(node->condition());
+        return walkBlockStatementNode(node) && flag;
     }
 
     virtual bool walkWhileStatement(WhileStatement* node) {
-        return walk(node->condition()) && walkBlockStatementNode(node);
+        bool flag = walk(node->condition());
+        return walkBlockStatementNode(node) && flag;
     }
 
     virtual bool walkContinueNode(ContinueNode* node) {
@@ -327,6 +307,7 @@ protected:
     }
 
     virtual bool walkMapNode(MapNode* node) {
+        bool flag = true;
         // Check each entry in the map
         for ( auto entry : *node->body() ) {
             // Check for duplicate name
@@ -343,16 +324,14 @@ protected:
                     "Duplicate map key: \"" + entry->id()->name() + "\""
                 );
 
-                return false;
+                flag = false;
             }
 
             // Check the value expression
-            if ( !walk(entry) ) {
-                return false;
-            }
+            flag = walk(entry) && flag;
         }
 
-        return true;
+        return flag;
     }
 
     virtual bool walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
@@ -374,16 +353,17 @@ protected:
     }
 
     virtual bool walkFunctionNode(FunctionNode* node) {
+        bool flag = true;
         _symbols->enter();
         for ( auto formal : *node->formals() ) {
             std::string name = formal.second->name();
-            const Type::Type* type = formal.first->type();
+            const Type::Type* type = formal.first->value();
 
             // Make sure the name isn't already declared in this scope
             if ( _symbols->isClashing(name) ) {
                 SemanticSymbol* existing = _symbols->lookup(name);
                 Reporting::nameError(node->position(), "Redeclaration of identifier \"" + name + "\" first declared at " + existing->declaredAt()->start() + ".");
-                return false;
+                flag = false;
             }
 
             // Add the declaration to the current scope
@@ -394,15 +374,12 @@ protected:
         }
 
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                _symbols->leave();
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
 
         _symbols->leave();
 
-        return true;
+        return flag;
     }
 
     virtual bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {

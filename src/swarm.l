@@ -28,13 +28,13 @@ using TokenKind = swarmc::Lang::Parser::token;
 %option c++
 
 DIGIT [0-9]
-WHITESPACE [\040\t]
 LETTER [a-zA-Z]
-ESCAPEE [nt'"\\]
-
- /* */ 
-BADESC [\\][^nt"\\\n]?
-STRELT (([\\][nt"\\])|([^\\\n"]))
+ESCAPEE [ntr'"\\]
+STRELT (([\\]{ESCAPEE})|([^\\\n"]))
+/* 
+WHITESPACE [\040\t]
+BADESC [\\][^nt"\\\n]? 
+*/
 
 %%
 %{

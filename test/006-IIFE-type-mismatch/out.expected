@@ -1,0 +1,2 @@
+[1m[31m[Type Error] [0m[1m[l: 4, c: 1] [0mAttempted to assign value of type Primitive<STRING> to lval of type Primitive<NUMBER>.
+[0m

@@ -38,8 +38,8 @@ ProgramNode<#body: 25>
             ReturnStatementNode<lval: StringLiteralExpressionNode<#value: 'zoinks'>>
   EnumerationStatement<e: MapAccessNode<path: IdentifierNode<name: t6> id: b>, as: joe, #body: 1>
     WithStatement<r: CallExpressionNode<id: tag, #args: 2>, as: _>
-      ExpressionStatementNode<AssignExpressionNode<lval: EnumerableAccessNode<path: IdentifierNode<name: t1>, index: 1>>>
-        AssignExpressionNode<lval: EnumerableAccessNode<path: IdentifierNode<name: t1>, index: 1>>
+      ExpressionStatementNode<AssignExpressionNode<lval: EnumerableAccessNode<path: IdentifierNode<name: t1>, index: NumberLiteralExpressionNode<#value: 1.000000>>>>
+        AssignExpressionNode<lval: EnumerableAccessNode<path: IdentifierNode<name: t1>, index: NumberLiteralExpressionNode<#value: 1.000000>>>
           NumberLiteralExpressionNode<#value: 4.000000>
   EnumerationStatement<e: MapAccessNode<path: IdentifierNode<name: t6> id: b>, as: var, #body: 1>
     WithStatement<r: CallExpressionNode<id: tag, #args: 2>, as: w>

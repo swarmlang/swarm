@@ -1,0 +1,2 @@
+number b = ((arg1: string): number => 69)(4);
+string s = ((): number => 420)();

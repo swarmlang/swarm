@@ -21,24 +21,23 @@ public:
     }
 protected:
     virtual bool walkProgramNode(ProgramNode* node) {
+        bool flag = true;
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkExpressionStatementNode(ExpressionStatementNode* node) {
-        bool expResult = walk(node->expression());
+        bool flag = walk(node->expression());
 
-        if ( expResult ) {
-            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        }
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
 
-        return expResult;
+        return flag;
     }
 
     virtual bool walkIdentifierNode(IdentifierNode* node) {
@@ -48,6 +47,7 @@ protected:
                 "Invalid type of free identifier: " + node->name()
             );
 
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
@@ -58,6 +58,7 @@ protected:
     virtual bool walkMapAccessNode(MapAccessNode* node) {
         bool pathresult = walk(node->path());
         if ( !pathresult ) {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
@@ -67,6 +68,7 @@ protected:
                 node->position(),
                 "Invalid map access: " + node->end()->name()
             );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
@@ -77,6 +79,7 @@ protected:
     virtual bool walkEnumerableAccessNode(EnumerableAccessNode* node) {
         bool pathresult = walk(node->path());
         if ( !pathresult ) {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
@@ -86,11 +89,13 @@ protected:
                 node->position(),
                 "Invalid array access: " + node->path()->toString()
             );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
         bool indexresult = walk(node->index());
         if ( !indexresult ) {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
@@ -100,6 +105,8 @@ protected:
                 node->position(),
                 "Invalid index type: " + node->index()->type()->toString()
             );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
         }
 
         _types->setTypeOf(node, ((Type::Enumerable*) typeLVal)->values());
@@ -117,49 +124,47 @@ protected:
     }
 
     virtual bool walkVariableDeclarationNode(VariableDeclarationNode* node) {
-        if (
-            !walk(node->typeNode())
-            || !walk(node->id())
-            || !walk(node->value())
-        ) {
-            return false;
-        }
+        bool flag = walk(node->typeNode());
+        flag = walk(node->id()) && flag;
+        flag = walk(node->value()) && flag;
 
         const Type::Type* typeOfValue = _types->getTypeOf(node->value());
-        if ( !node->typeNode()->value()->isAssignableTo(typeOfValue) ) {
+        if ( !node->typeNode()->value()->isAssignableTo(typeOfValue)
+            && typeOfValue->intrinsic() != Type::Intrinsic::ERROR
+        ) {
             
             Reporting::typeError(
                 node->position(),
                 "Attempted to initialize identifier of type " + node->typeNode()->value()->toString() + " with value of type " + typeOfValue->toString() + "."
             );
 
-            return false;
+            flag = false;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkCallExpressionNode(CallExpressionNode* node) {
         // Perform type analysis on the callable
-        if ( !walk(node->id()) ) {
-            return false;
-        }
+        bool flag = walk(node->id());
 
         // Perform type analysis on the arguments
         for ( auto arg : *node->args() ) {
-            if ( !walk(arg) ) {
-                return false;
-            }
+            flag = walk(arg) && flag;
         }
 
         // Make sure the callee is actually a function type
         const Type::Type* baseTypeOfCallee = _types->getTypeOf(node->id());
-        if ( baseTypeOfCallee->intrinsic() != Type::Intrinsic::LAMBDA0 && baseTypeOfCallee->intrinsic() != Type::Intrinsic::LAMBDA1 ) {
+        if ( !baseTypeOfCallee->isCallable() ) {
             Reporting::typeError(
                 node->position(),
                 "Attempted to call non-callable type " + baseTypeOfCallee->toString() + "."
             );
+        
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
         }
 
         const Type::Lambda* typeOfCallee = (Type::Lambda*) baseTypeOfCallee;
@@ -172,7 +177,7 @@ protected:
                 "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
             );
 
-            return false;
+            flag = false;
         }
 
         const Type::Type* nodeType = typeOfCallee;
@@ -182,46 +187,60 @@ protected:
         }
 
         // Make sure the type of each argument matches
-        for ( size_t i = 0; i < argTypes.size(); i += 1 ) {
+        for ( size_t i = 0; i < node->args()->size(); i += 1 ) {
             const Type::Type* expectedType = argTypes.at(i);
             const Type::Type* actualType = _types->getTypeOf(node->args()->at(i));
 
-            if ( !actualType->isAssignableTo(expectedType) ) {
+            if ( !actualType->isAssignableTo(expectedType) 
+                && actualType->intrinsic() != Type::Intrinsic::ERROR
+            ) {
                 Reporting::typeError(
                     node->position(),
                     "Invalid argument of type " + actualType->toString() + " in position " + std::to_string(i) + " (expected: " + expectedType->toString() + ")."
                 );
 
-                return false;
+                flag = false;
             }
 
             assert(nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 || nodeType->intrinsic() == Type::Intrinsic::LAMBDA1);
             nodeType = ((Type::Lambda*) nodeType)->returns();
         }
 
-        _types->setTypeOf(node, nodeType);
-        return true;
+        _types->setTypeOf(node, flag ? nodeType : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     virtual bool walkIIFExpressionNode(IIFExpressionNode* node) {
-        if ( !walk(node->expression()) ) {
-            return false;
-        }
+        bool flag = walk(node->expression());
 
         // Perform type analysis on the arguments
         for ( auto arg : *node->args() ) {
-            if ( !walk(arg) ) {
-                return false;
-            }
+            flag = walk(arg) && flag;
         }
 
         if ( !node->expression()->type()->isCallable() ) {
+            Reporting::typeError(
+                node->position(),
+                "Attempted to call non-callable type " + node->expression()->type()->toString() + "."
+            );
+        
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
         const Type::Lambda* typeOfCallee = (Type::Lambda*) node->expression()->type();
         auto argTypes = typeOfCallee->params();
 
+        // Make sure the # of arguments matches
+        if ( argTypes.size() != node->args()->size() ) {
+            Reporting::typeError(
+                node->position(),
+                "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
+            );
+
+            flag = false;
+        }
+
         const Type::Type* nodeType = typeOfCallee;
 
         if ( nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
@@ -229,58 +248,56 @@ protected:
         }
 
         // Make sure the type of each argument matches
-        for ( size_t i = 0; i < argTypes.size(); i += 1 ) {
+        for ( size_t i = 0; i < node->args()->size(); i += 1 ) {
             const Type::Type* expectedType = argTypes.at(i);
             const Type::Type* actualType = _types->getTypeOf(node->args()->at(i));
 
-            if ( !actualType->isAssignableTo(expectedType) ) {
+            if ( !actualType->isAssignableTo(expectedType) 
+                && actualType->intrinsic() != Type::Intrinsic::ERROR
+            ) {
                 Reporting::typeError(
                     node->position(),
                     "Invalid argument of type " + actualType->toString() + " in position " + std::to_string(i) + " (expected: " + expectedType->toString() + ")."
                 );
 
-                return false;
+                flag = false;
             }
 
-            assert(nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 || nodeType->intrinsic() == Type::Intrinsic::LAMBDA1);
+            assert(nodeType->isCallable());
             nodeType = ((Type::Lambda*) nodeType)->returns();
         }
 
-        _types->setTypeOf(node, nodeType);
-        return true;
+        _types->setTypeOf(node, flag ? nodeType : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     virtual bool walkPureBinaryExpression(PureBinaryExpressionNode* node) {
-        if (
-            !walk(node->left())
-            || !walk(node->right())
-        ) {
-            return false;
-        }
+        bool flag = walk(node->left());
+        flag = walk(node->right()) && flag;
 
         const Type::Type* actualLeftType = _types->getTypeOf(node->left());
         const Type::Type* actualRightType = _types->getTypeOf(node->right());
 
-        if ( !node->leftType()->isAssignableTo(actualLeftType) ) {
+        if ( !node->leftType()->isAssignableTo(actualLeftType) && actualLeftType->intrinsic() != Type::Intrinsic::ERROR ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid type " + actualLeftType->toString() + " of left-hand operand to expression (expected: " + node->leftType()->toString() + ")."
             );
 
-            return false;
+            flag = false;
         }
 
-        if ( !node->rightType()->isAssignableTo(actualRightType) ) {
+        if ( !node->rightType()->isAssignableTo(actualRightType) && actualRightType->intrinsic() != Type::Intrinsic::ERROR ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid type " + actualRightType->toString() + " of right-hand operand to expression (expected: " + node->rightType()->toString() + ")."
             );
 
-            return false;
+            flag = false;
         }
 
-        _types->setTypeOf(node, node->resultType());
-        return true;
+        _types->setTypeOf(node, flag ? node->resultType() : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     virtual bool walkAndNode(AndNode* node) {
@@ -292,49 +309,49 @@ protected:
     }
 
     virtual bool walkEqualsNode(EqualsNode* node) {
-        if (
-            !walk(node->left())
-            || !walk(node->right())
-        ) {
-            return false;
-        }
+        bool flag = walk(node->left());
+        flag = walk(node->right()) && flag;
 
         const Type::Type* actualLeftType = _types->getTypeOf(node->left());
         const Type::Type* actualRightType = _types->getTypeOf(node->right());
-        if ( !actualLeftType->isAssignableTo(actualRightType) ) {
+        if ( !actualLeftType->isAssignableTo(actualRightType) 
+            && actualLeftType->intrinsic() != Type::Intrinsic::ERROR
+            && actualRightType->intrinsic() != Type::Intrinsic::ERROR
+        ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid comparison between left-hand type " + actualLeftType->toString() + " and right-hand type " + actualRightType->toString() + "."
             );
 
-            return false;
+            flag = false;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::BOOLEAN));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::BOOLEAN) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkNotEqualsNode(NotEqualsNode* node) {
-        if (
-            !walk(node->left())
-            || !walk(node->right())
-        ) {
-            return false;
-        }
+        bool flag = walk(node->left());
+        flag = walk(node->right()) && flag;
 
         const Type::Type* actualLeftType = _types->getTypeOf(node->left());
         const Type::Type* actualRightType = _types->getTypeOf(node->right());
-        if ( !actualLeftType->isAssignableTo(actualRightType) ) {
+        if ( !actualLeftType->isAssignableTo(actualRightType)
+            && actualLeftType->intrinsic() != Type::Intrinsic::ERROR
+            && actualRightType->intrinsic() != Type::Intrinsic::ERROR
+        ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid comparison between left-hand type " + actualLeftType->toString() + " and right-hand type " + actualRightType->toString() + "."
             );
 
-            return false;
+            flag = false;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::BOOLEAN));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::BOOLEAN) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkAddNode(AddNode* node) {
@@ -366,41 +383,37 @@ protected:
     }
 
     virtual bool walkNegativeExpressionNode(NegativeExpressionNode* node) {
-        if ( !walk(node->exp()) ) {
-            return false;
-        }
+        bool flag = walk(node->exp());
 
         const Type::Type* numType = Type::Primitive::of(Type::Intrinsic::NUMBER);
         const Type::Type* expType = _types->getTypeOf(node->exp());
-        if ( !expType->isAssignableTo(numType) ) {
+        if ( !expType->isAssignableTo(numType) && expType->intrinsic() != Type::Intrinsic::ERROR ) {
             Reporting::typeError(
                 node->position(),
                 "Attempted to perform numeric negation on invalid type. Expected: " + numType->toString() + "; actual: " + expType->toString()
             );
-            return false;
+            flag = false;
         }
 
-        _types->setTypeOf(node, numType);
-        return true;
+        _types->setTypeOf(node, flag ? numType : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     virtual bool walkNotNode(NotNode* node) {
-        if ( !walk(node->exp()) ) {
-            return false;
-        }
+        bool flag = walk(node->exp());
 
         const Type::Type* boolType = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         const Type::Type* expType = _types->getTypeOf(node->exp());
-        if ( !expType->isAssignableTo(boolType) ) {
+        if ( !expType->isAssignableTo(boolType) && expType->intrinsic() != Type::Intrinsic::ERROR ) {
             Reporting::typeError(
                 node->position(),
                 "Attempted to perform boolean negation on invalid type. Expected: " + boolType->toString() + "; actual: " + expType->toString()
             );
-            return false;
+            flag = false;
         }
 
-        _types->setTypeOf(node, boolType);
-        return true;
+        _types->setTypeOf(node, flag ? boolType : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     virtual bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
@@ -413,10 +426,9 @@ protected:
             hadFirst = true;
         }
 
+        bool flag = true;
         for ( auto exp : *node->actuals() ) {
-            if ( !walk(exp) ) {
-                return false;
-            }
+            flag = walk(exp) && flag;
 
             const Type::Type* expType = _types->getTypeOf(exp);
             if ( !hadFirst ) {
@@ -426,32 +438,30 @@ protected:
                     node->position(),
                     "Invalid entry in enumerable at position " + std::to_string(idx) + ". Expected: " + innerType->toString() + "; Found: " + expType->toString()
                 );
-                return false;
+                flag = false;
             }
 
             idx += 1;
         }
 
         auto type = new Type::Enumerable(innerType);
-        _types->setTypeOf(node, type);
-        return true;
+        _types->setTypeOf(node, flag ? (Type::Type*)type : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     virtual bool walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
+        bool flag = true;
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt);
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkEnumerationStatement(EnumerationStatement* node) {
-        if ( !walk(node->enumerable()) ) {
-            return false;
-        }
+        bool flag = walk(node->enumerable());
 
         const Type::Type* enumType = node->enumerable()->type();
         if ( enumType->intrinsic() != Type::Intrinsic::ENUMERABLE ) {
@@ -459,6 +469,7 @@ protected:
                 node->position(),
                 "Attempted to enumerate invalid value"
             );
+            flag = false;
         }
 
         auto genericType = (Type::Enumerable*) enumType;
@@ -466,19 +477,16 @@ protected:
         _types->setTypeOf(node->local(), concreteType);
 
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkWithStatement(WithStatement* node) {
-        if ( !walk(node->resource()) ) {
-            return false;
-        }
+        bool flag = walk(node->resource());
 
         const Type::Type* type = _types->getTypeOf(node->resource());
         if ( type == nullptr || type->intrinsic() != Type::Intrinsic::RESOURCE ) {
@@ -487,7 +495,7 @@ protected:
                 "Expected Intrinsic::RESOURCE, found: " + (type == nullptr ? "none" : type->toString())
             );
 
-            return false;
+            flag = false;
         }
 
         auto localType = ((Type::Resource*) type)->yields()->copy();
@@ -496,63 +504,60 @@ protected:
         node->local()->symbol()->_type = localType;  // local is implicitly defined, so need to set its type
 
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        return true;
+        auto t = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, t);
+        return flag;
     }
 
     virtual bool walkIfStatement(IfStatement* node) {
-        if (!walk(node->condition())) {
-            return false;
-        }
+        bool flag = walk(node->condition());
 
         const Type::Type* condType = _types->getTypeOf(node->condition());
-        if ( !condType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)) ) {
+        if ( !condType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)) 
+            && condType->intrinsic() != Type::Intrinsic::ERROR
+        ) {
             Reporting::typeError(
                 node->position(),
                 "Condition for if statement not boolean " + condType->toString() + "."
             );
 
-            return false;
+            flag = false;
         }
 
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkWhileStatement(WhileStatement* node) {
-        if (!walk(node->condition())) {
-            return false;
-        }
+        bool flag = walk(node->condition());
 
         const Type::Type* condType = _types->getTypeOf(node->condition());
-        if ( !condType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)) ) {
+        if ( !condType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)) 
+            && condType->intrinsic() != Type::Intrinsic::ERROR
+        ) {
             Reporting::typeError(
                 node->position(),
                 "Condition for while loop not boolean " + condType->toString() + "."
             );
 
-            return false;
+            flag = false;
         }
 
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkContinueNode(ContinueNode* node) {
@@ -569,6 +574,7 @@ protected:
                 node->position(),
                 "Found return statement outside of a function"
             );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
@@ -587,15 +593,17 @@ protected:
             if ( funcType->intrinsic() != Type::Intrinsic::VOID ) {
                 Reporting::typeError(
                     node->position(),
-                    "Invalid return type. Expected: " + funcType->toString() + "; Found: VOID"
+                    "Invalid return type. Expected: " + funcType->toString() + "; Found: Primitive<VOID>"
                 );
+                _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
                 return false;
             }
-
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
             return true;
         }
 
         if ( !walk(node->value()) ) {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
@@ -606,13 +614,16 @@ protected:
                 node->position(),
                 "Invalid return type. Expected: " + funcType->toString() + "; Found: " + retType->toString()
             );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
+        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
         return true;
     }
 
     virtual bool walkMapStatementNode(MapStatementNode* node) {
         if ( !walk(node->value()) ) {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
@@ -630,10 +641,9 @@ protected:
             hadFirst = true;
         }
 
+        bool flag = true;
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt) && flag;
 
             const Type::Type* stmtType = _types->getTypeOf(stmt);
             if ( !hadFirst ) {
@@ -643,15 +653,15 @@ protected:
                     node->position(),
                     "Invalid entry in map at position " + std::to_string(idx) + ". Expected: " + innerType->toString() + "; Found: " + stmtType->toString()
                 );
-                return false;
+                flag = false;
             }
 
             idx += 1;
         }
 
         auto type = new Type::Map(innerType);
-        _types->setTypeOf(node, type);
-        return true;
+        _types->setTypeOf(node, flag ? (Type::Type*)type : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     virtual bool walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
@@ -665,27 +675,27 @@ protected:
     }
 
     virtual bool walkAssignExpressionNode(AssignExpressionNode* node) {
-        if (
-            !walk(node->dest())
-            || !walk(node->value())
-        ) {
-            return false;
-        }
+        bool flag = walk(node->dest());
+        flag = walk(node->value()) && flag;
 
         const Type::Type* typeOfValue = _types->getTypeOf(node->value());
         const Type::Type* typeOfDest = _types->getTypeOf(node->dest());
 
-        if ( !typeOfValue->isAssignableTo(typeOfDest) ) {
+        if ( !typeOfValue->isAssignableTo(typeOfDest) 
+            && typeOfValue->intrinsic() != Type::Intrinsic::ERROR
+            && typeOfDest->intrinsic() != Type::Intrinsic::ERROR
+        ) {
             Reporting::typeError(
                 node->position(),
                 "Attempted to assign value of type " + typeOfValue->toString() + " to lval of type " + typeOfDest->toString() + "."
             );
 
-            return false;
+            flag = false;
         }
 
-        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
-        return true;
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     virtual bool walkUnitNode(UnitNode* node) {
@@ -696,16 +706,15 @@ protected:
     virtual bool walkFunctionNode(FunctionNode* node) {
         _funcTypes->push(node->type());
         _funcArgs->push(node->formals()->size());
+        bool flag = true;
         for ( auto stmt : *node->body() ) {
-            if ( !walk(stmt) ) {
-                return false;
-            }
+            flag = walk(stmt) && flag;
         }
         _funcTypes->pop();
         _funcArgs->pop();
 
-        _types->setTypeOf(node, node->type());
-        return true;
+        _types->setTypeOf(node, flag ? node->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     virtual bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
