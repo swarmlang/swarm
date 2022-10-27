@@ -58,6 +58,7 @@ Shared storage is global across all jobs that have access to a location.
   - `callif $lloc ...` - behaves like `call ...` if `$lloc` is valued as `true`
   - `callelse $lloc ...` - behaves like `call ...` if `$lloc` is valued as `false`
   - `pushcall{,if,else} ...` - behaves like the call derivatives, but pushes the execution of the function onto the work queue
+  - `drain` - wait for the current context's work queue to finish
 - Stream operations
   - `streaminit $lloc1 $lloc2` - create an empty stream of type `$lloc1` at `$lloc2`
   - `streampush $lloc1 $lloc2` - push the value `$lloc2` onto the stream `$lloc1`
@@ -144,7 +145,7 @@ FUNCTION ::= f:IDENTIFIER
 LLOC ::= PRIMITIVE | FUNCTION | LOCATION | LITERAL
 LLOCS ::= LLOC | LLOC LLOCS
 OPERATION ::= out | err | beginfn | fnparam | return | curry
-              | call | callif | callelse | pushcall | pushcallif | pushcallelse
+              | call | callif | callelse | pushcall | pushcallif | pushcallelse | drain
               | streaminit | streampush | streampop | streamclose | streamempty
               | typify | lock | unlock | equal | scopeof | typeof | compatible
               | and | or | xor | nand | nor | not

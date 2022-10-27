@@ -20,6 +20,7 @@ namespace swarmc::ISA {
         if ( tag == Tag::PUSHCALLIF1 ) return "PUSHCALLIF1";
         if ( tag == Tag::PUSHCALLELSE0 ) return "PUSHCALLELSE0";
         if ( tag == Tag::PUSHCALLELSE1 ) return "PUSHCALLELSE1";
+        if ( tag == Tag::DRAIN ) return "DRAIN";
         if ( tag == Tag::OUT ) return "OUT";
         if ( tag == Tag::ERR ) return "ERR";
         if ( tag == Tag::STREAMINIT ) return "STREAMINIT";

@@ -241,6 +241,8 @@ namespace swarmc::ISA {
                     ));
                     i += 3;
                 }
+            } else if ( instructionLeader == "drain" ) {
+                is.push_back(new ISA::Drain());
             } else if ( instructionLeader == "out" ) {
                 is.push_back(new ISA::Out(parseUnaryReference(instructionLeader, tokens, startAt+i)));
                 i += 1;

@@ -3,11 +3,13 @@
 
 #include <chrono>
 #include <thread>
+#include <utility>
 #include "../Configuration.h"
 #include "../shared/IStringable.h"
 #include "../shared/util/Console.h"
 #include "../shared/uuid.h"
 #include "runtime/interfaces.h"
+#include "runtime/runtime_functions.h"
 #include "runtime/State.h"
 
 namespace swarmc::Runtime {
@@ -18,7 +20,7 @@ namespace swarmc::Runtime {
         virtual ~VirtualMachine() = default;
 
         void initialize(ISA::Instructions is) {
-            _state = new State(is);
+            _state = new State(std::move(is));
             _scope = new ScopeFrame(util::uuid4(), nullptr);
         }
 
@@ -54,6 +56,14 @@ namespace swarmc::Runtime {
         virtual void typify(ISA::LocationReference*, const Type::Type*);
 
         virtual void shadow(ISA::LocationReference*);
+
+        virtual void enterScope();
+
+        virtual void exitScope();
+
+        virtual void call(IFunctionCall*) { /* FIXME */ };
+
+        virtual void pushCall(IFunctionCall*) { /* FIXME */ };
 
         virtual void whileWaitingForLock() {
             std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));

@@ -22,6 +22,7 @@ namespace swarmc::Runtime {
         virtual ISA::BooleanReference* ensureBoolean(const ISA::Reference*);
         virtual ISA::TypeReference* ensureType(const ISA::Reference*);
         virtual ISA::StringReference* ensureString(const ISA::Reference*);
+        virtual ISA::FunctionReference* ensureFunction(const ISA::Reference*);
 
         virtual ISA::Reference* walkPlus(ISA::Plus*) = 0;
         virtual ISA::Reference* walkMinus(ISA::Minus*) = 0;

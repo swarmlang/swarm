@@ -105,6 +105,11 @@ namespace swarmc::ISA {
                 TrinaryInstruction<Reference, Reference, Reference>(Tag::PUSHCALLELSE1, cond, fn, param) {}
     };
 
+    class Drain : public NullaryInstruction {
+    public:
+        Drain() : NullaryInstruction(Tag::DRAIN) {}
+    };
+
 }
 
 #endif //SWARMVM_FUNCTIONS

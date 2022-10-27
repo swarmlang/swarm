@@ -94,4 +94,15 @@ namespace swarmc::Runtime {
     void VirtualMachine::shadow(ISA::LocationReference* loc) {
         _scope->shadow(loc);
     }
+
+    void VirtualMachine::enterScope() {
+        _scope = _scope->newChild();
+    }
+
+    void VirtualMachine::exitScope() {
+        // FIXME - this likely needs to do better cleanup work
+        auto old = _scope;
+        _scope = _scope->parent();
+        delete old;
+    }
 }

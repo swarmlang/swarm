@@ -2,6 +2,7 @@
 #define SWARMVM_STATE
 
 #include <map>
+#include <stack>
 #include "../../shared/IStringable.h"
 #include "../../errors/SwarmError.h"
 #include "../isa_meta.h"
@@ -18,6 +19,7 @@ namespace swarmc::Runtime {
         void shadow(ISA::LocationReference*);
         ISA::LocationReference* map(ISA::LocationReference*);
         ScopeFrame* newChild();
+        ScopeFrame* parent() { return _parent; }
 
         std::string toString() const;
     protected:
@@ -50,6 +52,24 @@ namespace swarmc::Runtime {
             return i;
         }
 
+        void jump(ISA::Instructions::size_type i) {
+            if ( i >= _is.size() ) throw Errors::SwarmError("Cannot advance beyond end of program.");
+            _pc = i;
+        }
+
+        void jumpCall(ISA::Instructions::size_type i) {
+            auto returnTo = _pc;
+            jump(i);
+            _callStack.push(returnTo);
+        }
+
+        void jumpReturn() {
+            if ( _callStack.empty() ) throw Errors::SwarmError("Cannot make return jump: the call stack is empty");
+            auto returnTo = _callStack.top();
+            jump(returnTo);
+            _callStack.pop();
+        }
+
         std::string toString() const override {
             return "Runtime::State<>";
         }
@@ -57,6 +77,7 @@ namespace swarmc::Runtime {
         ISA::Instructions _is;
         std::map<std::string, ISA::Instructions::size_type> _fmap;
         ISA::Instructions::size_type _pc = 0;
+        std::stack<ISA::Instructions::size_type> _callStack;
 
         void initialize() {
             _pc = 0;

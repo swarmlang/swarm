@@ -37,6 +37,7 @@ namespace swarmc::ISA {
         PUSHCALLIF1,
         PUSHCALLELSE0,
         PUSHCALLELSE1,
+        DRAIN,
         OUT,
         ERR,
         STREAMINIT,

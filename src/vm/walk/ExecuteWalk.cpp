@@ -3,6 +3,8 @@
 #include "../VirtualMachine.h"
 #include "ExecuteWalk.h"
 
+// FIXME: type checking for functions/function calls/&c. can be much better
+
 namespace swarmc::Runtime {
 
     using namespace swarmc::ISA;
@@ -38,6 +40,12 @@ namespace swarmc::Runtime {
         // FIXME: eventually, this should probably generate a runtime exception
         assert(ref->tag() == ReferenceTag::STRING);
         return (StringReference*) ref;
+    }
+
+    FunctionReference* ExecuteWalk::ensureFunction(const ISA::Reference* ref) {
+        // FIXME: eventually, this should generate a runtime exception
+        assert(ref->tag() == ReferenceTag::FUNCTION);
+        return (FunctionReference*) ref;
     }
 
     Reference* ExecuteWalk::walkPlus(Plus* i) {
@@ -157,7 +165,22 @@ namespace swarmc::Runtime {
     // TODO: walkFunctionParam
     // TODO: walkReturn1
     // TODO: walkReturn0
-    // TODO: walkCurry
+
+    Reference* ExecuteWalk::walkCurry(Curry* i) {
+        auto fn = ensureFunction(_vm->resolve(i->first()));
+        auto param = _vm->resolve(i->second());
+        return new FunctionReference(fn->fn()->curry(param));
+    }
+
+    Reference* ExecuteWalk::walkCall0(ISA::Call0* i) {
+        auto fn = ensureFunction(_vm->resolve(i->first()));
+
+        // FIXME: eventually, this needs to generate a runtime type error
+        assert(fn->fn()->paramTypes().empty());
+
+        return nullptr;
+    }
+
     // TODO: walkCall*
     // TODO: walkPushCall*
     // TODO: walkMap*

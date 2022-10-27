@@ -188,6 +188,10 @@ namespace swarmc::ISA {
             return "pushcallelse " + _rsw.walk(pce1->first()) + " " + _rsw.walk(pce1->second()) + " " + _rsw.walk(pce1->third());
         }
 
+        std::string walkDrain(Drain*) override {
+            return "drain";
+        }
+
         std::string walkMapInit(MapInit* mi) override {
             return "mapinit " + _rsw.walk(mi->first());
         }
