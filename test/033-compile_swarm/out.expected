@@ -4,18 +4,18 @@ ASSIGNVALUE<Location<l:var_e>, Location<l:temp0>>
 ASSIGNEVAL<Location<l:temp1>, ENUMINIT<TypeReference<MAP<Primitive<NUMBER>>>>>
 ASSIGNEVAL<Location<l:temp2>, MAPINIT<TypeReference<Primitive<NUMBER>>>>
 ASSIGNVALUE<Location<p:temp3>, NumberReference<4.000000>>
-MAPSET<Location<l:a>, Location<p:temp3>, Location<l:temp2>>
+MAPSET<Location<l:mkey_a>, Location<p:temp3>, Location<l:temp2>>
 ASSIGNVALUE<Location<p:temp4>, NumberReference<98.000000>>
-MAPSET<Location<l:b>, Location<p:temp4>, Location<l:temp2>>
+MAPSET<Location<l:mkey_b>, Location<p:temp4>, Location<l:temp2>>
 ASSIGNVALUE<Location<l:temp2>, Location<l:temp2>>
 ENUMAPPEND<Location<l:temp2>, Location<l:temp1>>
 ASSIGNVALUE<Location<l:temp1>, Location<l:temp1>>
 ASSIGNVALUE<Location<l:var_e>, Location<l:temp1>>
 ASSIGNEVAL<Location<l:temp5>, MAPINIT<TypeReference<Primitive<NUMBER>>>>
 ASSIGNVALUE<Location<p:temp6>, NumberReference<4.000000>>
-MAPSET<Location<l:c>, Location<p:temp6>, Location<l:temp5>>
+MAPSET<Location<l:mkey_c>, Location<p:temp6>, Location<l:temp5>>
 ASSIGNVALUE<Location<p:temp7>, NumberReference<60.000000>>
-MAPSET<Location<l:d>, Location<p:temp7>, Location<l:temp5>>
+MAPSET<Location<l:mkey_d>, Location<p:temp7>, Location<l:temp5>>
 ASSIGNVALUE<Location<l:temp5>, Location<l:temp5>>
 ASSIGNVALUE<Location<p:temp8>, NumberReference<0.000000>>
 ASSIGNVALUE<Location<l:var_e>, Location<l:var_e>>
@@ -24,6 +24,6 @@ ASSIGNVALUE<Location<p:temp9>, NumberReference<8.000000>>
 ASSIGNVALUE<Location<p:temp10>, NumberReference<0.000000>>
 ASSIGNVALUE<Location<l:var_e>, Location<l:var_e>>
 ASSIGNEVAL<Location<l:temp11>, ENUMGET<Location<l:var_e>, Location<p:temp10>>>
-MAPSET<Location<l:c>, Location<p:temp9>, Location<l:temp11>>
+MAPSET<Location<l:mkey_c>, Location<p:temp9>, Location<l:temp11>>
 [32m[SUCCESS] [0mCompiled to SVI.
 [0m

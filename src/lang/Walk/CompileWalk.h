@@ -44,7 +44,7 @@ protected:
         auto instrs = walk(node->path());
         // FIXME: map location affinity
         auto mapget = new ISA::MapGet(
-            new ISA::LocationReference(ISA::Affinity::LOCAL, node->end()->name()), getLocFromAssign(instrs->back()));
+            new ISA::LocationReference(ISA::Affinity::LOCAL, "mkey_" + node->end()->name()), getLocFromAssign(instrs->back()));
         instrs->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), mapget));
         return instrs;
     }
@@ -284,7 +284,7 @@ protected:
             instrs->push_back(new ISA::Return0());
         } else {
             instrs = walk(node->value());
-            instrs->push_back(new ISA::Return1(getLocFromAssign(instrs->back()));
+            instrs->push_back(new ISA::Return1(getLocFromAssign(instrs->back())));
         }
         return instrs;
     }
@@ -302,7 +302,7 @@ protected:
         instrs->push_back(map);
         for ( auto stmt : *node->body() ) {
             // FIXME: do map ids inherit sharedness from the map?
-            auto id = new ISA::LocationReference(ISA::Affinity::LOCAL, stmt->id()->name());
+            auto id = new ISA::LocationReference(ISA::Affinity::LOCAL, "mkey_" + stmt->id()->name());
             auto mapstmt = walk(stmt);
             auto mapset = new ISA::MapSet(id, getLocFromAssign(mapstmt->back()), loc);
             instrs->insert(instrs->end(), mapstmt->begin(), mapstmt->end());
@@ -355,7 +355,7 @@ protected:
             // FIXME: map key affinity
             instrs->push_back(
                 new ISA::MapSet(
-                    new ISA::LocationReference(ISA::Affinity::LOCAL, ma->end()->name()), 
+                    new ISA::LocationReference(ISA::Affinity::LOCAL, "mkey_" + ma->end()->name()), 
                     value,
                     getLocFromAssign(path->back())));
         }
