@@ -56,9 +56,11 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
-    int interpretResult = interpret();
-    if ( interpretResult != 0 ) {
-        result = interpretResult;
+    if ( flagOutputSVI ) {
+        int compileResult = compile();
+        if ( compileResult != 0 ) {
+            result = compileResult;
+        }
     }
 
     delete console;
@@ -105,8 +107,10 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputTokens = true;
             flagOutputTokensTo = outfile;
             skipOne = true;
+            flagOutputSVI = false;
         } else if ( arg == "--dbg-parse" ) {
             flagParseAndStop = true;
+            flagOutputSVI = false;
         } else if ( arg == "--dbg-output-parse-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --dbg-output-parse-to. Pass --help for more info.");
@@ -120,6 +124,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputParse = true;
             flagOutputParseTo = outfile;
             skipOne = true;
+            flagOutputSVI = false;
         } else if ( arg == "--run-test" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --run-test. Pass --help for more info.");
@@ -135,6 +140,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagRunTestName = name;
             skipOne = true;
             noInputFile = true;
+            flagOutputSVI = false;
         } else if ( arg == "--locally" ) {
             Configuration::FORCE_LOCAL = true;
             console->debug("Will interpret locally.");
@@ -152,6 +158,17 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             util::USE_DETERMINISTIC_UUIDS = true;
         } else if ( arg == "--svi" ) {
             flagSVI = true;
+            flagOutputSVI = false;
+        } else if ( arg == "-o" ) {
+            if ( i+1 >= params.size() ) {
+                console->error("Missing required parameter for -o. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            outputSVITo = params.at(i+1);
+            console->debug("Output file name: " + outputSVITo);
+            skipOne = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -242,6 +259,10 @@ void Executive::printUsage() {
 
         console->bold()->print("  --dbg-use-d-guid  :  ", true)
             ->line("Use deterministic UUIDs (for test output).")
+            ->line();
+
+        console->bold()->print("   -o <OUTFILE> :  ", true)
+            ->line("Set the name of the SVI output file")
             ->line();
     console->end();
 
@@ -354,6 +375,27 @@ int Executive::parseFilters() {
     return 0;
 }
 
-int Executive::interpret() {
-    return 1;
+int Executive::compile() {
+    std::ostream* stream;
+    if ( outputSVITo == "--" ) {
+        stream = &std::cout;
+    } else {
+        stream = new std::ofstream(outputSVITo);
+        if ( stream->bad() ) {
+            console->error("Could not open parse output file for writing: " + outputSVITo);
+            delete stream;
+            return 1;
+        }
+    }
+
+    swarmc::Pipeline pipeline(_input);
+
+    try {
+        pipeline.targetSVI(*stream);
+    } catch (swarmc::Errors::ParseError& e) {
+        return e.exitCode;
+    }
+
+    console->success("Compiled to SVI.");
+    return 0;
 }

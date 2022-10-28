@@ -10,6 +10,7 @@
 #include "../bison/grammar.hh"
 #include "../lang/AST.h"
 #include "../lang/Walk/PrintWalk.h"
+#include "../lang/Walk/CompileWalk.h"
 #include "../lang/Walk/NameAnalysisWalk.h"
 #include "../lang/Walk/TypeAnalysisWalk.h"
 #include "../vm/ISAParser.h"
@@ -87,6 +88,11 @@ namespace swarmc {
         void targetASTRepresentation(std::ostream& out) {
             targetASTSymbolicTyped();
             Lang::Walk::PrintWalk pW(out, _root);
+        }
+
+        void targetSVI(std::ostream& out) {
+            targetASTSymbolicTyped();
+            Lang::Walk::CompileWalk cw(out, _root);
         }
 
     protected:

@@ -531,8 +531,8 @@ expression :
     LBRACE RBRACE OF type {
         Position* pos = new Position($1->position(), $4->position());
         std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
-        $$ = new MapNode(pos, body, $4);
-        delete $1; delete $2; delete $3;
+        $$ = new MapNode(pos, body, new TypeLiteral(pos, new Type::Map($4->value())));
+        delete $1; delete $2; delete $3; delete $4;
     }
 
     | LBRACE mapStatements RBRACE {
@@ -553,8 +553,9 @@ expressionF :
     | LBRACKET RBRACKET OF type {
         Position* pos = new Position($1->position(), $4->position());
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
-        $$ = new EnumerationLiteralExpressionNode(pos, actuals, $4);
-        delete $1; delete $2; delete $3;
+        $$ = new EnumerationLiteralExpressionNode(pos, actuals, 
+            new TypeLiteral(pos, new Type::Enumerable($4->value())));
+        delete $1; delete $2; delete $3; delete $4;
     }
 
     | LBRACKET actuals RBRACKET {

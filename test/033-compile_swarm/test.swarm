@@ -1,0 +1,6 @@
+enumerable<map<number>> e = [] of map<number>;
+
+e = [{a:4,b:98}];
+
+e[0] = {c:4,d:60};
+e[0]{c} = 8;

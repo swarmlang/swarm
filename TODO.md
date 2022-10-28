@@ -1,8 +1,7 @@
 - setup docker container for builds
 - fix memory leaks
-- types as values
 - not dogshit test suite
-  - fuzzy testing with American Fuzzy
+  - fuzzy testing with American Fuzzy Lop
 - ability to call external bindings from vm
 - module system / import system
 - write queue / store interfaces

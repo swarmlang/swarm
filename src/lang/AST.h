@@ -1298,8 +1298,8 @@ namespace Walk {
     /** AST node representing literal enumerations. */
     class EnumerationLiteralExpressionNode final : public ExpressionNode {
     public:
-        EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals) : ExpressionNode(pos), _actuals(actuals) {}
-        EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals, TypeLiteral* disambiguationType) : ExpressionNode(pos), _actuals(actuals), _disambiguationType(disambiguationType) {}
+        EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals) : ExpressionNode(pos), _actuals(actuals), _type(nullptr) {}
+        EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals, TypeLiteral* type) : ExpressionNode(pos), _actuals(actuals), _type(type) {}
         virtual ~EnumerationLiteralExpressionNode() {}
 
         std::string toString() const override {
@@ -1357,21 +1357,20 @@ namespace Walk {
         }
 
         virtual EnumerationLiteralExpressionNode* copy() const override {
-            auto type = _disambiguationType == nullptr ? nullptr : _disambiguationType->copy();
             auto actuals = new ExpressionList;
             for ( auto actual : *_actuals ) actuals->push_back(actual->copy());
 
-            return new EnumerationLiteralExpressionNode(position()->copy(), actuals, type);
+            return new EnumerationLiteralExpressionNode(position()->copy(), actuals, _type->copy());
         }
 
         virtual const Type::Type* type() const override {
-            assert(_disambiguationType != nullptr || !_actuals->empty());
-            return (_disambiguationType == nullptr) ? _actuals->at(0)->type() : _disambiguationType->type();
+            assert(_type != nullptr);
+            return _type->value();
         }
 
     protected:
         ExpressionList* _actuals;
-        TypeLiteral* _disambiguationType = nullptr;
+        TypeLiteral* _type;
 
         friend class Walk::TypeAnalysisWalk;
     };
@@ -1599,8 +1598,8 @@ namespace Walk {
     /** AST node referencing a map literal. */
     class MapNode final : public ExpressionNode {
     public:
-        MapNode(Position* pos, MapBody* body) : ExpressionNode(pos), _body(body) {}
-        MapNode(Position* pos, MapBody* body, TypeLiteral* disambiguationType) : ExpressionNode(pos), _body(body), _disambiguationType(disambiguationType) {}
+        MapNode(Position* pos, MapBody* body) : ExpressionNode(pos), _body(body), _type(nullptr) {}
+        MapNode(Position* pos, MapBody* body, TypeLiteral* type) : ExpressionNode(pos), _body(body), _type(type) {}
         virtual ~MapNode() {}
 
         virtual std::string getName() const override {
@@ -1645,20 +1644,19 @@ namespace Walk {
         }
 
         virtual MapNode* copy() const override {
-            auto type = _disambiguationType == nullptr ? nullptr : _disambiguationType->copy();
             auto body = new MapBody;
             for ( auto entry : *_body ) body->push_back(entry->copy());
-            return new MapNode(position()->copy(), body, type);
+            return new MapNode(position()->copy(), body, _type->copy());
         }
 
         virtual const Type::Type* type() const override {
-            assert(_disambiguationType != nullptr || !_body->empty());
-            return (_disambiguationType == nullptr) ? _body->at(0)->value()->type() : _disambiguationType->value();
+            assert(_type != nullptr);
+            return _type->value();
         }
 
     protected:
         MapBody* _body;
-        TypeLiteral* _disambiguationType = nullptr;
+        TypeLiteral* _type;
 
         virtual MapStatementNode* getBodyNode(IdentifierNode* name) const {
             for ( auto stmt : *_body ) {

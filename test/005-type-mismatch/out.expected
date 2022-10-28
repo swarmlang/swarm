@@ -1,2 +1,11 @@
-[1m[31m[Type Error] [0m[1m[l: 4, c: 1] [0mAttempted to assign value of type Primitive<STRING> to lval of type Primitive<NUMBER>.
+[1m[31m[Type Error] [0m[1m[l: 2, c: 1] [0mAttempted to initialize identifier of type Primitive<NUMBER> with value of type Primitive<STRING>.
+[0m[1m[31m[Type Error] [0m[1m[l: 5, c: 13] [0mInvalid type Primitive<NUMBER> of left-hand operand to expression (expected: Primitive<STRING>).
+[0m[1m[31m[Type Error] [0m[1m[l: 9, c: 5] [0mAttempted to initialize identifier of type Primitive<NUMBER> with value of type Primitive<STRING>.
+[0m[1m[31m[Syntax Error] [0m[1m[l: 14, c: 1] [0mFound return statement outside of a function
+[0m[1m[31m[Type Error] [0m[1m[l: 18, c: 5] [0mInvalid return type. Expected: Primitive<VOID>; Found: Primitive<NUMBER>
+[0m[1m[31m[Type Error] [0m[1m[l: 21, c: 5] [0mInvalid return type. Expected: Primitive<NUMBER>; Found: Primitive<VOID>
+[0m[1m[31m[Type Error] [0m[1m[l: 29, c: 5] [0mAttempted to initialize identifier of type Primitive<STRING> with value of type Primitive<NUMBER>.
+[0m[1m[31m[Type Error] [0m[1m[l: 30, c: 19] [0mInvalid argument of type Primitive<STRING> in position 0 (expected: Primitive<NUMBER>).
+[0m[1m[31m[Type Error] [0m[1m[l: 35, c: 1] [0mCondition for if statement not boolean Primitive<NUMBER>.
+[0m[1m[31m[Type Error] [0m[1m[l: 38, c: 1] [0mCondition for while loop not boolean Primitive<STRING>.
 [0m

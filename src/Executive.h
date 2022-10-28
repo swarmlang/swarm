@@ -30,12 +30,14 @@ protected:
     bool flagClearQueue = false;
     bool flagWorkQueue = false;
     bool flagSVI = false;
+    bool flagOutputSVI = true;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;
     std::string flagOutputDeSerializeTo;
     std::string flagRunTestName;
     std::string outputResultTo = "--";
+    std::string outputSVITo = "a.out";
     std::string flagFilterFile;
     std::string inputFile;
     std::istream* _input = nullptr;
@@ -45,7 +47,7 @@ protected:
     int debugParseAndStop();
     int runTest();
     int parseFilters();
-    int interpret();
+    int compile();
 };
 
 

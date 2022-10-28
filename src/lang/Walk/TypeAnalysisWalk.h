@@ -420,9 +420,9 @@ protected:
         size_t idx = 0;
         bool hadFirst = false;
         const Type::Type* innerType = nullptr;
-
-        if ( node->_disambiguationType != nullptr ) {
-            innerType = node->_disambiguationType->value();
+        if (node->_type != nullptr) {
+            assert(node->type()->intrinsic() == Type::Intrinsic::ENUMERABLE);
+            innerType = ((Type::Enumerable*)node->type())->values();
             hadFirst = true;
         }
 
@@ -433,6 +433,9 @@ protected:
             const Type::Type* expType = _types->getTypeOf(exp);
             if ( !hadFirst ) {
                 innerType = expType;
+                // FIXME: Doesn't accurately type check this statement because type of enum is not known
+                node->_type = new TypeLiteral(node->position(), new Type::Enumerable(innerType));
+                hadFirst = false;
             } else if ( !expType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
                     node->position(),
@@ -444,8 +447,7 @@ protected:
             idx += 1;
         }
 
-        auto type = new Type::Enumerable(innerType);
-        _types->setTypeOf(node, flag ? (Type::Type*)type : Type::Primitive::of(Type::Intrinsic::ERROR));
+        _types->setTypeOf(node, flag ? node->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
         return flag;
     }
 
@@ -635,9 +637,9 @@ protected:
         size_t idx = 0;
         bool hadFirst = false;
         const Type::Type* innerType = nullptr;
-
-        if ( node->_disambiguationType != nullptr ) {
-            innerType = node->_disambiguationType->value();
+        if ( node->_type != nullptr ) {
+            assert(node->type()->intrinsic() == Type::Intrinsic::MAP);
+            innerType = ((Type::Map*)node->type())->values();
             hadFirst = true;
         }
 
@@ -648,6 +650,9 @@ protected:
             const Type::Type* stmtType = _types->getTypeOf(stmt);
             if ( !hadFirst ) {
                 innerType = stmtType;
+                // FIXME: Doesn't accurately type check this statement because type of map is not known
+                node->_type = new TypeLiteral(node->position(), new Type::Map(innerType));
+                hadFirst = false;
             } else if ( !stmtType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
                     node->position(),
@@ -659,8 +664,7 @@ protected:
             idx += 1;
         }
 
-        auto type = new Type::Map(innerType);
-        _types->setTypeOf(node, flag ? (Type::Type*)type : Type::Primitive::of(Type::Intrinsic::ERROR));
+        _types->setTypeOf(node, flag ? node->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
         return flag;
     }
 
