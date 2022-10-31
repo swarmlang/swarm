@@ -1,6 +1,12 @@
-enumerable<map<number>> e = [] of map<number>;
-
-e = [{a:4,b:98}];
-
-e[0] = {c:4,d:60};
-e[0]{c} = 8;
+fn x = (arg1: number, arg2: number): number => {
+    while (arg1 > 0) {
+        arg1 -= arg2;
+        if (arg2 < 0) {
+            break;
+            if (arg1 == 30) {
+                continue;
+            }
+        }
+    }
+    return 0;
+};

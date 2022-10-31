@@ -388,10 +388,6 @@ protected:
         return leftResult && rightResult;
     }
 
-    virtual bool walkTagResourceNode(TagResourceNode* node) {
-        return true;
-    }
-
     virtual std::string toString() const {
         return "NameAnalysisWalk<>";
     }

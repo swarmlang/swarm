@@ -304,10 +304,6 @@ protected:
         _out << _prefix << node->toString() << std::endl;
     }
 
-    virtual void walkTagResourceNode(TagResourceNode* node) {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
     virtual std::string toString() const {
         return "PrintWalk<>";
     }

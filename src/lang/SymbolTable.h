@@ -121,6 +121,10 @@ namespace Walk {
             _symbols = new std::map<std::string, SemanticSymbol*>();
         }
 
+        ~ScopeTable() {
+            delete _symbols;
+        }
+
         /** Try to find a symbol in scope by name. Returns nullptr if none exists. */
         SemanticSymbol* lookup(const std::string& name) {
             auto found = _symbols->find(name);
@@ -186,6 +190,11 @@ namespace Walk {
         SymbolTable() {
             _scopes = new std::list<ScopeTable*>();
             _scopes->push_back(ScopeTable::prologue());
+        }
+
+        ~SymbolTable() {
+            for ( auto scope : *_scopes ) delete scope;
+            delete _scopes;
         }
 
         /** Create a new scope. */

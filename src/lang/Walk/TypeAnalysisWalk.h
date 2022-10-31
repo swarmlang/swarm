@@ -171,7 +171,7 @@ protected:
         auto argTypes = typeOfCallee->params();
 
         // Make sure the # of arguments matches
-        if ( argTypes.size() != node->args()->size() ) {
+        if ( argTypes.size() < node->args()->size() ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
@@ -232,7 +232,7 @@ protected:
         auto argTypes = typeOfCallee->params();
 
         // Make sure the # of arguments matches
-        if ( argTypes.size() != node->args()->size() ) {
+        if ( argTypes.size() < node->args()->size() ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
@@ -433,8 +433,7 @@ protected:
             const Type::Type* expType = _types->getTypeOf(exp);
             if ( !hadFirst ) {
                 innerType = expType;
-                // FIXME: Doesn't accurately type check this statement because type of enum is not known
-                node->_type = new TypeLiteral(node->position(), new Type::Enumerable(innerType));
+                node->_type = new TypeLiteral(node->position()->copy(), new Type::Enumerable(innerType));
                 hadFirst = false;
             } else if ( !expType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
@@ -651,7 +650,7 @@ protected:
             if ( !hadFirst ) {
                 innerType = stmtType;
                 // FIXME: Doesn't accurately type check this statement because type of map is not known
-                node->_type = new TypeLiteral(node->position(), new Type::Map(innerType));
+                node->_type = new TypeLiteral(node->position()->copy(), new Type::Map(innerType));
                 hadFirst = false;
             } else if ( !stmtType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
@@ -723,11 +722,6 @@ protected:
 
     virtual bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
         return walkPureBinaryExpression(node);
-    }
-
-    virtual bool walkTagResourceNode(TagResourceNode* node) {
-        _types->setTypeOf(node, node->type());
-        return true;
     }
 
     virtual std::string toString() const {

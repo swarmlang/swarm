@@ -37,7 +37,9 @@ namespace Walk {
     public:
         explicit ASTNode(Position* pos) : IUsesConsole(), _pos(pos) {};
 
-        ~ASTNode() override = default;
+        ~ASTNode() {
+            delete _pos;
+        };
 
         /** Implements IStringable. */
         virtual std::string toString() const = 0;
@@ -75,11 +77,27 @@ namespace Walk {
             return false;
         }
 
+        virtual bool isBlock() const {
+            return false;
+        }
+
     private:
         Position* _pos = nullptr;
         ScopeTable* _scope = nullptr;
     };
 
+    /** AST node representing a statement that can occur in the root of a program. */
+    class StatementNode : public ASTNode {
+    public:
+        StatementNode(Position* pos) : ASTNode(pos) {}
+        virtual ~StatementNode() {}
+
+        virtual bool isStatement() const {
+            return true;
+        }
+
+        virtual StatementNode* copy() const override = 0;
+    };
 
     /** AST node representing the root of the program. */
     class ProgramNode final : public ASTNode {
@@ -87,6 +105,8 @@ namespace Walk {
         ProgramNode() : ASTNode(new Position(0, 0, 0, 0)) {
             _body = new std::vector<StatementNode*>();
         }
+
+        virtual ~ProgramNode() { /*cannot implement because of reduceToStatements */ }
 
         virtual std::string getName() const override {
             return "ProgramNode";
@@ -123,21 +143,7 @@ namespace Walk {
         StatementList* _body;
     };
 
-
-    /** AST node representing a statement that can occur in the root of a program. */
-    class StatementNode : public ASTNode {
-    public:
-        StatementNode(Position* pos) : ASTNode(pos) {}
-        virtual ~StatementNode() {}
-
-        virtual bool isStatement() const {
-            return true;
-        }
-
-        virtual StatementNode* copy() const override = 0;
-    };
-
-     class StatementListWrapper {
+    class StatementListWrapper {
     public:
         StatementListWrapper() {
             _body = new StatementList();
@@ -279,7 +285,9 @@ namespace Walk {
     class ExpressionStatementNode final : public StatementNode {
     public:
         ExpressionStatementNode(Position* pos, StatementExpressionNode* exp) : StatementNode(pos), _exp(exp) {}
-        virtual ~ExpressionStatementNode() {}
+        virtual ~ExpressionStatementNode() {
+            delete _exp;
+        }
 
         virtual std::string getName() const override {
             return "ExpressionStatementNode";
@@ -381,7 +389,10 @@ namespace Walk {
     class MapAccessNode final : public LValNode {
     public:
         MapAccessNode(Position* pos, LValNode* path, IdentifierNode* end) : LValNode(pos), _path(path), _end(end) {}
-        virtual ~MapAccessNode() {}
+        virtual ~MapAccessNode() {
+            delete _path;
+            delete _end;
+        }
 
         virtual std::string getName() const override {
             return "MapAccessNode";
@@ -453,134 +464,6 @@ namespace Walk {
         swarmc::Type::Type* _type;
     };
 
-    /** Base class for AST nodes referencing types. */
-    /*class TypeNode : public ASTNode {
-    public:
-        static TypeNode* newForType(Type* type);
-
-        TypeNode(Position* pos) : ASTNode(pos) {}
-        virtual ~TypeNode() {}
-
-        *//** Get the Type instance this node describes. *//*
-        virtual Type* type() const = 0;
-
-        virtual bool isType() const {
-            return true;
-        }
-
-        virtual void setShared(bool shared) = 0;
-
-        virtual TypeNode* copy() const override = 0;
-    };*/
-
-
-    /** AST node referencing a primitive type declaration. */
-    /*class PrimitiveTypeNode final : public TypeNode {
-    public:
-        PrimitiveTypeNode(Position* pos, PrimitiveType* t) : TypeNode(pos), _t(t) {}
-        virtual ~PrimitiveTypeNode() {}
-
-        virtual std::string getName() const override {
-            return "PrimitiveTypeNode";
-        }
-
-        virtual std::string toString() const override {
-            std::stringstream s;
-            s << "PrimitiveTypeNode<of: " << Type::valueTypeToString(_t->valueType())
-              << ", shared: " << (_t->shared() ? "true>" : "false>");
-            return s.str();
-        }
-
-        virtual Type* type() const override {
-            return _t;
-        }
-
-        virtual void setShared(bool shared) override {
-            _t = PrimitiveType::of(_t->valueType(), shared);
-        }
-
-        virtual PrimitiveTypeNode* copy() const override {
-            return new PrimitiveTypeNode(position()->copy(), _t);
-        }
-
-    protected:
-        PrimitiveType* _t;
-    };*/
-
-
-    /** Base class for TypeNodes that take a type-generic. */
-    /*class GenericTypeNode : public TypeNode {
-    public:
-        GenericTypeNode(Position* pos, TypeNode* concrete) : TypeNode(pos), _concrete(concrete) {}
-        virtual ~GenericTypeNode() {}
-
-        virtual void setShared(bool shared) override {
-            _shared = shared;    
-            _concrete->setShared(shared);  
-        }
-
-        virtual GenericTypeNode* copy() const override = 0;
-
-    protected:
-        TypeNode* _concrete;
-        bool _shared;
-    };*/
-
-
-    /** AST node referencing an enumerable type declaration. */
-    /*class EnumerableTypeNode final : public GenericTypeNode {
-    public:
-        EnumerableTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
-        virtual ~EnumerableTypeNode() {}
-
-        virtual std::string getName() const override {
-            return "EnumerableTypeNode";
-        }
-
-        virtual Type* type() const override {
-            return GenericType::of(ValueType::TENUMERABLE, _concrete->type());
-        }
-
-        virtual std::string toString() const override {
-            std::stringstream s;
-            s << "EnumerableTypeNode<of: " << _concrete->toString() 
-                << ", shared: " << (type()->shared() ? "true>" : "false>");
-            return s.str();
-        }
-
-        virtual EnumerableTypeNode* copy() const override {
-            return new EnumerableTypeNode(position()->copy(), _concrete->copy());
-        }
-    };*/
-
-
-    /** AST node referencing a map type declaration. */
-    /*class MapTypeNode final : public GenericTypeNode {
-    public:
-        MapTypeNode(Position* pos, TypeNode* concrete) : GenericTypeNode(pos, concrete) {}
-        virtual ~MapTypeNode() {}
-
-        virtual std::string getName() const override {
-            return "MapTypeNode";
-        }
-
-        virtual Type* type() const override {
-            return GenericType::of(ValueType::TMAP, _concrete->type());
-        }
-
-        virtual std::string toString() const override {
-            std::stringstream s;
-            s << "MapTypeNode<of: " << _concrete->toString() 
-                << ", shared: " << (type()->shared() ? "true>" : "false>");
-            return s.str();
-        }
-
-        virtual MapTypeNode* copy() const override {
-            return new MapTypeNode(position()->copy(), _concrete->copy());
-        }
-    };*/
-
-
     /** AST node referencing a literal boolean value. */
     class BooleanLiteralExpressionNode final : public ExpressionNode {
     public:
@@ -637,11 +520,15 @@ namespace Walk {
         VariableDeclarationNode(Position* pos, TypeLiteral* type, IdentifierNode* id, ExpressionNode* value)
             : DeclarationNode(pos), _type(type), _id(id), _value(value) {}
 
+        virtual ~VariableDeclarationNode() {
+            delete _type;
+            delete _id;
+            delete _value;
+        }
+
         virtual std::string getName() const override {
             return "VariableDeclarationNode";
         }
-
-        virtual ~VariableDeclarationNode() {}
 
         virtual std::string toString() const override {
             return "VariableDeclarationNode<name: " + _id->name() + ">";
@@ -678,7 +565,10 @@ namespace Walk {
     class AssignExpressionNode : public StatementExpressionNode {
     public:
         AssignExpressionNode(Position* pos, LValNode* dest, ExpressionNode* value) : StatementExpressionNode(pos), _dest(dest), _value(value) {}
-        virtual ~AssignExpressionNode() {}
+        virtual ~AssignExpressionNode() {
+            delete _dest;
+            delete _value;
+        }
 
         virtual std::string toString() const override {
             return "AssignExpressionNode<lval: " + _dest->toString() + ">";
@@ -712,6 +602,9 @@ namespace Walk {
     class ReturnStatementNode : public StatementNode {
     public:
         ReturnStatementNode(Position* pos, ExpressionNode* value) : StatementNode(pos), _value(value) {}
+        virtual ~ReturnStatementNode() {
+            if ( _value != nullptr ) delete _value;
+        }
 
         virtual std::string toString() const override {
             if (_value == nullptr) {
@@ -741,7 +634,13 @@ namespace Walk {
             : ExpressionNode(pos), _type(type), _formals(formals) {
         }
 
-        virtual ~FunctionNode() {}
+        virtual ~FunctionNode() {
+            for ( auto f : *_formals ) {
+                delete f.first;
+                delete f.second;
+            }
+            delete _formals;
+        }
 
         virtual std::string getName() const override {
             return "FunctionNode";
@@ -782,7 +681,11 @@ namespace Walk {
     class CallExpressionNode final : public StatementExpressionNode {
     public:
         CallExpressionNode(Position* pos, IdentifierNode* id, std::vector<ExpressionNode*>* args) : StatementExpressionNode(pos), _id(id), _args(args) {}
-        virtual ~CallExpressionNode() {}
+        virtual ~CallExpressionNode() {
+            delete _id;
+            for ( auto arg : *_args ) delete arg;
+            delete _args;
+        }
 
         virtual std::string getName() const override {
             return "CallExpressionNode";
@@ -824,7 +727,11 @@ namespace Walk {
     class IIFExpressionNode final : public StatementExpressionNode {
     public:
         IIFExpressionNode(Position* pos, ExpressionNode* exp, std::vector<ExpressionNode*>* args) : StatementExpressionNode(pos), _expression(exp), _args(args) {}
-        virtual ~IIFExpressionNode() {}
+        virtual ~IIFExpressionNode() {
+            delete _expression;
+            for ( auto arg : *_args ) delete arg;
+            delete _args;
+        }
 
         virtual std::string getName() const override {
             return "IIFExpressionNode";
@@ -867,7 +774,10 @@ namespace Walk {
     class BinaryExpressionNode : public ExpressionNode {
     public:
         BinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : ExpressionNode(pos), _left(left), _right(right) {}
-        virtual ~BinaryExpressionNode() {}
+        virtual ~BinaryExpressionNode() {
+            delete _left;
+            delete _right;
+        }
 
         ExpressionNode* left() const {
             return _left;
@@ -1239,7 +1149,9 @@ namespace Walk {
     class UnaryExpressionNode : public ExpressionNode {
     public:
         UnaryExpressionNode(Position* pos, ExpressionNode* exp) : ExpressionNode(pos), _exp(exp) {}
-        virtual ~UnaryExpressionNode() {}
+        virtual ~UnaryExpressionNode() {
+            delete _exp;
+        }
 
         ExpressionNode* exp() const {
             return _exp;
@@ -1300,7 +1212,11 @@ namespace Walk {
     public:
         EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals) : ExpressionNode(pos), _actuals(actuals), _type(nullptr) {}
         EnumerationLiteralExpressionNode(Position* pos, ExpressionList* actuals, TypeLiteral* type) : ExpressionNode(pos), _actuals(actuals), _type(type) {}
-        virtual ~EnumerationLiteralExpressionNode() {}
+        virtual ~EnumerationLiteralExpressionNode() {
+            if ( _type != nullptr ) delete _type;
+            for ( auto a : *_actuals ) delete a;
+            delete _actuals;
+        }
 
         std::string toString() const override {
             return "EnumerationLiteralExpressionNode<#actuals: " + std::to_string(_actuals->size()) + ">";
@@ -1384,6 +1300,8 @@ namespace Walk {
         virtual ~BlockStatementNode() {}
 
         virtual BlockStatementNode* copy() const override = 0;
+
+        virtual bool isBlock() const { return true; }
     };
 
 
@@ -1416,7 +1334,11 @@ namespace Walk {
         EnumerationStatement(Position* pos, LValNode* enumerable, IdentifierNode* local, IdentifierNode* index, bool shared)
             : BlockStatementNode(pos), _enumerable(enumerable), _local(local), _index(index), _shared(shared) {}
 
-        virtual ~EnumerationStatement() {}
+        virtual ~EnumerationStatement() {
+            delete _enumerable;
+            delete _local;
+            if ( _index != nullptr ) delete _index;
+        }
 
         virtual std::string getName() const override {
             return "EnumerationStatement";
@@ -1460,7 +1382,10 @@ namespace Walk {
         WithStatement(Position* pos, ExpressionNode* resource, IdentifierNode* local, bool shared)
             : BlockStatementNode(pos), _resource(resource), _local(local), _shared(shared) {}
 
-        virtual ~WithStatement() {}
+        virtual ~WithStatement() {
+            delete _resource;
+            delete _local;
+        }
 
         virtual std::string getName() const override {
             return "WithStatement";
@@ -1498,7 +1423,9 @@ namespace Walk {
         IfStatement(Position* pos, ExpressionNode* condition)
             : BlockStatementNode(pos), _condition(condition) {}
 
-        virtual ~IfStatement() {}
+        virtual ~IfStatement() {
+            delete _condition;
+        }
 
         virtual std::string getName() const override {
             return "IfStatement";
@@ -1528,7 +1455,9 @@ namespace Walk {
         WhileStatement(Position* pos, ExpressionNode* condition)
             : BlockStatementNode(pos), _condition(condition) {}
 
-        virtual ~WhileStatement() {}
+        virtual ~WhileStatement() {
+            delete _condition;
+        }
 
         virtual std::string getName() const override {
             return "WhileStatement";
@@ -1556,7 +1485,10 @@ namespace Walk {
     class MapStatementNode final : public ASTNode {
     public:
         MapStatementNode(Position* pos, IdentifierNode* id, ExpressionNode* value) : ASTNode(pos), _id(id), _value(value) {}
-        virtual ~MapStatementNode() {}
+        virtual ~MapStatementNode() {
+            delete _id;
+            delete _value;
+        }
 
         virtual std::string getName() const override {
             return "MapStatementNode";
@@ -1600,7 +1532,11 @@ namespace Walk {
     public:
         MapNode(Position* pos, MapBody* body) : ExpressionNode(pos), _body(body), _type(nullptr) {}
         MapNode(Position* pos, MapBody* body, TypeLiteral* type) : ExpressionNode(pos), _body(body), _type(type) {}
-        virtual ~MapNode() {}
+        virtual ~MapNode() {
+            delete _type;
+            for ( auto stmt : *_body ) delete stmt;
+            delete _body;
+        }
 
         virtual std::string getName() const override {
             return "MapNode";
@@ -1696,49 +1632,6 @@ namespace Walk {
         bool _opened = false;
     };
 
-
-    class TagResourceNode final : public PrologueResourceNode {
-    public:
-        TagResourceNode(Position* pos, std::string key, std::string value) : PrologueResourceNode(pos), _key(key), _value(value) {}
-
-        virtual ~TagResourceNode() {}
-
-        std::string keyString() const {
-            return _key;
-        }
-
-        std::string valueString() const {
-            return _value;
-        }
-
-        virtual std::string getName() const override {
-            return "TagResourceNode";
-        }
-
-        std::string toString() const override {
-            return "TagResourceNode<key: " + _key + ", value: " + _value + ">";
-        }
-
-        ExpressionNode* value() override {
-            return new UnitNode(position());
-        }
-
-        TagResourceNode* copy() const override {
-            return new TagResourceNode(position()->copy(), _key, _value);
-        }
-
-        virtual const Type::Type* type() const override {
-            return new Type::Resource(Type::Primitive::of(Type::Intrinsic::UNIT));
-        }
-
-    protected:
-        std::string _key;
-        std::string _value;
-        std::string _previous = "";
-        bool _hasPrevious = false;
-    };
-
-
     /** AST node representing literal strings. */
     class StringLiteralExpressionNode final : public ExpressionNode {
     public:
@@ -1833,7 +1726,10 @@ namespace Walk {
     class EnumerableAccessNode final : public LValNode {
     public:
         EnumerableAccessNode(Position* pos, LValNode* path, ExpressionNode* index) : LValNode(pos), _path(path), _index(index) {}
-        virtual ~EnumerableAccessNode() {}
+        virtual ~EnumerableAccessNode() {
+            delete _path;
+            delete _index;
+        }
 
         virtual std::string getName() const override {
             return "EnumerableAccessNode";
