@@ -12,7 +12,7 @@ namespace Walk {
 
 class TypeAnalysisWalk : public Walk<bool> {
 public:
-    TypeAnalysisWalk() : Walk<bool>(), _types(new TypeTable()), 
+    TypeAnalysisWalk() : Walk<bool>(), _whileCount(0), _types(new TypeTable()), 
         _funcTypes(new std::stack<const Type::Type*>()), _funcArgs(new std::stack<int>()) {}
     ~TypeAnalysisWalk() {
         delete _types;
@@ -552,9 +552,11 @@ protected:
             flag = false;
         }
 
+        _whileCount++;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
         }
+        _whileCount--;
 
         auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
         _types->setTypeOf(node, type);
@@ -562,10 +564,26 @@ protected:
     }
 
     virtual bool walkContinueNode(ContinueNode* node) {
+        if ( _whileCount == 0 ) {
+            Reporting::syntaxError(
+                node->position(),
+                "Found continue statement outside of a while statement"
+            );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
         return true;
     }
 
     virtual bool walkBreakNode(BreakNode* node) {
+        if ( _whileCount == 0 ) {
+            Reporting::syntaxError(
+                node->position(),
+                "Found break statement outside of a while statement"
+            );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
         return true;
     }
 
@@ -728,6 +746,7 @@ protected:
         return "TypeAnalysisWalk<>";
     }
 private:
+    int _whileCount;
     TypeTable* _types;
     std::stack<const Type::Type*>* _funcTypes;
     std::stack<int>* _funcArgs;
