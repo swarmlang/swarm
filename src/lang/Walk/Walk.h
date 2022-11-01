@@ -56,7 +56,6 @@ namespace Walk {
             if ( node->getName() == "UnitNode" ) return walkUnitNode((UnitNode*) node);
             if ( node->getName() == "FunctionNode" ) return walkFunctionNode((FunctionNode*) node);
             if ( node->getName() == "NumericComparisonExpressionNode" ) return walkNumericComparisonExpressionNode((NumericComparisonExpressionNode*) node);
-            if ( node->getName() == "CapturedBlockStatementNode" ) return walkCapturedBlockStatementNode((CapturedBlockStatementNode*) node);
             
             throw Errors::SwarmError("Invalid node type: " + node->getName());
         }
@@ -100,7 +99,6 @@ namespace Walk {
         virtual TReturn walkUnitNode(UnitNode* node) = 0;
         virtual TReturn walkFunctionNode(FunctionNode* node) = 0;
         virtual TReturn walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) = 0;
-        virtual TReturn walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) = 0;
         virtual TReturn walkIntegerLiteralExpressionNode(IntegerLiteralExpressionNode* node) {
             return walkNumberLiteralExpressionNode(node);
         }

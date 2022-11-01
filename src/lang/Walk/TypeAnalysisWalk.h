@@ -12,7 +12,7 @@ namespace Walk {
 
 class TypeAnalysisWalk : public Walk<bool> {
 public:
-    TypeAnalysisWalk() : Walk<bool>(), _whileCount(0), _types(new TypeTable()), 
+    TypeAnalysisWalk() : Walk<bool>(), _whileCount(0), _funcCount(0), _types(new TypeTable()), 
         _funcTypes(new std::stack<const Type::Type*>()), _funcArgs(new std::stack<int>()) {}
     ~TypeAnalysisWalk() {
         delete _types;
@@ -450,17 +450,6 @@ protected:
         return flag;
     }
 
-    virtual bool walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        bool flag = true;
-        for ( auto stmt : *node->body() ) {
-            flag = walk(stmt);
-        }
-
-        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
-        _types->setTypeOf(node, type);
-        return flag;
-    }
-
     virtual bool walkEnumerationStatement(EnumerationStatement* node) {
         bool flag = walk(node->enumerable());
 
@@ -477,9 +466,12 @@ protected:
         auto concreteType = genericType->values();
         _types->setTypeOf(node->local(), concreteType);
 
+        int temp = _funcCount;
+        _funcCount = 0;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
         }
+        _funcCount = temp;
 
         auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
         _types->setTypeOf(node, type);
@@ -588,7 +580,7 @@ protected:
     }
 
     virtual bool walkReturnStatementNode(ReturnStatementNode* node) {
-        if ( _funcTypes->empty() ) {
+        if ( _funcCount == 0 ) {
             Reporting::syntaxError(
                 node->position(),
                 "Found return statement outside of a function"
@@ -727,12 +719,14 @@ protected:
     virtual bool walkFunctionNode(FunctionNode* node) {
         _funcTypes->push(node->type());
         _funcArgs->push(node->formals()->size());
+        _funcCount++;
         bool flag = true;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
         }
         _funcTypes->pop();
         _funcArgs->pop();
+        _funcCount--;
 
         _types->setTypeOf(node, flag ? node->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
         return flag;
@@ -746,7 +740,7 @@ protected:
         return "TypeAnalysisWalk<>";
     }
 private:
-    int _whileCount;
+    int _whileCount, _funcCount;
     TypeTable* _types;
     std::stack<const Type::Type*>* _funcTypes;
     std::stack<int>* _funcArgs;

@@ -303,12 +303,30 @@ protected:
         return nullptr;
     }
 
-    virtual ISA::Instructions* walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        return nullptr;
-    }
-
     virtual ISA::Instructions* walkWithStatement(WithStatement* node) {
-        return nullptr;
+        auto instrs = walk(node->resource());
+        auto resLoc = getLocFromAssign(instrs->back());
+
+        auto typeLoc = makeLocation(ISA::Affinity::LOCAL);
+        instrs->push_back(new ISA::AssignEval(typeLoc, new ISA::TypeOf(resLoc)));
+        std::string name = "WITH_" + std::to_string(_tempCounter++);
+
+        instrs->push_back(new ISA::BeginFunction(name, new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID))));
+        instrs->push_back(new ISA::FunctionParam(typeLoc, new ISA::LocationReference(ISA::Affinity::LOCAL, "res_" + node->local()->name())));
+
+        for ( auto stmt : *node->body() ) {
+            auto s = walk(stmt);
+            instrs->insert(instrs->end(), s->begin(), s->end());
+            delete s;
+        }
+
+        instrs->push_back(new ISA::Return0());
+        instrs->push_back(new ISA::Call1(
+            new ISA::LocationReference(ISA::Affinity::LOCAL, name),
+            new ISA::LocationReference(ISA::Affinity::LOCAL, "res_" + node->local()->name())
+        ));
+
+        return instrs;
     }
 
     virtual ISA::Instructions* walkIfStatement(IfStatement* node) {

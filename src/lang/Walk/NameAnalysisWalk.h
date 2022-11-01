@@ -246,10 +246,6 @@ protected:
         return flag;
     }
 
-    virtual bool walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        return walkBlockStatementNode(node);
-    }
-
     virtual bool walkWithStatement(WithStatement* node) {
         bool flag = walk(node->resource());
 

@@ -161,10 +161,6 @@ protected:
         walkBlockStatementNode(node);
     }
 
-    virtual void walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        return walkBlockStatementNode(node);
-    }
-
     virtual void walkWithStatement(WithStatement* node) {
         walk(node->resource());
 

@@ -1304,30 +1304,6 @@ namespace Walk {
         virtual bool isBlock() const { return true; }
     };
 
-
-    /** Internal node used by the runtime. Represents a single block of statements. */
-    class CapturedBlockStatementNode final : public BlockStatementNode {
-    public:
-        CapturedBlockStatementNode(Position* pos) : BlockStatementNode(pos) {}
-
-        virtual ~CapturedBlockStatementNode() {}
-
-        virtual std::string getName() const override {
-            return "CapturedBlockStatementNode";
-        }
-
-        virtual std::string toString() const override {
-            return "CapturedBlockStatementNode<>";
-        }
-
-        virtual CapturedBlockStatementNode* copy() const override {
-            auto other = new CapturedBlockStatementNode(position()->copy());
-            other->assumeAndReduceStatements(copyBody());
-            return other;
-        }
-    };
-
-
     /** AST node representing an enumeration block. */
     class EnumerationStatement final : public BlockStatementNode {
     public:
