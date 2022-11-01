@@ -111,6 +111,7 @@ namespace swarmc::ISA {
         NUMBER,
         BOOLEAN,
         FUNCTION,
+        ENUMERATION,
     };
 
 
@@ -295,6 +296,47 @@ namespace swarmc::ISA {
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
+    };
+
+    class EnumerationReference : public Reference {
+    public:
+        explicit EnumerationReference(const Type::Type* innerType) :
+            Reference(ReferenceTag::ENUMERATION), _innerType(innerType) {}
+
+        std::string toString() const {
+            return "EnumerationReference<inner: " + _innerType->toString() + ">";
+        }
+
+        const Type::Enumerable* type() const override {
+            return new Type::Enumerable(_innerType);
+        }
+
+        virtual void append(Reference* value) {
+            _items.push_back(value);
+        }
+
+        virtual void prepend(Reference* value) {
+            _items.insert(_items.begin(), value);
+        }
+
+        virtual bool has(size_t i) const {
+            return _items.size() > i;
+        }
+
+        virtual Reference* get(size_t i) const {
+            return _items.at(i);
+        }
+
+        virtual void set(size_t i, Reference* value) {
+            _items[i] = value;
+        }
+
+        virtual std::vector<Reference*>::size_type length() const {
+            return _items.size();
+        }
+    protected:
+        std::vector<Reference*> _items;
+        const Type::Type* _innerType;
     };
 
 

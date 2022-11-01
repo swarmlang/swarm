@@ -1,3 +1,4 @@
+#include <cassert>
 #include "../errors/SwarmError.h"
 #include "VirtualMachine.h"
 
@@ -16,6 +17,18 @@ namespace swarmc::Runtime {
         throw Errors::SwarmError("Unable to find storage backend for location: " + loc->toString());
     }
 
+    IQueue* VirtualMachine::getQueue(IFunctionCall* j) {
+        Queues::size_type idx = _queues.size() - 1;
+        for ( auto it = _queues.rbegin(); it != _queues.rend(); ++it, --idx ) {
+            auto queue = *it;
+            if ( queue->shouldHandle(j) ) {
+                return _queues[idx];
+            }
+        }
+
+        throw Errors::SwarmError("Unable to find queue backend for job: " + j->toString());
+    }
+
     Reference* VirtualMachine::load(LocationReference* loc) {
         auto store = getStore(loc);
         if ( !store->has(loc) ) {
@@ -31,6 +44,19 @@ namespace swarmc::Runtime {
         }
 
         return ref;
+    }
+
+    void VirtualMachine::step() {
+        _exec->walkOne(_state->current());
+        _state->advance();
+    }
+
+    void VirtualMachine::rewind() {
+        _state->rewind();
+    }
+
+    void VirtualMachine::execute() {
+        while ( !_state->isEndOfProgram() ) step();
     }
 
     void VirtualMachine::store(LocationReference* loc, Reference* ref) {
@@ -99,10 +125,107 @@ namespace swarmc::Runtime {
         _scope = _scope->newChild();
     }
 
+    void VirtualMachine::enterCallScope(IFunctionCall* call) {
+        _scope = _scope->newCall(call);
+    }
+
     void VirtualMachine::exitScope() {
         // FIXME - this likely needs to do better cleanup work
         auto old = _scope;
         _scope = _scope->parent();
         delete old;
+    }
+
+    void VirtualMachine::call(IFunctionCall* call) {
+        if ( call->backend() == FunctionBackend::INLINE ) return callInlineFunction((InlineFunctionCall*) call);
+//        if ( call->backend() == FunctionBackend::BUILTIN ) return callBuiltinFunction((BuiltinFunctionCall*) call);
+        throw Errors::SwarmError("Cannot call function `" + call->toString() + "` (invalid backend)");
+    }
+
+    IFunctionCall* VirtualMachine::getCall() {
+        return _scope->call();
+    }
+
+    IQueueJob* VirtualMachine::pushCall(IFunctionCall* call) {
+        // fixme: need to account for contexts!
+        auto queue = getQueue(call);
+        auto job = queue->build(call, _scope, _state);
+        queue->push(job);
+        return job;
+    }
+
+    void VirtualMachine::drain() {
+        for ( auto queue : _queues ) {
+            while ( !queue->isEmpty() ) {
+                whileWaitingForDrain();
+            }
+        }
+    }
+
+    void VirtualMachine::enterQueueContext() {
+        QueueContextID id = _global->getUuid();
+        _queueContexts.push(id);
+
+        for ( auto queue : _queues ) {
+            queue->setContext(id);
+        }
+    }
+
+    void VirtualMachine::exitQueueContext() {
+        if ( _queueContexts.empty() ) {
+            throw Errors::SwarmError("Attempted to exit from non-existent queue context.");
+        }
+
+        _queueContexts.pop();
+
+        if ( _queueContexts.empty() ) {
+            throw Errors::SwarmError("Exited from last queue context. Cannot continue.");
+        }
+
+        QueueContextID id = _queueContexts.top();
+        for ( auto queue : _queues ) {
+            queue->setContext(id);
+        }
+    }
+
+    void VirtualMachine::returnToCaller() {
+        // Pop the callee's scope
+        exitScope();
+
+        // Set the return flag so we can execute assignments properly
+        _state->setFlag(StateFlag::JUMPED_FROM_RETURN);
+
+        // Jump back to the caller's site
+        _state->jumpReturn();
+    }
+
+    bool VirtualMachine::hasFlag(StateFlag f) const {
+        return _state->hasFlag(f);
+    }
+
+    void VirtualMachine::callInlineFunction(InlineFunctionCall* call) {
+        // Validate the inline function location
+        auto pc = _state->getInlineFunctionPC(call->name());
+
+        // Type check the parameters  // todo: generalize this
+        auto vector = call->vector();
+        for ( auto pair : vector ) {
+            auto type = pair.first;
+            auto ref = pair.second;
+            if ( !ref->type()->isAssignableTo(type) ) {
+                // FIXME: eventually, this needs to raise a runtime exception
+                throw Errors::SwarmError("Unable to make function call (" + call->toString() + ") - argument " + ref->toString() + " is not assignable to type " + type->toString());
+            }
+        }
+
+        // Start a new scope
+        enterCallScope(call);
+
+        // Jump to the function call
+        _state->jumpCall(pc);
+    }
+
+    void VirtualMachine::callBuiltinFunction(BuiltinFunctionCall* call) {
+        assert(false);
     }
 }

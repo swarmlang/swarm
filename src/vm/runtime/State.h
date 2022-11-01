@@ -3,29 +3,48 @@
 
 #include <map>
 #include <stack>
+#include <utility>
 #include "../../shared/IStringable.h"
 #include "../../errors/SwarmError.h"
 #include "../isa_meta.h"
 
 namespace swarmc::Runtime {
 
+    class InlineFunction;
+    class IFunctionCall;
+
+    enum class StateFlag: size_t {
+        NONE = 0,
+        JUMPED_FROM_RETURN = 2 << 0,
+    };
+
     class ScopeFrame : public IStringable {
     public:
         ScopeFrame(std::string id, ScopeFrame* parent) : _parent(parent) {
-            _id = id;
+            _id = std::move(id);
+        }
+        ScopeFrame(std::string id, ScopeFrame* parent, IFunctionCall* call) : _parent(parent), _call(call) {
+            _id = std::move(id);
         }
         virtual ~ScopeFrame() = default;
 
         void shadow(ISA::LocationReference*);
         ISA::LocationReference* map(ISA::LocationReference*);
         ScopeFrame* newChild();
+        ScopeFrame* newCall(IFunctionCall*);
         ScopeFrame* parent() { return _parent; }
+        IFunctionCall* call() {
+            if ( _call != nullptr ) return _call;
+            if ( _parent != nullptr ) return _parent->call();
+            return nullptr;
+        }
 
         std::string toString() const;
     protected:
         ScopeFrame* _parent = nullptr;
         std::map<std::string, ISA::LocationReference*> _map;
         std::string _id;
+        IFunctionCall* _call = nullptr;
     };
 
     class State : public IStringable {
@@ -41,9 +60,18 @@ namespace swarmc::Runtime {
             return _is[_pc];
         }
 
+        bool isEndOfProgram() const {
+            return _pc >= _is.size();
+        }
+
         void advance() {
-            if ( _pc >= _is.size() ) throw Errors::SwarmError("Cannot advance beyond end of program.");
+            if ( isEndOfProgram() ) throw Errors::SwarmError("Cannot advance beyond end of program.");
             _pc += 1;
+        }
+
+        void rewind() {
+            if ( _pc < 1 ) throw Errors::SwarmError("Cannot rewind beyond beginning of the program.");
+            _pc -= 1;
         }
 
         ISA::Instruction* pop() {
@@ -70,36 +98,41 @@ namespace swarmc::Runtime {
             _callStack.pop();
         }
 
+        std::vector<ISA::FunctionParam*> loadInlineFunctionParams(ISA::Instructions::size_type pc) const;
+
+        ISA::Instructions::size_type getInlineFunctionPC(std::string name) {
+            if ( _fJumps.find(name) == _fJumps.end() ) throw Errors::SwarmError("Unable to find pc for inline function f:" + name);
+            return _fJumps[name];
+        }
+
+        void setFlag(StateFlag flag) {
+            _flags = _flags | ((size_t) flag);
+        }
+
+        bool hasFlag(StateFlag flag) const {
+            return _flags & ((size_t) flag);
+        }
+
+        void clearFlag(StateFlag flag) {
+            _flags = _flags & ~((size_t) flag);
+        }
+
         std::string toString() const override {
             return "Runtime::State<>";
         }
     protected:
         ISA::Instructions _is;
-        std::map<std::string, ISA::Instructions::size_type> _fmap;
+        std::map<std::string, ISA::Instructions::size_type> _fJumps;
         ISA::Instructions::size_type _pc = 0;
         std::stack<ISA::Instructions::size_type> _callStack;
+        size_t _flags = 0;
 
         void initialize() {
             _pc = 0;
             annotate();
         }
 
-        void annotate() {
-            for ( auto it = _is.begin(); it != _is.end(); ++it ) {
-                auto i = *it;
-                if ( i->tag() == ISA::Tag::BEGINFN ) {
-                    auto idx = std::distance(_is.begin(), it);
-                    auto fn = (ISA::BeginFunction*) i;
-                    auto name = fn->first()->name();
-
-                    if ( _fmap.find(name) == _fmap.end() ) {
-                        _fmap[name] = idx;
-                    } else {
-                        throw Errors::SwarmError("Duplicate function region identifier: " + name + " (inline function names must be unique)");
-                    }
-                }
-            }
-        }
+        void annotate();
     };
 
 }

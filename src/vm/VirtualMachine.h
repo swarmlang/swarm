@@ -11,13 +11,22 @@
 #include "runtime/interfaces.h"
 #include "runtime/runtime_functions.h"
 #include "runtime/State.h"
+#include "walk/ExecuteWalk.h"
 
 namespace swarmc::Runtime {
 
     class VirtualMachine : public IStringable, public IUsesConsole {
     public:
-        VirtualMachine() : IUsesConsole() {}
-        virtual ~VirtualMachine() = default;
+        VirtualMachine(IGlobalServices* global) : IUsesConsole(), _global(global) {
+            _exec = new ExecuteWalk(this);
+            _queueContexts.push(_global->getUuid());
+        }
+
+        virtual ~VirtualMachine() {
+            delete _exec;
+        }
+
+        virtual IGlobalServices* global() const { return _global; }
 
         void initialize(ISA::Instructions is) {
             _state = new State(std::move(is));
@@ -45,6 +54,12 @@ namespace swarmc::Runtime {
 
         virtual ISA::Reference* resolve(ISA::Reference*);
 
+        virtual void step();
+
+        virtual void rewind();
+
+        virtual void execute();
+
         virtual void store(ISA::LocationReference*, ISA::Reference*);
 
         virtual bool hasLock(ISA::LocationReference*);
@@ -59,23 +74,51 @@ namespace swarmc::Runtime {
 
         virtual void enterScope();
 
+        virtual void enterCallScope(IFunctionCall*);
+
         virtual void exitScope();
 
-        virtual void call(IFunctionCall*) { /* FIXME */ };
+        virtual void call(IFunctionCall*);
 
-        virtual void pushCall(IFunctionCall*) { /* FIXME */ };
+        virtual IFunctionCall* getCall();
+
+        virtual IQueueJob* pushCall(IFunctionCall*);
+
+        virtual void drain();
+
+        virtual void enterQueueContext();
+
+        virtual void exitQueueContext();
+
+        virtual void returnToCaller();
+
+        virtual bool hasFlag(StateFlag) const;
 
         virtual void whileWaitingForLock() {
             std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
         }
 
+        virtual void whileWaitingForDrain() {
+            std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
+        }
+
     protected:
+        IGlobalServices* _global;
         State* _state = nullptr;
         Stores _stores;
+        Queues _queues;
         Locks _locks;
         ScopeFrame* _scope;
+        ExecuteWalk* _exec;
+        std::stack<QueueContextID> _queueContexts;
 
         virtual IStorageInterface* getStore(ISA::LocationReference*);
+
+        virtual IQueue* getQueue(IFunctionCall*);
+
+        virtual void callInlineFunction(InlineFunctionCall*);
+
+        virtual void callBuiltinFunction(BuiltinFunctionCall*);
     };
 
 }

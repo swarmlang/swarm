@@ -17,86 +17,90 @@ namespace swarmc::Runtime {
     protected:
         VirtualMachine* _vm;
 
+        std::string toString() const override;
+
         virtual void ensureType(const ISA::Reference*, const Type::Type*);
         virtual ISA::NumberReference* ensureNumber(const ISA::Reference*);
         virtual ISA::BooleanReference* ensureBoolean(const ISA::Reference*);
         virtual ISA::TypeReference* ensureType(const ISA::Reference*);
         virtual ISA::StringReference* ensureString(const ISA::Reference*);
         virtual ISA::FunctionReference* ensureFunction(const ISA::Reference*);
+        virtual ISA::EnumerationReference* ensureEnumeration(const ISA::Reference*);
 
-        virtual ISA::Reference* walkPlus(ISA::Plus*) = 0;
-        virtual ISA::Reference* walkMinus(ISA::Minus*) = 0;
-        virtual ISA::Reference* walkTimes(ISA::Times*) = 0;
-        virtual ISA::Reference* walkDivide(ISA::Divide*) = 0;
-        virtual ISA::Reference* walkPower(ISA::Power*) = 0;
-        virtual ISA::Reference* walkMod(ISA::Mod*) = 0;
-        virtual ISA::Reference* walkNegative(ISA::Negative*) = 0;
-        virtual ISA::Reference* walkGreaterThan(ISA::GreaterThan*) = 0;
-        virtual ISA::Reference* walkGreaterThanOrEqual(ISA::GreaterThanOrEqual*) = 0;
-        virtual ISA::Reference* walkLessThan(ISA::LessThan*) = 0;
-        virtual ISA::Reference* walkLessThanOrEqual(ISA::LessThanOrEqual*) = 0;
-        virtual ISA::Reference* walkAnd(ISA::And*) = 0;
-        virtual ISA::Reference* walkOr(ISA::Or*) = 0;
-        virtual ISA::Reference* walkXor(ISA::Xor*) = 0;
-        virtual ISA::Reference* walkNand(ISA::Nand*) = 0;
-        virtual ISA::Reference* walkNor(ISA::Nor*) = 0;
-        virtual ISA::Reference* walkNot(ISA::Not*) = 0;
-        virtual ISA::Reference* walkWhile(ISA::While*) = 0;
-        virtual ISA::Reference* walkWith(ISA::With*) = 0;
-        virtual ISA::Reference* walkEnumInit(ISA::EnumInit*) = 0;
-        virtual ISA::Reference* walkEnumAppend(ISA::EnumAppend*) = 0;
-        virtual ISA::Reference* walkEnumPrepend(ISA::EnumPrepend*) = 0;
-        virtual ISA::Reference* walkEnumLength(ISA::EnumLength*) = 0;
-        virtual ISA::Reference* walkEnumGet(ISA::EnumGet*) = 0;
-        virtual ISA::Reference* walkEnumSet(ISA::EnumSet*) = 0;
-        virtual ISA::Reference* walkEnumerate(ISA::Enumerate*) = 0;
-        virtual ISA::Reference* walkBeginFunction(ISA::BeginFunction*) = 0;
-        virtual ISA::Reference* walkFunctionParam(ISA::FunctionParam*) = 0;
-        virtual ISA::Reference* walkReturn1(ISA::Return1*) = 0;
-        virtual ISA::Reference* walkReturn0(ISA::Return0*) = 0;
-        virtual ISA::Reference* walkCurry(ISA::Curry*) = 0;
-        virtual ISA::Reference* walkCall0(ISA::Call0*) = 0;
-        virtual ISA::Reference* walkCall1(ISA::Call1*) = 0;
-        virtual ISA::Reference* walkCallIf0(ISA::CallIf0*) = 0;
-        virtual ISA::Reference* walkCallIf1(ISA::CallIf1*) = 0;
-        virtual ISA::Reference* walkCallElse0(ISA::CallElse0*) = 0;
-        virtual ISA::Reference* walkCallElse1(ISA::CallElse1*) = 0;
-        virtual ISA::Reference* walkPushCall0(ISA::PushCall0*) = 0;
-        virtual ISA::Reference* walkPushCall1(ISA::PushCall1*) = 0;
-        virtual ISA::Reference* walkPushCallIf0(ISA::PushCallIf0*) = 0;
-        virtual ISA::Reference* walkPushCallIf1(ISA::PushCallIf1*) = 0;
-        virtual ISA::Reference* walkPushCallElse0(ISA::PushCallElse0*) = 0;
-        virtual ISA::Reference* walkPushCallElse1(ISA::PushCallElse1*) = 0;
-        virtual ISA::Reference* walkMapInit(ISA::MapInit*) = 0;
-        virtual ISA::Reference* walkMapSet(ISA::MapSet*) = 0;
-        virtual ISA::Reference* walkMapGet(ISA::MapGet*) = 0;
-        virtual ISA::Reference* walkMapLength(ISA::MapLength*) = 0;
-        virtual ISA::Reference* walkMapKeys(ISA::MapKeys*) = 0;
-        virtual ISA::Reference* walkTypify(ISA::Typify*) = 0;
-        virtual ISA::Reference* walkAssignValue(ISA::AssignValue*) = 0;
-        virtual ISA::Reference* walkAssignEval(ISA::AssignEval*) = 0;
-        virtual ISA::Reference* walkLock(ISA::Lock*) = 0;
-        virtual ISA::Reference* walkUnlock(ISA::Unlock*) = 0;
-        virtual ISA::Reference* walkIsEqual(ISA::IsEqual*) = 0;
-        virtual ISA::Reference* walkScopeOf(ISA::ScopeOf*) = 0;
-        virtual ISA::Reference* walkStreamInit(ISA::StreamInit*) = 0;
-        virtual ISA::Reference* walkStreamPush(ISA::StreamPush*) = 0;
-        virtual ISA::Reference* walkStreamPop(ISA::StreamPop*) = 0;
-        virtual ISA::Reference* walkStreamClose(ISA::StreamClose*) = 0;
-        virtual ISA::Reference* walkStreamEmpty(ISA::StreamEmpty*) = 0;
-        virtual ISA::Reference* walkOut(ISA::Out*) = 0;
-        virtual ISA::Reference* walkErr(ISA::Err*) = 0;
-        virtual ISA::Reference* walkStringConcat(ISA::StringConcat*) = 0;
-        virtual ISA::Reference* walkStringLength(ISA::StringLength*) = 0;
-        virtual ISA::Reference* walkStringSliceFrom(ISA::StringSliceFrom*) = 0;
-        virtual ISA::Reference* walkStringSliceFromTo(ISA::StringSliceFromTo*) = 0;
-        virtual ISA::Reference* walkTypeOf(ISA::TypeOf*) = 0;
-        virtual ISA::Reference* walkIsCompatible(ISA::IsCompatible*) = 0;
-        virtual ISA::Reference* walkPushExceptionHandler1(ISA::PushExceptionHandler1*) = 0;
-        virtual ISA::Reference* walkPushExceptionHandler2(ISA::PushExceptionHandler2*) = 0;
-        virtual ISA::Reference* walkPopExceptionHandler(ISA::PopExceptionHandler*) = 0;
-        virtual ISA::Reference* walkRaise(ISA::Raise*) = 0;
-        virtual ISA::Reference* walkResume(ISA::Resume*) = 0;
+        ISA::Reference* walkPlus(ISA::Plus*) override;
+        ISA::Reference* walkMinus(ISA::Minus*) override;
+        ISA::Reference* walkTimes(ISA::Times*) override;
+        ISA::Reference* walkDivide(ISA::Divide*) override;
+        ISA::Reference* walkPower(ISA::Power*) override;
+        ISA::Reference* walkMod(ISA::Mod*) override;
+        ISA::Reference* walkNegative(ISA::Negative*) override;
+        ISA::Reference* walkGreaterThan(ISA::GreaterThan*) override;
+        ISA::Reference* walkGreaterThanOrEqual(ISA::GreaterThanOrEqual*) override;
+        ISA::Reference* walkLessThan(ISA::LessThan*) override;
+        ISA::Reference* walkLessThanOrEqual(ISA::LessThanOrEqual*) override;
+        ISA::Reference* walkAnd(ISA::And*) override;
+        ISA::Reference* walkOr(ISA::Or*) override;
+        ISA::Reference* walkXor(ISA::Xor*) override;
+        ISA::Reference* walkNand(ISA::Nand*) override;
+        ISA::Reference* walkNor(ISA::Nor*) override;
+        ISA::Reference* walkNot(ISA::Not*) override;
+        ISA::Reference* walkWhile(ISA::While*) override;
+        ISA::Reference* walkWith(ISA::With*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkEnumInit(ISA::EnumInit*) override;
+        ISA::Reference* walkEnumAppend(ISA::EnumAppend*) override;
+        ISA::Reference* walkEnumPrepend(ISA::EnumPrepend*) override;
+        ISA::Reference* walkEnumLength(ISA::EnumLength*) override;
+        ISA::Reference* walkEnumGet(ISA::EnumGet*) override;
+        ISA::Reference* walkEnumSet(ISA::EnumSet*) override;
+        ISA::Reference* walkEnumerate(ISA::Enumerate*) override;
+        ISA::Reference* walkBeginFunction(ISA::BeginFunction*) override;
+        ISA::Reference* walkFunctionParam(ISA::FunctionParam*) override;
+        ISA::Reference* walkReturn1(ISA::Return1*) override;
+        ISA::Reference* walkReturn0(ISA::Return0*) override;
+        ISA::Reference* walkCurry(ISA::Curry*) override;
+        ISA::Reference* walkCall0(ISA::Call0*) override;
+        ISA::Reference* walkCall1(ISA::Call1*) override;
+        ISA::Reference* walkCallIf0(ISA::CallIf0*) override;
+        ISA::Reference* walkCallIf1(ISA::CallIf1*) override;
+        ISA::Reference* walkCallElse0(ISA::CallElse0*) override;
+        ISA::Reference* walkCallElse1(ISA::CallElse1*) override;
+        ISA::Reference* walkPushCall0(ISA::PushCall0*) override;
+        ISA::Reference* walkPushCall1(ISA::PushCall1*) override;
+        ISA::Reference* walkPushCallIf0(ISA::PushCallIf0*) override;
+        ISA::Reference* walkPushCallIf1(ISA::PushCallIf1*) override;
+        ISA::Reference* walkPushCallElse0(ISA::PushCallElse0*) override;
+        ISA::Reference* walkPushCallElse1(ISA::PushCallElse1*) override;
+        ISA::Reference* walkDrain(ISA::Drain*) override;
+        ISA::Reference* walkMapInit(ISA::MapInit*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkMapSet(ISA::MapSet*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkMapGet(ISA::MapGet*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkMapLength(ISA::MapLength*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkMapKeys(ISA::MapKeys*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkTypify(ISA::Typify*) override;
+        ISA::Reference* walkAssignValue(ISA::AssignValue*) override;
+        ISA::Reference* walkAssignEval(ISA::AssignEval*) override;
+        ISA::Reference* walkLock(ISA::Lock*) override;
+        ISA::Reference* walkUnlock(ISA::Unlock*) override;
+        ISA::Reference* walkIsEqual(ISA::IsEqual*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkScopeOf(ISA::ScopeOf*) override;
+        ISA::Reference* walkStreamInit(ISA::StreamInit*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkStreamPush(ISA::StreamPush*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkStreamPop(ISA::StreamPop*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkStreamClose(ISA::StreamClose*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkStreamEmpty(ISA::StreamEmpty*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkOut(ISA::Out*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkErr(ISA::Err*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkStringConcat(ISA::StringConcat*) override;
+        ISA::Reference* walkStringLength(ISA::StringLength*) override;
+        ISA::Reference* walkStringSliceFrom(ISA::StringSliceFrom*) override;
+        ISA::Reference* walkStringSliceFromTo(ISA::StringSliceFromTo*) override;
+        ISA::Reference* walkTypeOf(ISA::TypeOf*) override;
+        ISA::Reference* walkIsCompatible(ISA::IsCompatible*) override;
+        ISA::Reference* walkPushExceptionHandler1(ISA::PushExceptionHandler1*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkPushExceptionHandler2(ISA::PushExceptionHandler2*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkPopExceptionHandler(ISA::PopExceptionHandler*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkRaise(ISA::Raise*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkResume(ISA::Resume*) override { return nullptr;  /* FIXME */ }
     };
 
 }

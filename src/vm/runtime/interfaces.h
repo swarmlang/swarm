@@ -16,11 +16,36 @@ namespace swarmc::Type {
 
 namespace swarmc::Runtime {
 
+    class IFunctionCall;
+    class ScopeFrame;
+    class State;
+
     class IStorageLock;
     class IStorageInterface;
+    class IQueue;
 
+    using JobID = size_t;
+    using QueueContextID = std::string;
     using Stores = std::vector<IStorageInterface*>;
     using Locks = std::vector<IStorageLock*>;
+    using Queues = std::vector<IQueue*>;
+
+    enum class JobState: size_t {
+        UNKNOWN = 2 << 0,
+        PENDING = 2 << 1,
+        RUNNING = 2 << 2,
+        COMPLETE = 2 << 3,
+        ERROR = 2 << 4,
+    };
+
+    class IGlobalServices : public IStringable {
+    public:
+        virtual ~IGlobalServices() = default;
+
+        virtual std::string getUuid() = 0;
+
+        virtual size_t getId() = 0;
+    };
 
     /** Represents a lock acquired by some control. */
     class IStorageLock : public IStringable {
@@ -71,6 +96,46 @@ namespace swarmc::Runtime {
 
         /** Forget all stored variables. */
         virtual void clear() = 0;
+    };
+
+
+    /** Tracking class for a single deferred function call. */
+    class IQueueJob : public IStringable {
+    public:
+        virtual ~IQueueJob() = default;
+
+        /** Get the tracking ID for this job. */
+        virtual JobID id() const = 0;
+
+        /** Get the current status of this job. */
+        virtual JobState state() const = 0;
+
+        virtual const IFunctionCall* getCall() const = 0;
+
+        virtual const ScopeFrame* getScope() const = 0;
+
+        virtual const State* getState() const = 0;
+    };
+
+
+    /** Interface for a deferred function call queue. */
+    class IQueue : public IStringable {
+    public:
+        virtual ~IQueue() = default;
+
+        virtual void setContext(QueueContextID) = 0;
+
+        virtual QueueContextID getContext() = 0;
+
+        virtual bool shouldHandle(IFunctionCall*) = 0;
+
+        virtual IQueueJob* build(const IFunctionCall*, const ScopeFrame*, const State*) = 0;
+
+        virtual void push(IQueueJob*) = 0;
+
+        virtual IQueueJob* pop() = 0;
+
+        virtual bool isEmpty() = 0;
     };
 
 }

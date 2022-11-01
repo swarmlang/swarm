@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 #include "../../shared/IStringable.h"
+#include "../../errors/SwarmError.h"
 
 namespace swarmc::Type {
     class Type;
@@ -39,34 +40,55 @@ namespace swarmc::Runtime {
 
     class IFunctionCall : public IStringable {
     public:
-        IFunctionCall(FunctionBackend backend, CallVector vector) : _backend(backend), _vector(std::move(vector)) {}
+        IFunctionCall(FunctionBackend backend, CallVector vector, const Type::Type* returnType):
+            _backend(backend), _vector(std::move(vector)), _returnType(returnType) {}
 
         virtual FunctionBackend backend() { return _backend; }
 
         virtual CallVector vector() { return _vector; }
 
+        virtual const Type::Type* returnType() { return _returnType; }
+
+        virtual void setReturn(ISA::Reference* value) { _returnValue = value; }
+
+        virtual ISA::Reference* getReturn() const { return _returnValue; }
+
+        virtual std::pair<const Type::Type*, ISA::Reference*> popParam() {
+            if ( !hasParamsRemaining() ) throw Errors::SwarmError("Cannot pop param from function call: index out of bounds");
+            return _vector[_paramIndex++];
+        }
+
+        virtual bool hasParamsRemaining() {
+            return _paramIndex < _vector.size();
+        }
+
     protected:
         FunctionBackend _backend;
         CallVector _vector;
+        const Type::Type* _returnType;
+        ISA::Reference* _returnValue = nullptr;
+        size_t _paramIndex = 0;
     };
 
     class InlineFunctionCall : public IFunctionCall {
     public:
-        InlineFunctionCall(size_t pc, CallVector vector) : IFunctionCall(FunctionBackend::INLINE, std::move(vector)), _pc(pc) {}
+        InlineFunctionCall(std::string name, CallVector vector, const Type::Type* returnType) :
+            IFunctionCall(FunctionBackend::INLINE, std::move(vector), returnType), _name(std::move(name)) {}
 
-        virtual size_t jumpTo() const { return _pc; }
+        std::string name() const { return _name; }
 
         std::string toString() const override {
-            return "InlineFunctionCall<pc: " + std::to_string(_pc) + ">";
+            return "InlineFunctionCall<f:" + _name + ">";
         }
 
     protected:
-        size_t _pc;
+        std::string _name;
     };
 
     class BuiltinFunctionCall : public IFunctionCall {
     public:
-        BuiltinFunctionCall(BuiltinFunctionTag tag, CallVector vector) : IFunctionCall(FunctionBackend::BUILTIN, vector), _tag(tag) {}
+        BuiltinFunctionCall(BuiltinFunctionTag tag, CallVector vector, const Type::Type* returnType) :
+            IFunctionCall(FunctionBackend::BUILTIN, vector, returnType), _tag(tag) {}
 
         virtual BuiltinFunctionTag tag() const { return _tag; }
 
@@ -115,6 +137,7 @@ namespace swarmc::Runtime {
         }
 
         CallVector getCallVector() const override {
+            // FIXME: validate type/param indices
             auto type = _upstream->paramTypes()[0];
             auto upstream = _upstream->getCallVector();
             upstream.push_back({type, _ref});
@@ -139,8 +162,8 @@ namespace swarmc::Runtime {
 
     class InlineFunction : public IFunction {
     public:
-        InlineFunction(size_t pc, std::string name, FormalTypes types, Type::Type* returnType)
-            : _pc(pc), _name(name), _types(types), _returnType(returnType) {}
+        InlineFunction(std::string name, FormalTypes types, Type::Type* returnType)
+            : _name(name), _types(types), _returnType(returnType) {}
 
         FormalTypes paramTypes() const override {
             return _types;
@@ -159,7 +182,7 @@ namespace swarmc::Runtime {
         }
 
         IFunctionCall* call(CallVector vector) const override {
-            return new InlineFunctionCall(_pc, vector);
+            return new InlineFunctionCall(_name, vector, _returnType);
         }
 
         FunctionBackend backend() const override {
@@ -169,7 +192,6 @@ namespace swarmc::Runtime {
         std::string toString() const override;
 
     protected:
-        size_t _pc;
         std::string _name;
         FormalTypes _types;
         Type::Type* _returnType;
@@ -191,7 +213,7 @@ namespace swarmc::Runtime {
         }
 
         IFunctionCall* call(CallVector vector) const override {
-            return new BuiltinFunctionCall(_tag, vector);
+            return new BuiltinFunctionCall(_tag, vector, returnType());
         }
 
         FunctionBackend backend() const override {
