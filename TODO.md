@@ -1,5 +1,6 @@
 - setup docker container for builds
 - fix memory leaks
+  - Type objects and semantic symbols
 - not dogshit test suite
   - fuzzy testing with American Fuzzy Lop
 - ability to call external bindings from vm
@@ -10,8 +11,14 @@
     - ...others?
 - pass to convert AST to ISA
 - ast optimization pass
+  - removing statements coming after a return
+  - simplification of trivial expressions
 - assembly optimization pass
   - `X += -Y` can be optimized in the assembly
+  - Remove instructions assigning variables to themselves
+  - Propagate primitives values
+  - Dead code elimination
+  - beginfn followed by return0
 - VM runtime
 - remove RESOURCE type from lexing (added so I could test WITH statements)
 - Serialize ISA to SVI code
@@ -21,3 +28,4 @@
 - Support Position annotations in SVI for better error messages from the VM
 - Garbage collection / reference counting
 - More generic logging class that can centralize logs from workers?
+- More compact binary form of SVI

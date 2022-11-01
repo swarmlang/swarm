@@ -208,15 +208,6 @@ protected:
         pop_space();
     }
 
-    virtual void walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        for ( auto stmt : *node->body() ) {
-            walk(stmt);
-        }
-        pop_space();
-    }
-
     virtual void walkWithStatement(WithStatement* node) {
         _out << _prefix << node->toString() << std::endl;
         push_space();
@@ -301,10 +292,6 @@ protected:
     }
 
     virtual void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
-    virtual void walkTagResourceNode(TagResourceNode* node) {
         _out << _prefix << node->toString() << std::endl;
     }
 

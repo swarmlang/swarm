@@ -37,7 +37,11 @@ namespace swarmc {
         virtual ~Pipeline(){
             delete _scanner;
             delete _parser;
-            delete _root;
+            if ( _root != nullptr) {
+                for ( auto stmt : *_root->body() ) delete stmt;
+                delete _root->body();
+                delete _root;
+            }
         }
 
         virtual std::string toString() const override {

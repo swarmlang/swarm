@@ -213,11 +213,11 @@ return
 ### Examples
 
 ```txt
-fn sum = (a: number, b: number, c: number): number -> a + b + c;
+fn sum = (a: number, b: number, c: number): number => a + b + c;
 
-local number one = 1.1;
-local number two = 2.2;
-local number three = 3.3;
+number one = 1.1;
+number two = 2.2;
+number three = 3.3;
 
 shared number onetwothree = sum(one)(two)(three);
 ```
@@ -242,8 +242,8 @@ $s:onetwothree <- call $l:fcall $l:three
 ```
 
 ```txt
-fn helloer = (name: string): string -> {
-  if ( name === "world" ) {
+fn helloer = (name: string): string => {
+  if ( name == "world" ) {
     return "Hi, there!";
   }
   

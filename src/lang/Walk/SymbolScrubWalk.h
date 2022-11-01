@@ -161,10 +161,6 @@ protected:
         walkBlockStatementNode(node);
     }
 
-    virtual void walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        return walkBlockStatementNode(node);
-    }
-
     virtual void walkWithStatement(WithStatement* node) {
         walk(node->resource());
 
@@ -231,8 +227,6 @@ protected:
         walk(node->left());
         walk(node->right());
     }
-
-    virtual void walkTagResourceNode(TagResourceNode* node) {}
 
     virtual std::string toString() const {
         return "SymbolScrubWalk<>";

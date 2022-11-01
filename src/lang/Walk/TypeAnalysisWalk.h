@@ -12,7 +12,7 @@ namespace Walk {
 
 class TypeAnalysisWalk : public Walk<bool> {
 public:
-    TypeAnalysisWalk() : Walk<bool>(), _types(new TypeTable()), 
+    TypeAnalysisWalk() : Walk<bool>(), _whileCount(0), _funcCount(0), _types(new TypeTable()), 
         _funcTypes(new std::stack<const Type::Type*>()), _funcArgs(new std::stack<int>()) {}
     ~TypeAnalysisWalk() {
         delete _types;
@@ -171,7 +171,7 @@ protected:
         auto argTypes = typeOfCallee->params();
 
         // Make sure the # of arguments matches
-        if ( argTypes.size() != node->args()->size() ) {
+        if ( argTypes.size() < node->args()->size() ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
@@ -232,7 +232,7 @@ protected:
         auto argTypes = typeOfCallee->params();
 
         // Make sure the # of arguments matches
-        if ( argTypes.size() != node->args()->size() ) {
+        if ( argTypes.size() < node->args()->size() ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
@@ -433,8 +433,7 @@ protected:
             const Type::Type* expType = _types->getTypeOf(exp);
             if ( !hadFirst ) {
                 innerType = expType;
-                // FIXME: Doesn't accurately type check this statement because type of enum is not known
-                node->_type = new TypeLiteral(node->position(), new Type::Enumerable(innerType));
+                node->_type = new TypeLiteral(node->position()->copy(), new Type::Enumerable(innerType));
                 hadFirst = false;
             } else if ( !expType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
@@ -448,17 +447,6 @@ protected:
         }
 
         _types->setTypeOf(node, flag ? node->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
-        return flag;
-    }
-
-    virtual bool walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        bool flag = true;
-        for ( auto stmt : *node->body() ) {
-            flag = walk(stmt);
-        }
-
-        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
-        _types->setTypeOf(node, type);
         return flag;
     }
 
@@ -478,9 +466,12 @@ protected:
         auto concreteType = genericType->values();
         _types->setTypeOf(node->local(), concreteType);
 
+        int temp = _funcCount;
+        _funcCount = 0;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
         }
+        _funcCount = temp;
 
         auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
         _types->setTypeOf(node, type);
@@ -553,9 +544,11 @@ protected:
             flag = false;
         }
 
+        _whileCount++;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
         }
+        _whileCount--;
 
         auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
         _types->setTypeOf(node, type);
@@ -563,15 +556,31 @@ protected:
     }
 
     virtual bool walkContinueNode(ContinueNode* node) {
+        if ( _whileCount == 0 ) {
+            Reporting::syntaxError(
+                node->position(),
+                "Found continue statement outside of a while statement"
+            );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
         return true;
     }
 
     virtual bool walkBreakNode(BreakNode* node) {
+        if ( _whileCount == 0 ) {
+            Reporting::syntaxError(
+                node->position(),
+                "Found break statement outside of a while statement"
+            );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
         return true;
     }
 
     virtual bool walkReturnStatementNode(ReturnStatementNode* node) {
-        if ( _funcTypes->empty() ) {
+        if ( _funcCount == 0 ) {
             Reporting::syntaxError(
                 node->position(),
                 "Found return statement outside of a function"
@@ -651,7 +660,7 @@ protected:
             if ( !hadFirst ) {
                 innerType = stmtType;
                 // FIXME: Doesn't accurately type check this statement because type of map is not known
-                node->_type = new TypeLiteral(node->position(), new Type::Map(innerType));
+                node->_type = new TypeLiteral(node->position()->copy(), new Type::Map(innerType));
                 hadFirst = false;
             } else if ( !stmtType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
@@ -710,12 +719,14 @@ protected:
     virtual bool walkFunctionNode(FunctionNode* node) {
         _funcTypes->push(node->type());
         _funcArgs->push(node->formals()->size());
+        _funcCount++;
         bool flag = true;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
         }
         _funcTypes->pop();
         _funcArgs->pop();
+        _funcCount--;
 
         _types->setTypeOf(node, flag ? node->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
         return flag;
@@ -725,15 +736,11 @@ protected:
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkTagResourceNode(TagResourceNode* node) {
-        _types->setTypeOf(node, node->type());
-        return true;
-    }
-
     virtual std::string toString() const {
         return "TypeAnalysisWalk<>";
     }
 private:
+    int _whileCount, _funcCount;
     TypeTable* _types;
     std::stack<const Type::Type*>* _funcTypes;
     std::stack<int>* _funcArgs;

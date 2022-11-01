@@ -348,22 +348,6 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        SymbolMap* map = new SymbolMap();
-
-        for (auto i : *node->body()) {
-            SymbolMap* m = walk(i);
-            map->insert(m->begin(), m->end());
-            delete m;
-        }
-
-        return map;
-    }
-
-    virtual SymbolMap* walkTagResourceNode(TagResourceNode* node) {
-        return new SymbolMap();
-    }
-
     std::string toString() const override {
         return "SymbolWalk<>";
     }

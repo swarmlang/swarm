@@ -15,7 +15,9 @@ namespace Lang {
     class Token : public IStringable {
     public:
         Token(Position* pos, int kind, std::string display) : _pos(pos), _kind(kind), _display(display) {};
-        virtual ~Token() {}
+        virtual ~Token() {
+            delete _pos;
+        }
 
         Position* position() const {
             return _pos;

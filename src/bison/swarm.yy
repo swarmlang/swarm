@@ -23,6 +23,7 @@
     class Shared {
     public:
         Shared(swarmc::Lang::Position* pos, bool shared): _pos(pos), _shared(shared) {}
+        ~Shared() { if ( _pos != nullptr ) delete _pos; }
         swarmc::Lang::Position* position() const { return _pos; }
         bool shared() const { return _shared; }
     private:
@@ -208,9 +209,9 @@ statement :
     | ENUMERATE lval AS shared id COMMA shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $11->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $8, $4->shared());
-        auto t = new TypeLiteral($8->position(), Type::Primitive::of(Type::Intrinsic::NUMBER));
+        auto t = new TypeLiteral($8->position()->copy(), Type::Primitive::of(Type::Intrinsic::NUMBER));
         t->setShared($7->shared());
-        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy(), $8->position()));
+        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy(), $8->position()->copy()));
         e->assumeAndReduceStatements($10->reduceToStatements());
         $$ = e;
         delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11; delete t;
@@ -283,7 +284,7 @@ statement :
 
 shared :
     SHARED {
-        $$ = new Shared($1->position(), true);
+        $$ = new Shared($1->position()->copy(), true);
         delete $1;
     }
 
@@ -320,63 +321,63 @@ assignment :
     | lval ADDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new AddNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
     | lval MULTIPLYASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new MultiplyNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
     | lval SUBTRACTASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new SubtractNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
     | lval DIVIDEASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new DivideNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
     | lval MODULUSASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new ModulusNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
     | lval POWERASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new PowerNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
     | lval CATASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new ConcatenateNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
     | lval ANDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new AndNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
     | lval ORASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new OrNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos, $1, r);
+        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
         delete $2;
     }
 
@@ -394,19 +395,13 @@ lval :
 
     | lval LBRACKET expression RBRACKET {
         Position* pos = new Position($1->position(), $4->position());
-        // if ($3->value() != (int)$3->value() || $3->value() < 0 || $3->value() > DBL_MAX) {
-        //     Reporting::parseError(
-        //         $3->position(),
-        //         "Invalid Enumerable index: " + std::to_string($3->value()));
-        //     throw swarmc::Errors::ParseError(1);
-        // }
         $$ = new EnumerableAccessNode(pos, $1, $3);
         delete $2; delete $4;
     }
 
 id :
     ID {
-        $$ = new IdentifierNode($1->position(), $1->identifier());
+        $$ = new IdentifierNode($1->position()->copy(), $1->identifier());
         delete $1;
     }
 
@@ -415,37 +410,37 @@ id :
 type :
     STRING {
         auto t = Type::Primitive::of(Type::Intrinsic::STRING);
-        $$ = new TypeLiteral($1->position(), t);
+        $$ = new TypeLiteral($1->position()->copy(), t);
         delete $1;
     }
 
     | NUMBER {
         auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
-        $$ = new TypeLiteral($1->position(), t);
+        $$ = new TypeLiteral($1->position()->copy(), t);
         delete $1;
     }
 
     | BOOL {
         auto t = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
-        $$ = new TypeLiteral($1->position(), t);
+        $$ = new TypeLiteral($1->position()->copy(), t);
         delete $1;
     }
 
     | VOID {
         auto t = Type::Primitive::of(Type::Intrinsic::VOID);
-        $$ = new TypeLiteral($1->position(), t);
+        $$ = new TypeLiteral($1->position()->copy(), t);
         delete $1;
     }
 
     | TYPE {
         auto t = Type::Primitive::of(Type::Intrinsic::TYPE);
-        $$ = new TypeLiteral($1->position(), t);
+        $$ = new TypeLiteral($1->position()->copy(), t);
         delete $1;
     }
 
     | RESOURCE {
         auto t = new Type::Resource(Type::Primitive::of(Type::Intrinsic::VOID));
-        $$ = new TypeLiteral($1->position(), t);
+        $$ = new TypeLiteral($1->position()->copy(), t);
         delete $1;
     }
 
@@ -489,7 +484,7 @@ function :
         Position* pos = new Position($1->position(), $8->position());
 
         FunctionNode* fn = new FunctionNode(
-            pos, new TypeLiteral($4->position(), new Type::Lambda0($4->value())), new FormalList());
+            pos, new TypeLiteral($4->position()->copy(), new Type::Lambda0($4->value())), new FormalList());
         fn->assumeAndReduceStatements($7->reduceToStatements());
         $$ = fn;
         delete $1; delete $2; delete $3; delete $5; delete $6; delete $8;
@@ -507,7 +502,7 @@ function :
 
         FunctionNode* fn = new FunctionNode(pos, new TypeLiteral(typepos, t), $2);
         auto retstmt = new StatementList();
-        retstmt->push_back(new ReturnStatementNode($7->position(), $7));
+        retstmt->push_back(new ReturnStatementNode($7->position()->copy(), $7));
         fn->assumeAndReduceStatements(retstmt);
         $$ = fn;
         delete $1; delete $3; delete $4; delete $6;
@@ -517,9 +512,9 @@ function :
         Position* pos = new Position($1->position(), $6->position());
 
         FunctionNode* fn = new FunctionNode(
-            pos, new TypeLiteral($4->position(), new Type::Lambda0($4->value())), new FormalList());
+            pos, new TypeLiteral($4->position()->copy(), new Type::Lambda0($4->value())), new FormalList());
         auto retstmt = new StatementList();
-        retstmt->push_back(new ReturnStatementNode($6->position(), $6));
+        retstmt->push_back(new ReturnStatementNode($6->position()->copy(), $6));
         fn->assumeAndReduceStatements(retstmt);
         $$ = fn;
         delete $1; delete $2; delete $3; delete $5;
@@ -531,7 +526,7 @@ expression :
     LBRACE RBRACE OF type {
         Position* pos = new Position($1->position(), $4->position());
         std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
-        $$ = new MapNode(pos, body, new TypeLiteral(pos, new Type::Map($4->value())));
+        $$ = new MapNode(pos, body, new TypeLiteral($4->position()->copy(), new Type::Map($4->value())));
         delete $1; delete $2; delete $3; delete $4;
     }
 
@@ -554,7 +549,7 @@ expressionF :
         Position* pos = new Position($1->position(), $4->position());
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
         $$ = new EnumerationLiteralExpressionNode(pos, actuals, 
-            new TypeLiteral(pos, new Type::Enumerable($4->value())));
+            new TypeLiteral($4->position()->copy(), new Type::Enumerable($4->value())));
         delete $1; delete $2; delete $3; delete $4;
     }
 
@@ -682,22 +677,22 @@ term :
     }
 
     | STRINGLITERAL {
-        $$ = new StringLiteralExpressionNode($1->position(), $1->value());
+        $$ = new StringLiteralExpressionNode($1->position()->copy(), $1->value());
         delete $1;
     }
 
     | NUMBERLITERAL {
-        $$ = new NumberLiteralExpressionNode($1->position(), $1->value());
+        $$ = new NumberLiteralExpressionNode($1->position()->copy(), $1->value());
         delete $1;
     }
 
     | TRUE {
-        $$ = new BooleanLiteralExpressionNode($1->position(), true);
+        $$ = new BooleanLiteralExpressionNode($1->position()->copy(), true);
         delete $1;
     }
 
     | FALSE {
-        $$ = new BooleanLiteralExpressionNode($1->position(), false);
+        $$ = new BooleanLiteralExpressionNode($1->position()->copy(), false);
         delete $1;
     }
 

@@ -13,6 +13,15 @@ fn funct3 = (arg1: string, arg2: number): number => {
 -- moldy return (should fail)
 return;
 
+-- moldy return 2 (should fail)
+fn t4 = ():number=>{
+    enumerable<number> t4_e = [1,2,3];
+    enumerate t4_e as t4s {
+        return t4s;
+    }
+    return 0;
+};
+
 -- bad return type (should fail)
 fn funct5_1 = (): void => {
     return 69;

@@ -53,7 +53,7 @@ beginfn f:ENUM_INNER p:VOID
 	while $l:i_lt_nplus1 f:WHILE_INNER
 
 	$l:pi_approx_diff <- times $l:s $l:h
-	$s:pi_approx <- $s:pi_approx + $l:pi_approx_diff
+	$s:pi_approx <- plus $s:pi_approx $l:pi_approx_diff
 return
 
 beginfn f:MAIN p:VOID

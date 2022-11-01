@@ -246,10 +246,6 @@ protected:
         return flag;
     }
 
-    virtual bool walkCapturedBlockStatementNode(CapturedBlockStatementNode* node) {
-        return walkBlockStatementNode(node);
-    }
-
     virtual bool walkWithStatement(WithStatement* node) {
         bool flag = walk(node->resource());
 
@@ -386,10 +382,6 @@ protected:
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
-    }
-
-    virtual bool walkTagResourceNode(TagResourceNode* node) {
-        return true;
     }
 
     virtual std::string toString() const {
