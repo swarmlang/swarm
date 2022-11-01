@@ -14,7 +14,7 @@ namespace Walk {
 
 class CompileWalk : Walk<ISA::Instructions*> {
 public:
-    CompileWalk(std::ostream& out, ASTNode* node) : Walk<ISA::Instructions*>(), _tempCounter(0), _inFunction(false), _whileConds(new std::stack<std::string>()) {
+    CompileWalk(std::ostream& out, ASTNode* node) : Walk<ISA::Instructions*>(), _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()) {
         ISA::Instructions* program = walk(node);
         for ( auto i : *program ) {
             out << i->toString() << "\n";
@@ -300,19 +300,30 @@ protected:
     }
 
     virtual ISA::Instructions* walkEnumerationStatement(EnumerationStatement* node) {
-        return nullptr;
-    }
+        auto instrs = walk(node->enumerable());
+        auto enumLoc = getLocFromAssign(instrs->back());
 
-    virtual ISA::Instructions* walkWithStatement(WithStatement* node) {
-        auto instrs = walk(node->resource());
-        auto resLoc = getLocFromAssign(instrs->back());
+        assert(node->enumerable()->type()->intrinsic() == Type::Intrinsic::ENUMERABLE);
+        auto elemType = new ISA::TypeReference(((Type::Enumerable*)node->enumerable()->type())->values());
 
-        auto typeLoc = makeLocation(ISA::Affinity::LOCAL);
-        instrs->push_back(new ISA::AssignEval(typeLoc, new ISA::TypeOf(resLoc)));
-        std::string name = "WITH_" + std::to_string(_tempCounter++);
+        std::string name = "ENUM_" + std::to_string(_tempCounter++);
 
-        instrs->push_back(new ISA::BeginFunction(name, new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID))));
-        instrs->push_back(new ISA::FunctionParam(typeLoc, new ISA::LocationReference(ISA::Affinity::LOCAL, "res_" + node->local()->name())));
+        _inFunction++;
+        instrs->push_back(new ISA::BeginFunction(name, Type::Primitive::of(Type::Intrinsic::VOID)));
+        auto elemShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
+        instrs->push_back(new ISA::FunctionParam(elemType, new ISA::LocationReference(elemShared, "arg_" + node->local()->name())));
+        if ( node->index() != nullptr ) {
+            auto idxShared = node->index()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
+            instrs->push_back(new ISA::FunctionParam(
+                new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::NUMBER)), 
+                new ISA::LocationReference(idxShared, "arg_" + node->index()->name())
+            ));
+        } else {
+            instrs->push_back(new ISA::FunctionParam(
+                new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::NUMBER)), 
+                new ISA::LocationReference(ISA::Affinity::LOCAL, "UNUSEDarg_idx")
+            ));
+        }
 
         for ( auto stmt : *node->body() ) {
             auto s = walk(stmt);
@@ -321,10 +332,43 @@ protected:
         }
 
         instrs->push_back(new ISA::Return0());
-        instrs->push_back(new ISA::Call1(
-            new ISA::LocationReference(ISA::Affinity::LOCAL, name),
-            new ISA::LocationReference(ISA::Affinity::LOCAL, "res_" + node->local()->name())
+        _inFunction--;
+
+        instrs->push_back(new ISA::Enumerate(
+            elemType,
+            enumLoc,
+            new ISA::LocationReference(ISA::Affinity::FUNCTION, name)
         ));
+
+        return instrs;
+    }
+
+    virtual ISA::Instructions* walkWithStatement(WithStatement* node) {
+        auto instrs = walk(node->resource());
+        auto resLoc = getLocFromAssign(instrs->back());
+
+        // get yield type
+        auto type = new ISA::TypeReference(node->local()->type());
+        auto typeLoc = makeLocation(ISA::Affinity::LOCAL);
+        instrs->push_back(new ISA::AssignValue(typeLoc, type));
+        std::string name = "WITH_" + std::to_string(_tempCounter++);
+
+        _inFunction++;
+        instrs->push_back(new ISA::BeginFunction(name, new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID))));
+        auto localShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
+        instrs->push_back(new ISA::FunctionParam(typeLoc, new ISA::LocationReference(localShared, "res_" + node->local()->name())));
+
+        // walk body
+        for ( auto stmt : *node->body() ) {
+            auto s = walk(stmt);
+            instrs->insert(instrs->end(), s->begin(), s->end());
+            delete s;
+        }
+
+        instrs->push_back(new ISA::Return0());
+        _inFunction--;
+
+        instrs->push_back(new ISA::With(resLoc, new ISA::LocationReference(ISA::Affinity::FUNCTION, name)));
 
         return instrs;
     }
@@ -334,7 +378,7 @@ protected:
         
         // build IF function (potentially need global scope? add to map if so)
         std::string name = "IFBODY_" + std::to_string(_tempCounter++);
-        _inFunction = true;
+        _inFunction++;
         auto begin = new ISA::BeginFunction(name, new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID)));
         instrs->push_back(begin);
         for ( auto stmt : *node->body() ) {
@@ -343,7 +387,7 @@ protected:
             delete i;
         }
         instrs->push_back(new ISA::Return0());
-        _inFunction = false;
+        _inFunction--;
         auto func = new ISA::LocationReference(ISA::Affinity::FUNCTION, name);
 
         // walk condition and callif
@@ -363,16 +407,18 @@ protected:
         );
         // condition function
         _whileConds->push("WHILECOND_" + std::to_string(_tempCounter++));
+        _inFunction++;
         instrs->push_back(new ISA::BeginFunction(_whileConds->top(), new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::BOOLEAN))));
         auto cond = walk(node->condition());
         instrs->insert(instrs->end(), cond->begin(), cond->end());
         instrs->push_back(new ISA::Return1(getLocFromAssign(instrs->back())));
+        _inFunction--;
 
         // While function header
         std::string name = "WHILE_" + std::to_string(_tempCounter++);
         auto retType = new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID));
         auto cfb = new ISA::LocationReference(ISA::Affinity::LOCAL, "CFBWhile");
-        _inFunction = true;
+        _inFunction++;
         instrs->push_back(new ISA::BeginFunction(name, retType));
 
         // bring control flow breaker tracker in scope
@@ -391,6 +437,7 @@ protected:
                 auto subf = new ISA::Instructions();
                 std::string name = "SUBFUNC_" + std::to_string(_tempCounter++);
                 auto voidtype = new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID));
+                _inFunction++;
                 subf->push_back(new ISA::BeginFunction(name, voidtype));
                 subfuncs.push(subf);
                 funcnames.push(name);
@@ -406,6 +453,7 @@ protected:
             if ( subf->size() != 1 ) {
                 instrs->insert(instrs->end(), subf->begin(), subf->end());
                 instrs->push_back(new ISA::Return0());
+                _inFunction--;
                 auto loc = new ISA::LocationReference(ISA::Affinity::FUNCTION, funcnames.front());
                 instrs->push_back(new ISA::CallElse0(cfb, loc));
             } else {
@@ -419,7 +467,7 @@ protected:
 
         // end of function return
         instrs->push_back(new ISA::Return0());
-        _inFunction = false;
+        _inFunction--;
 
         //evaluate condition
         instrs->push_back(new ISA::AssignEval(
@@ -564,7 +612,7 @@ protected:
         auto retType = new ISA::TypeReference(((Type::Lambda*)node->type())->returns());
         auto retVar = new ISA::LocationReference(ISA::Affinity::LOCAL, "retVal");
         auto cfb = new ISA::LocationReference(ISA::Affinity::LOCAL, "CFB");
-        _inFunction = true;
+        _inFunction++;
         instrs->push_back(new ISA::BeginFunction(name, retType));
 
         // formals
@@ -593,6 +641,7 @@ protected:
                 auto subf = new ISA::Instructions();
                 std::string name = "SUBFUNC_" + std::to_string(_tempCounter++);
                 auto voidtype = new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID));
+                _inFunction++;
                 subf->push_back(new ISA::BeginFunction(name, voidtype));
                 subfuncs.push(subf);
                 funcnames.push(name);
@@ -608,6 +657,7 @@ protected:
             if ( subf->size() != 1 ) {
                 instrs->insert(instrs->end(), subf->begin(), subf->end());
                 instrs->push_back(new ISA::Return0());
+                _inFunction--;
                 auto loc = new ISA::LocationReference(ISA::Affinity::FUNCTION, funcnames.front());
                 instrs->push_back(new ISA::CallElse0(cfb, loc));
             } else {
@@ -622,7 +672,7 @@ protected:
         } else {
             instrs->push_back(new ISA::Return1(retVar));
         }
-        _inFunction = false;
+        _inFunction--;
 
         // needed for assignment
         instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), new ISA::LocationReference(ISA::Affinity::FUNCTION, name)));
@@ -663,8 +713,7 @@ protected:
     }
 
 private:
-    int _tempCounter;
-    bool _inFunction;
+    int _tempCounter, _inFunction;
     std::stack<std::string>* _whileConds;
 
     ISA::LocationReference* makeLocation(ISA::Affinity affinity) {

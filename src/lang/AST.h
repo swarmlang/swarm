@@ -714,8 +714,11 @@ namespace Walk {
 
         virtual const Type::Type* type() const override {
             auto fnType = _id->type();
-            assert(fnType->intrinsic() == Type::Intrinsic::LAMBDA0 || fnType->intrinsic() == Type::Intrinsic::LAMBDA1);
-            return ((Type::Lambda*) fnType)->returns();
+            for ( size_t i = 0; i < _args->size(); i++ ) {
+                assert(fnType->isCallable());
+                fnType = ((Type::Lambda*) fnType)->returns();
+            }
+            return fnType;
         }
 
     protected:
@@ -759,9 +762,12 @@ namespace Walk {
         }
 
         virtual const Type::Type* type() const override {
-            auto fnType = _expression->type();
-            assert(fnType->intrinsic() == Type::Intrinsic::LAMBDA0 || fnType->intrinsic() == Type::Intrinsic::LAMBDA1);
-            return ((Type::Lambda*) fnType)->returns();
+            auto fnType = _id->type();
+            for ( size_t i = 0; i < _args->size(); i++ ) {
+                assert(fnType->isCallable());
+                fnType = ((Type::Lambda*) fnType)->returns();
+            }
+            return fnType;
         }
 
     protected:

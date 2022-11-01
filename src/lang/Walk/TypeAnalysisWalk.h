@@ -202,7 +202,7 @@ protected:
                 flag = false;
             }
 
-            assert(nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 || nodeType->intrinsic() == Type::Intrinsic::LAMBDA1);
+            assert(nodeType->isCallable());
             nodeType = ((Type::Lambda*) nodeType)->returns();
         }
 
@@ -482,7 +482,8 @@ protected:
         bool flag = walk(node->resource());
 
         const Type::Type* type = _types->getTypeOf(node->resource());
-        if ( type == nullptr || type->intrinsic() != Type::Intrinsic::RESOURCE ) {
+        if ( (type == nullptr || type->intrinsic() != Type::Intrinsic::RESOURCE)
+            && type->intrinsic() != Type::Intrinsic::ERROR ) {
             Reporting::typeError(
                 node->position(),
                 "Expected Intrinsic::RESOURCE, found: " + (type == nullptr ? "none" : type->toString())

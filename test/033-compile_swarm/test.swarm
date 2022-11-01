@@ -1,12 +1,6 @@
-fn x = (arg1: number, arg2: number): number => {
-    while (arg1 > 0) {
-        arg1 -= arg2;
-        if (arg2 < 0) {
-            break;
-            if (arg1 == 30) {
-                continue;
-            }
-        }
-    }
-    return 0;
-};
+fn tag = (s1:string,s2:string):resource => {};
+fn log = (s:string):void => {};
+
+with tag("s","t") as t {
+    log("hello");
+}
