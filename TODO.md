@@ -5,9 +5,10 @@
   - fuzzy testing with American Fuzzy Lop
 - ability to call external bindings from vm
 - module system / import system
-- write queue / store interfaces
+- Implement IStorageInterface, IQueue, IQueueJob, and IGlobalServices
     - Redis implementation
     - pthread implementation
+    - single-threaded implementation
     - ...others?
 - pass to convert AST to ISA
 - ast optimization pass
