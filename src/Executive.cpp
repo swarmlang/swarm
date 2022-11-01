@@ -56,10 +56,10 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
-    if ( flagOutputSVI ) {
-        int compileResult = compile();
-        if ( compileResult != 0 ) {
-            result = compileResult;
+    if ( flagOutputISA ) {
+        int isaResult = debugOutputISA();
+        if ( isaResult != 0 ) {
+            result = isaResult;
         }
     }
 
@@ -107,10 +107,8 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputTokens = true;
             flagOutputTokensTo = outfile;
             skipOne = true;
-            flagOutputSVI = false;
         } else if ( arg == "--dbg-parse" ) {
             flagParseAndStop = true;
-            flagOutputSVI = false;
         } else if ( arg == "--dbg-output-parse-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --dbg-output-parse-to. Pass --help for more info.");
@@ -124,7 +122,6 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputParse = true;
             flagOutputParseTo = outfile;
             skipOne = true;
-            flagOutputSVI = false;
         } else if ( arg == "--run-test" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --run-test. Pass --help for more info.");
@@ -140,7 +137,6 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagRunTestName = name;
             skipOne = true;
             noInputFile = true;
-            flagOutputSVI = false;
         } else if ( arg == "--locally" ) {
             Configuration::FORCE_LOCAL = true;
             console->debug("Will interpret locally.");
@@ -158,17 +154,17 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             util::USE_DETERMINISTIC_UUIDS = true;
         } else if ( arg == "--svi" ) {
             flagSVI = true;
-            flagOutputSVI = false;
-        } else if ( arg == "-o" ) {
+        } else if ( arg == "--dbg-output-isa-to" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for -o. Pass --help for more info.");
+                console->error("Missing required parameter for --debug-output-ISA-to. Pass --help for more info.");
                 failed = true;
                 continue;
             }
 
-            outputSVITo = params.at(i+1);
-            console->debug("Output file name: " + outputSVITo);
+            outputISATo = params.at(i+1);
+            console->debug("Output file name: " + outputISATo);
             skipOne = true;
+            flagOutputISA = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -261,8 +257,8 @@ void Executive::printUsage() {
             ->line("Use deterministic UUIDs (for test output).")
             ->line();
 
-        console->bold()->print("   -o <OUTFILE> :  ", true)
-            ->line("Set the name of the SVI output file")
+        console->bold()->print("  --dbg-output-isa-to <OUTFILE> :  ", true)
+            ->line("Set the name of the ISA output file")
             ->line();
     console->end();
 
@@ -375,14 +371,14 @@ int Executive::parseFilters() {
     return 0;
 }
 
-int Executive::compile() {
+int Executive::debugOutputISA() {
     std::ostream* stream;
-    if ( outputSVITo == "--" ) {
+    if ( outputISATo == "--" ) {
         stream = &std::cout;
     } else {
-        stream = new std::ofstream(outputSVITo);
+        stream = new std::ofstream(outputISATo);
         if ( stream->bad() ) {
-            console->error("Could not open parse output file for writing: " + outputSVITo);
+            console->error("Could not open parse output file for writing: " + outputISATo);
             delete stream;
             return 1;
         }
@@ -391,11 +387,11 @@ int Executive::compile() {
     swarmc::Pipeline pipeline(_input);
 
     try {
-        pipeline.targetSVI(*stream);
+        pipeline.targetISA(*stream);
     } catch (swarmc::Errors::ParseError& e) {
         return e.exitCode;
     }
 
-    console->success("Compiled to SVI.");
+    console->success("Compiled to ISA.");
     return 0;
 }

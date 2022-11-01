@@ -1,5 +1,5 @@
-#ifndef SWARMC_COMPILE_WALK_H
-#define SWARMC_COMPILE_WALK_H
+#ifndef SWARMC_TO_ISA_WALK_H
+#define SWARMC_TO_ISA_WALK_H
 
 #include <fstream>
 #include <stack>
@@ -12,16 +12,16 @@ namespace Lang {
 namespace Walk {
 
 
-class CompileWalk : Walk<ISA::Instructions*> {
+class ToISAWalk : Walk<ISA::Instructions*> {
 public:
-    CompileWalk(std::ostream& out, ASTNode* node) : Walk<ISA::Instructions*>(), _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()) {
+    ToISAWalk(std::ostream& out, ASTNode* node) : Walk<ISA::Instructions*>(), _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()) {
         ISA::Instructions* program = walk(node);
         for ( auto i : *program ) {
             out << i->toString() << "\n";
         }
     }
 
-    ~CompileWalk() {
+    ~ToISAWalk() {
         delete _whileConds;
     }
 protected:
@@ -309,7 +309,7 @@ protected:
         std::string name = "ENUM_" + std::to_string(_tempCounter++);
 
         _inFunction++;
-        instrs->push_back(new ISA::BeginFunction(name, Type::Primitive::of(Type::Intrinsic::VOID)));
+        instrs->push_back(new ISA::BeginFunction(name, new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID))));
         auto elemShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
         instrs->push_back(new ISA::FunctionParam(elemType, new ISA::LocationReference(elemShared, "arg_" + node->local()->name())));
         if ( node->index() != nullptr ) {
@@ -709,7 +709,7 @@ protected:
     }
 
     virtual std::string toString() const {
-        return "CompileWalk<>";
+        return "ToISAWalk<>";
     }
 
 private:

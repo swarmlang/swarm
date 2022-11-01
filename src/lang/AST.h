@@ -762,7 +762,7 @@ namespace Walk {
         }
 
         virtual const Type::Type* type() const override {
-            auto fnType = _id->type();
+            auto fnType = _expression->type();
             for ( size_t i = 0; i < _args->size(); i++ ) {
                 assert(fnType->isCallable());
                 fnType = ((Type::Lambda*) fnType)->returns();
