@@ -1,0 +1,44 @@
+
+-- Create a new, empty enum with elements of type `p:STRING`
+$l:enum <- enuminit p:STRING
+
+-- Append an element to the end of an existing enum
+enumappend $l:enum "World!"
+
+-- Prepend an element to the beginning of an existing enum
+enumprepend $l:enum "Hallo "
+
+-- Get the # of elements in an enum
+$l:n_enum <- enumlength $l:enum
+
+-- Get a specific element from an enum
+-- This generates an exception if the index is out of bounds
+$l:hallo <- enumget $l:enum 0
+
+-- Set a specific element in an enum
+-- This generates an exception if the index is out of bounds
+enumset $l:enum 0 "Hello "
+
+
+-- A callback which prints the element passed to it
+beginfn f:PRINT_ENUM p:VOID
+	fnparam p:STRING $l:elem
+	fnparam p:NUMBER $l:idx
+
+	scopeof $l:s_idx
+	$l:s_idx <- call f:NUMBER_TO_STRING $l:idx
+
+	scopeof $l:msg
+	$l:msg <- strconcat $l:s_idx ": "
+	$l:msg <- strconcat $l:msg $l:elem
+
+	out $l:msg
+return
+
+-- Now, enumerate (asynchronously) over the elements of $l:enum,
+-- calling f:PRINT_ENUM on each:
+enumerate p:STRING $l:enum f:PRINT_ENUM
+
+-- This outputs (in random order):
+--  0: Hello
+--  1: World!
