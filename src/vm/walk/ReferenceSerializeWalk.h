@@ -14,14 +14,14 @@ namespace swarmc::ISA {
 
     protected:
         std::string walkLocationReference(LocationReference* ref) override {
-            return "$" + ref->affinityString(ref->affinity()) + ":" + ref->name();
+            return "$" + LocationReference::affinityString(ref->affinity()) + ":" + ref->name();
         }
 
         std::string walkTypeReference(TypeReference*) override {
             return "FIXME:TYPE";  // FIXME
         }
 
-        std::string walkFunctionReference(swarmc::ISA::FunctionReference *) override {
+        std::string walkFunctionReference(swarmc::ISA::FunctionReference* f) override {
             return "FIXME:FUNCTION";  // FIXME
         }
 

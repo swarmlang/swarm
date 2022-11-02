@@ -112,6 +112,11 @@ namespace swarmc::Runtime {
             return _fJumps[name];
         }
 
+        ISA::Instructions::size_type getInlineFunctionSkipPC(const std::string& name) {
+            if ( _fSkips.find(name) == _fJumps.end() ) throw Errors::SwarmError("Unable to find pc to skip inline function f:" + name);
+            return _fSkips[name];
+        }
+
         ISA::BeginFunction* getInlineFunctionHeader(ISA::Instructions::size_type pc) const;
 
         bool hasInlineFunction(const std::string& name) {
@@ -131,6 +136,7 @@ namespace swarmc::Runtime {
     protected:
         ISA::Instructions _is;
         std::map<std::string, ISA::Instructions::size_type> _fJumps;
+        std::map<std::string, ISA::Instructions::size_type> _fSkips;
         ISA::Instructions::size_type _pc = 0;
         std::stack<ISA::Instructions::size_type> _callStack;
 

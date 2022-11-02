@@ -312,10 +312,9 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkBeginFunction(BeginFunction* i) {
-        // Function definitions are read statically when the SVI is loaded into
-        // the virtual machine. Calls jump to the instruction _after_ a beginfn.
-        // So, we should never encounter this.
-        throw Errors::SwarmError("Detected virtual execution across boundary of function body: " + i->toString());
+        _vm->skip(i);
+        _vm->rewind();  // skip takes us to the instruction we want to jump to, but we will advance after this
+        return nullptr;
     }
 
     Reference* ExecuteWalk::walkFunctionParam(FunctionParam* i) {

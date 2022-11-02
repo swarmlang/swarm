@@ -209,6 +209,12 @@ namespace swarmc::Runtime {
         while ( !_state->isEndOfProgram() && !c->hasReturned() ) step();
     }
 
+    void VirtualMachine::skip(ISA::BeginFunction* fn) {
+        auto pc = _state->getInlineFunctionSkipPC(fn->first()->name());
+        verbose("Skipping uncalled function body: " + fn->toString() + ", pc: " + std::to_string(pc));
+        _state->jump(pc);
+    }
+
     IFunctionCall* VirtualMachine::getCall() {
         return _scope->call();
     }

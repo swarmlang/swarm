@@ -101,6 +101,8 @@ namespace swarmc::Runtime {
 
         virtual void executeCall(IFunctionCall*);
 
+        virtual void skip(ISA::BeginFunction*);
+
         virtual IFunctionCall* getCall();
 
         virtual IFunctionCall* getReturn();

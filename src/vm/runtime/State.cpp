@@ -1,4 +1,6 @@
+#include <iostream>
 #include <cassert>
+#include <stack>
 #include "../../shared/uuid.h"
 #include "../../errors/SwarmError.h"
 #include "State.h"
@@ -51,17 +53,27 @@ namespace swarmc::Runtime {
     }
 
     void State::annotate()  {
+        std::stack<std::string> nesting;
         for ( auto it = _is.begin(); it != _is.end(); ++it ) {
             auto i = *it;
             if ( i->tag() == ISA::Tag::BEGINFN ) {
                 auto idx = std::distance(_is.begin(), it);
                 auto fn = (ISA::BeginFunction*) i;
-                auto name = fn->first()->name();
+                nesting.push(fn->first()->name());
 
-                if ( _fJumps.find(name) == _fJumps.end() ) {
-                    _fJumps[name] = idx;
+                if ( _fJumps.find(nesting.top()) == _fJumps.end() ) {
+                    _fJumps[nesting.top()] = idx;
                 } else {
-                    throw Errors::SwarmError("Duplicate function region identifier: " + name + " (inline function names must be unique)");
+                    throw Errors::SwarmError("Duplicate function region identifier: " + nesting.top() + " (inline function names must be unique)");
+                }
+            } else if ( i->tag() == ISA::Tag::RETURN0 || i->tag() == ISA::Tag::RETURN1 ) {
+                auto idx = std::distance(_is.begin(), it);
+
+                if ( nesting.empty() ) {
+                    throw Errors::SwarmError("Return detected outside function scope (pc: " + std::to_string(idx) + ")");
+                } else {
+                    _fSkips[nesting.top()] = idx + 1;
+                    nesting.pop();
                 }
             }
         }

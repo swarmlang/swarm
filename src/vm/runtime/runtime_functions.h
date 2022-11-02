@@ -21,6 +21,7 @@ namespace swarmc::Runtime {
 
     enum class FunctionBackend {
         INLINE,
+        PROVIDER,
         BUILTIN,
     };
 
