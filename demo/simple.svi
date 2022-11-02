@@ -1,9 +1,14 @@
-$l:greeting <- "Hello, \"escaped,\" "
-$l:name <- "World"
+call f:MAIN
+exit
 
-$l:msg <- strconcat $l:greeting $l:name
-$l:msg <- strconcat $l:msg "!
+beginfn f:MAIN p:VOID
+	$l:greeting <- "Hello, \"escaped,\" "
+	$l:name <- "World"
 
--- From Swarm"
+	$l:msg <- strconcat $l:greeting $l:name
+	$l:msg <- strconcat $l:msg "!
 
-out $l:msg
+	-- From Swarm"
+
+	out $l:msg
+return

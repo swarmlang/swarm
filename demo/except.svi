@@ -1,5 +1,5 @@
-
-$l:E_DEMO_ERROR_RANDOM_ERROR <- 1
+call f:MAIN
+exit
 
 beginfn f:ETS_DEMO_ERROR_RANDOM_ERROR p:STRING
 return "DemoError.RandomError"
@@ -72,7 +72,7 @@ beginfn f:MAIN0 p:VOID
 return
 
 beginfn f:MAIN p:VOID
+	$l:E_DEMO_ERROR_RANDOM_ERROR <- 1
+
 	call f:MAIN0
 return
-
-call f:MAIN

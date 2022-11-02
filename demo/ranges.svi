@@ -1,11 +1,5 @@
-$l:tmatrix_inner <- call p:ENUM p:NUMBER
-$l:tmatrix_outer <- call p:ENUM $l:tmatrix
-
-$l:tmp_matrixcall <- call f:RANDOM_MATRIX 25
-$l:matrix <- call $l:tmp_matrixcall 5000
-
-$l:minimum <- 0.3
-$l:maximum <- 0.7
+call f:MAIN
+exit
 
 beginfn f:MATRIX_INNER_INC_COUNT p:VOID
 	$s:count <- plus $s:count 1
@@ -40,7 +34,14 @@ beginfn f:MATRIX_OUTER p:VOID
 return
 
 beginfn f:MAIN p:VOID
+	$l:tmatrix_inner <- call p:ENUM p:NUMBER
+	$l:tmatrix_outer <- call p:ENUM $l:tmatrix
+
+	$l:tmp_matrixcall <- call f:RANDOM_MATRIX 25
+	$l:matrix <- call $l:tmp_matrixcall 5000
+
+	$l:minimum <- 0.3
+	$l:maximum <- 0.7
+
 	enumerate $l:tmatrix_inner $l:matrix f:MATRIX_OUTER
 return
-
-call f:MAIN

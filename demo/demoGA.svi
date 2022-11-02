@@ -1,10 +1,17 @@
-$l:n_jobs <- 5
+call f:MAIN
+exit
 
-$l:res <- 0.0005
+beginfn f:MAIN p:VOID
+	$l:n_jobs <- 5
 
-$l:community <- call f:RANGE 1
-$l:community <- call $l:community $l:n_jobs
-$l:community <- call $l:community 1
+	$l:res <- 0.0005
+
+	$l:community <- call f:RANGE 1
+	$l:community <- call $l:community $l:n_jobs
+	$l:community <- call $l:community 1
+
+	enumerate p:NUMBER $l:community $f:ENUM_COMMUNITY_AS_POPULATIONS
+return
 
 beginfn f:IF_R_LT_03 p:VOID
 	scopeof $l:restmp
@@ -152,9 +159,3 @@ beginfn f:ENUM_COMMUNITY_AS_POPULATIONS p:VOID
 
 	enumerate p:NUMBER $l:pop f:ENUM_POP_AS_MEMBER
 return
-
-beginfn f:MAIN p:VOID
-	enumerate p:NUMBER $l:community $f:ENUM_COMMUNITY_AS_POPULATIONS
-return
-
-call f:MAIN

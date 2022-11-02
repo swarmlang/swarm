@@ -4,8 +4,7 @@ The swarm VM is a runtime with 2 tiers of storage (local & shared), a shared job
 
 **Definitions:**
 - SVI - **S**warm **V**M **I**nstructions
-- job - a chunk of SVI executed in its own context
-- job context - the set of local variables available to a job
+- job - a function call, packaged up with the caller's state and context
 
 ## Storage
 
@@ -145,22 +144,28 @@ PRIMITIVE ::= p:STRING | p:NUMBER | p:ENUM | p:MAP | p:BOOLEAN | p:VOID | p:TYPE
 FUNCTION ::= f:IDENTIFIER
 LLOC ::= PRIMITIVE | FUNCTION | LOCATION | LITERAL
 LLOCS ::= LLOC | LLOC LLOCS
-OPERATION ::= out | err | beginfn | fnparam | return | curry
-              | call | callif | callelse | pushcall | pushcallif | pushcallelse | drain
-              | streaminit | streampush | streampop | streamclose | streamempty
-              | typify | lock | unlock | equal | scopeof | typeof | compatible
-              | and | or | xor | nand | nor | not
-              | mapinit | mapset | mapget | maplength | mapkeys
-              | enuminit | enumappend | enumprepend | enumlength | enumget | enumerate
-              | strconcat | strlength | strslice
-              | plus | minus | times | divide | power | mod | neg
-              | gt | gte | lt | lte
+EXPRESSION ::= curry | call
+         | streaminit | streampop | streamempty
+         | equal | typeof | compatible
+         | and | or | xor | nand | nor | not
+         | mapinit | mapget | maplength | mapkeys
+         | enuminit | enumlength | enumget
+         | strconcat | strlength | strslice
+         | plus | minus | times | divide | power | mod | neg
+         | gt | gte | lt | lte
+OPERATION ::= out | err | beginfn | fnparam | return
+              | callif | callelse | pushcall | pushcallif | pushcallelse | drain | exit
+              | streampush | streamclose
+              | typify | lock | unlock | scopeof
+              | mapset
+              | enumappend | enumprepend | enumerate
               | while | with
               | pushexhandler | popexhandler | raise | resume
 OPER ::= OPERATION LLOCS
-RVAL ::= OPER | LLOC
+EXPR ::= EXPRESSION LLOCS
+RVAL ::= EXPR | LLOC
 ASSIGN ::= LOCATION <- RVAL
-INST ::= ASSIGN | OPER
+INST ::= ASSIGN | OPER | EXPR
 SVI ::= INST EOF | INST \n INSTS
 ```
 
@@ -172,44 +177,6 @@ SVI ::= INST EOF | INST \n INSTS
   - `f:SIN n`/`f:COS n`/`f:TAN n` - the mathematical sine, cosine, and tangent functions
   - `f:RANDOM`/`f:RANDOM_VECTOR n`/`f:RANDOM_MATRIX m n` - get a random number, enum of random numbers of length n, or matrix of random numbers of size m by n
   - `f:RANGE n m s` - get an enum of the range of numbers from n to m with step size s
-  - `f:ENUMERATE t e c` - performs `pushcall`s of `c` on the elements of `e` which are of type `t`
-
-```txt
-beginfn f:ENUMERATE_INNER p:VOID
-	scopeof $l:entry
-	$l:entry <- enumget $l:enum $l:entryi
-
-	pushcall $l:callee $l:entry
-
-	$l:entryi <- add $l:entryi 1
-	$l:entryi_lt_entrylen <- lt $l:entryi $l:entrylen
-return
-
-beginfn f:ENUMERATE p:VOID
-	fnparam p:TYPE $l:tenumof
-
-	scopeof $l:tenum
-	$l:tenum <- call p:ENUM $l:tenumof
-
-	fnparam $l:tenum $l:enum
-
-	scopeof $l:tcallee
-	$l:tcallee <- call p:LAMBDA p:VOID
-	$l:tcallee <- call $l:tcallee $l:tenumof
-
-	fnparam $l:tcallee $l:callee
-
-	scopeof $l:entryi
-	scopeof $l:entrylen
-	scopeof $l:entryi_lt_entrylen
-
-	$l:entryi <- 0
-	$l:entrylen <- enumlength $l:enum
-	$l:entryi_lt_entrylen <- lt $l:entryi $l:entrylen
-
-	while $l:entryi_lt_entrylen f:ENUMERATE_INNER
-return
-```
 
 ### Examples
 
@@ -224,6 +191,9 @@ shared number onetwothree = sum(one)(two)(three);
 ```
 
 ```txt
+call f:MAIN
+exit
+
 beginfn f:SUM p:NUMBER
   fnparam p:NUMBER $l:a
   fnparam p:NUMBER $l:b
@@ -233,13 +203,15 @@ beginfn f:SUM p:NUMBER
   $l:temp <- plus $l:temp $l:c
 return $l:temp
 
-$l:one <- 1.1
-$l:two <- 2.2
-$l:three <- 3.3
-
-$l:fcall <- call f:SUM $l:one
-$l:fcall <- call $l:fcall $l:two
-$s:onetwothree <- call $l:fcall $l:three
+beginfn f:MAIN p:VOID
+  $l:one <- 1.1
+  $l:two <- 2.2
+  $l:three <- 3.3
+  
+  $l:fcall <- call f:SUM $l:one
+  $l:fcall <- call $l:fcall $l:two
+  $s:onetwothree <- call $l:fcall $l:three
+return
 ```
 
 ```txt
@@ -255,6 +227,9 @@ log(helloer("Bob"));
 ```
 
 ```txt
+call f:MAIN
+exit
+
 beginfn f:HELLOER p:STRING
   fnparam p:STRING $l:name
 
@@ -272,6 +247,8 @@ beginfn f:HELLOER p:STRING
   callelse $l:name_world f:HELLOER_ELSE
 return $l:retstring
 
-$l:helloer <- call f:HELLOER "Bob"
-log $l:helloer
+beginfn f:MAIN p:VOID
+  $l:helloer <- call f:HELLOER "Bob"
+  out $l:helloer
+return
 ```

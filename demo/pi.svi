@@ -1,14 +1,5 @@
-$l:pi_real <- 3.14159
-
-$l:n_jobs <- 8
-
-$l:ranks <- call f:RANGE 1
-$l:ranks <- call $l:ranks $l:n_jobs
-$l:ranks <- call $l:ranks 1
-
-$l:n <- 100000
-
-$s:pi_approx <- 0
+call f:MAIN
+exit
 
 beginfn f:WHILE_INNER p:VOID
 	scopeof $l:x
@@ -57,6 +48,18 @@ beginfn f:ENUM_INNER p:VOID
 return
 
 beginfn f:MAIN p:VOID
+	$l:pi_real <- 3.14159
+
+	$l:n_jobs <- 8
+
+	$l:ranks <- call f:RANGE 1
+	$l:ranks <- call $l:ranks $l:n_jobs
+	$l:ranks <- call $l:ranks 1
+
+	$l:n <- 100000
+
+	$s:pi_approx <- 0
+
 	scopeof $l:pi_approx_string
 	scopeof $l:pi_error
 	scopeof $l:pi_error_string
@@ -74,5 +77,3 @@ beginfn f:MAIN p:VOID
 	$l:message2 <- strconcat "Error: " $l:pi_error_string
 	out $l:message2
 return
-
-call f:MAIN
