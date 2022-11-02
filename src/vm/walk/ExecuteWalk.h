@@ -14,18 +14,28 @@ namespace swarmc::Runtime {
         ExecuteWalk(VirtualMachine* vm) : ISA::ISAWalk<ISA::Reference*>(), _vm(vm) {}
         virtual ~ExecuteWalk() = default;
 
-    protected:
-        VirtualMachine* _vm;
-
-        std::string toString() const override;
-
-        virtual void ensureType(const ISA::Reference*, const Type::Type*);
         virtual ISA::NumberReference* ensureNumber(const ISA::Reference*);
         virtual ISA::BooleanReference* ensureBoolean(const ISA::Reference*);
         virtual ISA::TypeReference* ensureType(const ISA::Reference*);
         virtual ISA::StringReference* ensureString(const ISA::Reference*);
         virtual ISA::FunctionReference* ensureFunction(const ISA::Reference*);
         virtual ISA::EnumerationReference* ensureEnumeration(const ISA::Reference*);
+        virtual ISA::MapReference* ensureMap(const ISA::Reference*);
+
+    protected:
+        VirtualMachine* _vm;
+
+        std::string toString() const override;
+
+        virtual void debug(const std::string& output) const {
+            console->debug("VM: " + output);
+        }
+
+        virtual void verbose(const std::string& output) const {
+            if ( Configuration::VERBOSE ) debug(output);
+        }
+
+        virtual void ensureType(const ISA::Reference*, const Type::Type*);
 
         ISA::Reference* walkPlus(ISA::Plus*) override;
         ISA::Reference* walkMinus(ISA::Minus*) override;
@@ -71,36 +81,37 @@ namespace swarmc::Runtime {
         ISA::Reference* walkPushCallElse0(ISA::PushCallElse0*) override;
         ISA::Reference* walkPushCallElse1(ISA::PushCallElse1*) override;
         ISA::Reference* walkDrain(ISA::Drain*) override;
-        ISA::Reference* walkMapInit(ISA::MapInit*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkMapSet(ISA::MapSet*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkMapGet(ISA::MapGet*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkMapLength(ISA::MapLength*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkMapKeys(ISA::MapKeys*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkExit(ISA::Exit*) override;
+        ISA::Reference* walkMapInit(ISA::MapInit*) override;
+        ISA::Reference* walkMapSet(ISA::MapSet*) override;
+        ISA::Reference* walkMapGet(ISA::MapGet*) override;
+        ISA::Reference* walkMapLength(ISA::MapLength*) override;
+        ISA::Reference* walkMapKeys(ISA::MapKeys*) override;
         ISA::Reference* walkTypify(ISA::Typify*) override;
         ISA::Reference* walkAssignValue(ISA::AssignValue*) override;
         ISA::Reference* walkAssignEval(ISA::AssignEval*) override;
         ISA::Reference* walkLock(ISA::Lock*) override;
         ISA::Reference* walkUnlock(ISA::Unlock*) override;
-        ISA::Reference* walkIsEqual(ISA::IsEqual*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkIsEqual(ISA::IsEqual*) override { assert(false);  /* FIXME */ }
         ISA::Reference* walkScopeOf(ISA::ScopeOf*) override;
-        ISA::Reference* walkStreamInit(ISA::StreamInit*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkStreamPush(ISA::StreamPush*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkStreamPop(ISA::StreamPop*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkStreamClose(ISA::StreamClose*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkStreamEmpty(ISA::StreamEmpty*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkOut(ISA::Out*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkErr(ISA::Err*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkStreamInit(ISA::StreamInit*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkStreamPush(ISA::StreamPush*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkStreamPop(ISA::StreamPop*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkStreamClose(ISA::StreamClose*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkStreamEmpty(ISA::StreamEmpty*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkOut(ISA::Out*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkErr(ISA::Err*) override { assert(false);  /* FIXME */ }
         ISA::Reference* walkStringConcat(ISA::StringConcat*) override;
         ISA::Reference* walkStringLength(ISA::StringLength*) override;
         ISA::Reference* walkStringSliceFrom(ISA::StringSliceFrom*) override;
         ISA::Reference* walkStringSliceFromTo(ISA::StringSliceFromTo*) override;
         ISA::Reference* walkTypeOf(ISA::TypeOf*) override;
         ISA::Reference* walkIsCompatible(ISA::IsCompatible*) override;
-        ISA::Reference* walkPushExceptionHandler1(ISA::PushExceptionHandler1*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkPushExceptionHandler2(ISA::PushExceptionHandler2*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkPopExceptionHandler(ISA::PopExceptionHandler*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkRaise(ISA::Raise*) override { return nullptr;  /* FIXME */ }
-        ISA::Reference* walkResume(ISA::Resume*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkPushExceptionHandler1(ISA::PushExceptionHandler1*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkPushExceptionHandler2(ISA::PushExceptionHandler2*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkPopExceptionHandler(ISA::PopExceptionHandler*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkRaise(ISA::Raise*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkResume(ISA::Resume*) override { assert(false);  /* FIXME */ }
     };
 
 }

@@ -7,6 +7,7 @@
 class Configuration {
 public:
     static bool DEBUG;
+    static bool VERBOSE;
     static bool FORCE_LOCAL;
 
     inline static const std::string REDIS_HOST = "localhost";

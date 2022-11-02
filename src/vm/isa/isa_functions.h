@@ -110,6 +110,11 @@ namespace swarmc::ISA {
         Drain() : NullaryInstruction(Tag::DRAIN) {}
     };
 
+    class Exit : public NullaryInstruction {
+    public:
+        Exit() : NullaryInstruction(Tag::EXIT) {}
+    };
+
 }
 
 #endif //SWARMVM_FUNCTIONS

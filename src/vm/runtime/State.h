@@ -13,11 +13,6 @@ namespace swarmc::Runtime {
     class InlineFunction;
     class IFunctionCall;
 
-    enum class StateFlag: size_t {
-        NONE = 0,
-        JUMPED_FROM_RETURN = 2 << 0,
-    };
-
     class ScopeFrame : public IStringable {
     public:
         ScopeFrame(std::string id, ScopeFrame* parent) : _parent(parent) {
@@ -40,6 +35,13 @@ namespace swarmc::Runtime {
         }
 
         std::string toString() const;
+
+        ScopeFrame* copy() const {
+            auto copy = new ScopeFrame(_id, _parent == nullptr ? nullptr : _parent->copy());
+            copy->_map = _map;
+            copy->_call = _call;
+            return copy;
+        }
     protected:
         ScopeFrame* _parent = nullptr;
         std::map<std::string, ISA::LocationReference*> _map;
@@ -80,6 +82,10 @@ namespace swarmc::Runtime {
             return i;
         }
 
+        void jumpEnd() {
+            _pc = _is.size();
+        }
+
         void jump(ISA::Instructions::size_type i) {
             if ( i >= _is.size() ) throw Errors::SwarmError("Cannot advance beyond end of program.");
             _pc = i;
@@ -87,6 +93,7 @@ namespace swarmc::Runtime {
 
         void jumpCall(ISA::Instructions::size_type i) {
             auto returnTo = _pc;
+//            jump(i+1);  // we begin with the first instruction after the beginfn
             jump(i);
             _callStack.push(returnTo);
         }
@@ -100,32 +107,32 @@ namespace swarmc::Runtime {
 
         std::vector<ISA::FunctionParam*> loadInlineFunctionParams(ISA::Instructions::size_type pc) const;
 
-        ISA::Instructions::size_type getInlineFunctionPC(std::string name) {
+        ISA::Instructions::size_type getInlineFunctionPC(const std::string& name) {
             if ( _fJumps.find(name) == _fJumps.end() ) throw Errors::SwarmError("Unable to find pc for inline function f:" + name);
             return _fJumps[name];
         }
 
-        void setFlag(StateFlag flag) {
-            _flags = _flags | ((size_t) flag);
-        }
+        ISA::BeginFunction* getInlineFunctionHeader(ISA::Instructions::size_type pc) const;
 
-        bool hasFlag(StateFlag flag) const {
-            return _flags & ((size_t) flag);
-        }
-
-        void clearFlag(StateFlag flag) {
-            _flags = _flags & ~((size_t) flag);
+        bool hasInlineFunction(const std::string& name) {
+            return _fJumps.find(name) != _fJumps.end();
         }
 
         std::string toString() const override {
             return "Runtime::State<>";
+        }
+
+        State* copy() const {
+            auto copy = new State(_is);
+            copy->_pc = _pc;
+            copy->_callStack = _callStack;
+            return copy;
         }
     protected:
         ISA::Instructions _is;
         std::map<std::string, ISA::Instructions::size_type> _fJumps;
         ISA::Instructions::size_type _pc = 0;
         std::stack<ISA::Instructions::size_type> _callStack;
-        size_t _flags = 0;
 
         void initialize() {
             _pc = 0;

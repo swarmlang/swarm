@@ -71,7 +71,7 @@ namespace swarmc::Runtime {
         assert(pc < _is.size() && _is[pc]->tag() == ISA::Tag::BEGINFN);
 
         std::vector<ISA::FunctionParam*> ps;
-        for ( ISA::Instructions::size_type i = pc; i < _is.size(); i += 1 ) {
+        for ( ISA::Instructions::size_type i = pc+1; i < _is.size(); i += 1 ) {
             auto inst = _is[i];
             // fnparam instructions must be the first instructions after the beginfn
             if ( inst->tag() != ISA::Tag::FNPARAM ) break;
@@ -79,5 +79,10 @@ namespace swarmc::Runtime {
         }
 
         return ps;
+    }
+
+    ISA::BeginFunction* State::getInlineFunctionHeader(ISA::Instructions::size_type pc) const {
+        assert(pc < _is.size() && _is[pc]->tag() == ISA::Tag::BEGINFN);
+        return (ISA::BeginFunction*) _is[pc];
     }
 }

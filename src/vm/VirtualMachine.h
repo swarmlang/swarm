@@ -26,6 +26,13 @@ namespace swarmc::Runtime {
             delete _exec;
         }
 
+        std::string toString() const override {
+            std::string adv = "yes";
+            if ( !_shouldAdvance ) adv = "no";
+
+            return "Runtime::VirtualMachine<shouldAdvance: " + adv + ">";
+        }
+
         virtual IGlobalServices* global() const { return _global; }
 
         void initialize(ISA::Instructions is) {
@@ -35,6 +42,10 @@ namespace swarmc::Runtime {
 
         void addStore(IStorageInterface* store) {
             _stores.push_back(store);
+        }
+
+        void addQueue(IQueue* queue) {
+            _queues.push_back(queue);
         }
 
         void cleanup() {
@@ -50,11 +61,19 @@ namespace swarmc::Runtime {
             _stores.clear();
         }
 
-        virtual ISA::Reference* load(ISA::LocationReference*);
+        virtual void restore(ScopeFrame*, State*);
+
+        virtual ISA::Reference* loadFromStore(ISA::LocationReference*);
+
+        virtual ISA::FunctionReference* loadFunction(ISA::LocationReference*);
+
+        virtual InlineFunction* loadInlineFunction(const std::string& name);
 
         virtual ISA::Reference* resolve(ISA::Reference*);
 
         virtual void step();
+
+        virtual void advance();
 
         virtual void rewind();
 
@@ -80,11 +99,17 @@ namespace swarmc::Runtime {
 
         virtual void call(IFunctionCall*);
 
+        virtual void executeCall(IFunctionCall*);
+
         virtual IFunctionCall* getCall();
+
+        virtual IFunctionCall* getReturn();
 
         virtual IQueueJob* pushCall(IFunctionCall*);
 
         virtual void drain();
+
+        virtual void exit();
 
         virtual void enterQueueContext();
 
@@ -92,14 +117,27 @@ namespace swarmc::Runtime {
 
         virtual void returnToCaller();
 
-        virtual bool hasFlag(StateFlag) const;
-
         virtual void whileWaitingForLock() {
             std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
         }
 
         virtual void whileWaitingForDrain() {
             std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
+        }
+
+        VirtualMachine* copy() const {
+            auto copy = new VirtualMachine(_global);
+            copy->_state = _state->copy();
+            copy->_queues = _queues;
+            copy->_locks = _locks;
+            copy->_scope = _scope->copy();
+            copy->_queueContexts = _queueContexts;
+
+            Stores stores;
+            for ( auto store : _stores ) stores.push_back(store->copy());
+            copy->_stores = stores;
+
+            return copy;
         }
 
     protected:
@@ -111,6 +149,17 @@ namespace swarmc::Runtime {
         ScopeFrame* _scope;
         ExecuteWalk* _exec;
         std::stack<QueueContextID> _queueContexts;
+        IFunctionCall* _return = nullptr;
+        bool _shouldClearReturn = false;
+        bool _shouldAdvance = true;
+
+        virtual void debug(const std::string& output) const {
+            console->debug("VM: " + output);
+        }
+
+        virtual void verbose(const std::string& output) const {
+            if ( Configuration::VERBOSE ) debug(output);
+        }
 
         virtual IStorageInterface* getStore(ISA::LocationReference*);
 

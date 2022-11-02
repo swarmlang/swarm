@@ -6,6 +6,7 @@
     bool Configuration::DEBUG = false;
 #endif
 
+bool Configuration::VERBOSE = false;
 bool Configuration::FORCE_LOCAL = false;
 
 int Configuration::REDIS_PORT = 6379;

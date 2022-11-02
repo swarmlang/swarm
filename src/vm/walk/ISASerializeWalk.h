@@ -192,6 +192,10 @@ namespace swarmc::ISA {
             return "drain";
         }
 
+        std::string walkExit(Exit*) override {
+            return "exit";
+        }
+
         std::string walkMapInit(MapInit* mi) override {
             return "mapinit " + _rsw.walk(mi->first());
         }

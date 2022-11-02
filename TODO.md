@@ -30,3 +30,11 @@
 - Garbage collection / reference counting
 - More generic logging class that can centralize logs from workers?
 - More compact binary form of SVI
+- `mapvalues` instruction? Parallel to `mapkeys`.
+- Currently, `typeof` only works when a variable has a value stored in it
+  - This means the following will fail:
+    ```txt
+    typify $l:a p:NUMBER
+    typeof $l:a
+    ```
+  - Do we care to support this?

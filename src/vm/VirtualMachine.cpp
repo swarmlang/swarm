@@ -29,18 +29,53 @@ namespace swarmc::Runtime {
         throw Errors::SwarmError("Unable to find queue backend for job: " + j->toString());
     }
 
-    Reference* VirtualMachine::load(LocationReference* loc) {
-        auto store = getStore(loc);
-        if ( !store->has(loc) ) {
-            throw Errors::SwarmError("Attempted to load undefined location (" + loc->toString() + ") from store (" + store->toString() + ")");
+    void VirtualMachine::restore(ScopeFrame* scope, State* state) {
+        if ( _scope != nullptr ) delete _scope;
+        _scope = scope;
+
+        if ( _state != nullptr ) delete _state;
+        _state = state;
+    }
+
+    Reference* VirtualMachine::loadFromStore(LocationReference* loc) {
+        auto scopeLoc = _scope->map(loc);
+        auto store = getStore(scopeLoc);
+        if ( !store->has(scopeLoc) ) {
+            throw Errors::SwarmError("Attempted to load undefined location (" + scopeLoc->toString() + ") from store (" + store->toString() + ")");
         }
 
-        return store->load(loc);
+        return store->load(scopeLoc);
+    }
+
+    FunctionReference* VirtualMachine::loadFunction(LocationReference* loc) {
+        if ( _state->hasInlineFunction(loc->name()) ) {
+            return new FunctionReference(loadInlineFunction(loc->name()));
+        }
+
+        throw Errors::SwarmError("Attempted to load invalid function " + loc->toString() + ". Location has an unknown function backend, or is an invalid name.");
+    }
+
+    InlineFunction* VirtualMachine::loadInlineFunction(const std::string& name) {
+        auto pc = _state->getInlineFunctionPC(name);
+
+        FormalTypes paramTypes;
+        for ( auto param : _state->loadInlineFunctionParams(pc) ) {
+            auto paramType = _exec->ensureType(resolve(param->first()));
+            paramTypes.push_back(paramType->value());
+        }
+
+        auto header = _state->getInlineFunctionHeader(pc);
+        auto returnType = _exec->ensureType(resolve(header->second()));
+
+        verbose("load inline function: " + name + " (#params: " + std::to_string(paramTypes.size()) + ") (returns: " + returnType->toString() + ")");
+        return new InlineFunction(name, paramTypes, returnType->value());
     }
 
     Reference* VirtualMachine::resolve(Reference* ref) {
         if ( ref->tag() == ReferenceTag::LOCATION ) {
-            return load((LocationReference*) ref);
+            auto loc = (LocationReference*) ref;
+            if ( loc->affinity() == Affinity::FUNCTION ) return loadFunction(loc);
+            return loadFromStore(loc);
         }
 
         return ref;
@@ -48,6 +83,21 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::step() {
         _exec->walkOne(_state->current());
+
+        if ( !_state->isEndOfProgram() && _shouldAdvance ) {
+            advance();
+        }
+        _shouldAdvance = true;
+
+        if ( _return != nullptr && _shouldClearReturn ) {
+            _return = nullptr;
+            _shouldClearReturn = false;
+        } else if ( _return != nullptr ) {
+            _shouldClearReturn = true;
+        }
+    }
+
+    void VirtualMachine::advance() {
         _state->advance();
     }
 
@@ -60,7 +110,8 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::store(LocationReference* loc, Reference* ref) {
-        getStore(loc)->store(loc, ref);
+        auto scopeLoc = _scope->map(loc);
+        getStore(scopeLoc)->store(scopeLoc, ref);
     }
 
     bool VirtualMachine::hasLock(LocationReference* loc) {
@@ -78,9 +129,10 @@ namespace swarmc::Runtime {
             return;  // FIXME: should this raise an error?
         }
 
-        auto store = getStore(loc);
+        auto scopeLoc = _scope->map(loc);
+        auto store = getStore(scopeLoc);
         for ( int i = 0; i < Configuration::LOCK_MAX_RETRIES; i += 1 ) {
-            auto lock = store->acquire(loc);
+            auto lock = store->acquire(scopeLoc);
             if ( lock == nullptr ) {
                 whileWaitingForLock();
                 continue;
@@ -91,7 +143,7 @@ namespace swarmc::Runtime {
         }
 
         // FIXME: should this throw a runtime error?
-        throw Errors::SwarmError("Unable to acquire lock for location (" + loc->toString() + ") from store (" + store->toString() + ") -- max retries exceeded");
+        throw Errors::SwarmError("Unable to acquire lock for location (" + scopeLoc->toString() + ") from store (" + store->toString() + ") -- max retries exceeded");
     }
 
     void VirtualMachine::unlock(LocationReference* loc) {
@@ -137,19 +189,39 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::call(IFunctionCall* call) {
+        _shouldAdvance = false;
         if ( call->backend() == FunctionBackend::INLINE ) return callInlineFunction((InlineFunctionCall*) call);
 //        if ( call->backend() == FunctionBackend::BUILTIN ) return callBuiltinFunction((BuiltinFunctionCall*) call);
         throw Errors::SwarmError("Cannot call function `" + call->toString() + "` (invalid backend)");
+    }
+
+    void VirtualMachine::executeCall(IFunctionCall* c) {
+        call(c);
+
+        // `call()` sets this to false because most calls are set up from w/in other instructions
+        // In that case, we don't want to advance at the end of the current instruction, since the
+        // call already does that for us.
+        // However, `executeCall()` is called from outside the normal instruction pipeline, so we
+        // need to allow `step()` to advance, otherwise the first instruction will be executed
+        // twice.
+        _shouldAdvance = true;
+
+        while ( !_state->isEndOfProgram() && !c->hasReturned() ) step();
     }
 
     IFunctionCall* VirtualMachine::getCall() {
         return _scope->call();
     }
 
+    IFunctionCall* VirtualMachine::getReturn() {
+        return _return;
+    }
+
     IQueueJob* VirtualMachine::pushCall(IFunctionCall* call) {
         // fixme: need to account for contexts!
         auto queue = getQueue(call);
         auto job = queue->build(call, _scope, _state);
+        verbose("pushCall - call: " + call->toString() + " | job: " + job->toString());
         queue->push(job);
         return job;
     }
@@ -160,6 +232,10 @@ namespace swarmc::Runtime {
                 whileWaitingForDrain();
             }
         }
+    }
+
+    void VirtualMachine::exit() {
+        _state->jumpEnd();
     }
 
     void VirtualMachine::enterQueueContext() {
@@ -189,18 +265,15 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::returnToCaller() {
+        // Mark the call as returned
+        _return = getCall();
+        _return->setReturned();
+
         // Pop the callee's scope
         exitScope();
 
-        // Set the return flag so we can execute assignments properly
-        _state->setFlag(StateFlag::JUMPED_FROM_RETURN);
-
         // Jump back to the caller's site
         _state->jumpReturn();
-    }
-
-    bool VirtualMachine::hasFlag(StateFlag f) const {
-        return _state->hasFlag(f);
     }
 
     void VirtualMachine::callInlineFunction(InlineFunctionCall* call) {
@@ -222,7 +295,13 @@ namespace swarmc::Runtime {
         enterCallScope(call);
 
         // Jump to the function call
+        debug("inline call: " + call->toString() + " (pc: " + std::to_string(pc) + ")");
         _state->jumpCall(pc);
+
+        // Skip over the beginfn instruction
+        advance();
+
+        verbose("next instruction for inline call: " + _state->current()->toString());
     }
 
     void VirtualMachine::callBuiltinFunction(BuiltinFunctionCall* call) {

@@ -27,6 +27,8 @@ protected:
     bool flagParseAndStop = false;
     bool flagOutputParse = false;
     bool flagRunTest = false;
+    bool flagSingleThreaded = false;
+    bool flagVerbose = false;
     bool flagClearQueue = false;
     bool flagWorkQueue = false;
     bool flagSVI = false;
@@ -48,6 +50,7 @@ protected:
     int runTest();
     int parseFilters();
     int compile();
+    int executeLocalSVI();
 };
 
 

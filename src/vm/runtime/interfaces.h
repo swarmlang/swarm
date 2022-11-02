@@ -96,6 +96,8 @@ namespace swarmc::Runtime {
 
         /** Forget all stored variables. */
         virtual void clear() = 0;
+
+        virtual IStorageInterface* copy() = 0;
     };
 
 
@@ -110,7 +112,7 @@ namespace swarmc::Runtime {
         /** Get the current status of this job. */
         virtual JobState state() const = 0;
 
-        virtual const IFunctionCall* getCall() const = 0;
+        virtual IFunctionCall* getCall() const = 0;
 
         virtual const ScopeFrame* getScope() const = 0;
 
@@ -129,7 +131,7 @@ namespace swarmc::Runtime {
 
         virtual bool shouldHandle(IFunctionCall*) = 0;
 
-        virtual IQueueJob* build(const IFunctionCall*, const ScopeFrame*, const State*) = 0;
+        virtual IQueueJob* build(IFunctionCall*, const ScopeFrame*, const State*) = 0;
 
         virtual void push(IQueueJob*) = 0;
 

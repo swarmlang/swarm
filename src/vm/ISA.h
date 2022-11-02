@@ -38,6 +38,7 @@ namespace swarmc::ISA {
         PUSHCALLELSE0,
         PUSHCALLELSE1,
         DRAIN,
+        EXIT,
         OUT,
         ERR,
         STREAMINIT,
@@ -112,6 +113,7 @@ namespace swarmc::ISA {
         BOOLEAN,
         FUNCTION,
         ENUMERATION,
+        MAP,
     };
 
 
@@ -162,7 +164,7 @@ namespace swarmc::ISA {
 
         const Type::Type* type() const override {
             if ( _type == nullptr )
-                return Type::Primitive::of(Type::Intrinsic::AMBIGUOUS);
+                return new Type::Ambiguous();
 
             return _type;
         }
@@ -303,8 +305,8 @@ namespace swarmc::ISA {
         explicit EnumerationReference(const Type::Type* innerType) :
             Reference(ReferenceTag::ENUMERATION), _innerType(innerType) {}
 
-        std::string toString() const {
-            return "EnumerationReference<inner: " + _innerType->toString() + ">";
+        std::string toString() const override {
+            return "EnumerationReference<inner: " + _innerType->toString() + ", #items: " + std::to_string(_items.size()) + ">";
         }
 
         const Type::Enumerable* type() const override {
@@ -336,6 +338,49 @@ namespace swarmc::ISA {
         }
     protected:
         std::vector<Reference*> _items;
+        const Type::Type* _innerType;
+    };
+
+
+    class MapReference : public Reference {
+    public:
+        explicit MapReference(const Type::Type* innerType) :
+                Reference(ReferenceTag::MAP), _innerType(innerType) {}
+
+        std::string toString() const override {
+            return "MapReference<inner: " + _innerType->toString() + ", #keys: " + std::to_string(_items.size()) + ">";
+        }
+
+        const Type::Map* type() const override {
+            return new Type::Map(_innerType);
+        }
+
+        virtual Reference* get(const std::string& key) const {
+            return _items.at(key);
+        }
+
+        virtual void set(const std::string& key, Reference* value) {
+            _items.insert({key, value});
+        }
+
+        virtual bool has(const std::string& key) const {
+            return _items.find(key) != _items.end();
+        }
+
+        virtual size_t length() const {
+            return _items.size();
+        }
+
+        virtual EnumerationReference* keys() const {
+            auto er = new EnumerationReference(Type::Primitive::of(Type::Intrinsic::STRING));
+            for ( const auto& item : _items ) {
+                er->append(new StringReference(item.first));
+            }
+            return er;
+        }
+
+    protected:
+        std::map<std::string, Reference*> _items;
         const Type::Type* _innerType;
     };
 

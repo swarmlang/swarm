@@ -1,0 +1,123 @@
+call f:MAIN
+exit
+
+beginfn f:MAIN p:VOID
+	$l:a <- plus 2 2
+	$l:a <- minus $l:a 2
+	$l:a <- times $l:a 2
+	$l:a <- divide $l:a 2
+	$l:a <- power $l:a 2
+	$l:a <- mod $l:a 2
+	$l:a <- neg $l:a
+
+	$l:b <- gt $l:a 2
+	$l:b <- gte $l:a 2
+	$l:b <- lt $l:a 2
+	$l:b <- lte $l:a 2
+
+	$l:c <- and true true
+	$l:c <- or $l:c false
+	$l:c <- xor $l:c false
+	$l:c <- nand $l:c false
+	$l:c <- nor $l:c false
+	$l:c <- not $l:c
+
+	$l:e <- enuminit p:STRING
+	enumappend $l:e "World!"
+	enumprepend $l:e "Hello"
+	enumset $l:e 0 "Hello,"
+	$l:n_e <- enumlength $l:e
+	enumget $l:e 0
+	enumerate p:STRING $l:e f:NOP
+
+	$l:inc <- curry f:ADDER 1
+	$l:two <- call $l:inc 1
+	$l:three <- call $l:inc $l:two
+
+	callif true f:NOP0
+	callif false f:NOP0
+	callelse true f:NOP0
+	callelse false f:NOP0
+	pushcallif true f:NOP0
+	pushcallif false f:NOP0
+	pushcallelse true f:NOP0
+	pushcallelse false f:NOP0
+
+	$l:s <- "A string"
+	$l:s <- strconcat $l:s ", concatenated"
+	$l:l_s <- strlength $l:s
+	$l:s <- strslice $l:s 2
+	$l:s <- strslice $l:s 0 6
+
+	$l:t_s <- typeof $l:s
+	$l:t_two <- typeof $l:two
+	$l:t_inc <- typeof $l:inc
+	$l:two_s_compat <- compatible $l:t_two $l:t_s
+	$l:two_s_compat <- compatible $l:two $l:s
+
+	scopeof $l:scoped
+	$l:scoped <- 42
+	call f:SCOPE_LOCAL
+	$l:scoped <- $l:scoped
+	call f:SCOPE_INHERITED
+	$l:scoped <- $l:scoped
+
+	call f:ISOLATION
+
+	typify $l:force_string p:STRING
+	$l:force_string <- "a string"
+
+	$l:m <- mapinit p:NUMBER
+	mapset $l:m "pi" 3.141
+	mapset $l:m "tau" 6.282
+	$l:pi <- mapget $l:m "pi"
+	$l:l_m <- maplength $l:m
+	$l:keys_m <- mapkeys $l:m
+return
+
+beginfn f:SCOPE_LOCAL p:VOID
+	scopeof $l:scoped
+	$l:scoped <- "a string now!"
+return
+
+beginfn f:SCOPE_INHERITED p:VOID
+	$l:scoped <- 3.14
+return
+
+beginfn f:NOP p:VOID
+	fnparam p:STRING $l:elem
+	fnparam p:NUMBER $l:idx
+	scopeof $l:nop
+	$l:nop <- $l:elem
+return
+
+beginfn f:NOP0 p:VOID
+return
+
+beginfn f:ADDER p:NUMBER
+	fnparam p:NUMBER $l:lhs
+	fnparam p:NUMBER $l:rhs
+	scopeof $l:sum
+	$l:sum <- plus $l:lhs $l:rhs
+return $l:sum
+
+beginfn f:ISOLATION p:VOID
+	scopeof $l:a_local
+	$l:a_local <- 1
+
+	scopeof $s:a_shared
+	$s:a_shared <- 1
+
+	pushcall f:PUSHED
+
+	scopeof $l:tmp
+	$l:tmp <- $l:a_local
+	$l:tmp <- $s:a_shared
+return
+
+beginfn f:PUSHED p:VOID
+	$l:a_local <- 2
+	$s:a_shared <- 2
+return
+
+$l:unr <- "unreachable"

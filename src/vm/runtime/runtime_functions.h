@@ -53,6 +53,10 @@ namespace swarmc::Runtime {
 
         virtual ISA::Reference* getReturn() const { return _returnValue; }
 
+        virtual void setReturned() { _returned = true; }
+
+        virtual bool hasReturned() const { return _returned; }
+
         virtual std::pair<const Type::Type*, ISA::Reference*> popParam() {
             if ( !hasParamsRemaining() ) throw Errors::SwarmError("Cannot pop param from function call: index out of bounds");
             return _vector[_paramIndex++];
@@ -68,6 +72,7 @@ namespace swarmc::Runtime {
         const Type::Type* _returnType;
         ISA::Reference* _returnValue = nullptr;
         size_t _paramIndex = 0;
+        bool _returned = false;
     };
 
     class InlineFunctionCall : public IFunctionCall {
@@ -162,7 +167,7 @@ namespace swarmc::Runtime {
 
     class InlineFunction : public IFunction {
     public:
-        InlineFunction(std::string name, FormalTypes types, Type::Type* returnType)
+        InlineFunction(std::string name, FormalTypes types, const Type::Type* returnType)
             : _name(name), _types(types), _returnType(returnType) {}
 
         FormalTypes paramTypes() const override {
@@ -194,7 +199,7 @@ namespace swarmc::Runtime {
     protected:
         std::string _name;
         FormalTypes _types;
-        Type::Type* _returnType;
+        const Type::Type* _returnType;
     };
 
 

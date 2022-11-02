@@ -243,6 +243,8 @@ namespace swarmc::ISA {
                 }
             } else if ( instructionLeader == "drain" ) {
                 is.push_back(new ISA::Drain());
+            } else if ( instructionLeader == "exit" ) {
+                is.push_back(new ISA::Exit());
             } else if ( instructionLeader == "out" ) {
                 is.push_back(new ISA::Out(parseUnaryReference(instructionLeader, tokens, startAt+i)));
                 i += 1;
@@ -356,15 +358,15 @@ namespace swarmc::ISA {
                 i += 1;
             } else if ( instructionLeader == "mapset" ) {
                 is.push_back(new ISA::MapSet(
-                    parseUnaryReference(instructionLeader, tokens, startAt+i),
                     parseUnaryReference(instructionLeader, tokens, startAt+i+1),
-                    parseLocationReference(instructionLeader, tokens, startAt+i+2)
+                    parseUnaryReference(instructionLeader, tokens, startAt+i+2),
+                    parseLocationReference(instructionLeader, tokens, startAt+i)
                 ));
                 i += 3;
             } else if ( instructionLeader == "mapget" ) {
                 is.push_back(new ISA::MapGet(
-                    parseUnaryReference(instructionLeader, tokens, startAt+i),
-                    parseLocationReference(instructionLeader, tokens, startAt+i+1)
+                    parseUnaryReference(instructionLeader, tokens, startAt+i+1),
+                    parseLocationReference(instructionLeader, tokens, startAt+i)
                 ));
                 i += 2;
             } else if ( instructionLeader == "maplength" ) {

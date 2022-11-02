@@ -63,6 +63,13 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( flagSingleThreaded && flagSVI ) {
+        int executeResult = executeLocalSVI();
+        if ( executeResult != 0 ) {
+            result = executeResult;
+        }
+    }
+
     delete console;
     if ( _input != nullptr ) delete _input;
     return result;
@@ -143,7 +150,12 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputSVI = false;
         } else if ( arg == "--locally" ) {
             Configuration::FORCE_LOCAL = true;
-            console->debug("Will interpret locally.");
+            flagSingleThreaded = true;
+            console->debug("Will execute locally.");
+        } else if ( arg == "--verbose" ) {
+            flagVerbose = true;
+            Configuration::DEBUG = true;
+            Configuration::VERBOSE = true;
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --run-test. Pass --help for more info.");
@@ -219,6 +231,10 @@ void Executive::printUsage() {
 
     console->bold()->print("  --locally  :  ", true)
         ->line("Evaluate the given Swarm program without connecting to remote executors.")
+        ->line();
+
+    console->bold()->print("  --verbose  :  ", true)
+        ->line("Enable verbose/debugging output.")
         ->line();
 
     console->bold()->print("  --clear-queue  :  ", true)
@@ -397,5 +413,13 @@ int Executive::compile() {
     }
 
     console->success("Compiled to SVI.");
+    return 0;
+}
+
+int Executive::executeLocalSVI() {
+    swarmc::VM::Pipeline pipeline(_input);
+    auto vm = pipeline.targetSingleThreaded();
+    vm->execute();
+    delete vm;
     return 0;
 }

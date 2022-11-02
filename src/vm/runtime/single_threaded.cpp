@@ -1,6 +1,7 @@
 #include <cassert>
 #include "single_threaded.h"
 #include "../isa_meta.h"
+#include "../VirtualMachine.h"
 
 namespace swarmc::Runtime::SingleThreaded {
 
@@ -21,7 +22,7 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
     bool StorageInterface::manages(ISA::LocationReference* loc) {
-        return true;  // TODO: allow configuring affinity?
+        return loc->affinity() == _affinity;
     }
 
     void StorageInterface::drop(ISA::LocationReference* loc) {
@@ -50,6 +51,20 @@ namespace swarmc::Runtime::SingleThreaded {
         _types.clear();
     }
 
+    IStorageInterface* StorageInterface::copy() {
+        // In a single threaded environment, shared variables are singleton,
+        // so we "copy" a shared variable store by re-using the reference
+        if ( _affinity == ISA::Affinity::SHARED ) return this;
+
+        // Otherwise, duplicate the store
+        auto copy = new StorageInterface(_affinity);
+        copy->_map = _map;
+        copy->_types = _types;
+        // (don't duplicate locks, since the recipient won't hold them)
+
+        return copy;
+    }
+
 
     ISA::LocationReference* StorageLock::location() const {
         return _loc;
@@ -66,5 +81,14 @@ namespace swarmc::Runtime::SingleThreaded {
 
     std::string QueueJob::toString() const {
         return "SingleThreaded::QueueJob<id: " + std::to_string(_id) + ", call: " + _call->toString() + ">";
+    }
+
+
+    void Queue::push(IQueueJob* job) {
+        auto vm = _vm->copy();
+        Console::get()->debug("Got VM from queue: " + vm->toString());
+        vm->restore(job->getScope()->copy(), job->getState()->copy());
+        vm->executeCall(job->getCall());
+        delete vm;
     }
 }

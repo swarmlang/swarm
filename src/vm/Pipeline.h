@@ -5,8 +5,12 @@
 #include "../shared/IStringable.h"
 #include "isa_meta.h"
 #include "ISAParser.h"
+#include "runtime/single_threaded.h"
+#include "VirtualMachine.h"
 
 namespace swarmc::VM {
+
+    using namespace Runtime;
 
     class Pipeline : public IStringable {
     public:
@@ -33,6 +37,16 @@ namespace swarmc::VM {
 
         void targetISARepresentation(std::ostream& out) {
             _parser->outputParse(out);
+        }
+
+        VirtualMachine* targetSingleThreaded() {
+            auto is = targetInstructions();
+            auto vm = new VirtualMachine(new SingleThreaded::GlobalServices());
+            vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::SHARED));
+            vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
+            vm->addQueue(new SingleThreaded::Queue(vm));
+            vm->initialize(is);
+            return vm;
         }
 
         std::string toString() const override {

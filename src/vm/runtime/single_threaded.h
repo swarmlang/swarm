@@ -6,6 +6,10 @@
 #include "../../shared/uuid.h"
 #include "interfaces.h"
 
+namespace swarmc::Runtime {
+    class VirtualMachine;
+}
+
 namespace swarmc::Runtime::SingleThreaded {
     class StorageLock;
 
@@ -31,6 +35,8 @@ namespace swarmc::Runtime::SingleThreaded {
 
     class StorageInterface : public IStorageInterface {
     public:
+        StorageInterface(ISA::Affinity affinity) : _affinity(affinity) {}
+
         ISA::Reference* load(ISA::LocationReference* loc) override;
 
         void store(ISA::LocationReference* loc, ISA::Reference* value) override;
@@ -49,11 +55,14 @@ namespace swarmc::Runtime::SingleThreaded {
 
         void clear() override;
 
+        IStorageInterface* copy() override;
+
         std::string toString() const override {
             return "SingleThreaded::StorageInterface<#loc: " + std::to_string(_map.size()) + ">";
         }
 
     protected:
+        ISA::Affinity _affinity;
         std::map<std::string, ISA::Reference*> _map;
         std::map<std::string, const Type::Type*> _types;
         std::map<std::string, StorageLock*> _locks;
@@ -82,14 +91,14 @@ namespace swarmc::Runtime::SingleThreaded {
 
     class QueueJob : public IQueueJob {
     public:
-        QueueJob(JobID id, JobState jobState, const IFunctionCall* call, const ScopeFrame* scope, const State* vmState):
+        QueueJob(JobID id, JobState jobState, IFunctionCall* call, const ScopeFrame* scope, const State* vmState):
             _id(id), _jobState(jobState), _call(call), _scope(scope), _vmState(vmState) {}
 
         JobID id() const override { return _id; }
 
         JobState state() const override { return _jobState; }
 
-        const IFunctionCall* getCall() const override { return _call; }
+        IFunctionCall* getCall() const override { return _call; }
 
         const ScopeFrame* getScope() const override { return _scope; }
 
@@ -100,7 +109,7 @@ namespace swarmc::Runtime::SingleThreaded {
     protected:
         JobID _id;
         JobState _jobState;
-        const IFunctionCall* _call;
+        IFunctionCall* _call;
         const ScopeFrame* _scope;
         const State* _vmState;
     };
@@ -108,37 +117,38 @@ namespace swarmc::Runtime::SingleThreaded {
 
     class Queue : public IQueue {
     public:
+        Queue(VirtualMachine* vm) : _vm(vm) {}
+
         void setContext(QueueContextID ctx) override {
             _context = ctx;
-            if ( _queues.find(ctx) == _queues.end() ) _queues[ctx] = std::queue<IQueueJob*>();
         }
 
         QueueContextID getContext() override { return _context; }
 
         bool shouldHandle(IFunctionCall* call) override { return true; }
 
-        QueueJob* build(const IFunctionCall* call, const ScopeFrame* scope, const State* state) override {
+        QueueJob* build(IFunctionCall* call, const ScopeFrame* scope, const State* state) override {
             return new QueueJob(_nextId++, JobState::PENDING, call, scope, state);
         }
 
-        void push(IQueueJob* job) override {
-            _queues[_context].push(job);
-        }
+        void push(IQueueJob* job) override;
 
         IQueueJob* pop() override {
-            auto job = _queues[_context].front();
-            _queues[_context].pop();
-            return job;
+            return nullptr;
         }
 
         bool isEmpty() override {
-            return _queues[_context].empty();
+            return true;
+        }
+
+        std::string toString() const override {
+            return "SingleThreaded::Queue<ctx: " + _context + ">";
         }
 
     protected:
+        VirtualMachine* _vm;
         JobID _nextId = 0;
         QueueContextID _context;
-        std::map<QueueContextID, std::queue<IQueueJob*>> _queues;
     };
 
 }

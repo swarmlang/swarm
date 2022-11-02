@@ -64,6 +64,7 @@ namespace swarmc::ISA {
             if ( inst->tag() == Tag::PUSHCALLELSE0 ) return walkPushCallElse0((PushCallElse0*) inst);
             if ( inst->tag() == Tag::PUSHCALLELSE1 ) return walkPushCallElse1((PushCallElse1*) inst);
             if ( inst->tag() == Tag::DRAIN ) return walkDrain((Drain*) inst);
+            if ( inst->tag() == Tag::EXIT ) return walkExit((Exit*) inst);
             if ( inst->tag() == Tag::MAPINIT ) return walkMapInit((MapInit*) inst);
             if ( inst->tag() == Tag::MAPSET ) return walkMapSet((MapSet*) inst);
             if ( inst->tag() == Tag::MAPGET ) return walkMapGet((MapGet*) inst);
@@ -149,6 +150,7 @@ namespace swarmc::ISA {
         virtual TReturn walkPushCallElse0(PushCallElse0*) = 0;
         virtual TReturn walkPushCallElse1(PushCallElse1*) = 0;
         virtual TReturn walkDrain(Drain*) = 0;
+        virtual TReturn walkExit(Exit*) = 0;
         virtual TReturn walkMapInit(MapInit*) = 0;
         virtual TReturn walkMapSet(MapSet*) = 0;
         virtual TReturn walkMapGet(MapGet*) = 0;

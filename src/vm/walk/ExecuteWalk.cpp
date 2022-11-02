@@ -19,6 +19,7 @@ namespace swarmc::Runtime {
     }
 
     NumberReference* ExecuteWalk::ensureNumber(const Reference* ref) {
+        verbose("ensureNumber: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::NUMBER));
         // FIXME: eventually, this should probably generate a runtime exception
         assert(ref->tag() == ReferenceTag::NUMBER);
@@ -26,6 +27,7 @@ namespace swarmc::Runtime {
     }
 
     BooleanReference* ExecuteWalk::ensureBoolean(const Reference* ref) {
+        verbose("ensureBoolean: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::BOOLEAN));
         // FIXME: eventually, this should probably generate a runtime exception
         assert(ref->tag() == ReferenceTag::BOOLEAN);
@@ -33,6 +35,7 @@ namespace swarmc::Runtime {
     }
 
     TypeReference* ExecuteWalk::ensureType(const Reference* ref) {
+        verbose("ensureType: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::TYPE));
         // FIXME: eventually, this should probably generate a runtime exception
         assert(ref->tag() == ReferenceTag::TYPE);
@@ -40,6 +43,7 @@ namespace swarmc::Runtime {
     }
 
     StringReference* ExecuteWalk::ensureString(const Reference* ref) {
+        verbose("ensureString: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::STRING));
         // FIXME: eventually, this should probably generate a runtime exception
         assert(ref->tag() == ReferenceTag::STRING);
@@ -47,36 +51,49 @@ namespace swarmc::Runtime {
     }
 
     FunctionReference* ExecuteWalk::ensureFunction(const ISA::Reference* ref) {
+        verbose("ensureFunction: " + ref->toString());
         // FIXME: eventually, this should generate a runtime exception
         assert(ref->tag() == ReferenceTag::FUNCTION);
         return (FunctionReference*) ref;
     }
 
     EnumerationReference* ExecuteWalk::ensureEnumeration(const ISA::Reference* ref) {
+        verbose("ensureEnumeration: " + ref->toString());
         // FIXME: eventually, this should generate a runtime exception
         assert(ref->tag() == ReferenceTag::ENUMERATION);
         return (EnumerationReference*) ref;
     }
 
+    MapReference* ExecuteWalk::ensureMap(const ISA::Reference* ref) {
+        verbose("ensureMap: " + ref->toString());
+        // FIXME: eventually, this should generate a runtime exception
+        assert(ref->tag() == ReferenceTag::MAP);
+        return (MapReference*) ref;
+    }
+
     Reference* ExecuteWalk::walkPlus(Plus* i) {
+        verbose("plus " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new NumberReference(lhs->value() + rhs->value());
     }
 
     Reference* ExecuteWalk::walkMinus(Minus* i) {
+        verbose("minus " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new NumberReference(lhs->value() - rhs->value());
     }
 
     Reference* ExecuteWalk::walkTimes(Times* i) {
+        verbose("times " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new NumberReference(lhs->value() * rhs->value());
     }
 
     Reference* ExecuteWalk::walkDivide(Divide* i) {
+        verbose("divide " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         // FIXME: eventually, this should generate a runtime exception
@@ -85,82 +102,97 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkPower(Power* i) {
+        verbose("power " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new NumberReference(pow(lhs->value(), rhs->value()));
     }
 
     Reference* ExecuteWalk::walkMod(Mod* i) {
+        verbose("mod " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new NumberReference(std::fmod(lhs->value(), rhs->value()));
     }
 
     Reference* ExecuteWalk::walkNegative(Negative* i) {
-        auto opd = ensureNumber(i->first());
+        verbose("neg " + i->first()->toString());
+        auto opd = ensureNumber(_vm->resolve(i->first()));
         return new NumberReference(- opd->value());
     }
 
     Reference* ExecuteWalk::walkGreaterThan(GreaterThan* i) {
+        verbose("gt " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new BooleanReference(lhs->value() > rhs->value());
     }
 
     Reference* ExecuteWalk::walkGreaterThanOrEqual(GreaterThanOrEqual* i) {
+        verbose("gte " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new BooleanReference(lhs->value() >= rhs->value());
     }
 
     Reference* ExecuteWalk::walkLessThan(LessThan* i) {
+        verbose("lt " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new BooleanReference(lhs->value() < rhs->value());
     }
 
     Reference* ExecuteWalk::walkLessThanOrEqual(LessThanOrEqual* i) {
+        verbose("lte " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
         return new BooleanReference(lhs->value() <= rhs->value());
     }
 
     Reference* ExecuteWalk::walkAnd(And* i) {
+        verbose("and " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureBoolean(_vm->resolve(i->first()));
         auto rhs = ensureBoolean(_vm->resolve(i->second()));
         return new BooleanReference(lhs->value() && rhs->value());
     }
 
     Reference* ExecuteWalk::walkOr(Or* i) {
+        verbose("or " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureBoolean(_vm->resolve(i->first()));
         auto rhs = ensureBoolean(_vm->resolve(i->second()));
         return new BooleanReference(lhs->value() || rhs->value());
     }
 
     Reference* ExecuteWalk::walkXor(Xor* i) {
+        verbose("xor " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureBoolean(_vm->resolve(i->first()));
         auto rhs = ensureBoolean(_vm->resolve(i->second()));
         return new BooleanReference(!lhs->value() != !rhs->value());
     }
 
     Reference* ExecuteWalk::walkNand(Nand* i) {
+        verbose("nand " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureBoolean(_vm->resolve(i->first()));
         auto rhs = ensureBoolean(_vm->resolve(i->second()));
         return new BooleanReference(!(lhs->value() && rhs->value()));
     }
 
     Reference* ExecuteWalk::walkNor(Nor* i) {
+        verbose("nor " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureBoolean(_vm->resolve(i->first()));
         auto rhs = ensureBoolean(_vm->resolve(i->second()));
         return new BooleanReference(!(lhs->value() || rhs->value()));
     }
 
     Reference* ExecuteWalk::walkNot(Not* i) {
+        verbose("not " + i->first()->toString());
         auto opd = ensureBoolean(_vm->resolve(i->first()));
         return new BooleanReference(!opd->value());
     }
 
     Reference* ExecuteWalk::walkWhile(While* i) {
+        verbose("while " + i->first()->toString() + " " + i->second()->toString());
+
         // create expected type for callback
         auto callbackType = new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID));
 
@@ -186,11 +218,13 @@ namespace swarmc::Runtime {
     // TODO: walkWith
 
     Reference* ExecuteWalk::walkEnumInit(EnumInit* i) {
+        verbose("enuminit " + i->first()->toString());
         auto type = ensureType(i->first());
         return new EnumerationReference(type->value());
     }
 
     Reference* ExecuteWalk::walkEnumAppend(EnumAppend* i) {
+        verbose("enumappend " + i->first()->toString() + " " + i->second()->toString());
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->first());
 
@@ -202,6 +236,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkEnumPrepend(EnumPrepend* i) {
+        verbose("enumprepend " + i->first()->toString() + " " + i->second()->toString());
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->first());
 
@@ -213,11 +248,13 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkEnumLength(EnumLength* i) {
+        verbose("enumlength " + i->first()->toString());
         auto enumeration = ensureEnumeration(_vm->resolve(i->first()));
         return new NumberReference(static_cast<double>(enumeration->length()));
     }
 
     Reference* ExecuteWalk::walkEnumGet(EnumGet* i) {
+        verbose("enumget " + i->first()->toString() + " " + i->second()->toString());
         auto enumeration = ensureEnumeration(_vm->resolve(i->first()));
         auto idx = ensureNumber(_vm->resolve(i->second()));
 
@@ -228,6 +265,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkEnumSet(EnumSet* i) {
+        verbose("enumset " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
         auto enumeration = ensureEnumeration(_vm->resolve(i->first()));
         auto idx = ensureNumber(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->third());
@@ -241,6 +279,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkEnumerate(Enumerate* i) {
+        verbose("enumerate " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
         auto elemType = ensureType(_vm->resolve(i->first()));
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto callback = ensureFunction(_vm->resolve(i->third()));
@@ -251,6 +290,8 @@ namespace swarmc::Runtime {
         Type::Lambda1 callbackOuter(elemType->value(), &callbackInner);
 
         // fixme: eventually, this should generate a runtime error
+        verbose("callback: " + callback->toString());
+        verbose("callback type: " + callback->type()->toString() + " | callback outer: " + callbackOuter.toString());
         assert(callback->type()->isAssignableTo(&callbackOuter));
 
         _vm->enterQueueContext();
@@ -274,31 +315,35 @@ namespace swarmc::Runtime {
         // Function definitions are read statically when the SVI is loaded into
         // the virtual machine. Calls jump to the instruction _after_ a beginfn.
         // So, we should never encounter this.
-        console->warn("Detected virtual execution across boundary of function body: " + i->toString());
-        return nullptr;
+        throw Errors::SwarmError("Detected virtual execution across boundary of function body: " + i->toString());
     }
 
     Reference* ExecuteWalk::walkFunctionParam(FunctionParam* i) {
+        verbose("fnparam " + i->first()->toString() + " " + i->second()->toString());
+
         auto call = _vm->getCall();
         // fixme: eventually, this should generate a runtime exception
         assert(call != nullptr);
 
-        auto param = call->popParam();
+        auto param = _vm->resolve(call->popParam().second);
         auto loc = i->second();
 
         // fixme: eventually, this should generate a runtime exception
-        assert(param.second->type()->isAssignableTo(loc->type()));
+        assert(param->type()->isAssignableTo(loc->type()));
 
-        _vm->store(loc, param.second);
+        debug("fnparam: " + loc->toString() + " <- " + param->toString());
+        _vm->store(loc, param);
         return nullptr;
     }
 
     Reference* ExecuteWalk::walkReturn0(Return0*) {
+        verbose("return0");
         _vm->returnToCaller();
         return nullptr;
     }
 
     ISA::Reference* ExecuteWalk::walkReturn1(ISA::Return1* i) {
+        verbose("return1 " + i->first()->toString());
         auto call = _vm->getCall();
         // fixme: eventually, this should generate a runtime exception
         assert(call != nullptr);
@@ -320,12 +365,14 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkCurry(Curry* i) {
+        verbose("curry " + i->first()->toString() + " " + i->second()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto param = _vm->resolve(i->second());
         return new FunctionReference(fn->fn()->curry(param));
     }
 
     Reference* ExecuteWalk::walkCall0(Call0* i) {
+        verbose("call0 " + i->first()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto call = fn->fn()->call();
         _vm->call(call);
@@ -333,6 +380,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkCall1(Call1* i) {
+        verbose("call1 " + i->first()->toString() + " " + i->second()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto param = _vm->resolve(i->second());
         auto call = fn->fn()->curry(param)->call();
@@ -341,6 +389,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkCallIf0(CallIf0* i) {
+        verbose("callif0 " + i->first()->toString() + " " + i->second()->toString());
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         if ( cond->value() ) _vm->call(fn->fn()->call());
@@ -348,6 +397,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkCallIf1(CallIf1* i) {
+        verbose("callif1 " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         auto param = _vm->resolve(i->third());
@@ -356,6 +406,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkCallElse0(CallElse0* i) {
+        verbose("callelse0 " + i->first()->toString() + " " + i->second()->toString());
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         if ( !cond->value() ) _vm->call(fn->fn()->call());
@@ -363,6 +414,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkCallElse1(CallElse1* i) {
+        verbose("callelse1 " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         auto param = _vm->resolve(i->third());
@@ -371,6 +423,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkPushCall0(PushCall0* i) {
+        verbose("pushcall0 " + i->first()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto call = fn->fn()->call();
         _vm->pushCall(call);
@@ -378,6 +431,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkPushCall1(PushCall1* i) {
+        verbose("pushcall1 " + i->first()->toString() + " " + i->second()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto param = _vm->resolve(i->second());
         auto call = fn->fn()->curry(param)->call();
@@ -386,6 +440,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkPushCallIf0(PushCallIf0* i) {
+        verbose("pushcallif0 " + i->first()->toString() + " " + i->second()->toString());
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         if ( cond->value() ) _vm->pushCall(fn->fn()->call());
@@ -393,6 +448,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkPushCallIf1(PushCallIf1* i) {
+        verbose("pushcallif1 " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         auto param = _vm->resolve(i->third());
@@ -401,6 +457,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkPushCallElse0(PushCallElse0* i) {
+        verbose("pushcallelse0 " + i->first()->toString() + " " + i->second()->toString());
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         if ( !cond->value() ) _vm->pushCall(fn->fn()->call());
@@ -408,6 +465,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkPushCallElse1(PushCallElse1* i) {
+        verbose("pushcallelse1 " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         auto param = _vm->resolve(i->third());
@@ -416,13 +474,59 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkDrain(Drain*) {
+        verbose("drain");
         _vm->drain();
         return nullptr;
     }
 
-    // TODO: walkMap*
+    Reference* ExecuteWalk::walkExit(Exit*) {
+        verbose("exit");
+        _vm->exit();
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkMapInit(MapInit* i) {
+        verbose("mapinit " + i->first()->toString());
+        auto innerType = ensureType(_vm->resolve(i->first()));
+        return new MapReference(innerType->value());
+    }
+
+    Reference* ExecuteWalk::walkMapSet(MapSet* i) {
+        verbose("mapset " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
+        auto key = ensureString(_vm->resolve(i->first()));
+        auto map = ensureMap(_vm->resolve(i->third()));
+        auto value = _vm->resolve(i->second());
+
+        ensureType(value, map->type()->values());
+        map->set(key->value(), value);
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkMapGet(MapGet* i) {
+        verbose("mapget " + i->first()->toString() + " " + i->second()->toString());
+        auto key = ensureString(_vm->resolve(i->first()));
+        auto map = ensureMap(_vm->resolve(i->second()));
+
+        // FIXME: eventually, this should generate a runtime exception
+        assert(map->has(key->value()));
+
+        return map->get(key->value());
+    }
+
+    Reference* ExecuteWalk::walkMapLength(MapLength* i) {
+        verbose("maplength " + i->first()->toString());
+        auto map = ensureMap(_vm->resolve(i->first()));
+        return new NumberReference(static_cast<double>(map->length()));
+    }
+
+    Reference* ExecuteWalk::walkMapKeys(MapKeys* i) {
+        verbose("mapkeys " + i->first()->toString());
+        auto map = ensureMap(_vm->resolve(i->first()));
+        return map->keys();
+    }
 
     Reference* ExecuteWalk::walkTypify(Typify* i) {
+        verbose("typify " + i->first()->toString() + " " + i->second()->toString());
         auto loc = i->first();
         auto type = ensureType(i->second());
         _vm->typify(loc, type->value());
@@ -430,8 +534,9 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkAssignValue(AssignValue* i) {
+        verbose("assignvalue " + i->first()->toString() + " " + i->second()->toString());
         auto loc = i->first();
-        auto value = i->second();
+        auto value = _vm->resolve(i->second());
 
         if ( loc->type()->isAmbiguous() ) {
             loc->setType(value->type());
@@ -440,11 +545,13 @@ namespace swarmc::Runtime {
         // FIXME: eventually, this needs to generate a runtime type error
         assert(value->type()->isAssignableTo(loc->type()));
 
+        debug(loc->toString() + " <- " + value->toString());
         _vm->store(loc, value);
         return nullptr;
     }
 
     Reference* ExecuteWalk::walkAssignEval(AssignEval* i) {
+        verbose("assigneval " + i->first()->toString() + " " + i->second()->toString());
         auto loc = i->first();
         auto eval = i->second();
 
@@ -454,15 +561,18 @@ namespace swarmc::Runtime {
         // then we will need to make the call and wait for the return
         // to jump back here
         if ( eval->tag() == Tag::CALL0 || eval->tag() == Tag::CALL1 ) {
-            // Check if we got here because of the return
-            if ( _vm->hasFlag(StateFlag::JUMPED_FROM_RETURN) ) {
-                // Get the return value and store that
-                auto call = _vm->getCall();
-                // FIXME: raise a runtime error?
-                assert(call != nullptr);
+            verbose("assignEval: got call0 or call1");
 
-                value = call->getReturn();
+            // Check if we got here because of the return
+            auto returnCall = _vm->getReturn();
+            if ( returnCall != nullptr ) {
+                verbose("assignEval: jumped from return");
+
+                // Get the return value and store that
+                value = returnCall->getReturn();
             } else {
+                verbose("assignEval: jumping to call");
+
                 // Otherwise, we need to make the call. Step back so we
                 // return-jump to the correct instruction.
                 _vm->rewind();
@@ -484,21 +594,25 @@ namespace swarmc::Runtime {
         // FIXME: eventually, this needs to generate a runtime type error
         assert(value->type()->isAssignableTo(loc->type()));
 
+        debug(loc->toString() + " <- " + value->toString());
         _vm->store(loc, value);
         return nullptr;
     }
 
     Reference* ExecuteWalk::walkLock(Lock* i) {
+        verbose("lock " + i->first()->toString());
         _vm->lock(i->first());
         return nullptr;
     }
 
     Reference* ExecuteWalk::walkUnlock(Unlock* i) {
+        verbose("unlock " + i->first()->toString());
         _vm->unlock(i->first());
         return nullptr;
     }
 
     Reference* ExecuteWalk::walkScopeOf(ScopeOf* i) {
+        verbose("scopeof " + i->first()->toString());
         _vm->shadow(i->first());
         return nullptr;
     }
@@ -508,12 +622,14 @@ namespace swarmc::Runtime {
     // TODO: walkErr
 
     Reference* ExecuteWalk::walkStringConcat(StringConcat* i) {
+        verbose("strconcat " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureString(_vm->resolve(i->first()));
         auto rhs = ensureString(_vm->resolve(i->second()));
         return new StringReference(lhs->value() + rhs->value());
     }
 
     Reference* ExecuteWalk::walkStringLength(StringLength* i) {
+        verbose("strlength " + i->first()->toString());
         auto opd = ensureString(_vm->resolve(i->first()));
         return new NumberReference(opd->value().length());
     }
@@ -521,6 +637,7 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkStringSliceFrom(StringSliceFrom* i) {
         // FIXME: handle negative indices
 
+        verbose("strslicefrom " + i->first()->toString() + " " + i->second()->toString());
         auto str = ensureString(_vm->resolve(i->first()));
         auto from = ensureNumber(_vm->resolve(i->second()));
         return new StringReference(str->value().substr(from->value()));
@@ -529,6 +646,7 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkStringSliceFromTo(StringSliceFromTo* i) {
         // FIXME: handle negative indices
 
+        verbose("strslicefromto " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
         auto str = ensureString(_vm->resolve(i->first()));
         auto from = ensureNumber(_vm->resolve(i->second()));
         auto to = ensureNumber(_vm->resolve(i->third()));
@@ -538,6 +656,7 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkTypeOf(TypeOf* i) {
         // FIXME: handle ambiguous type narrowing?
 
+        verbose("typeof " + i->first()->toString());
         auto opd = _vm->resolve(i->first());
         return new TypeReference(opd->type());
     }
@@ -545,6 +664,7 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkIsCompatible(IsCompatible* i) {
         // FIXME: handle ambiguous type narrowing?
 
+        verbose("compatible " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = _vm->resolve(i->first());
         auto rhs = _vm->resolve(i->second());
         return new BooleanReference(rhs->type()->isAssignableTo(lhs->type()));
