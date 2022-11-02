@@ -38,3 +38,4 @@
     typeof $l:a
     ```
   - Do we care to support this?
+- Well-defined C++/native bridge to allow custom `f:XXX` function bindings, as well as custom stream implementations.
