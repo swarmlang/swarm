@@ -47,6 +47,7 @@ while (t3 > 0 && t3 >= -1 && t4 != "jinkies" && t3 < 5 && t3 <= 4) {
         continue;
     }
     if (t3 == 1) {
+        -- FUNC_73
         fn func = (): void => {
             return;
         };

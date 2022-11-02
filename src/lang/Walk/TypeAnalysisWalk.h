@@ -454,7 +454,8 @@ protected:
         bool flag = walk(node->enumerable());
 
         const Type::Type* enumType = node->enumerable()->type();
-        if ( enumType->intrinsic() != Type::Intrinsic::ENUMERABLE ) {
+        if ( enumType->intrinsic() != Type::Intrinsic::ENUMERABLE &&
+            enumType->intrinsic() != Type::Intrinsic::ERROR ) {
             Reporting::typeError(
                 node->position(),
                 "Attempted to enumerate invalid value"
@@ -492,7 +493,7 @@ protected:
             flag = false;
         }
 
-        auto localType = ((Type::Resource*) type)->yields()->copy();
+        auto localType = ((Type::Resource*) type)->yields()->copy(node->_shared);
 
         _types->setTypeOf(node->local(), localType);
         node->local()->symbol()->_type = localType;  // local is implicitly defined, so need to set its type

@@ -68,14 +68,14 @@ protected:
     virtual ISA::Instructions* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::TypeReference(node->value());
-        instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::PRIMITIVE), ref));
+        instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), ref));
         return instrs;
     }
 
     virtual ISA::Instructions* walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::BooleanReference(node->value());
-        instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::PRIMITIVE), ref));
+        instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), ref));
         return instrs;
     }
 
@@ -104,18 +104,29 @@ protected:
     virtual ISA::Instructions* walkCallExpressionNode(CallExpressionNode* node) {
         auto instrs = walk(node->id());
         auto floc = getLocFromAssign(instrs->back());
-
         if ( node->args()->size() == 0 ) {
-            instrs->push_back(new ISA::Call0(floc));
+            auto call = new ISA::Call0(floc);
+            if (node->type()->intrinsic() == Type::Intrinsic::VOID) {
+                instrs->push_back(call);
+            } else {
+                instrs->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), call));
+            }
         } else {
+            auto fnType = node->id()->type();
             for ( auto arg : *node->args() ) {
                 auto evalarg = walk(arg);
                 auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
                 instrs->insert(instrs->end(), evalarg->begin(), evalarg->end());
                 delete evalarg;
-                auto loc2 = makeLocation(ISA::Affinity::LOCAL);
-                instrs->push_back(new ISA::AssignEval(loc2, call));
-                floc = loc2;
+                assert(fnType->isCallable());
+                if (((Type::Lambda*)fnType)->returns()->intrinsic() == Type::Intrinsic::VOID) {
+                    instrs->push_back(call);
+                } else {
+                    auto loc2 = makeLocation(ISA::Affinity::LOCAL);
+                    instrs->push_back(new ISA::AssignEval(loc2, call));
+                    floc = loc2;
+                }
+                fnType = ((Type::Lambda*)fnType)->returns();
             }
         }
 
@@ -127,16 +138,28 @@ protected:
         auto floc = getLocFromAssign(instrs->back());
 
         if ( node->args()->size() == 0 ) {
-            instrs->push_back(new ISA::Call0(floc));
+            auto call = new ISA::Call0(floc);
+            if (node->type()->intrinsic() == Type::Intrinsic::VOID) {
+                instrs->push_back(call);
+            } else {
+                instrs->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), call));
+            }
         } else {
+            auto fnType = node->expression()->type();
             for ( auto arg : *node->args() ) {
                 auto evalarg = walk(arg);
                 auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
                 instrs->insert(instrs->end(), evalarg->begin(), evalarg->end());
                 delete evalarg;
-                auto loc2 = makeLocation(ISA::Affinity::LOCAL);
-                instrs->push_back(new ISA::AssignEval(loc2, call));
-                floc = loc2;
+                assert(fnType->isCallable());
+                if (((Type::Lambda*)fnType)->returns()->intrinsic() == Type::Intrinsic::VOID) {
+                    instrs->push_back(call);
+                } else {
+                    auto loc2 = makeLocation(ISA::Affinity::LOCAL);
+                    instrs->push_back(new ISA::AssignEval(loc2, call));
+                    floc = loc2;
+                }
+                fnType = ((Type::Lambda*)fnType)->returns();
             }
         }
 
@@ -554,14 +577,14 @@ protected:
     virtual ISA::Instructions* walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::StringReference(node->value());
-        instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::PRIMITIVE), ref));
+        instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), ref));
         return instrs;
     }
 
     virtual ISA::Instructions* walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::NumberReference(node->value());
-        instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::PRIMITIVE), ref));
+        instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), ref));
         return instrs;
     }
 
@@ -608,8 +631,17 @@ protected:
         auto instrs = new ISA::Instructions();
 
         std::string name = "FUNC_" + std::to_string(_tempCounter++);
-        assert( node->type()->intrinsic() == Type::Intrinsic::LAMBDA0 || node->type()->intrinsic() == Type::Intrinsic::LAMBDA1 );
-        auto retType = new ISA::TypeReference(((Type::Lambda*)node->type())->returns());
+        auto fnType = node->type();
+        if (node->formals()->size() == 0) {
+            assert( fnType->isCallable() );
+            fnType = ((Type::Lambda*)fnType)->returns();
+        } else {
+            for ( size_t i = 0; i < node->formals()->size(); i++ ) {
+                assert( fnType->isCallable() );
+                fnType = ((Type::Lambda*)fnType)->returns();
+            }
+        }
+        auto retType = new ISA::TypeReference((fnType));
         auto retVar = new ISA::LocationReference(ISA::Affinity::LOCAL, "retVal");
         auto cfb = new ISA::LocationReference(ISA::Affinity::LOCAL, "CFB");
         _inFunction++;
@@ -623,7 +655,8 @@ protected:
         }
 
         // bring return value trackers in scope
-        if ( node->type()->intrinsic() != Type::Intrinsic::VOID ) {
+        std::cout << name << " " << fnType->toString() << "\n";
+        if ( fnType->intrinsic() != Type::Intrinsic::VOID ) {
             instrs->push_back(new ISA::ScopeOf(retVar));
         }
         instrs->push_back(new ISA::ScopeOf(cfb));
@@ -667,7 +700,7 @@ protected:
         }
 
         // end of function return
-        if ( node->type()->intrinsic() == Type::Intrinsic::VOID ) {
+        if ( fnType->intrinsic() == Type::Intrinsic::VOID ) {
             instrs->push_back(new ISA::Return0());
         } else {
             instrs->push_back(new ISA::Return1(retVar));
