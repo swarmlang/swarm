@@ -1,0 +1,14 @@
+call f:MAIN
+exit
+
+beginfn f:MAIN p:VOID
+    $l:i <- 100000
+    $l:i_cond <- gt $l:i 0
+    while $l:i_cond f:LOOP
+return
+
+beginfn f:LOOP p:VOID
+    $l:i <- minus $l:i 1
+    $l:i_cond <- gt $l:i 0
+return
+

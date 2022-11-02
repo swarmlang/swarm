@@ -202,8 +202,8 @@ namespace swarmc::Runtime {
         // fixme: eventually, this should raise a runtime exception
         assert(callback->type()->isAssignableTo(callbackType));
 
-        bool cond = _vm->resolve(i->first());
-        if ( cond ) {
+        auto cond = ensureBoolean(_vm->resolve(i->first()));
+        if ( cond->value() ) {
             // we want the VM to re-evaluate the condition after the call completes,
             // so rewind the program counter by one so the return jump is correct
             _vm->rewind();
