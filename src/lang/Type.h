@@ -54,6 +54,12 @@ namespace Type {
 
         virtual Type* copy() const = 0;
 
+        virtual Type* copy(bool shared) const {
+            auto e = copy();
+            e->_shared = shared;
+            return e;
+        }
+
         virtual Intrinsic intrinsic() const {
             return Intrinsic::CONTRADICTION;
         }

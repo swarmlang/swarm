@@ -200,7 +200,7 @@ statements :
 statement :
     ENUMERATE lval AS shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
-        EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, nullptr, $4);
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, nullptr, $4->shared());
         e->assumeAndReduceStatements($7->reduceToStatements());
         $$ = e;
         delete $1; delete $3; delete $4; delete $6; delete $8;
@@ -210,8 +210,7 @@ statement :
         Position* pos = new Position($1->position(), $11->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $8, $4->shared());
         auto t = new TypeLiteral($8->position()->copy(), Type::Primitive::of(Type::Intrinsic::NUMBER));
-        t->setShared($7->shared());
-        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy(), $8->position()->copy()));
+        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy($7->shared()), $8->position()->copy()));
         e->assumeAndReduceStatements($10->reduceToStatements());
         $$ = e;
         delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11; delete t;

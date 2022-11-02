@@ -231,7 +231,7 @@ protected:
             const Type::Type* enumType = node->enumerable()->type();
             if ( enumType->intrinsic() == Type::Intrinsic::ENUMERABLE ) {
                 auto enumGenericType = (Type::Enumerable*) enumType;
-                type = enumGenericType->values()->copy();
+                type = enumGenericType->values()->copy(node->_shared);
             }
 
             // Start a new scope in the body and add the local

@@ -10,7 +10,7 @@
 #include "../bison/grammar.hh"
 #include "../lang/AST.h"
 #include "../lang/Walk/PrintWalk.h"
-#include "../lang/Walk/CompileWalk.h"
+#include "../lang/Walk/ToISAWalk.h"
 #include "../lang/Walk/NameAnalysisWalk.h"
 #include "../lang/Walk/TypeAnalysisWalk.h"
 #include "../vm/ISAParser.h"
@@ -94,9 +94,9 @@ namespace swarmc {
             Lang::Walk::PrintWalk pW(out, _root);
         }
 
-        void targetSVI(std::ostream& out) {
+        void targetISA(std::ostream& out) {
             targetASTSymbolicTyped();
-            Lang::Walk::CompileWalk cw(out, _root);
+            Lang::Walk::ToISAWalk cw(out, _root);
         }
 
     protected:
