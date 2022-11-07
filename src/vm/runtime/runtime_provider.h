@@ -8,7 +8,7 @@
 namespace swarmc::Runtime {
 
     class IProvider;
-
+    using Providers = std::vector<IProvider*>;
 
     class IProviderFunctionCall : public IFunctionCall {
     public:
@@ -16,6 +16,8 @@ namespace swarmc::Runtime {
                 IFunctionCall(FunctionBackend::PROVIDER, vector, returnType) {}
 
         virtual IProvider* provider() const = 0;
+
+        virtual void execute() = 0;
     };
 
 

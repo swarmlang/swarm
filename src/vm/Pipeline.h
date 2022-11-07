@@ -7,6 +7,7 @@
 #include "ISAParser.h"
 #include "runtime/single_threaded.h"
 #include "VirtualMachine.h"
+#include "prologue/prologue_provider.h"
 
 namespace swarmc::VM {
 
@@ -45,6 +46,11 @@ namespace swarmc::VM {
             vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::SHARED));
             vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
             vm->addQueue(new SingleThreaded::Queue(vm));
+
+            if ( Configuration::WITH_PROLOGUE ) {
+                vm->addProvider(new Prologue::Provider());
+            }
+
             vm->initialize(is);
             return vm;
         }

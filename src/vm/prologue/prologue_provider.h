@@ -2,6 +2,7 @@
 #define SWARMVM_PROLOGUE_PROVIDER
 
 #include "../runtime/runtime_provider.h"
+#include "../runtime/runtime_functions.h"
 
 namespace swarmc::Runtime::Prologue {
 
@@ -24,6 +25,14 @@ namespace swarmc::Runtime::Prologue {
         PrologueFunctionCall* call(CallVector) const override = 0;
 
         PrologueFunctionCall* call() const override { return call(getCallVector()); }
+
+        CallVector getCallVector() const override {
+            return {};
+        }
+
+        IFunction* curry(ISA::Reference* ref) const override {
+            return new CurriedFunction(ref, this);
+        }
 
     protected:
         IProvider* _provider;

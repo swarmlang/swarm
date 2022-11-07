@@ -52,6 +52,9 @@ namespace swarmc::Runtime {
             return new FunctionReference(loadInlineFunction(loc->name()));
         }
 
+        auto providerFn = loadProviderFunction(loc->name());
+        if ( providerFn != nullptr ) return new FunctionReference(providerFn);
+
         throw Errors::SwarmError("Attempted to load invalid function " + loc->toString() + ". Location has an unknown function backend, or is an invalid name.");
     }
 
@@ -69,6 +72,16 @@ namespace swarmc::Runtime {
 
         verbose("load inline function: " + name + " (#params: " + std::to_string(paramTypes.size()) + ") (returns: " + returnType->toString() + ")");
         return new InlineFunction(name, paramTypes, returnType->value());
+    }
+
+    IProviderFunction* VirtualMachine::loadProviderFunction(const std::string &name) {
+        size_t idx = 0;
+        for ( auto it = _providers.rbegin(); it != _providers.rend(); ++it, --idx ) {
+            auto provider = _providers.at(idx);
+            auto fn = provider->loadFunction(name);
+            if ( fn != nullptr ) return fn;
+        }
+        return nullptr;
     }
 
     Reference* VirtualMachine::resolve(Reference* ref) {
@@ -191,7 +204,7 @@ namespace swarmc::Runtime {
     void VirtualMachine::call(IFunctionCall* call) {
         _shouldAdvance = false;
         if ( call->backend() == FunctionBackend::INLINE ) return callInlineFunction((InlineFunctionCall*) call);
-//        if ( call->backend() == FunctionBackend::BUILTIN ) return callBuiltinFunction((BuiltinFunctionCall*) call);
+        if ( call->backend() == FunctionBackend::PROVIDER ) return callProviderFunction((IProviderFunctionCall*) call);
         throw Errors::SwarmError("Cannot call function `" + call->toString() + "` (invalid backend)");
     }
 
@@ -270,7 +283,7 @@ namespace swarmc::Runtime {
         }
     }
 
-    void VirtualMachine::returnToCaller() {
+    void VirtualMachine::returnToCaller(bool shouldJump) {
         // Mark the call as returned
         _return = getCall();
         _return->setReturned();
@@ -279,14 +292,10 @@ namespace swarmc::Runtime {
         exitScope();
 
         // Jump back to the caller's site
-        _state->jumpReturn();
+        if ( shouldJump ) _state->jumpReturn();
     }
 
-    void VirtualMachine::callInlineFunction(InlineFunctionCall* call) {
-        // Validate the inline function location
-        auto pc = _state->getInlineFunctionPC(call->name());
-
-        // Type check the parameters  // todo: generalize this
+    void VirtualMachine::checkCall(IFunctionCall* call) {
         auto vector = call->vector();
         for ( auto pair : vector ) {
             auto type = pair.first;
@@ -296,6 +305,14 @@ namespace swarmc::Runtime {
                 throw Errors::SwarmError("Unable to make function call (" + call->toString() + ") - argument " + ref->toString() + " is not assignable to type " + type->toString());
             }
         }
+    }
+
+    void VirtualMachine::callInlineFunction(InlineFunctionCall* call) {
+        // Validate the inline function location
+        auto pc = _state->getInlineFunctionPC(call->name());
+
+        // Type check the parameters
+        checkCall(call);
 
         // Start a new scope
         enterCallScope(call);
@@ -310,7 +327,21 @@ namespace swarmc::Runtime {
         verbose("next instruction for inline call: " + _state->current()->toString());
     }
 
-    void VirtualMachine::callBuiltinFunction(BuiltinFunctionCall* call) {
-        assert(false);
+    void VirtualMachine::callProviderFunction(IProviderFunctionCall* call) {
+        // Type check the parameters
+        checkCall(call);
+
+        // Start a new scope
+        enterCallScope(call);
+
+        // Invoke the provider to execute the function call
+        debug("provider call: " + call->toString());
+        call->provider()->call(call);
+
+        // Skip over the call instruction
+        advance();
+
+        // Immediately return to the previous control
+        returnToCaller(false);
     }
 }

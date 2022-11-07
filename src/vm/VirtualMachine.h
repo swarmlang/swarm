@@ -10,6 +10,7 @@
 #include "../shared/uuid.h"
 #include "runtime/interfaces.h"
 #include "runtime/runtime_functions.h"
+#include "runtime/runtime_provider.h"
 #include "runtime/State.h"
 #include "walk/ExecuteWalk.h"
 
@@ -48,6 +49,10 @@ namespace swarmc::Runtime {
             _queues.push_back(queue);
         }
 
+        void addProvider(IProvider* provider) {
+            _providers.push_back(provider);
+        }
+
         void cleanup() {
             if ( _state != nullptr ) delete _state;
             _state = nullptr;
@@ -59,6 +64,7 @@ namespace swarmc::Runtime {
             _locks.clear();
 
             _stores.clear();
+            _providers.clear();
         }
 
         virtual void restore(ScopeFrame*, State*);
@@ -68,6 +74,8 @@ namespace swarmc::Runtime {
         virtual ISA::FunctionReference* loadFunction(ISA::LocationReference*);
 
         virtual InlineFunction* loadInlineFunction(const std::string& name);
+
+        virtual IProviderFunction* loadProviderFunction(const std::string& name);
 
         virtual ISA::Reference* resolve(ISA::Reference*);
 
@@ -117,7 +125,7 @@ namespace swarmc::Runtime {
 
         virtual void exitQueueContext();
 
-        virtual void returnToCaller();
+        virtual void returnToCaller(bool shouldJump = true);
 
         virtual void whileWaitingForLock() {
             std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
@@ -148,6 +156,7 @@ namespace swarmc::Runtime {
         Stores _stores;
         Queues _queues;
         Locks _locks;
+        Providers _providers;
         ScopeFrame* _scope;
         ExecuteWalk* _exec;
         std::stack<QueueContextID> _queueContexts;
@@ -167,9 +176,11 @@ namespace swarmc::Runtime {
 
         virtual IQueue* getQueue(IFunctionCall*);
 
+        virtual void checkCall(IFunctionCall*);
+
         virtual void callInlineFunction(InlineFunctionCall*);
 
-        virtual void callBuiltinFunction(BuiltinFunctionCall*);
+        virtual void callProviderFunction(IProviderFunctionCall*);
     };
 
 }

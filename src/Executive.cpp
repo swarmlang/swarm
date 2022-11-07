@@ -166,6 +166,9 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             util::USE_DETERMINISTIC_UUIDS = true;
         } else if ( arg == "--svi" ) {
             flagSVI = true;
+        } else if ( arg == "--without-prologue" ) {
+            flagWithPrologue = false;
+            Configuration::WITH_PROLOGUE = false;
         } else if ( arg == "--dbg-output-isa-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --debug-output-ISA-to. Pass --help for more info.");
@@ -252,6 +255,10 @@ void Executive::printUsage() {
 
     console->bold()->print("  --svi  :  ", true)
         ->line("Read the input file as SVI code.")
+        ->line();
+
+    console->bold()->print("  --without-prologue  :  ", true)
+        ->line("Exclude the Prologue provider from the runtime")
         ->line();
 
     console->debug();

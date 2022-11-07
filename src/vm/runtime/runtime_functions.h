@@ -22,7 +22,6 @@ namespace swarmc::Runtime {
     enum class FunctionBackend {
         INLINE,
         PROVIDER,
-        BUILTIN,
     };
 
     enum class BuiltinFunctionTag {
@@ -89,19 +88,6 @@ namespace swarmc::Runtime {
 
     protected:
         std::string _name;
-    };
-
-    class BuiltinFunctionCall : public IFunctionCall {
-    public:
-        BuiltinFunctionCall(BuiltinFunctionTag tag, CallVector vector, const Type::Type* returnType) :
-            IFunctionCall(FunctionBackend::BUILTIN, vector, returnType), _tag(tag) {}
-
-        virtual BuiltinFunctionTag tag() const { return _tag; }
-
-        std::string toString() const override;
-
-    protected:
-        BuiltinFunctionTag _tag;
     };
 
 
@@ -201,35 +187,6 @@ namespace swarmc::Runtime {
         std::string _name;
         FormalTypes _types;
         const Type::Type* _returnType;
-    };
-
-
-    class BuiltinFunction : public IFunction {
-    public:
-        explicit BuiltinFunction(BuiltinFunctionTag tag) : _tag(tag) {}
-
-        static std::string tagToString(BuiltinFunctionTag);
-
-        IFunction* curry(ISA::Reference* ref) const override {
-            return new CurriedFunction(ref, this);
-        }
-
-        CallVector getCallVector() const override {
-            return {};
-        }
-
-        IFunctionCall* call(CallVector vector) const override {
-            return new BuiltinFunctionCall(_tag, vector, returnType());
-        }
-
-        FunctionBackend backend() const override {
-            return FunctionBackend::BUILTIN;
-        }
-
-        std::string toString() const override;
-
-    protected:
-        BuiltinFunctionTag _tag;
     };
 
 }

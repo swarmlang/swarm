@@ -31,6 +31,7 @@ protected:
     bool flagVerbose = false;
     bool flagClearQueue = false;
     bool flagWorkQueue = false;
+    bool flagWithPrologue = true;
     bool flagSVI = false;
     bool flagOutputISA = false;
     std::string flagOutputTokensTo;

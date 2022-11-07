@@ -10,6 +10,8 @@ public:
     static bool VERBOSE;
     static bool FORCE_LOCAL;
 
+    static bool WITH_PROLOGUE;
+
     inline static const std::string REDIS_HOST = "localhost";
     static int REDIS_PORT;
     inline static const std::string REDIS_PREFIX = "swarm_";

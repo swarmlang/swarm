@@ -9,6 +9,8 @@
 bool Configuration::VERBOSE = false;
 bool Configuration::FORCE_LOCAL = false;
 
+bool Configuration::WITH_PROLOGUE = true;
+
 int Configuration::REDIS_PORT = 6379;
 
 int Configuration::QUEUE_SLEEP_uS = 1000;
