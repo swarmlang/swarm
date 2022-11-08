@@ -45,6 +45,8 @@ namespace swarmc::Runtime {
         virtual std::string getUuid() = 0;
 
         virtual size_t getId() = 0;
+
+        virtual double random() = 0;
     };
 
     /** Represents a lock acquired by some control. */

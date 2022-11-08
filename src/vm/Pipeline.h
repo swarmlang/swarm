@@ -48,7 +48,7 @@ namespace swarmc::VM {
             vm->addQueue(new SingleThreaded::Queue(vm));
 
             if ( Configuration::WITH_PROLOGUE ) {
-                vm->addProvider(new Prologue::Provider());
+                vm->addProvider(new Prologue::Provider(vm->global()));
             }
 
             vm->initialize(is);

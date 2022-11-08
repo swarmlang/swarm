@@ -3,6 +3,7 @@
 
 #include <map>
 #include <queue>
+#include <random>
 #include "../../shared/uuid.h"
 #include "interfaces.h"
 
@@ -16,6 +17,11 @@ namespace swarmc::Runtime::SingleThreaded {
 
     class GlobalServices : public IGlobalServices {
     public:
+        GlobalServices() {
+            _gen = std::default_random_engine(_rd());
+            _dist = std::uniform_real_distribution<double>(0.0, 1.0);
+        }
+
         std::string getUuid() override {
             return util::uuid4();
         }
@@ -24,12 +30,19 @@ namespace swarmc::Runtime::SingleThreaded {
             return _id++;
         }
 
+        double random() override {
+            return _dist(_gen);
+        }
+
         std::string toString() const override {
             return "SingleThreaded::GlobalServices<id: " + std::to_string(_id) + ">";
         }
 
     protected:
         size_t _id = 0;
+        std::random_device _rd;
+        std::default_random_engine _gen;
+        std::uniform_real_distribution<double> _dist;
     };
 
 

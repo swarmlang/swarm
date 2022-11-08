@@ -1,6 +1,8 @@
 #ifndef SWARMVM_PROLOGUE_PROVIDER
 #define SWARMVM_PROLOGUE_PROVIDER
 
+#include <utility>
+
 #include "../runtime/runtime_provider.h"
 #include "../runtime/runtime_functions.h"
 
@@ -9,9 +11,9 @@ namespace swarmc::Runtime::Prologue {
     class PrologueFunctionCall : public IProviderFunctionCall {
     public:
         PrologueFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType) :
-                IProviderFunctionCall(vector, returnType), _provider(provider) {}
+            IProviderFunctionCall(std::move(vector), returnType), _provider(provider) {}
 
-        IProvider* provider() const { return _provider; }
+        IProvider* provider() const override { return _provider; }
     protected:
         IProvider* _provider;
     };
@@ -39,13 +41,23 @@ namespace swarmc::Runtime::Prologue {
     };
 
     class Provider : public IProvider {
+    public:
+        Provider(IGlobalServices* global) : _global(global) {}
+
         PrologueFunction* loadFunction(std::string name) override;
 
         void call(IProviderFunctionCall* call) override;
 
+        IGlobalServices* global() const override {
+            return _global;
+        }
+
         std::string toString() const override {
             return "Prologue::Provider<>";
         }
+
+    protected:
+        IGlobalServices* _global;
     };
 
 }

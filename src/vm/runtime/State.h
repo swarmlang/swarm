@@ -58,6 +58,7 @@ namespace swarmc::Runtime {
         virtual ~State() = default;
 
         ISA::Instruction* current() {
+            if ( _rewindToHead && !_is.empty() ) return _is[0];
             if ( _pc >= _is.size() ) return nullptr;
             return _is[_pc];
         }
@@ -68,11 +69,22 @@ namespace swarmc::Runtime {
 
         void advance() {
             if ( isEndOfProgram() ) throw Errors::SwarmError("Cannot advance beyond end of program.");
+
+            if ( _rewindToHead ) {
+                _pc = 0;
+                _rewindToHead = false;
+                return;
+            }
+
             _pc += 1;
         }
 
         void rewind() {
-            if ( _pc < 1 ) throw Errors::SwarmError("Cannot rewind beyond beginning of the program.");
+            if ( _pc < 1 ) {
+                _rewindToHead = true;
+                return;
+            }
+
             _pc -= 1;
         }
 
@@ -139,6 +151,7 @@ namespace swarmc::Runtime {
         std::map<std::string, ISA::Instructions::size_type> _fSkips;
         ISA::Instructions::size_type _pc = 0;
         std::stack<ISA::Instructions::size_type> _callStack;
+        bool _rewindToHead = false;
 
         void initialize() {
             _pc = 0;

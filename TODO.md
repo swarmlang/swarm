@@ -39,3 +39,4 @@
     ```
   - Do we care to support this?
 - Well-defined C++/native bridge to allow custom `f:XXX` function bindings, as well as custom stream implementations.
+- The `call` instruction should curry partial applications. Right now, it just errors.

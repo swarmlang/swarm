@@ -13,6 +13,12 @@ namespace Lang {
 }
 
 namespace Type {
+    class Type;
+}
+
+using CType = const Type::Type*;
+
+namespace Type {
 
     enum class Intrinsic {
         STRING,

@@ -333,6 +333,10 @@ namespace swarmc::ISA {
             _items[i] = value;
         }
 
+        virtual void reserve(size_t len) {
+            _items.reserve(_items.size() + len);
+        }
+
         virtual std::vector<Reference*>::size_type length() const {
             return _items.size();
         }

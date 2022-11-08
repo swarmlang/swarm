@@ -39,6 +39,8 @@ namespace swarmc::Runtime {
 
         virtual IProviderFunction* loadFunction(std::string name) = 0;
 
+        virtual IGlobalServices* global() const = 0;
+
         virtual void call(IProviderFunctionCall* call) = 0;
     };
 
