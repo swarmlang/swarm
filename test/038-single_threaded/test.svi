@@ -1,0 +1,37 @@
+-- Scope isolation:
+$l:i <- 1
+
+beginfn f:INNER p:VOID
+	$l:i <- plus $l:i 1
+return
+
+beginfn f:OUTER p:VOID
+	scopeof $l:i
+	$l:i <- 5
+	call f:INNER
+return
+
+call f:OUTER
+$l:i <- $l:i
+
+
+-- Sharedness:
+$l:j <- 1
+$s:k <- 1
+
+beginfn f:INC p:VOID
+	$l:j <- plus $l:j 1
+	$s:k <- plus $s:k 1
+return
+
+beginfn f:PUSH_INC p:VOID
+	pushcall f:INC
+	pushcall f:INC
+	pushcall f:INC
+	pushcall f:INC
+	pushcall f:INC
+return
+
+call f:PUSH_INC
+$l:j <- $l:j
+$s:k <- $s:k

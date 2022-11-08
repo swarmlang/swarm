@@ -1,0 +1,20 @@
+-- sin 90, cos 60, tan 45
+$l:a <- call f:SIN 1.570796
+$l:b <- call f:COS 1.047197
+$l:c <- call f:TAN 0.785398
+
+-- random, random_vector, random_matrix
+call f:RANDOM
+$l:e <- call f:RANDOM_VECTOR 5
+$l:f_call <- curry f:RANDOM_MATRIX 5
+$l:f <- call $l:f_call 5
+
+-- range
+$l:g_call0 <- curry f:RANGE 2
+$l:g_call1 <- curry $l:g_call0 10
+$l:g <- call $l:g_call1 3
+
+-- number_to_string, boolean_to_string
+$l:h <- call f:NUMBER_TO_STRING $l:c
+$l:i <- call f:BOOLEAN_TO_STRING true
+$l:j <- call f:BOOLEAN_TO_STRING false

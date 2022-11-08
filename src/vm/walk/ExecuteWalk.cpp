@@ -574,6 +574,7 @@ namespace swarmc::Runtime {
 
                 // Otherwise, we need to make the call. Step back so we
                 // return-jump to the correct instruction.
+                _vm->setCaptureReturn();
                 _vm->rewind();
                 return walkOne(eval);
             }

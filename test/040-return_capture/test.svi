@@ -1,0 +1,13 @@
+
+$s:i <- 1
+
+beginfn f:NEXT_ID p:NUMBER
+	scopeof $l:i
+	$l:i <- $s:i
+	$s:i <- plus $s:i 1
+return $l:i
+
+call f:NEXT_ID
+
+-- This should set $l:test <- 2
+$l:test <- call f:NEXT_ID

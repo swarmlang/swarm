@@ -115,6 +115,15 @@ namespace swarmc::Runtime {
 
         virtual IFunctionCall* getReturn();
 
+        /**
+         * Return capture is used when the runtime needs to temporarily store the return value
+         * of a call so it can be used by the instruction the call returns to. The canonical
+         * example of this is the AssignEval instruction. The runtime "captures" the return
+         * value of the RHS when the RHS is a call so the value can be used to perform the
+         * assignment.
+         */
+        virtual void setCaptureReturn();
+
         virtual IQueueJob* pushCall(IFunctionCall*);
 
         virtual void drain();
@@ -142,6 +151,7 @@ namespace swarmc::Runtime {
             copy->_locks = _locks;
             copy->_scope = _scope->copy();
             copy->_queueContexts = _queueContexts;
+            copy->_providers = _providers;
 
             Stores stores;
             for ( auto store : _stores ) stores.push_back(store->copy());
@@ -163,6 +173,7 @@ namespace swarmc::Runtime {
         IFunctionCall* _return = nullptr;
         bool _shouldClearReturn = false;
         bool _shouldAdvance = true;
+        bool _shouldCaptureReturn = false;
 
         virtual void debug(const std::string& output) const {
             console->debug("VM: " + output);

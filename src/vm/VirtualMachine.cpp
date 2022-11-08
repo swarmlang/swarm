@@ -105,6 +105,7 @@ namespace swarmc::Runtime {
         if ( _return != nullptr && _shouldClearReturn ) {
             _return = nullptr;
             _shouldClearReturn = false;
+            _shouldCaptureReturn = false;
         } else if ( _return != nullptr ) {
             _shouldClearReturn = true;
         }
@@ -236,6 +237,10 @@ namespace swarmc::Runtime {
         return _return;
     }
 
+    void VirtualMachine::setCaptureReturn() {
+        _shouldCaptureReturn = true;
+    }
+
     IQueueJob* VirtualMachine::pushCall(IFunctionCall* call) {
         // fixme: need to account for contexts!
         auto queue = getQueue(call);
@@ -285,8 +290,11 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::returnToCaller(bool shouldJump) {
         // Mark the call as returned
-        _return = getCall();
-        _return->setReturned();
+        if ( _shouldCaptureReturn ) {
+            _return = getCall();
+        }
+
+        getCall()->setReturned();
 
         // Pop the callee's scope
         exitScope();

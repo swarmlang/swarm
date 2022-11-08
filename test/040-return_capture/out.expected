@@ -1,0 +1,43 @@
+[35m[DEBUG] [0mParsing argument: /home/garrettmills/Projects/swarm/test/040-return_capture/test.svi
+[0m[35m[DEBUG] [0mGot input file: /home/garrettmills/Projects/swarm/test/040-return_capture/test.svi
+[0m[35m[DEBUG] [0mVM: assignvalue Location<s:i> NumberReference<1.000000>
+[0m[35m[DEBUG] [0mVM: Location<s:i> <- NumberReference<1.000000>
+[0m[35m[DEBUG] [0mVM: Skipping uncalled function body: BEGINFN<Location<f:NEXT_ID>, TypeReference<Primitive<NUMBER>>>, pc: 6
+[0m[35m[DEBUG] [0mVM: call0 Location<f:NEXT_ID>
+[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[0m[35m[DEBUG] [0mVM: load inline function: NEXT_ID (#params: 0) (returns: TypeReference<Primitive<NUMBER>>)
+[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:NEXT_ID, rt: Primitive<NUMBER>>>
+[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:NEXT_ID> (pc: 1)
+[0m[35m[DEBUG] [0mVM: next instruction for inline call: SCOPEOF<Location<l:i>>
+[0m[35m[DEBUG] [0mVM: scopeof Location<l:i>
+[0m[35m[DEBUG] [0mVM: assignvalue Location<l:i> Location<s:i>
+[0m[35m[DEBUG] [0mVM: Location<l:i> <- NumberReference<1.000000>
+[0m[35m[DEBUG] [0mVM: assigneval Location<s:i> PLUS<Location<s:i>, NumberReference<1.000000>>
+[0m[35m[DEBUG] [0mVM: plus Location<s:i> NumberReference<1.000000>
+[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
+[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
+[0m[35m[DEBUG] [0mVM: Location<s:i> <- NumberReference<2.000000>
+[0m[35m[DEBUG] [0mVM: return1 Location<l:i>
+[0m[35m[DEBUG] [0mVM: assigneval Location<l:test> CALL0<Location<f:NEXT_ID>>
+[0m[35m[DEBUG] [0mVM: assignEval: got call0 or call1
+[0m[35m[DEBUG] [0mVM: assignEval: jumping to call
+[0m[35m[DEBUG] [0mVM: call0 Location<f:NEXT_ID>
+[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[0m[35m[DEBUG] [0mVM: load inline function: NEXT_ID (#params: 0) (returns: TypeReference<Primitive<NUMBER>>)
+[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:NEXT_ID, rt: Primitive<NUMBER>>>
+[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:NEXT_ID> (pc: 1)
+[0m[35m[DEBUG] [0mVM: next instruction for inline call: SCOPEOF<Location<l:i>>
+[0m[35m[DEBUG] [0mVM: scopeof Location<l:i>
+[0m[35m[DEBUG] [0mVM: assignvalue Location<l:i> Location<s:i>
+[0m[35m[DEBUG] [0mVM: Location<l:i> <- NumberReference<2.000000>
+[0m[35m[DEBUG] [0mVM: assigneval Location<s:i> PLUS<Location<s:i>, NumberReference<1.000000>>
+[0m[35m[DEBUG] [0mVM: plus Location<s:i> NumberReference<1.000000>
+[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<2.000000>
+[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
+[0m[35m[DEBUG] [0mVM: Location<s:i> <- NumberReference<3.000000>
+[0m[35m[DEBUG] [0mVM: return1 Location<l:i>
+[0m[35m[DEBUG] [0mVM: assigneval Location<l:test> CALL0<Location<f:NEXT_ID>>
+[0m[35m[DEBUG] [0mVM: assignEval: got call0 or call1
+[0m[35m[DEBUG] [0mVM: assignEval: jumped from return
+[0m[35m[DEBUG] [0mVM: Location<l:test> <- NumberReference<2.000000>
+[0m

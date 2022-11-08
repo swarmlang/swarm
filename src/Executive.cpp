@@ -152,6 +152,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagVerbose = true;
             Configuration::DEBUG = true;
             Configuration::VERBOSE = true;
+            console->verbose();
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --run-test. Pass --help for more info.");
