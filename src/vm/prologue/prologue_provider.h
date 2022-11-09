@@ -6,6 +6,11 @@
 #include "../runtime/runtime_provider.h"
 #include "../runtime/runtime_functions.h"
 
+/*
+ * This file contains implementations of the modular runtime provider interfaces
+ * which provide Swarm's Prologue standard library.
+ */
+
 namespace swarmc::Runtime::Prologue {
 
     class PrologueFunctionCall : public IProviderFunctionCall {

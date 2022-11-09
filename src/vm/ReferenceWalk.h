@@ -8,6 +8,7 @@
 
 namespace swarmc::ISA {
 
+    /** Base class for walks which perform an operation over ISA::Reference instances. */
     template <typename TReturn>
     class ReferenceWalk : public IStringable, public IUsesConsole {
     public:
@@ -25,6 +26,7 @@ namespace swarmc::ISA {
             throw Errors::SwarmError("Unknown reference tag: " + ref->toString());
         }
 
+        // FIXME: need to add the enumeration/map/other new reference types.
     protected:
         virtual TReturn walkLocationReference(LocationReference*) = 0;
         virtual TReturn walkTypeReference(TypeReference*) = 0;

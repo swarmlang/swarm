@@ -7,6 +7,12 @@
 #include "../../shared/uuid.h"
 #include "interfaces.h"
 
+/*
+ * This file contains a single-threaded, synchronous implementation of the
+ * runtime drivers. These are used for development/testing because they don't
+ * require any external services like Redis. However, they offer NO parallelism.
+ */
+
 namespace swarmc::Runtime {
     class VirtualMachine;
 }
@@ -15,6 +21,7 @@ namespace swarmc::Runtime::SingleThreaded {
     class StorageLock;
 
 
+    /** A single-threaded IGlobalServices using local variables, `<random>`, and util's `uuid4`. */
     class GlobalServices : public IGlobalServices {
     public:
         GlobalServices() {
@@ -46,6 +53,7 @@ namespace swarmc::Runtime::SingleThreaded {
     };
 
 
+    /** A single-threaded storage driver using `std::map`. */
     class StorageInterface : public IStorageInterface {
     public:
         StorageInterface(ISA::Affinity affinity) : _affinity(affinity) {}
@@ -84,6 +92,11 @@ namespace swarmc::Runtime::SingleThreaded {
     };
 
 
+    /**
+     * A trivial storage lock implementation.
+     * Locks are useless in a single-threaded environment, so this is just
+     * provided to satisfy the interfaces.
+     */
     class StorageLock : public IStorageLock {
     public:
         StorageLock(StorageInterface* store, ISA::LocationReference* loc) {
@@ -102,6 +115,11 @@ namespace swarmc::Runtime::SingleThreaded {
     };
 
 
+    /**
+     * A trivial queue job implementation.
+     * In a single threaded environment, jobs are executed immediately when they
+     * are pushed onto the queue, so this also exists just to satisfy the interfaces.
+     */
     class QueueJob : public IQueueJob {
     public:
         QueueJob(JobID id, JobState jobState, IFunctionCall* call, const ScopeFrame* scope, const State* vmState):
@@ -128,6 +146,11 @@ namespace swarmc::Runtime::SingleThreaded {
     };
 
 
+    /**
+     * A single-threaded queue implementation.
+     * This queue is not a queue at all, actually. It is always empty
+     * and executes jobs as soon as they are pushed onto the queue.
+     */
     class Queue : public IQueue {
     public:
         Queue(VirtualMachine* vm) : _vm(vm) {}

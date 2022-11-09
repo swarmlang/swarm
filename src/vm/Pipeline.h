@@ -13,6 +13,9 @@ namespace swarmc::VM {
 
     using namespace Runtime;
 
+    /**
+     * Helper class for configuring instances of the Swarm runtime classes.
+     */
     class Pipeline : public IStringable {
     public:
         Pipeline(std::istream* input) {
@@ -24,22 +27,30 @@ namespace swarmc::VM {
             delete _parser;
         }
 
+        /** Get a list of loaded tokens from the SVI input stream. */
         std::vector<std::string> targetTokenStream() {
             return _parser->tokenize();
         }
 
+        /** Get a list of parsed instructions from the SVI input stream. */
         ISA::Instructions targetInstructions() {
             return _parser->parse();
         }
 
+        /** Print the loaded tokens from the SVI input stream to the given output stream. */
         void targetTokenRepresentation(std::ostream& out) {
             _parser->outputTokens(out);
         }
 
+        /** Print the parsed instructions from the SVI input stream to the given output stream. */
         void targetISARepresentation(std::ostream& out) {
             _parser->outputParse(out);
         }
 
+        /**
+         * Parse the SVI input stream and load the instructions into a VirtualMachine configured with single-threaded drivers.
+         * This is primarily used for testing/development via the `--locally` flag.
+         */
         VirtualMachine* targetSingleThreaded() {
             auto is = targetInstructions();
             auto vm = new VirtualMachine(new SingleThreaded::GlobalServices());

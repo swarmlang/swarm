@@ -30,6 +30,7 @@ namespace swarmc::Runtime {
     using Locks = std::vector<IStorageLock*>;
     using Queues = std::vector<IQueue*>;
 
+    /** Tracks the status of a queued function call. */
     enum class JobState: size_t {
         UNKNOWN = 2 << 0,
         PENDING = 2 << 1,
@@ -38,14 +39,24 @@ namespace swarmc::Runtime {
         ERROR = 2 << 4,
     };
 
+    /**
+     * The VM requires some basic generators for IDs/random numbers, which may require
+     * different logic to ensure uniqueness depending on which drivers are used for the
+     * runtime.
+     *
+     * IGlobalServices abstracts these operations.
+     */
     class IGlobalServices : public IStringable {
     public:
         virtual ~IGlobalServices() = default;
 
+        /** This should return a UUIDv4-formatted string, globally unique. */
         virtual std::string getUuid() = 0;
 
+        /** This should return a globally-monotonic, unique numeric identifier. */
         virtual size_t getId() = 0;
 
+        /** This should use a source of randomness to generate a random double on [0,1]. */
         virtual double random() = 0;
     };
 
@@ -127,18 +138,31 @@ namespace swarmc::Runtime {
     public:
         virtual ~IQueue() = default;
 
+        /**
+         * Focuses the queue on a particular context.
+         * Contexts provide a way for the VM to isolate jobs in batches.
+         * e.g. an `enumerate` instruction will produce a batch of jobs, one for each element.
+         * The VM will push this batch into its own context so they can be awaited
+         * independently.
+         */
         virtual void setContext(QueueContextID) = 0;
 
+        /** Get the ID of the current queue context. */
         virtual QueueContextID getContext() = 0;
 
+        /** Determines whether this queue should execute the given function call. */
         virtual bool shouldHandle(IFunctionCall*) = 0;
 
+        /** Given a function call and context, instantiate a new IQueueJob. */
         virtual IQueueJob* build(IFunctionCall*, const ScopeFrame*, const State*) = 0;
 
+        /** Push a call onto this queue. */
         virtual void push(IQueueJob*) = 0;
 
+        /** Remove the next pending job from the queue and return it. */
         virtual IQueueJob* pop() = 0;
 
+        /** Returns true if there are no pending jobs. */
         virtual bool isEmpty() = 0;
     };
 

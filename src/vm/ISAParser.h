@@ -10,6 +10,7 @@
 
 namespace swarmc::ISA {
 
+    /** Parses SVI code into ISA instruction instances. */
     class Parser : public IStringable, public IUsesConsole {
     public:
         Parser(std::istream& in) : IUsesConsole(), _in(in) {}
@@ -19,6 +20,7 @@ namespace swarmc::ISA {
             return "ISA::Parser<>";
         }
 
+        /** Get a cleaned-up list of tokens, with the whitespace removed, and strings properly grouped. */
         virtual std::vector<std::string> tokenize() {
             std::string inputString(std::istreambuf_iterator<char>(_in), {});
             std::vector<std::string> tokens;
@@ -90,11 +92,13 @@ namespace swarmc::ISA {
             return tokens;
         }
 
+        /** Parse a list of instructions from the input to this parser. */
         virtual Instructions parse() {
             auto tokens = tokenize();
             return parse(tokens);
         }
 
+        /** Parse a list of instructions from the given list of tokens. */
         virtual Instructions parse(std::vector<std::string>& tokens) {
             Instructions is;
             for ( size_t i = 0; i < tokens.size(); ) {
@@ -103,6 +107,11 @@ namespace swarmc::ISA {
             return is;
         }
 
+        /**
+         * Parse a single instruction from the list of tokens and insert it into the `is` list
+         * starting at the `startAt`-th token in `tokens`.
+         * This function should return the number of tokens which were consumed from `tokens`.
+         */
         virtual size_t parseOne(Instructions& is, std::vector<std::string>& tokens, size_t startAt) {
             try {
                 auto token = tokens.at(startAt);
@@ -117,11 +126,16 @@ namespace swarmc::ISA {
             }
         }
 
+        /** Parse an ISA::Reference which consumes a single token from the tokens, starting at the `startAt`-th token. */
         virtual ISA::Reference* parseUnaryReference(std::string const& leader, std::vector<std::string>& tokens, size_t startAt) {
             if ( tokens.size() < startAt+1 ) throw Errors::SwarmError("Malformed instruction `" + leader + "` (expected 1 reference, got EOF)");
             return parseReference(tokens.at(startAt));
         }
 
+        /**
+         * Parse a single instruction from the token stream and append it to `is`, starting at the `startAt`-th token.
+         * Returns the number of tokens which were consumed from `tokens`.
+         */
         virtual size_t parseInstruction(Instructions& is, std::vector<std::string>& tokens, size_t startAt) {
             size_t i = 1;
             auto instructionLeader = tokens.at(startAt);
@@ -559,6 +573,10 @@ namespace swarmc::ISA {
             return i;
         }
 
+        /**
+         * Parse a single assignment instruction from the list of tokens, starting at the `startAt`-th token.
+         * Returns the number of tokens which were consumed from `tokens`.
+         */
         virtual size_t parseAssignment(Instructions& is, std::vector<std::string>& tokens, size_t startAt) {
             // An assignment must consist of <lval> <larrow> <reference|instruction>
 
@@ -592,6 +610,7 @@ namespace swarmc::ISA {
             return i;
         }
 
+        /** Parse the unary reference represented by the single token. */
         virtual ISA::Reference* parseReference(std::string const& token) {
             if ( isLocationLeader(token) ) {
                 return parseLocation(token);
@@ -621,6 +640,10 @@ namespace swarmc::ISA {
             throw Errors::SwarmError("Malformed reference `" + token + "`");
         }
 
+        /**
+         * Parse a location reference from the list of tokens starting at the `startAt`-th token.
+         * Returns the ISA::LocationReference instance, and consumes a single token.
+         */
         virtual ISA::LocationReference* parseLocationReference(std::string const& leader, std::vector<std::string>& tokens, size_t startAt) {
             if ( tokens.size() < startAt+1 ) throw Errors::SwarmError("Malformed instruction `" + leader + "` (expected 1 reference, got EOF)");
             auto token = tokens.at(startAt);
@@ -629,6 +652,7 @@ namespace swarmc::ISA {
             return (ISA::LocationReference*) r;
         }
 
+        /** Returns true if the leading string of a token represents a LocationReference. */
         virtual bool isLocationLeader(std::string const& leader) {
             if ( leader.at(0) == '$' ) return true;
             if ( leader == "p:MAP" ) return true;
@@ -642,6 +666,7 @@ namespace swarmc::ISA {
             );
         }
 
+        /** Returns true if the leading string of a token represents a type reference. */
         virtual bool isTypeLeader(std::string const& leader) {
             return (
                 leader.size() > 1
@@ -654,6 +679,7 @@ namespace swarmc::ISA {
             );
         }
 
+        /** Returns true if the leading string of a token represents a reference literal of some kind. */
         virtual bool isReferenceLeader(std::string const& leader) {
             // A leader for a reference must be any of:
             // - the beginning of a string
@@ -673,6 +699,7 @@ namespace swarmc::ISA {
             return leader == "true" || leader == "false";
         }
 
+        /** Parse the TypeReference represented by the given token. */
         virtual ISA::TypeReference* parseType(std::string const& token) {
             Type::Type* type;
 
@@ -686,6 +713,7 @@ namespace swarmc::ISA {
             return new ISA::TypeReference(type);
         }
 
+        /** Parse the LocationReference represented by the given token. */
         virtual ISA::LocationReference* parseLocation(std::string const& token) {
             if ( token.at(0) == '$' && (token.length() < 4 || token.at(2) != ':') ) throw Errors::SwarmError("Malformed location reference: `" + token + "` (expected form $_:_)");
             if ( token.at(0) != '$' && (token.length() < 3 || token.at(1) != ':') ) throw Errors::SwarmError("Malformed location reference: `" + token + "` (expected form f:_ or p:_)");
@@ -703,6 +731,7 @@ namespace swarmc::ISA {
             return new ISA::LocationReference(a, name);
         }
 
+        /** Print the parsed instructions to the given stream. */
         virtual void outputParse(std::ostream& out) {
             auto is = parse();
             for ( const auto& i : is ) {
@@ -711,6 +740,7 @@ namespace swarmc::ISA {
             dispose(is);
         }
 
+        /** Print the loaded tokens to the given stream. */
         virtual void outputTokens(std::ostream& out) {
             auto tokens = tokenize();
             for ( const auto& token : tokens ) {
@@ -718,12 +748,17 @@ namespace swarmc::ISA {
             }
         }
 
+        /** Free the memory used by the Instruction instances in `is`. */
         virtual void dispose(Instructions& is) {
             for ( auto i : is ) {
                 delete i;
             }
         }
 
+        /**
+         * Returns the number of operands present in the token stream before another instruction
+         * is encountered using a look-ahead, starting at the `startAt`-th token.
+         */
         virtual size_t countOperands(std::vector<std::string> const& tokens, size_t startAt) {
             size_t n = 0;
 

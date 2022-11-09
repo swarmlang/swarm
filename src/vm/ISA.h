@@ -105,6 +105,7 @@ namespace swarmc::ISA {
         PRIMITIVE,
     };
 
+    /** Broad types of references built-in to the runtime. */
     enum class ReferenceTag {
         LOCATION,
         TYPE,
@@ -123,6 +124,7 @@ namespace swarmc::ISA {
         Reference(ReferenceTag tag) : _tag(tag) {}
         ~Reference() override = default;
 
+        /** Get the type of this reference. */
         virtual const Type::Type* type() const = 0;
 
         ReferenceTag tag() const {
@@ -138,6 +140,7 @@ namespace swarmc::ISA {
     public:
         LocationReference(Affinity affinity, std::string name) : Reference(ReferenceTag::LOCATION), _affinity(affinity), _name(name) {}
 
+        /** Convert the given affinity value to a human-readable representation. */
         static std::string affinityString(Affinity a) {
             if ( a == Affinity::FUNCTION ) return "f";
             if ( a == Affinity::LOCAL ) return "l";
@@ -146,14 +149,17 @@ namespace swarmc::ISA {
             return "UNKNOWN";
         }
 
+        /** Get the storage affinity of this location. */
         Affinity affinity() const {
             return _affinity;
         }
 
+        /** Get the variable name of this location. */
         std::string name() const {
             return _name;
         }
 
+        /** Get the location-prefixed name of this location (e.g. `l:my_var`) */
         std::string fqName() const {
             return affinityString(_affinity) + ":" + _name;
         }
@@ -173,6 +179,7 @@ namespace swarmc::ISA {
             _type = t;
         }
 
+        /** Returns true if the given location refers to the same place as this one. */
         virtual bool is(const LocationReference* other) const {
             return (
                 other->affinity() == _affinity
@@ -215,6 +222,7 @@ namespace swarmc::ISA {
             return t;
         }
 
+        /** Get the runtime function implementation. */
         Runtime::IFunction* fn() const {
             return _fn;
         }
@@ -232,10 +240,12 @@ namespace swarmc::ISA {
             return "TypeReference<" + _type->toString() + ">";
         }
 
+        /** Get the type of the reference itself (always of type type). */
         const Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::TYPE);
         }
 
+        /** Get the actual type this value is holding. */
         const Type::Type* value() const {
             return _type;
         }
@@ -250,6 +260,7 @@ namespace swarmc::ISA {
     public:
         LiteralReference(ReferenceTag tag, const T value) : Reference(tag), _value(value) {}
 
+        /** The literal value this reference is wrapping. */
         virtual const T value() const {
             return _value;
         }
@@ -300,6 +311,9 @@ namespace swarmc::ISA {
         }
     };
 
+    /**
+     * Reference representing an enumerable list of values.
+     */
     class EnumerationReference : public Reference {
     public:
         explicit EnumerationReference(const Type::Type* innerType) :
@@ -313,30 +327,37 @@ namespace swarmc::ISA {
             return new Type::Enumerable(_innerType);
         }
 
+        /** Add an item to the end of this enumeration. */
         virtual void append(Reference* value) {
             _items.push_back(value);
         }
 
+        /** Add an item to the beginning of this enumeration. */
         virtual void prepend(Reference* value) {
             _items.insert(_items.begin(), value);
         }
 
+        /** Returns true if this enumeration has an item at the given index. */
         virtual bool has(size_t i) const {
             return _items.size() > i;
         }
 
+        /** Returns the item at the given index. */
         virtual Reference* get(size_t i) const {
             return _items.at(i);
         }
 
+        /** Inserts the given item into the enumeration at the specified index. */
         virtual void set(size_t i, Reference* value) {
             _items[i] = value;
         }
 
+        /** Pre-allocate space for the given number of items. */
         virtual void reserve(size_t len) {
             _items.reserve(_items.size() + len);
         }
 
+        /** Returns the number of items in this enumeration. */
         virtual std::vector<Reference*>::size_type length() const {
             return _items.size();
         }
@@ -346,6 +367,9 @@ namespace swarmc::ISA {
     };
 
 
+    /**
+     * A reference representing a string -> value mapping.
+     */
     class MapReference : public Reference {
     public:
         explicit MapReference(const Type::Type* innerType) :
@@ -359,22 +383,27 @@ namespace swarmc::ISA {
             return new Type::Map(_innerType);
         }
 
+        /** Get the element at the given key. */
         virtual Reference* get(const std::string& key) const {
             return _items.at(key);
         }
 
+        /** Store the given element at the given key. */
         virtual void set(const std::string& key, Reference* value) {
             _items.insert({key, value});
         }
 
+        /** Returns true if this map contains an element at the given key. */
         virtual bool has(const std::string& key) const {
             return _items.find(key) != _items.end();
         }
 
+        /** Get the number of entries in this map. */
         virtual size_t length() const {
             return _items.size();
         }
 
+        /** Get an enumeration of the keys of this map. */
         virtual EnumerationReference* keys() const {
             auto er = new EnumerationReference(Type::Primitive::of(Type::Intrinsic::STRING));
             for ( const auto& item : _items ) {

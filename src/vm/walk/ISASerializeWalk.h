@@ -7,6 +7,9 @@
 
 namespace swarmc::ISA {
 
+    /**
+     * ISA walk that writes a set of instruction objects back to SVI code.
+     */
     class ISASerializeWalk : public ISAWalk<std::string> {
     public:
         std::string toString() const override {

@@ -9,17 +9,33 @@ namespace swarmc::Runtime {
 
     class VirtualMachine;
 
+    /**
+     * ISA walk which uses the virtual machine to execute SVI instructions.
+     */
     class ExecuteWalk : public ISA::ISAWalk<ISA::Reference*> {
     public:
         ExecuteWalk(VirtualMachine* vm) : ISA::ISAWalk<ISA::Reference*>(), _vm(vm) {}
         virtual ~ExecuteWalk() = default;
 
+        /** Cast the reference as a number, or raise an exception. */
         virtual ISA::NumberReference* ensureNumber(const ISA::Reference*);
+
+        /** Cast the reference as a boolean, or raise an exception. */
         virtual ISA::BooleanReference* ensureBoolean(const ISA::Reference*);
+
+        /** Cast the reference as a type value, or raise an exception. */
         virtual ISA::TypeReference* ensureType(const ISA::Reference*);
+
+        /** Cast the reference as a string, or raise an exception. */
         virtual ISA::StringReference* ensureString(const ISA::Reference*);
+
+        /** Cast the reference as a function value, or raise an exception. */
         virtual ISA::FunctionReference* ensureFunction(const ISA::Reference*);
+
+        /** Cast the reference as an enumeration, or raise an exception. */
         virtual ISA::EnumerationReference* ensureEnumeration(const ISA::Reference*);
+
+        /** Cast the reference as a map, or raise an exception. */
         virtual ISA::MapReference* ensureMap(const ISA::Reference*);
 
     protected:
@@ -27,14 +43,17 @@ namespace swarmc::Runtime {
 
         std::string toString() const override;
 
+        /** Prints a message shown by default in the debug binary. */
         virtual void debug(const std::string& output) const {
             console->debug("VM: " + output);
         }
 
+        /** Prints a message shown only when the `--verbose` flag is used. */
         virtual void verbose(const std::string& output) const {
             if ( Configuration::VERBOSE ) debug(output);
         }
 
+        /** Verify that the reference is assignable to the given type, or raise an exception. */
         virtual void ensureType(const ISA::Reference*, const Type::Type*);
 
         ISA::Reference* walkPlus(ISA::Plus*) override;

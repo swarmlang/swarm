@@ -6,6 +6,9 @@
 
 namespace swarmc::ISA {
 
+    /**
+     * Runtime reference walk which writes reference values as SVI code.
+     */
     class ReferenceSerializeWalk : public ReferenceWalk<std::string> {
     public:
         std::string toString() const {
