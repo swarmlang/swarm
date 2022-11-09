@@ -103,3 +103,11 @@ test: $(TARGET_EXEC)
 -include $(DEPS)
 
 MKDIR_P ?= mkdir -p
+
+.PHONY: docker
+docker: Dockerfile
+	docker image build -t "${DOCKER_REGISTRY}/swarmlang/swarm:latest" .
+
+.PHONY: docker_run
+docker_run:
+	docker run --rm -it "${DOCKER_REGISTRY}/swarmlang/swarm:latest" bash

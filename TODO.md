@@ -1,4 +1,4 @@
-- setup docker container for builds
+- ~~setup docker container for builds~~
 - fix memory leaks
   - Type objects and semantic symbols
 - not dogshit test suite
