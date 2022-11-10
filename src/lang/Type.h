@@ -16,8 +16,6 @@ namespace Type {
     class Type;
 }
 
-using CType = const Type::Type*;
-
 namespace Type {
 
     enum class Intrinsic {
@@ -30,6 +28,7 @@ namespace Type {
         TYPE,
         MAP,
         ENUMERABLE,
+        STREAM,
         LAMBDA0,
         LAMBDA1,
         RESOURCE,
@@ -49,6 +48,7 @@ namespace Type {
             if ( intrinsic == Intrinsic::TYPE ) return "TYPE";
             if ( intrinsic == Intrinsic::MAP ) return "MAP";
             if ( intrinsic == Intrinsic::ENUMERABLE ) return "ENUMERABLE";
+            if ( intrinsic == Intrinsic::STREAM ) return "STREAM";
             if ( intrinsic == Intrinsic::LAMBDA0 ) return "LAMBDA0";
             if ( intrinsic == Intrinsic::LAMBDA1 ) return "LAMBDA1";
             if ( intrinsic == Intrinsic::RESOURCE ) return "RESOURCE";
@@ -255,6 +255,42 @@ namespace Type {
         }
     protected:
         Type* _yields;
+    };
+
+    class Stream : public Type {
+    public:
+        static Stream* of(const Type* inner) {
+            return new Stream(inner);
+        }
+
+        explicit Stream(const Type* inner) : _inner(inner) {}
+
+        Intrinsic intrinsic() const override {
+            return Intrinsic::STREAM;
+        }
+
+        const Type* inner() const {
+            return _inner;
+        }
+
+        Stream* copy() const override {
+            auto inst = new Stream(_inner->copy());
+            inst->_shared = shared();
+            return inst;
+        }
+
+        bool isAssignableTo(const Type* other) const override {
+            if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
+            if ( other->intrinsic() != Intrinsic::STREAM ) return false;
+            return _inner->isAssignableTo(((Stream*) other)->inner());
+        }
+
+        std::string toString() const override {
+            return Type::intrinsicString(intrinsic()) + "<" + _inner->toString() + ">";
+        }
+
+    protected:
+        const Type* _inner;
     };
 
     class Lambda : public Type {

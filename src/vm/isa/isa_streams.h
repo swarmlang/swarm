@@ -5,10 +5,10 @@
 
 namespace swarmc::ISA {
 
-    class StreamInit : public BinaryInstruction<Reference, LocationReference> {
+    class StreamInit : public UnaryInstruction<Reference> {
     public:
-        StreamInit(Reference* type, LocationReference* dest) :
-            BinaryInstruction<Reference, LocationReference>(Tag::STREAMINIT, type, dest) {}
+        StreamInit(Reference* type) :
+            UnaryInstruction<Reference>(Tag::STREAMINIT, type) {}
     };
 
     class StreamPush : public BinaryInstruction<LocationReference, Reference> {

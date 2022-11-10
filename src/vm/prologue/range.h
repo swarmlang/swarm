@@ -8,7 +8,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RangeFunctionCall : public PrologueFunctionCall {
     public:
-        RangeFunctionCall(IProvider* provider, CallVector vector, CType returnType):
+        RangeFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, vector, returnType) {}
 
         void execute() override;
@@ -24,7 +24,7 @@ namespace swarmc::Runtime::Prologue {
 
         FormalTypes paramTypes() const override;
 
-        CType returnType() const override;
+        const Type::Type* returnType() const override;
 
         PrologueFunctionCall* call(CallVector) const override;
 

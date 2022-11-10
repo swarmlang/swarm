@@ -47,6 +47,20 @@ namespace swarmc::Runtime {
         return store->load(scopeLoc);
     }
 
+    StreamReference* VirtualMachine::loadBuiltinStream(LocationReference* ref) {
+        if ( ref->affinity() == Affinity::SHARED && ref->name() == "STDERR" ) {
+            return new StreamReference(getSharedError());
+        } else if ( ref->affinity() == Affinity::SHARED && ref->name() == "STDOUT" ) {
+            return new StreamReference(getSharedOutput());
+        } else if ( ref->affinity() == Affinity::LOCAL && ref->name() == "STDERR" ) {
+            return new StreamReference(getLocalError());
+        } else if ( ref->affinity() == Affinity::LOCAL && ref->name() == "STDOUT" ) {
+            return new StreamReference(getLocalOutput());
+        }
+
+        throw Errors::SwarmError("Attempted to load invalid built-in stream: " + ref->toString());
+    }
+
     FunctionReference* VirtualMachine::loadFunction(LocationReference* loc) {
         if ( _state->hasInlineFunction(loc->name()) ) {
             return new FunctionReference(loadInlineFunction(loc->name()));
@@ -88,6 +102,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() == ReferenceTag::LOCATION ) {
             auto loc = (LocationReference*) ref;
             if ( loc->affinity() == Affinity::FUNCTION ) return loadFunction(loc);
+            if ( isBuiltinStream(loc) ) return loadBuiltinStream(loc);
             return loadFromStore(loc);
         }
 
@@ -351,5 +366,13 @@ namespace swarmc::Runtime {
 
         // Immediately return to the previous control
         returnToCaller(false);
+    }
+
+    bool VirtualMachine::isBuiltinStream(LocationReference* ref) {
+        if ( ref->affinity() != Affinity::SHARED && ref->affinity() != Affinity::LOCAL ) {
+            return false;
+        }
+
+        return ref->name() == "STDERR" || ref->name() == "STDOUT";
     }
 }

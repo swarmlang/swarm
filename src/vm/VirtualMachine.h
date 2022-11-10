@@ -11,6 +11,7 @@
 #include "runtime/interfaces.h"
 #include "runtime/runtime_functions.h"
 #include "runtime/runtime_provider.h"
+#include "runtime/local_streams.h"
 #include "runtime/State.h"
 #include "walk/ExecuteWalk.h"
 
@@ -42,6 +43,8 @@ namespace swarmc::Runtime {
         void initialize(ISA::Instructions is) {
             _state = new State(std::move(is));
             _scope = new ScopeFrame(util::uuid4(), nullptr);
+            _localOut = new LocalOutputStream();
+            _localErr = new LocalErrorStream();
         }
 
         /**
@@ -68,19 +71,35 @@ namespace swarmc::Runtime {
             _providers.push_back(provider);
         }
 
+        void useStreamDriver(IStreamDriver* driver) {
+            _streams = driver;
+        }
+
         /** Reset the VM to an uninitialized state. */
         void cleanup() {
-            if ( _state != nullptr ) delete _state;
+//            if ( _state != nullptr ) delete _state;
             _state = nullptr;
 
-            if ( _scope != nullptr ) delete _scope;
+//            if ( _scope != nullptr ) delete _scope;
             _scope = nullptr;
+
+//            if ( _streams != nullptr ) delete _streams;
+            _streams = nullptr;
+
+//            if ( _sharedErr != nullptr ) delete _sharedErr;
+            _sharedErr = nullptr;
+
+//            if ( _sharedOut != nullptr ) delete _sharedOut;
+            _sharedOut = nullptr;
 
             for ( auto lock : _locks ) lock->release();
             _locks.clear();
 
             _stores.clear();
             _providers.clear();
+
+            delete _localErr;
+            delete _localOut;
         }
 
         /** Restore the VM to the specified state. Can be used to re-hydrate VMs for queued call execution. */
@@ -88,6 +107,8 @@ namespace swarmc::Runtime {
 
         /** Load the value stored in the given location. */
         virtual ISA::Reference* loadFromStore(ISA::LocationReference*);
+
+        virtual ISA::StreamReference* loadBuiltinStream(ISA::LocationReference*);
 
         /** Load the function stored in the given location. */
         virtual ISA::FunctionReference* loadFunction(ISA::LocationReference*);
@@ -199,6 +220,30 @@ namespace swarmc::Runtime {
          */
         virtual void returnToCaller(bool shouldJump = true);
 
+        virtual IStream* getLocalOutput() const { return _localOut; }
+
+        virtual IStream* getLocalError() const { return _localErr; }
+
+        virtual IStream* getSharedOutput() {
+            if ( _sharedOut == nullptr ) {
+                _sharedOut = _streams->open("s:STDOUT", Type::Primitive::of(Type::Intrinsic::STRING));
+            }
+
+            return _sharedOut;
+        }
+
+        virtual IStream* getSharedError() {
+            if ( _sharedErr == nullptr ) {
+                _sharedErr = _streams->open("s:STDERR", Type::Primitive::of(Type::Intrinsic::STRING));
+            }
+
+            return _sharedErr;
+        }
+
+        virtual IStream* getStream(const std::string& id, const Type::Type* innerType) {
+            return _streams->open(id, innerType);
+        }
+
         /**
          * This callback is executed each time the VM fails to acquire a lock,
          * before it retries its attempt.
@@ -228,6 +273,11 @@ namespace swarmc::Runtime {
             copy->_scope = _scope->copy();
             copy->_queueContexts = _queueContexts;
             copy->_providers = _providers;
+            copy->_streams = _streams;
+            copy->_localOut = new LocalOutputStream();
+            copy->_localErr = new LocalErrorStream();
+            copy->_sharedOut = _sharedOut;
+            copy->_sharedErr = _sharedErr;
 
             Stores stores;
             for ( auto store : _stores ) stores.push_back(store->copy());
@@ -243,10 +293,15 @@ namespace swarmc::Runtime {
         Queues _queues;
         Locks _locks;
         Providers _providers;
+        IStreamDriver* _streams = nullptr;
         ScopeFrame* _scope;
         ExecuteWalk* _exec;
         std::stack<QueueContextID> _queueContexts;
         IFunctionCall* _return = nullptr;
+        IStream* _localOut;
+        IStream* _localErr;
+        IStream* _sharedOut = nullptr;
+        IStream* _sharedErr = nullptr;
         bool _shouldClearReturn = false;
         bool _shouldAdvance = true;
         bool _shouldCaptureReturn = false;
@@ -275,6 +330,8 @@ namespace swarmc::Runtime {
 
         /** Perform an external provider function call. */
         virtual void callProviderFunction(IProviderFunctionCall*);
+
+        virtual bool isBuiltinStream(ISA::LocationReference*);
     };
 
 }

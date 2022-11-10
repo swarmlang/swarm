@@ -7,7 +7,7 @@ namespace swarmc::Runtime::Prologue {
         setReturn(new ISA::NumberReference(_provider->global()->random()));
     }
 
-    CType RandomFunction::returnType() const {
+    const Type::Type* RandomFunction::returnType() const {
         return Type::Primitive::of(Type::Intrinsic::NUMBER);
     }
 
@@ -32,7 +32,7 @@ namespace swarmc::Runtime::Prologue {
         return {Type::Primitive::of(Type::Intrinsic::NUMBER)};
     }
 
-    CType RandomVectorFunction::returnType() const {
+    const Type::Type* RandomVectorFunction::returnType() const {
         return new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::NUMBER));
     }
 
@@ -70,7 +70,7 @@ namespace swarmc::Runtime::Prologue {
         };
     }
 
-    CType RandomMatrixFunction::returnType() const {
+    const Type::Type* RandomMatrixFunction::returnType() const {
         auto enumOfNumsType = new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::NUMBER));
         return new Type::Enumerable(enumOfNumsType);
     }

@@ -57,6 +57,7 @@ namespace swarmc::VM {
             vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::SHARED));
             vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
             vm->addQueue(new SingleThreaded::Queue(vm));
+            vm->useStreamDriver(new SingleThreaded::StreamDriver());
 
             if ( Configuration::WITH_PROLOGUE ) {
                 vm->addProvider(new Prologue::Provider(vm->global()));

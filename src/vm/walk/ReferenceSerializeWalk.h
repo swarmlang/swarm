@@ -24,8 +24,12 @@ namespace swarmc::ISA {
             return "FIXME:TYPE";  // FIXME
         }
 
-        std::string walkFunctionReference(swarmc::ISA::FunctionReference* f) override {
+        std::string walkFunctionReference(FunctionReference* f) override {
             return "FIXME:FUNCTION";  // FIXME
+        }
+
+        std::string walkStreamReference(StreamReference*) override {
+            return "FIXME:STREAM";
         }
 
         std::string walkStringReference(StringReference* ref) override {

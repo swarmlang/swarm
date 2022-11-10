@@ -22,6 +22,7 @@ namespace swarmc::ISA {
             if ( ref->tag() == ReferenceTag::NUMBER ) return walkNumberReference((NumberReference*) ref);
             if ( ref->tag() == ReferenceTag::BOOLEAN ) return walkBooleanReference((BooleanReference*) ref);
             if ( ref->tag() == ReferenceTag::FUNCTION ) return walkFunctionReference((FunctionReference*) ref);
+            if ( ref->tag() == ReferenceTag::STREAM ) return walkStreamReference((StreamReference*) ref);
 
             throw Errors::SwarmError("Unknown reference tag: " + ref->toString());
         }
@@ -34,6 +35,7 @@ namespace swarmc::ISA {
         virtual TReturn walkNumberReference(NumberReference*) = 0;
         virtual TReturn walkBooleanReference(BooleanReference*) = 0;
         virtual TReturn walkFunctionReference(FunctionReference*) = 0;
+        virtual TReturn walkStreamReference(StreamReference*) = 0;
     };
 
 }

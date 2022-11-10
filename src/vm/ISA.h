@@ -5,6 +5,7 @@
 #include "../shared/IStringable.h"
 #include "../lang/Type.h"
 #include "runtime/runtime_functions.h"
+#include "runtime/interfaces.h"
 
 /*
  * This file describes the structure of the SVI IR.
@@ -113,6 +114,7 @@ namespace swarmc::ISA {
         NUMBER,
         BOOLEAN,
         FUNCTION,
+        STREAM,
         ENUMERATION,
         MAP,
     };
@@ -193,6 +195,26 @@ namespace swarmc::ISA {
         Affinity _affinity;
         std::string _name;
         const Type::Type* _type = nullptr;
+    };
+
+    class StreamReference : public Reference {
+    public:
+        explicit StreamReference(Runtime::IStream* stream) : Reference(ReferenceTag::STREAM), _stream(stream) {}
+
+        std::string toString() const override {
+            return "StreamReference<" + _stream->toString() + ">";
+        }
+
+        const Type::Stream* type() const override {
+            return Type::Stream::of(_stream->innerType());
+        }
+
+        Runtime::IStream* stream() {
+            return _stream;
+        }
+
+    protected:
+        Runtime::IStream* _stream;
     };
 
     /** A function literal. */

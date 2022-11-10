@@ -248,7 +248,7 @@ namespace swarmc::ISA {
         }
 
         std::string walkStreamInit(StreamInit* si) override {
-            return "streaminit " + _rsw.walk(si->first()) + " " + _rsw.walk(si->second());
+            return "streaminit " + _rsw.walk(si->first());
         }
 
         std::string walkStreamPush(StreamPush* sp) override {

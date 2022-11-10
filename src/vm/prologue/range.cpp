@@ -29,7 +29,7 @@ namespace swarmc::Runtime::Prologue {
         };
     }
 
-    CType RangeFunction::returnType() const {
+    const Type::Type* RangeFunction::returnType() const {
         return new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::NUMBER));
     }
 

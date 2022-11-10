@@ -267,10 +267,9 @@ namespace swarmc::ISA {
                 i += 1;
             } else if ( instructionLeader == "streaminit" ) {
                 is.push_back(new ISA::StreamInit(
-                    parseUnaryReference(instructionLeader, tokens, startAt+i),
-                    parseLocationReference(instructionLeader, tokens, startAt+i+1)
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
                 ));
-                i += 2;
+                i += 1;
             } else if ( instructionLeader == "streampush" ) {
                 is.push_back(new ISA::StreamPush(
                     parseLocationReference(instructionLeader, tokens, startAt+i),

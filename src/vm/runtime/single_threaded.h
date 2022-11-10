@@ -4,6 +4,7 @@
 #include <map>
 #include <queue>
 #include <random>
+#include <utility>
 #include "../../shared/uuid.h"
 #include "interfaces.h"
 
@@ -185,6 +186,45 @@ namespace swarmc::Runtime::SingleThreaded {
         VirtualMachine* _vm;
         JobID _nextId = 0;
         QueueContextID _context;
+    };
+
+
+    class Stream : public IStream {
+    public:
+        Stream(std::string id, const Type::Type* innerType) : _id(std::move(id)), _innerType(innerType) {}
+
+        void open() override {}
+
+        void close() override {}
+
+        bool isOpen() override { return true; }
+
+        const Type::Type* innerType() override { return _innerType; }
+
+        void push(ISA::Reference* value) override;
+
+        ISA::Reference* pop() override;
+
+        bool isEmpty() override;
+
+        std::string id() const override { return _id; }
+
+        std::string toString() const override;
+
+    protected:
+        std::string _id;
+        const Type::Type* _innerType;
+        std::queue<ISA::Reference*> _items;
+    };
+
+
+    class StreamDriver : public IStreamDriver {
+    public:
+        IStream* open(const std::string& id, const Type::Type* innerType) override;
+
+        std::string toString() const override {
+            return "SingleThreaded::StreamDriver<>";
+        }
     };
 
 }

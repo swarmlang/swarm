@@ -91,4 +91,30 @@ namespace swarmc::Runtime::SingleThreaded {
         vm->executeCall(job->getCall());
         delete vm;
     }
+
+
+    void Stream::push(ISA::Reference* value) {
+        assert(value->type()->isAssignableTo(_innerType));
+        _items.push(value);
+    }
+
+    ISA::Reference* Stream::pop() {
+        assert(!_items.empty());
+        auto top = _items.front();
+        _items.pop();
+        return top;
+    }
+
+    bool Stream::isEmpty() {
+        return _items.empty();
+    }
+
+    std::string Stream::toString() const {
+        return "SingleThreaded::Stream<of: " + _innerType->toString() + ">";
+    }
+
+
+    IStream* StreamDriver::open(const std::string &id, const Type::Type* innerType) {
+        return new Stream(id, innerType);
+    }
 }

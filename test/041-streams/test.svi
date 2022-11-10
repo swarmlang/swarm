@@ -1,0 +1,23 @@
+$l:s <- streaminit p:STRING
+streampush $l:s "Hello"
+streampush $l:s "World!"
+
+beginfn f:POPPER_INNER p:VOID
+    scopeof $l:v
+    $l:v <- streampop $l:s
+    $l:empty <- streamempty $l:s
+    $l:n_empty <- not $l:empty
+return
+
+beginfn f:POPPER p:VOID
+    scopeof $l:empty
+    $l:empty <- streamempty $l:s
+
+    scopeof $l:n_empty
+    $l:n_empty <- not $l:empty
+
+    while $l:n_empty f:POPPER_INNER
+return
+
+call f:POPPER
+streamclose $l:s

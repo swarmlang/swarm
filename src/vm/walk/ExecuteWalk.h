@@ -35,6 +35,8 @@ namespace swarmc::Runtime {
         /** Cast the reference as an enumeration, or raise an exception. */
         virtual ISA::EnumerationReference* ensureEnumeration(const ISA::Reference*);
 
+        virtual ISA::StreamReference* ensureStream(const ISA::Reference*);
+
         /** Cast the reference as a map, or raise an exception. */
         virtual ISA::MapReference* ensureMap(const ISA::Reference*);
 
@@ -113,13 +115,13 @@ namespace swarmc::Runtime {
         ISA::Reference* walkUnlock(ISA::Unlock*) override;
         ISA::Reference* walkIsEqual(ISA::IsEqual*) override { assert(false);  /* FIXME */ }
         ISA::Reference* walkScopeOf(ISA::ScopeOf*) override;
-        ISA::Reference* walkStreamInit(ISA::StreamInit*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkStreamPush(ISA::StreamPush*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkStreamPop(ISA::StreamPop*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkStreamClose(ISA::StreamClose*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkStreamEmpty(ISA::StreamEmpty*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkOut(ISA::Out*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkErr(ISA::Err*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkStreamInit(ISA::StreamInit*) override;
+        ISA::Reference* walkStreamPush(ISA::StreamPush*) override;
+        ISA::Reference* walkStreamPop(ISA::StreamPop*) override;
+        ISA::Reference* walkStreamClose(ISA::StreamClose*) override;
+        ISA::Reference* walkStreamEmpty(ISA::StreamEmpty*) override;
+        ISA::Reference* walkOut(ISA::Out*) override;
+        ISA::Reference* walkErr(ISA::Err*) override;
         ISA::Reference* walkStringConcat(ISA::StringConcat*) override;
         ISA::Reference* walkStringLength(ISA::StringLength*) override;
         ISA::Reference* walkStringSliceFrom(ISA::StringSliceFrom*) override;

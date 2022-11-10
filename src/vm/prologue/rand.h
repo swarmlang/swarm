@@ -8,7 +8,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomFunctionCall : public PrologueFunctionCall {
     public:
-        RandomFunctionCall(IProvider* provider, CallVector vector, CType returnType):
+        RandomFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, vector, returnType) {}
 
         void execute() override;
@@ -24,7 +24,7 @@ namespace swarmc::Runtime::Prologue {
 
         FormalTypes paramTypes() const override { return {}; }
 
-        CType returnType() const override;
+        const Type::Type* returnType() const override;
 
         PrologueFunctionCall* call(CallVector) const override;
 
@@ -35,7 +35,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomVectorFunctionCall : public PrologueFunctionCall {
     public:
-        RandomVectorFunctionCall(IProvider* provider, CallVector vector, CType returnType):
+        RandomVectorFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, vector, returnType) {}
 
         void execute() override;
@@ -51,7 +51,7 @@ namespace swarmc::Runtime::Prologue {
 
         FormalTypes paramTypes() const override;
 
-        CType returnType() const override;
+        const Type::Type* returnType() const override;
 
         PrologueFunctionCall* call(CallVector) const override;
 
@@ -62,7 +62,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomMatrixFunctionCall : public PrologueFunctionCall {
     public:
-        RandomMatrixFunctionCall(IProvider* provider, CallVector vector, CType returnType):
+        RandomMatrixFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, vector, returnType) {}
 
         void execute() override;
@@ -78,7 +78,7 @@ namespace swarmc::Runtime::Prologue {
 
         FormalTypes paramTypes() const override;
 
-        CType returnType() const override;
+        const Type::Type* returnType() const override;
 
         PrologueFunctionCall* call(CallVector) const override;
 

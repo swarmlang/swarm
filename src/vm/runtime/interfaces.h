@@ -166,6 +166,34 @@ namespace swarmc::Runtime {
         virtual bool isEmpty() = 0;
     };
 
+
+    class IStream : public IStringable {
+    public:
+        virtual ~IStream() = default;
+
+        virtual void open() = 0;
+
+        virtual void close() = 0;
+
+        virtual bool isOpen() = 0;
+
+        virtual const Type::Type* innerType() = 0;
+
+        virtual void push(ISA::Reference* value) = 0;
+
+        virtual ISA::Reference* pop() = 0;
+
+        virtual bool isEmpty() = 0;
+
+        virtual std::string id() const = 0;
+    };
+
+
+    class IStreamDriver : public IStringable {
+    public:
+        virtual IStream* open(const std::string&, const Type::Type*) = 0;
+    };
+
 }
 
 #endif //SWARMVM_INTERFACES

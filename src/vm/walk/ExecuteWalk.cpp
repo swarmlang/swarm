@@ -1,5 +1,6 @@
 #include <cassert>
 #include <cmath>
+#include "../../shared/uuid.h"
 #include "../VirtualMachine.h"
 #include "ExecuteWalk.h"
 
@@ -62,6 +63,13 @@ namespace swarmc::Runtime {
         // FIXME: eventually, this should generate a runtime exception
         assert(ref->tag() == ReferenceTag::ENUMERATION);
         return (EnumerationReference*) ref;
+    }
+
+    StreamReference* ExecuteWalk::ensureStream(const ISA::Reference* ref) {
+        verbose("ensureStream: " + ref->toString());
+        // FIXME: eventually, this should generate a runtime exception
+        assert(ref->tag() == ReferenceTag::STREAM);
+        return (StreamReference*) ref;
     }
 
     MapReference* ExecuteWalk::ensureMap(const ISA::Reference* ref) {
@@ -617,9 +625,63 @@ namespace swarmc::Runtime {
         return nullptr;
     }
 
-    // TODO: walkStream*
-    // TODO: walkOut
-    // TODO: walkErr
+    Reference* ExecuteWalk::walkStreamInit(StreamInit* i) {
+        verbose("streaminit " + i->first()->toString());
+        auto type = ensureType(_vm->resolve(i->first()));
+        auto stream = _vm->getStream(util::uuid4(), type->value());
+        return new StreamReference(stream);
+    }
+
+    Reference* ExecuteWalk::walkStreamPush(StreamPush* i) {
+        verbose("streampush " + i->first()->toString() + " " + i->second()->toString());
+        auto stream = ensureStream(_vm->resolve(i->first()));
+        auto value = _vm->resolve(i->second());
+
+        // FIXME: eventually, this should generate a runtime exception
+        assert(stream->stream()->isOpen() && value->type()->isAssignableTo(stream->type()->inner()));
+
+        stream->stream()->push(value);
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkStreamPop(StreamPop* i) {
+        verbose("streampop " + i->first()->toString());
+        auto stream = ensureStream(_vm->resolve(i->first()));
+
+        // FIXME: eventually, this should generate a runtime exception
+        assert(stream->stream()->isOpen() && !stream->stream()->isEmpty());
+
+        return stream->stream()->pop();
+    }
+
+    Reference* ExecuteWalk::walkStreamClose(StreamClose* i) {
+        verbose("streamclose " + i->first()->toString());
+        auto stream = ensureStream(_vm->resolve(i->first()));
+
+        // FIXME: eventually, this should generate a runtime exception
+        assert(stream->stream()->isOpen());
+        stream->stream()->close();
+
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkStreamEmpty(StreamEmpty* i) {
+        verbose("streamempty " + i->first()->toString());
+        auto stream = ensureStream(_vm->resolve(i->first()));
+
+        // FIXME: eventually, this should generate a runtime exception
+        assert(stream->stream()->isOpen());
+
+        return new BooleanReference(stream->stream()->isEmpty());
+    }
+
+    Reference* ExecuteWalk::walkOut(Out* i) {
+        return walkStreamPush(i);
+    }
+
+    Reference* ExecuteWalk::walkErr(Err* i) {
+        return walkStreamPush(i);
+    }
 
     Reference* ExecuteWalk::walkStringConcat(StringConcat* i) {
         verbose("strconcat " + i->first()->toString() + " " + i->second()->toString());
