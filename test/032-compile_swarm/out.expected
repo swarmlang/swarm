@@ -1,14 +1,3 @@
-FUNC_0 RESOURCE<Primitive<VOID>>
-FUNC_2 Primitive<VOID>
-FUNC_14 Primitive<STRING>
-FUNC_18 Primitive<STRING>
-FUNC_21 Primitive<STRING>
-FUNC_73 Primitive<VOID>
-FUNC_75 Primitive<BOOLEAN>
-FUNC_116 Primitive<TYPE>
-FUNC_119 Primitive<TYPE>
-FUNC_127 Primitive<NUMBER> :: Primitive<TYPE> :: Primitive<TYPE>
-FUNC_128 Primitive<TYPE>
 BEGINFN<Location<f:FUNC_0>, TypeReference<RESOURCE<Primitive<VOID>>>>
 FNPARAM<TypeReference<Primitive<STRING>>, Location<l:arg_s>>
 FNPARAM<TypeReference<Primitive<STRING>>, Location<l:arg_s2>>
@@ -254,7 +243,7 @@ ASSIGNEVAL<Location<l:tmp97>, STRCONCAT<Location<s:var_t4>, Location<l:tmp96>>>
 ASSIGNVALUE<Location<s:var_t4>, Location<l:tmp97>>
 RETURN0<>
 CALLELSE0<Location<l:CFBWhile>, Location<f:SUBFUNC_83>>
-CALLELSE0<Location<l:CFBWhile>, Location<l:whileCond>>
+CALLELSE0<Location<l:CFBWhile>, Location<f:WHILECOND_51>>
 RETURN0<>
 ASSIGNEVAL<Location<l:whileCond>, CALL0<Location<f:WHILECOND_51>>>
 WHILE<Location<l:whileCond>, Location<f:WHILE_67>>

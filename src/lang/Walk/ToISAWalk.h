@@ -12,14 +12,10 @@ namespace Lang {
 namespace Walk {
 
 
-class ToISAWalk : Walk<ISA::Instructions*> {
+class ToISAWalk : public Walk<ISA::Instructions*> {
 public:
-    ToISAWalk(std::ostream& out, ASTNode* node) : Walk<ISA::Instructions*>(), _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()) {
-        ISA::Instructions* program = walk(node);
-        for ( auto i : *program ) {
-            out << i->toString() << "\n";
-        }
-    }
+    ToISAWalk() : Walk<ISA::Instructions*>(), 
+        _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()) {}
 
     ~ToISAWalk() {
         delete _whileConds;
@@ -49,7 +45,6 @@ protected:
 
     virtual ISA::Instructions* walkMapAccessNode(MapAccessNode* node) {
         auto instrs = walk(node->path());
-        // FIXME: map location affinity
         auto mapget = new ISA::MapGet(
             new ISA::LocationReference(ISA::Affinity::LOCAL, "mkey_" + node->end()->name()), getLocFromAssign(instrs->back()));
         instrs->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), mapget));
@@ -486,7 +481,7 @@ protected:
         }
 
         // reevaluate condition
-        instrs->push_back(new ISA::CallElse0(cfb, new ISA::LocationReference(ISA::Affinity::LOCAL, "whileCond")));
+        instrs->push_back(new ISA::CallElse0(cfb, new ISA::LocationReference(ISA::Affinity::FUNCTION, _whileConds->top())));
 
         // end of function return
         instrs->push_back(new ISA::Return0());
@@ -561,7 +556,6 @@ protected:
         auto map = new ISA::AssignEval(loc, new ISA::MapInit(new ISA::TypeReference(innerType)));
         instrs->push_back(map);
         for ( auto stmt : *node->body() ) {
-            // FIXME: do map ids inherit sharedness from the map?
             auto id = new ISA::LocationReference(ISA::Affinity::LOCAL, "mkey_" + stmt->id()->name());
             auto mapstmt = walk(stmt);
             auto mapset = new ISA::MapSet(id, getLocFromAssign(mapstmt->back()), loc);
@@ -612,7 +606,6 @@ protected:
             auto ma = (MapAccessNode*) node->dest();
             auto path = walk(ma->path());
             instrs->insert(instrs->end(), path->begin(), path->end());
-            // FIXME: map key affinity
             instrs->push_back(
                 new ISA::MapSet(
                     new ISA::LocationReference(ISA::Affinity::LOCAL, "mkey_" + ma->end()->name()), 
@@ -655,7 +648,6 @@ protected:
         }
 
         // bring return value trackers in scope
-        std::cout << name << " " << fnType->toString() << "\n";
         if ( fnType->intrinsic() != Type::Intrinsic::VOID ) {
             instrs->push_back(new ISA::ScopeOf(retVar));
         }

@@ -14,6 +14,7 @@
 #include "../lang/Walk/NameAnalysisWalk.h"
 #include "../lang/Walk/TypeAnalysisWalk.h"
 #include "../vm/ISAParser.h"
+#include "../cfg/cfg.h"
 
 namespace swarmc {
 
@@ -32,6 +33,7 @@ namespace swarmc {
             _scanner = new Lang::Scanner(input);
             _root = nullptr;
             _parser = new Lang::Parser(*_scanner, &_root);
+            _isa = nullptr;
         }
 
         virtual ~Pipeline(){
@@ -42,6 +44,9 @@ namespace swarmc {
                 delete _root->body();
                 delete _root;
             }
+            if ( _isa != nullptr ) {
+                delete _isa;
+            } 
         }
 
         virtual std::string toString() const override {
@@ -94,9 +99,27 @@ namespace swarmc {
             Lang::Walk::PrintWalk pW(out, _root);
         }
 
-        void targetISA(std::ostream& out) {
+        ISA::Instructions* targetISA() {
             targetASTSymbolicTyped();
-            Lang::Walk::ToISAWalk cw(out, _root);
+
+            Lang::Walk::ToISAWalk isaWalk;
+            _isa = isaWalk.walk(_root);
+
+            return _isa;
+        }
+
+        void targetISARepresentation(std::ostream& out) {
+            targetISA();
+
+            for ( auto instr : *_isa ) {
+                out << instr->toString() << "\n";
+            }
+        }
+
+        void targetCFGRepresentation(std::ostream& out) {
+            CFG::ControlFlowGraph c(targetISA());
+
+            c.serialize(out);
         }
 
     protected:
@@ -104,6 +127,7 @@ namespace swarmc {
         Lang::Scanner* _scanner;
         Lang::Parser* _parser;
         Lang::ProgramNode* _root;
+        ISA::Instructions* _isa;
     };
 
 }

@@ -17,12 +17,12 @@
 - module system / import system
 - language-native testing system
   - e.g. define named test blocks which are ignored during normal runtime
+- standard library for swarm
 - Implement IStorageInterface, IQueue, IQueueJob, and IGlobalServices
     - Redis implementation
     - pthread implementation
     - ~~single-threaded implementation~~
     - ...others?
-- ~~pass to convert AST to ISA~~
 - ast optimization pass
   - removing statements coming after a return
   - simplification of trivial expressions
