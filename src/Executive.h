@@ -34,6 +34,7 @@ protected:
     bool flagWithPrologue = true;
     bool flagSVI = false;
     bool flagOutputISA = false;
+    bool flagOutputCFG = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;
@@ -41,6 +42,7 @@ protected:
     std::string flagRunTestName;
     std::string outputResultTo = "--";
     std::string outputISATo = "--";
+    std::string outputCFGTo;
     std::string flagFilterFile;
     std::string inputFile;
     std::istream* _input = nullptr;
@@ -49,6 +51,7 @@ protected:
     int debugOutputParse();
     int debugParseAndStop();
     int debugOutputISA();
+    int debugOutputCFG();
     int runTest();
     int parseFilters();
     int executeLocalSVI();

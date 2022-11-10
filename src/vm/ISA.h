@@ -452,6 +452,22 @@ namespace swarmc::ISA {
             return _tag;
         }
 
+        virtual bool isNullary() const { 
+            return false; 
+        }
+
+        virtual bool isUnary() const { 
+            return false; 
+        }
+
+        virtual bool isBinary() const { 
+            return false; 
+        }
+
+        virtual bool isTrinary() const { 
+            return false; 
+        }
+
     protected:
         Tag _tag;
     };
@@ -463,6 +479,10 @@ namespace swarmc::ISA {
 
         std::string toString() const override {
             return tagName(tag()) + "<>";
+        }
+
+        virtual bool isNullary() const override { 
+            return true; 
         }
     };
 
@@ -476,8 +496,16 @@ namespace swarmc::ISA {
             return _first;
         }
 
+        virtual void setFirst(TFirst* first) {
+            _first = first;
+        }
+
         std::string toString() const override {
             return tagName(tag()) + "<" + _first->toString() + ">";
+        }
+
+        virtual bool isUnary() const override { 
+            return true; 
         }
     protected:
         TFirst* _first;
@@ -497,8 +525,20 @@ namespace swarmc::ISA {
             return _second;
         }
 
+        virtual void setFirst(TFirst* first) {
+            _first = first;
+        }
+
+        virtual void setSecond(TSecond* second) {
+            _second = second;
+        }
+
         std::string toString() const override {
             return tagName(tag()) + "<" + _first->toString() + ", " + _second->toString() + ">";
+        }
+
+        virtual bool isBinary() const override { 
+            return true; 
         }
     protected:
         TFirst* _first;
@@ -523,8 +563,24 @@ namespace swarmc::ISA {
             return _third;
         }
 
+        virtual void setFirst(TFirst* first) {
+            _first = first;
+        }
+
+        virtual void setSecond(TSecond* second) {
+            _second = second;
+        }
+
+        virtual void setThird(TThird* third) {
+            _third = third;
+        }
+
         std::string toString() const override {
             return tagName(tag()) + "<" + _first->toString() + ", " + _second->toString() + ", " + _third->toString() + ">";
+        }
+
+        virtual bool isTrinary() const override { 
+            return true; 
         }
     protected:
         TFirst* _first;

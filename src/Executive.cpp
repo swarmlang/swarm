@@ -63,6 +63,13 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( flagOutputCFG ) {
+        int cfgResult = debugOutputCFG();
+        if ( cfgResult != 0 ) {
+            result = cfgResult;
+        }
+    }
+
     if ( flagSingleThreaded && flagSVI ) {
         int executeResult = executeLocalSVI();
         if ( executeResult != 0 ) {
@@ -172,7 +179,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             Configuration::WITH_PROLOGUE = false;
         } else if ( arg == "--dbg-output-isa-to" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --debug-output-ISA-to. Pass --help for more info.");
+                console->error("Missing required parameter for --debug-output-isa-to. Pass --help for more info.");
                 failed = true;
                 continue;
             }
@@ -181,6 +188,17 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             console->debug("Output file name: " + outputISATo);
             skipOne = true;
             flagOutputISA = true;
+        } else if ( arg == "--dbg-output-cfg-to" ) {
+            if ( i+1 >= params.size() ) {
+                console->error("Missing required parameter for --debug-output-cfg-to. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            outputCFGTo = params.at(i+1);
+            console->debug("Output file name: " + outputCFGTo);
+            skipOne = true;
+            flagOutputCFG = true;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -283,6 +301,10 @@ void Executive::printUsage() {
 
         console->bold()->print("  --dbg-output-isa-to <OUTFILE> :  ", true)
             ->line("Set the name of the ISA output file")
+            ->line();
+
+        console->bold()->print("  --dbg-output-cfg-to <OUTFILE> :  ", true)
+            ->line("Set the name of the CFG output file")
             ->line();
     console->end();
 
@@ -411,12 +433,37 @@ int Executive::debugOutputISA() {
     swarmc::Pipeline pipeline(_input);
 
     try {
-        pipeline.targetISA(*stream);
+        pipeline.targetISARepresentation(*stream);
     } catch (swarmc::Errors::ParseError& e) {
         return e.exitCode;
     }
 
     console->success("Compiled to ISA.");
+    return 0;
+}
+
+int Executive::debugOutputCFG() {
+    std::ostream* stream;
+    if ( outputCFGTo == "--" ) {
+        stream = &std::cout;
+    } else {
+        stream = new std::ofstream(outputCFGTo);
+        if ( stream->bad() ) {
+            console->error("Could not open parse output file for writing: " + outputCFGTo);
+            delete stream;
+            return 1;
+        }
+    }
+
+    swarmc::Pipeline pipeline(_input);
+
+    try {
+        pipeline.targetCFGRepresentation(*stream);
+    } catch (swarmc::Errors::ParseError& e) {
+        return e.exitCode;
+    }
+
+    console->success("Output CFG.");
     return 0;
 }
 
