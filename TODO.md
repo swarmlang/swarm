@@ -51,6 +51,7 @@
   - exception handling
 - remove RESOURCE type from lexing (added so I could test WITH statements)
 - FUTURE: Serialize ISA to SVI code
+- FUTURE: Swarm module package manager?
 - change map access back to [] (check for lval type in name analysis to avoid parsing conflict)
 - some form of exception/error system (e.g. exceptions, error values, ...?)
 - FUTURE: separate fetch/execute/writeback threads for runtime
