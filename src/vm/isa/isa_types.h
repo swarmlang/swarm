@@ -9,12 +9,18 @@ namespace swarmc::ISA {
     public:
         TypeOf(Reference* value) :
             UnaryInstruction<Reference>(Tag::TYPEOF, value) {}
+        virtual TypeOf* copy() const override {
+            return new TypeOf(_first->copy());
+        }
     };
 
     class IsCompatible : public BinaryInstruction<Reference, Reference> {
     public:
         IsCompatible(Reference* lhs, Reference* value) :
             BinaryInstruction<Reference, Reference>(Tag::COMPATIBLE, lhs, value) {}
+        virtual IsCompatible* copy() const override {
+            return new IsCompatible(_first->copy(), _second->copy());
+        }
     };
 
 }

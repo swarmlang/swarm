@@ -9,12 +9,18 @@ namespace swarmc::ISA {
     public:
         While(Reference* cond, LocationReference* callback) :
             BinaryInstruction<Reference, LocationReference>(Tag::WHILE, cond, callback) {}
+        virtual While* copy() const override {
+            return new While(_first->copy(), _second->copy());
+        }
     };
 
     class With : public BinaryInstruction<Reference, LocationReference> {
     public:
         With(Reference* resource, LocationReference* callback) :
             BinaryInstruction<Reference, LocationReference>(Tag::WITH, resource, callback) {}
+        virtual With* copy() const override {
+            return new With(_first->copy(), _second->copy());
+        }
     };
 
 }
