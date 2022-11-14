@@ -68,7 +68,8 @@
     ```
   - Do we care to support this?
 - Well-defined C++/native bridge to allow ~~custom `f:XXX` function bindings, as well as~~ custom stream implementations.
-- The `call` instruction should curry partial applications. Right now, it just errors.
+- ~~The `call` instruction should curry partial applications. Right now, it just errors.~~
+- Modify compiler to render partial applications as `curry` instructions
 - Tiered call queues (e.g. a local one for fast, multi-thread calls and a distributed one for longer batch jobs)
 - Sci-comp natives
   - Map-reduce

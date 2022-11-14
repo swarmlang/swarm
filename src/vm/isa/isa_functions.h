@@ -10,8 +10,14 @@ namespace swarmc::ISA {
         BeginFunction(std::string name, Reference* returnType) :
             BinaryInstruction(
             Tag::BEGINFN,
-            new LocationReference(Affinity::FUNCTION, name),
+            new LocationReference(Affinity::FUNCTION, std::move(name)),
             returnType) {}
+
+        virtual bool isPure() const { return _isPure; }
+
+        virtual void markAsPure() { _isPure = true; }
+    protected:
+        bool _isPure;
     };
 
     class FunctionParam : public BinaryInstruction<Reference, LocationReference> {
