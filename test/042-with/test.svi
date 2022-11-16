@@ -1,4 +1,5 @@
-$l:tag <- call f:TAG "fast"
+$l:tag_call <- curry f:TAG "mykey"
+$l:tag <- call $l:tag_call "myvalue"
 
 beginfn f:CB p:VOID
 	fnparam p:VOID $l:v

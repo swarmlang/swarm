@@ -37,7 +37,8 @@ namespace swarmc::Runtime::Prologue {
 
     class TagResource : public IResource {
     public:
-        TagResource(IProvider* provider, const std::string& name) : _provider(provider), _name(name) {}
+        TagResource(IProvider* provider, std::string key, std::string value):
+            _provider(provider), _key(std::move(key)), _value(std::move(value)) {}
 
         void open() override;
 
@@ -53,7 +54,8 @@ namespace swarmc::Runtime::Prologue {
 
     protected:
         IProvider* _provider;
-        std::string _name;
+        std::string _key;
+        std::string _value;
         std::map<std::string, std::string> _old;
     };
 
