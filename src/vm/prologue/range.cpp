@@ -37,6 +37,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
     PrologueFunctionCall* RangeFunction::call(CallVector vector) const {
+        ensureCallable();
         return new RangeFunctionCall(_provider, vector, returnType());
     }
 

@@ -27,6 +27,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
     PrologueFunctionCall* TrigFunction::call(CallVector vector) const {
+        ensureCallable();
         return new TrigFunctionCall(_op, _provider, vector, returnType());
     }
 

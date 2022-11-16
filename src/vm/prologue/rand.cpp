@@ -12,6 +12,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
     PrologueFunctionCall* RandomFunction::call(CallVector vector) const {
+        ensureCallable();
         return new RandomFunctionCall(_provider, vector, returnType());
     }
 
@@ -37,6 +38,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
     PrologueFunctionCall* RandomVectorFunction::call(CallVector vector) const {
+        ensureCallable();
         return new RandomVectorFunctionCall(_provider, vector, returnType());
     }
 
@@ -76,6 +78,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
     PrologueFunctionCall* RandomMatrixFunction::call(CallVector vector) const {
+        ensureCallable();
         return new RandomMatrixFunctionCall(_provider, vector, returnType());
     }
 

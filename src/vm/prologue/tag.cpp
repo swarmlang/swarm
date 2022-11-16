@@ -22,6 +22,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
     PrologueFunctionCall* TagFunction::call(CallVector vector) const {
+        ensureCallable();
         return new TagFunctionCall(_provider, vector, returnType());
     }
 
