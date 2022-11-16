@@ -82,7 +82,7 @@ FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:arg_jo
 FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:UNUSEDarg_idx>>
 ASSIGNVALUE<Location<l:var_tag>, Location<l:var_tag>>
 ASSIGNVALUE<Location<l:tmp26>, StringReference<mama>>
-ASSIGNEVAL<Location<l:tmp27>, CALL1<Location<l:var_tag>, Location<l:tmp26>>>
+ASSIGNEVAL<Location<l:tmp27>, CURRY<Location<l:var_tag>, Location<l:tmp26>>>
 ASSIGNVALUE<Location<l:tmp28>, StringReference<is a nice woman>>
 ASSIGNEVAL<Location<l:tmp29>, CALL1<Location<l:tmp27>, Location<l:tmp28>>>
 ASSIGNVALUE<Location<l:tmp30>, TypeReference<Primitive<VOID>>>
@@ -103,7 +103,7 @@ FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<s:arg_va
 FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:UNUSEDarg_idx>>
 ASSIGNVALUE<Location<l:var_tag>, Location<l:var_tag>>
 ASSIGNVALUE<Location<l:tmp36>, StringReference<tag>>
-ASSIGNEVAL<Location<l:tmp37>, CALL1<Location<l:var_tag>, Location<l:tmp36>>>
+ASSIGNEVAL<Location<l:tmp37>, CURRY<Location<l:var_tag>, Location<l:tmp36>>>
 ASSIGNVALUE<Location<l:tmp38>, StringReference<str>>
 ASSIGNEVAL<Location<l:tmp39>, CALL1<Location<l:tmp37>, Location<l:tmp38>>>
 ASSIGNVALUE<Location<l:tmp40>, TypeReference<Primitive<VOID>>>
@@ -298,7 +298,7 @@ ASSIGNVALUE<Location<l:tmp121>, Location<f:FUNC_119>>
 ASSIGNVALUE<Location<s:var_t9>, Location<l:tmp121>>
 ASSIGNVALUE<Location<l:var_t8>, Location<l:var_t8>>
 ASSIGNVALUE<Location<l:tmp122>, NumberReference<6.000000>>
-ASSIGNEVAL<Location<l:tmp123>, CALL1<Location<l:var_t8>, Location<l:tmp122>>>
+ASSIGNEVAL<Location<l:tmp123>, CURRY<Location<l:var_t8>, Location<l:tmp122>>>
 ASSIGNVALUE<Location<l:tmp124>, TypeReference<Primitive<TYPE>>>
 ASSIGNEVAL<Location<l:tmp125>, CALL1<Location<l:tmp123>, Location<l:tmp124>>>
 ASSIGNVALUE<Location<l:var_t10>, Location<l:tmp125>>

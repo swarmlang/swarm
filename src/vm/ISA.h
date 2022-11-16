@@ -131,6 +131,9 @@ namespace swarmc::ISA {
         /** Get the type of this reference. */
         virtual const Type::Type* type() const = 0;
 
+        /** Get copy of object */
+        virtual Reference* copy() const = 0;
+
         ReferenceTag tag() const {
             return _tag;
         }
@@ -193,6 +196,12 @@ namespace swarmc::ISA {
             );
         }
 
+        virtual LocationReference* copy() const override {
+            auto t = new LocationReference(_affinity, _name);
+            if ( _type != nullptr ) t->setType(_type);
+            return t;
+        }
+
     protected:
         Affinity _affinity;
         std::string _name;
@@ -214,6 +223,11 @@ namespace swarmc::ISA {
 
         Runtime::IStream* stream() {
             return _stream;
+        }
+
+        virtual StreamReference* copy() const override {
+            // FIXME: might need a copy of _stream
+            return new StreamReference(_stream);
         }
 
     protected:
@@ -273,6 +287,11 @@ namespace swarmc::ISA {
             return _fn;
         }
 
+        virtual FunctionReference* copy() const override {
+            // FIXME: might need acopy of _fn
+            return new FunctionReference(_fn);
+        }
+
     protected:
         Runtime::IFunction* _fn;
     };
@@ -294,6 +313,10 @@ namespace swarmc::ISA {
         /** Get the actual type this value is holding. */
         const Type::Type* value() const {
             return _type;
+        }
+
+        virtual TypeReference* copy() const override {
+            return new TypeReference(_type->copy());
         }
 
     protected:
@@ -339,6 +362,10 @@ namespace swarmc::ISA {
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
+
+        virtual StringReference* copy() const override {
+            return new StringReference(_value);
+        }
     };
 
     /** A literal number value */
@@ -352,6 +379,10 @@ namespace swarmc::ISA {
 
         std::string toString() const override {
             return "NumberReference<" + std::to_string(_value) + ">";
+        }
+
+        virtual NumberReference* copy() const override {
+            return new NumberReference(_value);
         }
     };
 
@@ -367,6 +398,10 @@ namespace swarmc::ISA {
 
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+        }
+
+        virtual BooleanReference* copy() const override {
+            return new BooleanReference(_value);
         }
     };
 
@@ -420,6 +455,14 @@ namespace swarmc::ISA {
         virtual std::vector<Reference*>::size_type length() const {
             return _items.size();
         }
+
+        virtual EnumerationReference* copy() const override {
+            auto e = new EnumerationReference(_innerType->copy());
+            for ( auto item : _items ) {
+                e->append(item->copy());
+            }
+            return e;
+        }
     protected:
         std::vector<Reference*> _items;
         const Type::Type* _innerType;
@@ -471,6 +514,14 @@ namespace swarmc::ISA {
             return er;
         }
 
+        virtual MapReference* copy() const override {
+            auto m = new MapReference(_innerType->copy());
+            for ( auto item : _items ) {
+                m->set(item.first, item.second->copy());
+            }
+            return m;
+        }
+
     protected:
         std::map<std::string, Reference*> _items;
         const Type::Type* _innerType;
@@ -488,6 +539,8 @@ namespace swarmc::ISA {
         virtual Tag tag() const {
             return _tag;
         }
+
+        virtual Instruction* copy() const = 0;
 
         virtual bool isNullary() const { 
             return false; 
