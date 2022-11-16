@@ -228,7 +228,11 @@ namespace Type {
 
     class Resource : public Type {
     public:
-        explicit Resource(Type* yields) : _yields(yields) {}
+        static Resource* of(const Type* inner) {
+            return new Resource(inner);
+        }
+
+        explicit Resource(const Type* yields) : _yields(yields) {}
 
         Intrinsic intrinsic() const override {
             return Intrinsic::RESOURCE;
@@ -239,7 +243,7 @@ namespace Type {
         }
 
         Resource* copy() const override {
-            auto inst = new Resource(_yields->copy());
+            auto inst = new Resource(_yields);
             inst->_shared = shared();
             return inst;
         }
@@ -254,7 +258,7 @@ namespace Type {
             return Type::intrinsicString(intrinsic()) + "<" + _yields->toString() + ">";
         }
     protected:
-        Type* _yields;
+        const Type* _yields;
     };
 
     class Stream : public Type {

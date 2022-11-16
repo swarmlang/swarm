@@ -1,8 +1,12 @@
 #ifndef SWARMVM_INTERFACES
 #define SWARMVM_INTERFACES
 
+#include <utility>
 #include <vector>
+#include <map>
+#include <algorithm>
 #include "../../shared/IStringable.h"
+#include "../../shared/util/Console.h"
 
 namespace swarmc::ISA {
     class Reference;
@@ -24,6 +28,7 @@ namespace swarmc::Runtime {
     class IStorageInterface;
     class IQueue;
 
+    using SchedulingFilters = std::map<std::string, std::string>;
     using JobID = size_t;
     using QueueContextID = std::string;
     using Stores = std::vector<IStorageInterface*>;
@@ -58,6 +63,35 @@ namespace swarmc::Runtime {
 
         /** This should use a source of randomness to generate a random double on [0,1]. */
         virtual double random() = 0;
+
+        virtual SchedulingFilters getSchedulingFilters() const { return _filters; }
+
+        virtual void applySchedulingFilter(const std::string& key, std::string value) {
+            Console::get()->debug("Apply scheduling filter: " + key + " -> " + value);
+            _filters[key] = std::move(value);
+        }
+
+        virtual void applySchedulingFilters(SchedulingFilters filters) {
+            Console::get()->debug("Apply bulk scheduling filters.");
+            _filters = std::move(filters);
+        }
+
+        virtual void clearSchedulingFilters() {
+            Console::get()->debug("Clear scheduling filters.");
+            _filters.clear();
+        }
+
+        virtual SchedulingFilters getContextFilters() const { return _context; }
+
+        virtual void applyContextFilter(const std::string& key, std::string value) {
+            _context[key] = std::move(value);
+        }
+
+        virtual void clearContextFilters() { _context.clear(); }
+
+    protected:
+        SchedulingFilters _filters;
+        SchedulingFilters _context;
     };
 
     /** Represents a lock acquired by some control. */
@@ -130,6 +164,19 @@ namespace swarmc::Runtime {
         virtual const ScopeFrame* getScope() const = 0;
 
         virtual const State* getState() const = 0;
+
+        virtual void setFilters(SchedulingFilters) = 0;
+
+        virtual SchedulingFilters getFilters() const = 0;
+
+        virtual bool matchesFilters(const SchedulingFilters& current) const {
+            auto filters = getFilters();
+
+            return std::all_of(filters.begin(), filters.end(), [current](const std::pair<std::string, std::string>& filter) {
+                auto result = current.find(filter.first);
+                return result != current.end() && (*result).second == filter.second;
+            });
+        }
     };
 
 
@@ -192,6 +239,20 @@ namespace swarmc::Runtime {
     class IStreamDriver : public IStringable {
     public:
         virtual IStream* open(const std::string&, const Type::Type*) = 0;
+    };
+
+
+    class IResource : public IStringable {
+    public:
+        virtual bool isOpen() = 0;
+
+        virtual void open() = 0;
+
+        virtual void close() = 0;
+
+        virtual const Type::Type* innerType() = 0;
+
+        virtual ISA::Reference* innerValue() = 0;
     };
 
 }

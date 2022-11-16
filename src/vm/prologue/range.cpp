@@ -9,13 +9,16 @@ namespace swarmc::Runtime::Prologue {
         auto endNum = (ISA::NumberReference*) _vector.at(1).second;
         auto stepSize = (ISA::NumberReference*) _vector.at(2).second;
 
+        auto step = static_cast<size_t>(stepSize->value());
+        auto start = static_cast<size_t>(startNum->value());
+        auto end = static_cast<size_t>(endNum->value());
         auto len = static_cast<size_t>(floor(endNum->value() - startNum->value() / stepSize->value()));
 
         auto enumeration = new ISA::EnumerationReference(Type::Primitive::of(Type::Intrinsic::NUMBER));
         enumeration->reserve(len);
 
-        for ( auto i = startNum->value(); i <= endNum->value(); i += stepSize->value() ) {
-            enumeration->append(new ISA::NumberReference(i));
+        for ( auto i = start; i <= end; i += step ) {
+            enumeration->append(new ISA::NumberReference(static_cast<double>(i)));
         }
 
         setReturn(enumeration);

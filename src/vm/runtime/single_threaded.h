@@ -138,10 +138,15 @@ namespace swarmc::Runtime::SingleThreaded {
 
         std::string toString() const override;
 
+        void setFilters(SchedulingFilters filters) override { _filters = std::move(filters); }
+
+        SchedulingFilters getFilters() const override { return _filters; }
+
     protected:
         JobID _id;
         JobState _jobState;
         IFunctionCall* _call;
+        SchedulingFilters _filters;
         const ScopeFrame* _scope;
         const State* _vmState;
     };

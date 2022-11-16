@@ -51,32 +51,39 @@ namespace swarmc::Runtime {
         return (StringReference*) ref;
     }
 
-    FunctionReference* ExecuteWalk::ensureFunction(const ISA::Reference* ref) {
+    FunctionReference* ExecuteWalk::ensureFunction(const Reference* ref) {
         verbose("ensureFunction: " + ref->toString());
         // FIXME: eventually, this should generate a runtime exception
         assert(ref->tag() == ReferenceTag::FUNCTION);
         return (FunctionReference*) ref;
     }
 
-    EnumerationReference* ExecuteWalk::ensureEnumeration(const ISA::Reference* ref) {
+    EnumerationReference* ExecuteWalk::ensureEnumeration(const Reference* ref) {
         verbose("ensureEnumeration: " + ref->toString());
         // FIXME: eventually, this should generate a runtime exception
         assert(ref->tag() == ReferenceTag::ENUMERATION);
         return (EnumerationReference*) ref;
     }
 
-    StreamReference* ExecuteWalk::ensureStream(const ISA::Reference* ref) {
+    StreamReference* ExecuteWalk::ensureStream(const Reference* ref) {
         verbose("ensureStream: " + ref->toString());
         // FIXME: eventually, this should generate a runtime exception
         assert(ref->tag() == ReferenceTag::STREAM);
         return (StreamReference*) ref;
     }
 
-    MapReference* ExecuteWalk::ensureMap(const ISA::Reference* ref) {
+    MapReference* ExecuteWalk::ensureMap(const Reference* ref) {
         verbose("ensureMap: " + ref->toString());
         // FIXME: eventually, this should generate a runtime exception
         assert(ref->tag() == ReferenceTag::MAP);
         return (MapReference*) ref;
+    }
+
+    ResourceReference* ExecuteWalk::ensureResource(const Reference* ref) {
+        verbose("ensureResource: " + ref->toString());
+        // FIXME: eventually, this should generate a runtime exception
+        assert(ref->tag() == ReferenceTag::RESOURCE);
+        return (ResourceReference*) ref;
     }
 
     Reference* ExecuteWalk::walkPlus(Plus* i) {
@@ -223,7 +230,30 @@ namespace swarmc::Runtime {
         return nullptr;
     }
 
-    // TODO: walkWith
+    Reference* ExecuteWalk::walkWith(With* i) {
+        verbose("with " + i->first()->toString() + " " + i->second()->toString());
+        auto resource = ensureResource(_vm->resolve(i->first()));
+
+        auto callbackType = new Type::Lambda1(resource->type()->yields(), Type::Primitive::of(Type::Intrinsic::VOID));
+
+        auto callback = ensureFunction(_vm->resolve(i->second()));
+
+        // fixme: eventually, this should raise a runtime exception
+        assert(callback->type()->isAssignableTo(callbackType));
+
+        // open the resource
+        resource->resource()->open();
+
+        // perform the call
+        auto call = callback->fn()->curry(resource->resource()->innerValue())->call();
+        _vm->pushCall(call);
+        _vm->drain();
+
+        // close the resource
+        resource->resource()->close();
+
+        return nullptr;
+    }
 
     Reference* ExecuteWalk::walkEnumInit(EnumInit* i) {
         verbose("enuminit " + i->first()->toString());

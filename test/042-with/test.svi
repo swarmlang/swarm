@@ -1,0 +1,10 @@
+$l:tag <- call f:TAG "fast"
+
+beginfn f:CB p:VOID
+	fnparam p:VOID $l:v
+
+	scopeof $l:b
+	$l:b <- $l:tag
+return
+
+with $l:tag f:CB

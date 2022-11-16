@@ -115,8 +115,10 @@ namespace swarmc::ISA {
         BOOLEAN,
         FUNCTION,
         STREAM,
+        RESOURCE,
         ENUMERATION,
         MAP,
+        VOID,
     };
 
 
@@ -197,6 +199,7 @@ namespace swarmc::ISA {
         const Type::Type* _type = nullptr;
     };
 
+
     class StreamReference : public Reference {
     public:
         explicit StreamReference(Runtime::IStream* stream) : Reference(ReferenceTag::STREAM), _stream(stream) {}
@@ -216,6 +219,27 @@ namespace swarmc::ISA {
     protected:
         Runtime::IStream* _stream;
     };
+
+
+    class ResourceReference : public Reference {
+    public:
+        explicit ResourceReference(Runtime::IResource* resource) : Reference(ReferenceTag::RESOURCE), _resource(resource) {}
+
+        std::string toString() const override {
+            return "ResourceReference<" + _resource->toString() + ">";
+        }
+
+        const Type::Resource* type() const override {
+            return Type::Resource::of(_resource->innerType());
+        }
+
+        Runtime::IResource* resource() {
+            return _resource;
+        }
+    protected:
+        Runtime::IResource* _resource;
+    };
+
 
     /** A function literal. */
     class FunctionReference : public Reference {
@@ -274,6 +298,19 @@ namespace swarmc::ISA {
 
     protected:
         const Type::Type* _type;
+    };
+
+    class VoidReference : public Reference {
+    public:
+        VoidReference() : Reference(ReferenceTag::VOID) {}
+
+        std::string toString() const override {
+            return "VoidReference<>";
+        }
+
+        const Type::Type* type() const {
+            return Type::Primitive::of(Type::Intrinsic::VOID);
+        }
     };
 
     /** Helper class for literal values. */

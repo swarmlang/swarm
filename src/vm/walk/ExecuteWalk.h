@@ -40,6 +40,8 @@ namespace swarmc::Runtime {
         /** Cast the reference as a map, or raise an exception. */
         virtual ISA::MapReference* ensureMap(const ISA::Reference*);
 
+        virtual ISA::ResourceReference* ensureResource(const ISA::Reference*);
+
     protected:
         VirtualMachine* _vm;
 
@@ -76,7 +78,7 @@ namespace swarmc::Runtime {
         ISA::Reference* walkNor(ISA::Nor*) override;
         ISA::Reference* walkNot(ISA::Not*) override;
         ISA::Reference* walkWhile(ISA::While*) override;
-        ISA::Reference* walkWith(ISA::With*) override { return nullptr;  /* FIXME */ }
+        ISA::Reference* walkWith(ISA::With*) override;
         ISA::Reference* walkEnumInit(ISA::EnumInit*) override;
         ISA::Reference* walkEnumAppend(ISA::EnumAppend*) override;
         ISA::Reference* walkEnumPrepend(ISA::EnumPrepend*) override;

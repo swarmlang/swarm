@@ -1,6 +1,8 @@
 #ifndef SWARMVM_RANGE
 #define SWARMVM_RANGE
 
+#include <utility>
+
 #include "prologue_provider.h"
 #include "../isa_meta.h"
 
@@ -9,7 +11,7 @@ namespace swarmc::Runtime::Prologue {
     class RangeFunctionCall : public PrologueFunctionCall {
     public:
         RangeFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, vector, returnType) {}
+            PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
         void execute() override;
 
@@ -20,7 +22,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RangeFunction : public PrologueFunction {
     public:
-        RangeFunction(IProvider* provider) : PrologueFunction(provider) {}
+        explicit RangeFunction(IProvider* provider) : PrologueFunction(provider) {}
 
         FormalTypes paramTypes() const override;
 
