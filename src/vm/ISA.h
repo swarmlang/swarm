@@ -250,6 +250,10 @@ namespace swarmc::ISA {
         Runtime::IResource* resource() {
             return _resource;
         }
+
+        ResourceReference* copy() const override {
+            return new ResourceReference(_resource);
+        }
     protected:
         Runtime::IResource* _resource;
     };
@@ -333,6 +337,10 @@ namespace swarmc::ISA {
 
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::VOID);
+        }
+
+        VoidReference* copy() const override {
+            return new VoidReference;
         }
     };
 
