@@ -115,7 +115,7 @@ namespace swarmc::Runtime {
         ISA::Reference* walkAssignEval(ISA::AssignEval*) override;
         ISA::Reference* walkLock(ISA::Lock*) override;
         ISA::Reference* walkUnlock(ISA::Unlock*) override;
-        ISA::Reference* walkIsEqual(ISA::IsEqual*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkIsEqual(ISA::IsEqual*) override;
         ISA::Reference* walkScopeOf(ISA::ScopeOf*) override;
         ISA::Reference* walkStreamInit(ISA::StreamInit*) override;
         ISA::Reference* walkStreamPush(ISA::StreamPush*) override;

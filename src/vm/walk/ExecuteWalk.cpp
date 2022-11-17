@@ -649,6 +649,13 @@ namespace swarmc::Runtime {
         return nullptr;
     }
 
+    Reference* ExecuteWalk::walkIsEqual(IsEqual* i) {
+        verbose("equal " + i->first()->toString() + " " + i->second()->toString());
+        auto lhs = _vm->resolve(i->first());
+        auto rhs = _vm->resolve(i->second());
+        return new BooleanReference(lhs->isEqualTo(rhs));
+    }
+
     Reference* ExecuteWalk::walkScopeOf(ScopeOf* i) {
         verbose("scopeof " + i->first()->toString());
         _vm->shadow(i->first());

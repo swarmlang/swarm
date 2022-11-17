@@ -1,0 +1,48 @@
+$l:a <- equal 4 2
+$l:a <- equal 4 4
+$l:a <- equal "foo" "bar"
+$l:a <- equal "foo" "foo"
+$l:a <- equal true false
+$l:a <- equal true true
+
+
+$l:enum1 <- enuminit p:STRING
+enumappend $l:enum1 "Hello"
+
+$l:enum2 <- enuminit p:STRING
+enumappend $l:enum2 "Hello"
+enumappend $l:enum2 "World"
+
+$l:enum3 <- enuminit p:NUMBER
+enumappend $l:enum3 4
+
+$l:a <- equal $l:enum1 $l:enum2
+$l:a <- equal $l:enum1 $l:enum3
+
+enumappend $l:enum1 "World"
+
+$l:a <- equal $l:enum1 $l:enum2
+
+
+$l:map1 <- mapinit p:STRING
+$l:map2 <- mapinit p:STRING
+
+mapset $l:map1 "key1" "value1"
+mapset $l:map2 "key1" "value1"
+
+$l:a <- equal $l:map1 $l:map2
+
+mapset $l:map2 "key2" "value2"
+
+$l:a <- equal $l:map1 $l:map2
+
+-- $l:a <- equal l:STDOUT s:STDOUT
+-- $l:a <- equal l:STDOUT l:STDOUT
+
+$l:rsc1_call <- curry f:TAG "key"
+$l:rsc1 <- call $l:rsc1_call "value1"
+
+$l:rsc2_call <- curry f:TAG "key"
+$l:rsc2 <- call $l:rsc1_call "value1"
+
+$l:a <- equal $l:rsc1 $l:rsc2

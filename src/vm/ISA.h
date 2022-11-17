@@ -134,6 +134,8 @@ namespace swarmc::ISA {
         /** Get copy of object */
         virtual Reference* copy() const = 0;
 
+        virtual bool isEqualTo(const Reference* other) const = 0;
+
         ReferenceTag tag() const {
             return _tag;
         }
@@ -154,6 +156,15 @@ namespace swarmc::ISA {
             if ( a == Affinity::SHARED ) return "s";
             if ( a == Affinity::PRIMITIVE ) return "p";
             return "UNKNOWN";
+        }
+
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() == ReferenceTag::LOCATION ) {
+                auto loc = (LocationReference*) other;
+                if ( loc->affinity() == affinity() && loc->name() == name() ) return true;
+            }
+
+            throw Errors::SwarmError("Cannot directly compare the equality of two different locations.");
         }
 
         /** Get the storage affinity of this location. */
@@ -225,6 +236,12 @@ namespace swarmc::ISA {
             return _stream;
         }
 
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != ReferenceTag::STRING ) return false;
+            auto stream = (StreamReference*) other;
+            return stream->stream()->id() == _stream->id();
+        }
+
         virtual StreamReference* copy() const override {
             // FIXME: might need a copy of _stream
             return new StreamReference(_stream);
@@ -249,6 +266,10 @@ namespace swarmc::ISA {
 
         Runtime::IResource* resource() {
             return _resource;
+        }
+
+        bool isEqualTo(const Reference*) const override {
+            return false;
         }
 
         ResourceReference* copy() const override {
@@ -291,6 +312,10 @@ namespace swarmc::ISA {
             return _fn;
         }
 
+        bool isEqualTo(const Reference* other) const override {
+            return false;  // FIXME: can this be implemented by pushing equality into the IFunction implementation?
+        }
+
         virtual FunctionReference* copy() const override {
             // FIXME: might need acopy of _fn
             return new FunctionReference(_fn);
@@ -319,6 +344,12 @@ namespace swarmc::ISA {
             return _type;
         }
 
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != ReferenceTag::TYPE ) return false;
+            auto ref = (TypeReference*) other;
+            return ref->type()->isAssignableTo(type()) && type()->isAssignableTo(ref->type());
+        }
+
         virtual TypeReference* copy() const override {
             return new TypeReference(_type->copy());
         }
@@ -337,6 +368,10 @@ namespace swarmc::ISA {
 
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::VOID);
+        }
+
+        bool isEqualTo(const Reference* other) const override {
+            return other->tag() == ReferenceTag::VOID;
         }
 
         VoidReference* copy() const override {
@@ -371,6 +406,12 @@ namespace swarmc::ISA {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != tag() ) return false;
+            auto ref = (StringReference*) other;
+            return ref->value() == value();
+        }
+
         virtual StringReference* copy() const override {
             return new StringReference(_value);
         }
@@ -387,6 +428,12 @@ namespace swarmc::ISA {
 
         std::string toString() const override {
             return "NumberReference<" + std::to_string(_value) + ">";
+        }
+
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != tag() ) return false;
+            auto ref = (NumberReference*) other;
+            return ref->value() == value();
         }
 
         virtual NumberReference* copy() const override {
@@ -406,6 +453,12 @@ namespace swarmc::ISA {
 
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+        }
+
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != tag() ) return false;
+            auto ref = (BooleanReference*) other;
+            return ref->value() == value();
         }
 
         virtual BooleanReference* copy() const override {
@@ -464,6 +517,18 @@ namespace swarmc::ISA {
             return _items.size();
         }
 
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != tag() ) return false;
+            auto ref = (EnumerationReference*) other;
+            if ( ref->length() != length() ) return false;
+            for ( size_t i = 0; i < length(); i += 1 ) {
+                if ( !get(i)->isEqualTo(ref->get(i)) ) {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         virtual EnumerationReference* copy() const override {
             auto e = new EnumerationReference(_innerType->copy());
             for ( auto item : _items ) {
@@ -520,6 +585,15 @@ namespace swarmc::ISA {
                 er->append(new StringReference(item.first));
             }
             return er;
+        }
+
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != tag() ) return false;
+            auto ref = (MapReference*) other;
+            if ( ref->length() != length() ) return false;
+            return std::all_of(_items.begin(), _items.end(), [ref](const std::pair<std::string, Reference*>& item) {
+                return item.second->isEqualTo(ref->get(item.first));
+            });
         }
 
         virtual MapReference* copy() const override {
