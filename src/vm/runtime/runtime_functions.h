@@ -4,6 +4,7 @@
 #include <utility>
 #include <vector>
 #include "../../shared/IStringable.h"
+#include "../../shared/util/Console.h"
 #include "../../errors/SwarmError.h"
 
 namespace swarmc::Type {
@@ -128,15 +129,6 @@ namespace swarmc::Runtime {
 
         /** Get the mechanism the VM should use to execute calls to this function. */
         virtual FunctionBackend backend() const = 0;
-
-        virtual bool isCallable() const { return paramTypes().empty(); }
-
-        virtual void ensureCallable() const {
-            if ( !isCallable() ) {
-                // fixme: eventually this should generate a runtime exception
-                throw Errors::SwarmError("Unable to call partially applied function.");
-            }
-        }
     };
 
 
@@ -169,7 +161,6 @@ namespace swarmc::Runtime {
         }
 
         IFunctionCall* call(CallVector vector) const override {
-            ensureCallable();
             return _upstream->call(vector);
         }
 
@@ -211,7 +202,6 @@ namespace swarmc::Runtime {
         }
 
         IFunctionCall* call(CallVector vector) const override {
-            ensureCallable();
             return new InlineFunctionCall(_name, vector, _returnType);
         }
 

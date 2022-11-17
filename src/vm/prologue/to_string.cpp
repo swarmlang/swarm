@@ -20,7 +20,6 @@ namespace swarmc::Runtime::Prologue {
     }
 
     PrologueFunctionCall* NumberToStringFunction::call(CallVector vector) const {
-        ensureCallable();
         auto returnType = Type::Primitive::of(Type::Intrinsic::STRING);
         return new NumberToStringFunctionCall(_provider, vector, returnType);
     }
@@ -40,7 +39,6 @@ namespace swarmc::Runtime::Prologue {
     }
 
     PrologueFunctionCall* BooleanToStringFunction::call(CallVector vector) const {
-        ensureCallable();
         auto returnType = Type::Primitive::of(Type::Intrinsic::STRING);
         return new BooleanToStringFunctionCall(_provider, vector, returnType);
     }
