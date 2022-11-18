@@ -1,4 +1,4 @@
-ProgramNode<#body: 25>
+ProgramNode<#body: 27>
   VariableDeclarationNode<name: tag>
     Type<Primitive<STRING> :: Primitive<STRING> :: RESOURCE<Primitive<VOID>>>
     FunctionNode<type: Type<Primitive<STRING> :: Primitive<STRING> :: RESOURCE<Primitive<VOID>>>>
@@ -149,5 +149,14 @@ ProgramNode<#body: 25>
   ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: t8>>>
     AssignExpressionNode<lval: IdentifierNode<name: t8>>
       IIFExpressionNode<func: FunctionNode<type: Type<:: Primitive<NUMBER> :: Primitive<TYPE> :: Primitive<TYPE>>>, #args: 0>
+  VariableDeclarationNode<name: t11>
+    Type<Primitive<TYPE> :: Primitive<TYPE>>
+    CallExpressionNode<id: t8, #args: 1>
+      NumberLiteralExpressionNode<#value: 69.000000>
+  VariableDeclarationNode<name: t12>
+    Type<Primitive<TYPE>>
+    CallExpressionNode<id: t8, #args: 2>
+      NumberLiteralExpressionNode<#value: 420.000000>
+      Type<Primitive<TYPE>>
 [32m[SUCCESS] [0mParsed input program.
 [0m

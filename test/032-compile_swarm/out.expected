@@ -326,5 +326,15 @@ RETURN1<Location<l:retVal>>
 ASSIGNVALUE<Location<l:tmp131>, Location<f:FUNC_127>>
 ASSIGNEVAL<Location<l:tmp132>, CALL0<Location<l:tmp131>>>
 ASSIGNVALUE<Location<l:var_t8>, Location<l:tmp132>>
+ASSIGNVALUE<Location<l:var_t8>, Location<l:var_t8>>
+ASSIGNVALUE<Location<l:tmp133>, NumberReference<69.000000>>
+ASSIGNEVAL<Location<l:tmp134>, CURRY<Location<l:var_t8>, Location<l:tmp133>>>
+ASSIGNVALUE<Location<l:var_t11>, Location<l:tmp134>>
+ASSIGNVALUE<Location<l:var_t8>, Location<l:var_t8>>
+ASSIGNVALUE<Location<l:tmp135>, NumberReference<420.000000>>
+ASSIGNEVAL<Location<l:tmp136>, CURRY<Location<l:var_t8>, Location<l:tmp135>>>
+ASSIGNVALUE<Location<l:tmp137>, TypeReference<Primitive<TYPE>>>
+ASSIGNEVAL<Location<l:tmp138>, CALL1<Location<l:tmp136>, Location<l:tmp137>>>
+ASSIGNVALUE<Location<l:var_t12>, Location<l:tmp138>>
 [32m[SUCCESS] [0mCompiled to ISA.
 [0m

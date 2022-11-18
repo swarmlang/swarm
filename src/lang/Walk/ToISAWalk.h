@@ -149,18 +149,24 @@ protected:
             auto fnType = node->expression()->type();
             for ( auto arg : *node->args() ) {
                 auto evalarg = walk(arg);
-                auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
                 instrs->insert(instrs->end(), evalarg->begin(), evalarg->end());
-                delete evalarg;
                 assert(fnType->isCallable());
                 if (((Type::Lambda*)fnType)->returns()->intrinsic() == Type::Intrinsic::VOID) {
+                    auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
                     instrs->push_back(call);
+                } else if (((Type::Lambda*)fnType)->returns()->isCallable()) {
+                    auto call = new ISA::Curry(floc, getLocFromAssign(evalarg->back()));
+                    auto loc2 = makeLocation(ISA::Affinity::LOCAL);
+                    instrs->push_back(new ISA::AssignEval(loc2, call));
+                    floc = loc2;
                 } else {
+                    auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
                     auto loc2 = makeLocation(ISA::Affinity::LOCAL);
                     instrs->push_back(new ISA::AssignEval(loc2, call));
                     floc = loc2;
                 }
                 fnType = ((Type::Lambda*)fnType)->returns();
+                delete evalarg;
             }
         }
 
