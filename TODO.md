@@ -77,3 +77,6 @@
   - Parallel matrix operations
   - Parallel sorting
   - Machine learning
+- Limit jobs w/ serialized resources to the nodes that owns the resource
+  - FUTURE: backplane that tunnels resource requests to the appropriate nodes
+- SVI: optimizations for deferred/parallel pure function calls in the VM
