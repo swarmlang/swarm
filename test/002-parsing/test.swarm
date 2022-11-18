@@ -80,3 +80,5 @@ shared fn t9 = (): type => number;
 type t10 = t8(6, type);
 t10 = t9();
 t8 = ((): number->type->type => (a: number, b: type): type => string)();
+type->type t11 = t8(69);
+type t12 = t8(420, type);

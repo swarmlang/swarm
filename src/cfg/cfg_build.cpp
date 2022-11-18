@@ -1,167 +1,133 @@
 #include <stack>
 #include <assert.h>
 #include "cfg.h"
-#include <iostream>
+#include "../shared/util/Console.h"
 
 namespace swarmc {
 namespace CFG {
 
 void CFGBuild::buildBlocks() {
-    std::unordered_map<std::string, Block*> nameMap;
     std::stack<Block*> bstack;
-    std::stack<Block*> callStack;
-    _blocks->push_back(new Block("Top", false));
+    std::stack<CFGFunction*> callStack;
+    _blocks->push_back(new Block("Top", Block::BlockType::BLOCK, 0));
     bstack.push(_blocks->back());
     if ( _instrs->size() == 0 ) return;
     for ( size_t i = 0; i < _instrs->size(); i++ ) {
         bstack.top()->addInstruction(_instrs->at(i));
         if ( _instrs->at(i)->tag() == ISA::Tag::BEGINFN ) {
             std::string name = ((ISA::BeginFunction*)_instrs->at(i))->first()->fqName();
-            _blocks->push_back(new Block(name, true));
-            bstack.push(_blocks->back());
-            nameMap.insert({ name, bstack.top() });
-            callStack.push(_blocks->back());
+            auto fstart = new Block(name, Block::BlockType::FUNCTION, i);
+            auto cfgf = new CFGFunction(name, fstart);
+            console->debug("Created function " + name);
+            _blocks->push_back(fstart);
+            bstack.push(fstart);
+            _nameMap->insert({ name, cfgf });
+            callStack.push(cfgf);
         } else if ( _instrs->at(i)->tag() == ISA::Tag::RETURN0 
                 || _instrs->at(i)->tag() == ISA::Tag::RETURN1 ) 
         {
-            callStack.top()->setReturnsFrom(bstack.top());
-            while ( !bstack.top()->isFunction() ) bstack.pop();
+            callStack.top()->setEnd(bstack.top());
+            while ( bstack.top()->blockType() != Block::BlockType::FUNCTION ) bstack.pop();
             bstack.pop();
             callStack.pop();
-        } else if ( _instrs->at(i)->tag() == ISA::Tag::CALL0
-            || _instrs->at(i)->tag() == ISA::Tag::CALL1
-            || _instrs->at(i)->tag() == ISA::Tag::CALLIF0
-            || _instrs->at(i)->tag() == ISA::Tag::CALLIF1
-            || _instrs->at(i)->tag() == ISA::Tag::CALLELSE0
-            || _instrs->at(i)->tag() == ISA::Tag::CALLELSE1
-            || _instrs->at(i)->tag() == ISA::Tag::WITH
-            || _instrs->at(i)->tag() == ISA::Tag::ENUMERATE
-            || _instrs->at(i)->tag() == ISA::Tag::WHILE ) 
-        {
-            std::string name = "";
-            bool cond = true;
-            switch ( _instrs->at(i)->tag() ) {
-            case ISA::Tag::CALL0:
-                assert(((ISA::Call0*)_instrs->at(i))->first()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::Call0*)_instrs->at(i))->first())->fqName();
-                cond = false;
-                break; 
-            case ISA::Tag::CALL1:
-                assert(((ISA::Call1*)_instrs->at(i))->first()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::Call1*)_instrs->at(i))->first())->fqName();
-                cond = false;
-                break; 
-            case ISA::Tag::CALLIF0:
-                assert(((ISA::CallIf0*)_instrs->at(i))->second()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::CallIf0*)_instrs->at(i))->second())->fqName();
-                break; 
-            case ISA::Tag::CALLIF1:
-                assert(((ISA::CallIf1*)_instrs->at(i))->second()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::CallIf1*)_instrs->at(i))->second())->fqName();
-                break; 
-            case ISA::Tag::CALLELSE0:
-                assert(((ISA::CallElse0*)_instrs->at(i))->second()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::CallElse0*)_instrs->at(i))->second())->fqName();
-                break; 
-            case ISA::Tag::CALLELSE1:
-                assert(((ISA::CallElse1*)_instrs->at(i))->second()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::CallElse1*)_instrs->at(i))->second())->fqName();
-                break;  
-            case ISA::Tag::WITH:
-                name = ((ISA::With*)_instrs->at(i))->second()->fqName();
-                cond = false;
-                break;
-            case ISA::Tag::WHILE:
-                name = ((ISA::While*)_instrs->at(i))->second()->fqName();
-                cond = false;
-                break;
-            case ISA::Tag::ENUMERATE:
-                name = ((ISA::Enumerate*)_instrs->at(i))->third()->fqName();
-                cond = false;
-                break;
-            default:
-                break; 
-            }
-            
-            Block* p = bstack.top();
-            // postcall block
-            _blocks->push_back(new Block("POSTCALL:" + name + ":" + std::to_string(i), false));
-            bstack.push(_blocks->back());
+        } else {
+            auto instr = _instrs->at(i)->tag() == ISA::Tag::ASSIGNEVAL 
+                ? ((ISA::AssignEval*)_instrs->at(i))->second()
+                : _instrs->at(i);
 
-            // create call edge
-            if ( nameMap.count(name) == 0 ) {
-                _blocks->push_back(new Block("AmbiguousFunction:" + name + ":" + std::to_string(i), true));
-                _edges->push_back(new Edge(p, _blocks->back(), "call"));
-                _edges->push_back(new Edge(_blocks->back(), bstack.top(), "return"));
-            } else {
-                _edges->push_back(new Edge(p, nameMap.at(name), "call"));
-                _edges->push_back(new Edge(nameMap.at(name)->returnFrom(), bstack.top(), "return"));
-            }
+            if ( instr->tag() == ISA::Tag::CALL0
+                || instr->tag() == ISA::Tag::CALL1
+                || instr->tag() == ISA::Tag::CALLIF0
+                || instr->tag() == ISA::Tag::CALLIF1
+                || instr->tag() == ISA::Tag::CALLELSE0
+                || instr->tag() == ISA::Tag::CALLELSE1
+                || instr->tag() == ISA::Tag::WITH
+                || instr->tag() == ISA::Tag::ENUMERATE
+                || instr->tag() == ISA::Tag::WHILE ) 
+            {
+                std::string name = "";
+                bool cond = true;
+                switch ( instr->tag() ) {
+                case ISA::Tag::CALL0:
+                    assert(((ISA::Call0*)instr)->first()->tag() == ISA::ReferenceTag::LOCATION);
+                    name = ((ISA::LocationReference*)((ISA::Call0*)instr)->first())->fqName();
+                    cond = false;
+                    break; 
+                case ISA::Tag::CALL1:
+                    assert(((ISA::Call1*)instr)->first()->tag() == ISA::ReferenceTag::LOCATION);
+                    name = ((ISA::LocationReference*)((ISA::Call1*)instr)->first())->fqName();
+                    cond = false;
+                    break; 
+                case ISA::Tag::CALLIF0:
+                    assert(((ISA::CallIf0*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION);
+                    name = ((ISA::LocationReference*)((ISA::CallIf0*)instr)->second())->fqName();
+                    break; 
+                case ISA::Tag::CALLIF1:
+                    assert(((ISA::CallIf1*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION);
+                    name = ((ISA::LocationReference*)((ISA::CallIf1*)instr)->second())->fqName();
+                    break; 
+                case ISA::Tag::CALLELSE0:
+                    assert(((ISA::CallElse0*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION);
+                    name = ((ISA::LocationReference*)((ISA::CallElse0*)instr)->second())->fqName();
+                    break; 
+                case ISA::Tag::CALLELSE1:
+                    assert(((ISA::CallElse1*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION);
+                    name = ((ISA::LocationReference*)((ISA::CallElse1*)instr)->second())->fqName();
+                    break;  
+                case ISA::Tag::WITH:
+                    name = ((ISA::With*)instr)->second()->fqName();
+                    cond = false;
+                    break;
+                case ISA::Tag::WHILE:
+                    name = ((ISA::While*)instr)->second()->fqName();
+                    cond = false;
+                    break;
+                case ISA::Tag::ENUMERATE:
+                    name = ((ISA::Enumerate*)instr)->third()->fqName();
+                    cond = false;
+                    break;
+                default:
+                    break; 
+                }
+                
+                assert(!bstack.empty());
+                Block* previous = bstack.top();
+                // postcall block
+                Block* postcall = new Block("POSTCALL:" + name, Block::BlockType::BLOCK, i);
+                _blocks->push_back(postcall);
+                bstack.push(postcall);
+                if (!callStack.empty()) callStack.top()->addBlock(postcall);
 
-            // create fallthrough edge
-            if ( cond ) {
-                _edges->push_back(new Edge(p, bstack.top(), "fall"));
-            }
-        } else if (_instrs->at(i)->tag() == ISA::Tag::ASSIGNEVAL
-                && (((ISA::AssignEval*)_instrs->at(i))->second()->tag() == ISA::Tag::CALL0
-                || ((ISA::AssignEval*)_instrs->at(i))->second()->tag() == ISA::Tag::CALL1
-                || ((ISA::AssignEval*)_instrs->at(i))->second()->tag() == ISA::Tag::CALLIF0
-                || ((ISA::AssignEval*)_instrs->at(i))->second()->tag() == ISA::Tag::CALLIF1
-                || ((ISA::AssignEval*)_instrs->at(i))->second()->tag() == ISA::Tag::CALLELSE0
-                || ((ISA::AssignEval*)_instrs->at(i))->second()->tag() == ISA::Tag::CALLELSE1)) 
-        {
-            auto call = ((ISA::AssignEval*)_instrs->at(i))->second();
-            std::string name = "";
-            bool cond = true;
-            switch ( call->tag() ) {
-            case ISA::Tag::CALL0:
-                assert(((ISA::Call0*)call)->first()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::Call0*)call)->first())->fqName();
-                cond = false;
-                break; 
-            case ISA::Tag::CALL1:
-                assert(((ISA::Call1*)call)->first()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::Call1*)call)->first())->fqName();
-                cond = false;
-                break; 
-            case ISA::Tag::CALLIF0:
-                assert(((ISA::CallIf0*)call)->second()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::CallIf0*)call)->second())->fqName();
-                break; 
-            case ISA::Tag::CALLIF1:
-                assert(((ISA::CallIf1*)call)->second()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::CallIf1*)call)->second())->fqName();
-                break; 
-            case ISA::Tag::CALLELSE0:
-                assert(((ISA::CallElse0*)call)->second()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::CallElse0*)call)->second())->fqName();
-                break; 
-            case ISA::Tag::CALLELSE1:
-                assert(((ISA::CallElse1*)call)->second()->tag() == ISA::ReferenceTag::LOCATION);
-                name = ((ISA::LocationReference*)((ISA::CallElse1*)call)->second())->fqName();
-                break;
-            default:
-                break; 
-            }
-            
-            Block* p = bstack.top();
-            // postcall block
-            _blocks->push_back(new Block("POSTCALL:" + name + ":" + std::to_string(i), false));
-            bstack.push(_blocks->back());
+                // create call edge
+                if ( _nameMap->count(name) == 0 ) {
+                    Block* am = new AmbiguousFunctionBlock(name, i);
+                    console->debug("Created ambiguous function " + am->id());
+                    _blocks->push_back(am);
+                    auto cedge = new CallEdge(previous, am);
+                    previous->setCallOutEdge(cedge);
+                    am->setCallInEdge(cedge);
+                    auto redge = new ReturnEdge(am, postcall);
+                    am->setRetOutEdge(redge);
+                    postcall->setRetInEdge(redge);
 
-            // create call edge
-            if ( nameMap.count(name) == 0 ) {
-                _blocks->push_back(new Block("AmbiguousFunction:" + name + ":" + std::to_string(i), true));
-                _edges->push_back(new Edge(p, _blocks->back(), "call"));
-                _edges->push_back(new Edge(_blocks->back(), bstack.top(), "return"));
-            } else {
-                _edges->push_back(new Edge(p, nameMap.at(name), "call"));
-                _edges->push_back(new Edge(nameMap.at(name)->returnFrom(), bstack.top(), "return"));
-            }
+                    if (!callStack.empty()) callStack.top()->addBlock(am);
+                } else {
+                    auto funcCopy = _nameMap->at(name)->makeCopy(i, _blocks, &callStack);
+                    console->debug("Copied function " + _nameMap->at(name)->id() + " -> " + funcCopy.first->id());
+                    auto cedge = new CallEdge(previous, funcCopy.first);
+                    previous->setCallOutEdge(cedge);
+                    funcCopy.first->setCallInEdge(cedge);
+                    auto redge = new ReturnEdge(funcCopy.second, postcall);
+                    funcCopy.second->setRetOutEdge(redge);
+                    postcall->setRetInEdge(redge);
+                }
 
-            // create fallthrough edge
-            if ( cond ) {
-                _edges->push_back(new Edge(p, bstack.top(), "fall"));
+                // create fallthrough edge
+                if ( cond ) {
+                    auto edge = new FallEdge(previous, bstack.top());
+                    previous->setFallOutEdge(edge);
+                    bstack.top()->setFallInEdge(edge);
+                }
             }
         }
     }
@@ -274,22 +240,6 @@ void CFGBuild::buildBlocks() {
 //             }
 //         }
 //     }
-// }
-
-// std::vector<Block*>* CFGBuild::buildBlocks() {
-//     auto blocks = new std::vector<Block*>();
-//     for ( auto i : *_instrs ) {
-//         if ( _nameMap->count(i) != 0 ) {
-//             blocks->push_back(new Block(_nameMap->at(i)));
-//             auto temp = i;
-//             while ( temp != nullptr ) {
-//                 blocks->back()->addInstruction(temp);
-//                 temp = _nextInstr->at(temp);
-//             }
-//         }
-//     }
-
-//     return blocks;
 // }
 
 }
