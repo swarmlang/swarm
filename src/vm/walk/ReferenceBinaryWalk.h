@@ -20,59 +20,59 @@ namespace swarmc::ISA {
     protected:
         binn* walkLocationReference(LocationReference* ref) override {
             auto obj = binn_object();
-            binn_object_set_int64(obj, "tag", (size_t) ref->tag());
-            binn_object_set_int64(obj, "affinity", (size_t) ref->affinity());
-            binn_object_set_str(obj, "name", strdup(ref->name().c_str()));
+            binn_object_set_uint64(obj, "t", (size_t) ref->tag());
+            binn_object_set_uint64(obj, "a", (size_t) ref->affinity());
+            binn_object_set_str(obj, "n", strdup(ref->name().c_str()));
             return obj;
         }
 
         binn* walkTypeReference(TypeReference* ref) override {
             auto obj = binn_object();
-            binn_object_set_int64(obj, "tag", (size_t) ref->tag());
-            binn_object_set_object(obj, "type", walkType(ref->value()));
+            binn_object_set_uint64(obj, "t", (size_t) ref->tag());
+            binn_object_set_object(obj, "j", walkType(ref->value()));
             return obj;
         }
 
         binn* walkFunctionReference(FunctionReference* ref) override {
             auto obj = binn_object();
-            binn_object_set_int64(obj, "tag", (size_t) ref->tag());
-            binn_object_set_int64(obj, "backend", (size_t) ref->fn()->backend());
-            binn_object_set_str(obj, "name", strdup(ref->fn()->name().c_str()));
+            binn_object_set_uint64(obj, "t", (size_t) ref->tag());
+            binn_object_set_uint64(obj, "b", (size_t) ref->fn()->backend());
+            binn_object_set_str(obj, "n", strdup(ref->fn()->name().c_str()));
             return obj;
         }
 
         binn* walkStreamReference(StreamReference* ref) override {
             auto obj = binn_object();
-            binn_object_set_int64(obj, "tag", (size_t) ref->tag());
-            binn_object_set_str(obj, "id", strdup(ref->stream()->id().c_str()));
-            binn_object_set_object(obj, "type", walkType(ref->stream()->innerType()));
+            binn_object_set_uint64(obj, "t", (size_t) ref->tag());
+            binn_object_set_str(obj, "i", strdup(ref->stream()->id().c_str()));
+            binn_object_set_object(obj, "j", walkType(ref->stream()->innerType()));
             return obj;
         }
 
         binn* walkStringReference(StringReference* ref) override {
             auto obj = binn_object();
-            binn_object_set_int64(obj, "tag", (size_t) ref->tag());
-            binn_object_set_str(obj, "value", strdup(ref->value().c_str()));
+            binn_object_set_uint64(obj, "t", (size_t) ref->tag());
+            binn_object_set_str(obj, "v", strdup(ref->value().c_str()));
             return obj;
         }
 
         binn* walkNumberReference(NumberReference* ref) override {
             auto obj = binn_object();
-            binn_object_set_int64(obj, "tag", (size_t) ref->tag());
-            binn_object_set_double(obj, "value", ref->value());
+            binn_object_set_uint64(obj, "t", (size_t) ref->tag());
+            binn_object_set_double(obj, "v", ref->value());
             return obj;
         }
 
         binn* walkBooleanReference(BooleanReference* ref) override {
             auto obj = binn_object();
-            binn_object_set_int64(obj, "tag", (size_t) ref->tag());
-            binn_object_set_bool(obj, "value", ref->value());
+            binn_object_set_uint64(obj, "t", (size_t) ref->tag());
+            binn_object_set_bool(obj, "v", ref->value());
             return obj;
         }
 
         binn* walkType(const Type::Type* type) {
             auto obj = binn_object();
-            binn_object_set_int64(obj, "intrinsic", (size_t) type->intrinsic());
+            binn_object_set_uint64(obj, "i", (size_t) type->intrinsic());
 
             if ( Type::Primitive::isPrimitive(type->intrinsic()) )
                 return walkPrimitiveType(obj, (Type::Primitive*) type);
@@ -107,22 +107,22 @@ namespace swarmc::ISA {
         }
 
         binn* walkMapType(binn* obj, const Type::Map* type) {
-            binn_object_set_object(obj, "values", walkType(type->values()));
+            binn_object_set_object(obj, "vs", walkType(type->values()));
             return obj;
         }
 
         binn* walkEnumerableType(binn* obj, const Type::Enumerable* type) {
-            binn_object_set_object(obj, "values", walkType(type->values()));
+            binn_object_set_object(obj, "vs", walkType(type->values()));
             return obj;
         }
 
         binn* walkResourceType(binn* obj, const Type::Resource* type) {
-            binn_object_set_object(obj, "yields", walkType(type->yields()));
+            binn_object_set_object(obj, "ys", walkType(type->yields()));
             return obj;
         }
 
         binn* walkStreamType(binn* obj, const Type::Stream* type) {
-            binn_object_set_object(obj, "inner", walkType(type->inner()));
+            binn_object_set_object(obj, "i", walkType(type->inner()));
             return obj;
         }
 
@@ -132,8 +132,8 @@ namespace swarmc::ISA {
                 binn_list_add_object(params, walkType(param));
             }
 
-            binn_object_set_object(obj, "returns", walkType(type->returns()));
-            binn_object_set_list(obj, "params", params);
+            binn_object_set_object(obj, "rs", walkType(type->returns()));
+            binn_object_set_list(obj, "ps", params);
             return obj;
         }
     };
