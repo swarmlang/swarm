@@ -1,5 +1,3 @@
-#include <fstream>
-#include <map>
 #include <string>
 #include <vector>
 #include <chrono>
@@ -77,6 +75,13 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( flagOutputBinary ) {
+        int binResult = emitBinary();
+        if ( binResult != 0 ) {
+            result = binResult;
+        }
+    }
+
     delete console;
     if ( _input != nullptr ) delete _input;
     return result;
@@ -151,6 +156,18 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagRunTestName = name;
             skipOne = true;
             noInputFile = true;
+        } else if ( arg == "--binary" ) {
+            if ( i+1 >= params.size() ) {
+                console->error("Missing required parameter for --binary. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            std::string name = params.at(i+1);
+            console->debug("Will output binary to: " + name);
+            flagOutputBinary = true;
+            outputBinaryTo = name;
+            skipOne = true;
         } else if ( arg == "--locally" ) {
             Configuration::FORCE_LOCAL = true;
             flagSingleThreaded = true;
@@ -162,7 +179,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             console->verbose();
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --run-test. Pass --help for more info.");
+                console->error("Missing required parameter for --output-to. Pass --help for more info.");
                 failed = true;
                 continue;
             }
@@ -249,6 +266,10 @@ void Executive::printUsage() {
 
     console->bold()->print("  --locally  :  ", true)
         ->line("Evaluate the given Swarm program without connecting to remote executors.")
+        ->line();
+
+    console->bold()->print("  --binary  :  ", true)
+        ->line("Compile the given program and output the binary at the specified file.")
         ->line();
 
     console->bold()->print("  --verbose  :  ", true)
@@ -473,4 +494,23 @@ int Executive::executeLocalSVI() {
     vm->execute();
     delete vm;
     return 0;
+}
+
+int Executive::emitBinary() {
+    if ( flagSVI ) {
+        swarmc::VM::Pipeline pipeline(_input);
+        auto fh = fopen(outputBinaryTo.c_str(), "w");
+        if ( fh == nullptr ) {
+            console->error("Could not open binary output file for writing: " + outputBinaryTo);
+            return 1;
+        }
+
+        auto binary = pipeline.targetBinaryRepresentation();
+        fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
+        fclose(fh);
+        return 0;
+    }
+
+    // FIXME: compile Swarm source to SVI, then emit as binary
+    return 1;
 }

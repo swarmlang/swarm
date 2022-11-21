@@ -72,6 +72,18 @@ namespace swarmc::Runtime {
         throw Errors::SwarmError("Attempted to load invalid function " + loc->toString() + ". Location has an unknown function backend, or is an invalid name.");
     }
 
+    FunctionReference* VirtualMachine::loadFunction(FunctionBackend backend, const std::string& name) {
+        if ( backend == FunctionBackend::INLINE ) {
+            return new FunctionReference(loadInlineFunction(name));
+        }
+
+        if ( backend == FunctionBackend::PROVIDER ) {
+            return new FunctionReference(loadProviderFunction(name));
+        }
+
+        throw Errors::SwarmError("Attempted to load invalid function " + name + ". Location has an unknown function backend, or is an invalid name.");
+    }
+
     InlineFunction* VirtualMachine::loadInlineFunction(const std::string& name) {
         auto pc = _state->getInlineFunctionPC(name);
 

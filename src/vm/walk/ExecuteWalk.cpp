@@ -86,6 +86,10 @@ namespace swarmc::Runtime {
         return (ResourceReference*) ref;
     }
 
+    Reference* ExecuteWalk::walkPosition(PositionAnnotation* i) {
+        throw Errors::SwarmError("Attempted to interpret debugging annotation: " + i->toString());
+    }
+
     Reference* ExecuteWalk::walkPlus(Plus* i) {
         verbose("plus " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));

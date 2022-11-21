@@ -30,7 +30,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall
 CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall -DSWARM_DEBUG
 #LDFLAGS ?= -lredis++ -lhiredis -pthread
-LDFLAGS ?= -pthread
+LDFLAGS ?= -lbinn -pthread
 
 $(TARGET_EXEC): $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
 	$(EBIN) $@
@@ -111,3 +111,9 @@ docker: Dockerfile
 .PHONY: docker_run
 docker_run:
 	docker run --rm -it "${DOCKER_REGISTRY}/swarmlang/swarm:latest" bash
+
+.PHONY: binn
+binn:
+	git submodule update --init
+	$(MAKE) -C mod/binn
+	sudo $(MAKE) -C mod/binn install

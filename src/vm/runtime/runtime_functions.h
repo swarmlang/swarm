@@ -21,7 +21,7 @@ namespace swarmc::Runtime {
     using CallVector = std::vector<std::pair<const Type::Type*, ISA::Reference*>>;
 
     /** The VM mechanisms used to perform a function call. */
-    enum class FunctionBackend {
+    enum class FunctionBackend: size_t {
         INLINE,  // jumps to an inline function body in the program
         PROVIDER,  // calls an external, native function implementation
     };
@@ -129,6 +129,9 @@ namespace swarmc::Runtime {
 
         /** Get the mechanism the VM should use to execute calls to this function. */
         virtual FunctionBackend backend() const = 0;
+
+        /** Get the name of the function to be looked up from the backend. */
+        virtual std::string name() const = 0;
     };
 
 
@@ -166,6 +169,10 @@ namespace swarmc::Runtime {
 
         FunctionBackend backend() const override {
             return _upstream->backend();
+        }
+
+        std::string name() const override {
+            return _upstream->name();
         }
 
         std::string toString() const override;
@@ -207,6 +214,10 @@ namespace swarmc::Runtime {
 
         FunctionBackend backend() const override {
             return FunctionBackend::INLINE;
+        }
+
+        std::string name() const override {
+            return _name;
         }
 
         std::string toString() const override;

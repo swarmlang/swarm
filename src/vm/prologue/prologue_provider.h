@@ -25,7 +25,7 @@ namespace swarmc::Runtime::Prologue {
 
     class PrologueFunction : public IProviderFunction {
     public:
-        PrologueFunction(IProvider* provider) : _provider(provider) {}
+        PrologueFunction(std::string name, IProvider* provider) : IProviderFunction(std::move(name)), _provider(provider) {}
 
         IProvider* provider() const override { return _provider; }
 

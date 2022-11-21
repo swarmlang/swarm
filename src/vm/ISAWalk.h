@@ -26,6 +26,7 @@ namespace swarmc::ISA {
         }
 
         virtual TReturn walkOne(Instruction* inst) {
+            if ( inst->tag() == Tag::POSITION ) return walkPosition((PositionAnnotation*) inst);
             if ( inst->tag() == Tag::PLUS ) return walkPlus((Plus*) inst);
             if ( inst->tag() == Tag::MINUS ) return walkMinus((Minus*) inst);
             if ( inst->tag() == Tag::TIMES ) return walkTimes((Times*) inst);
@@ -106,6 +107,7 @@ namespace swarmc::ISA {
         }
 
     protected:
+        virtual TReturn walkPosition(PositionAnnotation*) = 0;
         virtual TReturn walkPlus(Plus*) = 0;
         virtual TReturn walkMinus(Minus*) = 0;
         virtual TReturn walkTimes(Times*) = 0;

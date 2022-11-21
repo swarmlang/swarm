@@ -11,7 +11,7 @@
 namespace swarmc::ISA {
     class Reference;
     class LocationReference;
-    enum class Affinity;
+    enum class Affinity: size_t;
 }
 
 namespace swarmc::Type {
@@ -63,6 +63,8 @@ namespace swarmc::Runtime {
 
         /** This should use a source of randomness to generate a random double on [0,1]. */
         virtual double random() = 0;
+
+        virtual std::string getNodeId() = 0;
 
         virtual SchedulingFilters getSchedulingFilters() const { return _filters; }
 

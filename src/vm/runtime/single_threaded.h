@@ -42,6 +42,10 @@ namespace swarmc::Runtime::SingleThreaded {
             return _dist(_gen);
         }
 
+        std::string getNodeId() override {
+            return "singlethreaded::localhost";
+        }
+
         std::string toString() const override {
             return "SingleThreaded::GlobalServices<id: " + std::to_string(_id) + ">";
         }

@@ -117,7 +117,7 @@ namespace swarmc::ISA {
                 auto token = tokens.at(startAt);
                 auto leader = token.at(0);
                 if ( leader == '$' ) return parseAssignment(is, tokens, startAt);
-                else if (std::isalpha(leader) ) return parseInstruction(is, tokens, startAt);
+                else if (std::isalpha(leader) || leader == '.') return parseInstruction(is, tokens, startAt);
                 else throw Errors::SwarmError("Error parsing SVI: invalid token `" + token + "` (expected assignment or instruction)");
             } catch (Errors::SwarmError& e) {
                 std::string last;
@@ -132,6 +132,19 @@ namespace swarmc::ISA {
             return parseReference(tokens.at(startAt));
         }
 
+        virtual ISA::PositionAnnotation* parsePosition(const std::string& instructionLeader, std::vector<std::string>& tokens, size_t startAt) {
+            auto file = parseUnaryReference(instructionLeader, tokens, startAt);
+            if ( file->tag() != ReferenceTag::STRING ) throw Errors::SwarmError("Malformed .position annotation (expected string, got " + file->toString() + ")");
+
+            auto line = parseUnaryReference(instructionLeader, tokens, startAt+1);
+            if ( line->tag() != ReferenceTag::NUMBER ) throw Errors::SwarmError("Malformed .position annotation (expected line number, got " + line->toString() + ")");
+
+            auto col = parseUnaryReference(instructionLeader, tokens, startAt+2);
+            if ( col->tag() != ReferenceTag::NUMBER ) throw Errors::SwarmError("Malformed .position annotation (expected col number, got " + col->toString() + ")");
+
+            return new ISA::PositionAnnotation((StringReference*) file, (NumberReference*) line, (NumberReference*) col);
+        }
+
         /**
          * Parse a single instruction from the token stream and append it to `is`, starting at the `startAt`-th token.
          * Returns the number of tokens which were consumed from `tokens`.
@@ -140,7 +153,10 @@ namespace swarmc::ISA {
             size_t i = 1;
             auto instructionLeader = tokens.at(startAt);
 
-            if ( instructionLeader == "beginfn" ) {
+            if ( instructionLeader == ".position" ) {
+                is.push_back(parsePosition(instructionLeader, tokens, startAt+i));
+                i += 3;
+            } else if ( instructionLeader == "beginfn" ) {
                 auto lr = parseLocationReference(instructionLeader, tokens, startAt+i);
                 is.push_back(new ISA::BeginFunction(
                     lr->name(),

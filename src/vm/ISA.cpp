@@ -3,6 +3,7 @@
 namespace swarmc::ISA {
 
     std::string Instruction::tagName(Tag tag) {
+        if ( tag == Tag::POSITION ) return "POSITION";
         if ( tag == Tag::BEGINFN ) return "BEGINFN";
         if ( tag == Tag::FNPARAM ) return "FNPARAM";
         if ( tag == Tag::RETURN0 ) return "RETURN0";

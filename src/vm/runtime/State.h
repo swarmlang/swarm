@@ -7,6 +7,7 @@
 #include "../../shared/IStringable.h"
 #include "../../errors/SwarmError.h"
 #include "../isa_meta.h"
+#include "../debug/Metadata.h"
 
 namespace swarmc::Runtime {
 
@@ -187,13 +188,16 @@ namespace swarmc::Runtime {
         std::map<std::string, ISA::Instructions::size_type> _fSkips;
         ISA::Instructions::size_type _pc = 0;
         std::stack<ISA::Instructions::size_type> _callStack;
+        Debug::Metadata _meta;
         bool _rewindToHead = false;
 
         void initialize() {
             _pc = 0;
+            extractMetadata();
             annotate();
         }
 
+        void extractMetadata();
         void annotate();
     };
 

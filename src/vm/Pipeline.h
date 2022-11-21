@@ -8,6 +8,7 @@
 #include "runtime/single_threaded.h"
 #include "VirtualMachine.h"
 #include "prologue/prologue_provider.h"
+#include "walk/ISABinaryWalk.h"
 
 namespace swarmc::VM {
 
@@ -35,6 +36,11 @@ namespace swarmc::VM {
         /** Get a list of parsed instructions from the SVI input stream. */
         ISA::Instructions targetInstructions() {
             return _parser->parse();
+        }
+
+        /** Get a binary-serialized form of the given instructions. */
+        binn* targetBinaryRepresentation() {
+            return ISA::ISABinaryWalk::serialize(targetInstructions());
         }
 
         /** Print the loaded tokens from the SVI input stream to the given output stream. */

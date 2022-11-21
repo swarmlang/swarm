@@ -3,6 +3,7 @@
 
 #include "ISA.h"
 
+#include "isa/isa_annotation.h"
 #include "isa/isa_arith.h"
 #include "isa/isa_boolean.h"
 #include "isa/isa_control.h"

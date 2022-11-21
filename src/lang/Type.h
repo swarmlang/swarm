@@ -18,7 +18,7 @@ namespace Type {
 
 namespace Type {
 
-    enum class Intrinsic {
+    enum class Intrinsic: size_t {
         STRING,
         NUMBER,
         BOOLEAN,

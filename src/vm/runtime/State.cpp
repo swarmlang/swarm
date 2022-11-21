@@ -52,6 +52,20 @@ namespace swarmc::Runtime {
         return indentedparent + "\n" + mine;
     }
 
+    void State::extractMetadata() {
+        size_t pc = 0;
+        _is.erase(std::remove_if(_is.begin(), _is.end(), [&pc, this](ISA::Instruction* i) {
+            pc += 1;
+            if ( i->tag() == ISA::Tag::POSITION ) {
+                auto pos = (ISA::PositionAnnotation*) i;
+                _meta.addMapping(pc, pos->first()->value(), static_cast<size_t>(pos->second()->value()), static_cast<size_t>(pos->third()->value()));
+                return true;
+            }
+
+            return false;
+        }), _is.end());
+    }
+
     void State::annotate()  {
         std::stack<std::string> nesting;
         for ( auto it = _is.begin(); it != _is.end(); ++it ) {

@@ -14,6 +14,7 @@
 #include "runtime/local_streams.h"
 #include "runtime/State.h"
 #include "walk/ExecuteWalk.h"
+#include "debug/Debugger.h"
 
 namespace swarmc::Runtime {
 
@@ -105,6 +106,8 @@ namespace swarmc::Runtime {
         /** Restore the VM to the specified state. Can be used to re-hydrate VMs for queued call execution. */
         virtual void restore(ScopeFrame*, State*);
 
+        virtual void attachDebugger(Debug::Debugger* debugger) { _debugger = debugger; }
+
         /** Load the value stored in the given location. */
         virtual ISA::Reference* loadFromStore(ISA::LocationReference*);
 
@@ -112,6 +115,8 @@ namespace swarmc::Runtime {
 
         /** Load the function stored in the given location. */
         virtual ISA::FunctionReference* loadFunction(ISA::LocationReference*);
+
+        virtual ISA::FunctionReference* loadFunction(FunctionBackend, const std::string&);
 
         /** Load the inline function with the given name. */
         virtual InlineFunction* loadInlineFunction(const std::string& name);
@@ -298,6 +303,7 @@ namespace swarmc::Runtime {
         ExecuteWalk* _exec;
         std::stack<QueueContextID> _queueContexts;
         IFunctionCall* _return = nullptr;
+        Debug::Debugger* _debugger = nullptr;
         IStream* _localOut;
         IStream* _localErr;
         IStream* _sharedOut = nullptr;

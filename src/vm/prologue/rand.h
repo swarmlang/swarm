@@ -20,7 +20,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomFunction : public PrologueFunction {
     public:
-        RandomFunction(IProvider* provider) : PrologueFunction(provider) {}
+        RandomFunction(IProvider* provider) : PrologueFunction("RANDOM", provider) {}
 
         FormalTypes paramTypes() const override { return {}; }
 
@@ -47,7 +47,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomVectorFunction : public PrologueFunction {
     public:
-        RandomVectorFunction(IProvider* provider) : PrologueFunction(provider) {}
+        RandomVectorFunction(IProvider* provider) : PrologueFunction("RANDOM_VECTOR", provider) {}
 
         FormalTypes paramTypes() const override;
 
@@ -74,7 +74,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomMatrixFunction : public PrologueFunction {
     public:
-        RandomMatrixFunction(IProvider* provider) : PrologueFunction(provider) {}
+        RandomMatrixFunction(IProvider* provider) : PrologueFunction("RANDOM_MATRIX", provider) {}
 
         FormalTypes paramTypes() const override;
 

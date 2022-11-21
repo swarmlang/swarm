@@ -22,7 +22,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RangeFunction : public PrologueFunction {
     public:
-        explicit RangeFunction(IProvider* provider) : PrologueFunction(provider) {}
+        explicit RangeFunction(IProvider* provider) : PrologueFunction("RANGE", provider) {}
 
         FormalTypes paramTypes() const override;
 

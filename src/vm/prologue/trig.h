@@ -1,6 +1,8 @@
 #ifndef SWARMVM_TRIG
 #define SWARMVM_TRIG
 
+#include <utility>
+
 #include "prologue_provider.h"
 
 namespace swarmc::Runtime::Prologue {
@@ -13,7 +15,7 @@ namespace swarmc::Runtime::Prologue {
     class TrigFunctionCall : public PrologueFunctionCall {
     public:
         TrigFunctionCall(TrigOperation op, IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, vector, returnType), _op(op) {}
+            PrologueFunctionCall(provider, std::move(vector), returnType), _op(op) {}
 
         void execute() override;
 
@@ -27,7 +29,14 @@ namespace swarmc::Runtime::Prologue {
 
     class TrigFunction : public PrologueFunction {
     public:
-        TrigFunction(TrigOperation op, IProvider* provider) : PrologueFunction(provider), _op(op) {}
+        static std::string opToString(TrigOperation op) {
+            if ( op == TrigOperation::SIN ) return "SIN";
+            if ( op == TrigOperation::COS ) return "COS";
+            if ( op == TrigOperation::TAN ) return "TAN";
+            throw Errors::SwarmError("Unknown trig operation.");
+        }
+
+        TrigFunction(TrigOperation op, IProvider* provider) : PrologueFunction(opToString(op), provider), _op(op) {}
 
         FormalTypes paramTypes() const override;
 

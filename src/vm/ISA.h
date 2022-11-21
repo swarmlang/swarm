@@ -20,7 +20,8 @@ namespace swarmc::ISA {
     using Instructions = std::vector<Instruction*>;
 
     /** Unique identifiers for each instruction. */
-    enum class Tag {
+    enum class Tag: size_t {
+        POSITION,
         BEGINFN,
         FNPARAM,
         RETURN0,
@@ -99,7 +100,7 @@ namespace swarmc::ISA {
     };
 
     /** Places where values can be stored. */
-    enum class Affinity {
+    enum class Affinity: size_t {
         LOCAL,
         SHARED,
         FUNCTION,
@@ -107,7 +108,7 @@ namespace swarmc::ISA {
     };
 
     /** Broad types of references built-in to the runtime. */
-    enum class ReferenceTag {
+    enum class ReferenceTag: size_t {
         LOCATION,
         TYPE,
         STRING,

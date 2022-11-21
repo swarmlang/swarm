@@ -37,6 +37,8 @@ namespace swarmc::Runtime {
     /** An IFunction returned by a provider which includes a reference to said provider. */
     class IProviderFunction : public IFunction {
     public:
+        explicit IProviderFunction(std::string name) : _name(std::move(name)) {}
+
         /** Get the IProvider responsible for this function call. */
         virtual IProvider* provider() const = 0;
 
@@ -45,6 +47,11 @@ namespace swarmc::Runtime {
         IProviderFunctionCall* call(CallVector) const override = 0;
 
         IProviderFunctionCall* call() const override { return call(getCallVector()); }
+
+        std::string name() const override { return _name; }
+
+    protected:
+        std::string _name;
     };
 
 

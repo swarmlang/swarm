@@ -22,7 +22,7 @@ namespace swarmc::Runtime::Prologue {
 
     class TagFunction : public PrologueFunction {
     public:
-        explicit TagFunction(IProvider* provider) : PrologueFunction(provider) {}
+        explicit TagFunction(IProvider* provider) : PrologueFunction("TAG", provider) {}
 
         FormalTypes paramTypes() const override;
 

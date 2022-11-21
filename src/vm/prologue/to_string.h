@@ -19,7 +19,7 @@ namespace swarmc::Runtime::Prologue {
 
     class NumberToStringFunction : public PrologueFunction {
     public:
-        NumberToStringFunction(IProvider* provider) : PrologueFunction(provider) {}
+        NumberToStringFunction(IProvider* provider) : PrologueFunction("NUMBER_TO_STRING", provider) {}
 
         FormalTypes paramTypes() const override;
 
@@ -46,7 +46,7 @@ namespace swarmc::Runtime::Prologue {
 
     class BooleanToStringFunction : public PrologueFunction {
     public:
-        BooleanToStringFunction(IProvider* provider) : PrologueFunction(provider) {}
+        BooleanToStringFunction(IProvider* provider) : PrologueFunction("BOOLEAN_TO_STRING", provider) {}
 
         FormalTypes paramTypes() const override;
 

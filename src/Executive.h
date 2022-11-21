@@ -35,6 +35,7 @@ protected:
     bool flagSVI = false;
     bool flagOutputISA = false;
     bool flagOutputCFG = false;
+    bool flagOutputBinary = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;
@@ -42,6 +43,7 @@ protected:
     std::string flagRunTestName;
     std::string outputResultTo = "--";
     std::string outputISATo = "--";
+    std::string outputBinaryTo;
     std::string outputCFGTo;
     std::string flagFilterFile;
     std::string inputFile;
@@ -55,6 +57,7 @@ protected:
     int runTest();
     int parseFilters();
     int executeLocalSVI();
+    int emitBinary();
 };
 
 

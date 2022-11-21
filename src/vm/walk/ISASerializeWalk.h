@@ -19,6 +19,10 @@ namespace swarmc::ISA {
     protected:
         ReferenceSerializeWalk _rsw;
 
+        std::string walkPosition(PositionAnnotation* position) override {
+            return ".position " + _rsw.walk(position->first()) + " " + _rsw.walk(position->second()) + " " + _rsw.walk(position->third());
+        }
+
         std::string walkPlus(Plus* plus) override {
             return "plus " + _rsw.walk(plus->first()) + " " + _rsw.walk(plus->second());
         }

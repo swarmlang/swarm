@@ -1,0 +1,3 @@
+[submodule "mod/binn"]
+	path = mod/binn
+	url = https://github.com/liteserver/binn
