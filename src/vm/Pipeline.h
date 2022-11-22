@@ -9,6 +9,7 @@
 #include "VirtualMachine.h"
 #include "prologue/prologue_provider.h"
 #include "walk/ISABinaryWalk.h"
+#include "walk/BinaryISAWalk.h"
 
 namespace swarmc::VM {
 
@@ -19,9 +20,10 @@ namespace swarmc::VM {
      */
     class Pipeline : public IStringable {
     public:
-        Pipeline(std::istream* input) {
+        Pipeline(std::istream* input, bool isBinary = false) {
             _input = input;
             _parser = new ISA::Parser(*input);
+            _isBinary = isBinary;
         }
 
         virtual ~Pipeline() {
@@ -30,27 +32,47 @@ namespace swarmc::VM {
 
         /** Get a list of loaded tokens from the SVI input stream. */
         std::vector<std::string> targetTokenStream() {
+            if ( _isBinary ) {
+                throw Errors::SwarmError("Cannot parse token stream from binary input.");
+            }
+
             return _parser->tokenize();
         }
 
         /** Get a list of parsed instructions from the SVI input stream. */
         ISA::Instructions targetInstructions() {
+            if ( _isBinary ) {
+                return ISA::BinaryISAWalk::fromInput(*_input);
+            }
+
             return _parser->parse();
         }
 
         /** Get a binary-serialized form of the given instructions. */
         binn* targetBinaryRepresentation() {
+            if ( _isBinary ) {
+                return ISA::BinaryISAWalk::readInput(*_input);
+            }
+
             return ISA::ISABinaryWalk::serialize(targetInstructions());
         }
 
         /** Print the loaded tokens from the SVI input stream to the given output stream. */
         void targetTokenRepresentation(std::ostream& out) {
+            if ( _isBinary ) {
+                throw Errors::SwarmError("Cannot output tokens from binary input source.");
+            }
+
             _parser->outputTokens(out);
         }
 
         /** Print the parsed instructions from the SVI input stream to the given output stream. */
         void targetISARepresentation(std::ostream& out) {
-            _parser->outputParse(out);
+            auto is = targetInstructions();
+            for ( auto i : is ) {
+                out << i->toString() << std::endl;
+            }
+            _parser->dispose(is);
         }
 
         /**
@@ -79,6 +101,7 @@ namespace swarmc::VM {
     protected:
         std::istream* _input;
         ISA::Parser* _parser;
+        bool _isBinary;
     };
 
 }

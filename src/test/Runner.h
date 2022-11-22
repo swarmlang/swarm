@@ -9,6 +9,7 @@
 #include "031_symbol_walk.h"
 #include "034_basic_isa.h"
 #include "035_isa_serialize.h"
+#include "044_binary.h"
 
 namespace swarmc {
 namespace Test {
@@ -19,7 +20,7 @@ namespace Test {
 
         ~Runner() {}
 
-        virtual bool run(std::string name) {
+        virtual bool run(const std::string& name) {
             if ( name == "021_map_node_accesses" ) {
                 MapNodeAccessesTest test;
                 return test.run();
@@ -37,6 +38,9 @@ namespace Test {
                 return test.run();
             } else if ( name == "035_isa_serialize" ) {
                 ISASerializationTest test;
+                return test.run();
+            } else if ( name == "044_binary" ) {
+                BinarySerializeTest test;
                 return test.run();
             }
 

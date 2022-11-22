@@ -33,6 +33,9 @@ private:
 
     bool _vp_grid_row_skip_newline = false;
 
+    bool _capture_output = false;
+    std::stringstream _captured;
+
     // Verbosity level for debugging output.
     bool _debug = false;
     bool _debug_capture = false;
@@ -115,7 +118,7 @@ public:
     // Customs
     Console* info(std::string text);
     Console* error(std::string text);
-    Console* cerr(std::string text);
+    Console* cerr(const std::string& text);
     Console* warn(std::string text);
     Console* success(std::string text);
     Console* debug(std::string text);
@@ -124,6 +127,11 @@ public:
     Console* end();
 
     bool isDebug();
+
+    // Capture
+    Console* capture();
+
+    std::string endCapture();
 
 
     // ===== Viewport functions =====
@@ -187,7 +195,7 @@ public:
     std::string toString(IStringable* stringable) const;
 
     // Pad the back of a string with spaces until it is at least the min length
-    std::string pad(std::string text, unsigned int pad = 20, std::string with = " ") const;
+    std::string pad(const std::string& text, unsigned int pad = 20, const std::string& with = " ") const;
 
     static std::string sPad(std::string text, unsigned int pad = 20, std::string with = " ") {
         std::stringstream s;
@@ -202,11 +210,11 @@ public:
     }
 
     // Pad the front of a string with spaces until it is at least the min length
-    std::string padFront(std::string text, unsigned int pad = 20, std::string with = " ") const;
+    std::string padFront(const std::string& text, unsigned int pad = 20, const std::string& with = " ") const;
 
     // Pad the front and back of a string with spaces until it is at least the min length
     // Keeps it roughly centered
-    std::string padCenter(std::string text, unsigned int pad = 20, std::string with = " ") const;
+    std::string padCenter(std::string text, unsigned int pad = 20, const std::string& with = " ") const;
 
     static std::string sPadCenter(std::string text, unsigned int pad = 20, std::string with = " ") {
         std::stringstream s;

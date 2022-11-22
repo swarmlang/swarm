@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <utility>
 
 #include <sys/ioctl.h>
 #include <stdio.h>
@@ -89,45 +90,50 @@ Console* Console::reset() {
 }
 
 Console* Console::print(std::string text, bool reset) {
-    output(text);
+    output(std::move(text));
     if ( reset ) { this->reset(); }
     return this;
 }
 
 Console* Console::line(std::string text, bool reset) {
-    output(text)->output("\n");
+    output(std::move(text))->output("\n");
     if ( reset ) { this->reset(); }
     return this;
 }
 
 Console* Console::info(std::string text) {
-    color("blue")->print("[INFO] ")->reset()->line(text);
+    color("blue")->print("[INFO] ")->reset()->line(std::move(text));
     return this;
 }
 
 Console* Console::error(std::string text) {
-    color("red")->print("[ERROR] ")->reset()->line(text);
+    color("red")->print("[ERROR] ")->reset()->line(std::move(text));
     return this;
 }
 
-Console* Console::cerr(std::string text) {
+Console* Console::cerr(const std::string& text) {
+    if ( _capture_output ) {
+        _captured << text << "\n";
+        return this;
+    }
+
     std::cerr << text << "\n";
     return this;
 }
 
 Console* Console::warn(std::string text) {
-    color("yellow")->print("[WARNING] ")->reset()->line(text);
+    color("yellow")->print("[WARNING] ")->reset()->line(std::move(text));
     return this;
 }
 
 Console* Console::success(std::string text) {
-    color("green")->print("[SUCCESS] ")->reset()->line(text);
+    color("green")->print("[SUCCESS] ")->reset()->line(std::move(text));
     return this;
 }
 
 Console* Console::debug(std::string text) {
     if ( _debug ) {
-        color("magenta")->print("[DEBUG] ")->reset()->line(text);
+        color("magenta")->print("[DEBUG] ")->reset()->line(std::move(text));
     }
 
     return this;
@@ -148,6 +154,18 @@ Console* Console::debug() {
 
 bool Console::isDebug() {
     return _debug;
+}
+
+Console* Console::capture() {
+    _capture_output = true;
+    return this;
+}
+
+std::string Console::endCapture() {
+    _capture_output = false;
+    auto s = _captured.str();
+    _captured = std::stringstream();
+    return s;
 }
 
 Console* Console::end() {
@@ -182,13 +200,14 @@ Console* Console::output(std::string raw) {
 //            _chars_since_last_newline += raw.length();
 //        }
 
-        std::cout << raw;
+        if ( _capture_output ) _captured << raw;
+        else std::cout << raw;
     }
 
     return this;
 }
 
-std::string Console::pad(std::string text, unsigned int pad, std::string with) const {
+std::string Console::pad(const std::string& text, unsigned int pad, const std::string& with) const {
     std::stringstream s;
     s << text;
 
@@ -200,11 +219,11 @@ std::string Console::pad(std::string text, unsigned int pad, std::string with) c
     return s.str();
 }
 
-std::string Console::padFront(std::string text, unsigned int pad, std::string with) const {
+std::string Console::padFront(const std::string& text, unsigned int pad, const std::string& with) const {
     std::stringstream s;
 
-    int pad_diff = pad - text.length();
-    for ( int i = 0; i < pad_diff; i++ ) {
+    unsigned int pad_diff = pad - text.length();
+    for ( unsigned int i = 0; i < pad_diff; i++ ) {
         s << with;
     }
 
@@ -212,7 +231,7 @@ std::string Console::padFront(std::string text, unsigned int pad, std::string wi
     return s.str();
 }
 
-std::string Console::padCenter(std::string text, unsigned int pad, std::string with) const {
+std::string Console::padCenter(std::string text, unsigned int pad, const std::string& with) const {
     std::stringstream s;
 
     if ( text.length() >= pad ) {
@@ -428,7 +447,8 @@ Console* Console::clear() {
     reset()->output(ANSI_CLEAR_ALL);
     if ( !mute() ) {
         _new_lines_since_last_clear = 0;
-        std::cout << std::flush;
+        if ( _capture_output ) _captured << std::flush;
+        else std::cout << std::flush;
     }
     return this;
 }

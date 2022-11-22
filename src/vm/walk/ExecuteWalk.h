@@ -1,6 +1,7 @@
 #ifndef SWARMVM_EXECUTEWALK
 #define SWARMVM_EXECUTEWALK
 
+#include <cassert>
 #include "../../shared/util/Console.h"
 #include "../../lang/Type.h"
 #include "../ISAWalk.h"

@@ -1,0 +1,95 @@
+-- Basic arithmetic
+$l:a <- plus 3 4
+$l:a <- minus 4 3
+$l:a <- times 3 4
+$l:a <- divide 3 4
+$l:a <- power 2 2
+$l:a <- mod 10 3
+$l:a <- neg 4
+
+-- Number comparison
+$l:b <- gt 3 4
+$l:b <- gte 3 4
+$l:b <- lt 3 4
+$l:b <- lte 3 4
+
+-- Boolean operations
+$l:c <- and true false
+$l:c <- or true false
+$l:c <- xor true false
+$l:c <- nand true false
+$l:c <- nor true false
+$l:c <- not true
+
+-- While loop
+beginfn f:WHILE_BODY p:VOID
+	$l:i <- plus $l:i 1
+	$l:i_cond <- lt $l:i 5
+return
+
+$l:i <- 0
+$l:i_cond <- true
+while $l:i_cond f:WHILE_BODY
+
+-- Enumerations
+$l:d <- enuminit p:STRING
+enumappend $l:d "World!"
+enumprepend $l:d "hello"
+$l:d_len <- enumlength $l:d
+$l:d_head <- enumget $l:d 0
+enumset $l:d 0 "Hello,"
+
+beginfn f:ENUM_BODY p:VOID
+	fnparam p:STRING $l:elem
+	fnparam p:NUMBER $l:idx
+return
+
+enumerate p:STRING $l:d f:ENUM_BODY
+
+-- Function calls (pushcalls/drain tested separately)
+beginfn f:ADDER p:NUMBER
+	fnparam p:NUMBER $l:lhs
+	fnparam p:NUMBER $l:rhs
+	scopeof $l:sum
+	$l:sum <- plus $l:lhs $l:rhs
+return $l:sum
+
+$l:inc <- curry f:ADDER 1
+$l:two <- curry $l:inc 1
+
+$l:e <- call $l:two
+$l:e <- call $l:inc 2
+callif true $l:inc 2
+callif false $l:inc 2
+callelse true $l:inc 2
+callelse false $l:inc 2
+
+-- Maps
+$l:f <- mapinit p:BOOLEAN
+mapset $l:f "abc" true
+mapset $l:f "def" false
+$l:g <- mapget $l:f "def"
+$l:f_len <- maplength $l:f
+$l:f_keys <- mapkeys $l:f
+
+-- Types
+typify $l:h p:NUMBER
+$l:h <- 3
+
+$l:t_h <- typeof $l:h
+$l:t_ADDER <- typeof f:ADDER
+compatible $l:t_h $l:t_ADDER
+
+-- Strings
+$l:n <- "Hello,"
+$l:j <- "World!"
+$l:k <- strconcat $l:n $l:j
+$l:k_len <- strlength $l:k
+$l:l <- strslice $l:k 6
+$l:m <- strslice $l:k 0 6
+
+-- Locks tested elsewhere
+-- Scoping tested elsewhere
+-- Equality tested elsewhere
+-- Streams tested elsewhere
+-- Exception handling tested elsewhere
