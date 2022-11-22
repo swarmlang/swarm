@@ -108,7 +108,7 @@ namespace swarmc::Runtime {
      */
     class IFunction : public IStringable {
     public:
-        virtual ~IFunction() = default;
+        ~IFunction() override = default;
 
         /** Get a list of parameters (as types) which must be provided to a call of this function. */
         virtual FormalTypes paramTypes() const = 0;
@@ -145,7 +145,7 @@ namespace swarmc::Runtime {
 
         FormalTypes paramTypes() const override {
             auto upstream = _upstream->paramTypes();
-            return FormalTypes(upstream.begin() + 1, upstream.end());
+            return {upstream.begin() + 1, upstream.end()};
         }
 
         const Type::Type* returnType() const override {
@@ -191,7 +191,7 @@ namespace swarmc::Runtime {
     class InlineFunction : public IFunction {
     public:
         InlineFunction(std::string name, FormalTypes types, const Type::Type* returnType)
-            : _name(name), _types(types), _returnType(returnType) {}
+            : _name(std::move(name)), _types(std::move(types)), _returnType(returnType) {}
 
         FormalTypes paramTypes() const override {
             return _types;

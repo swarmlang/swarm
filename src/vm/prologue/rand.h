@@ -1,6 +1,8 @@
 #ifndef SWARMVM_RAND
 #define SWARMVM_RAND
 
+#include <utility>
+
 #include "prologue_provider.h"
 #include "../../lang/Type.h"
 
@@ -9,7 +11,7 @@ namespace swarmc::Runtime::Prologue {
     class RandomFunctionCall : public PrologueFunctionCall {
     public:
         RandomFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, vector, returnType) {}
+            PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
         void execute() override;
 
@@ -20,7 +22,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomFunction : public PrologueFunction {
     public:
-        RandomFunction(IProvider* provider) : PrologueFunction("RANDOM", provider) {}
+        explicit RandomFunction(IProvider* provider) : PrologueFunction("RANDOM", provider) {}
 
         FormalTypes paramTypes() const override { return {}; }
 
@@ -36,7 +38,7 @@ namespace swarmc::Runtime::Prologue {
     class RandomVectorFunctionCall : public PrologueFunctionCall {
     public:
         RandomVectorFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, vector, returnType) {}
+            PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
         void execute() override;
 
@@ -47,7 +49,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomVectorFunction : public PrologueFunction {
     public:
-        RandomVectorFunction(IProvider* provider) : PrologueFunction("RANDOM_VECTOR", provider) {}
+        explicit RandomVectorFunction(IProvider* provider) : PrologueFunction("RANDOM_VECTOR", provider) {}
 
         FormalTypes paramTypes() const override;
 
@@ -63,7 +65,7 @@ namespace swarmc::Runtime::Prologue {
     class RandomMatrixFunctionCall : public PrologueFunctionCall {
     public:
         RandomMatrixFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, vector, returnType) {}
+            PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
         void execute() override;
 
@@ -74,7 +76,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomMatrixFunction : public PrologueFunction {
     public:
-        RandomMatrixFunction(IProvider* provider) : PrologueFunction("RANDOM_MATRIX", provider) {}
+        explicit RandomMatrixFunction(IProvider* provider) : PrologueFunction("RANDOM_MATRIX", provider) {}
 
         FormalTypes paramTypes() const override;
 

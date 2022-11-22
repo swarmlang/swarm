@@ -1,6 +1,7 @@
 #ifndef SWARMVM_ISA
 #define SWARMVM_ISA
 
+#include <utility>
 #include <vector>
 #include "../shared/nslib.h"
 #include "../lang/Type.h"
@@ -150,7 +151,7 @@ namespace swarmc::ISA {
     /** A variable / A value in storage */
     class LocationReference : public Reference {
     public:
-        LocationReference(Affinity affinity, std::string name) : Reference(ReferenceTag::LOCATION), _affinity(affinity), _name(name) {}
+        LocationReference(Affinity affinity, std::string name) : Reference(ReferenceTag::LOCATION), _affinity(affinity), _name(std::move(name)) {}
 
         /** Convert the given affinity value to a human-readable representation. */
         static std::string affinityString(Affinity a) {
@@ -210,7 +211,7 @@ namespace swarmc::ISA {
             );
         }
 
-        virtual LocationReference* copy() const override {
+        LocationReference* copy() const override {
             auto t = new LocationReference(_affinity, _name);
             if ( _type != nullptr ) t->setType(_type);
             return t;
@@ -245,7 +246,7 @@ namespace swarmc::ISA {
             return stream->stream()->id() == _stream->id();
         }
 
-        virtual StreamReference* copy() const override {
+        StreamReference* copy() const override {
             // FIXME: might need a copy of _stream
             return new StreamReference(_stream);
         }
@@ -319,7 +320,7 @@ namespace swarmc::ISA {
             return false;  // FIXME: can this be implemented by pushing equality into the IFunction implementation?
         }
 
-        virtual FunctionReference* copy() const override {
+        FunctionReference* copy() const override {
             // FIXME: might need acopy of _fn
             return new FunctionReference(_fn);
         }
@@ -331,7 +332,7 @@ namespace swarmc::ISA {
     /** A type literal */
     class TypeReference : public Reference {
     public:
-        TypeReference(const Type::Type* type) : Reference(ReferenceTag::TYPE), _type(type) {}
+        explicit TypeReference(const Type::Type* type) : Reference(ReferenceTag::TYPE), _type(type) {}
 
         std::string toString() const override {
             return "TypeReference<" + _type->toString() + ">";
@@ -353,7 +354,7 @@ namespace swarmc::ISA {
             return ref->type()->isAssignableTo(type()) && type()->isAssignableTo(ref->type());
         }
 
-        virtual TypeReference* copy() const override {
+        TypeReference* copy() const override {
             return new TypeReference(_type->copy());
         }
 
@@ -399,7 +400,7 @@ namespace swarmc::ISA {
     /** A literal string value */
     class StringReference : public LiteralReference<std::string> {
     public:
-        StringReference(std::string value) : LiteralReference<std::string>(ReferenceTag::STRING, value) {}
+        explicit StringReference(std::string value) : LiteralReference<std::string>(ReferenceTag::STRING, value) {}
 
         std::string toString() const override {
             return "StringReference<" + _value + ">";
@@ -415,7 +416,7 @@ namespace swarmc::ISA {
             return ref->value() == value();
         }
 
-        virtual StringReference* copy() const override {
+        StringReference* copy() const override {
             return new StringReference(_value);
         }
     };
@@ -423,7 +424,7 @@ namespace swarmc::ISA {
     /** A literal number value */
     class NumberReference : public LiteralReference<double> {
     public:
-        NumberReference(double value) : LiteralReference<double>(ReferenceTag::NUMBER, value) {}
+        explicit NumberReference(double value) : LiteralReference<double>(ReferenceTag::NUMBER, value) {}
 
         const Type::Type* type() const {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
@@ -439,7 +440,7 @@ namespace swarmc::ISA {
             return ref->value() == value();
         }
 
-        virtual NumberReference* copy() const override {
+        NumberReference* copy() const override {
             return new NumberReference(_value);
         }
     };
@@ -447,7 +448,7 @@ namespace swarmc::ISA {
     /** A literal boolean value */
     class BooleanReference : public LiteralReference<bool> {
     public:
-        BooleanReference(bool value) : LiteralReference<bool>(ReferenceTag::BOOLEAN, value) {}
+        explicit BooleanReference(bool value) : LiteralReference<bool>(ReferenceTag::BOOLEAN, value) {}
 
         std::string toString() const override {
             std::string value = _value ? "true" : "false";
@@ -464,7 +465,7 @@ namespace swarmc::ISA {
             return ref->value() == value();
         }
 
-        virtual BooleanReference* copy() const override {
+        BooleanReference* copy() const override {
             return new BooleanReference(_value);
         }
     };
@@ -532,7 +533,7 @@ namespace swarmc::ISA {
             return true;
         }
 
-        virtual EnumerationReference* copy() const override {
+        EnumerationReference* copy() const override {
             auto e = new EnumerationReference(_innerType->copy());
             for ( auto item : _items ) {
                 e->append(item->copy());
@@ -599,9 +600,9 @@ namespace swarmc::ISA {
             });
         }
 
-        virtual MapReference* copy() const override {
+        MapReference* copy() const override {
             auto m = new MapReference(_innerType->copy());
-            for ( auto item : _items ) {
+            for ( const auto& item : _items ) {
                 m->set(item.first, item.second->copy());
             }
             return m;
@@ -616,7 +617,7 @@ namespace swarmc::ISA {
     /** Base class for instructions which are executed in the VM */
     class Instruction : public IStringable {
     public:
-        Instruction(Tag tag) : _tag(tag) {}
+        explicit Instruction(Tag tag) : _tag(tag) {}
         ~Instruction() override = default;
 
         static std::string tagName(Tag tag);
@@ -650,13 +651,13 @@ namespace swarmc::ISA {
     /** Class of instructions which take no parameters */
     class NullaryInstruction : public Instruction {
     public:
-        NullaryInstruction(Tag tag) : Instruction(tag) {}
+        explicit NullaryInstruction(Tag tag) : Instruction(tag) {}
 
         std::string toString() const override {
             return tagName(tag()) + "<>";
         }
 
-        virtual bool isNullary() const override { 
+        bool isNullary() const override {
             return true; 
         }
     };
@@ -679,7 +680,7 @@ namespace swarmc::ISA {
             return tagName(tag()) + "<" + _first->toString() + ">";
         }
 
-        virtual bool isUnary() const override { 
+        bool isUnary() const override {
             return true; 
         }
     protected:
@@ -712,7 +713,7 @@ namespace swarmc::ISA {
             return tagName(tag()) + "<" + _first->toString() + ", " + _second->toString() + ">";
         }
 
-        virtual bool isBinary() const override { 
+        bool isBinary() const override {
             return true; 
         }
     protected:
@@ -754,7 +755,7 @@ namespace swarmc::ISA {
             return tagName(tag()) + "<" + _first->toString() + ", " + _second->toString() + ", " + _third->toString() + ">";
         }
 
-        virtual bool isTrinary() const override { 
+        bool isTrinary() const override {
             return true; 
         }
     protected:

@@ -54,7 +54,7 @@ namespace swarmc::Runtime {
      */
     class IGlobalServices : public IStringable {
     public:
-        virtual ~IGlobalServices() = default;
+        ~IGlobalServices() override = default;
 
         /** This should return a UUIDv4-formatted string, globally unique. */
         virtual std::string getUuid() = 0;
@@ -100,7 +100,7 @@ namespace swarmc::Runtime {
     /** Represents a lock acquired by some control. */
     class IStorageLock : public IStringable {
     public:
-        virtual ~IStorageLock() = default;
+        ~IStorageLock() override = default;
 
         /** Get the location this lock covers. */
         virtual ISA::LocationReference* location() const = 0;
@@ -114,7 +114,7 @@ namespace swarmc::Runtime {
      */
     class IStorageInterface : public IStringable {
     public:
-        virtual ~IStorageInterface() = default;
+        ~IStorageInterface() override = default;
 
         /** Load the actual value of a variable. */
         virtual ISA::Reference* load(ISA::LocationReference*) = 0;
@@ -154,7 +154,7 @@ namespace swarmc::Runtime {
     /** Tracking class for a single deferred function call. */
     class IQueueJob : public IStringable {
     public:
-        virtual ~IQueueJob() = default;
+        ~IQueueJob() override = default;
 
         /** Get the tracking ID for this job. */
         virtual JobID id() const = 0;
@@ -186,7 +186,7 @@ namespace swarmc::Runtime {
     /** Interface for a deferred function call queue. */
     class IQueue : public IStringable {
     public:
-        virtual ~IQueue() = default;
+        ~IQueue() override = default;
 
         /**
          * Focuses the queue on a particular context.
@@ -219,7 +219,7 @@ namespace swarmc::Runtime {
 
     class IStream : public IStringable {
     public:
-        virtual ~IStream() = default;
+        ~IStream() override = default;
 
         virtual void open() = 0;
 

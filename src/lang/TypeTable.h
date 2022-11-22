@@ -8,8 +8,7 @@
 
 using namespace nslib;
 
-namespace swarmc {
-namespace Lang {
+namespace swarmc::Lang {
 
     class ASTNode;
 
@@ -17,9 +16,9 @@ namespace Lang {
 
     class TypeTable : public IStringable {
     public:
-        TypeTable() {}
+        TypeTable() = default;
 
-        virtual ~TypeTable() {}
+        ~TypeTable() override = default;
 
         void setTypeOf(const ASTNode* node, const Type::Type* type) {
             _map[node] = type;
@@ -41,7 +40,6 @@ namespace Lang {
         TypeMap _map;
     };
 
-}
 }
 
 #endif

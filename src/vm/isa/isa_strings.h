@@ -9,16 +9,16 @@ namespace swarmc::ISA {
     public:
         StringConcat(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::STRCONCAT, lhs, rhs) {}
-        virtual StringConcat* copy() const override {
+        StringConcat* copy() const override {
             return new StringConcat(_first->copy(), _second->copy());
         }
     };
 
     class StringLength : public UnaryInstruction<Reference> {
     public:
-        StringLength(Reference* string) :
+        explicit StringLength(Reference* string) :
             UnaryInstruction<Reference>(Tag::STRLENGTH, string) {}
-        virtual StringLength* copy() const override {
+        StringLength* copy() const override {
             return new StringLength(_first->copy());
         }
     };
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     public:
         StringSliceFrom(Reference* string, Reference* startAtIndex) :
             BinaryInstruction<Reference, Reference>(Tag::STRSLICEFROM, string, startAtIndex) {}
-        virtual StringSliceFrom* copy() const override {
+        StringSliceFrom* copy() const override {
             return new StringSliceFrom(_first->copy(), _second->copy());
         }
     };
@@ -36,7 +36,7 @@ namespace swarmc::ISA {
     public:
         StringSliceFromTo(Reference* string, Reference* startAtIndex, Reference* endAtIndex) :
             TrinaryInstruction<Reference, Reference, Reference>(Tag::STRSLICEFROMTO, string, startAtIndex, endAtIndex) {}
-        virtual StringSliceFromTo* copy() const override {
+        StringSliceFromTo* copy() const override {
             return new StringSliceFromTo(_first->copy(), _second->copy(), _third->copy());
         }
     };

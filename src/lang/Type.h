@@ -329,7 +329,7 @@ namespace Type {
             return inst;
         }
 
-        bool isAssignableTo(const Type* other) const {
+        bool isAssignableTo(const Type* other) const override {
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::LAMBDA0 ) return false;
             return _returns->isAssignableTo(((Lambda0*) other)->returns());
@@ -358,7 +358,7 @@ namespace Type {
             return inst;
         }
 
-        bool isAssignableTo(const Type* other) const {
+        bool isAssignableTo(const Type* other) const override {
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::LAMBDA1 ) return false;
             return _returns->isAssignableTo(((Lambda1*) other)->returns()) && _param->isAssignableTo(((Lambda1*) other)->param());

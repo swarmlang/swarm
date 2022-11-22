@@ -6,9 +6,7 @@
 #include "../SymbolTable.h"
 #include "../AST.h"
 
-namespace swarmc {
-namespace Lang {
-namespace Walk {
+namespace swarmc::Lang::Walk {
 
 class SymbolScrubWalk : public Walk<void> {
 public:
@@ -17,42 +15,42 @@ public:
 protected:
     SemanticSymbol* _symbol;
 
-    virtual void walkProgramNode(ProgramNode* node) {
+    void walkProgramNode(ProgramNode* node) override {
         for ( auto stmt : *node->body() ) {
             walk(stmt);
         }
     }
 
-    virtual void walkExpressionStatementNode(ExpressionStatementNode* node) {
+    void walkExpressionStatementNode(ExpressionStatementNode* node) override {
         return walk(node->expression());
     }
 
-    virtual void walkIdentifierNode(IdentifierNode* node) {
+    void walkIdentifierNode(IdentifierNode* node) override {
         if ( node->_symbol != nullptr && node->_symbol->uuid() == _symbol->uuid() ) {
             node->_symbol = nullptr;
         }
     }
 
-    virtual void walkMapAccessNode(MapAccessNode* node) {
+    void walkMapAccessNode(MapAccessNode* node) override {
         return walk(node->path());
     }
 
-    virtual void walkEnumerableAccessNode(EnumerableAccessNode* node) {
+    void walkEnumerableAccessNode(EnumerableAccessNode* node) override {
         walk(node->path());
         walk(node->index());
     }
 
-    // virtual void walkPrimitiveTypeNode(PrimitiveTypeNode* node) {}
+    // void walkPrimitiveTypeNode(PrimitiveTypeNode* override node) {}
 
-    // virtual void walkEnumerableTypeNode(EnumerableTypeNode* node) {}
+    // void walkEnumerableTypeNode(EnumerableTypeNode* override node) {}
 
-    // virtual void walkMapTypeNode(MapTypeNode* node) {}
+    // void walkMapTypeNode(MapTypeNode* override node) {}
 
-    virtual void walkTypeLiteral(TypeLiteral* node) {}
+    void walkTypeLiteral(TypeLiteral* node) override {}
 
-    virtual void walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {}
+    void walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {}
 
-    virtual void walkVariableDeclarationNode(VariableDeclarationNode* node) {
+    void walkVariableDeclarationNode(VariableDeclarationNode* node) override {
         if ( node->id()->symbol() != nullptr && node->id()->symbol()->uuid() == _symbol->uuid() ) {
             node->id()->_symbol = nullptr;
         }
@@ -60,7 +58,7 @@ protected:
         walk(node->value());
     }
 
-    virtual void walkCallExpressionNode(CallExpressionNode* node) {
+    void walkCallExpressionNode(CallExpressionNode* node) override {
         walk(node->id());
 
         for ( auto arg : *node->args() ) {
@@ -68,7 +66,7 @@ protected:
         }
     }
 
-    virtual void walkIIFExpressionNode(IIFExpressionNode* node) {
+    void walkIIFExpressionNode(IIFExpressionNode* node) override {
         walk(node->expression());
 
         for ( auto arg : *node->args() ) {
@@ -76,82 +74,82 @@ protected:
         }
     }
 
-    virtual void walkAndNode(AndNode* node) {
+    void walkAndNode(AndNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkOrNode(OrNode* node) {
+    void walkOrNode(OrNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkEqualsNode(EqualsNode* node) {
+    void walkEqualsNode(EqualsNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkNotEqualsNode(NotEqualsNode* node) {
+    void walkNotEqualsNode(NotEqualsNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkAddNode(AddNode* node) {
+    void walkAddNode(AddNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkSubtractNode(SubtractNode* node) {
+    void walkSubtractNode(SubtractNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkMultiplyNode(MultiplyNode* node) {
+    void walkMultiplyNode(MultiplyNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkDivideNode(DivideNode* node) {
+    void walkDivideNode(DivideNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkModulusNode(ModulusNode* node) {
+    void walkModulusNode(ModulusNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkPowerNode(PowerNode* node) {
+    void walkPowerNode(PowerNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkConcatenateNode(ConcatenateNode* node) {
+    void walkConcatenateNode(ConcatenateNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual void walkNegativeExpressionNode(NegativeExpressionNode* node) {
+    void walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         walk(node->exp());
     }
 
-    virtual void walkNotNode(NotNode* node) {
+    void walkNotNode(NotNode* node) override {
         walk(node->exp());
     }
 
-    virtual void walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
+    void walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
         for ( auto actual : *node->actuals() ) {
             walk(actual);
         }
     }
 
-    virtual void walkBlockStatementNode(BlockStatementNode* node) {
+    void walkBlockStatementNode(BlockStatementNode* node) override {
         for ( auto stmt : *node->body() ) {
             walk(stmt);
         }
     }
 
-    virtual void walkEnumerationStatement(EnumerationStatement* node) {
+    void walkEnumerationStatement(EnumerationStatement* node) override {
         walk(node->enumerable());
 
         if ( node->local()->symbol() != nullptr && node->local()->symbol()->uuid() == _symbol->uuid() ) {
@@ -161,7 +159,7 @@ protected:
         walkBlockStatementNode(node);
     }
 
-    virtual void walkWithStatement(WithStatement* node) {
+    void walkWithStatement(WithStatement* node) override {
         walk(node->resource());
 
         if ( node->local()->symbol() != nullptr && node->local()->symbol()->uuid() == _symbol->uuid() ) {
@@ -171,70 +169,68 @@ protected:
         walkBlockStatementNode(node);
     }
 
-    virtual void walkIfStatement(IfStatement* node) {
+    void walkIfStatement(IfStatement* node) override {
         walk(node->condition());
         walkBlockStatementNode(node);
     }
 
-    virtual void walkWhileStatement(WhileStatement* node) {
+    void walkWhileStatement(WhileStatement* node) override {
         walk(node->condition());
         walkBlockStatementNode(node);
     }
 
-    virtual void walkContinueNode(ContinueNode* node) {
+    void walkContinueNode(ContinueNode* node) override {
         return;
     }
 
-    virtual void walkBreakNode(BreakNode* node) {
+    void walkBreakNode(BreakNode* node) override {
         return;
     }
 
-    virtual void walkReturnStatementNode(ReturnStatementNode* node) {
+    void walkReturnStatementNode(ReturnStatementNode* node) override {
         if ( node->value() != nullptr) {
             walk(node->value());
         }
     }
 
-    virtual void walkMapStatementNode(MapStatementNode* node) {
+    void walkMapStatementNode(MapStatementNode* node) override {
         walk(node->value());
     }
 
-    virtual void walkMapNode(MapNode* node) {
+    void walkMapNode(MapNode* node) override {
         for ( auto entry : *node->body() ) {
             walk(entry);
         }
     }
 
-    virtual void walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {}
+    void walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {}
 
-    virtual void walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) {}
+    void walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {}
 
-    virtual void walkAssignExpressionNode(AssignExpressionNode* node) {
+    void walkAssignExpressionNode(AssignExpressionNode* node) override {
         walk(node->dest());
         walk(node->value());
     }
 
-    virtual void walkUnitNode(UnitNode* node) {}
+    void walkUnitNode(UnitNode* node) override {}
 
-    virtual void walkFunctionNode(FunctionNode* node) {
+    void walkFunctionNode(FunctionNode* node) override {
         // TODO: determine if I need to scrub formals
         for ( auto stmt : *node->body() ) {
             walk(stmt);
         }
     }
 
-    virtual void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
+    void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
         walk(node->left());
         walk(node->right());
     }
 
-    virtual std::string toString() const {
+    std::string toString() const override {
         return "SymbolScrubWalk<>";
     }
 };
 
-}
-}
 }
 
 #endif

@@ -14,7 +14,7 @@ namespace swarmc::Runtime::Debug {
     class Metadata : public IStringable {
     public:
 
-        void addMapping(size_t pc, std::string file, size_t line, size_t col) {
+        void addMapping(size_t pc, const std::string& file, size_t line, size_t col) {
             _sourceMap[pc] = std::make_tuple(file, line, col);
         }
 

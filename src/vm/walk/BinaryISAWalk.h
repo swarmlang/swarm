@@ -23,7 +23,7 @@ namespace swarmc::ISA {
             _ref = BinaryReferenceWalk(vm);
         }
 
-        std::string toString() const {
+        std::string toString() const override {
             return "BinaryISAWalk<>";
         }
 

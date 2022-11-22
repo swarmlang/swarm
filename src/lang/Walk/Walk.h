@@ -7,9 +7,7 @@
 
 using namespace nslib;
 
-namespace swarmc {
-namespace Lang {
-namespace Walk {
+namespace swarmc::Lang::Walk {
 
     template <typename TReturn>
     class Walk : public IStringable, public IUsesConsole {
@@ -104,11 +102,9 @@ namespace Walk {
             return walkNumberLiteralExpressionNode(node);
         }
 
-        virtual std::string toString() const = 0;
+        std::string toString() const override = 0;
     };
 
-}
-}
 }
 
 #endif

@@ -2,7 +2,7 @@
 
 namespace nslib {
 
-    Framework* Framework::_global = nullptr;
+    bool Framework::_booted = false;
     Console* Console::_global = nullptr;
 
 }

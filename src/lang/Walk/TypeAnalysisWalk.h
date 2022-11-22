@@ -6,21 +6,20 @@
 #include "../TypeTable.h"
 #include "../../Reporting.h"
 
-namespace swarmc {
-namespace Lang {
-namespace Walk {
+namespace swarmc::Lang::Walk {
 
 class TypeAnalysisWalk : public Walk<bool> {
 public:
     TypeAnalysisWalk() : Walk<bool>(), _whileCount(0), _funcCount(0), _types(new TypeTable()), 
-        _funcTypes(new std::stack<const Type::Type*>()), _funcArgs(new std::stack<int>()) {}
-    ~TypeAnalysisWalk() {
+        _funcTypes(new std::stack<const Type::Type*>()), _funcArgs(new std::stack<size_t>()) {}
+
+    ~TypeAnalysisWalk() override {
         delete _types;
         delete _funcTypes;
         delete _funcArgs;
     }
 protected:
-    virtual bool walkProgramNode(ProgramNode* node) {
+    bool walkProgramNode(ProgramNode* node) override {
         bool flag = true;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
@@ -31,7 +30,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkExpressionStatementNode(ExpressionStatementNode* node) {
+    bool walkExpressionStatementNode(ExpressionStatementNode* node) override {
         bool flag = walk(node->expression());
 
         auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
@@ -40,7 +39,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkIdentifierNode(IdentifierNode* node) {
+    bool walkIdentifierNode(IdentifierNode* node) override {
         if ( node->_symbol->type() == nullptr ) {
             Reporting::typeError(
                 node->position(),
@@ -55,7 +54,7 @@ protected:
         return true;
     }
 
-    virtual bool walkMapAccessNode(MapAccessNode* node) {
+    bool walkMapAccessNode(MapAccessNode* node) override {
         bool pathresult = walk(node->path());
         if ( !pathresult ) {
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
@@ -76,7 +75,7 @@ protected:
         return true;
     }
 
-    virtual bool walkEnumerableAccessNode(EnumerableAccessNode* node) {
+    bool walkEnumerableAccessNode(EnumerableAccessNode* node) override {
         bool pathresult = walk(node->path());
         if ( !pathresult ) {
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
@@ -113,17 +112,17 @@ protected:
         return true;
     }
 
-    virtual bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
+    bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::TYPE));
         return true;
     }
 
-    virtual bool walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {
+    bool walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::BOOLEAN));
         return true;
     }
 
-    virtual bool walkVariableDeclarationNode(VariableDeclarationNode* node) {
+    bool walkVariableDeclarationNode(VariableDeclarationNode* node) override {
         bool flag = walk(node->typeNode());
         flag = walk(node->id()) && flag;
         flag = walk(node->value()) && flag;
@@ -146,7 +145,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkCallExpressionNode(CallExpressionNode* node) {
+    bool walkCallExpressionNode(CallExpressionNode* node) override {
         // Perform type analysis on the callable
         bool flag = walk(node->id());
 
@@ -210,7 +209,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkIIFExpressionNode(IIFExpressionNode* node) {
+    bool walkIIFExpressionNode(IIFExpressionNode* node) override {
         bool flag = walk(node->expression());
 
         // Perform type analysis on the arguments
@@ -300,15 +299,15 @@ protected:
         return flag;
     }
 
-    virtual bool walkAndNode(AndNode* node) {
+    bool walkAndNode(AndNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkOrNode(OrNode* node) {
+    bool walkOrNode(OrNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkEqualsNode(EqualsNode* node) {
+    bool walkEqualsNode(EqualsNode* node) override {
         bool flag = walk(node->left());
         flag = walk(node->right()) && flag;
 
@@ -331,7 +330,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkNotEqualsNode(NotEqualsNode* node) {
+    bool walkNotEqualsNode(NotEqualsNode* node) override {
         bool flag = walk(node->left());
         flag = walk(node->right()) && flag;
 
@@ -354,35 +353,35 @@ protected:
         return flag;
     }
 
-    virtual bool walkAddNode(AddNode* node) {
+    bool walkAddNode(AddNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkSubtractNode(SubtractNode* node) {
+    bool walkSubtractNode(SubtractNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkMultiplyNode(MultiplyNode* node) {
+    bool walkMultiplyNode(MultiplyNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkDivideNode(DivideNode* node) {
+    bool walkDivideNode(DivideNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkModulusNode(ModulusNode* node) {
+    bool walkModulusNode(ModulusNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkPowerNode(PowerNode* node) {
+    bool walkPowerNode(PowerNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkConcatenateNode(ConcatenateNode* node) {
+    bool walkConcatenateNode(ConcatenateNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
-    virtual bool walkNegativeExpressionNode(NegativeExpressionNode* node) {
+    bool walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         bool flag = walk(node->exp());
 
         const Type::Type* numType = Type::Primitive::of(Type::Intrinsic::NUMBER);
@@ -399,7 +398,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkNotNode(NotNode* node) {
+    bool walkNotNode(NotNode* node) override {
         bool flag = walk(node->exp());
 
         const Type::Type* boolType = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
@@ -416,7 +415,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
+    bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
         size_t idx = 0;
         bool hadFirst = false;
         const Type::Type* innerType = nullptr;
@@ -450,7 +449,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkEnumerationStatement(EnumerationStatement* node) {
+    bool walkEnumerationStatement(EnumerationStatement* node) override {
         bool flag = walk(node->enumerable());
 
         const Type::Type* enumType = node->enumerable()->type();
@@ -479,12 +478,14 @@ protected:
         return flag;
     }
 
-    virtual bool walkWithStatement(WithStatement* node) {
+    bool walkWithStatement(WithStatement* node) override {
         bool flag = walk(node->resource());
 
         const Type::Type* type = _types->getTypeOf(node->resource());
-        if ( (type == nullptr || type->intrinsic() != Type::Intrinsic::RESOURCE)
-            && type->intrinsic() != Type::Intrinsic::ERROR ) {
+        if (
+            type == nullptr ||
+            (type->intrinsic() != Type::Intrinsic::RESOURCE && type->intrinsic() != Type::Intrinsic::ERROR)
+        ) {
             Reporting::typeError(
                 node->position(),
                 "Expected Intrinsic::RESOURCE, found: " + (type == nullptr ? "none" : type->toString())
@@ -507,7 +508,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkIfStatement(IfStatement* node) {
+    bool walkIfStatement(IfStatement* node) override {
         bool flag = walk(node->condition());
 
         const Type::Type* condType = _types->getTypeOf(node->condition());
@@ -531,7 +532,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkWhileStatement(WhileStatement* node) {
+    bool walkWhileStatement(WhileStatement* node) override {
         bool flag = walk(node->condition());
 
         const Type::Type* condType = _types->getTypeOf(node->condition());
@@ -557,7 +558,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkContinueNode(ContinueNode* node) {
+    bool walkContinueNode(ContinueNode* node) override {
         if ( _whileCount == 0 ) {
             Reporting::syntaxError(
                 node->position(),
@@ -569,7 +570,7 @@ protected:
         return true;
     }
 
-    virtual bool walkBreakNode(BreakNode* node) {
+    bool walkBreakNode(BreakNode* node) override {
         if ( _whileCount == 0 ) {
             Reporting::syntaxError(
                 node->position(),
@@ -581,7 +582,7 @@ protected:
         return true;
     }
 
-    virtual bool walkReturnStatementNode(ReturnStatementNode* node) {
+    bool walkReturnStatementNode(ReturnStatementNode* node) override {
         if ( _funcCount == 0 ) {
             Reporting::syntaxError(
                 node->position(),
@@ -596,7 +597,7 @@ protected:
         if ( funcType->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
             funcType = ((Type::Lambda*) funcType)->returns();
         } else {
-            for ( int i = 0; i < _funcArgs->top(); i++ ) {
+            for ( size_t i = 0; i < _funcArgs->top(); i++ ) {
                 assert(funcType->intrinsic() == Type::Intrinsic::LAMBDA0 || funcType->intrinsic() == Type::Intrinsic::LAMBDA1);
                 funcType = ((Type::Lambda*) funcType)->returns();
             }
@@ -634,7 +635,7 @@ protected:
         return true;
     }
 
-    virtual bool walkMapStatementNode(MapStatementNode* node) {
+    bool walkMapStatementNode(MapStatementNode* node) override {
         if ( !walk(node->value()) ) {
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
@@ -644,7 +645,7 @@ protected:
         return true;
     }
 
-    virtual bool walkMapNode(MapNode* node) {
+    bool walkMapNode(MapNode* node) override {
         size_t idx = 0;
         bool hadFirst = false;
         const Type::Type* innerType = nullptr;
@@ -679,17 +680,17 @@ protected:
         return flag;
     }
 
-    virtual bool walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
+    bool walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::STRING));
         return true;
     }
 
-    virtual bool walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) {
+    bool walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::NUMBER));
         return true;
     }
 
-    virtual bool walkAssignExpressionNode(AssignExpressionNode* node) {
+    bool walkAssignExpressionNode(AssignExpressionNode* node) override {
         bool flag = walk(node->dest());
         flag = walk(node->value()) && flag;
 
@@ -713,12 +714,12 @@ protected:
         return flag;
     }
 
-    virtual bool walkUnitNode(UnitNode* node) {
+    bool walkUnitNode(UnitNode* node) override {
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
         return true;
     }
 
-    virtual bool walkFunctionNode(FunctionNode* node) {
+    bool walkFunctionNode(FunctionNode* node) override {
         _funcTypes->push(node->type());
         _funcArgs->push(node->formals()->size());
         _funcCount++;
@@ -734,7 +735,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
+    bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
@@ -745,11 +746,9 @@ private:
     int _whileCount, _funcCount;
     TypeTable* _types;
     std::stack<const Type::Type*>* _funcTypes;
-    std::stack<int>* _funcArgs;
+    std::stack<size_t>* _funcArgs;
 };
 
-}
-}
 }
 
 #endif

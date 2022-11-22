@@ -30,7 +30,7 @@ namespace swarmc {
 
     class Pipeline : public IStringable {
     public:
-        Pipeline(std::istream* input) {
+        explicit Pipeline(std::istream* input) {
             _input = input;
             _scanner = new Lang::Scanner(input);
             _root = nullptr;
@@ -38,20 +38,20 @@ namespace swarmc {
             _isa = nullptr;
         }
 
-        virtual ~Pipeline(){
+        ~Pipeline() override {
             delete _scanner;
             delete _parser;
+
             if ( _root != nullptr) {
                 for ( auto stmt : *_root->body() ) delete stmt;
                 delete _root->body();
-                delete _root;
             }
-            if ( _isa != nullptr ) {
-                delete _isa;
-            } 
+
+            delete _root;
+            delete _isa;
         }
 
-        virtual std::string toString() const override {
+        std::string toString() const override {
             return "Pipeline<>";
         }
 
@@ -98,7 +98,7 @@ namespace swarmc {
 
         void targetASTRepresentation(std::ostream& out) {
             targetASTSymbolicTyped();
-            Lang::Walk::PrintWalk pW(out, _root);
+            Lang::Walk::PrintWalk::print(out, _root);
         }
 
         ISA::Instructions* targetISA() {

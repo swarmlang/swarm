@@ -3,15 +3,13 @@
 
 #include "SwarmError.h"
 
-namespace swarmc {
-namespace Errors {
+namespace swarmc::Errors {
 
     class FreeSymbolError : public SwarmError {
     public:
         FreeSymbolError(std::string name) : SwarmError("Tried to retrieve value of unbound symbol: " + name) {}
     };
 
-}
 }
 
 #endif

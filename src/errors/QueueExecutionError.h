@@ -3,15 +3,13 @@
 
 #include "SwarmError.h"
 
-namespace swarmc {
-namespace Errors {
+namespace swarmc::Errors {
 
     class QueueExecutionError : public SwarmError {
     public:
         QueueExecutionError(std::string msg) : SwarmError("Exception during queue execution: " + msg) {}
     };
 
-}
 }
 
 #endif

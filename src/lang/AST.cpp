@@ -1,18 +1,13 @@
 #include <string>
-#include <ostream>
-#include <cassert>
 #include "AST.h"
 #include "SymbolTable.h"
-#include "../Reporting.h"
-#include "Type.h"
 #include "Walk/PrintWalk.h"
 
 #ifndef SWARMC_SPACE
 #define SWARMC_SPACE "  "
 #endif
 
-namespace swarmc {
-namespace Lang {
+namespace swarmc::Lang {
 
     ProgramNode* ProgramNode::copy() const  {
         auto other = new ProgramNode;
@@ -30,5 +25,5 @@ namespace Lang {
     SemanticSymbol* EnumerableAccessNode::lockable() const {
         return _path->lockable();
     }
-}
+
 }

@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
+#include <utility>
 #include "../shared/nslib.h"
 
 using namespace nslib;
 // TODO: create RuntimePosition class w/ trace?
 
-namespace swarmc {
-namespace Lang {
+namespace swarmc::Lang {
 
     /**
      * Class representing a character range in the input file.
@@ -21,7 +21,10 @@ namespace Lang {
             _startLine(startLine), _endLine(endLine), _startCol(startCol), _endCol(endCol) {};
 
         Position(Position* start, Position* end) {
-            expand(start, end);
+            _startLine = start->_startLine;
+            _endLine = end->_endLine;
+            _startCol = start->_startCol;
+            _endCol = end->_endCol;
         }
 
         virtual void expand(Position* start, Position* end) {
@@ -43,7 +46,7 @@ namespace Lang {
             return s.str();
         }
 
-        virtual std::string toString() const override {
+        std::string toString() const override {
             std::stringstream s;
             s << start() << "-" << end();
             return s.str();
@@ -80,21 +83,21 @@ namespace Lang {
     /** Arbitrary Position instance representing something defined in the Prologue standard library. */
     class ProloguePosition : public Position {
     public:
-        ProloguePosition(std::string symbolName): Position(0, 0, 0, 0), _symbolName(symbolName) {}
+        explicit ProloguePosition(std::string symbolName): Position(0, 0, 0, 0), _symbolName(std::move(symbolName)) {}
 
-        virtual std::string start() const override {
+        std::string start() const override {
             return toString();
         }
 
-        virtual std::string end() const override {
+        std::string end() const override {
             return toString();
         }
 
-        virtual std::string toString() const override {
+        std::string toString() const override {
             return "[Prologue Definition: " + _symbolName + "]";
         }
 
-        virtual ProloguePosition* copy() const override {
+        ProloguePosition* copy() const override {
             return new ProloguePosition(_symbolName);
         }
 
@@ -102,7 +105,6 @@ namespace Lang {
         std::string _symbolName;
     };
 
-}
 }
 
 #endif

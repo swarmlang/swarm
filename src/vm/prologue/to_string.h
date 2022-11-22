@@ -1,6 +1,8 @@
 #ifndef SWARMVM_TO_STRING
 #define SWARMVM_TO_STRING
 
+#include <utility>
+
 #include "prologue_provider.h"
 
 namespace swarmc::Runtime::Prologue {
@@ -8,7 +10,7 @@ namespace swarmc::Runtime::Prologue {
     class NumberToStringFunctionCall : public PrologueFunctionCall {
     public:
         NumberToStringFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, vector, returnType) {}
+            PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
         void execute() override;
 
@@ -19,7 +21,7 @@ namespace swarmc::Runtime::Prologue {
 
     class NumberToStringFunction : public PrologueFunction {
     public:
-        NumberToStringFunction(IProvider* provider) : PrologueFunction("NUMBER_TO_STRING", provider) {}
+        explicit NumberToStringFunction(IProvider* provider) : PrologueFunction("NUMBER_TO_STRING", provider) {}
 
         FormalTypes paramTypes() const override;
 
@@ -35,7 +37,7 @@ namespace swarmc::Runtime::Prologue {
     class BooleanToStringFunctionCall : public PrologueFunctionCall {
     public:
         BooleanToStringFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, vector, returnType) {}
+            PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
         void execute() override;
 
@@ -46,7 +48,7 @@ namespace swarmc::Runtime::Prologue {
 
     class BooleanToStringFunction : public PrologueFunction {
     public:
-        BooleanToStringFunction(IProvider* provider) : PrologueFunction("BOOLEAN_TO_STRING", provider) {}
+        explicit BooleanToStringFunction(IProvider* provider) : PrologueFunction("BOOLEAN_TO_STRING", provider) {}
 
         FormalTypes paramTypes() const override;
 

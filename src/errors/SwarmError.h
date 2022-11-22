@@ -7,14 +7,13 @@
 
 using namespace nslib;
 
-namespace swarmc {
-namespace Errors {
+namespace swarmc::Errors {
 
     class SwarmError : public std::logic_error, public IStringable {
     public:
-        SwarmError(std::string message) : std::logic_error(message), _message(message) {}
+        explicit SwarmError(const std::string& message) : std::logic_error(message), _message(message) {}
 
-        virtual std::string toString() const {
+        std::string toString() const override {
             return _message;
         }
 
@@ -22,7 +21,6 @@ namespace Errors {
         std::string _message;
     };
 
-}
 }
 
 #endif

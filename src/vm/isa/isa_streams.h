@@ -7,9 +7,9 @@ namespace swarmc::ISA {
 
     class StreamInit : public UnaryInstruction<Reference> {
     public:
-        StreamInit(Reference* type) :
+        explicit StreamInit(Reference* type) :
             UnaryInstruction<Reference>(Tag::STREAMINIT, type) {}
-        virtual StreamInit* copy() const override {
+        StreamInit* copy() const override {
             return new StreamInit(_first->copy());
         }
     };
@@ -18,47 +18,47 @@ namespace swarmc::ISA {
     public:
         StreamPush(LocationReference* stream, Reference* value) :
             BinaryInstruction<LocationReference, Reference>(Tag::STREAMPUSH, stream, value) {}
-        virtual StreamPush* copy() const override {
+        StreamPush* copy() const override {
             return new StreamPush(_first->copy(), _second->copy());
         }
     };
 
     class StreamPop : public UnaryInstruction<LocationReference> {
     public:
-        StreamPop(LocationReference* stream) :
+        explicit StreamPop(LocationReference* stream) :
             UnaryInstruction<LocationReference>(Tag::STREAMPOP, stream) {}
-        virtual StreamPop* copy() const override {
+        StreamPop* copy() const override {
             return new StreamPop(_first->copy());
         }
     };
 
     class StreamClose : public UnaryInstruction<LocationReference> {
     public:
-        StreamClose(LocationReference* stream) :
+        explicit StreamClose(LocationReference* stream) :
             UnaryInstruction<LocationReference>(Tag::STREAMCLOSE, stream) {}
-        virtual StreamClose* copy() const override {
+        StreamClose* copy() const override {
             return new StreamClose(_first->copy());
         }
     };
 
     class StreamEmpty : public UnaryInstruction<LocationReference> {
     public:
-        StreamEmpty(LocationReference* stream) :
+        explicit StreamEmpty(LocationReference* stream) :
             UnaryInstruction<LocationReference>(Tag::STREAMEMPTY, stream) {}
-        virtual StreamEmpty* copy() const override {
+        StreamEmpty* copy() const override {
             return new StreamEmpty(_first->copy());
         }
     };
 
     class Out : public StreamPush {
     public:
-        Out(Reference* value) :
+        explicit Out(Reference* value) :
                 StreamPush(new LocationReference(Affinity::SHARED, "STDOUT"), value) {}
     };
 
     class Err : public StreamPush {
     public:
-        Err(Reference* value) :
+        explicit Err(Reference* value) :
                 StreamPush(new LocationReference(Affinity::SHARED, "STDERR"), value) {}
     };
 

@@ -30,28 +30,23 @@ namespace nslib {
         Framework(Framework& other) = delete;  // don't allow cloning
         void operator=(const Framework&) = delete;  // don't allow assigning
 
-        static Framework* get() {
-            if ( _global == nullptr ) {
-                _global = new Framework;
-                _global->boot();
-            }
+        static void boot() {
+            if ( _booted ) return;
 
-            return _global;
-        }
-
-        void boot() {
             auto epoch = std::chrono::duration_cast<std::chrono::milliseconds>(
                 std::chrono::system_clock::now().time_since_epoch()).count();
             priv::generator.seed(epoch);
+
+            _booted = true;
         }
 
-        void shutdown() {}
+        static void shutdown() {
+            if ( !_booted ) return;
+        }
 
     protected:
         Framework() = default;
-        virtual ~Framework() { shutdown(); }
-        static Framework* _global;
-        bool _booted = false;
+        static bool _booted;
     };
 
 
@@ -199,12 +194,12 @@ namespace nslib {
         inline std::string join(std::string const& delimiter, std::vector<std::string> const& strs) {
             std::string buf;
 
-            if ( strs.size() > 0 ) {
+            if ( !strs.empty() ) {
                 buf.reserve(strs.size() * strs[0].size());
             }
 
             bool first = false;
-            for ( auto str : strs ) {
+            for ( const auto& str : strs ) {
                 if ( first ) buf += delimiter;
                 buf += str;
                 first = true;
@@ -452,7 +447,7 @@ namespace nslib {
         /** Show a progress bar. `value` should be a decimal percentage from 0 to 1. */
         Console* progress(double value) {
             size_t width = _vpWidth - 5;
-            size_t filled = static_cast<int>(width * value);
+            size_t filled = static_cast<int>(static_cast<double>(width) * value);
             size_t percent = static_cast<int>(100 * value);
             if ( value >= 1 ) {
                 percent = 100;

@@ -80,7 +80,7 @@ int Executive::run(int argc, char **argv) {
     }
 
     delete console;
-    if ( _input != nullptr ) delete _input;
+    delete _input;
     return result;
 }
 

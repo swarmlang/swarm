@@ -11,16 +11,15 @@
 #include "Token.h"
 #include "../bison/grammar.hh"
 
-namespace swarmc {
-namespace Lang {
+namespace swarmc::Lang {
 
     /**
      * Base class for the Flex-based input lexer.
      */
     class Scanner : public yyFlexLexer {
     public:
-        Scanner(std::istream* in) : yyFlexLexer(in) {};
-        virtual ~Scanner() {};
+        explicit Scanner(std::istream* in) : yyFlexLexer(in) {};
+        ~Scanner() override = default;
 
         using FlexLexer::yylex;
 
@@ -28,8 +27,8 @@ namespace Lang {
 
         /** Creates a new Token instance for the given Parser::token kind. */
         int makeBareToken(int tagIn) {
-            size_t length = static_cast<size_t>(yyleng);
-            Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+            auto length = static_cast<size_t>(yyleng);
+            auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             yylval->lexeme = new Token(pos, tagIn, Debugging::tokenKindToString(tagIn));
             colNum += length;
@@ -38,8 +37,8 @@ namespace Lang {
 
         int makeStringLiteralToken() {
             int tagIn = Parser::token::STRINGLITERAL;
-            size_t length = static_cast<size_t>(yyleng);
-            Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+            auto length = static_cast<size_t>(yyleng);
+            auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
             yylval->lexeme = new StringLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, text.substr(1, text.size() - 2));
@@ -49,8 +48,8 @@ namespace Lang {
 
         int makeNumberLiteralToken() {
             int tagIn = Parser::token::NUMBERLITERAL;
-            size_t length = static_cast<size_t>(yyleng);
-            Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+            auto length = static_cast<size_t>(yyleng);
+            auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
             yylval->lexeme = new NumberLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, std::stod(yytext));
@@ -60,8 +59,8 @@ namespace Lang {
 
         int makeIDToken() {
             int tagIn = Parser::token::ID;
-            size_t length = static_cast<size_t>(yyleng);
-            Position* pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+            auto length = static_cast<size_t>(yyleng);
+            auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
             yylval->lexeme = new IDToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, yytext);
@@ -92,7 +91,6 @@ namespace Lang {
         size_t colNum = 1;
     };
 
-}
 }
 
 #endif

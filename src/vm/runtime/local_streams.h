@@ -10,7 +10,7 @@ namespace swarmc::Runtime {
 
         class LocalStream : public IStream, public IUsesConsole {
         public:
-            LocalStream(std::string id) : IUsesConsole(), _id(std::move(id)) {}
+            explicit LocalStream(std::string id) : IUsesConsole(), _id(std::move(id)) {}
 
             void open() override {}
 

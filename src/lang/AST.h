@@ -38,12 +38,12 @@ namespace Walk {
     public:
         explicit ASTNode(Position* pos) : IUsesConsole(), _pos(pos) {};
 
-        ~ASTNode() {
+        ~ASTNode() override {
             delete _pos;
         };
 
         /** Implements IStringable. */
-        virtual std::string toString() const = 0;
+        std::string toString() const override = 0;
 
         virtual ASTNode* copy() const = 0;
 

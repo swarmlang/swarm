@@ -3,15 +3,13 @@
 
 #include "SwarmError.h"
 
-namespace swarmc {
-namespace Errors {
+namespace swarmc::Errors {
 
     class InvalidPrimitiveTypeInstantiationError : public SwarmError {
     public:
         InvalidPrimitiveTypeInstantiationError() : SwarmError("Tried to instantiate PrimitiveType with non-primitive ValueType.") {}
     };
 
-}
 }
 
 #endif

@@ -1,7 +1,7 @@
 #include "SymbolTable.h"
 
-namespace swarmc {
-namespace Lang {
+namespace swarmc::Lang {
+
     ScopeTable* ScopeTable::prologue() {
         auto prologueScope = new swarmc::Lang::ScopeTable();
 
@@ -78,5 +78,5 @@ namespace Lang {
 
         return prologueScope;
     }
-}
+
 }

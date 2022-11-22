@@ -7,9 +7,9 @@ namespace swarmc::ISA {
 
     class EnumInit : public UnaryInstruction<Reference> {
     public:
-        EnumInit(Reference* type) :
+        explicit EnumInit(Reference* type) :
             UnaryInstruction<Reference>(Tag::ENUMINIT, type) {}
-        virtual EnumInit* copy() const override {
+        EnumInit* copy() const override {
             return new EnumInit(_first->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         EnumAppend(Reference* value, LocationReference* enumeration) :
             BinaryInstruction<Reference, LocationReference>(Tag::ENUMAPPEND, value, enumeration) {}
-        virtual EnumAppend* copy() const override {
+        EnumAppend* copy() const override {
             return new EnumAppend(_first->copy(), _second->copy());
         }
     };
@@ -27,16 +27,16 @@ namespace swarmc::ISA {
     public:
         EnumPrepend(Reference* value, LocationReference* enumeration) :
             BinaryInstruction<Reference, LocationReference>(Tag::ENUMPREPEND, value, enumeration) {}
-        virtual EnumPrepend* copy() const override {
+        EnumPrepend* copy() const override {
             return new EnumPrepend(_first->copy(), _second->copy());
         }
     };
 
     class EnumLength : public UnaryInstruction<LocationReference> {
     public:
-        EnumLength(LocationReference* enumeration) :
+        explicit EnumLength(LocationReference* enumeration) :
             UnaryInstruction<LocationReference>(Tag::ENUMLENGTH, enumeration) {}
-        virtual EnumLength* copy() const override {
+        EnumLength* copy() const override {
             return new EnumLength(_first->copy());
         }
     };
@@ -45,7 +45,7 @@ namespace swarmc::ISA {
     public:
         EnumGet(LocationReference* enumeration, Reference* key) :
             BinaryInstruction<LocationReference, Reference>(Tag::ENUMGET, enumeration, key) {}
-        virtual EnumGet* copy() const override {
+        EnumGet* copy() const override {
             return new EnumGet(_first->copy(), _second->copy());
         }
     };
@@ -54,7 +54,7 @@ namespace swarmc::ISA {
     public:
         EnumSet(LocationReference* enumeration, Reference* key, Reference* value) :
             TrinaryInstruction<LocationReference, Reference, Reference>(Tag::ENUMSET, enumeration, key, value) {}
-        virtual EnumSet* copy() const override {
+        EnumSet* copy() const override {
             return new EnumSet(_first->copy(), _second->copy(), _third->copy());
         }
     };
@@ -63,7 +63,7 @@ namespace swarmc::ISA {
     public:
         Enumerate(Reference* elemType, LocationReference* enumeration, LocationReference* fn) :
             TrinaryInstruction<Reference, LocationReference, LocationReference>(Tag::ENUMERATE, elemType, enumeration, fn) {}
-        virtual Enumerate* copy() const override {
+        Enumerate* copy() const override {
             return new Enumerate(_first->copy(), _second->copy(), _third->copy());
         }
     };

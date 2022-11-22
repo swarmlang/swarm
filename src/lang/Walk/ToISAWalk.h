@@ -7,9 +7,7 @@
 #include "Walk.h"
 #include "../../vm/isa_meta.h"
 
-namespace swarmc {
-namespace Lang {
-namespace Walk {
+namespace swarmc::Lang::Walk {
 
 
 class ToISAWalk : public Walk<ISA::Instructions*> {
@@ -17,11 +15,11 @@ public:
     ToISAWalk() : Walk<ISA::Instructions*>(), 
         _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()) {}
 
-    ~ToISAWalk() {
+    ~ToISAWalk() override {
         delete _whileConds;
     }
 protected:
-    virtual ISA::Instructions* walkProgramNode(ProgramNode* node) {
+    ISA::Instructions* walkProgramNode(ProgramNode* node) override {
         auto instrs = new ISA::Instructions();
         for ( auto stmt : *node->body() ) {
             auto i = walk(stmt);
@@ -31,11 +29,11 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkExpressionStatementNode(ExpressionStatementNode* node) {
+    ISA::Instructions* walkExpressionStatementNode(ExpressionStatementNode* node) override {
         return walk(node->expression());
     }
 
-    virtual ISA::Instructions* walkIdentifierNode(IdentifierNode* node) {
+    ISA::Instructions* walkIdentifierNode(IdentifierNode* node) override {
         auto instrs = new ISA::Instructions();
         ISA::Affinity affinity = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
         auto ref = new ISA::LocationReference(affinity, "var_" + node->name());
@@ -43,7 +41,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkMapAccessNode(MapAccessNode* node) {
+    ISA::Instructions* walkMapAccessNode(MapAccessNode* node) override {
         auto instrs = walk(node->path());
         auto mapget = new ISA::MapGet(
             new ISA::LocationReference(ISA::Affinity::LOCAL, "mkey_" + node->end()->name()), getLocFromAssign(instrs->back()));
@@ -51,7 +49,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkEnumerableAccessNode(EnumerableAccessNode* node) {
+    ISA::Instructions* walkEnumerableAccessNode(EnumerableAccessNode* node) override {
         auto instrs = walk(node->index());
         auto llval = walk(node->path());
         auto enumget = new ISA::EnumGet(getLocFromAssign(llval->back()), getLocFromAssign(instrs->back()));
@@ -60,26 +58,26 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
+    ISA::Instructions* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::TypeReference(node->value());
         instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), ref));
         return instrs;
     }
 
-    virtual ISA::Instructions* walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {
+    ISA::Instructions* walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::BooleanReference(node->value());
         instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), ref));
         return instrs;
     }
 
-    virtual ISA::Instructions* walkVariableDeclarationNode(VariableDeclarationNode* node) {
+    ISA::Instructions* walkVariableDeclarationNode(VariableDeclarationNode* node) override {
         auto instrs = walk(node->value());
 
         // Create location from variable name
         auto aff = node->id()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        ISA::LocationReference* loc = new ISA::LocationReference(aff, "var_" + node->id()->name());
+        auto loc = new ISA::LocationReference(aff, "var_" + node->id()->name());
 
         // if in a function, add a scopeof just in case
         if ( _inFunction ) {
@@ -96,10 +94,10 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkCallExpressionNode(CallExpressionNode* node) {
+    ISA::Instructions* walkCallExpressionNode(CallExpressionNode* node) override {
         auto instrs = walk(node->id());
         auto floc = getLocFromAssign(instrs->back());
-        if ( node->args()->size() == 0 ) {
+        if ( node->args()->empty() ) {
             auto call = new ISA::Call0(floc);
             if (node->type()->intrinsic() == Type::Intrinsic::VOID) {
                 instrs->push_back(call);
@@ -134,11 +132,11 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkIIFExpressionNode(IIFExpressionNode* node) {
+    ISA::Instructions* walkIIFExpressionNode(IIFExpressionNode* node) override {
         auto instrs = walk(node->expression());
         auto floc = getLocFromAssign(instrs->back());
 
-        if ( node->args()->size() == 0 ) {
+        if ( node->args()->empty() ) {
             auto call = new ISA::Call0(floc);
             if (node->type()->intrinsic() == Type::Intrinsic::VOID) {
                 instrs->push_back(call);
@@ -173,7 +171,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkAndNode(AndNode* node) {
+    ISA::Instructions* walkAndNode(AndNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -184,7 +182,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkOrNode(OrNode* node) {
+    ISA::Instructions* walkOrNode(OrNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -195,7 +193,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkEqualsNode(EqualsNode* node) {
+    ISA::Instructions* walkEqualsNode(EqualsNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -206,7 +204,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkNotEqualsNode(NotEqualsNode* node) {
+    ISA::Instructions* walkNotEqualsNode(NotEqualsNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -219,7 +217,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkAddNode(AddNode* node) {
+    ISA::Instructions* walkAddNode(AddNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -230,7 +228,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkSubtractNode(SubtractNode* node) {
+    ISA::Instructions* walkSubtractNode(SubtractNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -241,7 +239,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkMultiplyNode(MultiplyNode* node) {
+    ISA::Instructions* walkMultiplyNode(MultiplyNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -252,7 +250,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkDivideNode(DivideNode* node) {
+    ISA::Instructions* walkDivideNode(DivideNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -263,7 +261,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkModulusNode(ModulusNode* node) {
+    ISA::Instructions* walkModulusNode(ModulusNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -274,7 +272,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkPowerNode(PowerNode* node) {
+    ISA::Instructions* walkPowerNode(PowerNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -285,7 +283,7 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkConcatenateNode(ConcatenateNode* node) {
+    ISA::Instructions* walkConcatenateNode(ConcatenateNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -296,21 +294,21 @@ protected:
         return left;
     }
 
-    virtual ISA::Instructions* walkNegativeExpressionNode(NegativeExpressionNode* node) {
+    ISA::Instructions* walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         auto instrs = walk(node->exp());
         auto loc = getLocFromAssign(instrs->back());
         instrs->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), new ISA::Negative(loc)));
         return instrs;
     }
 
-    virtual ISA::Instructions* walkNotNode(NotNode* node) {
+    ISA::Instructions* walkNotNode(NotNode* node) override {
         auto instrs = walk(node->exp());
         auto loc = getLocFromAssign(instrs->back());
         instrs->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), new ISA::Not(loc)));
         return instrs;
     }
 
-    virtual ISA::Instructions* walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
+    ISA::Instructions* walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
         auto instrs = new ISA::Instructions();
         auto loc = makeLocation(ISA::Affinity::LOCAL);
         assert(node->type()->intrinsic() == Type::Intrinsic::ENUMERABLE);
@@ -329,7 +327,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkEnumerationStatement(EnumerationStatement* node) {
+    ISA::Instructions* walkEnumerationStatement(EnumerationStatement* node) override {
         auto instrs = walk(node->enumerable());
         auto enumLoc = getLocFromAssign(instrs->back());
 
@@ -373,7 +371,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkWithStatement(WithStatement* node) {
+    ISA::Instructions* walkWithStatement(WithStatement* node) override {
         auto instrs = walk(node->resource());
         auto resLoc = getLocFromAssign(instrs->back());
 
@@ -403,7 +401,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkIfStatement(IfStatement* node) {
+    ISA::Instructions* walkIfStatement(IfStatement* node) override {
         auto instrs = new ISA::Instructions();
         
         // build IF function (potentially need global scope? add to map if so)
@@ -428,7 +426,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkWhileStatement(WhileStatement* node) {
+    ISA::Instructions* walkWhileStatement(WhileStatement* node) override {
         auto instrs = new ISA::Instructions();
 
         instrs->push_back(new ISA::AssignValue(
@@ -465,12 +463,12 @@ protected:
             subfuncs.back()->insert(subfuncs.back()->end(), walkstmt->begin(), walkstmt->end());
             if ( stmt->isBlock() ) {
                 auto subf = new ISA::Instructions();
-                std::string name = "SUBFUNC_" + std::to_string(_tempCounter++);
+                auto funcname = "SUBFUNC_" + std::to_string(_tempCounter++);
                 auto voidtype = new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID));
                 _inFunction++;
-                subf->push_back(new ISA::BeginFunction(name, voidtype));
+                subf->push_back(new ISA::BeginFunction(funcname, voidtype));
                 subfuncs.push(subf);
-                funcnames.push(name);
+                funcnames.push(funcname);
             }
             delete walkstmt;
         }
@@ -514,7 +512,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkContinueNode(ContinueNode* node) {
+    ISA::Instructions* walkContinueNode(ContinueNode* node) override {
         auto instrs = new ISA::Instructions();
         // evaluate condition
         instrs->push_back(new ISA::AssignEval(
@@ -529,7 +527,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkBreakNode(BreakNode* node) {
+    ISA::Instructions* walkBreakNode(BreakNode* node) override {
         auto instrs = new ISA::Instructions();
         // set condition to false
         instrs->push_back(new ISA::AssignValue(
@@ -544,7 +542,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkReturnStatementNode(ReturnStatementNode* node) {
+    ISA::Instructions* walkReturnStatementNode(ReturnStatementNode* node) override {
         auto instrs = new ISA::Instructions();
         instrs->push_back(new ISA::AssignValue(new ISA::LocationReference(ISA::Affinity::LOCAL, "CFB"), new ISA::BooleanReference(true)));
         if ( node->value() != nullptr ) {
@@ -556,11 +554,11 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkMapStatementNode(MapStatementNode* node) {
+    ISA::Instructions* walkMapStatementNode(MapStatementNode* node) override {
         return walk(node->value());
     }
 
-    virtual ISA::Instructions* walkMapNode(MapNode* node) {
+    ISA::Instructions* walkMapNode(MapNode* node) override {
         auto instrs = new ISA::Instructions();
         auto loc = makeLocation(ISA::Affinity::LOCAL);
         assert(node->type()->intrinsic() == Type::Intrinsic::MAP);
@@ -580,21 +578,21 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
+    ISA::Instructions* walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::StringReference(node->value());
         instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), ref));
         return instrs;
     }
 
-    virtual ISA::Instructions* walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) {
+    ISA::Instructions* walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::NumberReference(node->value());
         instrs->push_back(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL), ref));
         return instrs;
     }
 
-    virtual ISA::Instructions* walkAssignExpressionNode(AssignExpressionNode* node) {
+    ISA::Instructions* walkAssignExpressionNode(AssignExpressionNode* node) override {
         auto instrs = walk(node->value());
         auto value = getLocFromAssign(instrs->back());
         if ( node->dest()->getName() == "IdentifierNode" ) {
@@ -627,17 +625,17 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkUnitNode(UnitNode* node) {
+    ISA::Instructions* walkUnitNode(UnitNode* node) override {
         // this should never be called
         return new ISA::Instructions();
     }
 
-    virtual ISA::Instructions* walkFunctionNode(FunctionNode* node) {
+    ISA::Instructions* walkFunctionNode(FunctionNode* node) override {
         auto instrs = new ISA::Instructions();
 
         std::string name = "FUNC_" + std::to_string(_tempCounter++);
         auto fnType = node->type();
-        if (node->formals()->size() == 0) {
+        if (node->formals()->empty()) {
             assert( fnType->isCallable() );
             fnType = ((Type::Lambda*)fnType)->returns();
         } else {
@@ -676,12 +674,12 @@ protected:
             subfuncs.back()->insert(subfuncs.back()->end(), walkstmt->begin(), walkstmt->end());
             if ( stmt->isBlock() ) {
                 auto subf = new ISA::Instructions();
-                std::string name = "SUBFUNC_" + std::to_string(_tempCounter++);
+                auto funcname = "SUBFUNC_" + std::to_string(_tempCounter++);
                 auto voidtype = new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID));
                 _inFunction++;
-                subf->push_back(new ISA::BeginFunction(name, voidtype));
+                subf->push_back(new ISA::BeginFunction(funcname, voidtype));
                 subfuncs.push(subf);
-                funcnames.push(name);
+                funcnames.push(funcname);
             }
             delete walkstmt;
         }
@@ -717,7 +715,7 @@ protected:
         return instrs;
     }
 
-    virtual ISA::Instructions* walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
+    ISA::Instructions* walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
         auto left = walk(node->left());
         auto right = walk(node->right());
         auto lhs = getLocFromAssign(left->back());
@@ -745,7 +743,7 @@ protected:
         return left;
     }
 
-    virtual std::string toString() const {
+    std::string toString() const override {
         return "ToISAWalk<>";
     }
 
@@ -757,7 +755,7 @@ private:
         return new ISA::LocationReference(affinity, "tmp" + std::to_string(_tempCounter++));
     }
 
-    ISA::LocationReference* getLocFromAssign(ISA::Instruction* instr) {
+    static ISA::LocationReference* getLocFromAssign(ISA::Instruction* instr) {
         assert(instr->tag() == ISA::Tag::ASSIGNEVAL || instr->tag() == ISA::Tag::ASSIGNVALUE);
         if (instr->tag() == ISA::Tag::ASSIGNEVAL) {
             return ((ISA::AssignEval*)instr)->first();
@@ -766,8 +764,6 @@ private:
     }
 };
 
-}
-}
 }
 
 #endif

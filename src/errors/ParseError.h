@@ -3,8 +3,7 @@
 
 #include "SwarmError.h"
 
-namespace swarmc {
-namespace Errors {
+namespace swarmc::Errors {
 
     class ParseError : public SwarmError {
     public:
@@ -13,7 +12,6 @@ namespace Errors {
         ParseError(int inExitCode = 1) : SwarmError("Unable to parse input."), exitCode(inExitCode) {}
     };
 
-}
 }
 
 #endif

@@ -223,7 +223,7 @@ namespace swarmc::Runtime {
          * If `shouldJump` is true, the VM will jump to the position where the
          * call was performed (used during inline function execution).
          */
-        virtual void returnToCaller(bool shouldJump = true);
+        virtual void returnToCaller(bool shouldJump);
 
         virtual IStream* getLocalOutput() const { return _localOut; }
 

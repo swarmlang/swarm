@@ -379,7 +379,7 @@ namespace swarmc::Runtime {
 
     Reference* ExecuteWalk::walkReturn0(Return0*) {
         verbose("return0");
-        _vm->returnToCaller();
+        _vm->returnToCaller(true);
         return nullptr;
     }
 
@@ -400,7 +400,7 @@ namespace swarmc::Runtime {
         call->setReturn(ref);
 
         // Jump back to the caller
-        _vm->returnToCaller();
+        _vm->returnToCaller(true);
 
         return nullptr;
     }
@@ -734,7 +734,7 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkStringLength(StringLength* i) {
         verbose("strlength " + i->first()->toString());
         auto opd = ensureString(_vm->resolve(i->first()));
-        return new NumberReference(opd->value().length());
+        return new NumberReference(static_cast<double>(opd->value().length()));
     }
 
     Reference* ExecuteWalk::walkStringSliceFrom(StringSliceFrom* i) {
@@ -743,7 +743,7 @@ namespace swarmc::Runtime {
         verbose("strslicefrom " + i->first()->toString() + " " + i->second()->toString());
         auto str = ensureString(_vm->resolve(i->first()));
         auto from = ensureNumber(_vm->resolve(i->second()));
-        return new StringReference(str->value().substr(from->value()));
+        return new StringReference(str->value().substr(static_cast<size_t>(from->value())));
     }
 
     Reference* ExecuteWalk::walkStringSliceFromTo(StringSliceFromTo* i) {
@@ -753,7 +753,7 @@ namespace swarmc::Runtime {
         auto str = ensureString(_vm->resolve(i->first()));
         auto from = ensureNumber(_vm->resolve(i->second()));
         auto to = ensureNumber(_vm->resolve(i->third()));
-        return new StringReference(str->value().substr(from->value(), to->value()));
+        return new StringReference(str->value().substr(static_cast<size_t>(from->value()), static_cast<size_t>(to->value())));
     }
 
     Reference* ExecuteWalk::walkTypeOf(TypeOf* i) {

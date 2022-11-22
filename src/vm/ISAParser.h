@@ -14,8 +14,8 @@ namespace swarmc::ISA {
     /** Parses SVI code into ISA instruction instances. */
     class Parser : public IStringable, public IUsesConsole {
     public:
-        Parser(std::istream& in) : IUsesConsole(), _in(in) {}
-        virtual ~Parser() = default;
+        explicit Parser(std::istream& in) : IUsesConsole(), _in(in) {}
+        ~Parser() override = default;
 
         std::string toString() const override {
             return "ISA::Parser<>";

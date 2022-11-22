@@ -25,8 +25,7 @@ namespace swarmc::Runtime::SingleThreaded {
     /** A single-threaded IGlobalServices using local variables, `<random>`, and util's `uuid4`. */
     class GlobalServices : public IGlobalServices {
     public:
-        GlobalServices() {
-        }
+        GlobalServices() = default;
 
         std::string getUuid() override {
             return nslib::uuid();
@@ -56,7 +55,7 @@ namespace swarmc::Runtime::SingleThreaded {
     /** A single-threaded storage driver using `std::map`. */
     class StorageInterface : public IStorageInterface {
     public:
-        StorageInterface(ISA::Affinity affinity) : _affinity(affinity) {}
+        explicit StorageInterface(ISA::Affinity affinity) : _affinity(affinity) {}
 
         ISA::Reference* load(ISA::LocationReference* loc) override;
 
@@ -158,7 +157,7 @@ namespace swarmc::Runtime::SingleThreaded {
      */
     class Queue : public IQueue {
     public:
-        Queue(VirtualMachine* vm) : _vm(vm) {}
+        explicit Queue(VirtualMachine* vm) : _vm(vm) {}
 
         void setContext(QueueContextID ctx) override {
             _context = ctx;

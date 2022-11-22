@@ -24,7 +24,7 @@ namespace swarmc {
             }
         }
 
-        static void parseError(const Lang::Position* pos, std::string message) {
+        static void parseError(const Lang::Position* pos, const std::string& message) {
             Console::get()
                 ->bold()->color(ANSIColor::RED)->print("[Parse Error] ")->reset()
                 ->bold()->print(pos->start() + " ")->reset()
@@ -35,7 +35,7 @@ namespace swarmc {
             }
         }
 
-        static void typeError(const Lang::Position* pos, std::string message) {
+        static void typeError(const Lang::Position* pos, const std::string& message) {
             Console::get()
                 ->bold()->color(ANSIColor::RED)->print("[Type Error] ")->reset()
                 ->bold()->print(pos->start() + " ")->reset()
@@ -46,7 +46,7 @@ namespace swarmc {
             }
         }
 
-        static void syntaxError(const Lang::Position* pos, std::string message) {
+        static void syntaxError(const Lang::Position* pos, const std::string& message) {
             Console::get()
                 ->bold()->color(ANSIColor::RED)->print("[Syntax Error] ")->reset()
                 ->bold()->print(pos->start() + " ")->reset()

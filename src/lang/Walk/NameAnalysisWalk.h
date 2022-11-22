@@ -5,18 +5,16 @@
 #include "../../Reporting.h"
 #include "../SymbolTable.h"
 
-namespace swarmc {
-namespace Lang {
-namespace Walk {
+namespace swarmc::Lang::Walk {
 
 class NameAnalysisWalk : public Walk<bool> {
 public:
     NameAnalysisWalk() : Walk<bool>(), _symbols(new SymbolTable()) {}
-    ~NameAnalysisWalk() {
+    ~NameAnalysisWalk() override {
         delete _symbols;
     }
 protected:
-    virtual bool walkProgramNode(ProgramNode* node) {
+    bool walkProgramNode(ProgramNode* node) override {
         bool flag = true;
         // Enter the global scope
         _symbols->enter();
@@ -30,11 +28,11 @@ protected:
         return flag;
     }
 
-    virtual bool walkExpressionStatementNode(ExpressionStatementNode* node) {
+    bool walkExpressionStatementNode(ExpressionStatementNode* node) override {
         return walk(node->expression());
     }
 
-    virtual bool walkIdentifierNode(IdentifierNode* node) {
+    bool walkIdentifierNode(IdentifierNode* node) override {
         if ( node->_symbol != nullptr ) {
             return true;
         }
@@ -50,24 +48,24 @@ protected:
         return true;
     }
 
-    virtual bool walkMapAccessNode(MapAccessNode* node) {
+    bool walkMapAccessNode(MapAccessNode* node) override {
         return walk(node->path());
     }
 
-    virtual bool walkEnumerableAccessNode(EnumerableAccessNode* node) {
+    bool walkEnumerableAccessNode(EnumerableAccessNode* node) override {
         bool flag = walk(node->path());
         return walk(node->index()) && flag;
     }
 
-    virtual bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
+    bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
         return true;
     }
 
-    virtual bool walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {
+    bool walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {
         return true;
     }
 
-    virtual bool walkVariableDeclarationNode(VariableDeclarationNode* node) {
+    bool walkVariableDeclarationNode(VariableDeclarationNode* node) override {
         if ( node->id()->symbol() != nullptr ) {
             return walk(node->value());
         }
@@ -82,7 +80,7 @@ protected:
             return false;
         }
 
-        bool valueResult = true;
+        bool valueResult;
         if ( node->value()->getName() == "FunctionNode" ) {
             // Add the declaration to the current scope
             _symbols->addVariable(name, type, node->position());
@@ -102,7 +100,7 @@ protected:
         return valueResult;
     }
 
-    virtual bool walkCallExpressionNode(CallExpressionNode* node) {
+    bool walkCallExpressionNode(CallExpressionNode* node) override {
         bool flag = walk(node->id());
 
         for ( auto arg : *node->args() ) {
@@ -112,7 +110,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkIIFExpressionNode(IIFExpressionNode* node) {
+    bool walkIIFExpressionNode(IIFExpressionNode* node) override {
         bool flag = walk(node->expression());
 
         for ( auto arg : *node->args() ) {
@@ -122,81 +120,81 @@ protected:
         return flag;
     }
 
-    virtual bool walkAndNode(AndNode* node) {
+    bool walkAndNode(AndNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkOrNode(OrNode* node) {
+    bool walkOrNode(OrNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkEqualsNode(EqualsNode* node) {
+    bool walkEqualsNode(EqualsNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkNotEqualsNode(NotEqualsNode* node) {
+    bool walkNotEqualsNode(NotEqualsNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkAddNode(AddNode* node) {
+    bool walkAddNode(AddNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkSubtractNode(SubtractNode* node) {
+    bool walkSubtractNode(SubtractNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkMultiplyNode(MultiplyNode* node) {
+    bool walkMultiplyNode(MultiplyNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkDivideNode(DivideNode* node) {
+    bool walkDivideNode(DivideNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkModulusNode(ModulusNode* node) {
+    bool walkModulusNode(ModulusNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkPowerNode(PowerNode* node) {
+    bool walkPowerNode(PowerNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkConcatenateNode(ConcatenateNode* node) {
+    bool walkConcatenateNode(ConcatenateNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual bool walkNegativeExpressionNode(NegativeExpressionNode* node) {
+    bool walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         return walk(node->exp());
     }
 
-    virtual bool walkNotNode(NotNode* node) {
+    bool walkNotNode(NotNode* node) override {
         return walk(node->exp());
     }
 
-    virtual bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
+    bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
         bool flag = true;
         
         for ( auto actual : *node->actuals() ) {
@@ -216,7 +214,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkEnumerationStatement(EnumerationStatement* node) {
+    bool walkEnumerationStatement(EnumerationStatement* node) override {
         bool flag = walk(node->enumerable());
 
         // Need to register the block-local variable
@@ -246,7 +244,7 @@ protected:
         return flag;
     }
 
-    virtual bool walkWithStatement(WithStatement* node) {
+    bool walkWithStatement(WithStatement* node) override {
         bool flag = walk(node->resource());
 
         // need to register the block-local variable
@@ -272,25 +270,25 @@ protected:
         return flag;
     }
 
-    virtual bool walkIfStatement(IfStatement* node) {
+    bool walkIfStatement(IfStatement* node) override {
         bool flag = walk(node->condition());
         return walkBlockStatementNode(node) && flag;
     }
 
-    virtual bool walkWhileStatement(WhileStatement* node) {
+    bool walkWhileStatement(WhileStatement* node) override {
         bool flag = walk(node->condition());
         return walkBlockStatementNode(node) && flag;
     }
 
-    virtual bool walkContinueNode(ContinueNode* node) {
+    bool walkContinueNode(ContinueNode* node) override {
         return true;
     }
 
-    virtual bool walkBreakNode(BreakNode* node) {
+    bool walkBreakNode(BreakNode* node) override {
         return true;
     }
 
-    virtual bool walkReturnStatementNode(ReturnStatementNode* node) {
+    bool walkReturnStatementNode(ReturnStatementNode* node) override {
         if ( node->value() == nullptr ) {
             return true;
         }
@@ -298,11 +296,11 @@ protected:
         return walk(node->value());
     }
 
-    virtual bool walkMapStatementNode(MapStatementNode* node) {
+    bool walkMapStatementNode(MapStatementNode* node) override {
         return walk(node->value());
     }
 
-    virtual bool walkMapNode(MapNode* node) {
+    bool walkMapNode(MapNode* node) override {
         bool flag = true;
         // Check each entry in the map
         for ( auto entry : *node->body() ) {
@@ -330,25 +328,25 @@ protected:
         return flag;
     }
 
-    virtual bool walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
+    bool walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
         return true;
     }
 
-    virtual bool walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) {
+    bool walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
         return true;
     }
 
-    virtual bool walkAssignExpressionNode(AssignExpressionNode* node) {
+    bool walkAssignExpressionNode(AssignExpressionNode* node) override {
         bool lvalResult = walk(node->dest());
         bool rvalResult = walk(node->value());
         return lvalResult && rvalResult;
     }
 
-    virtual bool walkUnitNode(UnitNode* node) {
+    bool walkUnitNode(UnitNode* node) override {
         return true;
     }
 
-    virtual bool walkFunctionNode(FunctionNode* node) {
+    bool walkFunctionNode(FunctionNode* node) override {
         bool flag = true;
         _symbols->enter();
         for ( auto formal : *node->formals() ) {
@@ -378,21 +376,19 @@ protected:
         return flag;
     }
 
-    virtual bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
+    bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
     }
 
-    virtual std::string toString() const {
+    std::string toString() const override {
         return "NameAnalysisWalk<>";
     }
 private:
     SymbolTable* _symbols;
 };
 
-}
-}
 }
 
 #endif

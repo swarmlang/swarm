@@ -2,13 +2,13 @@
 #define SWARMC_TOKEN_H
 
 #include <sstream>
+#include <utility>
 #include "../shared/nslib.h"
 #include "Position.h"
 
 using namespace nslib;
 
-namespace swarmc {
-namespace Lang {
+namespace swarmc::Lang {
 
     /**
      * Base class for tokens lexed from some input source.
@@ -16,7 +16,7 @@ namespace Lang {
      */
     class Token : public IStringable {
     public:
-        Token(Position* pos, int kind, std::string display) : _pos(pos), _kind(kind), _display(display) {};
+        Token(Position* pos, int kind, std::string display) : _pos(pos), _kind(kind), _display(std::move(display)) {};
         virtual ~Token() {
             delete _pos;
         }
@@ -26,7 +26,7 @@ namespace Lang {
         }
 
         /** Implements IStringable. */
-        virtual std::string toString() const {
+        std::string toString() const override {
             std::stringstream s;
 
             s << _display << " ";
@@ -48,7 +48,7 @@ namespace Lang {
      */
     class IDToken : public Token {
     public:
-        IDToken(Position* pos, int kind, std::string display, std::string identifier) : Token(pos, kind, display), _identifier(identifier) {};
+        IDToken(Position* pos, int kind, std::string display, std::string identifier) : Token(pos, kind, std::move(display)), _identifier(std::move(identifier)) {};
 
         /** Get the string identifier of this token. */
         std::string identifier() const {
@@ -63,7 +63,7 @@ namespace Lang {
      */
     class StringLiteralToken : public Token {
     public:
-        StringLiteralToken(Position* pos, int kind, std::string display, std::string value) : Token(pos, kind, display), _value(value) {};
+        StringLiteralToken(Position* pos, int kind, std::string display, std::string value) : Token(pos, kind, std::move(display)), _value(std::move(value)) {};
 
         /** Get the string literal content of this token. */
         std::string value() const {
@@ -78,7 +78,7 @@ namespace Lang {
      */
     class NumberLiteralToken : public Token {
     public:
-        NumberLiteralToken(Position* pos, int kind, std::string display, double value) : Token(pos, kind, display), _value(value) {};
+        NumberLiteralToken(Position* pos, int kind, std::string display, double value) : Token(pos, kind, std::move(display)), _value(value) {};
 
         /** Get the double representation of number literal content of this token. */
         double value() const {
@@ -88,9 +88,6 @@ namespace Lang {
         double _value;
     };
 
-
-
-}
 }
 
 #endif

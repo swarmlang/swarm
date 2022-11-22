@@ -19,9 +19,9 @@ namespace swarmc::Runtime::Prologue {
     void RandomVectorFunctionCall::execute() {
         auto len = (ISA::NumberReference*) _vector.at(0).second;
         auto enumeration = new ISA::EnumerationReference(Type::Primitive::of(Type::Intrinsic::NUMBER));
-        enumeration->reserve(len->value());
+        enumeration->reserve(static_cast<size_t>(len->value()));
 
-        for ( size_t i = 0; i < len->value(); i += 1 ) {
+        for ( size_t i = 0; i < static_cast<size_t>(len->value()); i += 1 ) {
             enumeration->append(new ISA::NumberReference(_provider->global()->random()));
         }
 
@@ -47,13 +47,13 @@ namespace swarmc::Runtime::Prologue {
 
         auto enumOfNumsType = new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::NUMBER));
         auto matrix = new ISA::EnumerationReference(enumOfNumsType);
-        matrix->reserve(nRows->value());
+        matrix->reserve(static_cast<size_t>(nRows->value()));
 
-        for ( size_t i = 0; i < nRows->value(); i += 1 ) {
+        for ( size_t i = 0; i < static_cast<size_t>(nRows->value()); i += 1 ) {
             auto row = new ISA::EnumerationReference(Type::Primitive::of(Type::Intrinsic::NUMBER));
-            row->reserve(nCols->value());
+            row->reserve(static_cast<size_t>(nCols->value()));
 
-            for ( size_t j = 0; j < nCols->value(); j += 1 ) {
+            for ( size_t j = 0; j < static_cast<size_t>(nCols->value()); j += 1 ) {
                 row->append(new ISA::NumberReference(_provider->global()->random()));
             }
 

@@ -1,4 +1,3 @@
-#include <cassert>
 #include "../errors/SwarmError.h"
 #include "VirtualMachine.h"
 
@@ -30,10 +29,10 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::restore(ScopeFrame* scope, State* state) {
-        if ( _scope != nullptr ) delete _scope;
+        delete _scope;
         _scope = scope;
 
-        if ( _state != nullptr ) delete _state;
+        delete _state;
         _state = state;
     }
 
@@ -156,12 +155,9 @@ namespace swarmc::Runtime {
     }
 
     bool VirtualMachine::hasLock(LocationReference* loc) {
-        for ( auto lock : _locks ) {
-            if ( lock->location()->is(loc) ) {
-                return true;
-            }
-        }
-        return false;
+        return std::any_of(_locks.begin(), _locks.end(), [loc](IStorageLock* lock) {
+            return lock->location()->is(loc);
+        });
     }
 
     void VirtualMachine::lock(LocationReference* loc) {

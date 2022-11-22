@@ -6,9 +6,7 @@
 #include "../bison/grammar.hh"
 #include "./SymbolTable.h"
 
-namespace swarmc {
-namespace Lang {
-
+namespace swarmc::Lang {
 
     /**
      * Some helpful debugging utilities.
@@ -90,7 +88,6 @@ namespace Lang {
         }
     };
 
-}
 }
 
 #endif

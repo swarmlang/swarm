@@ -22,13 +22,13 @@ namespace swarmc::VM {
      */
     class Pipeline : public IStringable {
     public:
-        Pipeline(std::istream* input, bool isBinary = false) {
+        explicit Pipeline(std::istream* input, bool isBinary = false) {
             _input = input;
             _parser = new ISA::Parser(*input);
             _isBinary = isBinary;
         }
 
-        virtual ~Pipeline() {
+        ~Pipeline() override {
             delete _parser;
         }
 

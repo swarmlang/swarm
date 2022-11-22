@@ -27,7 +27,7 @@ namespace swarmc::Runtime {
         ScopeFrame(std::string id, ScopeFrame* parent, IFunctionCall* call) : _parent(parent), _call(call) {
             _id = std::move(id);
         }
-        virtual ~ScopeFrame() = default;
+        ~ScopeFrame() override = default;
 
         /** Make this instance the parent scope of the given location. */
         void shadow(ISA::LocationReference*);
@@ -51,7 +51,7 @@ namespace swarmc::Runtime {
             return nullptr;
         }
 
-        std::string toString() const;
+        std::string toString() const override;
 
         /** Create a deep copy of this scope. */
         ScopeFrame* copy() const {
@@ -80,7 +80,7 @@ namespace swarmc::Runtime {
             initialize();
         }
 
-        virtual ~State() = default;
+        ~State() override = default;
 
         /** Get the current instruction. */
         ISA::Instruction* current() {

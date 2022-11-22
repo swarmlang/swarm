@@ -14,7 +14,7 @@ namespace swarmc::ISA {
     class ReferenceWalk : public IStringable, public IUsesConsole {
     public:
         ReferenceWalk() : IUsesConsole() {}
-        virtual ~ReferenceWalk() = default;
+        ~ReferenceWalk() override = default;
 
         virtual TReturn walk(Reference* ref) {
             if ( ref->tag() == ReferenceTag::LOCATION ) return walkLocationReference((LocationReference*) ref);

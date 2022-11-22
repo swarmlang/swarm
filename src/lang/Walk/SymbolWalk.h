@@ -5,9 +5,7 @@
 #include <unordered_map>
 #include "Walk.h"
 
-namespace swarmc {
-namespace Lang {
-namespace Walk {
+namespace swarmc::Lang::Walk {
 
 using SymbolMap = std::unordered_map<std::string, SemanticSymbol*>;
 
@@ -15,8 +13,8 @@ class SymbolWalk : public Walk<SymbolMap*> {
 public:
     SymbolWalk() : Walk<SymbolMap*>() {}
 protected:
-    virtual SymbolMap* walkProgramNode(ProgramNode* node) {
-        SymbolMap* map = new SymbolMap();
+    SymbolMap* walkProgramNode(ProgramNode* node) override {
+        auto* map = new SymbolMap();
 
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
@@ -27,21 +25,21 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkExpressionStatementNode(ExpressionStatementNode* node) {
+    SymbolMap* walkExpressionStatementNode(ExpressionStatementNode* node) override {
         return walk(node->expression());
     }
 
-    virtual SymbolMap* walkIdentifierNode(IdentifierNode* node) {
-        SymbolMap* map = new SymbolMap();
+    SymbolMap* walkIdentifierNode(IdentifierNode* node) override {
+        auto map = new SymbolMap();
         map->insert(std::pair<std::string, SemanticSymbol*>(node->symbol()->uuid(), node->symbol()));
         return map;
     }
 
-    virtual SymbolMap* walkMapAccessNode(MapAccessNode* node) {
+    SymbolMap* walkMapAccessNode(MapAccessNode* node) override {
         return walk(node->path());
     }
 
-    virtual SymbolMap* walkEnumerableAccessNode(EnumerableAccessNode* node) {
+    SymbolMap* walkEnumerableAccessNode(EnumerableAccessNode* node) override {
         SymbolMap* leftMap = walk(node->path());
         SymbolMap* rightMap = walk(node->index());
 
@@ -51,15 +49,15 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) {
+    SymbolMap* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
         return new SymbolMap();
     }
 
-    virtual SymbolMap* walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {
+    SymbolMap* walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {
         return new SymbolMap();
     }
 
-    virtual SymbolMap* walkVariableDeclarationNode(VariableDeclarationNode* node) {
+    SymbolMap* walkVariableDeclarationNode(VariableDeclarationNode* node) override {
         SymbolMap* leftMap = walk(node->id());
         SymbolMap* rightMap = walk(node->value());
 
@@ -69,8 +67,8 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkCallExpressionNode(CallExpressionNode* node) {
-        SymbolMap* map = new SymbolMap();
+    SymbolMap* walkCallExpressionNode(CallExpressionNode* node) override {
+        auto map = new SymbolMap();
 
         for (auto i : *node->args()) {
             SymbolMap* m = walk(i);
@@ -81,7 +79,7 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkIIFExpressionNode(IIFExpressionNode* node) {
+    SymbolMap* walkIIFExpressionNode(IIFExpressionNode* node) override {
         SymbolMap* map = walk(node->expression());
 
         for (auto i : *node->args()) {
@@ -93,7 +91,7 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkAndNode(AndNode* node) {
+    SymbolMap* walkAndNode(AndNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -103,7 +101,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkOrNode(OrNode* node) {
+    SymbolMap* walkOrNode(OrNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -113,7 +111,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkEqualsNode(EqualsNode* node) {
+    SymbolMap* walkEqualsNode(EqualsNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -123,7 +121,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkNotEqualsNode(NotEqualsNode* node) {
+    SymbolMap* walkNotEqualsNode(NotEqualsNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -133,7 +131,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkAddNode(AddNode* node) {
+    SymbolMap* walkAddNode(AddNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -143,7 +141,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkSubtractNode(SubtractNode* node) {
+    SymbolMap* walkSubtractNode(SubtractNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -153,7 +151,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkMultiplyNode(MultiplyNode* node) {
+    SymbolMap* walkMultiplyNode(MultiplyNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -163,7 +161,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkDivideNode(DivideNode* node) {
+    SymbolMap* walkDivideNode(DivideNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -173,7 +171,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkModulusNode(ModulusNode* node) {
+    SymbolMap* walkModulusNode(ModulusNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -183,7 +181,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkPowerNode(PowerNode* node) {
+    SymbolMap* walkPowerNode(PowerNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -193,7 +191,7 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkConcatenateNode(ConcatenateNode* node) {
+    SymbolMap* walkConcatenateNode(ConcatenateNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -203,16 +201,16 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkNegativeExpressionNode(NegativeExpressionNode* node) {
+    SymbolMap* walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         return walk(node->exp());
     }
 
-    virtual SymbolMap* walkNotNode(NotNode* node) {
+    SymbolMap* walkNotNode(NotNode* node) override {
         return walk(node->exp());
     }
 
-    virtual SymbolMap* walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
-        SymbolMap* map = new SymbolMap();
+    SymbolMap* walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
+        auto map = new SymbolMap();
 
         for (auto i : *node->actuals()) {
             SymbolMap* m = walk(i);
@@ -223,7 +221,7 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkEnumerationStatement(EnumerationStatement* node) {
+    SymbolMap* walkEnumerationStatement(EnumerationStatement* node) override {
         SymbolMap* map = walk(node->local());
 
         for (auto i : *node->body()) {
@@ -235,7 +233,7 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkWithStatement(WithStatement* node) {
+    SymbolMap* walkWithStatement(WithStatement* node) override {
         SymbolMap* map = walk(node->local());
 
         for (auto i : *node->body()) {
@@ -247,7 +245,7 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkIfStatement(IfStatement* node) {
+    SymbolMap* walkIfStatement(IfStatement* node) override {
         SymbolMap* map = walk(node->condition());
 
         for (auto i : *node->body()) {
@@ -259,7 +257,7 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkWhileStatement(WhileStatement* node) {
+    SymbolMap* walkWhileStatement(WhileStatement* node) override {
         SymbolMap* map = walk(node->condition());
 
         for (auto i : *node->body()) {
@@ -271,15 +269,15 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkContinueNode(ContinueNode* node) {
+    SymbolMap* walkContinueNode(ContinueNode* node) override {
         return new SymbolMap();
     }
 
-    virtual SymbolMap* walkBreakNode(BreakNode* node) {
+    SymbolMap* walkBreakNode(BreakNode* node) override {
         return new SymbolMap();
     }
 
-    virtual SymbolMap* walkReturnStatementNode(ReturnStatementNode* node) {
+    SymbolMap* walkReturnStatementNode(ReturnStatementNode* node) override {
         if ( node->value() != nullptr ) {
             return walk(node->value());
         }
@@ -287,12 +285,12 @@ protected:
         return new SymbolMap();
     }
 
-    virtual SymbolMap* walkMapStatementNode(MapStatementNode* node) {
+    SymbolMap* walkMapStatementNode(MapStatementNode* node) override {
         return walk(node->value());
     }
 
-    virtual SymbolMap* walkMapNode(MapNode* node) {
-        SymbolMap* map = new SymbolMap();
+    SymbolMap* walkMapNode(MapNode* node) override {
+        auto map = new SymbolMap();
 
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
@@ -303,15 +301,15 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
+    SymbolMap* walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
         return new SymbolMap();
     }
 
-    virtual SymbolMap* walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) {
+    SymbolMap* walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
         return new SymbolMap();
     }
 
-    virtual SymbolMap* walkAssignExpressionNode(AssignExpressionNode* node) {
+    SymbolMap* walkAssignExpressionNode(AssignExpressionNode* node) override {
         SymbolMap* leftMap = walk(node->dest());
         SymbolMap* rightMap = walk(node->value());
 
@@ -321,13 +319,13 @@ protected:
         return leftMap;
     }
 
-    virtual SymbolMap* walkUnitNode(UnitNode* node) {
+    SymbolMap* walkUnitNode(UnitNode* node) override {
         return new SymbolMap();
     }
 
     // TODO: determine if I need to walk formals
-    virtual SymbolMap* walkFunctionNode(FunctionNode* node) {
-        SymbolMap* map = new SymbolMap();
+    SymbolMap* walkFunctionNode(FunctionNode* node) override {
+        auto map = new SymbolMap();
 
         for (auto i : *node->body()) {
             SymbolMap* m = walk(i);
@@ -338,7 +336,7 @@ protected:
         return map;
     }
 
-    virtual SymbolMap* walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
+    SymbolMap* walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -353,8 +351,6 @@ protected:
     }
 };
 
-}
-}
 }
 
 #endif

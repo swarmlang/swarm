@@ -11,7 +11,7 @@ namespace swarmc::ISA {
      */
     class ReferenceSerializeWalk : public ReferenceWalk<std::string> {
     public:
-        std::string toString() const {
+        std::string toString() const override {
             return "ReferenceSerializeWalk<>";
         }
 

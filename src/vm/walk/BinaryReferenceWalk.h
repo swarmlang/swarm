@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         explicit BinaryReferenceWalk(Runtime::VirtualMachine* vm = nullptr) : _vm(vm) {}
 
-        std::string toString() const {
+        std::string toString() const override {
             return "BinaryReferenceWalk<>";
         }
 

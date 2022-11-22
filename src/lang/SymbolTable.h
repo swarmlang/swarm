@@ -5,14 +5,14 @@
 #include <iostream>
 #include <list>
 #include <stdexcept>
+#include <utility>
 #include "../shared/nslib.h"
 #include "Position.h"
 #include "Type.h"
 
 using namespace nslib;
 
-namespace swarmc {
-namespace Lang {
+namespace swarmc::Lang {
 namespace Walk {
     class TypeAnalysisWalk;
     class DeSerializeWalk;
@@ -30,11 +30,11 @@ namespace Walk {
     /** Base class for names identified in code. */
     class SemanticSymbol : public IStringable {
     public:
-        SemanticSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : _name(name), _type(type), _declaredAt(declaredAt) {
+        SemanticSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : _name(std::move(name)), _type(type), _declaredAt(declaredAt) {
             _uuid = nslib::uuid();
         }
 
-        virtual std::string toString() const {
+        std::string toString() const override {
             return "SemanticSymbol<name: " + _name + ", type: " + _type->toString() + ", declaredAt: " + _declaredAt->start() + ", uuid: " + _uuid + ">";
         }
 
@@ -84,9 +84,9 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class VariableSymbol : public SemanticSymbol {
     public:
-        VariableSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
+        VariableSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : SemanticSymbol(std::move(name), type, declaredAt) {}
 
-        virtual SemanticSymbolKind kind() const override {
+        SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::VARIABLE;
         }
     };
@@ -95,9 +95,9 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class FunctionSymbol : public SemanticSymbol {
     public:
-        FunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : SemanticSymbol(name, type, declaredAt) {}
+        FunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : SemanticSymbol(std::move(name), type, declaredAt) {}
 
-        virtual SemanticSymbolKind kind() const override {
+        SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::FUNCTION;
         }
     };
@@ -106,9 +106,9 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class PrologueFunctionSymbol : public FunctionSymbol {
     public:
-        PrologueFunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : FunctionSymbol(name, type, declaredAt) {}
+        PrologueFunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : FunctionSymbol(std::move(name), type, declaredAt) {}
 
-        virtual bool isPrologue() const override { return true; }
+        bool isPrologue() const override { return true; }
     };
 
 
@@ -121,7 +121,7 @@ namespace Walk {
             _symbols = new std::map<std::string, SemanticSymbol*>();
         }
 
-        ~ScopeTable() {
+        ~ScopeTable() override {
             delete _symbols;
         }
 
@@ -147,33 +147,33 @@ namespace Walk {
         }
 
         /** Returns true if this scope already has the given name. */
-        bool isClashing(std::string name) {
+        bool isClashing(const std::string& name) {
             SemanticSymbol* found = lookup(name);
             return found != nullptr;
         }
 
         /** Add a new variable to this scope. */
         void addVariable(std::string name, const Type::Type* type, const Position* declaredAt) {
-            insert(new VariableSymbol(name, type, declaredAt));
+            insert(new VariableSymbol(std::move(name), type, declaredAt));
         }
 
         /** Add a new function to this scope. */
         void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
-            insert(new FunctionSymbol(name, type, declaredAt));
+            insert(new FunctionSymbol(std::move(name), type, declaredAt));
         }
 
         /** Add a new function to this scope as if it were from the Prologue. */
         void addPrologueFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
-            insert(new PrologueFunctionSymbol(name, type, declaredAt));
+            insert(new PrologueFunctionSymbol(std::move(name), type, declaredAt));
         }
 
-        virtual std::string toString() const {
+        std::string toString() const override {
             return "ScopeTable<#symbols: " + std::to_string(_symbols->size()) + " >";
         }
 
         /** Print all names in the current scope. */
         void print(std::ostream& out) const {
-            for ( auto symbol : *_symbols ) {
+            for ( const auto& symbol : *_symbols ) {
                 out << symbol.second->toString();
                 out << std::endl;
             }
@@ -192,14 +192,14 @@ namespace Walk {
             _scopes->push_back(ScopeTable::prologue());
         }
 
-        ~SymbolTable() {
+        ~SymbolTable() override {
             for ( auto scope : *_scopes ) delete scope;
             delete _scopes;
         }
 
         /** Create a new scope. */
         ScopeTable* enter() {
-            ScopeTable* scope = new ScopeTable();
+            auto scope = new ScopeTable();
             _scopes->push_front(scope);
             return scope;
         }
@@ -225,7 +225,7 @@ namespace Walk {
         }
 
         /** Find a symbol by name, recursing up the scope list. */
-        SemanticSymbol* lookup(std::string name) {
+        SemanticSymbol* lookup(const std::string& name) {
             for ( ScopeTable* scope : *_scopes ) {
                 SemanticSymbol* symbol = scope->lookup(name);
                 if ( symbol != nullptr ) {
@@ -238,21 +238,21 @@ namespace Walk {
         }
 
         /** Returns true if the current scope already has a symbol with the given name. */
-        bool isClashing(std::string name) {
+        bool isClashing(const std::string& name) {
             return current()->isClashing(name);
         }
 
         /** Add a new variable to the current scope. */
         void addVariable(std::string name, const Type::Type* type, const Position* declaredAt) {
-            return current()->addVariable(name, type, declaredAt);
+            return current()->addVariable(std::move(name), type, declaredAt);
         }
 
         /** Add a new function to the current scope. */
         void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
-            return current()->addFunction(name, type, declaredAt);
+            return current()->addFunction(std::move(name), type, declaredAt);
         }
 
-        virtual std::string toString() const {
+        std::string toString() const override {
             return "SymbolTable<#scopes: " + std::to_string(_scopes->size()) + ">";
         }
 
@@ -268,7 +268,6 @@ namespace Walk {
         std::list<ScopeTable*>* _scopes;
     };
 
-}
 }
 
 #endif

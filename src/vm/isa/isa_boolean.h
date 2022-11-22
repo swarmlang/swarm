@@ -9,7 +9,7 @@ namespace swarmc::ISA {
     public:
         And(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::AND, lhs, rhs) {}
-        virtual And* copy() const override {
+        And* copy() const override {
             return new And(_first->copy(), _second->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         Or(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::OR, lhs, rhs) {}
-        virtual Or* copy() const override {
+        Or* copy() const override {
             return new Or(_first->copy(), _second->copy());
         }
     };
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     public:
         Xor(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::XOR, lhs, rhs) {}
-        virtual Xor* copy() const override {
+        Xor* copy() const override {
             return new Xor(_first->copy(), _second->copy());
         }
     };
@@ -36,7 +36,7 @@ namespace swarmc::ISA {
     public:
         Nand(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::NAND, lhs, rhs) {}
-        virtual Nand* copy() const override {
+        Nand* copy() const override {
             return new Nand(_first->copy(), _second->copy());
         }
     };
@@ -45,16 +45,16 @@ namespace swarmc::ISA {
     public:
         Nor(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::NOR, lhs, rhs) {}
-        virtual Nor* copy() const override {
+        Nor* copy() const override {
             return new Nor(_first->copy(), _second->copy());
         }
     };
 
     class Not : public UnaryInstruction<Reference> {
     public:
-        Not(Reference* value) :
+        explicit Not(Reference* value) :
             UnaryInstruction<Reference>(Tag::NOT, value) {}
-        virtual Not* copy() const override {
+        Not* copy() const override {
             return new Not(_first->copy());
         }
     };
