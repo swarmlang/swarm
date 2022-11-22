@@ -2,9 +2,11 @@
 #define SWARMVM_EXECUTEWALK
 
 #include <cassert>
-#include "../../shared/util/Console.h"
+#include "../../shared/nslib.h"
 #include "../../lang/Type.h"
 #include "../ISAWalk.h"
+
+using namespace nslib;
 
 namespace swarmc::Runtime {
 

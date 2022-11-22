@@ -1,8 +1,10 @@
 #ifndef SWARMVM_DEBUGGER
 #define SWARMVM_DEBUGGER
 
-#include "../../shared/IStringable.h"
+#include "../../shared/nslib.h"
 #include "Metadata.h"
+
+using namespace nslib;
 
 namespace swarmc::Runtime::Debug {
 

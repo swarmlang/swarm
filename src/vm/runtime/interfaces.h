@@ -5,8 +5,9 @@
 #include <vector>
 #include <map>
 #include <algorithm>
-#include "../../shared/IStringable.h"
-#include "../../shared/util/Console.h"
+#include "../../shared/nslib.h"
+
+using namespace nslib;
 
 namespace swarmc::ISA {
     class Reference;

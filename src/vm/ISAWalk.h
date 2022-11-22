@@ -2,9 +2,10 @@
 #define SWARMVM_ISAWALK
 
 #include "../errors/SwarmError.h"
-#include "../shared/IStringable.h"
-#include "../shared/util/Console.h"
+#include "../shared/nslib.h"
 #include "isa_meta.h"
+
+using namespace nslib;
 
 namespace swarmc::ISA {
 
@@ -15,7 +16,7 @@ namespace swarmc::ISA {
         ISAWalk() : IUsesConsole() {}
         virtual ~ISAWalk() = default;
 
-        virtual std::vector<TReturn> walk(Instructions instructions) {
+        virtual std::vector<TReturn> walk(const Instructions& instructions) {
             std::vector<TReturn> returns;
 
             for ( auto inst : instructions ) {

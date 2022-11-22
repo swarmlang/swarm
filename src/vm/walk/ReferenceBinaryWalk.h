@@ -3,7 +3,6 @@
 
 #include <cstring>
 #include "../../../mod/binn/src/binn.h"
-#include "../../shared/util_string_helpers.h"
 #include "../ReferenceWalk.h"
 #include "binary_const.h"
 

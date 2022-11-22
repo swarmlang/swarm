@@ -4,10 +4,12 @@
 #include <map>
 #include <stack>
 #include <utility>
-#include "../../shared/IStringable.h"
+#include "../../shared/nslib.h"
 #include "../../errors/SwarmError.h"
 #include "../isa_meta.h"
 #include "../debug/Metadata.h"
+
+using namespace nslib;
 
 namespace swarmc::Runtime {
 
@@ -74,7 +76,7 @@ namespace swarmc::Runtime {
      */
     class State : public IStringable {
     public:
-        State(ISA::Instructions is) : _is(is) {
+        explicit State(ISA::Instructions is) : _is(std::move(is)) {
             initialize();
         }
 

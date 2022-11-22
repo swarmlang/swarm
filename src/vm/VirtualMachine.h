@@ -5,9 +5,7 @@
 #include <thread>
 #include <utility>
 #include "../Configuration.h"
-#include "../shared/IStringable.h"
-#include "../shared/util/Console.h"
-#include "../shared/uuid.h"
+#include "../shared/nslib.h"
 #include "runtime/interfaces.h"
 #include "runtime/runtime_functions.h"
 #include "runtime/runtime_provider.h"
@@ -15,6 +13,8 @@
 #include "runtime/State.h"
 #include "walk/ExecuteWalk.h"
 #include "debug/Debugger.h"
+
+using namespace nslib;
 
 namespace swarmc::Runtime {
 
@@ -43,7 +43,7 @@ namespace swarmc::Runtime {
         /** Load a set of parsed instructions into the runtime. */
         void initialize(ISA::Instructions is) {
             _state = new State(std::move(is));
-            _scope = new ScopeFrame(util::uuid4(), nullptr);
+            _scope = new ScopeFrame(nslib::uuid(), nullptr);
             _localOut = new LocalOutputStream();
             _localErr = new LocalErrorStream();
         }

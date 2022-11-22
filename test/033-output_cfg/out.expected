@@ -181,5 +181,4 @@ digraph cfg {
 	"l:tmp131:0:326" [shape=rectangle,label="AmbiguousFunction:l:tmp131:0:326"]
 	"l:tmp131:0:326"->"POSTCALL:l:tmp131:0:326" [label="return"]
 }
-[32m[SUCCESS] [0mOutput CFG.
-[0m
+[32m success [39m[0mOutput CFG.

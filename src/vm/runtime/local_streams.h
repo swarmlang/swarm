@@ -1,8 +1,10 @@
 #ifndef SWARMVM_LOCALSTREAM
 #define SWARMVM_LOCALSTREAM
 
-#include "../../shared/util/Console.h"
+#include "../../shared/nslib.h"
 #include "interfaces.h"
+
+using namespace nslib;
 
 namespace swarmc::Runtime {
 

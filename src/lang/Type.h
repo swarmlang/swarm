@@ -4,8 +4,10 @@
 #include <map>
 #include <sstream>
 #include <vector>
-#include "../shared/IStringable.h"
+#include "../shared/nslib.h"
 #include "../errors/InvalidPrimitiveTypeInstantiation.h"
+
+using namespace nslib;
 
 namespace swarmc {
 namespace Lang {

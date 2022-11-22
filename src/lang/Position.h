@@ -4,8 +4,9 @@
 #include <cstdint>
 #include <string>
 #include <sstream>
-#include "../shared/IStringable.h"
+#include "../shared/nslib.h"
 
+using namespace nslib;
 // TODO: create RuntimePosition class w/ trace?
 
 namespace swarmc {

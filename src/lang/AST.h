@@ -5,12 +5,13 @@
 #include <ostream>
 #include <algorithm>
 #include <cassert>
-#include "../shared/IStringable.h"
-#include "../shared/util/Console.h"
+#include "../shared/nslib.h"
 #include "Position.h"
 #include "Type.h"
 #include "SymbolTable.h"
 #include "TypeTable.h"
+
+using namespace nslib;
 
 namespace swarmc::Lang {
 namespace Walk {

@@ -5,7 +5,10 @@
 #include <unordered_map>
 #include <stack>
 #include <cassert>
+#include "../shared/nslib.h"
 #include "../vm/isa_meta.h"
+
+using namespace nslib;
 
 namespace swarmc {
 namespace CFG {

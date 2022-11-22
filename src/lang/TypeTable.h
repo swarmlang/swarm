@@ -2,9 +2,11 @@
 #define SWARMC_TYPETABLE_H
 
 #include <map>
-#include "../shared/IStringable.h"
+#include "../shared/nslib.h"
 #include "../errors/SwarmError.h"
 #include "./Type.h"
+
+using namespace nslib;
 
 namespace swarmc {
 namespace Lang {

@@ -3,10 +3,11 @@
 
 #include <iostream>
 #include <cctype>
-#include "../shared/IStringable.h"
-#include "../shared/util/Console.h"
+#include "../shared/nslib.h"
 #include "../errors/SwarmError.h"
 #include "isa_meta.h"
+
+using namespace nslib;
 
 namespace swarmc::ISA {
 

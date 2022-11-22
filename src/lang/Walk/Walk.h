@@ -1,10 +1,11 @@
 #ifndef SWARMC_WALK_H
 #define SWARMC_WALK_H
 
-#include "../shared/IStringable.h"
-#include "../shared/util/Console.h"
+#include "../shared/nslib.h"
 #include "../errors/SwarmError.h"
 #include "AST.h"
+
+using namespace nslib;
 
 namespace swarmc {
 namespace Lang {

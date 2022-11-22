@@ -11,12 +11,15 @@
 %code requires{
 	#include <list>
     #include <float.h>
-    #include "../shared/util/Console.h"
+    #include "../shared/nslib.h"
 	#include "../lang/Token.h"
    	#include "../lang/AST.h"
    	#include "../lang/Type.h"
     #include "../Reporting.h"
     #include "../errors/ParseError.h"
+
+    using namespace nslib;
+
 	namespace swarmc::Lang {
 		class Scanner;
 	}
@@ -47,11 +50,13 @@
     #include <cstdlib>
     #include <fstream>
 
-    #include "../shared/util/Console.h"
+    #include "../shared/nslib.h"
     #include "../lang/Scanner.h"
     #include "../lang/Token.h"
     #undef yylex
     #define yylex scanner.yylex
+
+    using namespace nslib;
 }
 
 %union {

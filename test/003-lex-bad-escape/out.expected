@@ -3,5 +3,4 @@ ID:t3 [l: 1, c: 8]->[l: 1, c: 10]
 ASSIGN [l: 1, c: 11]->[l: 1, c: 12]
 STRINGLITERAL:"\'\r\n\t\"\\" [l: 1, c: 13]->[l: 1, c: 27]
 CAT [l: 1, c: 28]->[l: 1, c: 29]
-[31m[ERROR] [0mParse error, unexpected character
-[0m
+[31m   error [39m[0mParse error, unexpected character

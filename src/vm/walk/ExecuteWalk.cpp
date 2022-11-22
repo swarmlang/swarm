@@ -1,6 +1,6 @@
 #include <cassert>
 #include <cmath>
-#include "../../shared/uuid.h"
+#include "../../shared/nslib.h"
 #include "../VirtualMachine.h"
 #include "ExecuteWalk.h"
 
@@ -669,7 +669,7 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkStreamInit(StreamInit* i) {
         verbose("streaminit " + i->first()->toString());
         auto type = ensureType(_vm->resolve(i->first()));
-        auto stream = _vm->getStream(util::uuid4(), type->value());
+        auto stream = _vm->getStream(nslib::uuid(), type->value());
         return new StreamReference(stream);
     }
 

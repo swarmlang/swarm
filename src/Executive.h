@@ -7,7 +7,9 @@
 #include <chrono>
 #include <vector>
 
-#include "shared/util/Console.h"
+#include "shared/nslib.h"
+
+using namespace nslib;
 
 /**
  * Executive class for CLI applications. Handles arg parsing and manages runtime globals.

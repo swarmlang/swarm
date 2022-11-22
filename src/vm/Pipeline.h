@@ -2,7 +2,7 @@
 #define SWARMVM_PIPELINE
 
 #include <iostream>
-#include "../shared/IStringable.h"
+#include "../shared/nslib.h"
 #include "isa_meta.h"
 #include "ISAParser.h"
 #include "runtime/single_threaded.h"
@@ -10,6 +10,8 @@
 #include "prologue/prologue_provider.h"
 #include "walk/ISABinaryWalk.h"
 #include "walk/BinaryISAWalk.h"
+
+using namespace nslib;
 
 namespace swarmc::VM {
 

@@ -1,7 +1,6 @@
 #include <stack>
 #include <assert.h>
 #include "cfg.h"
-#include "../shared/util/Console.h"
 
 namespace swarmc {
 namespace CFG {

@@ -2,10 +2,12 @@
 #define SWARMVM_ISA
 
 #include <vector>
-#include "../shared/IStringable.h"
+#include "../shared/nslib.h"
 #include "../lang/Type.h"
 #include "runtime/runtime_functions.h"
 #include "runtime/interfaces.h"
+
+using namespace nslib;
 
 /*
  * This file describes the structure of the SVI IR.
@@ -126,7 +128,7 @@ namespace swarmc::ISA {
     /** A reference is a construct that resolves to a value at runtime. */
     class Reference : public IStringable {
     public:
-        Reference(ReferenceTag tag) : _tag(tag) {}
+        explicit Reference(ReferenceTag tag) : _tag(tag) {}
         ~Reference() override = default;
 
         /** Get the type of this reference. */

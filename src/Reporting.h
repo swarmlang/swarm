@@ -2,20 +2,22 @@
 #define SWARMC_REPORTING_H
 
 #include <string>
-#include "shared/util/Console.h"
+#include "shared/nslib.h"
 #include "lang/Position.h"
 #include "errors/SwarmError.h"
 #include "../Configuration.h"
+
+using namespace nslib;
 
 namespace swarmc {
 
     class Reporting {
     public:
-        static void nameError(const Lang::Position* pos, std::string message) {
+        static void nameError(const Lang::Position* pos, const std::string& message) {
             Console::get()
-                ->bold()->color("red")->print("[Name Error] ")->reset()
+                ->bold()->color(ANSIColor::RED)->print("[Name Error] ")->reset()
                 ->bold()->print(pos->start() + " ")->reset()
-                ->line(message);
+                ->println(message);
 
             if ( Configuration::DEBUG ) {
                 throw std::runtime_error("nameError");
@@ -24,9 +26,9 @@ namespace swarmc {
 
         static void parseError(const Lang::Position* pos, std::string message) {
             Console::get()
-                ->bold()->color("red")->print("[Parse Error] ")->reset()
+                ->bold()->color(ANSIColor::RED)->print("[Parse Error] ")->reset()
                 ->bold()->print(pos->start() + " ")->reset()
-                ->line(message);
+                ->println(message);
 
             if ( Configuration::DEBUG ) {
                 throw std::runtime_error("parseError");
@@ -35,9 +37,9 @@ namespace swarmc {
 
         static void typeError(const Lang::Position* pos, std::string message) {
             Console::get()
-                ->bold()->color("red")->print("[Type Error] ")->reset()
+                ->bold()->color(ANSIColor::RED)->print("[Type Error] ")->reset()
                 ->bold()->print(pos->start() + " ")->reset()
-                ->line(message);
+                ->println(message);
 
             if ( Configuration::DEBUG ) {
                 throw std::runtime_error("typeError");
@@ -46,9 +48,9 @@ namespace swarmc {
 
         static void syntaxError(const Lang::Position* pos, std::string message) {
             Console::get()
-                ->bold()->color("red")->print("[Syntax Error] ")->reset()
+                ->bold()->color(ANSIColor::RED)->print("[Syntax Error] ")->reset()
                 ->bold()->print(pos->start() + " ")->reset()
-                ->line(message);
+                ->println(message);
 
             if ( Configuration::DEBUG ) {
                 throw std::runtime_error("syntaxError");

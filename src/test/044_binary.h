@@ -17,7 +17,7 @@ namespace swarmc::Test {
         BinarySerializeTest() : Test() {}
 
         bool run() override {
-            console->verbose();
+            console->only(nslib::Verbosity::VERBOSE);
             Configuration::VERBOSE = true;
             Configuration::DEBUG = true;
 

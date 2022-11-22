@@ -1,6 +1,6 @@
 #include <string>
 #include <ostream>
-#include <assert.h>
+#include <cassert>
 #include "AST.h"
 #include "SymbolTable.h"
 #include "../Reporting.h"

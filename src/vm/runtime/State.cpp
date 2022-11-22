@@ -1,7 +1,6 @@
-#include <iostream>
 #include <cassert>
 #include <stack>
-#include "../../shared/uuid.h"
+#include "../../shared/nslib.h"
 #include "../../errors/SwarmError.h"
 #include "State.h"
 
@@ -30,11 +29,11 @@ namespace swarmc::Runtime {
     }
 
     ScopeFrame* ScopeFrame::newChild() {
-        return new ScopeFrame(util::uuid4(), this);
+        return new ScopeFrame(nslib::uuid(), this);
     }
 
     ScopeFrame* ScopeFrame::newCall(IFunctionCall* call) {
-        return new ScopeFrame(util::uuid4(), this, call);
+        return new ScopeFrame(nslib::uuid(), this, call);
     }
 
     std::string ScopeFrame::toString() const {

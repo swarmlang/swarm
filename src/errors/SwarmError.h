@@ -3,7 +3,9 @@
 
 #include <string>
 #include <stdexcept>
-#include "../shared/IStringable.h"
+#include "../shared/nslib.h"
+
+using namespace nslib;
 
 namespace swarmc {
 namespace Errors {

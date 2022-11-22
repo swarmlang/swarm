@@ -12,11 +12,8 @@
 int Executive::run(int argc, char **argv) {
     // Set up the console. Enable debugging output, if we want:
     if ( Configuration::DEBUG ) {
-        console->verbose();
+        console->setVerbosity(nslib::Verbosity::VERBOSE);
     }
-
-    auto epoch = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-    util::generator.seed(epoch);
 
     std::vector<std::string> params(argv + 1, argv + argc);
 
@@ -176,7 +173,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagVerbose = true;
             Configuration::DEBUG = true;
             Configuration::VERBOSE = true;
-            console->verbose();
+            console->setVerbosity(nslib::Verbosity::VERBOSE);
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --output-to. Pass --help for more info.");
@@ -188,7 +185,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             console->debug("Will output results to: " + name);
             outputResultTo = name;
         } else if ( arg == "--dbg-use-d-guid" ) {
-            util::USE_DETERMINISTIC_UUIDS = true;
+            nslib::priv::USE_DETERMINISTIC_UUIDS = true;
         } else if ( arg == "--svi" ) {
             flagSVI = true;
         } else if ( arg == "--without-prologue" ) {
@@ -255,91 +252,91 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
 }
 
 void Executive::printUsage() {
-    console->bold()->print("swarmc")->reset()->line(" - compiler/interpreter for the swarm language");
-    console->bold()->print("USAGE: ")->reset()->line("swarmc [...OPTIONS] <INPUT FILE>");
-    console->line();
-    console->bold()->line("OPTIONS:");
+    console->bold()->print("swarmc")->reset()->println(" - compiler/interpreter for the swarm language");
+    console->bold()->print("USAGE: ")->reset()->println("swarmc [...OPTIONS] <INPUT FILE>");
+    console->println();
+    console->bold()->println("OPTIONS:");
 
     console->bold()->print("  --help  :  ", true)
-        ->line("Show usage information and exit.")
-        ->line();
+        ->println("Show usage information and exit.")
+        ->println();
 
     console->bold()->print("  --locally  :  ", true)
-        ->line("Evaluate the given Swarm program without connecting to remote executors.")
-        ->line();
+        ->println("Evaluate the given Swarm program without connecting to remote executors.")
+        ->println();
 
     console->bold()->print("  --binary  :  ", true)
-        ->line("Compile the given program and output the binary at the specified file.")
-        ->line();
+        ->println("Compile the given program and output the binary at the specified file.")
+        ->println();
 
     console->bold()->print("  --verbose  :  ", true)
-        ->line("Enable verbose/debugging output.")
-        ->line();
+        ->println("Enable verbose/debugging output.")
+        ->println();
 
     console->bold()->print("  --clear-queue  :  ", true)
-        ->line("Force clear any jobs in the Redis queue.")
-        ->line();
+        ->println("Force clear any jobs in the Redis queue.")
+        ->println();
 
     console->bold()->print("  --work-queue <FILTERS> :  ", true)
-        ->line("Listen for and execute jobs in the Redis queue, with the filters from the given file. ")
-        ->line();
+        ->println("Listen for and execute jobs in the Redis queue, with the filters from the given file. ")
+        ->println();
 
     console->bold()->print("  --output-to <OUTFILE>  :  ", true)
-        ->line("Print the result of the evaluation to the given file.")
-        ->line("                                       If the output file is \"--\", will write to stdout (default).")
-        ->line();
+        ->println("Print the result of the evaluation to the given file.")
+        ->println("                                       If the output file is \"--\", will write to stdout (default).")
+        ->println();
 
     console->bold()->print("  --run-test <NAME>  :  ", true)
-        ->line("Run the C++-based test with the given name.")
-        ->line();
+        ->println("Run the C++-based test with the given name.")
+        ->println();
 
     console->bold()->print("  --svi  :  ", true)
-        ->line("Read the input file as SVI code.")
-        ->line();
+        ->println("Read the input file as SVI code.")
+        ->println();
 
     console->bold()->print("  --without-prologue  :  ", true)
-        ->line("Exclude the Prologue provider from the runtime")
-        ->line();
+        ->println("Exclude the Prologue provider from the runtime")
+        ->println();
 
     console->debug();
         console->bold()->print("  --dbg-output-tokens-to <OUTFILE>  :  ", true)
-            ->line("Lex the input and output the tokens to the specified file.")
-            ->line("                                       If the output file is \"--\", will write to stdout.")
-            ->line();
+            ->println("Lex the input and output the tokens to the specified file.")
+            ->println("                                       If the output file is \"--\", will write to stdout.")
+            ->println();
 
         console->bold()->print("  --dbg-parse  :  ", true)
-            ->line("Lex and parse the input, then stop.")
-            ->line();
+            ->println("Lex and parse the input, then stop.")
+            ->println();
 
         console->bold()->print("  --dbg-output-parse-to <OUTFILE>  :  ", true)
-            ->line("Parse the input and output the AST to the specified file.")
-            ->line("                                      If the output file is \"--\", will write to stdout.")
-            ->line();
+            ->println("Parse the input and output the AST to the specified file.")
+            ->println("                                      If the output file is \"--\", will write to stdout.")
+            ->println();
 
         console->bold()->print("  --dbg-use-d-guid  :  ", true)
-            ->line("Use deterministic UUIDs (for test output).")
-            ->line();
+            ->println("Use deterministic UUIDs (for test output).")
+            ->println();
 
         console->bold()->print("  --dbg-output-isa-to <OUTFILE> :  ", true)
-            ->line("Set the name of the ISA output file")
-            ->line();
+            ->println("Set the name of the ISA output file")
+            ->println();
 
         console->bold()->print("  --dbg-output-cfg-to <OUTFILE> :  ", true)
-            ->line("Set the name of the CFG output file")
-            ->line();
+            ->println("Set the name of the CFG output file")
+            ->println();
     console->end();
 
-    console->bold()->line("FILTERS:")
-        ->line("Workers can have key-value filters applied to them so that tagged code regions can be")
-        ->line("selectively executed on nodes matching the appropriate filters.")
-        ->line()
-        ->line("To do this, pass the path to a JSON file containing an object of string-string mappings to")
-        ->line("the --work-queue flag.")
-        ->line();
+    console->bold()->println("FILTERS:")
+        ->println("Workers can have key-value filters applied to them so that tagged code regions can be")
+        ->println("selectively executed on nodes matching the appropriate filters.")
+        ->println()
+        ->println("To do this, pass the path to a JSON file containing an object of string-string mappings to")
+        ->println("the --work-queue flag.")
+        ->println();
 
     // Output in debugging mode only:
     console->debug()
-            ->line("Built with debugging enabled.")
+            ->println("Built with debugging enabled.")
         ->end();
 }
 

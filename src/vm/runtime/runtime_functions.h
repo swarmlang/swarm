@@ -3,9 +3,10 @@
 
 #include <utility>
 #include <vector>
-#include "../../shared/IStringable.h"
-#include "../../shared/util/Console.h"
+#include "../../shared/nslib.h"
 #include "../../errors/SwarmError.h"
+
+using namespace nslib;
 
 namespace swarmc::Type {
     class Type;

@@ -1,7 +1,7 @@
 #ifndef SWARMVM_REFERENCESERIALIZEWALK
 #define SWARMVM_REFERENCESERIALIZEWALK
 
-#include "../../shared/util_string_helpers.h"
+#include "../../shared/nslib.h"
 #include "../ReferenceWalk.h"
 
 namespace swarmc::ISA {
@@ -33,7 +33,7 @@ namespace swarmc::ISA {
         }
 
         std::string walkStringReference(StringReference* ref) override {
-            std::string escaped = string_replace(string_replace(ref->value(), "\"", "\\\""), "\n", "\\\n");
+            std::string escaped = nslib::str::replace(nslib::str::replace(ref->value(), "\"", "\\\""), "\n", "\\\n");
             return "\"" + escaped + "\"";
         }
 

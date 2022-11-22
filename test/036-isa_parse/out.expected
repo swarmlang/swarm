@@ -131,5 +131,4 @@ POPEXHANDLER<Location<l:MAIN_EH>>
 CALL0<Location<f:MAIN_AFTER_SKETCHY>>
 RETURN0<>
 CALL0<Location<f:MAIN>>
-[32m[SUCCESS] [0mParsed input program.
-[0m
+[32m success [39m[0mParsed input program.

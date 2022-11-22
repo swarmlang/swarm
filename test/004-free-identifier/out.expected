@@ -1,8 +1,8 @@
-[1m[31m[Name Error] [0m[1m[l: 2, c: 13] [0mUse of free identifier "b".
-[0m[1m[31m[Name Error] [0m[1m[l: 5, c: 13] [0mUse of free identifier "t2".
-[0m[1m[31m[Name Error] [0m[1m[l: 8, c: 13] [0mUse of free identifier "funct3".
-[0m[1m[31m[Name Error] [0m[1m[l: 12, c: 20] [0mUse of free identifier "b".
-[0m[1m[31m[Name Error] [0m[1m[l: 28, c: 31] [0mUse of free identifier "arg2".
-[0m[1m[31m[Name Error] [0m[1m[l: 31, c: 33] [0mUse of free identifier "bad_value".
-[0m[1m[31m[Name Error] [0m[1m[l: 37, c: 11] [0mUse of free identifier "bad_value".
+[1m[31m[Name Error] [39m[22m[0m[1m[l: 2, c: 13] [22m[0mUse of free identifier "b".
+[0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 5, c: 13] [22m[0mUse of free identifier "t2".
+[0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 8, c: 13] [22m[0mUse of free identifier "funct3".
+[0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 12, c: 20] [22m[0mUse of free identifier "b".
+[0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 28, c: 31] [22m[0mUse of free identifier "arg2".
+[0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 31, c: 33] [22m[0mUse of free identifier "bad_value".
+[0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 37, c: 11] [22m[0mUse of free identifier "bad_value".
 [0m

@@ -5,11 +5,11 @@
 #include <iostream>
 #include <list>
 #include <stdexcept>
-#include "../shared/util/Console.h"
-#include "../shared/IStringable.h"
-#include "../shared/uuid.h"
+#include "../shared/nslib.h"
 #include "Position.h"
 #include "Type.h"
+
+using namespace nslib;
 
 namespace swarmc {
 namespace Lang {
@@ -31,7 +31,7 @@ namespace Walk {
     class SemanticSymbol : public IStringable {
     public:
         SemanticSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : _name(name), _type(type), _declaredAt(declaredAt) {
-            _uuid = util::uuid4();
+            _uuid = nslib::uuid();
         }
 
         virtual std::string toString() const {

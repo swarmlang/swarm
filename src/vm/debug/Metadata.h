@@ -3,7 +3,9 @@
 
 #include <tuple>
 #include <map>
-#include "../../shared/IStringable.h"
+#include "../../shared/nslib.h"
+
+using namespace nslib;
 
 namespace swarmc::Runtime::Debug {
 

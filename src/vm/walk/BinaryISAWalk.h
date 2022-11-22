@@ -4,10 +4,12 @@
 #include <cassert>
 #include <iostream>
 #include "../../../mod/binn/src/binn.h"
-#include "../../shared/IStringable.h"
+#include "../../shared/nslib.h"
 #include "../isa_meta.h"
 #include "./BinaryReferenceWalk.h"
 #include "binary_const.h"
+
+using namespace nslib;
 
 namespace swarmc::Runtime {
     class VirtualMachine;

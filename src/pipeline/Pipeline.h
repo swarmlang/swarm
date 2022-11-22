@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include "../shared/IStringable.h"
+#include "../shared/nslib.h"
 #include "../errors/ParseError.h"
 #include "../lang/Scanner.h"
 #include "../bison/grammar.hh"
@@ -15,6 +15,8 @@
 #include "../lang/Walk/TypeAnalysisWalk.h"
 #include "../vm/ISAParser.h"
 #include "../cfg/cfg.h"
+
+using namespace nslib;
 
 namespace swarmc {
 

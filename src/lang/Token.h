@@ -2,8 +2,10 @@
 #define SWARMC_TOKEN_H
 
 #include <sstream>
-#include "../shared/IStringable.h"
+#include "../shared/nslib.h"
 #include "Position.h"
+
+using namespace nslib;
 
 namespace swarmc {
 namespace Lang {

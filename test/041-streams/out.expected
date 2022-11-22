@@ -1,79 +1,78 @@
-[35m[DEBUG] [0mParsing argument: /home/garrettmills/Projects/swarm/test/041-streams/test.svi
-[0m[35m[DEBUG] [0mGot input file: /home/garrettmills/Projects/swarm/test/041-streams/test.svi
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:s> STREAMINIT<TypeReference<Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: streaminit TypeReference<Primitive<STRING>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<STRING>>
-[0m[35m[DEBUG] [0mVM: Location<l:s> <- StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: streampush Location<l:s> StringReference<Hello>
-[0m[35m[DEBUG] [0mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: streampush Location<l:s> StringReference<World!>
-[0m[35m[DEBUG] [0mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: Skipping uncalled function body: BEGINFN<Location<f:POPPER_INNER>, TypeReference<Primitive<VOID>>>, pc: 9
-[0m[35m[DEBUG] [0mVM: Skipping uncalled function body: BEGINFN<Location<f:POPPER>, TypeReference<Primitive<VOID>>>, pc: 16
-[0m[35m[DEBUG] [0mVM: call0 Location<f:POPPER>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: POPPER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:POPPER, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:POPPER> (pc: 9)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: SCOPEOF<Location<l:empty>>
-[0m[35m[DEBUG] [0mVM: scopeof Location<l:empty>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:empty> STREAMEMPTY<Location<l:s>>
-[0m[35m[DEBUG] [0mVM: streamempty Location<l:s>
-[0m[35m[DEBUG] [0mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: Location<l:empty> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: scopeof Location<l:n_empty>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:n_empty> NOT<Location<l:empty>>
-[0m[35m[DEBUG] [0mVM: not Location<l:empty>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: Location<l:n_empty> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: while Location<l:n_empty> Location<f:POPPER_INNER>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: POPPER_INNER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:POPPER_INNER, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:POPPER_INNER> (pc: 3)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: SCOPEOF<Location<l:v>>
-[0m[35m[DEBUG] [0mVM: scopeof Location<l:v>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:v> STREAMPOP<Location<l:s>>
-[0m[35m[DEBUG] [0mVM: streampop Location<l:s>
-[0m[35m[DEBUG] [0mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: Location<l:v> <- StringReference<Hello>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:empty> STREAMEMPTY<Location<l:s>>
-[0m[35m[DEBUG] [0mVM: streamempty Location<l:s>
-[0m[35m[DEBUG] [0mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: Location<l:empty> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:n_empty> NOT<Location<l:empty>>
-[0m[35m[DEBUG] [0mVM: not Location<l:empty>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: Location<l:n_empty> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: while Location<l:n_empty> Location<f:POPPER_INNER>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: POPPER_INNER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:POPPER_INNER, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:POPPER_INNER> (pc: 3)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: SCOPEOF<Location<l:v>>
-[0m[35m[DEBUG] [0mVM: scopeof Location<l:v>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:v> STREAMPOP<Location<l:s>>
-[0m[35m[DEBUG] [0mVM: streampop Location<l:s>
-[0m[35m[DEBUG] [0mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: Location<l:v> <- StringReference<World!>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:empty> STREAMEMPTY<Location<l:s>>
-[0m[35m[DEBUG] [0mVM: streamempty Location<l:s>
-[0m[35m[DEBUG] [0mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: Location<l:empty> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:n_empty> NOT<Location<l:empty>>
-[0m[35m[DEBUG] [0mVM: not Location<l:empty>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: Location<l:n_empty> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: while Location<l:n_empty> Location<f:POPPER_INNER>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: POPPER_INNER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:POPPER_INNER, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: streamclose Location<l:s>
-[0m[35m[DEBUG] [0mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[0m
+[35m   debug [39mParsing argument: /home/garrettmills/Projects/swarm/test/041-streams/test.svi
+[35m   debug [39mGot input file: /home/garrettmills/Projects/swarm/test/041-streams/test.svi
+[35m   debug [39mVM: assigneval Location<l:s> STREAMINIT<TypeReference<Primitive<STRING>>>
+[35m   debug [39mVM: streaminit TypeReference<Primitive<STRING>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39mVM: Location<l:s> <- StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39mVM: streampush Location<l:s> StringReference<Hello>
+[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39mVM: streampush Location<l:s> StringReference<World!>
+[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39mVM: Skipping uncalled function body: BEGINFN<Location<f:POPPER_INNER>, TypeReference<Primitive<VOID>>>, pc: 9
+[35m   debug [39mVM: Skipping uncalled function body: BEGINFN<Location<f:POPPER>, TypeReference<Primitive<VOID>>>, pc: 16
+[35m   debug [39mVM: call0 Location<f:POPPER>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: POPPER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:POPPER, rt: Primitive<VOID>>>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:POPPER> (pc: 9)
+[35m   debug [39mVM: next instruction for inline call: SCOPEOF<Location<l:empty>>
+[35m   debug [39mVM: scopeof Location<l:empty>
+[35m   debug [39mVM: assigneval Location<l:empty> STREAMEMPTY<Location<l:s>>
+[35m   debug [39mVM: streamempty Location<l:s>
+[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39mVM: Location<l:empty> <- BooleanReference<false>
+[35m   debug [39mVM: scopeof Location<l:n_empty>
+[35m   debug [39mVM: assigneval Location<l:n_empty> NOT<Location<l:empty>>
+[35m   debug [39mVM: not Location<l:empty>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: Location<l:n_empty> <- BooleanReference<true>
+[35m   debug [39mVM: while Location<l:n_empty> Location<f:POPPER_INNER>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: POPPER_INNER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:POPPER_INNER, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:POPPER_INNER> (pc: 3)
+[35m   debug [39mVM: next instruction for inline call: SCOPEOF<Location<l:v>>
+[35m   debug [39mVM: scopeof Location<l:v>
+[35m   debug [39mVM: assigneval Location<l:v> STREAMPOP<Location<l:s>>
+[35m   debug [39mVM: streampop Location<l:s>
+[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39mVM: Location<l:v> <- StringReference<Hello>
+[35m   debug [39mVM: assigneval Location<l:empty> STREAMEMPTY<Location<l:s>>
+[35m   debug [39mVM: streamempty Location<l:s>
+[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39mVM: Location<l:empty> <- BooleanReference<false>
+[35m   debug [39mVM: assigneval Location<l:n_empty> NOT<Location<l:empty>>
+[35m   debug [39mVM: not Location<l:empty>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: Location<l:n_empty> <- BooleanReference<true>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: while Location<l:n_empty> Location<f:POPPER_INNER>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: POPPER_INNER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:POPPER_INNER, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:POPPER_INNER> (pc: 3)
+[35m   debug [39mVM: next instruction for inline call: SCOPEOF<Location<l:v>>
+[35m   debug [39mVM: scopeof Location<l:v>
+[35m   debug [39mVM: assigneval Location<l:v> STREAMPOP<Location<l:s>>
+[35m   debug [39mVM: streampop Location<l:s>
+[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39mVM: Location<l:v> <- StringReference<World!>
+[35m   debug [39mVM: assigneval Location<l:empty> STREAMEMPTY<Location<l:s>>
+[35m   debug [39mVM: streamempty Location<l:s>
+[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39mVM: Location<l:empty> <- BooleanReference<true>
+[35m   debug [39mVM: assigneval Location<l:n_empty> NOT<Location<l:empty>>
+[35m   debug [39mVM: not Location<l:empty>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: Location<l:n_empty> <- BooleanReference<false>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: while Location<l:n_empty> Location<f:POPPER_INNER>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: POPPER_INNER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:POPPER_INNER, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: streamclose Location<l:s>
+[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>

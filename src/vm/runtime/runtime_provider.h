@@ -1,9 +1,13 @@
 #ifndef SWARMVM_RUNTIME_PROVIDER
 #define SWARMVM_RUNTIME_PROVIDER
 
-#include "../../shared/IStringable.h"
+#include <utility>
+
+#include "../../shared/nslib.h"
 #include "interfaces.h"
 #include "runtime_functions.h"
+
+using namespace nslib;
 
 /*
  * This file contains interface definitions for external code which provides
@@ -20,7 +24,7 @@ namespace swarmc::Runtime {
     class IProviderFunctionCall : public IFunctionCall {
     public:
         IProviderFunctionCall(CallVector vector, const Type::Type* returnType):
-                IFunctionCall(FunctionBackend::PROVIDER, vector, returnType) {}
+                IFunctionCall(FunctionBackend::PROVIDER, std::move(vector), returnType) {}
 
         /** Get the IProvider responsible for this function call. */
         virtual IProvider* provider() const = 0;
@@ -61,7 +65,7 @@ namespace swarmc::Runtime {
      */
     class IProvider : public IStringable {
     public:
-        virtual ~IProvider() = default;
+        ~IProvider() override = default;
 
         /**
          * Attempt to load a function backed by this provider by name.

@@ -1,392 +1,391 @@
-[35m[DEBUG] [0mParsing argument: /home/garrettmills/Projects/swarm/test/037-basic_execution/test.svi
-[0m[35m[DEBUG] [0mGot input file: /home/garrettmills/Projects/swarm/test/037-basic_execution/test.svi
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:a> PLUS<NumberReference<3.000000>, NumberReference<4.000000>>
-[0m[35m[DEBUG] [0mVM: plus NumberReference<3.000000> NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:a> <- NumberReference<7.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:a> MINUS<NumberReference<4.000000>, NumberReference<3.000000>>
-[0m[35m[DEBUG] [0mVM: minus NumberReference<4.000000> NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:a> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:a> TIMES<NumberReference<3.000000>, NumberReference<4.000000>>
-[0m[35m[DEBUG] [0mVM: times NumberReference<3.000000> NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:a> <- NumberReference<12.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:a> DIVIDE<NumberReference<3.000000>, NumberReference<4.000000>>
-[0m[35m[DEBUG] [0mVM: divide NumberReference<3.000000> NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:a> <- NumberReference<0.750000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:a> POWER<NumberReference<2.000000>, NumberReference<2.000000>>
-[0m[35m[DEBUG] [0mVM: power NumberReference<2.000000> NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:a> <- NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:a> MOD<NumberReference<10.000000>, NumberReference<3.000000>>
-[0m[35m[DEBUG] [0mVM: mod NumberReference<10.000000> NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<10.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:a> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:a> NEG<NumberReference<4.000000>>
-[0m[35m[DEBUG] [0mVM: neg NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:a> <- NumberReference<-4.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:b> GT<NumberReference<3.000000>, NumberReference<4.000000>>
-[0m[35m[DEBUG] [0mVM: gt NumberReference<3.000000> NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:b> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:b> GTE<NumberReference<3.000000>, NumberReference<4.000000>>
-[0m[35m[DEBUG] [0mVM: gte NumberReference<3.000000> NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:b> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:b> LT<NumberReference<3.000000>, NumberReference<4.000000>>
-[0m[35m[DEBUG] [0mVM: lt NumberReference<3.000000> NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:b> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:b> LTE<NumberReference<3.000000>, NumberReference<4.000000>>
-[0m[35m[DEBUG] [0mVM: lte NumberReference<3.000000> NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:b> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:c> AND<BooleanReference<true>, BooleanReference<false>>
-[0m[35m[DEBUG] [0mVM: and BooleanReference<true> BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: Location<l:c> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:c> OR<BooleanReference<true>, BooleanReference<false>>
-[0m[35m[DEBUG] [0mVM: or BooleanReference<true> BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: Location<l:c> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:c> XOR<BooleanReference<true>, BooleanReference<false>>
-[0m[35m[DEBUG] [0mVM: xor BooleanReference<true> BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: Location<l:c> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:c> NAND<BooleanReference<true>, BooleanReference<false>>
-[0m[35m[DEBUG] [0mVM: nand BooleanReference<true> BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: Location<l:c> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:c> NOR<BooleanReference<true>, BooleanReference<false>>
-[0m[35m[DEBUG] [0mVM: nor BooleanReference<true> BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: Location<l:c> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:c> NOT<BooleanReference<true>>
-[0m[35m[DEBUG] [0mVM: not BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: Location<l:c> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: Skipping uncalled function body: BEGINFN<Location<f:WHILE_BODY>, TypeReference<Primitive<VOID>>>, pc: 21
-[0m[35m[DEBUG] [0mVM: assignvalue Location<l:i> NumberReference<0.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i> <- NumberReference<0.000000>
-[0m[35m[DEBUG] [0mVM: assignvalue Location<l:i_cond> BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: Location<l:i_cond> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:i> NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<0.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
-[0m[35m[DEBUG] [0mVM: lt Location<l:i> NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i_cond> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:i> NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i> <- NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
-[0m[35m[DEBUG] [0mVM: lt Location<l:i> NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i_cond> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:i> NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i> <- NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
-[0m[35m[DEBUG] [0mVM: lt Location<l:i> NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i_cond> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:i> NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i> <- NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
-[0m[35m[DEBUG] [0mVM: lt Location<l:i> NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i_cond> <- BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:i> NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<4.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i> <- NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
-[0m[35m[DEBUG] [0mVM: lt Location<l:i> NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<5.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:i_cond> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:d> ENUMINIT<TypeReference<Primitive<STRING>>>
-[0m[35m[DEBUG] [0mVM: enuminit TypeReference<Primitive<STRING>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<STRING>>
-[0m[35m[DEBUG] [0mVM: Location<l:d> <- EnumerationReference<inner: Primitive<STRING>, #items: 0>
-[0m[35m[DEBUG] [0mVM: enumappend StringReference<World!> Location<l:d>
-[0m[35m[DEBUG] [0mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 0>
-[0m[35m[DEBUG] [0mVM: enumprepend StringReference<hello> Location<l:d>
-[0m[35m[DEBUG] [0mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 1>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:d_len> ENUMLENGTH<Location<l:d>>
-[0m[35m[DEBUG] [0mVM: enumlength Location<l:d>
-[0m[35m[DEBUG] [0mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 2>
-[0m[35m[DEBUG] [0mVM: Location<l:d_len> <- NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:d_head> ENUMGET<Location<l:d>, NumberReference<0.000000>>
-[0m[35m[DEBUG] [0mVM: enumget Location<l:d> NumberReference<0.000000>
-[0m[35m[DEBUG] [0mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 2>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<0.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:d_head> <- StringReference<hello>
-[0m[35m[DEBUG] [0mVM: enumset Location<l:d> NumberReference<0.000000> StringReference<Hello,>
-[0m[35m[DEBUG] [0mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 2>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<0.000000>
-[0m[35m[DEBUG] [0mVM: Skipping uncalled function body: BEGINFN<Location<f:ENUM_BODY>, TypeReference<Primitive<VOID>>>, pc: 34
-[0m[35m[DEBUG] [0mVM: enumerate TypeReference<Primitive<STRING>> Location<l:d> Location<f:ENUM_BODY>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<STRING>>
-[0m[35m[DEBUG] [0mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 2>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<STRING>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<VOID>>
-[0m[35m[DEBUG] [0mVM: load inline function: ENUM_BODY (#params: 2) (returns: TypeReference<Primitive<VOID>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:ENUM_BODY, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: callback: FunctionReference<InlineFunction<f:ENUM_BODY, rt: Primitive<VOID>>>
-[0m[35m[DEBUG] [0mVM: callback type: Primitive<STRING> :: Primitive<NUMBER> :: Primitive<VOID> | callback outer: Primitive<STRING> :: Primitive<NUMBER> :: Primitive<VOID>
-[0m[35m[DEBUG] [0mVM: pushCall - call: InlineFunctionCall<f:ENUM_BODY> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:ENUM_BODY>>
-[0m[35m[DEBUG] [0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:ENUM_BODY> (pc: 30)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<STRING>>, Location<l:elem>>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<STRING>> Location<l:elem>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:elem> <- StringReference<Hello,>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:idx>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:idx> <- NumberReference<0.000000>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: pushCall - call: InlineFunctionCall<f:ENUM_BODY> | job: SingleThreaded::QueueJob<id: 1, call: InlineFunctionCall<f:ENUM_BODY>>
-[0m[35m[DEBUG] [0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:ENUM_BODY> (pc: 30)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<STRING>>, Location<l:elem>>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<STRING>> Location<l:elem>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:elem> <- StringReference<World!>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:idx>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:idx> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: return0
-[0m[35m[DEBUG] [0mVM: Skipping uncalled function body: BEGINFN<Location<f:ADDER>, TypeReference<Primitive<NUMBER>>>, pc: 41
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:inc> CURRY<Location<f:ADDER>, NumberReference<1.000000>>
-[0m[35m[DEBUG] [0mVM: curry Location<f:ADDER> NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: load inline function: ADDER (#params: 2) (returns: TypeReference<Primitive<NUMBER>>)
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<InlineFunction<f:ADDER, rt: Primitive<NUMBER>>>
-[0m[35m[DEBUG] [0mVM: Location<l:inc> <- FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:two> CURRY<Location<l:inc>, NumberReference<1.000000>>
-[0m[35m[DEBUG] [0mVM: curry Location<l:inc> NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: Location<l:two> <- FunctionReference<CurriedFunction<f: CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:e> CALL0<Location<l:two>>
-[0m[35m[DEBUG] [0mVM: assignEval: got call0 or call1
-[0m[35m[DEBUG] [0mVM: assignEval: jumping to call
-[0m[35m[DEBUG] [0mVM: call0 Location<l:two>
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<CurriedFunction<f: CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:ADDER> (pc: 35)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:lhs> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:rhs> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: scopeof Location<l:sum>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:lhs> Location<l:rhs>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:sum> <- NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: return1 Location<l:sum>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:e> CALL0<Location<l:two>>
-[0m[35m[DEBUG] [0mVM: assignEval: got call0 or call1
-[0m[35m[DEBUG] [0mVM: assignEval: jumped from return
-[0m[35m[DEBUG] [0mVM: Location<l:e> <- NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:e> CALL1<Location<l:inc>, NumberReference<2.000000>>
-[0m[35m[DEBUG] [0mVM: assignEval: got call0 or call1
-[0m[35m[DEBUG] [0mVM: assignEval: jumping to call
-[0m[35m[DEBUG] [0mVM: call1 Location<l:inc> NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:ADDER> (pc: 35)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:lhs> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:rhs> <- NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: scopeof Location<l:sum>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:lhs> Location<l:rhs>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:sum> <- NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: return1 Location<l:sum>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:e> CALL1<Location<l:inc>, NumberReference<2.000000>>
-[0m[35m[DEBUG] [0mVM: assignEval: got call0 or call1
-[0m[35m[DEBUG] [0mVM: assignEval: jumped from return
-[0m[35m[DEBUG] [0mVM: Location<l:e> <- NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: callif1 BooleanReference<true> Location<l:inc> NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:ADDER> (pc: 35)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:lhs> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:rhs> <- NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: scopeof Location<l:sum>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:lhs> Location<l:rhs>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:sum> <- NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: return1 Location<l:sum>
-[0m[35m[DEBUG] [0mVM: callif1 BooleanReference<false> Location<l:inc> NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: callelse1 BooleanReference<true> Location<l:inc> NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<true>
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: callelse1 BooleanReference<false> Location<l:inc> NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: ensureBoolean: BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
-[0m[35m[DEBUG] [0mVM: inline call: InlineFunctionCall<f:ADDER> (pc: 35)
-[0m[35m[DEBUG] [0mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:lhs> <- NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
-[0m[35m[DEBUG] [0mVM: fnparam: Location<l:rhs> <- NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: scopeof Location<l:sum>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
-[0m[35m[DEBUG] [0mVM: plus Location<l:lhs> Location<l:rhs>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<1.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:sum> <- NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: return1 Location<l:sum>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:f> MAPINIT<TypeReference<Primitive<BOOLEAN>>>
-[0m[35m[DEBUG] [0mVM: mapinit TypeReference<Primitive<BOOLEAN>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<BOOLEAN>>
-[0m[35m[DEBUG] [0mVM: Location<l:f> <- MapReference<inner: Primitive<BOOLEAN>, #keys: 0>
-[0m[35m[DEBUG] [0mVM: mapset StringReference<abc> BooleanReference<true> Location<l:f>
-[0m[35m[DEBUG] [0mVM: ensureString: StringReference<abc>
-[0m[35m[DEBUG] [0mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 0>
-[0m[35m[DEBUG] [0mVM: mapset StringReference<def> BooleanReference<false> Location<l:f>
-[0m[35m[DEBUG] [0mVM: ensureString: StringReference<def>
-[0m[35m[DEBUG] [0mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 1>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:g> MAPGET<StringReference<def>, Location<l:f>>
-[0m[35m[DEBUG] [0mVM: mapget StringReference<def> Location<l:f>
-[0m[35m[DEBUG] [0mVM: ensureString: StringReference<def>
-[0m[35m[DEBUG] [0mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 2>
-[0m[35m[DEBUG] [0mVM: Location<l:g> <- BooleanReference<false>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:f_len> MAPLENGTH<Location<l:f>>
-[0m[35m[DEBUG] [0mVM: maplength Location<l:f>
-[0m[35m[DEBUG] [0mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 2>
-[0m[35m[DEBUG] [0mVM: Location<l:f_len> <- NumberReference<2.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:f_keys> MAPKEYS<Location<l:f>>
-[0m[35m[DEBUG] [0mVM: mapkeys Location<l:f>
-[0m[35m[DEBUG] [0mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 2>
-[0m[35m[DEBUG] [0mVM: Location<l:f_keys> <- EnumerationReference<inner: Primitive<STRING>, #items: 2>
-[0m[35m[DEBUG] [0mVM: typify Location<l:h> TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: assignvalue Location<l:h> NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:h> <- NumberReference<3.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:t_h> TYPEOF<Location<l:h>>
-[0m[35m[DEBUG] [0mVM: typeof Location<l:h>
-[0m[35m[DEBUG] [0mVM: Location<l:t_h> <- TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:t_ADDER> TYPEOF<Location<f:ADDER>>
-[0m[35m[DEBUG] [0mVM: typeof Location<f:ADDER>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: load inline function: ADDER (#params: 2) (returns: TypeReference<Primitive<NUMBER>>)
-[0m[35m[DEBUG] [0mVM: Location<l:t_ADDER> <- TypeReference<Primitive<NUMBER> :: Primitive<NUMBER> :: Primitive<NUMBER>>
-[0m[35m[DEBUG] [0mVM: compatible Location<l:t_h> Location<l:t_ADDER>
-[0m[35m[DEBUG] [0mVM: assignvalue Location<l:n> StringReference<Hello,>
-[0m[35m[DEBUG] [0mVM: Location<l:n> <- StringReference<Hello,>
-[0m[35m[DEBUG] [0mVM: assignvalue Location<l:j> StringReference<World!>
-[0m[35m[DEBUG] [0mVM: Location<l:j> <- StringReference<World!>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:k> STRCONCAT<Location<l:n>, Location<l:j>>
-[0m[35m[DEBUG] [0mVM: strconcat Location<l:n> Location<l:j>
-[0m[35m[DEBUG] [0mVM: ensureString: StringReference<Hello,>
-[0m[35m[DEBUG] [0mVM: ensureString: StringReference<World!>
-[0m[35m[DEBUG] [0mVM: Location<l:k> <- StringReference<Hello,World!>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:k_len> STRLENGTH<Location<l:k>>
-[0m[35m[DEBUG] [0mVM: strlength Location<l:k>
-[0m[35m[DEBUG] [0mVM: ensureString: StringReference<Hello,World!>
-[0m[35m[DEBUG] [0mVM: Location<l:k_len> <- NumberReference<12.000000>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:l> STRSLICEFROM<Location<l:k>, NumberReference<6.000000>>
-[0m[35m[DEBUG] [0mVM: strslicefrom Location<l:k> NumberReference<6.000000>
-[0m[35m[DEBUG] [0mVM: ensureString: StringReference<Hello,World!>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<6.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:l> <- StringReference<World!>
-[0m[35m[DEBUG] [0mVM: assigneval Location<l:m> STRSLICEFROMTO<Location<l:k>, NumberReference<0.000000>, NumberReference<6.000000>>
-[0m[35m[DEBUG] [0mVM: strslicefromto Location<l:k> NumberReference<0.000000> NumberReference<6.000000>
-[0m[35m[DEBUG] [0mVM: ensureString: StringReference<Hello,World!>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<0.000000>
-[0m[35m[DEBUG] [0mVM: ensureNumber: NumberReference<6.000000>
-[0m[35m[DEBUG] [0mVM: Location<l:m> <- StringReference<Hello,>
-[0m
+[35m   debug [39mParsing argument: /home/garrettmills/Projects/swarm/test/037-basic_execution/test.svi
+[35m   debug [39mGot input file: /home/garrettmills/Projects/swarm/test/037-basic_execution/test.svi
+[35m   debug [39mVM: assigneval Location<l:a> PLUS<NumberReference<3.000000>, NumberReference<4.000000>>
+[35m   debug [39mVM: plus NumberReference<3.000000> NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: Location<l:a> <- NumberReference<7.000000>
+[35m   debug [39mVM: assigneval Location<l:a> MINUS<NumberReference<4.000000>, NumberReference<3.000000>>
+[35m   debug [39mVM: minus NumberReference<4.000000> NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: Location<l:a> <- NumberReference<1.000000>
+[35m   debug [39mVM: assigneval Location<l:a> TIMES<NumberReference<3.000000>, NumberReference<4.000000>>
+[35m   debug [39mVM: times NumberReference<3.000000> NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: Location<l:a> <- NumberReference<12.000000>
+[35m   debug [39mVM: assigneval Location<l:a> DIVIDE<NumberReference<3.000000>, NumberReference<4.000000>>
+[35m   debug [39mVM: divide NumberReference<3.000000> NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: Location<l:a> <- NumberReference<0.750000>
+[35m   debug [39mVM: assigneval Location<l:a> POWER<NumberReference<2.000000>, NumberReference<2.000000>>
+[35m   debug [39mVM: power NumberReference<2.000000> NumberReference<2.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<2.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<2.000000>
+[35m   debug [39mVM: Location<l:a> <- NumberReference<4.000000>
+[35m   debug [39mVM: assigneval Location<l:a> MOD<NumberReference<10.000000>, NumberReference<3.000000>>
+[35m   debug [39mVM: mod NumberReference<10.000000> NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<10.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: Location<l:a> <- NumberReference<1.000000>
+[35m   debug [39mVM: assigneval Location<l:a> NEG<NumberReference<4.000000>>
+[35m   debug [39mVM: neg NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: Location<l:a> <- NumberReference<-4.000000>
+[35m   debug [39mVM: assigneval Location<l:b> GT<NumberReference<3.000000>, NumberReference<4.000000>>
+[35m   debug [39mVM: gt NumberReference<3.000000> NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: Location<l:b> <- BooleanReference<false>
+[35m   debug [39mVM: assigneval Location<l:b> GTE<NumberReference<3.000000>, NumberReference<4.000000>>
+[35m   debug [39mVM: gte NumberReference<3.000000> NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: Location<l:b> <- BooleanReference<false>
+[35m   debug [39mVM: assigneval Location<l:b> LT<NumberReference<3.000000>, NumberReference<4.000000>>
+[35m   debug [39mVM: lt NumberReference<3.000000> NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: Location<l:b> <- BooleanReference<true>
+[35m   debug [39mVM: assigneval Location<l:b> LTE<NumberReference<3.000000>, NumberReference<4.000000>>
+[35m   debug [39mVM: lte NumberReference<3.000000> NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: Location<l:b> <- BooleanReference<true>
+[35m   debug [39mVM: assigneval Location<l:c> AND<BooleanReference<true>, BooleanReference<false>>
+[35m   debug [39mVM: and BooleanReference<true> BooleanReference<false>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: Location<l:c> <- BooleanReference<false>
+[35m   debug [39mVM: assigneval Location<l:c> OR<BooleanReference<true>, BooleanReference<false>>
+[35m   debug [39mVM: or BooleanReference<true> BooleanReference<false>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: Location<l:c> <- BooleanReference<true>
+[35m   debug [39mVM: assigneval Location<l:c> XOR<BooleanReference<true>, BooleanReference<false>>
+[35m   debug [39mVM: xor BooleanReference<true> BooleanReference<false>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: Location<l:c> <- BooleanReference<true>
+[35m   debug [39mVM: assigneval Location<l:c> NAND<BooleanReference<true>, BooleanReference<false>>
+[35m   debug [39mVM: nand BooleanReference<true> BooleanReference<false>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: Location<l:c> <- BooleanReference<true>
+[35m   debug [39mVM: assigneval Location<l:c> NOR<BooleanReference<true>, BooleanReference<false>>
+[35m   debug [39mVM: nor BooleanReference<true> BooleanReference<false>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: Location<l:c> <- BooleanReference<false>
+[35m   debug [39mVM: assigneval Location<l:c> NOT<BooleanReference<true>>
+[35m   debug [39mVM: not BooleanReference<true>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: Location<l:c> <- BooleanReference<false>
+[35m   debug [39mVM: Skipping uncalled function body: BEGINFN<Location<f:WHILE_BODY>, TypeReference<Primitive<VOID>>>, pc: 21
+[35m   debug [39mVM: assignvalue Location<l:i> NumberReference<0.000000>
+[35m   debug [39mVM: Location<l:i> <- NumberReference<0.000000>
+[35m   debug [39mVM: assignvalue Location<l:i_cond> BooleanReference<true>
+[35m   debug [39mVM: Location<l:i_cond> <- BooleanReference<true>
+[35m   debug [39mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
+[35m   debug [39mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
+[35m   debug [39mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
+[35m   debug [39mVM: plus Location<l:i> NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<0.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: Location<l:i> <- NumberReference<1.000000>
+[35m   debug [39mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
+[35m   debug [39mVM: lt Location<l:i> NumberReference<5.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<5.000000>
+[35m   debug [39mVM: Location<l:i_cond> <- BooleanReference<true>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
+[35m   debug [39mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
+[35m   debug [39mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
+[35m   debug [39mVM: plus Location<l:i> NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: Location<l:i> <- NumberReference<2.000000>
+[35m   debug [39mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
+[35m   debug [39mVM: lt Location<l:i> NumberReference<5.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<2.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<5.000000>
+[35m   debug [39mVM: Location<l:i_cond> <- BooleanReference<true>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
+[35m   debug [39mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
+[35m   debug [39mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
+[35m   debug [39mVM: plus Location<l:i> NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<2.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: Location<l:i> <- NumberReference<3.000000>
+[35m   debug [39mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
+[35m   debug [39mVM: lt Location<l:i> NumberReference<5.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<5.000000>
+[35m   debug [39mVM: Location<l:i_cond> <- BooleanReference<true>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
+[35m   debug [39mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
+[35m   debug [39mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
+[35m   debug [39mVM: plus Location<l:i> NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<3.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: Location<l:i> <- NumberReference<4.000000>
+[35m   debug [39mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
+[35m   debug [39mVM: lt Location<l:i> NumberReference<5.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<5.000000>
+[35m   debug [39mVM: Location<l:i_cond> <- BooleanReference<true>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:WHILE_BODY> (pc: 17)
+[35m   debug [39mVM: next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
+[35m   debug [39mVM: assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
+[35m   debug [39mVM: plus Location<l:i> NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<4.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: Location<l:i> <- NumberReference<5.000000>
+[35m   debug [39mVM: assigneval Location<l:i_cond> LT<Location<l:i>, NumberReference<5.000000>>
+[35m   debug [39mVM: lt Location<l:i> NumberReference<5.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<5.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<5.000000>
+[35m   debug [39mVM: Location<l:i_cond> <- BooleanReference<false>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: while Location<l:i_cond> Location<f:WHILE_BODY>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: WHILE_BODY (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:WHILE_BODY, rt: Primitive<VOID>>>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: assigneval Location<l:d> ENUMINIT<TypeReference<Primitive<STRING>>>
+[35m   debug [39mVM: enuminit TypeReference<Primitive<STRING>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39mVM: Location<l:d> <- EnumerationReference<inner: Primitive<STRING>, #items: 0>
+[35m   debug [39mVM: enumappend StringReference<World!> Location<l:d>
+[35m   debug [39mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 0>
+[35m   debug [39mVM: enumprepend StringReference<hello> Location<l:d>
+[35m   debug [39mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 1>
+[35m   debug [39mVM: assigneval Location<l:d_len> ENUMLENGTH<Location<l:d>>
+[35m   debug [39mVM: enumlength Location<l:d>
+[35m   debug [39mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 2>
+[35m   debug [39mVM: Location<l:d_len> <- NumberReference<2.000000>
+[35m   debug [39mVM: assigneval Location<l:d_head> ENUMGET<Location<l:d>, NumberReference<0.000000>>
+[35m   debug [39mVM: enumget Location<l:d> NumberReference<0.000000>
+[35m   debug [39mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 2>
+[35m   debug [39mVM: ensureNumber: NumberReference<0.000000>
+[35m   debug [39mVM: Location<l:d_head> <- StringReference<hello>
+[35m   debug [39mVM: enumset Location<l:d> NumberReference<0.000000> StringReference<Hello,>
+[35m   debug [39mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 2>
+[35m   debug [39mVM: ensureNumber: NumberReference<0.000000>
+[35m   debug [39mVM: Skipping uncalled function body: BEGINFN<Location<f:ENUM_BODY>, TypeReference<Primitive<VOID>>>, pc: 34
+[35m   debug [39mVM: enumerate TypeReference<Primitive<STRING>> Location<l:d> Location<f:ENUM_BODY>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39mVM: ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 2>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39mVM: load inline function: ENUM_BODY (#params: 2) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:ENUM_BODY, rt: Primitive<VOID>>>
+[35m   debug [39mVM: callback: FunctionReference<InlineFunction<f:ENUM_BODY, rt: Primitive<VOID>>>
+[35m   debug [39mVM: callback type: Primitive<STRING> :: Primitive<NUMBER> :: Primitive<VOID> | callback outer: Primitive<STRING> :: Primitive<NUMBER> :: Primitive<VOID>
+[35m   debug [39mVM: pushCall - call: InlineFunctionCall<f:ENUM_BODY> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:ENUM_BODY>>
+[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:ENUM_BODY> (pc: 30)
+[35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<STRING>>, Location<l:elem>>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<STRING>> Location<l:elem>
+[35m   debug [39mVM: fnparam: Location<l:elem> <- StringReference<Hello,>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:idx>
+[35m   debug [39mVM: fnparam: Location<l:idx> <- NumberReference<0.000000>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: pushCall - call: InlineFunctionCall<f:ENUM_BODY> | job: SingleThreaded::QueueJob<id: 1, call: InlineFunctionCall<f:ENUM_BODY>>
+[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:ENUM_BODY> (pc: 30)
+[35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<STRING>>, Location<l:elem>>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<STRING>> Location<l:elem>
+[35m   debug [39mVM: fnparam: Location<l:elem> <- StringReference<World!>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:idx>
+[35m   debug [39mVM: fnparam: Location<l:idx> <- NumberReference<1.000000>
+[35m   debug [39mVM: return0
+[35m   debug [39mVM: Skipping uncalled function body: BEGINFN<Location<f:ADDER>, TypeReference<Primitive<NUMBER>>>, pc: 41
+[35m   debug [39mVM: assigneval Location<l:inc> CURRY<Location<f:ADDER>, NumberReference<1.000000>>
+[35m   debug [39mVM: curry Location<f:ADDER> NumberReference<1.000000>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: load inline function: ADDER (#params: 2) (returns: TypeReference<Primitive<NUMBER>>)
+[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:ADDER, rt: Primitive<NUMBER>>>
+[35m   debug [39mVM: Location<l:inc> <- FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: assigneval Location<l:two> CURRY<Location<l:inc>, NumberReference<1.000000>>
+[35m   debug [39mVM: curry Location<l:inc> NumberReference<1.000000>
+[35m   debug [39mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: Location<l:two> <- FunctionReference<CurriedFunction<f: CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: assigneval Location<l:e> CALL0<Location<l:two>>
+[35m   debug [39mVM: assignEval: got call0 or call1
+[35m   debug [39mVM: assignEval: jumping to call
+[35m   debug [39mVM: call0 Location<l:two>
+[35m   debug [39mVM: ensureFunction: FunctionReference<CurriedFunction<f: CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:ADDER> (pc: 35)
+[35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39mVM: fnparam: Location<l:lhs> <- NumberReference<1.000000>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
+[35m   debug [39mVM: fnparam: Location<l:rhs> <- NumberReference<1.000000>
+[35m   debug [39mVM: scopeof Location<l:sum>
+[35m   debug [39mVM: assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
+[35m   debug [39mVM: plus Location<l:lhs> Location<l:rhs>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: Location<l:sum> <- NumberReference<2.000000>
+[35m   debug [39mVM: return1 Location<l:sum>
+[35m   debug [39mVM: assigneval Location<l:e> CALL0<Location<l:two>>
+[35m   debug [39mVM: assignEval: got call0 or call1
+[35m   debug [39mVM: assignEval: jumped from return
+[35m   debug [39mVM: Location<l:e> <- NumberReference<2.000000>
+[35m   debug [39mVM: assigneval Location<l:e> CALL1<Location<l:inc>, NumberReference<2.000000>>
+[35m   debug [39mVM: assignEval: got call0 or call1
+[35m   debug [39mVM: assignEval: jumping to call
+[35m   debug [39mVM: call1 Location<l:inc> NumberReference<2.000000>
+[35m   debug [39mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:ADDER> (pc: 35)
+[35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39mVM: fnparam: Location<l:lhs> <- NumberReference<1.000000>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
+[35m   debug [39mVM: fnparam: Location<l:rhs> <- NumberReference<2.000000>
+[35m   debug [39mVM: scopeof Location<l:sum>
+[35m   debug [39mVM: assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
+[35m   debug [39mVM: plus Location<l:lhs> Location<l:rhs>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<2.000000>
+[35m   debug [39mVM: Location<l:sum> <- NumberReference<3.000000>
+[35m   debug [39mVM: return1 Location<l:sum>
+[35m   debug [39mVM: assigneval Location<l:e> CALL1<Location<l:inc>, NumberReference<2.000000>>
+[35m   debug [39mVM: assignEval: got call0 or call1
+[35m   debug [39mVM: assignEval: jumped from return
+[35m   debug [39mVM: Location<l:e> <- NumberReference<3.000000>
+[35m   debug [39mVM: callif1 BooleanReference<true> Location<l:inc> NumberReference<2.000000>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:ADDER> (pc: 35)
+[35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39mVM: fnparam: Location<l:lhs> <- NumberReference<1.000000>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
+[35m   debug [39mVM: fnparam: Location<l:rhs> <- NumberReference<2.000000>
+[35m   debug [39mVM: scopeof Location<l:sum>
+[35m   debug [39mVM: assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
+[35m   debug [39mVM: plus Location<l:lhs> Location<l:rhs>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<2.000000>
+[35m   debug [39mVM: Location<l:sum> <- NumberReference<3.000000>
+[35m   debug [39mVM: return1 Location<l:sum>
+[35m   debug [39mVM: callif1 BooleanReference<false> Location<l:inc> NumberReference<2.000000>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: callelse1 BooleanReference<true> Location<l:inc> NumberReference<2.000000>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<true>
+[35m   debug [39mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: callelse1 BooleanReference<false> Location<l:inc> NumberReference<2.000000>
+[35m   debug [39mVM: ensureBoolean: BooleanReference<false>
+[35m   debug [39mVM: ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:ADDER, rt: Primitive<NUMBER>>, ref: NumberReference<1.000000>>>
+[35m   debug [39mVM: inline call: InlineFunctionCall<f:ADDER> (pc: 35)
+[35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39mVM: fnparam: Location<l:lhs> <- NumberReference<1.000000>
+[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
+[35m   debug [39mVM: fnparam: Location<l:rhs> <- NumberReference<2.000000>
+[35m   debug [39mVM: scopeof Location<l:sum>
+[35m   debug [39mVM: assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
+[35m   debug [39mVM: plus Location<l:lhs> Location<l:rhs>
+[35m   debug [39mVM: ensureNumber: NumberReference<1.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<2.000000>
+[35m   debug [39mVM: Location<l:sum> <- NumberReference<3.000000>
+[35m   debug [39mVM: return1 Location<l:sum>
+[35m   debug [39mVM: assigneval Location<l:f> MAPINIT<TypeReference<Primitive<BOOLEAN>>>
+[35m   debug [39mVM: mapinit TypeReference<Primitive<BOOLEAN>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<BOOLEAN>>
+[35m   debug [39mVM: Location<l:f> <- MapReference<inner: Primitive<BOOLEAN>, #keys: 0>
+[35m   debug [39mVM: mapset StringReference<abc> BooleanReference<true> Location<l:f>
+[35m   debug [39mVM: ensureString: StringReference<abc>
+[35m   debug [39mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 0>
+[35m   debug [39mVM: mapset StringReference<def> BooleanReference<false> Location<l:f>
+[35m   debug [39mVM: ensureString: StringReference<def>
+[35m   debug [39mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 1>
+[35m   debug [39mVM: assigneval Location<l:g> MAPGET<StringReference<def>, Location<l:f>>
+[35m   debug [39mVM: mapget StringReference<def> Location<l:f>
+[35m   debug [39mVM: ensureString: StringReference<def>
+[35m   debug [39mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 2>
+[35m   debug [39mVM: Location<l:g> <- BooleanReference<false>
+[35m   debug [39mVM: assigneval Location<l:f_len> MAPLENGTH<Location<l:f>>
+[35m   debug [39mVM: maplength Location<l:f>
+[35m   debug [39mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 2>
+[35m   debug [39mVM: Location<l:f_len> <- NumberReference<2.000000>
+[35m   debug [39mVM: assigneval Location<l:f_keys> MAPKEYS<Location<l:f>>
+[35m   debug [39mVM: mapkeys Location<l:f>
+[35m   debug [39mVM: ensureMap: MapReference<inner: Primitive<BOOLEAN>, #keys: 2>
+[35m   debug [39mVM: Location<l:f_keys> <- EnumerationReference<inner: Primitive<STRING>, #items: 2>
+[35m   debug [39mVM: typify Location<l:h> TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: assignvalue Location<l:h> NumberReference<3.000000>
+[35m   debug [39mVM: Location<l:h> <- NumberReference<3.000000>
+[35m   debug [39mVM: assigneval Location<l:t_h> TYPEOF<Location<l:h>>
+[35m   debug [39mVM: typeof Location<l:h>
+[35m   debug [39mVM: Location<l:t_h> <- TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: assigneval Location<l:t_ADDER> TYPEOF<Location<f:ADDER>>
+[35m   debug [39mVM: typeof Location<f:ADDER>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39mVM: load inline function: ADDER (#params: 2) (returns: TypeReference<Primitive<NUMBER>>)
+[35m   debug [39mVM: Location<l:t_ADDER> <- TypeReference<Primitive<NUMBER> :: Primitive<NUMBER> :: Primitive<NUMBER>>
+[35m   debug [39mVM: compatible Location<l:t_h> Location<l:t_ADDER>
+[35m   debug [39mVM: assignvalue Location<l:n> StringReference<Hello,>
+[35m   debug [39mVM: Location<l:n> <- StringReference<Hello,>
+[35m   debug [39mVM: assignvalue Location<l:j> StringReference<World!>
+[35m   debug [39mVM: Location<l:j> <- StringReference<World!>
+[35m   debug [39mVM: assigneval Location<l:k> STRCONCAT<Location<l:n>, Location<l:j>>
+[35m   debug [39mVM: strconcat Location<l:n> Location<l:j>
+[35m   debug [39mVM: ensureString: StringReference<Hello,>
+[35m   debug [39mVM: ensureString: StringReference<World!>
+[35m   debug [39mVM: Location<l:k> <- StringReference<Hello,World!>
+[35m   debug [39mVM: assigneval Location<l:k_len> STRLENGTH<Location<l:k>>
+[35m   debug [39mVM: strlength Location<l:k>
+[35m   debug [39mVM: ensureString: StringReference<Hello,World!>
+[35m   debug [39mVM: Location<l:k_len> <- NumberReference<12.000000>
+[35m   debug [39mVM: assigneval Location<l:l> STRSLICEFROM<Location<l:k>, NumberReference<6.000000>>
+[35m   debug [39mVM: strslicefrom Location<l:k> NumberReference<6.000000>
+[35m   debug [39mVM: ensureString: StringReference<Hello,World!>
+[35m   debug [39mVM: ensureNumber: NumberReference<6.000000>
+[35m   debug [39mVM: Location<l:l> <- StringReference<World!>
+[35m   debug [39mVM: assigneval Location<l:m> STRSLICEFROMTO<Location<l:k>, NumberReference<0.000000>, NumberReference<6.000000>>
+[35m   debug [39mVM: strslicefromto Location<l:k> NumberReference<0.000000> NumberReference<6.000000>
+[35m   debug [39mVM: ensureString: StringReference<Hello,World!>
+[35m   debug [39mVM: ensureNumber: NumberReference<0.000000>
+[35m   debug [39mVM: ensureNumber: NumberReference<6.000000>
+[35m   debug [39mVM: Location<l:m> <- StringReference<Hello,>

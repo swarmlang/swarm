@@ -336,5 +336,4 @@ ASSIGNEVAL<Location<l:tmp136>, CURRY<Location<l:var_t8>, Location<l:tmp135>>>
 ASSIGNVALUE<Location<l:tmp137>, TypeReference<Primitive<TYPE>>>
 ASSIGNEVAL<Location<l:tmp138>, CALL1<Location<l:tmp136>, Location<l:tmp137>>>
 ASSIGNVALUE<Location<l:var_t12>, Location<l:tmp138>>
-[32m[SUCCESS] [0mCompiled to ISA.
-[0m
+[32m success [39m[0mCompiled to ISA.
