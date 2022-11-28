@@ -5,7 +5,7 @@
 #include "shared/nslib.h"
 #include "lang/Position.h"
 #include "errors/SwarmError.h"
-#include "../Configuration.h"
+#include "Configuration.h"
 
 using namespace nslib;
 
