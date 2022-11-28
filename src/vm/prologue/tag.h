@@ -15,7 +15,7 @@ namespace swarmc::Runtime::Prologue {
 
         void execute() override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "TagFunctionCall<>";
         }
     };
@@ -24,13 +24,13 @@ namespace swarmc::Runtime::Prologue {
     public:
         explicit TagFunction(IProvider* provider) : PrologueFunction("TAG", provider) {}
 
-        FormalTypes paramTypes() const override;
+        [[nodiscard]] FormalTypes paramTypes() const override;
 
-        const Type::Type* returnType() const override;
+        [[nodiscard]] const Type::Type* returnType() const override;
 
-        PrologueFunctionCall* call(CallVector) const override;
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "TagFunction<>";
         }
     };
@@ -50,7 +50,7 @@ namespace swarmc::Runtime::Prologue {
 
         ISA::Reference* innerValue() override;
 
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
 
     protected:
         IProvider* _provider;

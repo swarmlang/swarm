@@ -9,7 +9,7 @@ namespace swarmc::ISA {
     public:
         explicit PushExceptionHandler1(LocationReference* handlerFn) :
             UnaryInstruction<LocationReference>(Tag::PUSHEXHANDLER1, handlerFn) {}
-        PushExceptionHandler1* copy() const override {
+        [[nodiscard]] PushExceptionHandler1* copy() const override {
             return new PushExceptionHandler1(_first->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         PushExceptionHandler2(LocationReference* handlerFn, LocationReference* discriminatorFn) :
             BinaryInstruction<LocationReference, LocationReference>(Tag::PUSHEXHANDLER2, handlerFn, discriminatorFn) {}
-        PushExceptionHandler2* copy() const override {
+        [[nodiscard]] PushExceptionHandler2* copy() const override {
             return new PushExceptionHandler2(_first->copy(), _second->copy());
         }
     };
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     public:
         explicit PopExceptionHandler(Reference* handlerId) :
             UnaryInstruction<Reference>(Tag::POPEXHANDLER, handlerId) {}
-        PopExceptionHandler* copy() const override {
+        [[nodiscard]] PopExceptionHandler* copy() const override {
             return new PopExceptionHandler(_first->copy());
         }
     };
@@ -36,7 +36,7 @@ namespace swarmc::ISA {
     public:
         explicit Raise(Reference* exceptionId) :
             UnaryInstruction<Reference>(Tag::RAISE, exceptionId) {}
-        Raise* copy() const override {
+        [[nodiscard]] Raise* copy() const override {
             return new Raise(_first->copy());
         }
     };
@@ -45,7 +45,7 @@ namespace swarmc::ISA {
     public:
         explicit Resume(LocationReference* fn) :
             UnaryInstruction<LocationReference>(Tag::RESUME, fn) {}
-        Resume* copy() const override {
+        [[nodiscard]] Resume* copy() const override {
             return new Resume(_first->copy());
         }
     };

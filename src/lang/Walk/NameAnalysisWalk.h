@@ -382,7 +382,7 @@ protected:
         return leftResult && rightResult;
     }
 
-    std::string toString() const override {
+    [[nodiscard]] std::string toString() const override {
         return "NameAnalysisWalk<>";
     }
 private:

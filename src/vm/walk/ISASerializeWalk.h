@@ -12,7 +12,7 @@ namespace swarmc::ISA {
      */
     class ISASerializeWalk : public ISAWalk<std::string> {
     public:
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "ISASerializeWalk<>";
         }
 

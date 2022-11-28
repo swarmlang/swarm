@@ -9,7 +9,7 @@ namespace swarmc::ISA {
     public:
         explicit MapInit(Reference* type) :
             UnaryInstruction<Reference>(Tag::MAPINIT, type) {}
-        MapInit* copy() const override {
+        [[nodiscard]] MapInit* copy() const override {
             return new MapInit(_first->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         MapSet(Reference* key, Reference* value, LocationReference* map) :
             TrinaryInstruction<Reference, Reference, LocationReference>(Tag::MAPSET, key, value, map) {}
-        MapSet* copy() const override {
+        [[nodiscard]] MapSet* copy() const override {
             return new MapSet(_first->copy(), _second->copy(), _third->copy());
         }
     };
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     public:
         MapGet(Reference* key, LocationReference* map) :
             BinaryInstruction<Reference, LocationReference>(Tag::MAPGET, key, map) {}
-        MapGet* copy() const override {
+        [[nodiscard]] MapGet* copy() const override {
             return new MapGet(_first->copy(), _second->copy());
         }
     };
@@ -36,7 +36,7 @@ namespace swarmc::ISA {
     public:
         explicit MapLength(LocationReference* map) :
             UnaryInstruction<LocationReference>(Tag::MAPLENGTH, map) {}
-        MapLength* copy() const override {
+        [[nodiscard]] MapLength* copy() const override {
             return new MapLength(_first->copy());
         }
     };
@@ -45,7 +45,7 @@ namespace swarmc::ISA {
     public:
         explicit MapKeys(LocationReference* map) :
             UnaryInstruction<LocationReference>(Tag::MAPKEYS, map) {}
-        MapKeys* copy() const override {
+        [[nodiscard]] MapKeys* copy() const override {
             return new MapKeys(_first->copy());
         }
     };

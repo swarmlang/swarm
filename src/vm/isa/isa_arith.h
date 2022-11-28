@@ -9,7 +9,7 @@ namespace swarmc::ISA {
     public:
         Plus(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::PLUS, lhs, rhs) {}
-        Plus* copy() const override {
+        [[nodiscard]] Plus* copy() const override {
             return new Plus(_first->copy(), _second->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         Minus(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::MINUS, lhs, rhs) {}
-        Minus* copy() const override {
+        [[nodiscard]] Minus* copy() const override {
             return new Minus(_first->copy(), _second->copy());
         }
     };
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     public:
         Times(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::TIMES, lhs, rhs) {}
-        Times* copy() const override {
+        [[nodiscard]] Times* copy() const override {
             return new Times(_first->copy(), _second->copy());
         }
     };
@@ -36,7 +36,7 @@ namespace swarmc::ISA {
     public:
         Divide(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::DIVIDE, lhs, rhs) {}
-        Divide* copy() const override {
+        [[nodiscard]] Divide* copy() const override {
             return new Divide(_first->copy(), _second->copy());
         }
     };
@@ -45,7 +45,7 @@ namespace swarmc::ISA {
     public:
         Power(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::POWER, lhs, rhs) {}
-        Power* copy() const override {
+        [[nodiscard]] Power* copy() const override {
             return new Power(_first->copy(), _second->copy());
         }
     };
@@ -54,7 +54,7 @@ namespace swarmc::ISA {
     public:
         Mod(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::MOD, lhs, rhs) {}
-        Mod* copy() const override {
+        [[nodiscard]] Mod* copy() const override {
             return new Mod(_first->copy(), _second->copy());
         }
     };
@@ -63,7 +63,7 @@ namespace swarmc::ISA {
     public:
         explicit Negative(Reference* value) :
             UnaryInstruction<Reference>(Tag::NEG, value) {}
-        Negative* copy() const override {
+        [[nodiscard]] Negative* copy() const override {
             return new Negative(_first->copy());
         }
     };
@@ -72,7 +72,7 @@ namespace swarmc::ISA {
     public:
         GreaterThan(Reference* lhs, Reference* rhs) :
                 BinaryInstruction<Reference, Reference>(Tag::GT, lhs, rhs) {}
-        GreaterThan* copy() const override {
+        [[nodiscard]] GreaterThan* copy() const override {
             return new GreaterThan(_first->copy(), _second->copy());
         }
     };
@@ -81,7 +81,7 @@ namespace swarmc::ISA {
     public:
         GreaterThanOrEqual(Reference* lhs, Reference* rhs) :
                 BinaryInstruction<Reference, Reference>(Tag::GTE, lhs, rhs) {}
-        GreaterThanOrEqual* copy() const override {
+        [[nodiscard]] GreaterThanOrEqual* copy() const override {
             return new GreaterThanOrEqual(_first->copy(), _second->copy());
         }
     };
@@ -90,7 +90,7 @@ namespace swarmc::ISA {
     public:
         LessThan(Reference* lhs, Reference* rhs) :
                 BinaryInstruction<Reference, Reference>(Tag::LT, lhs, rhs) {}
-        LessThan* copy() const override {
+        [[nodiscard]] LessThan* copy() const override {
             return new LessThan(_first->copy(), _second->copy());
         }
     };
@@ -99,7 +99,7 @@ namespace swarmc::ISA {
     public:
         LessThanOrEqual(Reference* lhs, Reference* rhs) :
                 BinaryInstruction<Reference, Reference>(Tag::LTE, lhs, rhs) {}
-        LessThanOrEqual* copy() const override {
+        [[nodiscard]] LessThanOrEqual* copy() const override {
             return new LessThanOrEqual(_first->copy(), _second->copy());
         }
     };

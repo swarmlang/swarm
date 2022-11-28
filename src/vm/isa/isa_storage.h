@@ -9,7 +9,7 @@ namespace swarmc::ISA {
     public:
         Typify(LocationReference* loc, Reference* type) :
             BinaryInstruction<LocationReference, Reference>(Tag::TYPIFY, loc, type) {}
-        Typify* copy() const override {
+        [[nodiscard]] Typify* copy() const override {
             return new Typify(_first->copy(), _second->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         AssignValue(LocationReference* loc, Reference* value) :
             BinaryInstruction<LocationReference, Reference>(Tag::ASSIGNVALUE, loc, value) {}
-        AssignValue* copy() const override {
+        [[nodiscard]] AssignValue* copy() const override {
             return new AssignValue(_first->copy(), _second->copy());
         }
     };
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     public:
         AssignEval(LocationReference* loc, Instruction* exe) :
             BinaryInstruction<LocationReference, Instruction>(Tag::ASSIGNEVAL, loc, exe) {}
-        AssignEval* copy() const override {
+        [[nodiscard]] AssignEval* copy() const override {
             return new AssignEval(_first->copy(), _second->copy());
         }
     };
@@ -36,7 +36,7 @@ namespace swarmc::ISA {
     public:
         explicit Lock(LocationReference* loc) :
             UnaryInstruction<LocationReference>(Tag::LOCK, loc) {}
-        Lock* copy() const override {
+        [[nodiscard]] Lock* copy() const override {
             return new Lock(_first->copy());
         }
     };
@@ -45,7 +45,7 @@ namespace swarmc::ISA {
     public:
         explicit Unlock(LocationReference* loc) :
             UnaryInstruction<LocationReference>(Tag::UNLOCK, loc) {}
-        Unlock* copy() const override {
+        [[nodiscard]] Unlock* copy() const override {
             return new Unlock(_first->copy());
         }
     };
@@ -54,7 +54,7 @@ namespace swarmc::ISA {
     public:
         IsEqual(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::EQUAL, lhs, rhs) {}
-        IsEqual* copy() const override {
+        [[nodiscard]] IsEqual* copy() const override {
             return new IsEqual(_first->copy(), _second->copy());
         }
     };
@@ -63,7 +63,7 @@ namespace swarmc::ISA {
     public:
         explicit ScopeOf(LocationReference* loc) :
             UnaryInstruction<LocationReference>(Tag::SCOPEOF, loc) {}
-        ScopeOf* copy() const override {
+        [[nodiscard]] ScopeOf* copy() const override {
             return new ScopeOf(_first->copy());
         }
     };

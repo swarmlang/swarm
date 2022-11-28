@@ -133,14 +133,14 @@ namespace swarmc::ISA {
         ~Reference() override = default;
 
         /** Get the type of this reference. */
-        virtual const Type::Type* type() const = 0;
+        [[nodiscard]] virtual const Type::Type* type() const = 0;
 
         /** Get copy of object */
-        virtual Reference* copy() const = 0;
+        [[nodiscard]] virtual Reference* copy() const = 0;
 
         virtual bool isEqualTo(const Reference* other) const = 0;
 
-        ReferenceTag tag() const {
+        [[nodiscard]] ReferenceTag tag() const {
             return _tag;
         }
 
@@ -172,25 +172,25 @@ namespace swarmc::ISA {
         }
 
         /** Get the storage affinity of this location. */
-        Affinity affinity() const {
+        [[nodiscard]] Affinity affinity() const {
             return _affinity;
         }
 
         /** Get the variable name of this location. */
-        std::string name() const {
+        [[nodiscard]] std::string name() const {
             return _name;
         }
 
         /** Get the location-prefixed name of this location (e.g. `l:my_var`) */
-        std::string fqName() const {
+        [[nodiscard]] std::string fqName() const {
             return affinityString(_affinity) + ":" + _name;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "Location<" + affinityString(_affinity) + ":" + _name + ">";
         }
 
-        const Type::Type* type() const override {
+        [[nodiscard]] const Type::Type* type() const override {
             if ( _type == nullptr )
                 return new Type::Ambiguous();
 
@@ -211,7 +211,7 @@ namespace swarmc::ISA {
             );
         }
 
-        LocationReference* copy() const override {
+        [[nodiscard]] LocationReference* copy() const override {
             auto t = new LocationReference(_affinity, _name);
             if ( _type != nullptr ) t->setType(_type);
             return t;
@@ -228,11 +228,11 @@ namespace swarmc::ISA {
     public:
         explicit StreamReference(Runtime::IStream* stream) : Reference(ReferenceTag::STREAM), _stream(stream) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "StreamReference<" + _stream->toString() + ">";
         }
 
-        const Type::Stream* type() const override {
+        [[nodiscard]] const Type::Stream* type() const override {
             return Type::Stream::of(_stream->innerType());
         }
 
@@ -246,7 +246,7 @@ namespace swarmc::ISA {
             return stream->stream()->id() == _stream->id();
         }
 
-        StreamReference* copy() const override {
+        [[nodiscard]] StreamReference* copy() const override {
             // FIXME: might need a copy of _stream
             return new StreamReference(_stream);
         }
@@ -260,11 +260,11 @@ namespace swarmc::ISA {
     public:
         explicit ResourceReference(Runtime::IResource* resource) : Reference(ReferenceTag::RESOURCE), _resource(resource) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "ResourceReference<" + _resource->toString() + ">";
         }
 
-        const Type::Resource* type() const override {
+        [[nodiscard]] const Type::Resource* type() const override {
             return Type::Resource::of(_resource->innerType());
         }
 
@@ -276,7 +276,7 @@ namespace swarmc::ISA {
             return false;
         }
 
-        ResourceReference* copy() const override {
+        [[nodiscard]] ResourceReference* copy() const override {
             return new ResourceReference(_resource);
         }
     protected:
@@ -289,11 +289,11 @@ namespace swarmc::ISA {
     public:
         explicit FunctionReference(Runtime::IFunction* fn) : Reference(ReferenceTag::FUNCTION), _fn(fn) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "FunctionReference<" + _fn->toString() + ">";
         }
 
-        const Type::Type* type() const override {
+        [[nodiscard]] const Type::Type* type() const override {
             auto params = _fn->paramTypes();
             auto returnType = _fn->returnType();
             if ( params.empty() ) {
@@ -312,7 +312,7 @@ namespace swarmc::ISA {
         }
 
         /** Get the runtime function implementation. */
-        Runtime::IFunction* fn() const {
+        [[nodiscard]] Runtime::IFunction* fn() const {
             return _fn;
         }
 
@@ -320,7 +320,7 @@ namespace swarmc::ISA {
             return false;  // FIXME: can this be implemented by pushing equality into the IFunction implementation?
         }
 
-        FunctionReference* copy() const override {
+        [[nodiscard]] FunctionReference* copy() const override {
             // FIXME: might need acopy of _fn
             return new FunctionReference(_fn);
         }
@@ -334,17 +334,17 @@ namespace swarmc::ISA {
     public:
         explicit TypeReference(const Type::Type* type) : Reference(ReferenceTag::TYPE), _type(type) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "TypeReference<" + _type->toString() + ">";
         }
 
         /** Get the type of the reference itself (always of type type). */
-        const Type::Type* type() const override {
+        [[nodiscard]] const Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::TYPE);
         }
 
         /** Get the actual type this value is holding. */
-        const Type::Type* value() const {
+        [[nodiscard]] const Type::Type* value() const {
             return _type;
         }
 
@@ -354,7 +354,7 @@ namespace swarmc::ISA {
             return ref->type()->isAssignableTo(type()) && type()->isAssignableTo(ref->type());
         }
 
-        TypeReference* copy() const override {
+        [[nodiscard]] TypeReference* copy() const override {
             return new TypeReference(_type->copy());
         }
 
@@ -366,11 +366,11 @@ namespace swarmc::ISA {
     public:
         VoidReference() : Reference(ReferenceTag::VOID) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "VoidReference<>";
         }
 
-        const Type::Type* type() const {
+        [[nodiscard]] const Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::VOID);
         }
 
@@ -378,7 +378,7 @@ namespace swarmc::ISA {
             return other->tag() == ReferenceTag::VOID;
         }
 
-        VoidReference* copy() const override {
+        [[nodiscard]] VoidReference* copy() const override {
             return new VoidReference;
         }
     };
@@ -390,7 +390,7 @@ namespace swarmc::ISA {
         LiteralReference(ReferenceTag tag, const T value) : Reference(tag), _value(value) {}
 
         /** The literal value this reference is wrapping. */
-        virtual const T value() const {
+        [[nodiscard]] virtual T value() const {
             return _value;
         }
     protected:
@@ -400,23 +400,23 @@ namespace swarmc::ISA {
     /** A literal string value */
     class StringReference : public LiteralReference<std::string> {
     public:
-        explicit StringReference(std::string value) : LiteralReference<std::string>(ReferenceTag::STRING, value) {}
+        explicit StringReference(std::string value) : LiteralReference<std::string>(ReferenceTag::STRING, std::move(value)) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "StringReference<" + _value + ">";
         }
 
-        const Type::Type* type() const {
+        [[nodiscard]] const Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
-        bool isEqualTo(const Reference* other) const override {
+        [[nodiscard]] bool isEqualTo(const Reference* other) const override {
             if ( other->tag() != tag() ) return false;
             auto ref = (StringReference*) other;
             return ref->value() == value();
         }
 
-        StringReference* copy() const override {
+        [[nodiscard]] StringReference* copy() const override {
             return new StringReference(_value);
         }
     };
@@ -426,11 +426,11 @@ namespace swarmc::ISA {
     public:
         explicit NumberReference(double value) : LiteralReference<double>(ReferenceTag::NUMBER, value) {}
 
-        const Type::Type* type() const {
+        [[nodiscard]] const Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "NumberReference<" + std::to_string(_value) + ">";
         }
 
@@ -440,7 +440,7 @@ namespace swarmc::ISA {
             return ref->value() == value();
         }
 
-        NumberReference* copy() const override {
+        [[nodiscard]] NumberReference* copy() const override {
             return new NumberReference(_value);
         }
     };
@@ -450,12 +450,12 @@ namespace swarmc::ISA {
     public:
         explicit BooleanReference(bool value) : LiteralReference<bool>(ReferenceTag::BOOLEAN, value) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             std::string value = _value ? "true" : "false";
             return "BooleanReference<" + value + ">";
         }
 
-        const Type::Type* type() const {
+        [[nodiscard]] const Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
@@ -465,7 +465,7 @@ namespace swarmc::ISA {
             return ref->value() == value();
         }
 
-        BooleanReference* copy() const override {
+        [[nodiscard]] BooleanReference* copy() const override {
             return new BooleanReference(_value);
         }
     };
@@ -478,11 +478,11 @@ namespace swarmc::ISA {
         explicit EnumerationReference(const Type::Type* innerType) :
             Reference(ReferenceTag::ENUMERATION), _innerType(innerType) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "EnumerationReference<inner: " + _innerType->toString() + ", #items: " + std::to_string(_items.size()) + ">";
         }
 
-        const Type::Enumerable* type() const override {
+        [[nodiscard]] const Type::Enumerable* type() const override {
             return new Type::Enumerable(_innerType);
         }
 
@@ -497,12 +497,12 @@ namespace swarmc::ISA {
         }
 
         /** Returns true if this enumeration has an item at the given index. */
-        virtual bool has(size_t i) const {
+        [[nodiscard]] virtual bool has(size_t i) const {
             return _items.size() > i;
         }
 
         /** Returns the item at the given index. */
-        virtual Reference* get(size_t i) const {
+        [[nodiscard]] virtual Reference* get(size_t i) const {
             return _items.at(i);
         }
 
@@ -517,7 +517,7 @@ namespace swarmc::ISA {
         }
 
         /** Returns the number of items in this enumeration. */
-        virtual std::vector<Reference*>::size_type length() const {
+        [[nodiscard]] virtual std::vector<Reference*>::size_type length() const {
             return _items.size();
         }
 
@@ -533,7 +533,7 @@ namespace swarmc::ISA {
             return true;
         }
 
-        EnumerationReference* copy() const override {
+        [[nodiscard]] EnumerationReference* copy() const override {
             auto e = new EnumerationReference(_innerType->copy());
             for ( auto item : _items ) {
                 e->append(item->copy());
@@ -554,16 +554,16 @@ namespace swarmc::ISA {
         explicit MapReference(const Type::Type* innerType) :
                 Reference(ReferenceTag::MAP), _innerType(innerType) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "MapReference<inner: " + _innerType->toString() + ", #keys: " + std::to_string(_items.size()) + ">";
         }
 
-        const Type::Map* type() const override {
+        [[nodiscard]] const Type::Map* type() const override {
             return new Type::Map(_innerType);
         }
 
         /** Get the element at the given key. */
-        virtual Reference* get(const std::string& key) const {
+        [[nodiscard]] virtual Reference* get(const std::string& key) const {
             return _items.at(key);
         }
 
@@ -573,17 +573,17 @@ namespace swarmc::ISA {
         }
 
         /** Returns true if this map contains an element at the given key. */
-        virtual bool has(const std::string& key) const {
+        [[nodiscard]] virtual bool has(const std::string& key) const {
             return _items.find(key) != _items.end();
         }
 
         /** Get the number of entries in this map. */
-        virtual size_t length() const {
+        [[nodiscard]] virtual size_t length() const {
             return _items.size();
         }
 
         /** Get an enumeration of the keys of this map. */
-        virtual EnumerationReference* keys() const {
+        [[nodiscard]] virtual EnumerationReference* keys() const {
             auto er = new EnumerationReference(Type::Primitive::of(Type::Intrinsic::STRING));
             for ( const auto& item : _items ) {
                 er->append(new StringReference(item.first));
@@ -600,7 +600,7 @@ namespace swarmc::ISA {
             });
         }
 
-        MapReference* copy() const override {
+        [[nodiscard]] MapReference* copy() const override {
             auto m = new MapReference(_innerType->copy());
             for ( const auto& item : _items ) {
                 m->set(item.first, item.second->copy());
@@ -622,25 +622,25 @@ namespace swarmc::ISA {
 
         static std::string tagName(Tag tag);
 
-        virtual Tag tag() const {
+        [[nodiscard]] virtual Tag tag() const {
             return _tag;
         }
 
-        virtual Instruction* copy() const = 0;
+        [[nodiscard]] virtual Instruction* copy() const = 0;
 
-        virtual bool isNullary() const { 
+        [[nodiscard]] virtual bool isNullary() const {
             return false; 
         }
 
-        virtual bool isUnary() const { 
+        [[nodiscard]] virtual bool isUnary() const {
             return false; 
         }
 
-        virtual bool isBinary() const { 
+        [[nodiscard]] virtual bool isBinary() const {
             return false; 
         }
 
-        virtual bool isTrinary() const { 
+        [[nodiscard]] virtual bool isTrinary() const {
             return false; 
         }
 
@@ -653,11 +653,11 @@ namespace swarmc::ISA {
     public:
         explicit NullaryInstruction(Tag tag) : Instruction(tag) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return tagName(tag()) + "<>";
         }
 
-        bool isNullary() const override {
+        [[nodiscard]] bool isNullary() const override {
             return true; 
         }
     };
@@ -676,11 +676,11 @@ namespace swarmc::ISA {
             _first = first;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return tagName(tag()) + "<" + _first->toString() + ">";
         }
 
-        bool isUnary() const override {
+        [[nodiscard]] bool isUnary() const override {
             return true; 
         }
     protected:
@@ -709,11 +709,11 @@ namespace swarmc::ISA {
             _second = second;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return tagName(tag()) + "<" + _first->toString() + ", " + _second->toString() + ">";
         }
 
-        bool isBinary() const override {
+        [[nodiscard]] bool isBinary() const override {
             return true; 
         }
     protected:
@@ -751,12 +751,12 @@ namespace swarmc::ISA {
             _third = third;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return tagName(tag()) + "<" + _first->toString() + ", " + _second->toString() + ", " + _third->toString() + ">";
         }
 
-        bool isTrinary() const override {
-            return true; 
+        [[nodiscard]] bool isTrinary() const override {
+            return true;
         }
     protected:
         TFirst* _first;

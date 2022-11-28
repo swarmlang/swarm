@@ -51,10 +51,10 @@ namespace swarmc::Runtime {
             return nullptr;
         }
 
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
 
         /** Create a deep copy of this scope. */
-        ScopeFrame* copy() const {
+        [[nodiscard]] ScopeFrame* copy() const {
             auto copy = new ScopeFrame(_id, _parent == nullptr ? nullptr : _parent->copy());
             copy->_map = _map;
             copy->_call = _call;
@@ -90,7 +90,7 @@ namespace swarmc::Runtime {
         }
 
         /** Returns true if there are no more instructions to be executed. */
-        bool isEndOfProgram() const {
+        [[nodiscard]] bool isEndOfProgram() const {
             return _pc >= _is.size();
         }
 
@@ -151,7 +151,7 @@ namespace swarmc::Runtime {
         }
 
         /** Get the `fnparam` instructions for the inline function beginning at `pc`. */
-        std::vector<ISA::FunctionParam*> loadInlineFunctionParams(ISA::Instructions::size_type pc) const;
+        [[nodiscard]] std::vector<ISA::FunctionParam*> loadInlineFunctionParams(ISA::Instructions::size_type pc) const;
 
         /** Get the position of the inline function with the given name. */
         ISA::Instructions::size_type getInlineFunctionPC(const std::string& name) {
@@ -166,19 +166,19 @@ namespace swarmc::Runtime {
         }
 
         /** Get the `beginfn` instruction for the function at the given position. */
-        ISA::BeginFunction* getInlineFunctionHeader(ISA::Instructions::size_type pc) const;
+        [[nodiscard]] ISA::BeginFunction* getInlineFunctionHeader(ISA::Instructions::size_type pc) const;
 
         /** Returns true if the loaded program has an inline function with the given name. */
         bool hasInlineFunction(const std::string& name) {
             return _fJumps.find(name) != _fJumps.end();
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "Runtime::State<>";
         }
 
         /** Create a deep copy of this state object. */
-        State* copy() const {
+        [[nodiscard]] State* copy() const {
             auto copy = new State(_is);
             copy->_pc = _pc;
             copy->_callStack = _callStack;

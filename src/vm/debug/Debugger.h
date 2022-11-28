@@ -10,7 +10,7 @@ namespace swarmc::Runtime::Debug {
 
     class Debugger : public IStringable {
 
-        Metadata* meta() const { return _meta; }
+        [[nodiscard]] Metadata* meta() const { return _meta; }
 
         void setMetadata(Metadata* meta) { _meta = meta; }
 

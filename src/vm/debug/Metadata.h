@@ -18,7 +18,7 @@ namespace swarmc::Runtime::Debug {
             _sourceMap[pc] = std::make_tuple(file, line, col);
         }
 
-        bool hasMapping(size_t pc) const {
+        [[nodiscard]] bool hasMapping(size_t pc) const {
             return _sourceMap.find(pc) != _sourceMap.end();
         }
 
@@ -26,7 +26,7 @@ namespace swarmc::Runtime::Debug {
             return _sourceMap[pc];
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "Debug::Metadata<#map: " + std::to_string(_sourceMap.size()) + ">";
         }
 

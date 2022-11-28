@@ -49,13 +49,13 @@ namespace swarmc::Runtime {
         virtual void setReturn(ISA::Reference* value) { _returnValue = value; }
 
         /** Get the value returned by the execution of this call. `nullptr` if the function has not returned. */
-        virtual ISA::Reference* getReturn() const { return _returnValue; }
+        [[nodiscard]] virtual ISA::Reference* getReturn() const { return _returnValue; }
 
         /** Mark the function call as completed. */
         virtual void setReturned() { _returned = true; }
 
         /** Returns true if the function call has completed. */
-        virtual bool hasReturned() const { return _returned; }
+        [[nodiscard]] virtual bool hasReturned() const { return _returned; }
 
         /**
          * Get the next parameter curried with this function and advance the iterator.
@@ -92,9 +92,9 @@ namespace swarmc::Runtime {
          * Get the identifier name of the function.
          * e.g. if you want to jump to `beginfn f:MY_FN`, `name` is `MY_FN`.
          */
-        std::string name() const { return _name; }
+        [[nodiscard]] std::string name() const { return _name; }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "InlineFunctionCall<f:" + _name + ">";
         }
 
@@ -111,28 +111,28 @@ namespace swarmc::Runtime {
         ~IFunction() override = default;
 
         /** Get a list of parameters (as types) which must be provided to a call of this function. */
-        virtual FormalTypes paramTypes() const = 0;
+        [[nodiscard]] virtual FormalTypes paramTypes() const = 0;
 
         /** Get the return type of this function. */
-        virtual const Type::Type* returnType() const = 0;
+        [[nodiscard]] virtual const Type::Type* returnType() const = 0;
 
         /** Get a new IFunction which contains the given parameter, curried into a partial application. */
-        virtual IFunction* curry(ISA::Reference*) const = 0;
+        [[nodiscard]] virtual IFunction* curry(ISA::Reference*) const = 0;
 
         /** Get a list of the parameters which have been curried thusfar, along with their types. */
-        virtual CallVector getCallVector() const = 0;
+        [[nodiscard]] virtual CallVector getCallVector() const = 0;
 
         /** Begin a function call with the given parameters. */
-        virtual IFunctionCall* call(CallVector) const = 0;
+        [[nodiscard]] virtual IFunctionCall* call(CallVector) const = 0;
 
         /** Begin a function call with the curried parameters. */
-        virtual IFunctionCall* call() const { return call(getCallVector()); }
+        [[nodiscard]] virtual IFunctionCall* call() const { return call(getCallVector()); }
 
         /** Get the mechanism the VM should use to execute calls to this function. */
-        virtual FunctionBackend backend() const = 0;
+        [[nodiscard]] virtual FunctionBackend backend() const = 0;
 
         /** Get the name of the function to be looked up from the backend. */
-        virtual std::string name() const = 0;
+        [[nodiscard]] virtual std::string name() const = 0;
     };
 
 
@@ -143,12 +143,12 @@ namespace swarmc::Runtime {
     public:
         CurriedFunction(ISA::Reference* ref, const IFunction* upstream) : _ref(ref), _upstream(upstream) {}
 
-        FormalTypes paramTypes() const override {
+        [[nodiscard]] FormalTypes paramTypes() const override {
             auto upstream = _upstream->paramTypes();
             return {upstream.begin() + 1, upstream.end()};
         }
 
-        const Type::Type* returnType() const override {
+        [[nodiscard]] const Type::Type* returnType() const override {
             return _upstream->returnType();
         }
 
@@ -156,7 +156,7 @@ namespace swarmc::Runtime {
             return new CurriedFunction(ref, this);
         }
 
-        CallVector getCallVector() const override {
+        [[nodiscard]] CallVector getCallVector() const override {
             // FIXME: validate type/param indices
             auto type = _upstream->paramTypes()[0];
             auto upstream = _upstream->getCallVector();
@@ -164,19 +164,19 @@ namespace swarmc::Runtime {
             return upstream;
         }
 
-        IFunctionCall* call(CallVector vector) const override {
+        [[nodiscard]] IFunctionCall* call(CallVector vector) const override {
             return _upstream->call(vector);
         }
 
-        FunctionBackend backend() const override {
+        [[nodiscard]] FunctionBackend backend() const override {
             return _upstream->backend();
         }
 
-        std::string name() const override {
+        [[nodiscard]] std::string name() const override {
             return _upstream->name();
         }
 
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
 
     protected:
         ISA::Reference* _ref;
@@ -193,11 +193,11 @@ namespace swarmc::Runtime {
         InlineFunction(std::string name, FormalTypes types, const Type::Type* returnType)
             : _name(std::move(name)), _types(std::move(types)), _returnType(returnType) {}
 
-        FormalTypes paramTypes() const override {
+        [[nodiscard]] FormalTypes paramTypes() const override {
             return _types;
         }
 
-        const Type::Type* returnType() const override {
+        [[nodiscard]] const Type::Type* returnType() const override {
             return _returnType;
         };
 
@@ -205,23 +205,23 @@ namespace swarmc::Runtime {
             return new CurriedFunction(ref, this);
         }
 
-        CallVector getCallVector() const override {
+        [[nodiscard]] CallVector getCallVector() const override {
             return {};
         }
 
-        IFunctionCall* call(CallVector vector) const override {
+        [[nodiscard]] IFunctionCall* call(CallVector vector) const override {
             return new InlineFunctionCall(_name, vector, _returnType);
         }
 
-        FunctionBackend backend() const override {
+        [[nodiscard]] FunctionBackend backend() const override {
             return FunctionBackend::INLINE;
         }
 
-        std::string name() const override {
+        [[nodiscard]] std::string name() const override {
             return _name;
         }
 
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
 
     protected:
         std::string _name;

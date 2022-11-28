@@ -97,7 +97,7 @@ namespace swarmc::VM {
             return vm;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "VM::Pipeline<>";
         }
     protected:

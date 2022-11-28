@@ -13,11 +13,11 @@ namespace swarmc::ISA {
             new LocationReference(Affinity::FUNCTION, std::move(name)),
             returnType) {}
 
-        virtual bool isPure() const { return _isPure; }
+        [[nodiscard]] virtual bool isPure() const { return _isPure; }
 
         virtual void markAsPure() { _isPure = true; }
 
-        BeginFunction* copy() const override {
+        [[nodiscard]] BeginFunction* copy() const override {
             return new BeginFunction(_first->name(), _second->copy());
         }
     protected:
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     class FunctionParam : public BinaryInstruction<Reference, LocationReference> {
     public:
         FunctionParam(Reference* type, LocationReference* loc) : BinaryInstruction<Reference, LocationReference>(Tag::FNPARAM, type, loc) {}
-        FunctionParam* copy() const override {
+        [[nodiscard]] FunctionParam* copy() const override {
             return new FunctionParam(_first->copy(), _second->copy());
         }
     };
@@ -35,7 +35,7 @@ namespace swarmc::ISA {
     class Return1 : public UnaryInstruction<Reference> {
     public:
         explicit Return1(Reference* value) : UnaryInstruction<Reference>(Tag::RETURN1, value) {}
-        Return1* copy() const override {
+        [[nodiscard]] Return1* copy() const override {
             return new Return1(_first->copy());
         }
     };
@@ -43,7 +43,7 @@ namespace swarmc::ISA {
     class Return0 : public NullaryInstruction {
     public:
         Return0() : NullaryInstruction(Tag::RETURN0) {}
-        Return0* copy() const override {
+        [[nodiscard]] Return0* copy() const override {
             return new Return0();
         }
     };
@@ -52,7 +52,7 @@ namespace swarmc::ISA {
     public:
         Curry(Reference* fn, Reference* param) :
             BinaryInstruction<Reference, Reference>(Tag::CURRY, fn, param) {}
-        Curry* copy() const override {
+        [[nodiscard]] Curry* copy() const override {
             return new Curry(_first->copy(), _second->copy());
         }
     };
@@ -60,7 +60,7 @@ namespace swarmc::ISA {
     class Call0 : public UnaryInstruction<Reference> {
     public:
         explicit Call0(Reference* fn) : UnaryInstruction<Reference>(Tag::CALL0, fn) {}
-        Call0* copy() const override {
+        [[nodiscard]] Call0* copy() const override {
             return new Call0(_first->copy());
         }
     };
@@ -69,7 +69,7 @@ namespace swarmc::ISA {
     public:
         Call1(Reference* fn, Reference* param) :
                 BinaryInstruction<Reference, Reference>(Tag::CALL1, fn, param) {}
-        Call1* copy() const override {
+        [[nodiscard]] Call1* copy() const override {
             return new Call1(_first->copy(), _second->copy());
         }
     };
@@ -78,7 +78,7 @@ namespace swarmc::ISA {
     public:
         CallIf0(Reference* cond, Reference* fn) :
                 BinaryInstruction<Reference, Reference>(Tag::CALLIF0, cond, fn) {}
-        CallIf0* copy() const override {
+        [[nodiscard]] CallIf0* copy() const override {
             return new CallIf0(_first->copy(), _second->copy());
         }
     };
@@ -87,7 +87,7 @@ namespace swarmc::ISA {
     public:
         CallIf1(Reference* cond, Reference* fn, Reference* param) :
                 TrinaryInstruction<Reference, Reference, Reference>(Tag::CALLIF1, cond, fn, param) {}
-        CallIf1* copy() const override {
+        [[nodiscard]] CallIf1* copy() const override {
             return new CallIf1(_first->copy(), _second->copy(), _third->copy());
         }
     };
@@ -96,7 +96,7 @@ namespace swarmc::ISA {
     public:
         CallElse0(Reference* cond, Reference* fn) :
                 BinaryInstruction<Reference, Reference>(Tag::CALLELSE0, cond, fn) {}
-        CallElse0* copy() const override {
+        [[nodiscard]] CallElse0* copy() const override {
             return new CallElse0(_first->copy(), _second->copy());
         }
     };
@@ -105,7 +105,7 @@ namespace swarmc::ISA {
     public:
         CallElse1(Reference* cond, Reference* fn, Reference* param) :
                 TrinaryInstruction<Reference, Reference, Reference>(Tag::CALLELSE1, cond, fn, param) {}
-        CallElse1* copy() const override {
+        [[nodiscard]] CallElse1* copy() const override {
             return new CallElse1(_first->copy(), _second->copy(), _third->copy());
         }
     };
@@ -113,7 +113,7 @@ namespace swarmc::ISA {
     class PushCall0 : public UnaryInstruction<Reference> {
     public:
         explicit PushCall0(Reference* fn) : UnaryInstruction<Reference>(Tag::PUSHCALL0, fn) {}
-        PushCall0* copy() const override {
+        [[nodiscard]] PushCall0* copy() const override {
             return new PushCall0(_first->copy());
         }
     };
@@ -122,7 +122,7 @@ namespace swarmc::ISA {
     public:
         PushCall1(Reference* fn, Reference* param) :
                 BinaryInstruction<Reference, Reference>(Tag::PUSHCALL1, fn, param) {}
-        PushCall1* copy() const override {
+        [[nodiscard]] PushCall1* copy() const override {
             return new PushCall1(_first->copy(), _second->copy());
         }
     };
@@ -131,7 +131,7 @@ namespace swarmc::ISA {
     public:
         PushCallIf0(Reference* cond, Reference* fn) :
                 BinaryInstruction<Reference, Reference>(Tag::PUSHCALLIF0, cond, fn) {}
-        PushCallIf0* copy() const override {
+        [[nodiscard]] PushCallIf0* copy() const override {
             return new PushCallIf0(_first->copy(), _second->copy());
         }
     };
@@ -140,7 +140,7 @@ namespace swarmc::ISA {
     public:
         PushCallIf1(Reference* cond, Reference* fn, Reference* param) :
                 TrinaryInstruction<Reference, Reference, Reference>(Tag::PUSHCALLIF1, cond, fn, param) {}
-        PushCallIf1* copy() const override {
+        [[nodiscard]] PushCallIf1* copy() const override {
             return new PushCallIf1(_first->copy(), _second->copy(), _third->copy());
         }
     };
@@ -149,7 +149,7 @@ namespace swarmc::ISA {
     public:
         PushCallElse0(Reference* cond, Reference* fn) :
                 BinaryInstruction<Reference, Reference>(Tag::PUSHCALLELSE0, cond, fn) {}
-        PushCallElse0* copy() const override {
+        [[nodiscard]] PushCallElse0* copy() const override {
             return new PushCallElse0(_first->copy(), _second->copy());
         }
     };
@@ -158,7 +158,7 @@ namespace swarmc::ISA {
     public:
         PushCallElse1(Reference* cond, Reference* fn, Reference* param) :
                 TrinaryInstruction<Reference, Reference, Reference>(Tag::PUSHCALLELSE1, cond, fn, param) {}
-        PushCallElse1* copy() const override {
+        [[nodiscard]] PushCallElse1* copy() const override {
             return new PushCallElse1(_first->copy(), _second->copy(), _third->copy());
         }
     };
@@ -166,7 +166,7 @@ namespace swarmc::ISA {
     class Drain : public NullaryInstruction {
     public:
         Drain() : NullaryInstruction(Tag::DRAIN) {}
-        Drain* copy() const override {
+        [[nodiscard]] Drain* copy() const override {
             return new Drain();
         }
     };
@@ -174,7 +174,7 @@ namespace swarmc::ISA {
     class Exit : public NullaryInstruction {
     public:
         Exit() : NullaryInstruction(Tag::EXIT) {}
-        Exit* copy() const override {
+        [[nodiscard]] Exit* copy() const override {
             return new Exit();
         }
     };

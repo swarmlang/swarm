@@ -84,7 +84,6 @@ namespace Walk {
 
     private:
         Position* _pos = nullptr;
-        ScopeTable* _scope = nullptr;
     };
 
     /** AST node representing a statement that can occur in the root of a program. */
@@ -93,7 +92,7 @@ namespace Walk {
         StatementNode(Position* pos) : ASTNode(pos) {}
         virtual ~StatementNode() {}
 
-        virtual bool isStatement() const {
+        virtual bool isStatement() const override {
             return true;
         }
 
@@ -251,15 +250,15 @@ namespace Walk {
             return new UnitNode(position()->copy());
         }
 
-        virtual const Type::Type* type() const {
+        const Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::UNIT);
         }
 
-        virtual std::string toString() const {
+        std::string toString() const override {
             return "UnitNode<>";
         }
 
-        virtual std::string getName() const {
+        std::string getName() const override {
             return "UnitNode";
         }
     };
@@ -317,7 +316,7 @@ namespace Walk {
         LValNode(Position* pos) : ExpressionNode(pos) {}
         virtual ~LValNode() {}
 
-        virtual bool isLVal() const {
+        bool isLVal() const override {
             return true;
         }
 
@@ -325,9 +324,9 @@ namespace Walk {
 
         virtual SemanticSymbol* lockable() const = 0;
 
-        virtual LValNode* copy() const override = 0;
+        LValNode* copy() const override = 0;
 
-        virtual const Type::Type* type() const = 0;
+        const Type::Type* type() const override = 0;
     };
 
 
@@ -977,11 +976,11 @@ namespace Walk {
             return new NumericComparisonExpressionNode(position()->copy(), _comparisonType, _left->copy(), _right->copy());
         }
 
-        std::string getName() const {
+        std::string getName() const override {
             return "NumericComparisonExpressionNode";
         }
 
-        std::string toString() const {
+        std::string toString() const override {
             return "NumericComparisonExpressionNode<type: " + comparisonTypeToString() + ">";
         }
 
@@ -1308,7 +1307,7 @@ namespace Walk {
 
         virtual BlockStatementNode* copy() const override = 0;
 
-        virtual bool isBlock() const { return true; }
+        bool isBlock() const override { return true; }
     };
 
     /** AST node representing an enumeration block. */

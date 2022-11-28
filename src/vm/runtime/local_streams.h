@@ -24,7 +24,7 @@ namespace swarmc::Runtime {
 
             bool isEmpty() override { return true; }
 
-            std::string id() const override { return _id; }
+            [[nodiscard]] std::string id() const override { return _id; }
 
         protected:
             std::string _id;
@@ -37,7 +37,7 @@ namespace swarmc::Runtime {
 
             void push(ISA::Reference* value) override;
 
-            std::string toString() const override {
+            [[nodiscard]] std::string toString() const override {
                 return "LocalOutputStream<>";
             }
         };
@@ -49,7 +49,7 @@ namespace swarmc::Runtime {
 
             void push(ISA::Reference* value) override;
 
-            std::string toString() const override {
+            [[nodiscard]] std::string toString() const override {
                 return "LocalErrorString<>";
             }
         };

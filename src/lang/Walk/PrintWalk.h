@@ -296,7 +296,7 @@ protected:
         _out << _prefix << node->toString() << std::endl;
     }
 
-    std::string toString() const override {
+    [[nodiscard]] std::string toString() const override {
         return "PrintWalk<>";
     }
 

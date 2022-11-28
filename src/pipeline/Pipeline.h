@@ -51,7 +51,7 @@ namespace swarmc {
             delete _isa;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "Pipeline<>";
         }
 

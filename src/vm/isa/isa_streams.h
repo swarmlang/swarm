@@ -9,7 +9,7 @@ namespace swarmc::ISA {
     public:
         explicit StreamInit(Reference* type) :
             UnaryInstruction<Reference>(Tag::STREAMINIT, type) {}
-        StreamInit* copy() const override {
+        [[nodiscard]] StreamInit* copy() const override {
             return new StreamInit(_first->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         StreamPush(LocationReference* stream, Reference* value) :
             BinaryInstruction<LocationReference, Reference>(Tag::STREAMPUSH, stream, value) {}
-        StreamPush* copy() const override {
+        [[nodiscard]] StreamPush* copy() const override {
             return new StreamPush(_first->copy(), _second->copy());
         }
     };
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     public:
         explicit StreamPop(LocationReference* stream) :
             UnaryInstruction<LocationReference>(Tag::STREAMPOP, stream) {}
-        StreamPop* copy() const override {
+        [[nodiscard]] StreamPop* copy() const override {
             return new StreamPop(_first->copy());
         }
     };
@@ -36,7 +36,7 @@ namespace swarmc::ISA {
     public:
         explicit StreamClose(LocationReference* stream) :
             UnaryInstruction<LocationReference>(Tag::STREAMCLOSE, stream) {}
-        StreamClose* copy() const override {
+        [[nodiscard]] StreamClose* copy() const override {
             return new StreamClose(_first->copy());
         }
     };
@@ -45,7 +45,7 @@ namespace swarmc::ISA {
     public:
         explicit StreamEmpty(LocationReference* stream) :
             UnaryInstruction<LocationReference>(Tag::STREAMEMPTY, stream) {}
-        StreamEmpty* copy() const override {
+        [[nodiscard]] StreamEmpty* copy() const override {
             return new StreamEmpty(_first->copy());
         }
     };

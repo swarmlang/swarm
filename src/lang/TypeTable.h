@@ -33,7 +33,7 @@ namespace swarmc::Lang {
             return type;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "TypeTable<#entries: " + std::to_string(_map.size()) + ">";
         }
     protected:

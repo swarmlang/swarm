@@ -19,7 +19,7 @@ namespace swarmc::Runtime::Prologue {
 
         void execute() override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "NumberToStringFunctionCall<>";
         }
 
@@ -38,13 +38,13 @@ namespace swarmc::Runtime::Prologue {
 
         TrigFunction(TrigOperation op, IProvider* provider) : PrologueFunction(opToString(op), provider), _op(op) {}
 
-        FormalTypes paramTypes() const override;
+        [[nodiscard]] FormalTypes paramTypes() const override;
 
-        const Type::Type* returnType() const override;
+        [[nodiscard]] const Type::Type* returnType() const override;
 
-        PrologueFunctionCall* call(CallVector) const override;
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "TrigFunction<>";
         }
 

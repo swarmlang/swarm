@@ -102,7 +102,7 @@ namespace swarmc::Lang::Walk {
             return walkNumberLiteralExpressionNode(node);
         }
 
-        std::string toString() const override = 0;
+        [[nodiscard]] std::string toString() const override = 0;
     };
 
 }

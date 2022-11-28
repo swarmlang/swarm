@@ -67,7 +67,7 @@ namespace swarmc::Runtime {
 
         virtual std::string getNodeId() = 0;
 
-        virtual SchedulingFilters getSchedulingFilters() const { return _filters; }
+        [[nodiscard]] virtual SchedulingFilters getSchedulingFilters() const { return _filters; }
 
         virtual void applySchedulingFilter(const std::string& key, std::string value) {
             Console::get()->debug("Apply scheduling filter: " + key + " -> " + value);
@@ -84,7 +84,7 @@ namespace swarmc::Runtime {
             _filters.clear();
         }
 
-        virtual SchedulingFilters getContextFilters() const { return _context; }
+        [[nodiscard]] virtual SchedulingFilters getContextFilters() const { return _context; }
 
         virtual void applyContextFilter(const std::string& key, std::string value) {
             _context[key] = std::move(value);
@@ -103,7 +103,7 @@ namespace swarmc::Runtime {
         ~IStorageLock() override = default;
 
         /** Get the location this lock covers. */
-        virtual ISA::LocationReference* location() const = 0;
+        [[nodiscard]] virtual ISA::LocationReference* location() const = 0;
 
         /** Release this lock. */
         virtual void release() = 0;
@@ -157,22 +157,22 @@ namespace swarmc::Runtime {
         ~IQueueJob() override = default;
 
         /** Get the tracking ID for this job. */
-        virtual JobID id() const = 0;
+        [[nodiscard]] virtual JobID id() const = 0;
 
         /** Get the current status of this job. */
-        virtual JobState state() const = 0;
+        [[nodiscard]] virtual JobState state() const = 0;
 
-        virtual IFunctionCall* getCall() const = 0;
+        [[nodiscard]] virtual IFunctionCall* getCall() const = 0;
 
-        virtual const ScopeFrame* getScope() const = 0;
+        [[nodiscard]] virtual const ScopeFrame* getScope() const = 0;
 
-        virtual const State* getState() const = 0;
+        [[nodiscard]] virtual const State* getState() const = 0;
 
         virtual void setFilters(SchedulingFilters) = 0;
 
-        virtual SchedulingFilters getFilters() const = 0;
+        [[nodiscard]] virtual SchedulingFilters getFilters() const = 0;
 
-        virtual bool matchesFilters(const SchedulingFilters& current) const {
+        [[nodiscard]] virtual bool matchesFilters(const SchedulingFilters& current) const {
             auto filters = getFilters();
 
             return std::all_of(filters.begin(), filters.end(), [current](const std::pair<std::string, std::string>& filter) {
@@ -235,7 +235,7 @@ namespace swarmc::Runtime {
 
         virtual bool isEmpty() = 0;
 
-        virtual std::string id() const = 0;
+        [[nodiscard]] virtual std::string id() const = 0;
     };
 
 

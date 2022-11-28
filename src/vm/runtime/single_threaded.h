@@ -43,7 +43,7 @@ namespace swarmc::Runtime::SingleThreaded {
             return "singlethreaded::localhost";
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "SingleThreaded::GlobalServices<id: " + std::to_string(_id) + ">";
         }
 
@@ -77,7 +77,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
         IStorageInterface* copy() override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "SingleThreaded::StorageInterface<#loc: " + std::to_string(_map.size()) + ">";
         }
 
@@ -103,11 +103,11 @@ namespace swarmc::Runtime::SingleThreaded {
             _store = store;
         }
 
-        ISA::LocationReference* location() const override;
+        [[nodiscard]] ISA::LocationReference* location() const override;
 
         void release() override;
 
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
     protected:
         ISA::LocationReference* _loc = nullptr;
         StorageInterface* _store = nullptr;
@@ -124,21 +124,21 @@ namespace swarmc::Runtime::SingleThreaded {
         QueueJob(JobID id, JobState jobState, IFunctionCall* call, const ScopeFrame* scope, const State* vmState):
             _id(id), _jobState(jobState), _call(call), _scope(scope), _vmState(vmState) {}
 
-        JobID id() const override { return _id; }
+        [[nodiscard]] JobID id() const override { return _id; }
 
-        JobState state() const override { return _jobState; }
+        [[nodiscard]] JobState state() const override { return _jobState; }
 
-        IFunctionCall* getCall() const override { return _call; }
+        [[nodiscard]] IFunctionCall* getCall() const override { return _call; }
 
-        const ScopeFrame* getScope() const override { return _scope; }
+        [[nodiscard]] const ScopeFrame* getScope() const override { return _scope; }
 
-        const State* getState() const override { return _vmState; }
+        [[nodiscard]] const State* getState() const override { return _vmState; }
 
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
 
         void setFilters(SchedulingFilters filters) override { _filters = std::move(filters); }
 
-        SchedulingFilters getFilters() const override { return _filters; }
+        [[nodiscard]] SchedulingFilters getFilters() const override { return _filters; }
 
     protected:
         JobID _id;
@@ -181,7 +181,7 @@ namespace swarmc::Runtime::SingleThreaded {
             return true;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "SingleThreaded::Queue<ctx: " + _context + ">";
         }
 
@@ -210,9 +210,9 @@ namespace swarmc::Runtime::SingleThreaded {
 
         bool isEmpty() override;
 
-        std::string id() const override { return _id; }
+        [[nodiscard]] std::string id() const override { return _id; }
 
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
 
     protected:
         std::string _id;
@@ -225,7 +225,7 @@ namespace swarmc::Runtime::SingleThreaded {
     public:
         IStream* open(const std::string& id, const Type::Type* innerType) override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "SingleThreaded::StreamDriver<>";
         }
     };

@@ -17,7 +17,7 @@ namespace swarmc::ISA {
         explicit Parser(std::istream& in) : IUsesConsole(), _in(in) {}
         ~Parser() override = default;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "ISA::Parser<>";
         }
 

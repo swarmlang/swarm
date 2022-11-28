@@ -34,41 +34,41 @@ namespace swarmc::Lang {
             _endCol = end->_endCol;
         }
 
-        virtual std::string start() const {
+        [[nodiscard]] virtual std::string start() const {
             std::stringstream s;
             s << "[l: " << _startLine << ", c: " << _startCol << "]";
             return s.str();
         }
 
-        virtual std::string end() const {
+        [[nodiscard]] virtual std::string end() const {
             std::stringstream s;
             s << "[l: " << _endLine << ", c: " << _endCol << "]";
             return s.str();
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             std::stringstream s;
             s << start() << "-" << end();
             return s.str();
         }
 
-        size_t startLine() const {
+        [[nodiscard]] size_t startLine() const {
             return _startLine;
         }
 
-        size_t endLine() const {
+        [[nodiscard]] size_t endLine() const {
             return _endLine;
         }
 
-        size_t startCol() const {
+        [[nodiscard]] size_t startCol() const {
             return _startCol;
         }
 
-        size_t endCol() const {
+        [[nodiscard]] size_t endCol() const {
             return _endCol;
         }
 
-        virtual Position* copy() const {
+        [[nodiscard]] virtual Position* copy() const {
             return new Position(_startLine, _endLine, _startCol, _endCol);
         }
 
@@ -85,19 +85,19 @@ namespace swarmc::Lang {
     public:
         explicit ProloguePosition(std::string symbolName): Position(0, 0, 0, 0), _symbolName(std::move(symbolName)) {}
 
-        std::string start() const override {
+        [[nodiscard]] std::string start() const override {
             return toString();
         }
 
-        std::string end() const override {
+        [[nodiscard]] std::string end() const override {
             return toString();
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "[Prologue Definition: " + _symbolName + "]";
         }
 
-        ProloguePosition* copy() const override {
+        [[nodiscard]] ProloguePosition* copy() const override {
             return new ProloguePosition(_symbolName);
         }
 

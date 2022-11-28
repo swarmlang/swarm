@@ -34,39 +34,39 @@ namespace Walk {
             _uuid = nslib::uuid();
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "SemanticSymbol<name: " + _name + ", type: " + _type->toString() + ", declaredAt: " + _declaredAt->start() + ", uuid: " + _uuid + ">";
         }
 
         /** The user-given name of the symbol. */
-        virtual std::string name() const {
+        [[nodiscard]] virtual std::string name() const {
             return _name;
         }
 
         /** The kind of the symbol. */
-        virtual SemanticSymbolKind kind() const = 0;
+        [[nodiscard]] virtual SemanticSymbolKind kind() const = 0;
 
         /** The type of the symbol. */
-        virtual const Type::Type* type() const {
+        [[nodiscard]] virtual const Type::Type* type() const {
             return _type;
         }
 
         /** Get the position where this symbol was declared. */
-        virtual const Position* declaredAt() const {
+        [[nodiscard]] virtual const Position* declaredAt() const {
             return _declaredAt;
         }
 
         /** Get a universally-unique ID for this symbol. */
-        virtual std::string uuid() const {
+        [[nodiscard]] virtual std::string uuid() const {
             return _uuid;
         }
 
         /** Get the shared flag of this symbol */
-        virtual bool shared() const {
+        [[nodiscard]] virtual bool shared() const {
             return _type->shared();
         }
 
-        virtual bool isPrologue() const {
+        [[nodiscard]] virtual bool isPrologue() const {
             return false;
         }
 
@@ -86,7 +86,7 @@ namespace Walk {
     public:
         VariableSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : SemanticSymbol(std::move(name), type, declaredAt) {}
 
-        SemanticSymbolKind kind() const override {
+        [[nodiscard]] SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::VARIABLE;
         }
     };
@@ -97,7 +97,7 @@ namespace Walk {
     public:
         FunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : SemanticSymbol(std::move(name), type, declaredAt) {}
 
-        SemanticSymbolKind kind() const override {
+        [[nodiscard]] SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::FUNCTION;
         }
     };
@@ -108,7 +108,7 @@ namespace Walk {
     public:
         PrologueFunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : FunctionSymbol(std::move(name), type, declaredAt) {}
 
-        bool isPrologue() const override { return true; }
+        [[nodiscard]] bool isPrologue() const override { return true; }
     };
 
 
@@ -167,7 +167,7 @@ namespace Walk {
             insert(new PrologueFunctionSymbol(std::move(name), type, declaredAt));
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "ScopeTable<#symbols: " + std::to_string(_symbols->size()) + " >";
         }
 
@@ -252,7 +252,7 @@ namespace Walk {
             return current()->addFunction(std::move(name), type, declaredAt);
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "SymbolTable<#scopes: " + std::to_string(_scopes->size()) + ">";
         }
 

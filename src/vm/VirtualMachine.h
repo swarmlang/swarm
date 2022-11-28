@@ -21,16 +21,16 @@ namespace swarmc::Runtime {
     /** The Swarm runtime virtual machine (aka "the runtime"). */
     class VirtualMachine : public IStringable, public IUsesConsole {
     public:
-        VirtualMachine(IGlobalServices* global) : IUsesConsole(), _global(global) {
+        explicit VirtualMachine(IGlobalServices* global) : IUsesConsole(), _global(global) {
             _exec = new ExecuteWalk(this);
             _queueContexts.push(_global->getUuid());
         }
 
-        virtual ~VirtualMachine() {
+        ~VirtualMachine() override {
             delete _exec;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             std::string adv = "yes";
             if ( !_shouldAdvance ) adv = "no";
 
@@ -38,7 +38,7 @@ namespace swarmc::Runtime {
         }
 
         /** Get the IGlobalServices used by the runtime. */
-        virtual IGlobalServices* global() const { return _global; }
+        [[nodiscard]] virtual IGlobalServices* global() const { return _global; }
 
         /** Load a set of parsed instructions into the runtime. */
         void initialize(ISA::Instructions is) {
@@ -225,9 +225,9 @@ namespace swarmc::Runtime {
          */
         virtual void returnToCaller(bool shouldJump);
 
-        virtual IStream* getLocalOutput() const { return _localOut; }
+        [[nodiscard]] virtual IStream* getLocalOutput() const { return _localOut; }
 
-        virtual IStream* getLocalError() const { return _localErr; }
+        [[nodiscard]] virtual IStream* getLocalError() const { return _localErr; }
 
         virtual IStream* getSharedOutput() {
             if ( _sharedOut == nullptr ) {
@@ -270,7 +270,7 @@ namespace swarmc::Runtime {
         }
 
         /** Make a deep copy of this instance. */
-        VirtualMachine* copy() const {
+        [[nodiscard]] VirtualMachine* copy() const {
             auto copy = new VirtualMachine(_global);
             copy->_state = _state->copy();
             copy->_queues = _queues;

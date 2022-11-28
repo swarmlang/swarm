@@ -14,7 +14,7 @@ namespace swarmc::Runtime::Prologue {
 
         void execute() override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "NumberToStringFunctionCall<>";
         }
     };
@@ -23,13 +23,13 @@ namespace swarmc::Runtime::Prologue {
     public:
         explicit NumberToStringFunction(IProvider* provider) : PrologueFunction("NUMBER_TO_STRING", provider) {}
 
-        FormalTypes paramTypes() const override;
+        [[nodiscard]] FormalTypes paramTypes() const override;
 
-        const Type::Type* returnType() const override;
+        [[nodiscard]] const Type::Type* returnType() const override;
 
-        PrologueFunctionCall* call(CallVector) const override;
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "NumberToStringFunction<>";
         }
     };
@@ -41,7 +41,7 @@ namespace swarmc::Runtime::Prologue {
 
         void execute() override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "BooleanToStringFunctionCall<>";
         }
     };
@@ -50,13 +50,13 @@ namespace swarmc::Runtime::Prologue {
     public:
         explicit BooleanToStringFunction(IProvider* provider) : PrologueFunction("BOOLEAN_TO_STRING", provider) {}
 
-        FormalTypes paramTypes() const override;
+        [[nodiscard]] FormalTypes paramTypes() const override;
 
-        const Type::Type* returnType() const override;
+        [[nodiscard]] const Type::Type* returnType() const override;
 
-        PrologueFunctionCall* call(CallVector) const override;
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "BooleanToStringFunction<>";
         }
     };

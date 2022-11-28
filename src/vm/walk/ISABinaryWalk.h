@@ -13,7 +13,7 @@ namespace swarmc::ISA {
 
     class ISABinaryWalk : public ISAWalk<binn*> {
     public:
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "ISABinaryWalk<>";
         }
 

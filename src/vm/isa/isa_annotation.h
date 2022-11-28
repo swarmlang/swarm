@@ -10,7 +10,7 @@ namespace swarmc::ISA {
         PositionAnnotation(StringReference* file, NumberReference* line, NumberReference* col):
             TrinaryInstruction<StringReference, NumberReference, NumberReference>(Tag::POSITION, file, line, col) {}
 
-        PositionAnnotation* copy() const override {
+        [[nodiscard]] PositionAnnotation* copy() const override {
             return new PositionAnnotation(first(), second(), third());
         }
     };

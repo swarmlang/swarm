@@ -346,7 +346,7 @@ protected:
         return leftMap;
     }
 
-    std::string toString() const override {
+    [[nodiscard]] std::string toString() const override {
         return "SymbolWalk<>";
     }
 };

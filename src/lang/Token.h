@@ -17,16 +17,16 @@ namespace swarmc::Lang {
     class Token : public IStringable {
     public:
         Token(Position* pos, int kind, std::string display) : _pos(pos), _kind(kind), _display(std::move(display)) {};
-        virtual ~Token() {
+        ~Token() override {
             delete _pos;
         }
 
-        Position* position() const {
+        [[nodiscard]] Position* position() const {
             return _pos;
         }
 
         /** Implements IStringable. */
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             std::stringstream s;
 
             s << _display << " ";
@@ -51,7 +51,7 @@ namespace swarmc::Lang {
         IDToken(Position* pos, int kind, std::string display, std::string identifier) : Token(pos, kind, std::move(display)), _identifier(std::move(identifier)) {};
 
         /** Get the string identifier of this token. */
-        std::string identifier() const {
+        [[nodiscard]] std::string identifier() const {
             return _identifier;
         }
     protected:
@@ -66,7 +66,7 @@ namespace swarmc::Lang {
         StringLiteralToken(Position* pos, int kind, std::string display, std::string value) : Token(pos, kind, std::move(display)), _value(std::move(value)) {};
 
         /** Get the string literal content of this token. */
-        std::string value() const {
+        [[nodiscard]] std::string value() const {
             return _value;
         }
     protected:
@@ -81,7 +81,7 @@ namespace swarmc::Lang {
         NumberLiteralToken(Position* pos, int kind, std::string display, double value) : Token(pos, kind, std::move(display)), _value(value) {};
 
         /** Get the double representation of number literal content of this token. */
-        double value() const {
+        [[nodiscard]] double value() const {
             return _value;
         }
     protected:

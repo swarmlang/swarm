@@ -60,31 +60,31 @@ namespace Type {
 
         ~Type() override = default;
 
-        virtual Type* copy() const = 0;
+        [[nodiscard]] virtual Type* copy() const = 0;
 
-        virtual Type* copy(bool shared) const {
+        [[nodiscard]] virtual Type* copy(bool shared) const {
             auto e = copy();
             e->_shared = shared;
             return e;
         }
 
-        virtual Intrinsic intrinsic() const {
+        [[nodiscard]] virtual Intrinsic intrinsic() const {
             return Intrinsic::CONTRADICTION;
         }
 
-        bool isCallable() const {
+        [[nodiscard]] bool isCallable() const {
             return intrinsic() == Intrinsic::LAMBDA0 || intrinsic() == Intrinsic::LAMBDA1;
         }
 
-        bool isIntrinsic() const {
+        [[nodiscard]] bool isIntrinsic() const {
             return intrinsic() != Intrinsic::CONTRADICTION;
         }
 
-        bool isAmbiguous() const {
+        [[nodiscard]] bool isAmbiguous() const {
             return intrinsic() == Intrinsic::AMBIGUOUS;
         }
 
-        virtual bool shared() const {
+        [[nodiscard]] virtual bool shared() const {
             return _shared;
         }
 
@@ -116,13 +116,13 @@ namespace Type {
 
         explicit Primitive(Intrinsic intrinsic) : _intrinsic(intrinsic) {}
 
-        Primitive* copy() const override {
+        [[nodiscard]] Primitive* copy() const override {
             auto inst = Primitive::of(_intrinsic);
             inst->_shared = shared();
             return inst;
         }
 
-        Intrinsic intrinsic() const override {
+        [[nodiscard]] Intrinsic intrinsic() const override {
             if ( !isPrimitive(_intrinsic) ) {
                 return Intrinsic::CONTRADICTION;
             }
@@ -136,7 +136,7 @@ namespace Type {
             return other->intrinsic() == intrinsic();
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "Primitive<" + intrinsicString(_intrinsic) + ">";
         }
     protected:
@@ -149,11 +149,11 @@ namespace Type {
             return new Ambiguous();
         }
 
-        Intrinsic intrinsic() const override {
+        [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::AMBIGUOUS;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic());
         }
 
@@ -161,7 +161,7 @@ namespace Type {
             return true;
         }
 
-        Ambiguous* copy() const override {
+        [[nodiscard]] Ambiguous* copy() const override {
             return Ambiguous::of();
         }
     };
@@ -170,15 +170,15 @@ namespace Type {
     public:
         explicit Map(const Type* values) : _values(values) {}
 
-        Intrinsic intrinsic() const override {
+        [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::MAP;
         }
 
-        const Type* values() const {
+        [[nodiscard]] const Type* values() const {
             return _values;
         }
 
-        Map* copy() const override {
+        [[nodiscard]] Map* copy() const override {
             auto inst = new Map(_values->copy());
             inst->_shared = shared();
             return inst;
@@ -190,7 +190,7 @@ namespace Type {
             return _values->isAssignableTo(((Map*) other)->values());
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
     protected:
@@ -201,15 +201,15 @@ namespace Type {
     public:
         explicit Enumerable(const Type* values) : _values(values) {}
 
-        Intrinsic intrinsic() const override {
+        [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::ENUMERABLE;
         }
 
-        const Type* values() const {
+        [[nodiscard]] const Type* values() const {
             return _values;
         }
 
-        Enumerable* copy() const override {
+        [[nodiscard]] Enumerable* copy() const override {
             auto inst = new Enumerable(_values->copy());
             inst->_shared = shared();
             return inst;
@@ -221,7 +221,7 @@ namespace Type {
             return _values->isAssignableTo(((Enumerable*) other)->values());
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
     protected:
@@ -236,15 +236,15 @@ namespace Type {
 
         explicit Resource(const Type* yields) : _yields(yields) {}
 
-        Intrinsic intrinsic() const override {
+        [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::RESOURCE;
         }
 
-        const Type* yields() const {
+        [[nodiscard]] const Type* yields() const {
             return _yields;
         }
 
-        Resource* copy() const override {
+        [[nodiscard]] Resource* copy() const override {
             auto inst = new Resource(_yields);
             inst->_shared = shared();
             return inst;
@@ -256,7 +256,7 @@ namespace Type {
             return _yields->isAssignableTo(((Resource*) other)->yields());
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic()) + "<" + _yields->toString() + ">";
         }
     protected:
@@ -271,15 +271,15 @@ namespace Type {
 
         explicit Stream(const Type* inner) : _inner(inner) {}
 
-        Intrinsic intrinsic() const override {
+        [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::STREAM;
         }
 
-        const Type* inner() const {
+        [[nodiscard]] const Type* inner() const {
             return _inner;
         }
 
-        Stream* copy() const override {
+        [[nodiscard]] Stream* copy() const override {
             auto inst = new Stream(_inner->copy());
             inst->_shared = shared();
             return inst;
@@ -291,7 +291,7 @@ namespace Type {
             return _inner->isAssignableTo(((Stream*) other)->inner());
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic()) + "<" + _inner->toString() + ">";
         }
 
@@ -303,11 +303,11 @@ namespace Type {
     public:
         explicit Lambda(const Type* returns): _returns(returns) {}
 
-        const Type* returns() const {
+        [[nodiscard]] const Type* returns() const {
             return _returns;
         }
 
-        virtual std::vector<const Type*> params() const {
+        [[nodiscard]] virtual std::vector<const Type*> params() const {
             return {};
         }
 
@@ -319,11 +319,11 @@ namespace Type {
     public:
         explicit Lambda0(const Type* returns) : Lambda(returns) {}
 
-        Intrinsic intrinsic() const override {
+        [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::LAMBDA0;
         }
 
-        Lambda0* copy() const override {
+        [[nodiscard]] Lambda0* copy() const override {
             auto inst = new Lambda0(_returns->copy());
             inst->_shared = shared();
             return inst;
@@ -335,7 +335,7 @@ namespace Type {
             return _returns->isAssignableTo(((Lambda0*) other)->returns());
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return ":: " + _returns->toString();
         }
     };
@@ -344,15 +344,15 @@ namespace Type {
     public:
         explicit Lambda1(const Type* param, const Type* returns) : Lambda(returns), _param(param) {}
 
-        Intrinsic intrinsic() const override {
+        [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::LAMBDA1;
         }
 
-        const Type* param() const {
+        [[nodiscard]] const Type* param() const {
             return _param;
         }
 
-        Lambda1* copy() const override {
+        [[nodiscard]] Lambda1* copy() const override {
             auto inst = new Lambda1(_param->copy(), _returns->copy());
             inst->_shared = shared();
             return inst;
@@ -364,11 +364,11 @@ namespace Type {
             return _returns->isAssignableTo(((Lambda1*) other)->returns()) && _param->isAssignableTo(((Lambda1*) other)->param());
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return _param->toString() + " :: " + _returns->toString();
         }
 
-        std::vector<const Type*> params() const override {
+        [[nodiscard]] std::vector<const Type*> params() const override {
             std::vector<const Type*> p = {_param};
 
             if ( returns()->intrinsic() == Intrinsic::LAMBDA1 ) {

@@ -18,7 +18,7 @@ namespace swarmc::Runtime::Prologue {
         PrologueFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType) :
             IProviderFunctionCall(std::move(vector), returnType), _provider(provider) {}
 
-        IProvider* provider() const override { return _provider; }
+        [[nodiscard]] IProvider* provider() const override { return _provider; }
     protected:
         IProvider* _provider;
     };
@@ -27,13 +27,13 @@ namespace swarmc::Runtime::Prologue {
     public:
         PrologueFunction(std::string name, IProvider* provider) : IProviderFunction(std::move(name)), _provider(provider) {}
 
-        IProvider* provider() const override { return _provider; }
+        [[nodiscard]] IProvider* provider() const override { return _provider; }
 
-        PrologueFunctionCall* call(CallVector) const override = 0;
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override = 0;
 
-        PrologueFunctionCall* call() const override { return call(getCallVector()); }
+        [[nodiscard]] PrologueFunctionCall* call() const override { return call(getCallVector()); }
 
-        CallVector getCallVector() const override {
+        [[nodiscard]] CallVector getCallVector() const override {
             return {};
         }
 
@@ -53,11 +53,11 @@ namespace swarmc::Runtime::Prologue {
 
         void call(IProviderFunctionCall* call) override;
 
-        IGlobalServices* global() const override {
+        [[nodiscard]] IGlobalServices* global() const override {
             return _global;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "Prologue::Provider<>";
         }
 

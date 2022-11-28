@@ -48,7 +48,7 @@ namespace swarmc::Runtime {
     protected:
         VirtualMachine* _vm;
 
-        std::string toString() const override;
+        [[nodiscard]] std::string toString() const override;
 
         /** Prints a message shown by default in the debug binary. */
         virtual void debug(const std::string& output) const {

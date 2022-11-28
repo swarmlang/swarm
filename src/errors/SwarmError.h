@@ -13,7 +13,7 @@ namespace swarmc::Errors {
     public:
         explicit SwarmError(const std::string& message) : std::logic_error(message), _message(message) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return _message;
         }
 

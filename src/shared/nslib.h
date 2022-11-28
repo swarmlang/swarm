@@ -54,7 +54,7 @@ namespace nslib {
     class IStringable {
     public:
         virtual ~IStringable() = default;
-        virtual std::string toString() const = 0;
+        [[nodiscard]] virtual std::string toString() const = 0;
     };
 
 

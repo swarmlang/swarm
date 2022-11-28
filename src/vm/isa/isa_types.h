@@ -9,7 +9,7 @@ namespace swarmc::ISA {
     public:
         explicit TypeOf(Reference* value) :
             UnaryInstruction<Reference>(Tag::TYPEOF, value) {}
-        TypeOf* copy() const override {
+        [[nodiscard]] TypeOf* copy() const override {
             return new TypeOf(_first->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         IsCompatible(Reference* lhs, Reference* value) :
             BinaryInstruction<Reference, Reference>(Tag::COMPATIBLE, lhs, value) {}
-        IsCompatible* copy() const override {
+        [[nodiscard]] IsCompatible* copy() const override {
             return new IsCompatible(_first->copy(), _second->copy());
         }
     };

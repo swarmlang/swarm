@@ -18,11 +18,11 @@ namespace swarmc::ISA {
     public:
         explicit BinaryReferenceWalk(Runtime::VirtualMachine* vm = nullptr) : _vm(vm) {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "BinaryReferenceWalk<>";
         }
 
-        Reference* walk(binn* obj) {
+        [[nodiscard]] Reference* walk(binn* obj) {
             auto tag = (ReferenceTag) binn_map_uint64(obj, BC_TAG);
 
             if ( tag == ReferenceTag::LOCATION ) return walkLocationReference(obj);

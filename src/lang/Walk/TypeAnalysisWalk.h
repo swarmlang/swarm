@@ -739,7 +739,7 @@ protected:
         return walkPureBinaryExpression(node);
     }
 
-    virtual std::string toString() const {
+    [[nodiscard]] std::string toString() const override {
         return "TypeAnalysisWalk<>";
     }
 private:

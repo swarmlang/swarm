@@ -27,7 +27,7 @@ namespace swarmc::Runtime {
                 IFunctionCall(FunctionBackend::PROVIDER, std::move(vector), returnType) {}
 
         /** Get the IProvider responsible for this function call. */
-        virtual IProvider* provider() const = 0;
+        [[nodiscard]] virtual IProvider* provider() const = 0;
 
         /**
          * Execute the native function.
@@ -44,15 +44,15 @@ namespace swarmc::Runtime {
         explicit IProviderFunction(std::string name) : _name(std::move(name)) {}
 
         /** Get the IProvider responsible for this function call. */
-        virtual IProvider* provider() const = 0;
+        [[nodiscard]] virtual IProvider* provider() const = 0;
 
-        FunctionBackend backend() const override { return FunctionBackend::PROVIDER; }
+        [[nodiscard]] FunctionBackend backend() const override { return FunctionBackend::PROVIDER; }
 
-        IProviderFunctionCall* call(CallVector) const override = 0;
+        [[nodiscard]] IProviderFunctionCall* call(CallVector) const override = 0;
 
-        IProviderFunctionCall* call() const override { return call(getCallVector()); }
+        [[nodiscard]] IProviderFunctionCall* call() const override { return call(getCallVector()); }
 
-        std::string name() const override { return _name; }
+        [[nodiscard]] std::string name() const override { return _name; }
 
     protected:
         std::string _name;
@@ -77,10 +77,10 @@ namespace swarmc::Runtime {
          * @param name
          * @return
          */
-        virtual IProviderFunction* loadFunction(std::string name) = 0;
+        [[nodiscard]] virtual IProviderFunction* loadFunction(std::string name) = 0;
 
         /** Gives the provider access to the VM's IGlobalServices. */
-        virtual IGlobalServices* global() const = 0;
+        [[nodiscard]] virtual IGlobalServices* global() const = 0;
 
         /**
          * Execute a call to a function backed by this provider.

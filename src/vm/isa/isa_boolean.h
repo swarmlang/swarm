@@ -9,7 +9,7 @@ namespace swarmc::ISA {
     public:
         And(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::AND, lhs, rhs) {}
-        And* copy() const override {
+        [[nodiscard]] And* copy() const override {
             return new And(_first->copy(), _second->copy());
         }
     };
@@ -18,7 +18,7 @@ namespace swarmc::ISA {
     public:
         Or(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::OR, lhs, rhs) {}
-        Or* copy() const override {
+        [[nodiscard]] Or* copy() const override {
             return new Or(_first->copy(), _second->copy());
         }
     };
@@ -27,7 +27,7 @@ namespace swarmc::ISA {
     public:
         Xor(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::XOR, lhs, rhs) {}
-        Xor* copy() const override {
+        [[nodiscard]] Xor* copy() const override {
             return new Xor(_first->copy(), _second->copy());
         }
     };
@@ -36,7 +36,7 @@ namespace swarmc::ISA {
     public:
         Nand(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::NAND, lhs, rhs) {}
-        Nand* copy() const override {
+        [[nodiscard]] Nand* copy() const override {
             return new Nand(_first->copy(), _second->copy());
         }
     };
@@ -45,7 +45,7 @@ namespace swarmc::ISA {
     public:
         Nor(Reference* lhs, Reference* rhs) :
             BinaryInstruction<Reference, Reference>(Tag::NOR, lhs, rhs) {}
-        Nor* copy() const override {
+        [[nodiscard]] Nor* copy() const override {
             return new Nor(_first->copy(), _second->copy());
         }
     };
@@ -54,7 +54,7 @@ namespace swarmc::ISA {
     public:
         explicit Not(Reference* value) :
             UnaryInstruction<Reference>(Tag::NOT, value) {}
-        Not* copy() const override {
+        [[nodiscard]] Not* copy() const override {
             return new Not(_first->copy());
         }
     };
