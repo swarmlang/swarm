@@ -247,6 +247,10 @@ namespace swarmc::Runtime {
             copy->_callStack = _callStack;
             return copy;
         }
+
+        [[nodiscard]] Debug::Metadata getMetadata() const {
+            return _meta;
+        }
     protected:
         ISA::Instructions _is;
         std::map<std::string, ISA::Instructions::size_type> _fJumps;

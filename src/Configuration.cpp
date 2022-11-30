@@ -24,3 +24,6 @@ size_t Configuration::ENUMERATION_UNROLLING_LIMIT = 200;
 bool Configuration::THREAD_EXIT = false;
 
 std::map<std::string, std::string> Configuration::QUEUE_FILTERS;
+
+std::string Configuration::DEBUG_SERVER_DATA_PATH = "/tmp/swarm-debug.sock";
+std::string Configuration::DEBUG_SERVER_CMD_PATH = "/tmp/swarm-command.sock";

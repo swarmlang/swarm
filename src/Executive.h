@@ -30,6 +30,8 @@ protected:
     bool flagOutputParse = false;
     bool flagRunTest = false;
     bool flagSingleThreaded = false;
+    bool flagDebugger = false;
+    bool flagInteractiveDebug = false;
     bool flagVerbose = false;
     bool flagClearQueue = false;
     bool flagWorkQueue = false;

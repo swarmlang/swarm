@@ -72,6 +72,10 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( flagDebugger ) {
+        swarmc::Runtime::Debug::Debugger::launchInteractive();
+    }
+
     if ( flagOutputBinary ) {
         int binResult = emitBinary();
         if ( binResult != 0 ) {
@@ -138,6 +142,13 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagOutputParse = true;
             flagOutputParseTo = outfile;
             skipOne = true;
+        } else if ( arg == "--debugger" ) {
+            flagDebugger = true;
+            noInputFile = true;
+        } else if ( arg == "--interactive-debug" ) {
+            flagInteractiveDebug = true;
+            flagSingleThreaded = true;
+            console->warn("--interactive-debug implies --locally. Will use single-threaded runtime drivers.");
         } else if ( arg == "--run-test" ) {
             if ( i+1 >= params.size() ) {
                 console->error("Missing required parameter for --run-test. Pass --help for more info.");
@@ -487,6 +498,12 @@ int Executive::debugOutputCFG() {
 
 int Executive::executeLocalSVI() {
     swarmc::VM::Pipeline pipeline(_input);
+
+    if ( flagInteractiveDebug ) {
+        pipeline.targetInteractiveDebugger();
+        return 0;
+    }
+
     auto vm = pipeline.targetSingleThreaded();
     vm->execute();
     delete vm;

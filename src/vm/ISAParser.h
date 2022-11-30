@@ -730,7 +730,7 @@ namespace swarmc::ISA {
         }
 
         /** Parse the LocationReference represented by the given token. */
-        virtual ISA::LocationReference* parseLocation(std::string const& token) {
+        static ISA::LocationReference* parseLocation(std::string const& token) {
             if ( token.at(0) == '$' && (token.length() < 4 || token.at(2) != ':') ) throw Errors::SwarmError("Malformed location reference: `" + token + "` (expected form $_:_)");
             if ( token.at(0) != '$' && (token.length() < 3 || token.at(1) != ':') ) throw Errors::SwarmError("Malformed location reference: `" + token + "` (expected form f:_ or p:_)");
 

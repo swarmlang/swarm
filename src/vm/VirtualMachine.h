@@ -108,7 +108,10 @@ namespace swarmc::Runtime {
         /** Restore the VM to the specified state. Can be used to re-hydrate VMs for queued call execution. */
         virtual void restore(ScopeFrame*, State*);
 
-        virtual void attachDebugger(Debug::Debugger* debugger) { _debugger = debugger; }
+        virtual void attachDebugger(Debug::Debugger* debugger) {
+            _debugger = debugger;
+            _debugger->setMetadata(_state->getMetadata());
+        }
 
         /** Load the value stored in the given location. */
         virtual ISA::Reference* loadFromStore(ISA::LocationReference*);
@@ -131,6 +134,8 @@ namespace swarmc::Runtime {
          * e.g. will take a LocationReference to a StringReference
          */
         virtual ISA::Reference* resolve(ISA::Reference*);
+
+        virtual ISA::Instruction* current();
 
         /** Execute a the current instruction, and advance to the next one. */
         virtual void step();
@@ -372,6 +377,8 @@ namespace swarmc::Runtime {
         virtual void callProviderFunction(IProviderFunctionCall*);
 
         virtual bool isBuiltinStream(ISA::LocationReference*);
+
+        friend class Debug::Debugger;
     };
 
 }

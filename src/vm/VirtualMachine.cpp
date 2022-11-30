@@ -125,6 +125,10 @@ namespace swarmc::Runtime {
         return ref;
     }
 
+    Instruction* VirtualMachine::current() {
+        return _state->current();
+    }
+
     void VirtualMachine::step() {
         _exec->walkOne(_state->current());
 

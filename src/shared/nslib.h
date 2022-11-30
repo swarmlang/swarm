@@ -7,9 +7,19 @@
 #include <sstream>
 #include <iostream>
 #include <chrono>
+#include <thread>
 #include <functional>
+#include <filesystem>
+#include <fstream>
+#include <utility>
+#include <stdexcept>
 #include <unistd.h>
+#include <cstdlib>
+#include <cstring>
+#include <semaphore.h>
 #include <sys/ioctl.h>
+#include <sys/stat.h>
+#include <sys/shm.h>
 
 namespace nslib {
 
@@ -264,6 +274,231 @@ namespace nslib {
                 return current == idx;
             }, 0);
         }
+
+        inline std::string readStreamContents(std::istream& fh) {
+            std::stringstream ss;
+            std::string s;
+            while ( std::getline(fh, s) ) ss << s;
+            return ss.str();
+        }
+    }
+
+
+    /* An impoverished IPC message passing system. */
+    namespace ipc {
+        namespace priv {
+            struct StringSegment {
+                sem_t mutex;
+                size_t size;
+                int id;
+                bool written;
+                bool read;
+                bool exit;
+            };
+
+            inline void initSharedEntry(StringSegment* ptr) {
+                sem_init(&ptr->mutex, 0, 1);
+                ptr->size = 0;
+                ptr->id = 0;
+                ptr->written = false;
+                ptr->read = false;
+                ptr->exit = false;
+            }
+        }
+
+
+        /** Repeatedly checks for a condition. If the condition is false, non-blocking sleep for a period before rechecking. */
+        class Sleeper : public IStringable {
+        public:
+            explicit Sleeper(std::function<bool()> check, size_t sleepMs = 10) : _check(std::move(check)), _sleepMs(sleepMs) {}
+
+            void waitFor() {
+                while ( !_check() ) std::this_thread::sleep_for(std::chrono::milliseconds(_sleepMs));
+            }
+
+            [[nodiscard]] std::string toString() const override {
+                return "ipc::Sleeper<ms: " + s(_sleepMs) + ">";
+            }
+        protected:
+            std::function<bool()> _check;
+            size_t _sleepMs;
+        };
+
+
+        /** Publishes messages to shared memory for an IPC to read. */
+        class Publisher : public IStringable {
+        public:
+            explicit Publisher(std::string path, size_t sleepMs = 10) : _path(std::move(path)) {
+                _id = shmget(IPC_PRIVATE, sizeof(priv::StringSegment), S_IRUSR|S_IWUSR);
+                _segment = (priv::StringSegment*) shmat(_id, nullptr, 0);
+
+                priv::initSharedEntry(_segment);
+
+                _read = new Sleeper([this]() {
+                    sem_wait(&_segment->mutex);
+                    bool result = _segment->read;
+                    sem_post(&_segment->mutex);
+                    return result;
+                }, sleepMs);
+
+                std::ofstream of;
+                of.open(_path);
+                of << _id;
+                of.close();
+            }
+
+            ~Publisher() override {
+                if ( !_exited ) exit();
+//                _read->waitFor();
+                sem_destroy(&_segment->mutex);
+                shmdt(_segment);
+                shmctl(_id, IPC_RMID, nullptr);
+                delete _read;
+                unlink(_path.c_str());
+            }
+
+            void publish(const std::string& value) {
+                // Allocate the string in a new shared memory location
+                auto cstr = value.c_str();
+                auto id = shmget(IPC_PRIVATE, sizeof(cstr), S_IRUSR|S_IWUSR);
+                char* segment = (char*) shmat(id, nullptr, 0);
+                strcpy(segment, cstr);
+                shmdt(segment);
+
+                // Acquire the mutex
+                sem_wait(&_segment->mutex);
+
+                // If we have an existing value, make sure it has been read
+                if ( _segment->written ) {
+                    sem_post(&_segment->mutex);
+                    _read->waitFor();
+                    sem_wait(&_segment->mutex);
+
+                    // Deallocate the old string
+                    shmctl(_segment->id, IPC_RMID, nullptr);
+                }
+
+                // Update the shared data structure with the new string
+                _segment->id = id;
+                _segment->size = value.size();
+                _segment->written = true;
+                _segment->read = false;
+
+                // Release the mutex
+                sem_post(&_segment->mutex);
+            }
+
+            void exit(bool clean = true) {
+                if ( _exited ) return;
+
+                // Acquire the mutex
+                sem_wait(&_segment->mutex);
+
+                // If we have an existing value, make sure it has been read
+                if ( _segment->written ) {
+                    if ( clean ) {
+                        sem_post(&_segment->mutex);
+                        _read->waitFor();
+                        sem_wait(&_segment->mutex);
+                    }
+
+                    // Deallocate the old string
+                    shmctl(_segment->id, IPC_RMID, nullptr);
+                }
+
+                // Set the exit flag
+                _segment->exit = true;
+                _segment->written = true;
+                _segment->read = false;
+
+                // Release the mutex
+                sem_post(&_segment->mutex);
+
+                _exited = true;
+            }
+
+            [[nodiscard]] std::string toString() const override {
+                return "ipc::Publisher<path: " + _path + ", id: " + s(_id) + ">";
+            }
+        protected:
+            int _id;
+            priv::StringSegment* _segment;
+            std::string _path;
+            Sleeper* _read;
+            bool _exited = false;
+        };
+
+
+        /** Receives messages published to shared memory by an IPC. */
+        class Subscriber : public IStringable {
+        public:
+            Subscriber(std::string path, std::function<void(std::string)> handler, size_t sleepMs = 10) : _path(std::move(path)), _handler(std::move(handler)) {
+                std::ifstream fh;
+                fh.open(_path);
+                _id = std::stoi(stl::readStreamContents(fh));
+                _segment = (priv::StringSegment*) shmat(_id, nullptr, 0);
+
+                _pending = new Sleeper([this]() {
+                    sem_wait(&_segment->mutex);
+                    auto result = _segment->written && !_segment->read;
+
+                    // NOTE: don't release the mutex if there's pending data, since we'll immediately read it
+                    if ( !result ) sem_post(&_segment->mutex);
+                    return result;
+                }, sleepMs);
+            }
+
+            ~Subscriber() override {
+                shmdt(_segment);
+            }
+
+            void listenOnce() {
+                if ( _exited ) return;
+
+                // This acquires the mutex
+                _pending->waitFor();
+
+                // Check for the exit flag
+                if ( _segment->exit ) {
+                    _exited = true;
+                    _segment->read = true;
+                    sem_post(&_segment->mutex);
+                    return;
+                }
+
+                // Attach the allocated string location
+                auto segment = (char*) shmat(_segment->id, nullptr, 0);
+
+                // Read the shared string
+                std::string value(segment, _segment->size);
+
+                // Detach the allocated string and mark it as read
+                shmdt(segment);
+                _segment->read = true;
+
+                // Release the mutex
+                sem_post(&_segment->mutex);
+
+                // Execute the handler on the read string
+                _handler(value);
+            }
+
+            void listen() {
+                while ( !_exited ) listenOnce();
+            }
+
+            [[nodiscard]] std::string toString() const override {
+                return "ipc::Subscriber<path: " + _path + ", exited: " + s(_exited) + ">";
+            }
+
+        protected:
+            int _id;
+            priv::StringSegment* _segment;
+            std::string _path;
+            std::function<void(std::string)> _handler;
+            Sleeper* _pending;
+            bool _exited = false;
+        };
     }
 
 
@@ -562,6 +797,153 @@ namespace nslib {
             s << inst->UNI_BAR_VERT << text << inst->UNI_BAR_VERT << '\n';
             s << inst->UNI_BAR_BOTTOM_LEFT << hbar << inst->UNI_BAR_BOTTOM_RIGHT;
             return s.str();
+        }
+
+        std::string prompt(const std::string& message) {
+            println()
+                ->color(ANSIColor::GREEN)->println("    " + message)
+                ->print("    > ");
+
+            std::cin >> std::noskipws;
+
+            std::string check;
+            check = std::cin.peek();
+
+            println();
+            if ( check == "\n" ) {
+                std::string dump;
+                std::getline(std::cin, dump);
+                return "";
+            }
+
+            std::string input;
+            std::cin >> input;
+
+            std::string dump;
+            std::getline(std::cin, dump);
+
+            return input;
+        }
+
+        std::string prompt(const std::string& message, const std::string& def) {
+            println()
+                    ->color(ANSIColor::GREEN)->print("    " + message)->reset()
+                    ->print(" [")->color(ANSIColor::YELLOW)->print(def)->reset()->println("]")
+                    ->print("    > ");
+
+            std::cin >> std::noskipws;
+
+            std::string check;
+            check = std::cin.peek();
+
+            println();
+            if ( check == "\n" ) {
+                std::string dump;
+                std::getline(std::cin, dump);
+                return def;
+            }
+
+            std::string input;
+            std::cin >> input;
+
+            std::string dump;
+            std::getline(std::cin, dump);
+
+            return input;
+        }
+
+        std::string choice(const std::string& message, const std::vector<std::string>& options) {
+            println()
+                    ->color(ANSIColor::GREEN)->println("    " + message + "\n");
+
+            size_t idx = 0;
+            for ( auto iter = options.begin(); iter != options.end(); ++iter, idx++ ) {
+                print("    [")->color(ANSIColor::YELLOW)->print(s(idx), true)->println("] " + (*iter));
+            }
+
+            println()->print("    > ");
+
+            std::cin >> std::noskipws;
+
+            std::string check;
+            check = std::cin.peek();
+
+            println();
+            if ( check == "\n" ) {
+                std::string dump;
+                std::getline(std::cin, dump);
+                color(ANSIColor::RED)->println("Invalid selection.");
+                return choice(message, options);
+            }
+
+            std::string inputStr;
+            std::cin >> inputStr;
+
+            bool inputValid = true;
+            size_t input = 0;
+            try {
+                input = std::stoi(inputStr);
+            } catch (std::invalid_argument&) {
+                inputValid = false;
+            }
+
+            if ( !inputValid || input >= options.size() ) {
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                color(ANSIColor::RED)->println("Invalid selection.");
+                return choice(message, options);
+            }
+
+            std::string dump;
+            std::getline(std::cin, dump);
+
+            return options[input];
+        }
+
+        std::string choice(const std::string& message, const std::vector<std::string>& options, const std::string& def) {
+            println()
+                    ->color(ANSIColor::GREEN)->print("    " + message)->reset()
+                    ->print(" [")->color(ANSIColor::YELLOW)->print(def)->reset()->println("]\n");
+
+            size_t idx = 0;
+            for ( auto iter = options.begin(); iter != options.end(); ++iter, idx++ ) {
+                print("    [")->color(ANSIColor::YELLOW)->print(s(idx), true)->println("] " + (*iter));
+            }
+
+            println()->print("    > ");
+
+            std::cin >> std::noskipws;
+
+            std::string check;
+            check = std::cin.peek();
+
+            println();
+            if ( check == "\n" ) {
+                std::string dump;
+                std::getline(std::cin, dump);
+                return def;
+            }
+
+            std::string inputStr;
+            std::cin >> inputStr;
+
+            bool inputValid = true;
+            size_t input = 0;
+            try {
+                input = std::stoi(inputStr);
+            } catch (std::invalid_argument&) {
+                inputValid = false;
+            }
+
+            if ( !inputValid || input >= options.size() ) {
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                color(ANSIColor::RED)->println("Invalid selection.");
+                return choice(message, options, def);
+            }
+
+            std::string dump;
+            std::getline(std::cin, dump);
+
+            return options[input];
         }
 
 

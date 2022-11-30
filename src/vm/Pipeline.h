@@ -97,6 +97,17 @@ namespace swarmc::VM {
             return vm;
         }
 
+        void targetInteractiveDebugger() {
+            Debug::Debugger d;
+
+            auto vm = targetSingleThreaded();  // TODO: support other targets for interactive debugging
+            vm->attachDebugger(&d);
+
+            Debug::Debugger::launchInteractive(vm);
+
+            delete vm;
+        }
+
         [[nodiscard]] std::string toString() const override {
             return "VM::Pipeline<>";
         }

@@ -26,6 +26,9 @@ public:
 
     static bool THREAD_EXIT;
     static std::map<std::string, std::string> QUEUE_FILTERS;
+
+    static std::string DEBUG_SERVER_DATA_PATH;
+    static std::string DEBUG_SERVER_CMD_PATH;
 };
 
 #endif //SWARM_CONFIGURATION_H
