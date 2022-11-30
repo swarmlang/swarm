@@ -16,8 +16,8 @@ namespace swarmc::ISA {
 
     class PushExceptionHandler2 : public BinaryInstruction<LocationReference, LocationReference> {
     public:
-        PushExceptionHandler2(LocationReference* handlerFn, LocationReference* discriminatorFn) :
-            BinaryInstruction<LocationReference, LocationReference>(Tag::PUSHEXHANDLER2, handlerFn, discriminatorFn) {}
+        PushExceptionHandler2(LocationReference* handlerFn, LocationReference* discriminator) :
+            BinaryInstruction<LocationReference, LocationReference>(Tag::PUSHEXHANDLER2, handlerFn, discriminator) {}
         [[nodiscard]] PushExceptionHandler2* copy() const override {
             return new PushExceptionHandler2(_first->copy(), _second->copy());
         }

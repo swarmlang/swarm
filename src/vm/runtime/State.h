@@ -4,6 +4,7 @@
 #include <map>
 #include <stack>
 #include <utility>
+#include <optional>
 #include "../../shared/nslib.h"
 #include "../../errors/SwarmError.h"
 #include "../isa_meta.h"
@@ -13,18 +14,44 @@ using namespace nslib;
 
 namespace swarmc::Runtime {
 
+    class VirtualMachine;
     class InlineFunction;
     class IFunctionCall;
+    class IFunction;
+
+    using ExceptionHandlerId = std::string;
+    using ExceptionSelector = std::pair<std::optional<size_t>, IFunction*>;
+    using ExceptionHandler = std::tuple<ExceptionHandlerId, ExceptionSelector, IFunction*>;
+    using ExceptionHandlers = std::stack<ExceptionHandler>;
+
+    inline bool exceptionHandlerIsUniversal(ExceptionHandler h) {
+        auto selector = std::get<1>(h);
+        return selector.first == std::nullopt && selector.second == nullptr;
+    }
+
+    inline bool exceptionHandlerIsCode(ExceptionHandler h, size_t code) {
+        auto selector = std::get<1>(h);
+        return selector.first != std::nullopt && selector.first == code;
+    }
+
+    inline IFunction* unpackExceptionHandlerDiscriminator(ExceptionHandler h) {
+        auto selector = std::get<1>(h);
+        return selector.second;
+    }
+
+    inline IFunction* unpackExceptionHandler(ExceptionHandler h) {
+        return std::get<2>(h);
+    }
 
     /**
      * A linked-list style dynamic scope data structure used by the VM.
      */
     class ScopeFrame : public IStringable {
     public:
-        ScopeFrame(std::string id, ScopeFrame* parent) : _parent(parent) {
+        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent) : _parent(parent), _global(global) {
             _id = std::move(id);
         }
-        ScopeFrame(std::string id, ScopeFrame* parent, IFunctionCall* call) : _parent(parent), _call(call) {
+        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent, IFunctionCall* call) : _parent(parent), _call(call), _global(global) {
             _id = std::move(id);
         }
         ~ScopeFrame() override = default;
@@ -55,16 +82,52 @@ namespace swarmc::Runtime {
 
         /** Create a deep copy of this scope. */
         [[nodiscard]] ScopeFrame* copy() const {
-            auto copy = new ScopeFrame(_id, _parent == nullptr ? nullptr : _parent->copy());
+            auto copy = new ScopeFrame(_global, _id, _parent == nullptr ? nullptr : _parent->copy());
             copy->_map = _map;
             copy->_call = _call;
+            copy->_handlers = _handlers;
             return copy;
+        }
+
+        ExceptionHandlerId pushExceptionHandler(IFunction* selector, IFunction* handler) {
+            auto id = getNextHandlerId();
+            _handlers.push(std::make_tuple(id, std::make_pair(std::nullopt, selector), handler));
+            return id;
+        }
+
+        ExceptionHandlerId pushExceptionHandler(size_t code, IFunction* handler) {
+            auto id = getNextHandlerId();
+            _handlers.push(std::make_tuple(id, std::make_pair(std::make_optional(code), nullptr), handler));
+            return id;
+        }
+
+        ExceptionHandlerId pushExceptionHandler(IFunction* handler) {
+            auto id = getNextHandlerId();
+            _handlers.push(std::make_tuple(id, std::make_pair(std::nullopt, nullptr), handler));
+            return id;
+        }
+
+        // FIXME: write test for pushing/popping these by ID
+        void popExceptionHandler(const ExceptionHandlerId& id) {
+            nslib::stl::erase<ExceptionHandler>(_handlers, [id](size_t, ExceptionHandler h) {
+                return std::get<0>(h) == id;
+            });
+        }
+
+        [[nodiscard]] ExceptionHandlers getExceptionHandlers() const {
+            return _handlers;
         }
     protected:
         ScopeFrame* _parent = nullptr;
         std::map<std::string, ISA::LocationReference*> _map;
         std::string _id;
         IFunctionCall* _call = nullptr;
+        ExceptionHandlers _handlers;
+        IGlobalServices* _global;
+
+        [[nodiscard]] ExceptionHandlerId getNextHandlerId() const {
+            return _global->getUuid();
+        }
     };
 
 

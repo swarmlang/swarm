@@ -27,7 +27,6 @@ namespace swarmc::Runtime {
         PROVIDER,  // calls an external, native function implementation
     };
 
-
     /**
      * Represents a function call (which may be in-progress or completed).
      */
@@ -86,7 +85,7 @@ namespace swarmc::Runtime {
     class InlineFunctionCall : public IFunctionCall {
     public:
         InlineFunctionCall(std::string name, CallVector vector, const Type::Type* returnType) :
-            IFunctionCall(FunctionBackend::INLINE, std::move(vector), returnType), _name(std::move(name)) {}
+                IFunctionCall(FunctionBackend::INLINE, std::move(vector), returnType), _name(std::move(name)) {}
 
         /**
          * Get the identifier name of the function.

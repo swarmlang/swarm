@@ -43,7 +43,7 @@ namespace swarmc::Runtime {
         /** Load a set of parsed instructions into the runtime. */
         void initialize(ISA::Instructions is) {
             _state = new State(std::move(is));
-            _scope = new ScopeFrame(nslib::uuid(), nullptr);
+            _scope = new ScopeFrame(_global, nslib::uuid(), nullptr);
             _localOut = new LocalOutputStream();
             _localErr = new LocalErrorStream();
         }
@@ -102,6 +102,8 @@ namespace swarmc::Runtime {
             delete _localErr;
             delete _localOut;
         }
+
+        virtual void restore(ScopeFrame*);
 
         /** Restore the VM to the specified state. Can be used to re-hydrate VMs for queued call execution. */
         virtual void restore(ScopeFrame*, State*);
@@ -269,6 +271,24 @@ namespace swarmc::Runtime {
             std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
         }
 
+        virtual ExceptionHandlerId pushExceptionHandler(IFunction* selector, IFunction* handler) {
+            return _scope->pushExceptionHandler(selector, handler);
+        }
+
+        virtual ExceptionHandlerId pushExceptionHandler(size_t code, IFunction* handler) {
+            return _scope->pushExceptionHandler(code, handler);
+        }
+
+        virtual ExceptionHandlerId pushExceptionHandler(IFunction* handler) {
+            return _scope->pushExceptionHandler(handler);
+        }
+
+        virtual void popExceptionHandler(const ExceptionHandlerId& id) {
+            _scope->popExceptionHandler(id);
+        }
+
+        virtual std::pair<ScopeFrame*, IFunction*> getExceptionHandler(size_t code);
+
         /** Make a deep copy of this instance. */
         [[nodiscard]] VirtualMachine* copy() const {
             auto copy = new VirtualMachine(_global);
@@ -291,6 +311,20 @@ namespace swarmc::Runtime {
             return copy;
         }
 
+        void copy(const std::function<void(VirtualMachine*)>& handler) const {
+            auto vm = copy();
+            handler(vm);
+            delete vm;
+        }
+
+        template <typename ReturnT>
+        ReturnT copy(const std::function<ReturnT(VirtualMachine*)>& handler) const {
+            auto vm = copy();
+            auto ret = handler(vm);
+            delete vm;
+            return ret;
+        }
+
     protected:
         IGlobalServices* _global;
         State* _state = nullptr;
@@ -299,13 +333,13 @@ namespace swarmc::Runtime {
         Locks _locks;
         Providers _providers;
         IStreamDriver* _streams = nullptr;
-        ScopeFrame* _scope;
-        ExecuteWalk* _exec;
+        ScopeFrame* _scope = nullptr;
+        ExecuteWalk* _exec = nullptr;
         std::stack<QueueContextID> _queueContexts;
         IFunctionCall* _return = nullptr;
         Debug::Debugger* _debugger = nullptr;
-        IStream* _localOut;
-        IStream* _localErr;
+        IStream* _localOut = nullptr;
+        IStream* _localErr = nullptr;
         IStream* _sharedOut = nullptr;
         IStream* _sharedErr = nullptr;
         bool _shouldClearReturn = false;

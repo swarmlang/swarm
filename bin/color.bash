@@ -53,6 +53,6 @@ function white(){
 THECOLOR="$1"
 shift
 
-"$THECOLOR" "$1"
+FORMATTED=$("$THECOLOR" "$1")
 shift
-echo "$*"
+echo "${FORMATTED}$*"

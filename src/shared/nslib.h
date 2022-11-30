@@ -233,6 +233,40 @@ namespace nslib {
     }
 
 
+    namespace stl {
+        namespace priv {
+            template <typename ElemT>
+            void erase(std::stack<ElemT>& s, std::function<bool(size_t, ElemT)> d, size_t current) {
+                if ( s.empty() ) {
+                    return;
+                }
+
+                auto elem = s.top();
+                if ( d(current, elem) ) {
+                    s.pop();
+                    return;
+                }
+
+                s.pop();
+                erase(s, d, current + 1);
+                s.push(elem);
+            }
+        }
+
+        template<typename ElemT>
+        void erase(std::stack<ElemT>& s, std::function<bool(size_t, ElemT)> d) {
+            priv::erase<ElemT>(s, d, 0);
+        }
+
+        template<typename ElemT>
+        void erase(std::stack<ElemT>& s, size_t idx) {
+            priv::erase<ElemT>(s, [idx](size_t current, ElemT) {
+                return current == idx;
+            }, 0);
+        }
+    }
+
+
     /**
      * Utility class for interacting with the Console window.
      * @todo prompts

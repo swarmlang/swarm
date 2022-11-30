@@ -134,11 +134,11 @@ namespace swarmc::Runtime {
         ISA::Reference* walkStringSliceFromTo(ISA::StringSliceFromTo*) override;
         ISA::Reference* walkTypeOf(ISA::TypeOf*) override;
         ISA::Reference* walkIsCompatible(ISA::IsCompatible*) override;
-        ISA::Reference* walkPushExceptionHandler1(ISA::PushExceptionHandler1*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkPushExceptionHandler2(ISA::PushExceptionHandler2*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkPopExceptionHandler(ISA::PopExceptionHandler*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkRaise(ISA::Raise*) override { assert(false);  /* FIXME */ }
-        ISA::Reference* walkResume(ISA::Resume*) override { assert(false);  /* FIXME */ }
+        ISA::Reference* walkPushExceptionHandler1(ISA::PushExceptionHandler1*) override;
+        ISA::Reference* walkPushExceptionHandler2(ISA::PushExceptionHandler2*) override;
+        ISA::Reference* walkPopExceptionHandler(ISA::PopExceptionHandler*) override;
+        ISA::Reference* walkRaise(ISA::Raise*) override;
+        ISA::Reference* walkResume(ISA::Resume*) override;
     };
 
 }

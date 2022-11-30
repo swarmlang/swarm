@@ -82,3 +82,5 @@
 - SVI: optimizations for deferred/parallel pure function calls in the VM
 - Support for signed binaries
 - Support building `swarmc` binary without the C++ test suite
+- hilariously low: blockchain-based distributed drivers
+- Support automatically determining which variables should be shared?

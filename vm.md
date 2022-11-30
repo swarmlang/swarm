@@ -127,7 +127,7 @@ Shared storage is global across all jobs that have access to a location.
     exception's code on the handler stack is called.
   - The exception handler is responsible for calling into the correct point where execution should be resumed.
   - `pushexhandler $lloc` - register the function `$lloc` as the handler for all exceptions raised in the current context
-    - Returns a `p:NUMBER` with the ID of the exception handler
+    - Returns a `p:STRING` with the ID of the exception handler
   - `pushexhandler $lloc1 $lloc2` - register the function `$lloc1` as the handler for all exceptions with the code `$lloc2` in the current context
     - `$lloc2` can be either a static number or a function of type `p:NUMBER -> p:BOOLEAN`
   - `popexhandler $lloc` - pop the exception handler with the ID `$lloc`
@@ -177,6 +177,7 @@ SVI ::= INST EOF | INST \n INSTS
   - `f:SIN n`/`f:COS n`/`f:TAN n` - the mathematical sine, cosine, and tangent functions
   - `f:RANDOM`/`f:RANDOM_VECTOR n`/`f:RANDOM_MATRIX m n` - get a random number, enum of random numbers of length n, or matrix of random numbers of size m by n
   - `f:RANGE n m s` - get an enum of the range of numbers from n to m with step size s
+  - `f:ID v` - the identity function (e.g. `f:ID 3 -> 3`)
 
 ### Examples
 

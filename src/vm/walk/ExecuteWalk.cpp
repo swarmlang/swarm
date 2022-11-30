@@ -773,9 +773,77 @@ namespace swarmc::Runtime {
         return new BooleanReference(rhs->type()->isAssignableTo(lhs->type()));
     }
 
-    // TODO: walkPushExceptionHandler1
-    // TODO: walkPushExceptionHandler2
-    // TODO: walkPopExceptionHandler
-    // TODO: walkRaise
-    // TODO: walkResume
+    Reference* ExecuteWalk::walkPushExceptionHandler1(PushExceptionHandler1* i) {
+        verbose("pushexhandler " + i->first()->toString());
+        auto handler = ensureFunction(_vm->resolve(i->first()));
+        // FIXME: type check handler function
+
+        auto id = _vm->pushExceptionHandler(handler->fn());
+        return new StringReference(id);
+    }
+
+    Reference* ExecuteWalk::walkPushExceptionHandler2(PushExceptionHandler2* i) {
+        verbose("pushexhandler " + i->first()->toString() + " " + i->second()->toString());
+        auto handler = ensureFunction(_vm->resolve(i->first()));
+        // FIXME: type check handler function
+        auto discriminator = _vm->resolve(i->second());
+
+        ExceptionHandlerId id;
+        if ( discriminator->tag() == ReferenceTag::NUMBER ) {
+            id = _vm->pushExceptionHandler(static_cast<size_t>(ensureNumber(discriminator)->value()), handler->fn());
+        } else {
+            auto discriminatorFn = ensureFunction(discriminator);
+            // FIXME: type check discriminator function
+            id = _vm->pushExceptionHandler(discriminatorFn->fn(), handler->fn());
+        }
+
+        return new StringReference(id);
+    }
+
+    Reference* ExecuteWalk::walkPopExceptionHandler(PopExceptionHandler* i) {
+        verbose("popexhandler " + i->first()->toString());
+        auto id = ensureString(_vm->resolve(i->first()));
+        _vm->popExceptionHandler(id->value());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkRaise(Raise* i) {
+        verbose("raise " + i->first()->toString());
+        auto id = ensureNumber(_vm->resolve(i->first()));
+        auto handler = _vm->getExceptionHandler(static_cast<size_t>(id->value()));
+
+        if ( handler.first == nullptr || handler.second == nullptr ) {
+            throw Errors::SwarmError("Unhandled runtime exception: " + s(id));
+        }
+
+        // Rewind to the scope of the selected exception handler
+        _vm->restore(handler.first);
+
+        // The exception handler is responsible for using the `resume` instruction
+        // to jump back to the correct context. If it doesn't assume that was a mistake
+        // and halt execution.
+        _vm->exit();
+
+        // Call the exception handler
+        _vm->executeCall(handler.second->curry(id)->call());
+
+        // FIXME: pull this into a _vm->raise(size_t) method.
+
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkResume(Resume* i) {
+        verbose("resume " + i->first()->toString());
+        auto fn = ensureFunction(_vm->resolve(i->first()));
+        auto fnType = new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID));
+
+        // FIXME: should this generate a runtime exception?
+        assert(fn->type()->isAssignableTo(fnType));
+
+        // FIXME: I am not confident that this works correctly lol
+        _vm->rewind();
+        _vm->executeCall(fn->fn()->call());
+
+        return nullptr;
+    }
 }

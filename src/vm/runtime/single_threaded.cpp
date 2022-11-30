@@ -85,11 +85,11 @@ namespace swarmc::Runtime::SingleThreaded {
 
 
     void Queue::push(IQueueJob* job) {
-        auto vm = _vm->copy();
-        Console::get()->debug("Got VM from queue: " + vm->toString());
-        vm->restore(job->getScope()->copy(), job->getState()->copy());
-        vm->executeCall(job->getCall());
-        delete vm;
+        _vm->copy([job](VirtualMachine* vm) {
+            Console::get()->debug("Got VM from queue: " + vm->toString());
+            vm->restore(job->getScope()->copy(), job->getState()->copy());
+            vm->executeCall(job->getCall());
+        });
     }
 
 

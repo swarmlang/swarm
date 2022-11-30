@@ -29,11 +29,11 @@ namespace swarmc::Runtime {
     }
 
     ScopeFrame* ScopeFrame::newChild() {
-        return new ScopeFrame(nslib::uuid(), this);
+        return new ScopeFrame(_global, nslib::uuid(), this);
     }
 
     ScopeFrame* ScopeFrame::newCall(IFunctionCall* call) {
-        return new ScopeFrame(nslib::uuid(), this, call);
+        return new ScopeFrame(_global, nslib::uuid(), this, call);
     }
 
     std::string ScopeFrame::toString() const {

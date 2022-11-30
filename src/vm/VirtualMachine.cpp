@@ -28,6 +28,11 @@ namespace swarmc::Runtime {
         throw Errors::SwarmError("Unable to find queue backend for job: " + j->toString());
     }
 
+    void VirtualMachine::restore(ScopeFrame* scope) {
+        delete _scope;  // FIXME: delete parent chain?
+        _scope = scope;
+    }
+
     void VirtualMachine::restore(ScopeFrame* scope, State* state) {
         delete _scope;
         _scope = scope;
@@ -99,7 +104,7 @@ namespace swarmc::Runtime {
         return new InlineFunction(name, paramTypes, returnType->value());
     }
 
-    IProviderFunction* VirtualMachine::loadProviderFunction(const std::string &name) {
+    IProviderFunction* VirtualMachine::loadProviderFunction(const std::string& name) {
         size_t idx = 0;
         for ( auto it = _providers.rbegin(); it != _providers.rend(); ++it, --idx ) {
             auto provider = _providers.at(idx);
@@ -324,6 +329,51 @@ namespace swarmc::Runtime {
 
         // Jump back to the caller's site
         if ( shouldJump ) _state->jumpReturn();
+    }
+
+    std::pair<ScopeFrame*, IFunction*> VirtualMachine::getExceptionHandler(size_t code) {
+        auto scope = _scope;
+        while ( scope != nullptr ) {
+            auto handlers = scope->getExceptionHandlers();
+            while ( !handlers.empty() ) {
+                auto handler = handlers.top();
+                handlers.pop();
+
+                // If the handler is universal, it fits
+                if ( exceptionHandlerIsUniversal(handler) ) {
+                    return {scope, unpackExceptionHandler(handler)};
+                }
+
+                // If the handler defines a specific code, it fits
+                if ( exceptionHandlerIsCode(handler, code) ) {
+                    return {scope, unpackExceptionHandler(handler)};
+                }
+
+                // If the handler defines a discriminator function, and that function is satisfied, it fits
+                auto discriminatorFn = unpackExceptionHandlerDiscriminator(handler);
+                if ( discriminatorFn != nullptr ) {
+                    auto call = discriminatorFn->curry(new NumberReference(static_cast<double>(code)))->call();
+
+                    copy([call](VirtualMachine* vm) {
+                        vm->executeCall(call);
+                    });
+
+                    // the handler is type-checked before being pushed
+                    assert(call->returnType()->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)));
+                    auto result = (BooleanReference*) call->getReturn();
+                    auto resultValue = result->value();
+                    delete result;
+
+                    if ( resultValue ) {
+                        return {scope, unpackExceptionHandler(handler)};
+                    }
+                }
+            }
+
+            scope = scope->parent();
+        }
+
+        return {nullptr, nullptr};
     }
 
     void VirtualMachine::checkCall(IFunctionCall* call) {
