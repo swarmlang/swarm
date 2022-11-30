@@ -38,3 +38,4 @@ build*
 .sublime
 swarmc_debug
 run_tests
+vgcore.*
