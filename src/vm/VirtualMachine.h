@@ -135,6 +135,7 @@ namespace swarmc::Runtime {
          */
         virtual ISA::Reference* resolve(ISA::Reference*);
 
+        /** Get the instruction which will be executed during this step. */
         virtual ISA::Instruction* current();
 
         /** Execute a the current instruction, and advance to the next one. */
@@ -350,6 +351,7 @@ namespace swarmc::Runtime {
         bool _shouldClearReturn = false;
         bool _shouldAdvance = true;
         bool _shouldCaptureReturn = false;
+        bool _shouldRunToCompletion = false;
 
         /** Print output visible by default in the debug binary. */
         virtual void debug(const std::string& output) const {

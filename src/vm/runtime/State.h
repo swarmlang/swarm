@@ -19,6 +19,9 @@ namespace swarmc::Runtime {
     class IFunctionCall;
     class IFunction;
 
+    using pc_t = ISA::Instructions::size_type;
+    using CallStackFrame = std::pair<pc_t, ISA::Instruction*>;
+    using CallStack = std::stack<CallStackFrame>;
     using ExceptionHandlerId = std::string;
     using ExceptionSelector = std::pair<std::optional<size_t>, IFunction*>;
     using ExceptionHandler = std::tuple<ExceptionHandlerId, ExceptionSelector, IFunction*>;
@@ -117,6 +120,18 @@ namespace swarmc::Runtime {
         [[nodiscard]] ExceptionHandlers getExceptionHandlers() const {
             return _handlers;
         }
+
+        void setReturnPC(pc_t pc) {
+            _returnTo = {pc};
+        }
+
+        [[nodiscard]] std::optional<pc_t> getReturnPC() const {
+            return _returnTo;
+        }
+
+        void clearReturnPC() {
+            _returnTo = std::nullopt;
+        }
     protected:
         ScopeFrame* _parent = nullptr;
         std::map<std::string, ISA::LocationReference*> _map;
@@ -124,6 +139,7 @@ namespace swarmc::Runtime {
         IFunctionCall* _call = nullptr;
         ExceptionHandlers _handlers;
         IGlobalServices* _global;
+        std::optional<pc_t> _returnTo = std::nullopt;
 
         [[nodiscard]] ExceptionHandlerId getNextHandlerId() const {
             return _global->getUuid();
@@ -150,6 +166,12 @@ namespace swarmc::Runtime {
             if ( _rewindToHead && !_is.empty() ) return _is[0];
             if ( _pc >= _is.size() ) return nullptr;
             return _is[_pc];
+        }
+
+        /** Look up a specific instruction. */
+        ISA::Instruction* lookup(pc_t pc) {
+            if ( pc < _is.size() ) return _is[pc];
+            return nullptr;
         }
 
         /** Returns true if there are no more instructions to be executed. */
@@ -193,43 +215,50 @@ namespace swarmc::Runtime {
         }
 
         /** Jump to a specific position in the program. */
-        void jump(ISA::Instructions::size_type i) {
+        void jump(pc_t i) {
             if ( i >= _is.size() ) throw Errors::SwarmError("Cannot advance beyond end of program.");
             _pc = i;
         }
 
         /** Jump to a specific position in the program, keeping track of the return position. */
-        void jumpCall(ISA::Instructions::size_type i) {
-            auto returnTo = _pc;
+        void jumpCall(ScopeFrame* scope, pc_t i) {
+            scope->setReturnPC(_pc);
             jump(i);
-            _callStack.push(returnTo);
         }
 
         /** Jump to the return location for the function currently in scope and pop the call stack. */
-        void jumpReturn() {
-            if ( _callStack.empty() ) throw Errors::SwarmError("Cannot make return jump: the call stack is empty");
-            auto returnTo = _callStack.top();
-            jump(returnTo);
-            _callStack.pop();
+        ScopeFrame* jumpReturn(ScopeFrame* scope) {
+            while ( scope != nullptr ) {
+                auto returnTo = scope->getReturnPC();
+                if ( returnTo != std::nullopt ) {
+                    jump(*returnTo);
+                    scope->clearReturnPC();
+                    return scope;
+                }
+
+                scope = scope->parent();
+            }
+
+            throw Errors::SwarmError("Cannot make return jump: the call stack is empty");
         }
 
         /** Get the `fnparam` instructions for the inline function beginning at `pc`. */
-        [[nodiscard]] std::vector<ISA::FunctionParam*> loadInlineFunctionParams(ISA::Instructions::size_type pc) const;
+        [[nodiscard]] std::vector<ISA::FunctionParam*> loadInlineFunctionParams(pc_t pc) const;
 
         /** Get the position of the inline function with the given name. */
-        ISA::Instructions::size_type getInlineFunctionPC(const std::string& name) {
+        pc_t getInlineFunctionPC(const std::string& name) {
             if ( _fJumps.find(name) == _fJumps.end() ) throw Errors::SwarmError("Unable to find pc for inline function f:" + name);
             return _fJumps[name];
         }
 
         /** Get the position of the first instruction after the inline function with the given name. */
-        ISA::Instructions::size_type getInlineFunctionSkipPC(const std::string& name) {
+        pc_t getInlineFunctionSkipPC(const std::string& name) {
             if ( _fSkips.find(name) == _fJumps.end() ) throw Errors::SwarmError("Unable to find pc to skip inline function f:" + name);
             return _fSkips[name];
         }
 
         /** Get the `beginfn` instruction for the function at the given position. */
-        [[nodiscard]] ISA::BeginFunction* getInlineFunctionHeader(ISA::Instructions::size_type pc) const;
+        [[nodiscard]] ISA::BeginFunction* getInlineFunctionHeader(pc_t pc) const;
 
         /** Returns true if the loaded program has an inline function with the given name. */
         bool hasInlineFunction(const std::string& name) {
@@ -244,7 +273,6 @@ namespace swarmc::Runtime {
         [[nodiscard]] State* copy() const {
             auto copy = new State(_is);
             copy->_pc = _pc;
-            copy->_callStack = _callStack;
             return copy;
         }
 
@@ -253,10 +281,9 @@ namespace swarmc::Runtime {
         }
     protected:
         ISA::Instructions _is;
-        std::map<std::string, ISA::Instructions::size_type> _fJumps;
-        std::map<std::string, ISA::Instructions::size_type> _fSkips;
-        ISA::Instructions::size_type _pc = 0;
-        std::stack<ISA::Instructions::size_type> _callStack;
+        std::map<std::string, pc_t> _fJumps;
+        std::map<std::string, pc_t> _fSkips;
+        pc_t _pc = 0;
         Debug::Metadata _meta;
         bool _rewindToHead = false;
 

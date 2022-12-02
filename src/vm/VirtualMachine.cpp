@@ -155,6 +155,7 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::execute() {
+        _shouldRunToCompletion = true;
         while ( !_state->isEndOfProgram() ) step();
     }
 
@@ -242,6 +243,8 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::executeCall(IFunctionCall* c) {
+        auto singleStep = _debugger != nullptr && _debugger->isInteractive() && !_shouldRunToCompletion;
+
         call(c);
 
         // `call()` sets this to false because most calls are set up from w/in other instructions
@@ -250,9 +253,10 @@ namespace swarmc::Runtime {
         // However, `executeCall()` is called from outside the normal instruction pipeline, so we
         // need to allow `step()` to advance, otherwise the first instruction will be executed
         // twice.
-        _shouldAdvance = true;
+        _shouldAdvance = !singleStep;  // fixme: !isInteractive
 
-        while ( !_state->isEndOfProgram() && !c->hasReturned() ) step();
+        // FIXME: need to allow debugger to step through this
+        while ( !_state->isEndOfProgram() && !c->hasReturned() && !singleStep ) step();
     }
 
     void VirtualMachine::skip(ISA::BeginFunction* fn) {
@@ -321,6 +325,10 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::returnToCaller(bool shouldJump) {
+        if ( getCall() == nullptr ) {
+            throw Errors::SwarmError("Unable to return from caller: no call in progress.");
+        }
+
         // Mark the call as returned
         if ( _shouldCaptureReturn ) {
             _return = getCall();
@@ -328,11 +336,9 @@ namespace swarmc::Runtime {
 
         getCall()->setReturned();
 
-        // Pop the callee's scope
-        exitScope();
-
         // Jump back to the caller's site
-        if ( shouldJump ) _state->jumpReturn();
+        if ( shouldJump ) _scope = _state->jumpReturn(_scope);
+        else exitScope();
     }
 
     std::pair<ScopeFrame*, IFunction*> VirtualMachine::getExceptionHandler(size_t code) {
@@ -399,12 +405,12 @@ namespace swarmc::Runtime {
         // Type check the parameters
         checkCall(call);
 
+        // Jump to the function call
+        debug("inline call: " + s(call) + " (pc: " + s(pc) + ")");
+        _state->jumpCall(_scope, pc);
+
         // Start a new scope
         enterCallScope(call);
-
-        // Jump to the function call
-        debug("inline call: " + call->toString() + " (pc: " + std::to_string(pc) + ")");
-        _state->jumpCall(pc);
 
         // Skip over the beginfn instruction
         advance();

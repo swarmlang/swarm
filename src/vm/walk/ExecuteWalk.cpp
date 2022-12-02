@@ -379,6 +379,10 @@ namespace swarmc::Runtime {
 
     Reference* ExecuteWalk::walkReturn0(Return0*) {
         verbose("return0");
+
+        // fixme: eventually, this should generate a runtime exception
+        if ( _vm->getCall() == nullptr ) throw Errors::SwarmError("Cannot return: no call in progress.");
+
         _vm->returnToCaller(true);
         return nullptr;
     }
@@ -386,8 +390,9 @@ namespace swarmc::Runtime {
     ISA::Reference* ExecuteWalk::walkReturn1(ISA::Return1* i) {
         verbose("return1 " + i->first()->toString());
         auto call = _vm->getCall();
+
         // fixme: eventually, this should generate a runtime exception
-        assert(call != nullptr);
+        if ( call == nullptr ) throw Errors::SwarmError("Cannot return: no call in progress.");
 
         // Resolve the return value
         auto ref = _vm->resolve(i->first());

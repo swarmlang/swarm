@@ -166,6 +166,7 @@ namespace nslib {
 
         /** Pad the front of a string to the given length. */
         inline std::string padFront(const std::string& text, unsigned int pad, const std::string& with = " ") {
+            if ( pad < 1 ) return text;
             std::stringstream s;
 
             unsigned int pad_diff = pad - text.length();
@@ -280,6 +281,15 @@ namespace nslib {
             std::string s;
             while ( std::getline(fh, s) ) ss << s;
             return ss.str();
+        }
+
+        template<typename ElemT>
+        inline void stackLoop(std::stack<ElemT> s, std::function<void(ElemT)> fn) {
+            while ( !s.empty() ) {
+                auto elem = s.top();
+                s.pop();
+                fn(elem);
+            }
         }
     }
 
