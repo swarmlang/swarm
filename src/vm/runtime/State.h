@@ -24,7 +24,7 @@ namespace swarmc::Runtime {
     using CallStack = std::stack<CallStackFrame>;
     using ExceptionHandlerId = std::string;
     using ExceptionSelector = std::pair<std::optional<size_t>, IFunction*>;
-    using ExceptionHandler = std::tuple<ExceptionHandlerId, ExceptionSelector, IFunction*>;
+    using ExceptionHandler = std::tuple<ExceptionHandlerId, ExceptionSelector, IFunction*, pc_t>;
     using ExceptionHandlers = std::stack<ExceptionHandler>;
 
     inline bool exceptionHandlerIsUniversal(ExceptionHandler h) {
@@ -92,21 +92,21 @@ namespace swarmc::Runtime {
             return copy;
         }
 
-        ExceptionHandlerId pushExceptionHandler(IFunction* selector, IFunction* handler) {
+        ExceptionHandlerId pushExceptionHandler(IFunction* selector, IFunction* handler, pc_t resumeTo) {
             auto id = getNextHandlerId();
-            _handlers.push(std::make_tuple(id, std::make_pair(std::nullopt, selector), handler));
+            _handlers.emplace(id, std::make_pair(std::nullopt, selector), handler, resumeTo);
             return id;
         }
 
-        ExceptionHandlerId pushExceptionHandler(size_t code, IFunction* handler) {
+        ExceptionHandlerId pushExceptionHandler(size_t code, IFunction* handler, pc_t resumeTo) {
             auto id = getNextHandlerId();
-            _handlers.push(std::make_tuple(id, std::make_pair(std::make_optional(code), nullptr), handler));
+            _handlers.emplace(id, std::make_pair(std::make_optional(code), nullptr), handler, resumeTo);
             return id;
         }
 
-        ExceptionHandlerId pushExceptionHandler(IFunction* handler) {
+        ExceptionHandlerId pushExceptionHandler(IFunction* handler, pc_t resumeTo) {
             auto id = getNextHandlerId();
-            _handlers.push(std::make_tuple(id, std::make_pair(std::nullopt, nullptr), handler));
+            _handlers.emplace(id, std::make_pair(std::nullopt, nullptr), handler, resumeTo);
             return id;
         }
 

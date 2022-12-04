@@ -13,7 +13,7 @@
     - ~~dynamic scoping/shadowing~~
     - function currying
     - locking
-    - equality
+    - ~~equality~~
 - module system / import system
 - language-native testing system
   - e.g. define named test blocks which are ignored during normal runtime
@@ -58,7 +58,7 @@
 - Support Position annotations in SVI for better error messages from the VM
 - Garbage collection / reference counting
 - More generic logging class that can centralize logs from workers?
-- More compact binary form of SVI (using binn: https://github.com/liteserver/binn)
+- ~~More compact binary form of SVI (using binn: https://github.com/liteserver/binn)~~
 - `mapvalues` instruction? Parallel to `mapkeys`.
 - Currently, `typeof` only works when a variable has a value stored in it
   - This means the following will fail:
@@ -70,7 +70,7 @@
 - Well-defined C++/native bridge to allow ~~custom `f:XXX` function bindings, as well as~~ custom stream implementations.
   - File operations, e.g.
 - ~~The `call` instruction should curry partial applications. Right now, it just errors.~~
-- Modify compiler to render partial applications as `curry` instructions
+- ~~Modify compiler to render partial applications as `curry` instructions~~
 - Tiered call queues (e.g. a local one for fast, multi-thread calls and a distributed one for longer batch jobs)
 - Sci-comp natives
   - Map-reduce

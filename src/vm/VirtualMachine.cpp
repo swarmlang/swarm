@@ -29,7 +29,7 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::restore(ScopeFrame* scope) {
-        delete _scope;  // FIXME: delete parent chain?
+        if ( _scope != scope ) delete _scope;  // FIXME: delete parent chain?
         _scope = scope;
     }
 

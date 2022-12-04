@@ -842,7 +842,7 @@ namespace swarmc::Runtime {
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto fnType = new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID));
 
-        // FIXME: should this generate a runtime exception?
+        // FIXME: should this generate a runtime exception? kinda weird to have the exception system raising exceptions
         assert(fn->type()->isAssignableTo(fnType));
 
         // FIXME: I am not confident that this works correctly lol
