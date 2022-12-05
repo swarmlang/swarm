@@ -56,12 +56,12 @@ namespace swarmc::Runtime::Debug {
             return "Debug::Debugger<>";
         }
 
+        static std::string getStateString(VirtualMachine*);
     protected:
         Metadata _meta;
 
         bool _interactive;
 
-        static std::string getStateString(VirtualMachine*);
     };
 
 }

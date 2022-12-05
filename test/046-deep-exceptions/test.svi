@@ -1,0 +1,45 @@
+beginfn f:HANDLER p:VOID
+    fnparam p:NUMBER $l:code
+    scopeof $l:msg
+    $l:msg <- call f:NUMBER_TO_STRING $l:code
+    $l:msg <- strconcat "Handled: " $l:msg
+    out $l:msg
+    resume f:RESUMED
+    out "Bad: handler!"
+return
+
+beginfn f:DANGEROUS_THROW p:VOID
+    raise 0
+return
+
+beginfn f:DANGEROUS_SAFE p:VOID
+    $l:dangerous_out <- 3.141
+return
+
+beginfn f:DANGEROUS p:NUMBER
+    fnparam p:NUMBER $l:in
+    scopeof $l:dangerous_out
+    scopeof $l:cond
+
+    $l:cond <- lt $l:in 1
+
+    callif $l:cond f:DANGEROUS_THROW
+    callelse $l:cond f:DANGEROUS_SAFE
+return $l:dangerous_out
+
+beginfn f:RESUMED p:NUMBER
+    out "An error occurred. Estimating!"
+return 3.2
+
+beginfn f:OUTER p:NUMBER
+    fnparam p:NUMBER $l:in
+    pushexhandler f:HANDLER
+    scopeof $l:pi
+    $l:pi <- call f:DANGEROUS $l:in
+return $l:pi
+
+out "Calling outer..."
+$l:outerResult <- call f:OUTER 4
+$l:outerResult <- call f:OUTER 0
+$l:outerResult <- call f:OUTER 4
+out "After outer!"

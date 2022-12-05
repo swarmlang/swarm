@@ -36,6 +36,12 @@ namespace swarmc::Runtime {
         return new ScopeFrame(_global, nslib::uuid(), this, call);
     }
 
+    ScopeFrame* ScopeFrame::overrideCall(IFunctionCall* fc) const {
+        auto frame = copy();
+        frame->_call = fc;
+        return frame;
+    }
+
     std::string ScopeFrame::toString() const {
         auto mine = "ScopeFrame<id: " + _id + ", #symbols: " + std::to_string(_map.size()) + ">";
         if ( _parent == nullptr ) {

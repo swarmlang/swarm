@@ -170,49 +170,50 @@ namespace swarmc::Runtime::Debug {
         auto console = Console::get();
         console->capture();
 
-        console->println()->color(ANSIColor::MAGENTA)->header("Call Stack")->println();
-        size_t level = 0;
+        console->println()->color(ANSIColor::MAGENTA)->header("Scope Frames")->println();
+
         auto scope = vm->_scope;
         while ( scope != nullptr ) {
+            console->color(ANSIColor::MAGENTA)->println(s(scope));
+
+            auto call = scope->call();
+            console->color(ANSIColor::CYAN)->print("  - Call: ", true)->println(s(call));
+
             auto returnTo = scope->getReturnPC();
-            if ( returnTo == std::nullopt || scope->call() == nullptr ) {
-                scope = scope->parent();
-                continue;
+            if ( returnTo != std::nullopt ) {
+                auto returnI = vm->_state->lookup(*returnTo);
+                console->color(ANSIColor::CYAN)->print("    Return to: ", true)->println(s(returnI));
             }
 
-            auto returnI = vm->_state->lookup(*returnTo);
-            console->println(str::padFront("Call: ", level++) + s(scope->call()) + "  |  Return: " + s(returnI) + " (pc: " + s(*returnTo) + ")");
-            scope = scope->parent();
-        }
+            console->color(ANSIColor::CYAN)->print("    Parent: ", true)->println(s(scope->parent()));
 
-        console->println()->color(ANSIColor::YELLOW)->header("Exception Handlers")->println();
-        scope = vm->_scope;
-        while ( scope != nullptr ) {
             auto handlers = scope->getExceptionHandlers();
+            if ( !handlers.empty() ) {
+                console->color(ANSIColor::CYAN)->println("    Exception handlers:");
+
+                stl::stackLoop<ExceptionHandler>(handlers, [&console](const ExceptionHandler& h) {
+                    console->color(ANSIColor::CYAN)->print("      - ID: ", true)->println(std::get<0>(h))
+                            ->color(ANSIColor::CYAN)->print("        Selector: ", true);
+
+                    auto selector = std::get<1>(h);
+                    if ( exceptionHandlerIsUniversal(h) ) {
+                        console->println(" (universal)");
+                    } else if ( selector.first != std::nullopt ) {
+                        console->println(" (code: " + s(*selector.first) + ")");
+                    } else if ( selector.second != nullptr ) {
+                        console->println(" " + s(selector.second));
+                    } else {
+                        console->println(" (invalid!)");
+                    }
+
+                    console->color(ANSIColor::CYAN)->print("        Handler: ", true)
+                            ->println(s(std::get<2>(h)))
+                            ->println();
+                });
+            }
+
+            console->println();
             scope = scope->parent();
-            if ( handlers.empty() ) continue;
-
-            console->color(ANSIColor::CYAN)->println(s(scope));
-            stl::stackLoop<ExceptionHandler>(handlers, [&console](const ExceptionHandler& h) {
-                console->color(ANSIColor::CYAN)->print("    ID: ", true)->print(std::get<0>(h))
-                    ->color(ANSIColor::CYAN)->print("  |  Selector: ", true);
-
-                auto selector = std::get<1>(h);
-                if ( exceptionHandlerIsUniversal(h) ) {
-                    console->print(" (universal)");
-                } else if ( selector.first != std::nullopt ) {
-                    console->print(" (code: " + s(*selector.first) + ")");
-                } else if ( selector.second != nullptr ) {
-                    console->print(" " + s(selector.second));
-                } else {
-                    console->print(" (invalid!)");
-                }
-
-                console->color(ANSIColor::CYAN)->print("  |  Handler: ", true)
-                    ->println(s(std::get<2>(h)))
-                    ->println();
-            });
-
         }
 
         return console->endCapture();

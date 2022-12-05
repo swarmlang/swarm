@@ -7,6 +7,7 @@
 #include <optional>
 #include "../../shared/nslib.h"
 #include "../../errors/SwarmError.h"
+#include "../../errors/EmptyCallStackError.h"
 #include "../isa_meta.h"
 #include "../debug/Metadata.h"
 
@@ -20,11 +21,11 @@ namespace swarmc::Runtime {
     class IFunction;
 
     using pc_t = ISA::Instructions::size_type;
-    using CallStackFrame = std::pair<pc_t, ISA::Instruction*>;
-    using CallStack = std::stack<CallStackFrame>;
+//    using CallStackFrame = std::pair<pc_t, ISA::Instruction*>;
+//    using CallStack = std::stack<CallStackFrame>;
     using ExceptionHandlerId = std::string;
     using ExceptionSelector = std::pair<std::optional<size_t>, IFunction*>;
-    using ExceptionHandler = std::tuple<ExceptionHandlerId, ExceptionSelector, IFunction*, pc_t>;
+    using ExceptionHandler = std::tuple<ExceptionHandlerId, ExceptionSelector, IFunction*>;
     using ExceptionHandlers = std::stack<ExceptionHandler>;
 
     inline bool exceptionHandlerIsUniversal(ExceptionHandler h) {
@@ -71,6 +72,8 @@ namespace swarmc::Runtime {
         /** Create a new function call scope as a child of this scope and return it. */
         ScopeFrame* newCall(IFunctionCall*);
 
+        [[nodiscard]] ScopeFrame* overrideCall(IFunctionCall*) const;
+
         /** Get the parent of this scope. If this is the top-level, returns nullptr. */
         ScopeFrame* parent() { return _parent; }
 
@@ -89,24 +92,25 @@ namespace swarmc::Runtime {
             copy->_map = _map;
             copy->_call = _call;
             copy->_handlers = _handlers;
+            copy->_returnTo = _returnTo;
             return copy;
         }
 
-        ExceptionHandlerId pushExceptionHandler(IFunction* selector, IFunction* handler, pc_t resumeTo) {
+        ExceptionHandlerId pushExceptionHandler(IFunction* selector, IFunction* handler) {
             auto id = getNextHandlerId();
-            _handlers.emplace(id, std::make_pair(std::nullopt, selector), handler, resumeTo);
+            _handlers.emplace(id, std::make_pair(std::nullopt, selector), handler);
             return id;
         }
 
-        ExceptionHandlerId pushExceptionHandler(size_t code, IFunction* handler, pc_t resumeTo) {
+        ExceptionHandlerId pushExceptionHandler(size_t code, IFunction* handler) {
             auto id = getNextHandlerId();
-            _handlers.emplace(id, std::make_pair(std::make_optional(code), nullptr), handler, resumeTo);
+            _handlers.emplace(id, std::make_pair(std::make_optional(code), nullptr), handler);
             return id;
         }
 
-        ExceptionHandlerId pushExceptionHandler(IFunction* handler, pc_t resumeTo) {
+        ExceptionHandlerId pushExceptionHandler(IFunction* handler) {
             auto id = getNextHandlerId();
-            _handlers.emplace(id, std::make_pair(std::nullopt, nullptr), handler, resumeTo);
+            _handlers.emplace(id, std::make_pair(std::nullopt, nullptr), handler);
             return id;
         }
 
@@ -121,6 +125,15 @@ namespace swarmc::Runtime {
             return _handlers;
         }
 
+        ScopeFrame* asExceptionFrame() {
+            _isExceptionFrame = true;
+            return this;
+        }
+
+        [[nodiscard]] bool isExceptionFrame() const {
+            return _isExceptionFrame;
+        }
+
         void setReturnPC(pc_t pc) {
             _returnTo = {pc};
         }
@@ -132,14 +145,37 @@ namespace swarmc::Runtime {
         void clearReturnPC() {
             _returnTo = std::nullopt;
         }
+
+        void setReturnCall(IFunctionCall* call) {
+            _return = call;
+        }
+
+        [[nodiscard]] IFunctionCall* getReturnCall() const {
+            return _return;
+        }
+
+        void clearReturnCall() {
+            _return = nullptr;
+        }
+
+        void shouldCaptureReturn(bool set) {
+            _shouldCaptureReturn = set;
+        }
+
+        [[nodiscard]] bool shouldCaptureReturn() const {
+            return _shouldCaptureReturn;
+        }
     protected:
         ScopeFrame* _parent = nullptr;
         std::map<std::string, ISA::LocationReference*> _map;
         std::string _id;
         IFunctionCall* _call = nullptr;
+        IFunctionCall* _return = nullptr;
         ExceptionHandlers _handlers;
         IGlobalServices* _global;
         std::optional<pc_t> _returnTo = std::nullopt;
+        bool _isExceptionFrame = false;
+        bool _shouldCaptureReturn = false;
 
         [[nodiscard]] ExceptionHandlerId getNextHandlerId() const {
             return _global->getUuid();
@@ -231,7 +267,15 @@ namespace swarmc::Runtime {
             while ( scope != nullptr ) {
                 auto returnTo = scope->getReturnPC();
                 if ( returnTo != std::nullopt ) {
-                    jump(*returnTo);
+                    // This is a special case. Semantically, we allow a function
+                    // to designate itself as the new "main control" of the program
+                    // by setting its return PC to the end of the program.
+                    // This has the effect of making the program terminate when the
+                    // function returns. Such functionality is used in the exception
+                    // handling logic, e.g.
+                    if ( returnTo == _is.size() ) jumpEnd();
+                    else jump(*returnTo);
+
                     scope->clearReturnPC();
                     return scope;
                 }
@@ -239,7 +283,7 @@ namespace swarmc::Runtime {
                 scope = scope->parent();
             }
 
-            throw Errors::SwarmError("Cannot make return jump: the call stack is empty");
+            throw Errors::EmptyCallStackError();
         }
 
         /** Get the `fnparam` instructions for the inline function beginning at `pc`. */

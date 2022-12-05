@@ -13,6 +13,7 @@
 #include <fstream>
 #include <utility>
 #include <stdexcept>
+#include <optional>
 #include <unistd.h>
 #include <cstdlib>
 #include <cstring>
@@ -139,7 +140,16 @@ namespace nslib {
     inline std::string s(long double v) { return std::to_string(v); }
     inline std::string s(bool v) { return v ? "true" : "false"; }
     inline std::string s(IStringable& v) { return v.toString(); }
-    inline std::string s(IStringable* v) { return v->toString(); }
+    inline std::string s(IStringable* v) {
+        if ( v == nullptr ) return "(nullptr)";
+        return v->toString();
+    }
+
+    template <typename T>
+    inline std::string s(std::optional<T> v) {
+        if ( v == std::nullopt ) return "(none)";
+        return s(*v);
+    }
 
 
     namespace str {

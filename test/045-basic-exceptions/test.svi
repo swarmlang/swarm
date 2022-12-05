@@ -1,0 +1,22 @@
+beginfn f:HANDLER p:VOID
+    fnparam p:NUMBER $l:code
+    scopeof $l:msg
+    $l:msg <- call f:NUMBER_TO_STRING $l:code
+    $l:msg <- strconcat "Handled: " $l:msg
+    out $l:msg
+    resume f:RESUMED
+    out "Bad: handler!"
+return
+
+beginfn f:RESUMED p:VOID
+    out "Resumed!"
+return
+
+-- Basic:
+-- Before.
+-- Handled: 0
+-- Resumed!
+
+pushexhandler f:HANDLER
+out "Before."
+raise 0

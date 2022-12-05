@@ -1,0 +1,17 @@
+
+beginfn f:INNER2 p:NUMBER
+    fnparam p:NUMBER $l:lhs
+    $l:lhs <- plus $l:lhs 1
+return $l:lhs
+
+beginfn f:INNER1 p:NUMBER
+    fnparam p:NUMBER $l:lhs
+    $l:lhs <- call f:INNER2 $l:lhs
+return $l:lhs
+
+beginfn f:INNER0 p:NUMBER
+    fnparam p:NUMBER $l:lhs
+    $l:lhs <- call f:INNER1 $l:lhs
+return $l:lhs
+
+$l:two <- call f:INNER0 1

@@ -137,11 +137,11 @@ namespace swarmc::Runtime {
         }
         _shouldAdvance = true;
 
-        if ( _return != nullptr && _shouldClearReturn ) {
-            _return = nullptr;
+        if ( _shouldClearReturn ) {
+            _scope->clearReturnCall();
+            _scope->shouldCaptureReturn(false);
             _shouldClearReturn = false;
-            _shouldCaptureReturn = false;
-        } else if ( _return != nullptr ) {
+        } else if ( _scope->getReturnCall() != nullptr ) {
             _shouldClearReturn = true;
         }
     }
@@ -228,6 +228,10 @@ namespace swarmc::Runtime {
         _scope = _scope->newCall(call);
     }
 
+    void VirtualMachine::inheritCallScope(IFunctionCall* call) {
+        _scope = _scope->overrideCall(call);
+    }
+
     void VirtualMachine::exitScope() {
         // FIXME - this likely needs to do better cleanup work
         auto old = _scope;
@@ -235,10 +239,18 @@ namespace swarmc::Runtime {
         delete old;
     }
 
-    void VirtualMachine::call(IFunctionCall* call) {
+    void VirtualMachine::call(IFunctionCall* fc) {
+        return call(fc, false);
+    }
+
+    void VirtualMachine::callWithInheritedScope(IFunctionCall* fc) {
+        return call(fc, true);
+    }
+
+    void VirtualMachine::call(IFunctionCall* call, bool inheritScope) {
         _shouldAdvance = false;
-        if ( call->backend() == FunctionBackend::INLINE ) return callInlineFunction((InlineFunctionCall*) call);
-        if ( call->backend() == FunctionBackend::PROVIDER ) return callProviderFunction((IProviderFunctionCall*) call);
+        if ( call->backend() == FunctionBackend::INLINE ) return callInlineFunction((InlineFunctionCall*) call, inheritScope);
+        if ( call->backend() == FunctionBackend::PROVIDER ) return callProviderFunction((IProviderFunctionCall*) call, inheritScope);
         throw Errors::SwarmError("Cannot call function `" + call->toString() + "` (invalid backend)");
     }
 
@@ -270,11 +282,11 @@ namespace swarmc::Runtime {
     }
 
     IFunctionCall* VirtualMachine::getReturn() {
-        return _return;
+        return _scope->getReturnCall();
     }
 
     void VirtualMachine::setCaptureReturn() {
-        _shouldCaptureReturn = true;
+        _scope->shouldCaptureReturn(true);
     }
 
     IQueueJob* VirtualMachine::pushCall(IFunctionCall* call) {
@@ -325,20 +337,22 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::returnToCaller(bool shouldJump) {
-        if ( getCall() == nullptr ) {
+        auto call = getCall();
+        if ( call == nullptr ) {
             throw Errors::SwarmError("Unable to return from caller: no call in progress.");
         }
 
         // Mark the call as returned
-        if ( _shouldCaptureReturn ) {
-            _return = getCall();
-        }
-
-        getCall()->setReturned();
+        call->setReturned();
 
         // Jump back to the caller's site
         if ( shouldJump ) _scope = _state->jumpReturn(_scope);
         else exitScope();
+
+        // Make the returned IFunctionCall available to the caller
+        if ( _scope->shouldCaptureReturn() ) {
+            _scope->setReturnCall(call);
+        }
     }
 
     std::pair<ScopeFrame*, IFunction*> VirtualMachine::getExceptionHandler(size_t code) {
@@ -386,6 +400,32 @@ namespace swarmc::Runtime {
         return {nullptr, nullptr};
     }
 
+    void VirtualMachine::raise(size_t code) {
+        auto handler = getExceptionHandler(code);
+
+        if ( handler.first == nullptr || handler.second == nullptr ) {
+            throw Errors::SwarmError("Unhandled runtime exception: " + s(code));
+        }
+
+        // Rewind to the scope of the selected exception handler
+        restore(handler.first->copy()->asExceptionFrame());
+
+        // The exception handler is responsible for using the `resume` instruction
+        // to jump back to the correct context. If it doesn't assume that was a mistake
+        // and halt execution.
+        exit();
+
+        // Call the exception handler
+        executeCall(handler.second->curry(new NumberReference(static_cast<double>(code)))->call());
+    }
+
+    ScopeFrame* VirtualMachine::getExceptionFrame() {
+        auto scope = _scope;
+        while ( scope != nullptr && !scope->isExceptionFrame() )
+            scope = scope->parent();
+        return scope;
+    }
+
     void VirtualMachine::checkCall(IFunctionCall* call) {
         auto vector = call->vector();
         for ( auto pair : vector ) {
@@ -398,7 +438,7 @@ namespace swarmc::Runtime {
         }
     }
 
-    void VirtualMachine::callInlineFunction(InlineFunctionCall* call) {
+    void VirtualMachine::callInlineFunction(InlineFunctionCall* call, bool inheritScope) {
         // Validate the inline function location
         auto pc = _state->getInlineFunctionPC(call->name());
 
@@ -407,10 +447,12 @@ namespace swarmc::Runtime {
 
         // Jump to the function call
         debug("inline call: " + s(call) + " (pc: " + s(pc) + ")");
-        _state->jumpCall(_scope, pc);
+        if ( inheritScope ) _state->jump(pc);
+        else _state->jumpCall(_scope, pc);
 
         // Start a new scope
-        enterCallScope(call);
+        if ( inheritScope ) inheritCallScope(call);
+        else enterCallScope(call);
 
         // Skip over the beginfn instruction
         advance();
@@ -418,12 +460,13 @@ namespace swarmc::Runtime {
         verbose("next instruction for inline call: " + _state->current()->toString());
     }
 
-    void VirtualMachine::callProviderFunction(IProviderFunctionCall* call) {
+    void VirtualMachine::callProviderFunction(IProviderFunctionCall* call, bool inheritScope) {
         // Type check the parameters
         checkCall(call);
 
         // Start a new scope
-        enterCallScope(call);
+        if ( inheritScope ) inheritCallScope(call);
+        else enterCallScope(call);
 
         // Invoke the provider to execute the function call
         debug("provider call: " + call->toString());

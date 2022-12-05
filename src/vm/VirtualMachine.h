@@ -174,11 +174,15 @@ namespace swarmc::Runtime {
         /** Create a new scope frame (adding the IFunctionCall to the call stack), and make it the current scope. */
         virtual void enterCallScope(IFunctionCall*);
 
+        virtual void inheritCallScope(IFunctionCall*);
+
         /** Pop the current scope frame and return to its parent. */
         virtual void exitScope();
 
         /** Perform the specified function call using the appropriate FunctionBackend. */
         virtual void call(IFunctionCall*);
+
+        virtual void callWithInheritedScope(IFunctionCall*);
 
         /**
          * Perform the specified function call using the appropriate FunctionBackend, then
@@ -295,6 +299,10 @@ namespace swarmc::Runtime {
 
         virtual std::pair<ScopeFrame*, IFunction*> getExceptionHandler(size_t code);
 
+        virtual void raise(size_t code);
+
+        virtual ScopeFrame* getExceptionFrame();
+
         /** Make a deep copy of this instance. */
         [[nodiscard]] VirtualMachine* copy() const {
             auto copy = new VirtualMachine(_global);
@@ -372,11 +380,13 @@ namespace swarmc::Runtime {
         /** Validate the given function call (e.g. type check params). */
         virtual void checkCall(IFunctionCall*);
 
+        virtual void call(IFunctionCall*, bool inheritScope);
+
         /** Perform an inline function call. */
-        virtual void callInlineFunction(InlineFunctionCall*);
+        virtual void callInlineFunction(InlineFunctionCall*, bool inheritScope);
 
         /** Perform an external provider function call. */
-        virtual void callProviderFunction(IProviderFunctionCall*);
+        virtual void callProviderFunction(IProviderFunctionCall*, bool inheritScope);
 
         virtual bool isBuiltinStream(ISA::LocationReference*);
 

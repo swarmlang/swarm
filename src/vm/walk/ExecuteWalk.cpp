@@ -815,25 +815,7 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkRaise(Raise* i) {
         verbose("raise " + i->first()->toString());
         auto id = ensureNumber(_vm->resolve(i->first()));
-        auto handler = _vm->getExceptionHandler(static_cast<size_t>(id->value()));
-
-        if ( handler.first == nullptr || handler.second == nullptr ) {
-            throw Errors::SwarmError("Unhandled runtime exception: " + s(id));
-        }
-
-        // Rewind to the scope of the selected exception handler
-        _vm->restore(handler.first);
-
-        // The exception handler is responsible for using the `resume` instruction
-        // to jump back to the correct context. If it doesn't assume that was a mistake
-        // and halt execution.
-        _vm->exit();
-
-        // Call the exception handler
-        _vm->executeCall(handler.second->curry(id)->call());
-
-        // FIXME: pull this into a _vm->raise(size_t) method.
-
+        _vm->raise(static_cast<size_t>(id->value()));
         return nullptr;
     }
 
@@ -845,9 +827,17 @@ namespace swarmc::Runtime {
         // FIXME: should this generate a runtime exception? kinda weird to have the exception system raising exceptions
         assert(fn->type()->isAssignableTo(fnType));
 
-        // FIXME: I am not confident that this works correctly lol
-        _vm->rewind();
-        _vm->executeCall(fn->fn()->call());
+        // Get the scope where the exception handler was registered
+        auto scope = _vm->getExceptionFrame();
+
+        // FIXME: this should generate a runtime exception -- resume was called outside an exception handler
+        assert(scope != nullptr);
+
+        // Rewind to the scope we are resuming to
+        _vm->restore(scope);
+
+        // Call the resumed function w/in the scope fo the exception handler
+        _vm->callWithInheritedScope(fn->fn()->call());
 
         return nullptr;
     }
