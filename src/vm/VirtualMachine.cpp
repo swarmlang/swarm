@@ -416,7 +416,7 @@ namespace swarmc::Runtime {
         exit();
 
         // Call the exception handler
-        executeCall(handler.second->curry(new NumberReference(static_cast<double>(code)))->call());
+        call(handler.second->curry(new NumberReference(static_cast<double>(code)))->call());
     }
 
     ScopeFrame* VirtualMachine::getExceptionFrame() {
