@@ -13,6 +13,7 @@
 #include "runtime/State.h"
 #include "walk/ExecuteWalk.h"
 #include "debug/Debugger.h"
+#include "../errors/RuntimeError.h"
 
 using namespace nslib;
 

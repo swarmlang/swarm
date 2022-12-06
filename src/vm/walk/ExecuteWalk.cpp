@@ -15,74 +15,130 @@ namespace swarmc::Runtime {
     }
 
     void ExecuteWalk::ensureType(const Reference* ref, const Type::Type* type) {
-        // FIXME: eventually, this needs to generate a runtime type exception
-        assert(ref->type()->isAssignableTo(type));
+        if ( !ref->type()->isAssignableTo(type) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Value " + s(ref) + " of type " + s(ref->type()) + " is not assignable to required type " + s(type)
+            );
+        }
+    }
+
+    Reference* ExecuteWalk::walkOne(Instruction* inst) {
+        try {
+            return ISAWalk<Reference*>::walkOne(inst);
+        } catch (Errors::RuntimeError& e) {
+            std::string msg = e.what();
+            console->debug()->error(msg)->end();
+            _vm->raise((size_t) e.code());
+        }
+
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkOnePropagatingExceptions(Instruction* inst) {
+        return ISAWalk<Reference*>::walkOne(inst);
     }
 
     NumberReference* ExecuteWalk::ensureNumber(const Reference* ref) {
         verbose("ensureNumber: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::NUMBER));
-        // FIXME: eventually, this should probably generate a runtime exception
-        assert(ref->tag() == ReferenceTag::NUMBER);
+        if ( ref->tag() != ReferenceTag::NUMBER ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (NumberReference*) ref;
     }
 
     BooleanReference* ExecuteWalk::ensureBoolean(const Reference* ref) {
         verbose("ensureBoolean: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::BOOLEAN));
-        // FIXME: eventually, this should probably generate a runtime exception
-        assert(ref->tag() == ReferenceTag::BOOLEAN);
+        if ( ref->tag() != ReferenceTag::BOOLEAN ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (BooleanReference*) ref;
     }
 
     TypeReference* ExecuteWalk::ensureType(const Reference* ref) {
         verbose("ensureType: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::TYPE));
-        // FIXME: eventually, this should probably generate a runtime exception
-        assert(ref->tag() == ReferenceTag::TYPE);
+        if ( ref->tag() != ReferenceTag::TYPE ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (TypeReference*) ref;
     }
 
     StringReference* ExecuteWalk::ensureString(const Reference* ref) {
         verbose("ensureString: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::STRING));
-        // FIXME: eventually, this should probably generate a runtime exception
-        assert(ref->tag() == ReferenceTag::STRING);
+        if ( ref->tag() != ReferenceTag::STRING ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (StringReference*) ref;
     }
 
     FunctionReference* ExecuteWalk::ensureFunction(const Reference* ref) {
         verbose("ensureFunction: " + ref->toString());
-        // FIXME: eventually, this should generate a runtime exception
-        assert(ref->tag() == ReferenceTag::FUNCTION);
+        if ( ref->tag() != ReferenceTag::FUNCTION ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (FunctionReference*) ref;
     }
 
     EnumerationReference* ExecuteWalk::ensureEnumeration(const Reference* ref) {
         verbose("ensureEnumeration: " + ref->toString());
-        // FIXME: eventually, this should generate a runtime exception
-        assert(ref->tag() == ReferenceTag::ENUMERATION);
+        if ( ref->tag() != ReferenceTag::ENUMERATION ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (EnumerationReference*) ref;
     }
 
     StreamReference* ExecuteWalk::ensureStream(const Reference* ref) {
         verbose("ensureStream: " + ref->toString());
-        // FIXME: eventually, this should generate a runtime exception
-        assert(ref->tag() == ReferenceTag::STREAM);
+        if ( ref->tag() != ReferenceTag::STREAM ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (StreamReference*) ref;
     }
 
     MapReference* ExecuteWalk::ensureMap(const Reference* ref) {
         verbose("ensureMap: " + ref->toString());
-        // FIXME: eventually, this should generate a runtime exception
-        assert(ref->tag() == ReferenceTag::MAP);
+        if ( ref->tag() != ReferenceTag::MAP ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (MapReference*) ref;
     }
 
     ResourceReference* ExecuteWalk::ensureResource(const Reference* ref) {
         verbose("ensureResource: " + ref->toString());
-        // FIXME: eventually, this should generate a runtime exception
-        assert(ref->tag() == ReferenceTag::RESOURCE);
+        if ( ref->tag() != ReferenceTag::RESOURCE ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+            );
+        }
         return (ResourceReference*) ref;
     }
 
@@ -115,8 +171,14 @@ namespace swarmc::Runtime {
         verbose("divide " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = ensureNumber(_vm->resolve(i->first()));
         auto rhs = ensureNumber(_vm->resolve(i->second()));
-        // FIXME: eventually, this should generate a runtime exception
-        assert(rhs->value() != 0.0);
+
+        if ( rhs->value() == 0.0 ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::DivisionByZero,
+                "Attempted to divide by zero"
+            );
+        }
+
         return new NumberReference(lhs->value() / rhs->value());
     }
 
@@ -218,8 +280,12 @@ namespace swarmc::Runtime {
         // load callback function & validate the type
         auto callback = ensureFunction(_vm->resolve(i->second()));
 
-        // fixme: eventually, this should raise a runtime exception
-        assert(callback->type()->isAssignableTo(callbackType));
+        if ( !callback->type()->isAssignableTo(callbackType) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::WhileCallbackTypeInvalid,
+                "Invalid while callback " + s(callback) + " (expected: " + s(callbackType) + ", got: " + s(callback->type()) + ")"
+            );
+        }
 
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         if ( cond->value() ) {
@@ -242,8 +308,12 @@ namespace swarmc::Runtime {
 
         auto callback = ensureFunction(_vm->resolve(i->second()));
 
-        // fixme: eventually, this should raise a runtime exception
-        assert(callback->type()->isAssignableTo(callbackType));
+        if ( !callback->type()->isAssignableTo(callbackType) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::WithCallbackTypeInvalid,
+                "Invalid with callback " + s(callback) + " (expected: " + s(callbackType) + ", got: " + s(callback->type()) + ")"
+            );
+        }
 
         // open the resource
         resource->resource()->open();
@@ -300,8 +370,12 @@ namespace swarmc::Runtime {
         auto enumeration = ensureEnumeration(_vm->resolve(i->first()));
         auto idx = ensureNumber(_vm->resolve(i->second()));
 
-        // fixme: eventually, this should generate a runtime error
-        assert(idx->value() < enumeration->length());
+        if ( static_cast<size_t>(idx->value()) >= enumeration->length() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::EnumIndexOutOfBounds,
+                "Index " + s(idx->value()) + " out of bounds for enumeration " + s(enumeration)
+            );
+        }
 
         return enumeration->get(static_cast<size_t>(idx->value()));
     }
@@ -312,9 +386,19 @@ namespace swarmc::Runtime {
         auto idx = ensureNumber(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->third());
 
-        // fixme: eventually, these should generate runtime errors
-        assert(idx->value() <= enumeration->length());
-        assert(value->type()->isAssignableTo(enumeration->type()->values()));
+        if ( static_cast<size_t>(idx->value()) > enumeration->length() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::EnumIndexOutOfBounds,
+                "Index " + s(idx->value()) + " out of bounds for enumeration " + s(enumeration)
+            );
+        }
+
+        if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Element " + s(value) + " is incompatible with the type of the enumeration " + s(enumeration) + " (expected: " + s(enumeration->type()->values()) + ", got: " + s(value->type()) + ")"
+            );
+        }
 
         enumeration->set(static_cast<size_t>(idx->value()), value);
         return nullptr;
@@ -331,10 +415,12 @@ namespace swarmc::Runtime {
         Type::Lambda1 callbackInner(&tNum, &tVoid);
         Type::Lambda1 callbackOuter(elemType->value(), &callbackInner);
 
-        // fixme: eventually, this should generate a runtime error
-        verbose("callback: " + callback->toString());
-        verbose("callback type: " + callback->type()->toString() + " | callback outer: " + callbackOuter.toString());
-        assert(callback->type()->isAssignableTo(&callbackOuter));
+        if ( !callback->type()->isAssignableTo(&callbackOuter) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::EnumerateCallbackTypeInvalid,
+                "Invalid enumerate callback " + s(callback) + " (expected: " + s(callbackOuter) + ", got: " + s(callback->type()) + ")"
+            );
+        }
 
         _vm->enterQueueContext();
 
@@ -363,14 +449,22 @@ namespace swarmc::Runtime {
         verbose("fnparam " + i->first()->toString() + " " + i->second()->toString());
 
         auto call = _vm->getCall();
-        // fixme: eventually, this should generate a runtime exception
-        assert(call != nullptr);
+        if ( call == nullptr ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::FnParamOutsideCall,
+                "Attempted to load fnparam outside call context"
+            );
+        }
 
         auto param = _vm->resolve(call->popParam().second);
         auto loc = i->second();
 
-        // fixme: eventually, this should generate a runtime exception
-        assert(param->type()->isAssignableTo(loc->type()));
+        if ( !param->type()->isAssignableTo(loc->type()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Value " + s(param) + " has incompatible type for parameter " + s(loc) + " (expected: " + s(loc->type()) + ", got: " + s(param->type()) + ")"
+            );
+        }
 
         debug("fnparam: " + loc->toString() + " <- " + param->toString());
         _vm->store(loc, param);
@@ -380,8 +474,12 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkReturn0(Return0*) {
         verbose("return0");
 
-        // fixme: eventually, this should generate a runtime exception
-        if ( _vm->getCall() == nullptr ) throw Errors::SwarmError("Cannot return: no call in progress.");
+        if ( _vm->getCall() == nullptr ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::ReturnOutsideCall,
+                "Cannot return: no call in progress"
+            );
+        }
 
         _vm->returnToCaller(true);
         return nullptr;
@@ -390,16 +488,23 @@ namespace swarmc::Runtime {
     ISA::Reference* ExecuteWalk::walkReturn1(ISA::Return1* i) {
         verbose("return1 " + i->first()->toString());
         auto call = _vm->getCall();
-
-        // fixme: eventually, this should generate a runtime exception
-        if ( call == nullptr ) throw Errors::SwarmError("Cannot return: no call in progress.");
+        if ( call == nullptr ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::ReturnOutsideCall,
+                "Cannot return: no call in progress"
+            );
+        }
 
         // Resolve the return value
         auto ref = _vm->resolve(i->first());
 
         // Validate the return type
-        // fixme: eventually, this should generate a runtime exception
-        assert(ref->type()->isAssignableTo(call->returnType()));
+        if ( !ref->type()->isAssignableTo(call->returnType()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Value " + s(ref) + " is incompatible with the return type of " + s(call) + " (expected: " + s(call->returnType()) + ", got: " + s(ref->type()) + ")"
+            );
+        }
 
         // Set the return value on the function call
         call->setReturn(ref);
@@ -422,7 +527,7 @@ namespace swarmc::Runtime {
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto call = fn->fn()->call();
         _vm->call(call);
-        return call->getReturn();  // fixme: this doesn't actually return properly, since the "call" is an async jump
+        return nullptr;
     }
 
     Reference* ExecuteWalk::walkCall1(Call1* i) {
@@ -431,7 +536,7 @@ namespace swarmc::Runtime {
         auto param = _vm->resolve(i->second());
         auto call = fn->fn()->curry(param)->call();
         _vm->call(call);
-        return call->getReturn();
+        return nullptr;
     }
 
     Reference* ExecuteWalk::walkCallIf0(CallIf0* i) {
@@ -553,8 +658,12 @@ namespace swarmc::Runtime {
         auto key = ensureString(_vm->resolve(i->first()));
         auto map = ensureMap(_vm->resolve(i->second()));
 
-        // FIXME: eventually, this should generate a runtime exception
-        assert(map->has(key->value()));
+        if ( !map->has(key->value()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidMapKey,
+                "Invalid key " + s(key) + " for map " + s(map)
+            );
+        }
 
         return map->get(key->value());
     }
@@ -588,8 +697,12 @@ namespace swarmc::Runtime {
             loc->setType(value->type());
         }
 
-        // FIXME: eventually, this needs to generate a runtime type error
-        assert(value->type()->isAssignableTo(loc->type()));
+        if ( !value->type()->isAssignableTo(loc->type()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Value " + s(value) + " has type which is incompatible with location " + s(loc) + " (expected: " + s(loc->type()) + ", got: " + s(value->type()) + ")"
+            );
+        }
 
         debug(loc->toString() + " <- " + value->toString());
         _vm->store(loc, value);
@@ -603,7 +716,7 @@ namespace swarmc::Runtime {
 
         Reference* value = nullptr;
 
-        // if the right-hand side is an call which can yield a value,
+        // if the right-hand side is a call which can yield a value,
         // then we will need to make the call and wait for the return
         // to jump back here
         if ( eval->tag() == Tag::CALL0 || eval->tag() == Tag::CALL1 ) {
@@ -623,23 +736,29 @@ namespace swarmc::Runtime {
                 // return-jump to the correct instruction.
                 _vm->setCaptureReturn();
                 _vm->rewind();
-                return walkOne(eval);
+                return walkOnePropagatingExceptions(eval);
             }
         } else {
-            value = walkOne(eval);
+            value = walkOnePropagatingExceptions(eval);
         }
 
         if ( value == nullptr ) {
-            // FIXME: eventually, this should generate a runtime error
-            throw Errors::SwarmError("Attempted to assign result of an instruction which does not yield a value: " + eval->toString());
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidAssignEval,
+                "Attempted to assign result of instruction " + s(eval) + " to location " + s(loc) + ", but the instruction does not yield a value"
+            );
         }
 
         if ( loc->type()->isAmbiguous() ) {
             loc->setType(value->type());
         }
 
-        // FIXME: eventually, this needs to generate a runtime type error
-        assert(value->type()->isAssignableTo(loc->type()));
+        if ( !value->type()->isAssignableTo(loc->type()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Value " + s(value) + " has type which is incompatible with location " + s(loc) + " (expected: " + s(loc->type()) + ", got: " + s(value->type()) + ")"
+            );
+        }
 
         debug(loc->toString() + " <- " + value->toString());
         _vm->store(loc, value);
@@ -683,8 +802,19 @@ namespace swarmc::Runtime {
         auto stream = ensureStream(_vm->resolve(i->first()));
         auto value = _vm->resolve(i->second());
 
-        // FIXME: eventually, this should generate a runtime exception
-        assert(stream->stream()->isOpen() && value->type()->isAssignableTo(stream->type()->inner()));
+        if ( !stream->stream()->isOpen() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::StreamNotOpen,
+                "Attempted to push to stream " + s(stream->stream()) + " which is not yet open"
+            );
+        }
+
+        if ( !value->type()->isAssignableTo(stream->type()->inner()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Value " + s(value) + " has incompatible type for stream " + s(stream->stream()) + " (expected: " + s(stream->type()->inner()) + ", got: " + s(value->type()) + ")"
+            );
+        }
 
         stream->stream()->push(value);
         return nullptr;
@@ -694,8 +824,19 @@ namespace swarmc::Runtime {
         verbose("streampop " + i->first()->toString());
         auto stream = ensureStream(_vm->resolve(i->first()));
 
-        // FIXME: eventually, this should generate a runtime exception
-        assert(stream->stream()->isOpen() && !stream->stream()->isEmpty());
+        if ( !stream->stream()->isOpen() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::StreamNotOpen,
+                "Attempted to pop from stream " + s(stream->stream()) + " which is not yet open"
+            );
+        }
+
+        if ( stream->stream()->isEmpty() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::StreamEmpty,
+                "Attempted to pop from empty stream " + s(stream->stream())
+            );
+        }
 
         return stream->stream()->pop();
     }
@@ -704,10 +845,14 @@ namespace swarmc::Runtime {
         verbose("streamclose " + i->first()->toString());
         auto stream = ensureStream(_vm->resolve(i->first()));
 
-        // FIXME: eventually, this should generate a runtime exception
-        assert(stream->stream()->isOpen());
-        stream->stream()->close();
+        if ( !stream->stream()->isOpen() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::StreamNotOpen,
+                "Attempted to close stream " + s(stream->stream()) + " which is not yet open"
+            );
+        }
 
+        stream->stream()->close();
         return nullptr;
     }
 
@@ -715,8 +860,12 @@ namespace swarmc::Runtime {
         verbose("streamempty " + i->first()->toString());
         auto stream = ensureStream(_vm->resolve(i->first()));
 
-        // FIXME: eventually, this should generate a runtime exception
-        assert(stream->stream()->isOpen());
+        if ( !stream->stream()->isOpen() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::StreamNotOpen,
+                "Attempted to check stream " + s(stream->stream()) + " which is not yet open"
+            );
+        }
 
         return new BooleanReference(stream->stream()->isEmpty());
     }
@@ -822,16 +971,28 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkResume(Resume* i) {
         verbose("resume " + i->first()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
-        auto fnType = new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID));
-
-        // FIXME: should this generate a runtime exception? kinda weird to have the exception system raising exceptions
-        assert(fn->type()->isAssignableTo(fnType));
 
         // Get the scope where the exception handler was registered
         auto scope = _vm->getExceptionFrame();
+        if ( scope == nullptr ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::ResumeOutsideExHandler,
+                "Attempted to call `resume` from outside context of exception handler"
+            );
+        }
 
-        // FIXME: this should generate a runtime exception -- resume was called outside an exception handler
-        assert(scope != nullptr);
+        // The "resumed" code inherits the scope where the exception handler was
+        // registered. This means that it is responsible for satisfying the return type
+        // of that scope's IFunctionCall, if one exists.
+        auto inheritedCall = scope->call();
+        auto returnType = inheritedCall == nullptr ? Type::Primitive::of(Type::Intrinsic::VOID) : inheritedCall->returnType();
+        auto fnType = new Type::Lambda0(returnType);
+        if ( !fn->type()->isAssignableTo(fnType) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Resumed function " + s(fn) + " has type which is incompatible with the parent scope it subsumes " + s(inheritedCall) + " (expected: " + s(fnType) + ", got: " + s(fn->type()) + ")"
+            );
+        }
 
         // Rewind to the scope we are resuming to
         _vm->restore(scope);

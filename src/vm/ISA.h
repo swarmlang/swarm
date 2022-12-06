@@ -629,19 +629,19 @@ namespace swarmc::ISA {
         [[nodiscard]] virtual Instruction* copy() const = 0;
 
         [[nodiscard]] virtual bool isNullary() const {
-            return false; 
+            return false;
         }
 
         [[nodiscard]] virtual bool isUnary() const {
-            return false; 
+            return false;
         }
 
         [[nodiscard]] virtual bool isBinary() const {
-            return false; 
+            return false;
         }
 
         [[nodiscard]] virtual bool isTrinary() const {
-            return false; 
+            return false;
         }
 
     protected:
@@ -658,7 +658,7 @@ namespace swarmc::ISA {
         }
 
         [[nodiscard]] bool isNullary() const override {
-            return true; 
+            return true;
         }
     };
 
@@ -681,7 +681,7 @@ namespace swarmc::ISA {
         }
 
         [[nodiscard]] bool isUnary() const override {
-            return true; 
+            return true;
         }
     protected:
         TFirst* _first;
@@ -714,7 +714,7 @@ namespace swarmc::ISA {
         }
 
         [[nodiscard]] bool isBinary() const override {
-            return true; 
+            return true;
         }
     protected:
         TFirst* _first;
@@ -763,6 +763,25 @@ namespace swarmc::ISA {
         TSecond* _second;
         TThird* _third;
     };
+}
+
+namespace nslib {
+
+    inline std::string s(swarmc::ISA::ReferenceTag v) {
+        if ( v == swarmc::ISA::ReferenceTag::LOCATION ) return "ReferenceTag(LOCATION)";
+        if ( v == swarmc::ISA::ReferenceTag::TYPE ) return "ReferenceTag(TYPE)";
+        if ( v == swarmc::ISA::ReferenceTag::STRING ) return "ReferenceTag(STRING)";
+        if ( v == swarmc::ISA::ReferenceTag::NUMBER ) return "ReferenceTag(NUMBER)";
+        if ( v == swarmc::ISA::ReferenceTag::BOOLEAN ) return "ReferenceTag(BOOLEAN)";
+        if ( v == swarmc::ISA::ReferenceTag::FUNCTION ) return "ReferenceTag(FUNCTION)";
+        if ( v == swarmc::ISA::ReferenceTag::STREAM ) return "ReferenceTag(STREAM)";
+        if ( v == swarmc::ISA::ReferenceTag::RESOURCE ) return "ReferenceTag(RESOURCE)";
+        if ( v == swarmc::ISA::ReferenceTag::ENUMERATION ) return "ReferenceTag(ENUMERATION)";
+        if ( v == swarmc::ISA::ReferenceTag::MAP ) return "ReferenceTag(MAP)";
+        if ( v == swarmc::ISA::ReferenceTag::VOID ) return "ReferenceTag(VOID)";
+        return "ReferenceTag(UNKNOWN)";
+    }
+
 }
 
 #endif

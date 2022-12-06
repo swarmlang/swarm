@@ -212,8 +212,6 @@
 [35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
 [35m   debug [39mVM: load inline function: ENUM_BODY (#params: 2) (returns: TypeReference<Primitive<VOID>>)
 [35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:ENUM_BODY, rt: Primitive<VOID>>>
-[35m   debug [39mVM: callback: FunctionReference<InlineFunction<f:ENUM_BODY, rt: Primitive<VOID>>>
-[35m   debug [39mVM: callback type: Primitive<STRING> :: Primitive<NUMBER> :: Primitive<VOID> | callback outer: Primitive<STRING> :: Primitive<NUMBER> :: Primitive<VOID>
 [35m   debug [39mVM: pushCall - call: InlineFunctionCall<f:ENUM_BODY> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:ENUM_BODY>>
 [35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
 [35m   debug [39mVM: inline call: InlineFunctionCall<f:ENUM_BODY> (pc: 30)

@@ -1,0 +1,34 @@
+
+beginfn f:HANDLER1 p:VOID
+    fnparam p:NUMBER $l:code
+    scopeof $l:msg
+    $l:msg <- call f:NUMBER_TO_STRING $l:code
+    $l:msg <- strconcat "Handled: " $l:msg
+    out $l:msg
+    resume f:AFTER1
+return
+
+$l:h1 <- pushexhandler f:HANDLER1
+$l:bad <- divide 14 0
+out "Bad!"
+
+beginfn f:HANDLER2 p:VOID
+    fnparam p:NUMBER $l:code
+    scopeof $l:msg
+    $l:msg <- call f:NUMBER_TO_STRING $l:code
+    $l:msg <- strconcat "Handled: " $l:msg
+    out $l:msg
+    resume f:AFTER2
+return
+
+beginfn f:AFTER1 p:VOID
+    out "After 1!"
+    popexhandler $l:h1
+    pushexhandler f:HANDLER2
+    resume f:HANDLER1
+    out "Bad2!"
+return
+
+beginfn f:AFTER2 p:VOID
+    out "After 2!"
+return

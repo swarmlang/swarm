@@ -49,6 +49,8 @@
   - threaded listener for `s:STDOUT` and `s:STDERR` streams
   - resources
   - exception handling
+    - exceptions caught w/in calls should resume control for outer calls
+    - ~~allow passing parameters to `resume`'d functions~~
 - remove RESOURCE type from lexing (added so I could test WITH statements)
 - FUTURE: Serialize ISA to SVI code
 - FUTURE: Swarm module package manager?

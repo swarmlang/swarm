@@ -20,6 +20,10 @@ namespace swarmc::Runtime {
         explicit ExecuteWalk(VirtualMachine* vm) : ISA::ISAWalk<ISA::Reference*>(), _vm(vm) {}
         ~ExecuteWalk() override = default;
 
+        ISA::Reference* walkOne(ISA::Instruction* inst) override;
+
+        ISA::Reference* walkOnePropagatingExceptions(ISA::Instruction* inst);
+
         /** Cast the reference as a number, or raise an exception. */
         virtual ISA::NumberReference* ensureNumber(const ISA::Reference*);
 

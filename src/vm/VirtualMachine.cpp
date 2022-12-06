@@ -411,7 +411,7 @@ namespace swarmc::Runtime {
         restore(handler.first->copy()->asExceptionFrame());
 
         // The exception handler is responsible for using the `resume` instruction
-        // to jump back to the correct context. If it doesn't assume that was a mistake
+        // to jump back to the correct context. If it doesn't, assume that was a mistake
         // and halt execution.
         exit();
 
@@ -432,13 +432,15 @@ namespace swarmc::Runtime {
             auto type = pair.first;
             auto ref = pair.second;
             if ( !ref->type()->isAssignableTo(type) ) {
-                // FIXME: eventually, this needs to raise a runtime exception
-                throw Errors::SwarmError("Unable to make function call (" + call->toString() + ") - argument " + ref->toString() + " is not assignable to type " + type->toString());
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::InvalidArgumentType,
+                    "Unable to make function call (" + call->toString() + ") - argument " + ref->toString() + " is not assignable to type " + type->toString()
+                );
             }
         }
     }
 
-    void VirtualMachine::callInlineFunction(InlineFunctionCall* call, bool inheritScope) {
+    void VirtualMachine:: callInlineFunction(InlineFunctionCall* call, bool inheritScope) {
         // Validate the inline function location
         auto pc = _state->getInlineFunctionPC(call->name());
 
