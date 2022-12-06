@@ -110,18 +110,36 @@ namespace swarmc {
             return _isa;
         }
 
-        void targetISARepresentation(std::ostream& out) {
-            targetISA();
+        void targetISAOptimized(bool rSelfAssign, bool litProp) {
+            CFG::ControlFlowGraph c(targetISA());
+
+            c.optimize(rSelfAssign, litProp);
+
+            auto isa = c.reconstruct();
+
+            delete _isa;
+            _isa = isa;
+        }
+
+        void targetISARepresentation(std::ostream& out, bool rSelfAssign, bool litProp) {
+            targetISAOptimized(rSelfAssign, litProp);
 
             for ( auto instr : *_isa ) {
                 out << instr->toString() << "\n";
             }
         }
 
-        void targetCFGRepresentation(std::ostream& out) {
+        void targetCFGRepresentation(std::ostream& out, bool rSelfAssign, bool litProp) {
             CFG::ControlFlowGraph c(targetISA());
 
+            c.optimize(rSelfAssign, litProp);
+
             c.serialize(out);
+
+            auto isa = c.reconstruct();
+
+            delete _isa;
+            _isa = isa;
         }
 
     protected:

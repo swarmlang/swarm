@@ -1,6 +1,7 @@
 #ifndef SWARMC_CFG_H
 #define SWARMC_CFG_H
 
+#include <utility>
 #include <vector>
 #include <unordered_map>
 #include <stack>
@@ -10,8 +11,7 @@
 
 using namespace nslib;
 
-namespace swarmc {
-namespace CFG {
+namespace swarmc::CFG {
 
 class CFGBuild;
 class CallEdge;
@@ -21,44 +21,49 @@ class ReturnEdge;
 class Block : public IStringable {
 public:
     enum class BlockType {
-        BLOCK, AMBIGUOUSFUNCTION, FUNCTION, ERROR
+        BLOCK, AMBIGUOUSFUNCTION, FUNCTION
     };
     
-    Block(std::string id, BlockType type, size_t i) : _id(id), _copy(0), _idx(i), _type(type), 
+    Block(std::string id, BlockType type, size_t i) : _id(std::move(id)), _copy(0), _idx(i), _type(type),
         _instructions(new ISA::Instructions()), _callInEdge(nullptr), _callOutEdge(nullptr), 
         _fallInEdge(nullptr), _fallOutEdge(nullptr), _retInEdge(nullptr), _retOutEdge(nullptr) {}
 
-    ~Block();
+    ~Block() override;
 
     void addInstruction(ISA::Instruction* instr) {
         _instructions->push_back(instr);
     }
 
-    std::string id() const { return _id; }
+    /* Returns name of node */
+    [[nodiscard]] std::string id() const { return _id; }
 
-    size_t idx() const { return _idx; }
+    [[nodiscard]] size_t idx() const { return _idx; }
 
-    size_t numCopy() const { return _copy; }
-    
-    BlockType blockType() const { return _type; }
-    
-    std::string blockTypeString() const {
+    /* Returns which copy of the set of blocks this block is a part of this is */
+    [[nodiscard]] size_t numCopy() const { return _copy; }
+
+    [[nodiscard]] BlockType blockType() const { return _type; }
+
+    [[nodiscard]] std::string blockTypeString() const {
         if (_type == BlockType::BLOCK) return "BLOCK";
         if (_type == BlockType::AMBIGUOUSFUNCTION) return "AMBIGUOUSFUNCTION";
         if (_type == BlockType::FUNCTION) return "FUNCTION";
         return "ERROR";
     }
-    
-    ISA::Instructions* instructions() const { return _instructions; }
-    
-    std::string toString() const { return "Block<" + _id + ">"; }
 
-    CallEdge* getCallInEdge() const;
-    CallEdge* getCallOutEdge() const;
-    FallEdge* getFallInEdge() const ;
-    FallEdge* getFallOutEdge() const;
-    ReturnEdge* getRetInEdge() const;
-    ReturnEdge* getRetOutEdge() const;
+    [[nodiscard]] ISA::Instructions* instructions() const { return _instructions; }
+
+    [[nodiscard]] std::string toString() const override {
+        return "Block<id:" + _id + ", cpy:" + std::to_string(_copy) 
+                + ", idx:" + std::to_string(_idx) + ">"; 
+    }
+
+    [[nodiscard]] CallEdge* getCallInEdge() const;
+    [[nodiscard]] CallEdge* getCallOutEdge() const;
+    [[nodiscard]] FallEdge* getFallInEdge() const ;
+    [[nodiscard]] FallEdge* getFallOutEdge() const;
+    [[nodiscard]] ReturnEdge* getRetInEdge() const;
+    [[nodiscard]] ReturnEdge* getRetOutEdge() const;
 
     void setCallInEdge(CallEdge* edge);
     void setCallOutEdge(CallEdge* edge);
@@ -68,8 +73,8 @@ public:
     void setRetOutEdge(ReturnEdge* edge);
 
     /* DOES NOT COPY EDGES */
-    virtual Block* copy(size_t idx) const {
-        Block* copy = new Block(_id, _type, idx);
+    [[nodiscard]] virtual Block* copy(size_t idx) const {
+        auto copy = new Block(_id, _type, idx);
         copy->_copy = _copy + 1;
         for ( auto i : *_instructions ) {
             copy->addInstruction(i->copy());
@@ -77,11 +82,8 @@ public:
         return copy;
     }
     
-    virtual std::string serialize() const;
-
-    virtual bool removeSelfAssigns();
-
-    virtual bool literalPropagation(std::unordered_map<std::string,ISA::Reference*>*, std::unordered_map<std::string,ISA::Instruction*>*);
+    /* Returns the dot file lines for the block and its outgoing edges */
+    [[nodiscard]] virtual std::string serialize() const;
 protected:
     std::string _id;
     size_t _copy;
@@ -91,17 +93,18 @@ protected:
     CallEdge* _callInEdge, * _callOutEdge;
     FallEdge* _fallInEdge, * _fallOutEdge;
     ReturnEdge* _retInEdge, * _retOutEdge;
+
 };
 
 class AmbiguousFunctionBlock : public Block {
 public:
-    AmbiguousFunctionBlock(std::string id, size_t i) : Block(id, BlockType::AMBIGUOUSFUNCTION, i) {}
+    AmbiguousFunctionBlock(std::string id, size_t i) : Block(std::move(id), BlockType::AMBIGUOUSFUNCTION, i) {}
 
-    std::string toString() const { return "AmbiguousFunction" + Block::toString(); }
-    
-    std::string serialize() const;
-    
-    virtual AmbiguousFunctionBlock* copy(size_t idx) const {
+    [[nodiscard]] std::string toString() const override { return "AmbiguousFunction" + Block::toString(); }
+
+    [[nodiscard]] std::string serialize() const override;
+
+    [[nodiscard]] AmbiguousFunctionBlock* copy(size_t idx) const override {
         auto copy = new AmbiguousFunctionBlock(_id, idx);
         copy->_copy = true;
         return copy;
@@ -110,21 +113,22 @@ public:
 
 class CFGFunction : public IStringable {
 public:
-    CFGFunction(std::string id, Block* start) : _id(id), _start(start), _end(nullptr), _blocks(new std::vector<Block*>()) {
+    CFGFunction(std::string id, Block* start) : _id(std::move(id)), _start(start), _end(nullptr), _blocks(new std::vector<Block*>()) {
         _blocks->push_back(_start);
     }
 
-    std::string id() const { return _id; }
-    Block* start() const { return _start; }
-    Block* end() const { return _end; }
+    [[nodiscard]] std::string id() const { return _id; }
+    [[nodiscard]] Block* start() const { return _start; }
+    [[nodiscard]] Block* end() const { return _end; }
     void setEnd(Block* end) { 
         assert(_end == nullptr);
         _end = end;
     }
     void addBlock(Block* block) { _blocks->push_back(block); }
 
-    std::string toString() const override { return "CFGFunction<" + _id + ">"; }
+    [[nodiscard]] std::string toString() const override { return "CFGFunction<" + _id + ">"; }
 
+    /* Returns a deep copy of the set of blocks and edges that make up this function */
     std::pair<Block*,Block*> makeCopy(size_t i, std::vector<Block*>* blocks, std::stack<CFGFunction*>* callStack) const;
 
 private:
@@ -139,25 +143,25 @@ private:
 class Edge : public IStringable {
 public:
     enum class EdgeType {
-        CALL, FALL, RETURN, ERROR
+        CALL, FALL, RETURN
     };
 
     Edge(Block* source, Block* dest, EdgeType label) : _source(source), _destination(dest), _label(label) {}
-    
-    Block* source() const { return _source; }
-    
-    Block* destination() const { return _destination; }
-    
-    EdgeType label() const { return _label; }
-    
-    std::string labelString() const {
+
+    [[nodiscard]] Block* source() const { return _source; }
+
+    [[nodiscard]] Block* destination() const { return _destination; }
+
+    [[nodiscard]] EdgeType label() const { return _label; }
+
+    [[nodiscard]] std::string labelString() const {
         if (_label == EdgeType::CALL) return "call";
         if (_label == EdgeType::FALL) return "fall";
         if (_label == EdgeType::RETURN) return "return";
         return "ERROR";
     }
-    
-    std::string serialize() const {
+
+    [[nodiscard]] std::string serialize() const {
         return "\t\"" + source()->id() + ":" + std::to_string(source()->numCopy()) 
             + ":" + std::to_string(source()->idx()) + "\"->\"" 
             + destination()->id() + ":" + std::to_string(destination()->numCopy()) 
@@ -173,7 +177,7 @@ protected:
 class CallEdge : public Edge {
 public:
     CallEdge(Block* source, Block* dest) : Edge(source, dest, Edge::EdgeType::CALL) {}
-    std::string toString() const { 
+    [[nodiscard]] std::string toString() const override {
         return "CallEdge<" + _source->toString() + "," + _destination->toString()+ ">";
     }
 };
@@ -181,7 +185,7 @@ public:
 class FallEdge : public Edge {
 public:
     FallEdge(Block* source, Block* dest) : Edge(source, dest, Edge::EdgeType::FALL) {}
-    std::string toString() const { 
+    [[nodiscard]] std::string toString() const override {
         return "FallEdge<" + _source->toString() + "," + _destination->toString()+ ">";
     }
 };
@@ -189,24 +193,34 @@ public:
 class ReturnEdge : public Edge {
 public:
     ReturnEdge(Block* source, Block* dest) : Edge(source, dest, Edge::EdgeType::RETURN) {}
-    std::string toString() const { 
+    [[nodiscard]] std::string toString() const override {
         return "ReturnEdge<" + _source->toString() + "," + _destination->toString()+ ">";
     }
 };
 
 class ControlFlowGraph {
 public:
-    ControlFlowGraph(ISA::Instructions*);
+    explicit ControlFlowGraph(ISA::Instructions*);
     
     ~ControlFlowGraph() {
         for ( auto b : *_blocks ) delete b;
         delete _blocks;
+        for ( const auto& p : *_nameMap ) delete p.second;
+        delete _nameMap;
     }
     
     // make a dot file :)
     void serialize(std::ostream&) const;
 
-    ISA::Instructions* reconstruct() const;
+    /* Rebuilds a linear ISA with optimizations */
+    [[nodiscard]] ISA::Instructions* reconstruct() const;
+
+    /* Calls different optimization walks until a fixpoint is reached */
+    bool optimize(bool rSelfAssign, bool litProp);
+
+    [[nodiscard]] Block* first() const { return _first; }
+    [[nodiscard]] Block* last() const { return _last; }
+    [[nodiscard]] std::unordered_map<std::string, CFGFunction*>* getNameMap() const { return _nameMap; }
 private:
     Block* _first = nullptr;
     Block* _last = nullptr;
@@ -215,15 +229,13 @@ private:
     std::vector<Block*>* _blocks;
     std::unordered_map<std::string, CFGFunction*>* _nameMap;
 
-    bool removeSelfAssigns();
-    bool literalPropagation();
+    ISA::Instructions* reconstruct(Block*, size_t) const;
 };
 
 class CFGBuild : public IUsesConsole {
 public:
-    CFGBuild(ISA::Instructions* instrs) : _instrs(instrs), _blocks(new std::vector<Block*>()), 
+    explicit CFGBuild(ISA::Instructions* instrs) : _instrs(instrs), _blocks(new std::vector<Block*>()),
         _nameMap(new std::unordered_map<std::string, CFGFunction*>()) {
-        //sequenceISA();
         buildBlocks();
     }
 protected:
@@ -237,7 +249,6 @@ protected:
     friend ControlFlowGraph;
 };
 
-}
 }
 
 #endif

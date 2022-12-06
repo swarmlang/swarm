@@ -1,18 +1,16 @@
 #include <stack>
-#include <assert.h>
+#include <cassert>
 #include "cfg.h"
 
-namespace swarmc {
-namespace CFG {
+namespace swarmc::CFG {
 
 void CFGBuild::buildBlocks() {
     std::stack<Block*> bstack;
     std::stack<CFGFunction*> callStack;
     _blocks->push_back(new Block("Top", Block::BlockType::BLOCK, 0));
     bstack.push(_blocks->back());
-    if ( _instrs->size() == 0 ) return;
+    if ( _instrs->empty() ) return;
     for ( size_t i = 0; i < _instrs->size(); i++ ) {
-        bstack.top()->addInstruction(_instrs->at(i));
         if ( _instrs->at(i)->tag() == ISA::Tag::BEGINFN ) {
             std::string name = ((ISA::BeginFunction*)_instrs->at(i))->first()->fqName();
             auto fstart = new Block(name, Block::BlockType::FUNCTION, i);
@@ -22,14 +20,17 @@ void CFGBuild::buildBlocks() {
             bstack.push(fstart);
             _nameMap->insert({ name, cfgf });
             callStack.push(cfgf);
+            bstack.top()->addInstruction(_instrs->at(i));
         } else if ( _instrs->at(i)->tag() == ISA::Tag::RETURN0 
                 || _instrs->at(i)->tag() == ISA::Tag::RETURN1 ) 
         {
+            bstack.top()->addInstruction(_instrs->at(i));
             callStack.top()->setEnd(bstack.top());
             while ( bstack.top()->blockType() != Block::BlockType::FUNCTION ) bstack.pop();
             bstack.pop();
             callStack.pop();
         } else {
+            bstack.top()->addInstruction(_instrs->at(i));
             auto instr = _instrs->at(i)->tag() == ISA::Tag::ASSIGNEVAL 
                 ? ((ISA::AssignEval*)_instrs->at(i))->second()
                 : _instrs->at(i);
@@ -44,7 +45,7 @@ void CFGBuild::buildBlocks() {
                 || instr->tag() == ISA::Tag::ENUMERATE
                 || instr->tag() == ISA::Tag::WHILE ) 
             {
-                std::string name = "";
+                std::string name;
                 bool cond = true;
                 switch ( instr->tag() ) {
                 case ISA::Tag::CALL0:
@@ -92,7 +93,7 @@ void CFGBuild::buildBlocks() {
                 assert(!bstack.empty());
                 Block* previous = bstack.top();
                 // postcall block
-                Block* postcall = new Block("POSTCALL:" + name, Block::BlockType::BLOCK, i);
+                auto postcall = new Block("POSTCALL:" + name, Block::BlockType::BLOCK, i);
                 _blocks->push_back(postcall);
                 bstack.push(postcall);
                 if (!callStack.empty()) callStack.top()->addBlock(postcall);
@@ -112,7 +113,7 @@ void CFGBuild::buildBlocks() {
                     if (!callStack.empty()) callStack.top()->addBlock(am);
                 } else {
                     auto funcCopy = _nameMap->at(name)->makeCopy(i, _blocks, &callStack);
-                    console->debug("Copied function " + _nameMap->at(name)->id() + " -> " + funcCopy.first->id());
+                    console->debug("Copied function " + _nameMap->at(name)->id());
                     auto cedge = new CallEdge(previous, funcCopy.first);
                     previous->setCallOutEdge(cedge);
                     funcCopy.first->setCallInEdge(cedge);
@@ -241,5 +242,4 @@ void CFGBuild::buildBlocks() {
 //     }
 // }
 
-}
 }

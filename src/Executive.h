@@ -39,6 +39,8 @@ protected:
     bool flagSVI = false;
     bool flagOutputISA = false;
     bool flagOutputCFG = false;
+    bool flagRemoveSelfAssign = true;
+    bool flagConstProp = true;
     bool flagOutputBinary = false;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;

@@ -28,22 +28,10 @@
   - simplification of trivial expressions
 - assembly optimization pass
   - `X += -Y` can be optimized in the assembly
-  - Remove instructions assigning variables to themselves
+  - ~~Remove instructions assigning variables to themselves~~
   - Propagate primitives values
   - Dead code elimination
   - beginfn followed by return0
-  - Collapse call instructions
-    - Example:
-      ```txt
-      -- this
-      $l:call0 <- curry f:MY_FN 1
-      $l:call1 <- curry $l:call0 2
-      $l:assn <- call $l:call1
-
-      -- can reduce to
-      $l:call0 <- curry f:MY_FN 1
-      $l:assn <- call $l:call0 2
-      ```
 - Runtime
   - ~~streams~~
   - threaded listener for `s:STDOUT` and `s:STDERR` streams
@@ -86,3 +74,12 @@
 - Support building `swarmc` binary without the C++ test suite
 - hilariously low: blockchain-based distributed drivers
 - Support automatically determining which variables should be shared?
+- add unset instruction
+- generic types :(
+- update syntax highlighting
+- Syntax for deferred function calls
+  - ```
+    wait<string> a = ~test();
+    ...
+    log(a);
+    ```

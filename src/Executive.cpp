@@ -224,6 +224,10 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             console->debug("Output file name: " + outputCFGTo);
             skipOne = true;
             flagOutputCFG = true;
+        } else if ( arg == "--no-remove-self-assigns" ) {
+            flagRemoveSelfAssign = false;
+        } else if ( arg == "--no-constant-propagation" ) {
+            flagConstProp = false;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -334,6 +338,14 @@ void Executive::printUsage() {
 
         console->bold()->print("  --dbg-output-cfg-to <OUTFILE> :  ", true)
             ->println("Set the name of the CFG output file")
+            ->println();
+
+        console->bold()->print("  --no-remove-self-assigns: ", true)
+            ->println("Disable self-assignment removal in the ISA")
+            ->println();
+
+        console->bold()->print("  --no-constant-propagation: ", true)
+            ->println("Disable constant propagation in the ISA")
             ->println();
     console->end();
 
@@ -462,7 +474,7 @@ int Executive::debugOutputISA() {
     swarmc::Pipeline pipeline(_input);
 
     try {
-        pipeline.targetISARepresentation(*stream);
+        pipeline.targetISARepresentation(*stream, flagRemoveSelfAssign, flagConstProp);
     } catch (swarmc::Errors::ParseError& e) {
         return e.exitCode;
     }
@@ -487,7 +499,7 @@ int Executive::debugOutputCFG() {
     swarmc::Pipeline pipeline(_input);
 
     try {
-        pipeline.targetCFGRepresentation(*stream);
+        pipeline.targetCFGRepresentation(*stream, flagRemoveSelfAssign, flagConstProp);
     } catch (swarmc::Errors::ParseError& e) {
         return e.exitCode;
     }
