@@ -133,6 +133,11 @@ namespace swarmc::Runtime {
             return this;
         }
 
+        ScopeFrame* clearExceptionFrame() {
+            _isExceptionFrame = false;
+            return this;
+        }
+
         [[nodiscard]] bool isExceptionFrame() const {
             return _isExceptionFrame;
         }

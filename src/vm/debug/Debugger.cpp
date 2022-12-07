@@ -180,6 +180,7 @@ namespace swarmc::Runtime::Debug {
             console->color(ANSIColor::CYAN)->print("  - Call: ", true)->println(s(call));
 
             console->color(ANSIColor::CYAN)->print("    Capture return? ", true)->println(s(scope->shouldCaptureReturn()));
+            console->color(ANSIColor::CYAN)->print("    Exception frame? ", true)->println(s(scope->isExceptionFrame()));
 
             auto returnTo = scope->getReturnPC();
             if ( returnTo != std::nullopt ) {

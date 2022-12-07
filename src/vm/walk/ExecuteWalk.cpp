@@ -995,7 +995,7 @@ namespace swarmc::Runtime {
         }
 
         // Rewind to the scope we are resuming to
-        _vm->restore(scope);
+        _vm->restore(scope->clearExceptionFrame());
 
         // Call the resumed function w/in the scope fo the exception handler
         _vm->callWithInheritedScope(fn->fn()->call());
