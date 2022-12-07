@@ -158,4 +158,4 @@ ProgramNode<#body: 27>
     CallExpressionNode<id: t8, #args: 2>
       NumberLiteralExpressionNode<#value: 420.000000>
       Type<Primitive<TYPE>>
-[32m success [39m[0mParsed input program.
+[32m success [39m[0m[main] Parsed input program.

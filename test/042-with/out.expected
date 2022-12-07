@@ -1,35 +1,35 @@
-[35m   debug [39mParsing argument: /home/garrettmills/Projects/swarm/test/042-with/test.svi
-[35m   debug [39mGot input file: /home/garrettmills/Projects/swarm/test/042-with/test.svi
-[35m   debug [39mVM: assigneval Location<l:tag_call> CURRY<Location<f:TAG>, StringReference<mykey>>
-[35m   debug [39mVM: curry Location<f:TAG> StringReference<mykey>
-[35m   debug [39mVM: ensureFunction: FunctionReference<TagFunction<>>
-[35m   debug [39mVM: Location<l:tag_call> <- FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<mykey>>>
-[35m   debug [39mVM: assigneval Location<l:tag> CALL1<Location<l:tag_call>, StringReference<myvalue>>
-[35m   debug [39mVM: assignEval: got call0 or call1
-[35m   debug [39mVM: assignEval: jumping to call
-[35m   debug [39mVM: call1 Location<l:tag_call> StringReference<myvalue>
-[35m   debug [39mVM: ensureFunction: FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<mykey>>>
-[35m   debug [39mVM: provider call: TagFunctionCall<>
-[35m   debug [39mVM: assigneval Location<l:tag> CALL1<Location<l:tag_call>, StringReference<myvalue>>
-[35m   debug [39mVM: assignEval: got call0 or call1
-[35m   debug [39mVM: assignEval: jumped from return
-[35m   debug [39mVM: Location<l:tag> <- ResourceReference<TagResource<k: mykey, v: myvalue>>
-[35m   debug [39mVM: Skipping uncalled function body: BEGINFN<Location<f:CB>, TypeReference<Primitive<VOID>>>, pc: 7
-[35m   debug [39mVM: with Location<l:tag> Location<f:CB>
-[35m   debug [39mVM: ensureResource: ResourceReference<TagResource<k: mykey, v: myvalue>>
-[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39mVM: load inline function: CB (#params: 1) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:CB, rt: Primitive<VOID>>>
+[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/042-with/test.svi
+[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/042-with/test.svi
+[35m   debug [39m[vm] assigneval Location<l:tag_call> CURRY<Location<f:TAG>, StringReference<mykey>>
+[35m   debug [39m[vm] curry Location<f:TAG> StringReference<mykey>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<TagFunction<>>
+[35m   debug [39m[vm] Location<l:tag_call> <- FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<mykey>>>
+[35m   debug [39m[vm] assigneval Location<l:tag> CALL1<Location<l:tag_call>, StringReference<myvalue>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<l:tag_call> StringReference<myvalue>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<mykey>>>
+[35m   debug [39m[vm] provider call: TagFunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:tag> CALL1<Location<l:tag_call>, StringReference<myvalue>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:tag> <- ResourceReference<TagResource<k: mykey, v: myvalue>>
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:CB>, TypeReference<Primitive<VOID>>>, pc: 7
+[35m   debug [39m[vm] with Location<l:tag> Location<f:CB>
+[35m   debug [39m[vm] ensureResource: ResourceReference<TagResource<k: mykey, v: myvalue>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: CB (#params: 1) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:CB, rt: Primitive<VOID>>>
 [35m   debug [39mApply scheduling filter: mykey -> myvalue
-[35m   debug [39mVM: pushCall - call: InlineFunctionCall<f:CB> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:CB>>
+[35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:CB> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:CB>>
 [35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[35m   debug [39mVM: inline call: InlineFunctionCall<f:CB> (pc: 2)
-[35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<VOID>>, Location<l:v>>
-[35m   debug [39mVM: fnparam TypeReference<Primitive<VOID>> Location<l:v>
-[35m   debug [39mVM: fnparam: Location<l:v> <- VoidReference<>
-[35m   debug [39mVM: scopeof Location<l:b>
-[35m   debug [39mVM: assignvalue Location<l:b> Location<l:tag>
-[35m   debug [39mVM: Location<l:b> <- ResourceReference<TagResource<k: mykey, v: myvalue>>
-[35m   debug [39mVM: return0
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:CB> (pc: 2)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<VOID>>, Location<l:v>>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<VOID>> Location<l:v>
+[35m   debug [39m[vm] fnparam: Location<l:v> <- VoidReference<>
+[35m   debug [39m[vm] scopeof Location<l:b>
+[35m   debug [39m[vm] assignvalue Location<l:b> Location<l:tag>
+[35m   debug [39m[vm] Location<l:b> <- ResourceReference<TagResource<k: mykey, v: myvalue>>
+[35m   debug [39m[vm] return0
 [35m   debug [39mApply bulk scheduling filters.

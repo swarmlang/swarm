@@ -20,9 +20,9 @@ using namespace nslib;
 namespace swarmc::Runtime {
 
     /** The Swarm runtime virtual machine (aka "the runtime"). */
-    class VirtualMachine : public IStringable, public IUsesConsole {
+    class VirtualMachine : public IStringable, public IUsesLogger {
     public:
-        explicit VirtualMachine(IGlobalServices* global) : IUsesConsole(), _global(global) {
+        explicit VirtualMachine(IGlobalServices* global) : IUsesLogger("vm"), _global(global) {
             _exec = new ExecuteWalk(this);
             _queueContexts.push(_global->getUuid());
         }
@@ -363,7 +363,7 @@ namespace swarmc::Runtime {
 
         /** Print output visible by default in the debug binary. */
         virtual void debug(const std::string& output) const {
-            console->debug("VM: " + output);
+            logger->debug(output);
         }
 
         /** Print verbose output visible when the `--verbose` flag is present. */

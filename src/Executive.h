@@ -14,9 +14,9 @@ using namespace nslib;
 /**
  * Executive class for CLI applications. Handles arg parsing and manages runtime globals.
  */
-class Executive : public IUsesConsole {
+class Executive : public IUsesConsole, public IUsesLogger {
 public:
-    Executive() : IUsesConsole() {};
+    Executive() : IUsesConsole(), IUsesLogger("main") {};
 
     int run(int argc, char **argv);
     void cleanup();

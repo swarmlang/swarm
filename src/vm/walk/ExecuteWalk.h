@@ -15,9 +15,9 @@ namespace swarmc::Runtime {
     /**
      * ISA walk which uses the virtual machine to execute SVI instructions.
      */
-    class ExecuteWalk : public ISA::ISAWalk<ISA::Reference*> {
+    class ExecuteWalk : public ISA::ISAWalk<ISA::Reference*>, public IUsesLogger {
     public:
-        explicit ExecuteWalk(VirtualMachine* vm) : ISA::ISAWalk<ISA::Reference*>(), _vm(vm) {}
+        explicit ExecuteWalk(VirtualMachine* vm) : ISA::ISAWalk<ISA::Reference*>(), IUsesLogger("vm"), _vm(vm) {}
         ~ExecuteWalk() override = default;
 
         ISA::Reference* walkOne(ISA::Instruction* inst) override;
@@ -56,7 +56,7 @@ namespace swarmc::Runtime {
 
         /** Prints a message shown by default in the debug binary. */
         virtual void debug(const std::string& output) const {
-            console->debug("VM: " + output);
+            logger->debug(output);
         }
 
         /** Prints a message shown only when the `--verbose` flag is used. */

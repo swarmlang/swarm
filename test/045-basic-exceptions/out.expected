@@ -1,44 +1,44 @@
-[35m   debug [39mParsing argument: /home/garrettmills/Projects/swarm/test/045-basic-exceptions/test.svi
-[35m   debug [39mGot input file: /home/garrettmills/Projects/swarm/test/045-basic-exceptions/test.svi
-[35m   debug [39mVM: Skipping uncalled function body: BEGINFN<Location<f:HANDLER>, TypeReference<Primitive<VOID>>>, pc: 9
-[35m   debug [39mVM: Skipping uncalled function body: BEGINFN<Location<f:RESUMED>, TypeReference<Primitive<VOID>>>, pc: 12
-[35m   debug [39mVM: pushexhandler Location<f:HANDLER>
-[35m   debug [39mVM: ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39mVM: load inline function: HANDLER (#params: 1) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:HANDLER, rt: Primitive<VOID>>>
-[35m   debug [39mVM: streampush Location<s:STDOUT> StringReference<Before.>
-[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[35m   debug [39mVM: raise NumberReference<0.000000>
-[35m   debug [39mVM: ensureNumber: NumberReference<0.000000>
-[35m   debug [39mVM: inline call: InlineFunctionCall<f:HANDLER> (pc: 0)
-[35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:code>>
-[35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
-[35m   debug [39mVM: fnparam: Location<l:code> <- NumberReference<0.000000>
-[35m   debug [39mVM: scopeof Location<l:msg>
-[35m   debug [39mVM: assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
-[35m   debug [39mVM: assignEval: got call0 or call1
-[35m   debug [39mVM: assignEval: jumping to call
-[35m   debug [39mVM: call1 Location<f:NUMBER_TO_STRING> Location<l:code>
-[35m   debug [39mVM: ensureFunction: FunctionReference<NumberToStringFunction<>>
-[35m   debug [39mVM: provider call: NumberToStringFunctionCall<>
-[35m   debug [39mVM: assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
-[35m   debug [39mVM: assignEval: got call0 or call1
-[35m   debug [39mVM: assignEval: jumped from return
-[35m   debug [39mVM: Location<l:msg> <- StringReference<0.000000>
-[35m   debug [39mVM: assigneval Location<l:msg> STRCONCAT<StringReference<Handled: >, Location<l:msg>>
-[35m   debug [39mVM: strconcat StringReference<Handled: > Location<l:msg>
-[35m   debug [39mVM: ensureString: StringReference<Handled: >
-[35m   debug [39mVM: ensureString: StringReference<0.000000>
-[35m   debug [39mVM: Location<l:msg> <- StringReference<Handled: 0.000000>
-[35m   debug [39mVM: streampush Location<s:STDOUT> Location<l:msg>
-[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[35m   debug [39mVM: resume Location<f:RESUMED>
-[35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39mVM: load inline function: RESUMED (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:RESUMED, rt: Primitive<VOID>>>
-[35m   debug [39mVM: inline call: InlineFunctionCall<f:RESUMED> (pc: 9)
-[35m   debug [39mVM: next instruction for inline call: STREAMPUSH<Location<s:STDOUT>, StringReference<Resumed!>>
-[35m   debug [39mVM: streampush Location<s:STDOUT> StringReference<Resumed!>
-[35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[35m   debug [39mVM: return0
+[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/045-basic-exceptions/test.svi
+[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/045-basic-exceptions/test.svi
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:HANDLER>, TypeReference<Primitive<VOID>>>, pc: 9
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:RESUMED>, TypeReference<Primitive<VOID>>>, pc: 12
+[35m   debug [39m[vm] pushexhandler Location<f:HANDLER>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: HANDLER (#params: 1) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:HANDLER, rt: Primitive<VOID>>>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> StringReference<Before.>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] raise NumberReference<0.000000>
+[35m   debug [39m[vm] ensureNumber: NumberReference<0.000000>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:HANDLER> (pc: 0)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:code>>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
+[35m   debug [39m[vm] fnparam: Location<l:code> <- NumberReference<0.000000>
+[35m   debug [39m[vm] scopeof Location<l:msg>
+[35m   debug [39m[vm] assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<f:NUMBER_TO_STRING> Location<l:code>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:msg> <- StringReference<0.000000>
+[35m   debug [39m[vm] assigneval Location<l:msg> STRCONCAT<StringReference<Handled: >, Location<l:msg>>
+[35m   debug [39m[vm] strconcat StringReference<Handled: > Location<l:msg>
+[35m   debug [39m[vm] ensureString: StringReference<Handled: >
+[35m   debug [39m[vm] ensureString: StringReference<0.000000>
+[35m   debug [39m[vm] Location<l:msg> <- StringReference<Handled: 0.000000>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> Location<l:msg>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] resume Location<f:RESUMED>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: RESUMED (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:RESUMED, rt: Primitive<VOID>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:RESUMED> (pc: 9)
+[35m   debug [39m[vm] next instruction for inline call: STREAMPUSH<Location<s:STDOUT>, StringReference<Resumed!>>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> StringReference<Resumed!>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] return0

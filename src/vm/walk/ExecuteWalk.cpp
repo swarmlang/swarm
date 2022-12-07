@@ -28,7 +28,7 @@ namespace swarmc::Runtime {
             return ISAWalk<Reference*>::walkOne(inst);
         } catch (Errors::RuntimeError& e) {
             std::string msg = e.what();
-            console->debug()->error(msg)->end();
+            logger->error(msg);
             _vm->raise((size_t) e.code());
         }
 

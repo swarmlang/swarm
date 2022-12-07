@@ -3,6 +3,8 @@
 
 #include <random>
 #include <stack>
+#include <map>
+#include <list>
 #include <string>
 #include <sstream>
 #include <iostream>
@@ -41,15 +43,7 @@ namespace nslib {
         Framework(Framework& other) = delete;  // don't allow cloning
         void operator=(const Framework&) = delete;  // don't allow assigning
 
-        static void boot() {
-            if ( _booted ) return;
-
-            auto epoch = std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::system_clock::now().time_since_epoch()).count();
-            priv::generator.seed(epoch);
-
-            _booted = true;
-        }
+        static void boot();
 
         static void shutdown() {
             if ( !_booted ) return;
@@ -100,6 +94,7 @@ namespace nslib {
 
     /** Log message verbosity levels. */
     enum class Verbosity: size_t {
+        SUCCESS = 6,
         ERROR = 5,
         WARNING = 4,
         INFO = 3,
@@ -109,6 +104,7 @@ namespace nslib {
     };
 
     inline std::string s(Verbosity v) {
+        if ( v == Verbosity::SUCCESS ) return "Verbosity(SUCCESS)";
         if ( v == Verbosity::ERROR ) return "Verbosity(ERROR)";
         if ( v == Verbosity::WARNING ) return "Verbosity(WARNING)";
         if ( v == Verbosity::INFO ) return "Verbosity(INFO)";
@@ -123,6 +119,188 @@ namespace nslib {
     class ILogTarget : public IStringable {
     public:
         virtual void output(Verbosity, std::string) = 0;
+    };
+
+
+    class Logger : public IStringable {
+    public:
+        explicit Logger(std::string tag) : _tag(std::move(tag)) {}
+
+        ~Logger() override = default;
+
+        virtual void output(Verbosity, const std::string& p);
+
+        /** Output an error message. */
+        virtual void error(const std::string& p) {
+            output(Verbosity::ERROR, p);
+        }
+
+        /** Output an error message. */
+        virtual void success(const std::string& p) {
+            output(Verbosity::SUCCESS, p);
+        }
+
+        /** Output a warning message. */
+        virtual void warn(const std::string& p) {
+            output(Verbosity::WARNING, p);
+        }
+
+        /** Output an informational message. */
+        virtual void info(const std::string& p) {
+            output(Verbosity::INFO, p);
+        }
+
+        /** Output a debugging message. */
+        virtual void debug(const std::string& p) {
+            output(Verbosity::DEBUG, p);
+        }
+
+        /** Output a verbose message. */
+        virtual void verbose(const std::string& p) {
+            output(Verbosity::VERBOSE, p);
+        }
+
+        /** Output a trace message. */
+        virtual void trace(const std::string& p) {
+            output(Verbosity::TRACE, p);
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "nslib::Logger<" + _tag + ">";
+        }
+    protected:
+        std::string _tag;
+    };
+
+
+    class Logging : public IStringable {
+    public:
+        Logging(Logging& other) = delete;  // don't allow cloning
+        void operator=(const Logging&) = delete;  // don't allow assigning
+
+        static Logging* get() {
+            if ( _inst == nullptr ) {
+                _inst = new Logging();
+            }
+
+            return _inst;
+        }
+
+        static void useTimestamps(bool v) {
+            _useTimestamps = v;
+        }
+
+        [[nodiscard]] Verbosity getVerbosity() const {
+            return _verb;
+        }
+
+        void setVerbosity(Verbosity v) {
+            _verb = v;
+        }
+
+        void addTarget(ILogTarget* target) {
+            _targets.push_back(target);
+        }
+
+        Logger* get(const std::string& name) {
+            auto res = _loggers.find(name);
+            if ( res != _loggers.end() ) return res->second;
+
+            auto inst = new Logger(name);
+            _loggers[name] = inst;
+            return inst;
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "nslib::Logging<>";
+        }
+
+        virtual void output(Verbosity v, const std::string& p) {
+            if ( !shouldOutput(v) ) return;
+            for ( auto target : _targets ) target->output(v, format(p));
+        }
+
+        virtual void output(const std::string& tag, Verbosity v, const std::string& p) {
+            if ( !shouldOutput(v) ) return;
+            if ( _allowList && std::find(_configuredTags.begin(), _configuredTags.end(), tag) == _configuredTags.end() ) return;
+            if ( !_allowList && std::find(_configuredTags.begin(), _configuredTags.end(), tag) != _configuredTags.end() ) return;
+            for ( auto target : _targets ) target->output(v, format(tag, p));
+        }
+
+        virtual void onlyEnabledLoggers() {
+            _allowList = true;
+        }
+
+        virtual void configureLoggerTag(const std::string& name) {
+            _configuredTags.push_back(name);
+        }
+    protected:
+        static inline Logging* _inst = nullptr;
+        static inline bool _useTimestamps = false;
+
+        Logging() = default;
+        Verbosity _verb = Verbosity::INFO;
+        std::map<std::string, Logger*> _loggers;
+        std::list<ILogTarget*> _targets;
+
+        bool _allowList = false;
+        std::list<std::string> _configuredTags;
+
+        static std::string format(const std::string& p) {
+            return p;
+        }
+
+        static std::string format(const std::string& tag, const std::string& p) {
+            return "[" + tag + "] " + format(p);  // FIXME
+        }
+
+        /** Returns true if the given verbosity should be displayed. */
+        bool shouldOutput(Verbosity v) const {
+            return v >= _verb;
+        }
+    };
+
+
+    class IUsesLogger {
+    public:
+        explicit IUsesLogger(const std::string& tag) {
+            logger = Logging::get()->get(tag);
+        }
+
+        virtual ~IUsesLogger() = default;
+    protected:
+        Logger* logger;
+    };
+
+
+    class LogFileTarget : public ILogTarget {
+    public:
+        explicit LogFileTarget(const std::string& path) : _path(path) {
+            _fh.open(path);
+        }
+
+        void output(Verbosity v, std::string s) override {
+            _fh << format(v, s) << std::endl;
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "LogFileTarget<path: " + _path + ">";
+        }
+
+        static std::string format(Verbosity v, const std::string& s) {
+            if ( v == Verbosity::SUCCESS ) return " success " + s + "\n";
+            if ( v == Verbosity::ERROR ) return " error   " + s + "\n";
+            if ( v == Verbosity::WARNING ) return " warning " + s + "\n";
+            if ( v == Verbosity::INFO ) return " info    " + s + "\n";
+            if ( v == Verbosity::DEBUG ) return " debug   " + s + "\n";
+            if ( v == Verbosity::VERBOSE ) return " verbose " + s + "\n";
+            if ( v == Verbosity::TRACE ) return " trace   " + s + "\n";
+            return s + "\n";
+        }
+
+    protected:
+        std::string _path;
+        std::ofstream _fh;
     };
 
 
@@ -542,10 +720,14 @@ namespace nslib {
 
         /** Output a string at the given verbosity. Satisfies ILogTarget. */
         void output(Verbosity verb, std::string s) override {
-            if ( shouldOutput(verb) ) {
-                auto& stream = getStreamFor(verb);
-                stream << s;
-            }
+            if ( verb == Verbosity::SUCCESS ) success(s);
+            else if ( verb == Verbosity::ERROR ) error(s);
+            else if ( verb == Verbosity::WARNING ) warn(s);
+            else if ( verb == Verbosity::INFO ) info(s);
+            else if ( verb == Verbosity::DEBUG ) debug(s);
+            else if ( verb == Verbosity::VERBOSE ) verbose(s);
+            else if ( verb == Verbosity::TRACE ) trace(s);
+            else only(verb)->output(s + "\n")->end();
         }
 
         std::string toString() const override {
@@ -573,7 +755,7 @@ namespace nslib {
             if ( color == ANSIColor::CYAN ) output(ANSI_BACKGROUND_CYAN);
             if ( color == ANSIColor::WHITE ) output(ANSI_BACKGROUND_WHITE);
             if ( color == ANSIColor::RESET ) output(ANSI_RESET_BACKGROUND_COLOR);
-            _cleanup.push([](Console* c) {
+            _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_BACKGROUND_COLOR);
             });
             return this;
@@ -591,7 +773,7 @@ namespace nslib {
             if ( color == ANSIColor::CYAN ) output(ANSI_FOREGROUND_CYAN);
             if ( color == ANSIColor::WHITE ) output(ANSI_FOREGROUND_WHITE);
             if ( color == ANSIColor::RESET ) output(ANSI_RESET_FOREGROUND_COLOR);
-            _cleanup.push([](Console* c) {
+            _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_FOREGROUND_COLOR);
             });
             return this;
@@ -600,7 +782,7 @@ namespace nslib {
         /** Start bolding text. */
         Console* bold() {
             output(ANSI_BOLD);
-            _cleanup.push([](Console* c) {
+            _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_BOLD);
             });
             return this;
@@ -609,7 +791,7 @@ namespace nslib {
         /** Start underlining text. */
         Console* underline() {
             output(ANSI_UNDERLINE);
-            _cleanup.push([](Console* c) {
+            _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_UNDERLINE);
             });
             return this;
@@ -618,7 +800,7 @@ namespace nslib {
         /** Invert background/foreground colors. */
         Console* invert() {
             output(ANSI_INVERSE);
-            _cleanup.push([](Console* c) {
+            _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_INVERSE);
             });
             return this;
@@ -766,7 +948,7 @@ namespace nslib {
         /** Temporarily mute output. */
         Console* mute() {
             _muteStack += 1;
-            _cleanup.push([](Console* c) {
+            _cleanup.emplace([](Console* c) {
                 c->_muteStack -= 1;
             });
             return this;
@@ -775,7 +957,7 @@ namespace nslib {
         /** Temporarily limit output to the given verbosity. */
         Console* only(Verbosity v) {
             _verbLimits.push(v);
-            _cleanup.push([](Console* c) {
+            _cleanup.emplace([](Console* c) {
                 c->_verbLimits.pop();
             });
             return this;

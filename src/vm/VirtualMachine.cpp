@@ -172,7 +172,7 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::lock(LocationReference* loc) {
         if ( hasLock(loc) ) {
-            console->warn("Attempted to acquire lock that is already held by the requesting control: " + loc->toString());
+            logger->warn("Attempted to acquire lock that is already held by the requesting control: " + loc->toString());
             return;  // FIXME: should this raise an error?
         }
 
@@ -195,7 +195,7 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::unlock(LocationReference* loc) {
         if ( !hasLock(loc) ) {
-            console->warn("Attempted to release lock that is not held by the requesting control: " + loc->toString());
+            logger->warn("Attempted to release lock that is not held by the requesting control: " + loc->toString());
             return;  // FIXME: should this raise an error?
         }
 

@@ -10,21 +10,24 @@
 #include "vm/Pipeline.h"
 
 int Executive::run(int argc, char **argv) {
+    Framework::boot();
+
     // Set up the console. Enable debugging output, if we want:
     if ( Configuration::DEBUG ) {
         console->setVerbosity(nslib::Verbosity::VERBOSE);
+        Logging::get()->setVerbosity(nslib::Verbosity::VERBOSE);
     }
 
     std::vector<std::string> params(argv + 1, argv + argc);
 
-    console->debug("Debugging output enabled.");
+    logger->debug("Debugging output enabled.");
 
     // Load in the CLI args. Fail if necessary.
     if ( !this->parseArgs(params) ) return 1;
 
     int result = 0;
 
-    console->debug("Got input file: " + inputFile);
+    logger->debug("Got input file: " + inputFile);
 
     if ( flagRunTest ) {
         return runTest();
@@ -108,7 +111,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         }
 
         std::string arg = params.at(i);
-        console->debug("Parsing argument: " + arg);
+        logger->debug("Parsing argument: " + arg);
 
         if ( arg == "--help" ) {
             usage = true;
@@ -116,13 +119,13 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             continue;
         } else if ( arg == "--dbg-output-tokens-to" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --dbg-output-tokens-to. Pass --help for more info.");
+                logger->error("Missing required parameter for --dbg-output-tokens-to. Pass --help for more info.");
                 failed = true;
                 continue;
             }
 
             std::string outfile = params.at(i+1);
-            console->debug("Token output file: " + outfile);
+            logger->debug("Token output file: " + outfile);
 
             flagOutputTokens = true;
             flagOutputTokensTo = outfile;
@@ -131,13 +134,13 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagParseAndStop = true;
         } else if ( arg == "--dbg-output-parse-to" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --dbg-output-parse-to. Pass --help for more info.");
+                logger->error("Missing required parameter for --dbg-output-parse-to. Pass --help for more info.");
                 failed = true;
                 continue;
             }
 
             std::string outfile = params.at(i+1);
-            console->debug("Parse output file: " + outfile);
+            logger->debug("Parse output file: " + outfile);
 
             flagOutputParse = true;
             flagOutputParseTo = outfile;
@@ -148,17 +151,17 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         } else if ( arg == "--interactive-debug" ) {
             flagInteractiveDebug = true;
             flagSingleThreaded = true;
-            console->warn("--interactive-debug implies --locally. Will use single-threaded runtime drivers.");
+            logger->warn("--interactive-debug implies --locally. Will use single-threaded runtime drivers.");
         } else if ( arg == "--run-test" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --run-test. Pass --help for more info.");
+                logger->error("Missing required parameter for --run-test. Pass --help for more info.");
                 failed = true;
                 continue;
             }
 
 
             std::string name = params.at(i+1);
-            console->debug("Will run test: " + name);
+            logger->debug("Will run test: " + name);
 
             flagRunTest = true;
             flagRunTestName = name;
@@ -166,34 +169,35 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             noInputFile = true;
         } else if ( arg == "--binary" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --binary. Pass --help for more info.");
+                logger->error("Missing required parameter for --binary. Pass --help for more info.");
                 failed = true;
                 continue;
             }
 
             std::string name = params.at(i+1);
-            console->debug("Will output binary to: " + name);
+            logger->debug("Will output binary to: " + name);
             flagOutputBinary = true;
             outputBinaryTo = name;
             skipOne = true;
         } else if ( arg == "--locally" ) {
             Configuration::FORCE_LOCAL = true;
             flagSingleThreaded = true;
-            console->debug("Will execute locally.");
+            logger->debug("Will execute locally.");
         } else if ( arg == "--verbose" ) {
             flagVerbose = true;
             Configuration::DEBUG = true;
             Configuration::VERBOSE = true;
             console->setVerbosity(nslib::Verbosity::VERBOSE);
+            Logging::get()->setVerbosity(nslib::Verbosity::VERBOSE);
         } else if ( arg == "--output-to" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --output-to. Pass --help for more info.");
+                logger->error("Missing required parameter for --output-to. Pass --help for more info.");
                 failed = true;
                 continue;
             }
 
             std::string name = params.at(i+1);
-            console->debug("Will output results to: " + name);
+            logger->debug("Will output results to: " + name);
             outputResultTo = name;
         } else if ( arg == "--dbg-use-d-guid" ) {
             nslib::priv::USE_DETERMINISTIC_UUIDS = true;
@@ -202,26 +206,47 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         } else if ( arg == "--without-prologue" ) {
             flagWithPrologue = false;
             Configuration::WITH_PROLOGUE = false;
+        } else if ( arg == "--log-target" ) {
+            if ( i+1 >= params.size() ) {
+                logger->error("Missing required parameter for --log-target. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            std::string name = params.at(i+1);
+            Logging::get()->onlyEnabledLoggers();
+            Logging::get()->configureLoggerTag(name);
+            skipOne = true;
+        } else if ( arg == "--log-file" ) {
+            if ( i+1 >= params.size() ) {
+                logger->error("Missing required parameter for --log-file. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            std::string path = params.at(i+1);
+            Logging::get()->addTarget(new LogFileTarget(path));
+            skipOne = true;
         } else if ( arg == "--dbg-output-isa-to" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --debug-output-isa-to. Pass --help for more info.");
+                logger->error("Missing required parameter for --debug-output-isa-to. Pass --help for more info.");
                 failed = true;
                 continue;
             }
 
             outputISATo = params.at(i+1);
-            console->debug("Output file name: " + outputISATo);
+            logger->debug("Output file name: " + outputISATo);
             skipOne = true;
             flagOutputISA = true;
         } else if ( arg == "--dbg-output-cfg-to" ) {
             if ( i+1 >= params.size() ) {
-                console->error("Missing required parameter for --debug-output-cfg-to. Pass --help for more info.");
+                logger->error("Missing required parameter for --debug-output-cfg-to. Pass --help for more info.");
                 failed = true;
                 continue;
             }
 
             outputCFGTo = params.at(i+1);
-            console->debug("Output file name: " + outputCFGTo);
+            logger->debug("Output file name: " + outputCFGTo);
             skipOne = true;
             flagOutputCFG = true;
         } else if ( arg == "--no-remove-self-assigns" ) {
@@ -231,7 +256,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
-                console->error("Unknown or invalid argument: " + arg + ". Pass --help for more info.");
+                logger->error("Unknown or invalid argument: " + arg + ". Pass --help for more info.");
                 failed = true;
                 continue;
             }
@@ -242,7 +267,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
     }
 
     if ( !failed && !(gotInputFile || noInputFile) ) {
-        console->error("Missing input file argument. Pass --help for more info.");
+        logger->error("Missing input file argument. Pass --help for more info.");
         failed = true;
     }
 
@@ -254,7 +279,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
     if ( !noInputFile ) {
         _input = new std::ifstream(inputFile);
         if ( _input->bad() ) {
-            console->error("Could not open input file: " + inputFile);
+            logger->error("Could not open input file: " + inputFile);
 
             delete _input;
             _input = nullptr;
@@ -312,6 +337,14 @@ void Executive::printUsage() {
     console->bold()->print("  --without-prologue  :  ", true)
         ->println("Exclude the Prologue provider from the runtime")
         ->println();
+
+    console->bold()->print("  --log-target <NAME>  :  ", true)
+            ->println("Enable a logging target. This flag can be specified multiple times")
+            ->println();
+
+    console->bold()->print("  --log-file <PATH>  :  ", true)
+            ->println("Enable logging to the specified file")
+            ->println();
 
     console->debug();
         console->bold()->print("  --dbg-output-tokens-to <OUTFILE>  :  ", true)
@@ -371,7 +404,7 @@ int Executive::debugOutputTokens() {
     } else {
         stream = new std::ofstream(flagOutputTokensTo);
         if ( stream->bad() ) {
-            console->error("Could not open token output file for writing: " + flagOutputTokensTo);
+            logger->error("Could not open token output file for writing: " + flagOutputTokensTo);
             delete stream;
             return 1;
         }
@@ -396,7 +429,7 @@ int Executive::debugOutputParse() {
     } else {
         stream = new std::ofstream(flagOutputParseTo);
         if ( stream->bad() ) {
-            console->error("Could not open parse output file for writing: " + flagOutputParseTo);
+            logger->error("Could not open parse output file for writing: " + flagOutputParseTo);
             delete stream;
             return 1;
         }
@@ -407,7 +440,7 @@ int Executive::debugOutputParse() {
             swarmc::VM::Pipeline pipeline(_input);
             pipeline.targetISARepresentation(*stream);
         } catch (swarmc::Errors::SwarmError& e) {
-            console->error(e.what());
+            logger->error(e.what());
             return 1;
         }
     } else {
@@ -419,7 +452,7 @@ int Executive::debugOutputParse() {
         }
     }
 
-    console->success("Parsed input program.");
+    logger->success("Parsed input program.");
     if ( stream != &std::cout ) delete stream;
     return 0;
 }
@@ -433,7 +466,7 @@ int Executive::debugParseAndStop() {
         return e.exitCode;
     }
 
-    console->success("Parsed input program.");
+    logger->success("Parsed input program.");
     return 0;
 }
 
@@ -441,11 +474,11 @@ int Executive::runTest() {
     swarmc::Test::Runner runner;
     bool result = runner.run(flagRunTestName);
     if ( result ) {
-        console->success("Test passed: " + flagRunTestName);
+        logger->success("Test passed: " + flagRunTestName);
         return 0;
     }
 
-    console->error("Test failed: " + flagRunTestName);
+    logger->error("Test failed: " + flagRunTestName);
     return 1;
 }
 
@@ -465,7 +498,7 @@ int Executive::debugOutputISA() {
     } else {
         stream = new std::ofstream(outputISATo);
         if ( stream->bad() ) {
-            console->error("Could not open parse output file for writing: " + outputISATo);
+            logger->error("Could not open parse output file for writing: " + outputISATo);
             delete stream;
             return 1;
         }
@@ -479,7 +512,7 @@ int Executive::debugOutputISA() {
         return e.exitCode;
     }
 
-    console->success("Compiled to ISA.");
+    logger->success("Compiled to ISA.");
     return 0;
 }
 
@@ -490,7 +523,7 @@ int Executive::debugOutputCFG() {
     } else {
         stream = new std::ofstream(outputCFGTo);
         if ( stream->bad() ) {
-            console->error("Could not open parse output file for writing: " + outputCFGTo);
+            logger->error("Could not open parse output file for writing: " + outputCFGTo);
             delete stream;
             return 1;
         }
@@ -504,7 +537,7 @@ int Executive::debugOutputCFG() {
         return e.exitCode;
     }
 
-    console->success("Output CFG.");
+    logger->success("Output CFG.");
     return 0;
 }
 
@@ -527,7 +560,7 @@ int Executive::emitBinary() {
         swarmc::VM::Pipeline pipeline(_input);
         auto fh = fopen(outputBinaryTo.c_str(), "w");
         if ( fh == nullptr ) {
-            console->error("Could not open binary output file for writing: " + outputBinaryTo);
+            logger->error("Could not open binary output file for writing: " + outputBinaryTo);
             return 1;
         }
 
