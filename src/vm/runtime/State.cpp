@@ -43,19 +43,7 @@ namespace swarmc::Runtime {
     }
 
     std::string ScopeFrame::toString() const {
-        auto mine = "ScopeFrame<id: " + _id + ", #symbols: " + std::to_string(_map.size()) + ">";
-        if ( _parent == nullptr ) {
-            return mine;
-        }
-
-        auto parent = _parent->toString();
-        std::string indentedparent;
-        for ( auto c : parent ) {
-            indentedparent += c;
-            if ( c == '\n' ) indentedparent += "  ";
-        }
-        return indentedparent + "\n" + mine;
-//        return "ScopeFrame<id: " + _id + ", #symbols: " + std::to_string(_map.size()) + ">";
+        return "ScopeFrame<id: " + _id + ", #symbols: " + std::to_string(_map.size()) + ">";
     }
 
     void State::extractMetadata() {
