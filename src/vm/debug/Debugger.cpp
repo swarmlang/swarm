@@ -179,6 +179,8 @@ namespace swarmc::Runtime::Debug {
             auto call = scope->call();
             console->color(ANSIColor::CYAN)->print("  - Call: ", true)->println(s(call));
 
+            console->color(ANSIColor::CYAN)->print("    Capture return? ", true)->println(s(scope->shouldCaptureReturn()));
+
             auto returnTo = scope->getReturnPC();
             if ( returnTo != std::nullopt ) {
                 auto returnI = vm->_state->lookup(*returnTo);

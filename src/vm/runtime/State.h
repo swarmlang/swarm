@@ -93,6 +93,9 @@ namespace swarmc::Runtime {
             copy->_call = _call;
             copy->_handlers = _handlers;
             copy->_returnTo = _returnTo;
+            copy->_isExceptionFrame = _isExceptionFrame;
+            copy->_shouldCaptureReturn = _shouldCaptureReturn;
+            copy->_return = _return;
             return copy;
         }
 
@@ -264,26 +267,36 @@ namespace swarmc::Runtime {
 
         /** Jump to the return location for the function currently in scope and pop the call stack. */
         ScopeFrame* jumpReturn(ScopeFrame* scope) {
-            while ( scope != nullptr ) {
-                auto returnTo = scope->getReturnPC();
-                if ( returnTo != std::nullopt ) {
-                    // This is a special case. Semantically, we allow a function
-                    // to designate itself as the new "main control" of the program
-                    // by setting its return PC to the end of the program.
-                    // This has the effect of making the program terminate when the
-                    // function returns. Such functionality is used in the exception
-                    // handling logic, e.g.
-                    if ( returnTo == _is.size() ) jumpEnd();
-                    else jump(*returnTo);
+            ScopeFrame* current = scope;
+            while ( current != nullptr ) {
+                auto returnTo = current->getReturnPC();
 
-                    scope->clearReturnPC();
-                    return scope;
+                // Exception frames advance to the end of the program. This is a characteristic
+                // of the way scope inheritance is implemented in the SVM. When a scope is inherited,
+                // its return PC is set to NULL. Then, to properly resume execution from an inherited
+                // scope, we collapse that scope into the one below it by popping it off the stack,
+                // but returning to the return PC from the previous scope on the stack.
+                // An example for future me:
+                // Normal call -- before: PC = 123, stack = (scope A, returnTo: 34) :: (scope B, returnTo 28) :: (scope C, nullptr)
+                //                after:  PC = 34, stack = (scope B, returnTo: 28) :: (scope C, nullptr)
+                //
+                // Inherited call -- before: PC = 123, stack = (scope A, returnTo: nullptr) :: (scope B, returnTo 28) :: (scope C, nullptr)
+                //                   after: PC = 28, stack = (scope C, nullptr)
+                if ( returnTo != std::nullopt && returnTo != _is.size() ) {
+                    jump(*returnTo);
+                    current->clearReturnPC();
+                    return current;
                 }
 
-                scope = scope->parent();
+                current = current->parent();
             }
 
-            throw Errors::EmptyCallStackError();
+            // This case occurs as a result of exception handling. A resumed function can take the place
+            // of the top-level control flow. When this function then returns, it has nothing to return into,
+            // since it replaced the top-level control.
+            // So, assume that means we've hit the end of valid control.
+            jumpEnd();
+            return scope;
         }
 
         /** Get the `fnparam` instructions for the inline function beginning at `pc`. */

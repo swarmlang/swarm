@@ -359,7 +359,6 @@ namespace swarmc::Runtime {
         IStream* _sharedErr = nullptr;
         bool _shouldClearReturn = false;
         bool _shouldAdvance = true;
-        bool _shouldCaptureReturn = false;
         bool _shouldRunToCompletion = false;
 
         /** Print output visible by default in the debug binary. */

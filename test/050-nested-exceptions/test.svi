@@ -1,0 +1,65 @@
+beginfn f:INNER_HANDLER p:VOID
+    fnparam p:NUMBER $l:code
+    resume f:INNER_AFTER
+return
+
+beginfn f:INNER_AFTER p:NUMBER
+return 420
+
+beginfn f:INNER_THROW p:VOID
+    raise 500
+return
+
+beginfn f:INNER p:NUMBER
+    fnparam p:NUMBER $l:in
+
+    scopeof $l:cond
+    $l:cond <- lt $l:in 1
+
+    pushexhandler f:INNER_HANDLER
+    callif $l:cond f:INNER_THROW
+return 69
+
+
+$l:res <- call f:INNER 11
+$l:res <- call f:INNER 0
+
+beginfn f:OUTER_HANDLER p:VOID
+    fnparam p:NUMBER $l:in
+    fnparam p:NUMBER $l:code
+
+    $l:in <- call f:INNER $l:in
+
+    scopeof $l:resume
+    $l:resume <- curry f:OUTER_AFTER $l:in
+    resume $l:resume
+return
+
+beginfn f:OUTER_AFTER p:STRING
+    fnparam p:NUMBER $l:in
+
+    scopeof $l:str
+    $l:str <- call f:NUMBER_TO_STRING $l:in
+    $l:str <- strconcat "Caught: " $l:str
+return $l:str
+
+beginfn f:OUTER_THROW p:VOID
+    raise 501
+return
+
+beginfn f:OUTER p:STRING
+    fnparam p:NUMBER $l:in
+
+    scopeof $l:cond
+    $l:cond <- lt $l:in 5
+
+    scopeof $l:handler
+    $l:handler <- curry f:OUTER_HANDLER $l:in
+    pushexhandler $l:handler
+
+    callif $l:cond f:OUTER_THROW
+return "No throw!"
+
+$l:res2 <- call f:OUTER 0
+$l:res2 <- call f:OUTER 4
+$l:res2 <- call f:OUTER 10

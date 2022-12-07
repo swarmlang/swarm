@@ -55,6 +55,7 @@ namespace swarmc::Runtime {
             if ( c == '\n' ) indentedparent += "  ";
         }
         return indentedparent + "\n" + mine;
+//        return "ScopeFrame<id: " + _id + ", #symbols: " + std::to_string(_map.size()) + ">";
     }
 
     void State::extractMetadata() {

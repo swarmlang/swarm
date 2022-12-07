@@ -55,11 +55,11 @@
 [35m   debug [39mVM: ensureType: TypeReference<Primitive<VOID>>
 [35m   debug [39mVM: load inline function: HANDLER1 (#params: 1) (returns: TypeReference<Primitive<VOID>>)
 [35m   debug [39mVM: ensureFunction: FunctionReference<InlineFunction<f:HANDLER1, rt: Primitive<VOID>>>
-[31m   error [39m[0mRuntime error: Attempted to call `resume` from outside context of exception handler (RuntimeExCode(ResumeOutsideExHandler, code: 19))
+[31m   error [39m[0mRuntime error: Resumed function FunctionReference<InlineFunction<f:HANDLER1, rt: Primitive<VOID>>> has type which is incompatible with the parent scope it subsumes InlineFunctionCall<f:AFTER1> (expected: :: Primitive<VOID>, got: true) (RuntimeExCode(TypeError, code: 6))
 [35m   debug [39mVM: inline call: InlineFunctionCall<f:HANDLER2> (pc: 11)
 [35m   debug [39mVM: next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:code>>
 [35m   debug [39mVM: fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
-[35m   debug [39mVM: fnparam: Location<l:code> <- NumberReference<19.000000>
+[35m   debug [39mVM: fnparam: Location<l:code> <- NumberReference<6.000000>
 [35m   debug [39mVM: scopeof Location<l:msg>
 [35m   debug [39mVM: assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
 [35m   debug [39mVM: assignEval: got call0 or call1
@@ -70,12 +70,12 @@
 [35m   debug [39mVM: assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
 [35m   debug [39mVM: assignEval: got call0 or call1
 [35m   debug [39mVM: assignEval: jumped from return
-[35m   debug [39mVM: Location<l:msg> <- StringReference<19.000000>
+[35m   debug [39mVM: Location<l:msg> <- StringReference<6.000000>
 [35m   debug [39mVM: assigneval Location<l:msg> STRCONCAT<StringReference<Handled: >, Location<l:msg>>
 [35m   debug [39mVM: strconcat StringReference<Handled: > Location<l:msg>
 [35m   debug [39mVM: ensureString: StringReference<Handled: >
-[35m   debug [39mVM: ensureString: StringReference<19.000000>
-[35m   debug [39mVM: Location<l:msg> <- StringReference<Handled: 19.000000>
+[35m   debug [39mVM: ensureString: StringReference<6.000000>
+[35m   debug [39mVM: Location<l:msg> <- StringReference<Handled: 6.000000>
 [35m   debug [39mVM: streampush Location<s:STDOUT> Location<l:msg>
 [35m   debug [39mVM: ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
 [35m   debug [39mVM: resume Location<f:AFTER2>

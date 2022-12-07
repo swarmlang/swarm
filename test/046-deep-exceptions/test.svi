@@ -10,6 +10,7 @@ return
 
 beginfn f:DANGEROUS_THROW p:VOID
     raise 0
+    out "Bad after throw!"
 return
 
 beginfn f:DANGEROUS_SAFE p:VOID
@@ -25,6 +26,7 @@ beginfn f:DANGEROUS p:NUMBER
 
     callif $l:cond f:DANGEROUS_THROW
     callelse $l:cond f:DANGEROUS_SAFE
+    out "After cond call"
 return $l:dangerous_out
 
 beginfn f:RESUMED p:NUMBER
@@ -41,5 +43,5 @@ return $l:pi
 out "Calling outer..."
 $l:outerResult <- call f:OUTER 4
 $l:outerResult <- call f:OUTER 0
-$l:outerResult <- call f:OUTER 4
+$l:outerResult <- call f:OUTER 5
 out "After outer!"

@@ -20,3 +20,4 @@ return
 pushexhandler f:HANDLER
 out "Before."
 raise 0
+out "Bad: main"
