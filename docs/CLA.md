@@ -12,7 +12,7 @@ You hereby represent that all present, past and future contributions are governe
 This entails that to the extent possible under law, you transfer all copyright and related or neighboring rights
 of the code or documents you contribute to the project itself.
 Furthermore you also represent that you have the authority to perform the above waiver
-with respect to the entirety of you contributions.
+with respect to the entirety of your contributions.
 
 ### Moral Rights.
 
