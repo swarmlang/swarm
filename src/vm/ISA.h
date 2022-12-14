@@ -7,6 +7,7 @@
 #include "../lang/Type.h"
 #include "runtime/runtime_functions.h"
 #include "runtime/interfaces.h"
+#include "runtime/fabric.h"
 
 using namespace nslib;
 

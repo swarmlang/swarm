@@ -5,6 +5,7 @@
 
 #include "../../shared/nslib.h"
 #include "interfaces.h"
+#include "fabric.h"
 #include "runtime_functions.h"
 
 using namespace nslib;
@@ -17,6 +18,7 @@ using namespace nslib;
 
 namespace swarmc::Runtime {
 
+    class VirtualMachine;
     class IProvider;
     using Providers = std::vector<IProvider*>;
 
@@ -24,7 +26,7 @@ namespace swarmc::Runtime {
     class IProviderFunctionCall : public IFunctionCall {
     public:
         IProviderFunctionCall(CallVector vector, const Type::Type* returnType):
-                IFunctionCall(FunctionBackend::PROVIDER, std::move(vector), returnType) {}
+                IFunctionCall(FunctionBackend::FB_PROVIDER, std::move(vector), returnType) {}
 
         /** Get the IProvider responsible for this function call. */
         [[nodiscard]] virtual IProvider* provider() const = 0;
@@ -34,7 +36,7 @@ namespace swarmc::Runtime {
          * This should store the return value, if there is one, as an
          * `ISA::Reference*` using the `setReturn(...)` method.
          */
-        virtual void execute() = 0;
+        virtual void execute(VirtualMachine*) = 0;
     };
 
 
@@ -46,7 +48,7 @@ namespace swarmc::Runtime {
         /** Get the IProvider responsible for this function call. */
         [[nodiscard]] virtual IProvider* provider() const = 0;
 
-        [[nodiscard]] FunctionBackend backend() const override { return FunctionBackend::PROVIDER; }
+        [[nodiscard]] FunctionBackend backend() const override { return FunctionBackend::FB_PROVIDER; }
 
         [[nodiscard]] IProviderFunctionCall* call(CallVector) const override = 0;
 
@@ -86,9 +88,8 @@ namespace swarmc::Runtime {
          * Execute a call to a function backed by this provider.
          * This is the entrypoint used by the VM to invoke functions
          * created by this provider.
-         * @param call
          */
-        virtual void call(IProviderFunctionCall* call) = 0;
+        virtual void call(VirtualMachine*, IProviderFunctionCall*) = 0;
     };
 
 }

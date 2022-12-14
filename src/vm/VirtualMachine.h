@@ -9,6 +9,7 @@
 #include "runtime/interfaces.h"
 #include "runtime/runtime_functions.h"
 #include "runtime/runtime_provider.h"
+#include "runtime/fabric.h"
 #include "runtime/local_streams.h"
 #include "runtime/State.h"
 #include "walk/ExecuteWalk.h"
@@ -24,11 +25,13 @@ namespace swarmc::Runtime {
     public:
         explicit VirtualMachine(IGlobalServices* global) : IUsesLogger("vm"), _global(global) {
             _exec = new ExecuteWalk(this);
+            _fabric = new Fabric(_global);
             _queueContexts.push(_global->getUuid());
         }
 
         ~VirtualMachine() override {
             delete _exec;
+            delete _fabric;
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -40,6 +43,9 @@ namespace swarmc::Runtime {
 
         /** Get the IGlobalServices used by the runtime. */
         [[nodiscard]] virtual IGlobalServices* global() const { return _global; }
+
+        /** Get the Fabric driver used by the runtime. */
+        [[nodiscard]] virtual Fabric* fabric() const { return _fabric; }
 
         /** Load a set of parsed instructions into the runtime. */
         void initialize(ISA::Instructions is) {
@@ -350,6 +356,7 @@ namespace swarmc::Runtime {
         IStreamDriver* _streams = nullptr;
         ScopeFrame* _scope = nullptr;
         ExecuteWalk* _exec = nullptr;
+        Fabric* _fabric = nullptr;
         std::stack<QueueContextID> _queueContexts;
         IFunctionCall* _return = nullptr;
         Debug::Debugger* _debugger = nullptr;

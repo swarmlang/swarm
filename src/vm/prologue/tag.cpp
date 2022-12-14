@@ -1,9 +1,9 @@
 #include "../runtime/interfaces.h"
 #include "tag.h"
 
-namespace swarmc::Runtime::Prologue {
+/*namespace swarmc::Runtime::Prologue {
 
-    void TagFunctionCall::execute() {
+    void TagFunctionCall::execute(VirtualMachine*) {
         auto keyRef = (ISA::StringReference*) _vector[0].second;
         auto valueRef = (ISA::StringReference*) _vector[1].second;
         auto tag = new TagResource(_provider, keyRef->value(), valueRef->value());
@@ -52,3 +52,4 @@ namespace swarmc::Runtime::Prologue {
     }
 
 }
+*/

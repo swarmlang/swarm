@@ -315,7 +315,9 @@ namespace swarmc::Runtime {
             );
         }
 
-        // open the resource
+        assert(false);  // FIXME
+
+        /* open the resource
         resource->resource()->open();
 
         // perform the call
@@ -326,7 +328,7 @@ namespace swarmc::Runtime {
         // close the resource
         resource->resource()->close();
 
-        return nullptr;
+        return nullptr;*/
     }
 
     Reference* ExecuteWalk::walkEnumInit(EnumInit* i) {

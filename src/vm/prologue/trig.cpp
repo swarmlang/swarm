@@ -6,7 +6,7 @@
 
 namespace swarmc::Runtime::Prologue {
 
-    void TrigFunctionCall::execute() {
+    void TrigFunctionCall::execute(VirtualMachine*) {
         auto opd = (ISA::NumberReference*) _vector.at(0).second;
 
         double result;

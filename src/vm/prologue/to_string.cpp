@@ -4,7 +4,7 @@
 
 namespace swarmc::Runtime::Prologue {
 
-    void NumberToStringFunctionCall::execute() {
+    void NumberToStringFunctionCall::execute(VirtualMachine*) {
         // At this point, the call should have been type-checked by the runtime
         // So, we're going to assume that the parameters are correct.
         auto opd = (ISA::NumberReference*) _vector.at(0).second;
@@ -24,7 +24,7 @@ namespace swarmc::Runtime::Prologue {
         return new NumberToStringFunctionCall(_provider, vector, returnType);
     }
 
-    void BooleanToStringFunctionCall::execute() {
+    void BooleanToStringFunctionCall::execute(VirtualMachine*) {
         auto opd = (ISA::BooleanReference*) _vector.at(0).second;
         if ( opd->value() ) setReturn(new ISA::StringReference("true"));
         else setReturn(new ISA::StringReference("false"));

@@ -13,7 +13,7 @@ namespace swarmc::Runtime::Prologue {
         RandomFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
-        void execute() override;
+        void execute(VirtualMachine*) override;
 
         [[nodiscard]] std::string toString() const override {
             return "RandomFunctionCall<>";
@@ -40,7 +40,7 @@ namespace swarmc::Runtime::Prologue {
         RandomVectorFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
-        void execute() override;
+        void execute(VirtualMachine*) override;
 
         [[nodiscard]] std::string toString() const override {
             return "RandomVectorFunctionCall<>";
@@ -67,7 +67,7 @@ namespace swarmc::Runtime::Prologue {
         RandomMatrixFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
-        void execute() override;
+        void execute(VirtualMachine*) override;
 
         [[nodiscard]] std::string toString() const override {
             return "RandomMatrixFunctionCall<>";

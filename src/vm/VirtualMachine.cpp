@@ -77,11 +77,11 @@ namespace swarmc::Runtime {
     }
 
     FunctionReference* VirtualMachine::loadFunction(FunctionBackend backend, const std::string& name) {
-        if ( backend == FunctionBackend::INLINE ) {
+        if ( backend == FunctionBackend::FB_INLINE ) {
             return new FunctionReference(loadInlineFunction(name));
         }
 
-        if ( backend == FunctionBackend::PROVIDER ) {
+        if ( backend == FunctionBackend::FB_PROVIDER ) {
             return new FunctionReference(loadProviderFunction(name));
         }
 
@@ -249,8 +249,8 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::call(IFunctionCall* call, bool inheritScope) {
         _shouldAdvance = false;
-        if ( call->backend() == FunctionBackend::INLINE ) return callInlineFunction((InlineFunctionCall*) call, inheritScope);
-        if ( call->backend() == FunctionBackend::PROVIDER ) return callProviderFunction((IProviderFunctionCall*) call, inheritScope);
+        if ( call->backend() == FunctionBackend::FB_INLINE ) return callInlineFunction((InlineFunctionCall*) call, inheritScope);
+        if ( call->backend() == FunctionBackend::FB_PROVIDER ) return callProviderFunction((IProviderFunctionCall*) call, inheritScope);
         throw Errors::SwarmError("Cannot call function `" + call->toString() + "` (invalid backend)");
     }
 
@@ -472,7 +472,7 @@ namespace swarmc::Runtime {
 
         // Invoke the provider to execute the function call
         debug("provider call: " + call->toString());
-        call->provider()->call(call);
+        call->provider()->call(this, call);
 
         // Skip over the call instruction
         advance();

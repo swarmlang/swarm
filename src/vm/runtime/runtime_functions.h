@@ -23,8 +23,8 @@ namespace swarmc::Runtime {
 
     /** The VM mechanisms used to perform a function call. */
     enum class FunctionBackend: size_t {
-        INLINE,  // jumps to an inline function body in the program
-        PROVIDER,  // calls an external, native function implementation
+        FB_INLINE,  // jumps to an inline function body in the program
+        FB_PROVIDER,  // calls an external, native function implementation
     };
 
     /**
@@ -85,7 +85,7 @@ namespace swarmc::Runtime {
     class InlineFunctionCall : public IFunctionCall {
     public:
         InlineFunctionCall(std::string name, CallVector vector, const Type::Type* returnType) :
-                IFunctionCall(FunctionBackend::INLINE, std::move(vector), returnType), _name(std::move(name)) {}
+                IFunctionCall(FunctionBackend::FB_INLINE, std::move(vector), returnType), _name(std::move(name)) {}
 
         /**
          * Get the identifier name of the function.
@@ -213,7 +213,7 @@ namespace swarmc::Runtime {
         }
 
         [[nodiscard]] FunctionBackend backend() const override {
-            return FunctionBackend::INLINE;
+            return FunctionBackend::FB_INLINE;
         }
 
         [[nodiscard]] std::string name() const override {

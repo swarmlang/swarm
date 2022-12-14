@@ -36,6 +36,7 @@ namespace Type {
         RESOURCE,
         AMBIGUOUS,
         CONTRADICTION,
+        OPAQUE,
     };
 
     class Type : public IStringable {
@@ -55,6 +56,7 @@ namespace Type {
             if ( intrinsic == Intrinsic::LAMBDA1 ) return "LAMBDA1";
             if ( intrinsic == Intrinsic::RESOURCE ) return "RESOURCE";
             if ( intrinsic == Intrinsic::AMBIGUOUS ) return "AMBIGUOUS";
+            if ( intrinsic == Intrinsic::OPAQUE ) return "OPAQUE";
             return "CONTRADICTION";
         }
 
@@ -142,6 +144,36 @@ namespace Type {
     protected:
         Intrinsic _intrinsic;
     };
+
+
+    class Opaque : public Type {
+    public:
+        [[nodiscard]] static Opaque* of(const std::string& name) {
+            return new Opaque(name);
+        }
+
+        explicit Opaque(std::string name) : _name(std::move(name)) {}
+
+        [[nodiscard]] Intrinsic intrinsic() const override {
+            return Intrinsic::OPAQUE;
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "Opaque<" + _name + ">";
+        }
+
+        bool isAssignableTo(const Type* other) const override {
+            return other->intrinsic() == Intrinsic::OPAQUE && ((const Opaque*) other)->_name == _name;
+        }
+
+        [[nodiscard]] Opaque* copy() const override {
+            return Opaque::of(_name);
+        }
+
+    protected:
+        std::string _name;
+    };
+
 
     class Ambiguous : public Type {
     public:

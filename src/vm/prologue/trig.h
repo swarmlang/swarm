@@ -17,7 +17,7 @@ namespace swarmc::Runtime::Prologue {
         TrigFunctionCall(TrigOperation op, IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(vector), returnType), _op(op) {}
 
-        void execute() override;
+        void execute(VirtualMachine*) override;
 
         [[nodiscard]] std::string toString() const override {
             return "NumberToStringFunctionCall<>";

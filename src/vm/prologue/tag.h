@@ -8,12 +8,12 @@
 
 namespace swarmc::Runtime::Prologue {
 
-    class TagFunctionCall : public PrologueFunctionCall {
+    /*class TagFunctionCall : public PrologueFunctionCall {
     public:
         TagFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
-        void execute() override;
+        void execute(VirtualMachine*) override;
 
         [[nodiscard]] std::string toString() const override {
             return "TagFunctionCall<>";
@@ -57,7 +57,7 @@ namespace swarmc::Runtime::Prologue {
         std::string _key;
         std::string _value;
         std::map<std::string, std::string> _old;
-    };
+    };*/
 
 }
 

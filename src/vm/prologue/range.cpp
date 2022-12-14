@@ -4,7 +4,7 @@
 
 namespace swarmc::Runtime::Prologue {
 
-    void RangeFunctionCall::execute() {
+    void RangeFunctionCall::execute(VirtualMachine*) {
         auto startNum = (ISA::NumberReference*) _vector.at(0).second;
         auto endNum = (ISA::NumberReference*) _vector.at(1).second;
         auto stepSize = (ISA::NumberReference*) _vector.at(2).second;

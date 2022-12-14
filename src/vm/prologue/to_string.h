@@ -12,7 +12,7 @@ namespace swarmc::Runtime::Prologue {
         NumberToStringFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
-        void execute() override;
+        void execute(VirtualMachine*) override;
 
         [[nodiscard]] std::string toString() const override {
             return "NumberToStringFunctionCall<>";
@@ -39,7 +39,7 @@ namespace swarmc::Runtime::Prologue {
         BooleanToStringFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
-        void execute() override;
+        void execute(VirtualMachine*) override;
 
         [[nodiscard]] std::string toString() const override {
             return "BooleanToStringFunctionCall<>";
