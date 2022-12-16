@@ -21,6 +21,7 @@ namespace swarmc::Runtime {
     class VirtualMachine;
     class IProvider;
     using Providers = std::vector<IProvider*>;
+    using Resources = std::vector<IResource*>;
 
     /** An IFunctionCall returned by a provider which includes a reference to said provider. */
     class IProviderFunctionCall : public IFunctionCall {
@@ -30,6 +31,9 @@ namespace swarmc::Runtime {
 
         /** Get the IProvider responsible for this function call. */
         [[nodiscard]] virtual IProvider* provider() const = 0;
+
+        /** Get the IResource instances that need to be acquired to execute this call. */
+        [[nodiscard]] virtual Resources needsResources() const { return {}; }  // FIXME: Should we move this to IFunctionCall itself?
 
         /**
          * Execute the native function.

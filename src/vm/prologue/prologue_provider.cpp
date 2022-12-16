@@ -3,8 +3,9 @@
 #include "trig.h"
 #include "rand.h"
 #include "range.h"
-#include "tag.h"
 #include "FileResource.h"
+#include "TagResource.h"
+#include "resource.h"
 
 namespace swarmc::Runtime::Prologue {
 
@@ -18,9 +19,12 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "RANDOM_VECTOR" ) return new RandomVectorFunction(this);
         if ( name == "RANDOM_MATRIX" ) return new RandomMatrixFunction(this);
         if ( name == "RANGE" ) return new RangeFunction(this);
-//        if ( name == "TAG" ) return new TagFunction(this);
+        if ( name == "TAG" ) return new TagFunction(this);
         if ( name == "OPEN_FILE" ) return new OpenFileFunction(this);
         if ( name == "READ_FILE" ) return new ReadFileFunction(this);
+        if ( name == "RESOURCE_T" ) return new ResourceTFunction(this);
+        if ( name == "FILE_T" ) return new FileTFunction(this);
+        if ( name == "TAG_T" ) return new TagTFunction(this);
         return nullptr;
     }
 

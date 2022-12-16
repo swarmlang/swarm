@@ -22,6 +22,11 @@ namespace swarmc::Runtime::Prologue {
         setReturn(new ISA::StringReference(content));
     }
 
+    Resources ReadFileFunctionCall::needsResources() const {
+        auto resource = (ISA::ResourceReference*) _vector.at(0).second;
+        return {resource->resource()};
+    }
+
 
     FormalTypes ReadFileFunction::paramTypes() const {
         return {Type::Resource::of(fileType())};
@@ -53,6 +58,23 @@ namespace swarmc::Runtime::Prologue {
 
     PrologueFunctionCall* OpenFileFunction::call(CallVector v) const {
         return new OpenFileFunctionCall(_provider, v, returnType());
+    }
+
+
+    void FileTFunctionCall::execute(VirtualMachine*) {
+        setReturn(new ISA::TypeReference(Type::Opaque::of("PROLOGUE::FILE")));
+    }
+
+    FormalTypes FileTFunction::paramTypes() const {
+        return {};
+    }
+
+    const Type::Type* FileTFunction::returnType() const {
+        return Type::Primitive::of(Type::Intrinsic::TYPE);
+    }
+
+    PrologueFunctionCall* FileTFunction::call(CallVector v) const {
+        return new FileTFunctionCall(_provider, v, returnType());
     }
 
 }

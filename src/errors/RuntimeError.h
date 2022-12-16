@@ -22,6 +22,7 @@ namespace swarmc::Errors {
         StreamNotOpen = 17,
         StreamEmpty = 18,
         ResumeOutsideExHandler = 19,
+        AttemptedCloneOfNonReplicableResource = 20,
     };
 
 }
@@ -44,6 +45,7 @@ namespace nslib {
         if ( v == swarmc::Errors::RuntimeExCode::StreamNotOpen ) return "RuntimeExCode(StreamNotOpen, code: 17)";
         if ( v == swarmc::Errors::RuntimeExCode::StreamEmpty ) return "RuntimeExCode(StreamEmpty, code: 18)";
         if ( v == swarmc::Errors::RuntimeExCode::ResumeOutsideExHandler ) return "RuntimeExCode(ResumeOutsideExHandler, code: 19)";
+        if ( v == swarmc::Errors::RuntimeExCode::AttemptedCloneOfNonReplicableResource ) return "RuntimeExCode(AttemptedCloneOfNonReplicableResource, code: 20)";
         return "RuntimeExCode(UNKNOWN" + s((size_t) v) + ")";
     }
 

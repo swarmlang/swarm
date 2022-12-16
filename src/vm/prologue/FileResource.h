@@ -50,6 +50,8 @@ namespace swarmc::Runtime::Prologue {
 
         void execute(VirtualMachine*) override;
 
+        [[nodiscard]] Resources needsResources() const override;
+
         [[nodiscard]] std::string toString() const override {
             return "ReadFileFunctionCall<>";
         }
@@ -95,6 +97,33 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] std::string toString() const override {
             return "OpenFileFunction<>";
+        }
+    };
+
+    class FileTFunctionCall : public PrologueFunctionCall {
+    public:
+        FileTFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
+                PrologueFunctionCall(provider, std::move(vector), returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "FileTFunctionCall<>";
+        }
+    };
+
+    class FileTFunction : public PrologueFunction {
+    public:
+        explicit FileTFunction(IProvider* provider) : PrologueFunction("FILE_T", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override;
+
+        [[nodiscard]] const Type::Type* returnType() const override;
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "FileTFunction<>";
         }
     };
 }

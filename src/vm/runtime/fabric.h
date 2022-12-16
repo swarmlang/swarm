@@ -3,9 +3,12 @@
 
 #include "../../../mod/binn/src/binn.h"
 #include "../../shared/nslib.h"
+#include "../../errors/RuntimeError.h"
 #include "./interfaces.h"
 
 namespace swarmc::Runtime {
+
+    class VirtualMachine;
 
     enum class ResourceCategory: size_t {
         TUNNELED = 1 << 0,
@@ -21,6 +24,14 @@ namespace swarmc::Runtime {
         [[nodiscard]] virtual NodeID owner() const = 0;
         [[nodiscard]] virtual std::string name() const = 0;
         [[nodiscard]] virtual const Type::Type* innerType() const = 0;
+        [[nodiscard]] virtual SchedulingFilters getSchedulingFilters() const { return {}; }
+
+        virtual void acquire(VirtualMachine*) {}
+        virtual void release(VirtualMachine*) {}
+
+        virtual void replicateLocally(VirtualMachine*) {
+            throw Errors::RuntimeError(Errors::RuntimeExCode::AttemptedCloneOfNonReplicableResource, "Cannot clone non-replicable resource: " + s(this));
+        }
     };
 
 

@@ -1,8 +1,11 @@
 $l:tag_call <- curry f:TAG "mykey"
 $l:tag <- call $l:tag_call "myvalue"
 
+$l:tag_t <- call f:TAG_T
+$l:tag_rs_t <- call f:RESOURCE_T $l:tag_t
+
 beginfn f:CB p:VOID
-	fnparam p:VOID $l:v
+	fnparam $l:tag_rs_t $l:v
 
 	scopeof $l:b
 	$l:b <- $l:tag

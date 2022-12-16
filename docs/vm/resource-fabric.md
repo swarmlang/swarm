@@ -90,3 +90,15 @@ infrastructure to execute the operations. Maybe: use a "meta" queue context call
 on a resource needs to be performed, the call to the provider function is pushed onto this special queue with a context
 filter limiting it to the node which owns the resource (or some similar filter). The owner's RF thread just waits for
 and executes jobs pushed to this context.
+
+A call w/ resources goes like this:
+
+- Ask the provider function call for any resources that need to be acquired
+- Obtain resources in this order
+  - If there are any exclusive resources or tunneled resources marked as call-atomic:
+    - Check the list of scheduling filters for conflicts
+    - If none, push the call to the queue w/ those scheduling filters and wait for it to complete
+  - If there are any replicable resources, clone them
+- Once the resources have been acquired for the current context, perform the logic and return
+- Release any replicated resources
+

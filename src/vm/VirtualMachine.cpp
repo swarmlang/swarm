@@ -470,15 +470,77 @@ namespace swarmc::Runtime {
         if ( inheritScope ) inheritCallScope(call);
         else enterCallScope(call);
 
+        // Get the list of resources that we need to acquire
+        auto resources = call->needsResources();
+
+        // Get the scheduling filters for exclusive/call-atomic resources
+        auto [filters, needsSchedule] = buildResourceFilters(resources);
+
+        // If there are any filters, try to reschedule the call for the respective node
+        if ( needsSchedule ) {
+            // Apply the needed filters
+            auto oldFilters = _global->getSchedulingFilters();
+            _global->applySchedulingFilters(filters);
+
+            // Push the job onto the queue
+            auto job = pushCall(call);
+
+            // Wait for it to complete
+            while ( job->state() != JobState::COMPLETE && job->state() != JobState::ERROR ) {
+                whileWaitingForDrain();
+            }
+
+            // Restore the old filters
+            _global->applySchedulingFilters(oldFilters);
+
+            // FIXME: not sure this logic is correct
+            advance();
+            returnToCaller(false);  // fixme: is this necessary?
+            return;
+        }
+
+        // Otherwise, we're the respective node. Clone any replicable resources
+        Resources replicated;
+        for ( auto resource : resources ) {
+            if ( resource->category() == ResourceCategory::REPLICATED && resource->owner() != _global->getNodeId() ) {
+                resource->replicateLocally(this);
+                replicated.push_back(resource);
+            }
+        }
+
         // Invoke the provider to execute the function call
         debug("provider call: " + call->toString());
         call->provider()->call(this, call);
+
+        // Release any replicated resources
+        for ( auto resource : replicated ) resource->release(this);
 
         // Skip over the call instruction
         advance();
 
         // Immediately return to the previous control
         returnToCaller(false);
+    }
+
+    std::pair<SchedulingFilters, bool> VirtualMachine::buildResourceFilters(const Resources& resources) {
+        SchedulingFilters filters;
+        bool needsSchedule = false;
+        auto context = _global->getContextFilters();
+
+        for ( auto resource : resources ) {
+            if ( resource->category() == ResourceCategory::REPLICATED ) continue;
+            if ( resource->owner() == _global->getNodeId() ) continue;
+
+            for ( const auto& filter : resource->getSchedulingFilters() ) {
+                // fixme: conflicting keys should raise an exception. might need to expand this.
+                filters.insert(filter);
+
+                // Check if we are missing this filter
+                if ( context[filter.first] != filter.second ) needsSchedule = true;
+            }
+        }
+
+        return {filters, needsSchedule};
     }
 
     bool VirtualMachine::isBuiltinStream(LocationReference* ref) {

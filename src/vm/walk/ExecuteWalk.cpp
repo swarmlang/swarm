@@ -304,7 +304,7 @@ namespace swarmc::Runtime {
         verbose("with " + i->first()->toString() + " " + i->second()->toString());
         auto resource = ensureResource(_vm->resolve(i->first()));
 
-        auto callbackType = new Type::Lambda1(resource->type()->yields(), Type::Primitive::of(Type::Intrinsic::VOID));
+        auto callbackType = new Type::Lambda1(resource->type(), Type::Primitive::of(Type::Intrinsic::VOID));
 
         auto callback = ensureFunction(_vm->resolve(i->second()));
 
@@ -315,20 +315,17 @@ namespace swarmc::Runtime {
             );
         }
 
-        assert(false);  // FIXME
+        // Open the resource
+        resource->resource()->acquire(_vm);
 
-        /* open the resource
-        resource->resource()->open();
-
-        // perform the call
-        auto call = callback->fn()->curry(resource->resource()->innerValue())->call();
+        // Perform the call
+        auto call = callback->fn()->curry(resource)->call();
         _vm->pushCall(call);
         _vm->drain();
 
-        // close the resource
-        resource->resource()->close();
-
-        return nullptr;*/
+        // Close the resource
+        resource->resource()->release(_vm);
+        return nullptr;
     }
 
     Reference* ExecuteWalk::walkEnumInit(EnumInit* i) {

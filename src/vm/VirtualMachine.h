@@ -395,6 +395,8 @@ namespace swarmc::Runtime {
         /** Perform an external provider function call. */
         virtual void callProviderFunction(IProviderFunctionCall*, bool inheritScope);
 
+        virtual std::pair<SchedulingFilters, bool> buildResourceFilters(const Resources&);
+
         virtual bool isBuiltinStream(ISA::LocationReference*);
 
         friend class Debug::Debugger;

@@ -1,0 +1,14 @@
+$l:path <- "test/051-file-io/test.txt"
+$l:fh <- call f:OPEN_FILE $l:path
+
+$l:file_t <- call f:FILE_T
+$l:file_rs_t <- call f:RESOURCE_T $l:file_t
+
+beginfn f:TEST p:VOID
+    fnparam $l:file_rs_t $l:file
+    scopeof $l:contents
+    $l:contents <- call f:READ_FILE $l:file
+    out $l:contents
+return
+
+with $l:fh f:TEST
