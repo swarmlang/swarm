@@ -264,3 +264,4 @@ Exception codes `0` through `499` are reserved by the SVM for exceptions generat
 | 17   | Stream not open                                                                     |
 | 18   | Attempted to pop from empty stream                                                  |
 | 19   | Attempted to `resume` outside exception handler context                             |
+| 20   | Attempted to clone a non-replicable resource                                        |

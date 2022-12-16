@@ -35,14 +35,15 @@ namespace swarmc::Runtime {
     using Stores = std::vector<IStorageInterface*>;
     using Locks = std::vector<IStorageLock*>;
     using Queues = std::vector<IQueue*>;
+    using NodeID = std::string;
 
     /** Tracks the status of a queued function call. */
     enum class JobState: size_t {
-        UNKNOWN = 2 << 0,
-        PENDING = 2 << 1,
-        RUNNING = 2 << 2,
-        COMPLETE = 2 << 3,
-        ERROR = 2 << 4,
+        UNKNOWN = 1 << 0,
+        PENDING = 1 << 1,
+        RUNNING = 1 << 2,
+        COMPLETE = 1 << 3,
+        ERROR = 1 << 4,
     };
 
     /**
@@ -65,7 +66,13 @@ namespace swarmc::Runtime {
         /** This should use a source of randomness to generate a random double on [0,1]. */
         virtual double random() = 0;
 
-        virtual std::string getNodeId() = 0;
+        virtual NodeID getNodeId() = 0;
+
+        virtual void putKeyValue(const std::string& key, const std::string& value) = 0;
+
+        virtual std::optional<std::string> getKeyValue(const std::string& key) = 0;
+
+        virtual void dropKeyValue(const std::string& key) = 0;
 
         [[nodiscard]] virtual SchedulingFilters getSchedulingFilters() const { return _filters; }
 
@@ -243,21 +250,6 @@ namespace swarmc::Runtime {
     public:
         virtual IStream* open(const std::string&, const Type::Type*) = 0;
     };
-
-
-    class IResource : public IStringable {
-    public:
-        virtual bool isOpen() = 0;
-
-        virtual void open() = 0;
-
-        virtual void close() = 0;
-
-        virtual const Type::Type* innerType() = 0;
-
-        virtual ISA::Reference* innerValue() = 0;
-    };
-
 }
 
 #endif //SWARMVM_INTERFACES

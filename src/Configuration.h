@@ -29,6 +29,9 @@ public:
 
     static std::string DEBUG_SERVER_DATA_PATH;
     static std::string DEBUG_SERVER_CMD_PATH;
+
+    inline static const std::string FABRIC_PREFIX = "fabric_resource_";
+    inline static const std::string FABRIC_QUEUE_CONTEXT = "fabric";
 };
 
 #endif //SWARM_CONFIGURATION_H

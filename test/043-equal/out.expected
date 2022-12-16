@@ -85,7 +85,7 @@
 [35m   debug [39m[vm] assigneval Location<l:rsc1> CALL1<Location<l:rsc1_call>, StringReference<value1>>
 [35m   debug [39m[vm] assignEval: got call0 or call1
 [35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:rsc1> <- ResourceReference<TagResource<k: key, v: value1>>
+[35m   debug [39m[vm] Location<l:rsc1> <- ResourceReference<Prologue::TagResource<key -> value1>>
 [35m   debug [39m[vm] assigneval Location<l:rsc2_call> CURRY<Location<f:TAG>, StringReference<key>>
 [35m   debug [39m[vm] curry Location<f:TAG> StringReference<key>
 [35m   debug [39m[vm] ensureFunction: FunctionReference<TagFunction<>>
@@ -99,7 +99,7 @@
 [35m   debug [39m[vm] assigneval Location<l:rsc2> CALL1<Location<l:rsc1_call>, StringReference<value1>>
 [35m   debug [39m[vm] assignEval: got call0 or call1
 [35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:rsc2> <- ResourceReference<TagResource<k: key, v: value1>>
+[35m   debug [39m[vm] Location<l:rsc2> <- ResourceReference<Prologue::TagResource<key -> value1>>
 [35m   debug [39m[vm] assigneval Location<l:a> EQUAL<Location<l:rsc1>, Location<l:rsc2>>
 [35m   debug [39m[vm] equal Location<l:rsc1> Location<l:rsc2>
 [35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>

@@ -1,28 +1,26 @@
-#ifndef SWARMVM_RANGE
-#define SWARMVM_RANGE
-
-#include <utility>
+#ifndef SWARM_RESOURCE_H
+#define SWARM_RESOURCE_H
 
 #include "prologue_provider.h"
 #include "../isa_meta.h"
 
 namespace swarmc::Runtime::Prologue {
 
-    class RangeFunctionCall : public PrologueFunctionCall {
+    class ResourceTFunctionCall : public PrologueFunctionCall {
     public:
-        RangeFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
+        ResourceTFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(vector), returnType) {}
 
         void execute(VirtualMachine*) override;
 
         [[nodiscard]] std::string toString() const override {
-            return "RangeFunctionCall<>";
+            return "ResourceTFunctionCall<>";
         }
     };
 
-    class RangeFunction : public PrologueFunction {
+    class ResourceTFunction : public PrologueFunction {
     public:
-        explicit RangeFunction(IProvider* provider) : PrologueFunction("RANGE", provider) {}
+        explicit ResourceTFunction(IProvider* provider) : PrologueFunction("RESOURCE_T", provider) {}
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
@@ -31,10 +29,10 @@ namespace swarmc::Runtime::Prologue {
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
         [[nodiscard]] std::string toString() const override {
-            return "RangeFunction<>";
+            return "ResourceTFunction<>";
         }
     };
 
 }
 
-#endif //SWARMVM_RANGE
+#endif //SWARM_RESOURCE_H

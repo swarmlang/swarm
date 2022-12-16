@@ -51,7 +51,7 @@ namespace swarmc::Runtime::Prologue {
 
         PrologueFunction* loadFunction(std::string name) override;
 
-        void call(IProviderFunctionCall* call) override;
+        void call(VirtualMachine* vm, IProviderFunctionCall* call) override;
 
         [[nodiscard]] IGlobalServices* global() const override {
             return _global;

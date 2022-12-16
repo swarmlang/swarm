@@ -39,6 +39,19 @@ namespace swarmc::Runtime::SingleThreaded {
             return nslib::rand();
         }
 
+        std::optional<std::string> getKeyValue(const std::string &key) override {
+            auto value = _map.find(key);
+            return value == _map.end() ? std::nullopt : std::make_optional(value->second);
+        }
+
+        void putKeyValue(const std::string& key, const std::string& value) override {
+            _map[key] = value;
+        }
+
+        void dropKeyValue(const std::string& key) override {
+            _map.erase(key);
+        }
+
         std::string getNodeId() override {
             return "singlethreaded::localhost";
         }
@@ -49,6 +62,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
     protected:
         size_t _id = 0;
+        std::map<std::string, std::string> _map;
     };
 
 

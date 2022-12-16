@@ -3,7 +3,7 @@
 
 namespace swarmc::Runtime::Prologue {
 
-    void RandomFunctionCall::execute() {
+    void RandomFunctionCall::execute(VirtualMachine*) {
         setReturn(new ISA::NumberReference(_provider->global()->random()));
     }
 
@@ -16,7 +16,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
 
-    void RandomVectorFunctionCall::execute() {
+    void RandomVectorFunctionCall::execute(VirtualMachine*) {
         auto len = (ISA::NumberReference*) _vector.at(0).second;
         auto enumeration = new ISA::EnumerationReference(Type::Primitive::of(Type::Intrinsic::NUMBER));
         enumeration->reserve(static_cast<size_t>(len->value()));
@@ -41,7 +41,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
 
-    void RandomMatrixFunctionCall::execute() {
+    void RandomMatrixFunctionCall::execute(VirtualMachine*) {
         auto nRows = (ISA::NumberReference*) _vector.at(0).second;
         auto nCols = (ISA::NumberReference*) _vector.at(1).second;
 
