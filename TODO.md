@@ -67,3 +67,4 @@
 - FUTURE: separate fetch/execute/writeback threads for runtime
 - FUTURE: Serialize ISA to SVI code
 - FUTURE: Swarm module package manager?
+- Fabric: rewrite Stream as a resource

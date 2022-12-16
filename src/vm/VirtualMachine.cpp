@@ -478,6 +478,9 @@ namespace swarmc::Runtime {
 
         // If there are any filters, try to reschedule the call for the respective node
         if ( needsSchedule ) {
+            // Enter fabric's queue context
+            for ( auto queue : _queues ) queue->setContext(Configuration::FABRIC_QUEUE_CONTEXT);
+
             // Apply the needed filters
             auto oldFilters = _global->getSchedulingFilters();
             _global->applySchedulingFilters(filters);
@@ -492,6 +495,9 @@ namespace swarmc::Runtime {
 
             // Restore the old filters
             _global->applySchedulingFilters(oldFilters);
+
+            // Restore the old queue context
+            for ( auto queue : _queues ) queue->setContext(_queueContexts.top());
 
             // FIXME: not sure this logic is correct
             advance();
