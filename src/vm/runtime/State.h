@@ -117,7 +117,7 @@ namespace swarmc::Runtime {
             return id;
         }
 
-        // FIXME: write test for pushing/popping these by ID
+        // TODO: write test for pushing/popping these by ID
         void popExceptionHandler(const ExceptionHandlerId& id) {
             nslib::stl::erase<ExceptionHandler>(_handlers, [id](std::size_t, ExceptionHandler h) {
                 return std::get<0>(h) == id;

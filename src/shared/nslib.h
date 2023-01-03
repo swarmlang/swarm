@@ -63,6 +63,23 @@ namespace nslib {
     };
 
 
+    // TODO: better date class
+    inline std::string timestamp() {
+        std::stringstream s;
+        auto now = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+        auto local = *localtime(&now);
+
+        s << local.tm_year + 1900 << "-";
+        s << local.tm_mon + 1 << "-";
+        s << local.tm_mday << " ";
+        s << local.tm_hour << ":";
+        s << local.tm_min << ":";
+        s << local.tm_sec;
+
+        return s.str();
+    }
+
+
     /** ANSI-supported colors. */
     enum class ANSIColor: std::size_t {
         BLACK,
@@ -251,11 +268,11 @@ namespace nslib {
         }
 
         static std::string format(const std::string& tag, const std::string& p) {
-            return "[" + tag + "] " + format(p);  // FIXME
+            return (_useTimestamps ? timestamp() + ": " : "") + "[" + tag + "] " + format(p);
         }
 
         /** Returns true if the given verbosity should be displayed. */
-        bool shouldOutput(Verbosity v) const {
+        [[nodiscard]] bool shouldOutput(Verbosity v) const {
             return v >= _verb;
         }
     };
@@ -453,13 +470,13 @@ namespace nslib {
         }
 
         template<typename ElemT>
-        void erase(std::stack<ElemT>& s, std::function<bool(size_t, ElemT)> d) {
+        void erase(std::stack<ElemT>& s, std::function<bool(std::size_t, ElemT)> d) {
             priv::erase<ElemT>(s, d, 0);
         }
 
         template<typename ElemT>
-        void erase(std::stack<ElemT>& s, size_t idx) {
-            priv::erase<ElemT>(s, [idx](size_t current, ElemT) {
+        void erase(std::stack<ElemT>& s, std::size_t idx) {
+            priv::erase<ElemT>(s, [idx](std::size_t current, ElemT) {
                 return current == idx;
             }, 0);
         }
@@ -487,7 +504,7 @@ namespace nslib {
         namespace priv {
             struct StringSegment {
                 sem_t mutex;
-                size_t size;
+                std::size_t size;
                 int id;
                 bool written;
                 bool read;
@@ -508,7 +525,7 @@ namespace nslib {
         /** Repeatedly checks for a condition. If the condition is false, non-blocking sleep for a period before rechecking. */
         class Sleeper : public IStringable {
         public:
-            explicit Sleeper(std::function<bool()> check, size_t sleepMs = 10) : _check(std::move(check)), _sleepMs(sleepMs) {}
+            explicit Sleeper(std::function<bool()> check, std::size_t sleepMs = 10) : _check(std::move(check)), _sleepMs(sleepMs) {}
 
             void waitFor() {
                 while ( !_check() ) std::this_thread::sleep_for(std::chrono::milliseconds(_sleepMs));
@@ -519,14 +536,14 @@ namespace nslib {
             }
         protected:
             std::function<bool()> _check;
-            size_t _sleepMs;
+            std::size_t _sleepMs;
         };
 
 
         /** Publishes messages to shared memory for an IPC to read. */
         class Publisher : public IStringable {
         public:
-            explicit Publisher(std::string path, size_t sleepMs = 10) : _path(std::move(path)) {
+            explicit Publisher(std::string path, std::size_t sleepMs = 10) : _path(std::move(path)) {
                 _id = shmget(IPC_PRIVATE, sizeof(priv::StringSegment), S_IRUSR|S_IWUSR);
                 _segment = (priv::StringSegment*) shmat(_id, nullptr, 0);
 
@@ -619,7 +636,7 @@ namespace nslib {
                 return "ipc::Publisher<path: " + _path + ", id: " + s(_id) + ">";
             }
         protected:
-            int _id;
+            int _id = 0;
             priv::StringSegment* _segment;
             std::string _path;
             Sleeper* _read;
@@ -630,7 +647,7 @@ namespace nslib {
         /** Receives messages published to shared memory by an IPC. */
         class Subscriber : public IStringable {
         public:
-            Subscriber(std::string path, std::function<void(std::string)> handler, size_t sleepMs = 10) : _path(std::move(path)), _handler(std::move(handler)) {
+            Subscriber(std::string path, std::function<void(std::string)> handler, std::size_t sleepMs = 10) : _path(std::move(path)), _handler(std::move(handler)) {
                 std::ifstream fh;
                 fh.open(_path);
                 _id = std::stoi(stl::readStreamContents(fh));
@@ -702,7 +719,6 @@ namespace nslib {
 
     /**
      * Utility class for interacting with the Console window.
-     * @todo prompts
      */
     class Console : public ILogTarget {
     public:
@@ -917,9 +933,9 @@ namespace nslib {
 
         /** Show a progress bar. `value` should be a decimal percentage from 0 to 1. */
         Console* progress(double value) {
-            size_t width = _vpWidth - 5;
-            size_t filled = static_cast<int>(static_cast<double>(width) * value);
-            size_t percent = static_cast<int>(100 * value);
+            std::size_t width = _vpWidth - 5;
+            std::size_t filled = static_cast<int>(static_cast<double>(width) * value);
+            std::size_t percent = static_cast<int>(100 * value);
             if ( value >= 1 ) {
                 percent = 100;
                 filled = width;
@@ -1058,7 +1074,7 @@ namespace nslib {
             println()
                     ->color(ANSIColor::GREEN)->println("    " + message + "\n");
 
-            size_t idx = 0;
+            std::size_t idx = 0;
             for ( auto iter = options.begin(); iter != options.end(); ++iter, idx++ ) {
                 print("    [")->color(ANSIColor::YELLOW)->print(s(idx), true)->println("] " + (*iter));
             }
@@ -1082,7 +1098,7 @@ namespace nslib {
             std::cin >> inputStr;
 
             bool inputValid = true;
-            size_t input = 0;
+            std::size_t input = 0;
             try {
                 input = std::stoi(inputStr);
             } catch (std::invalid_argument&) {
@@ -1106,7 +1122,7 @@ namespace nslib {
                     ->color(ANSIColor::GREEN)->print("    " + message)->reset()
                     ->print(" [")->color(ANSIColor::YELLOW)->print(def)->reset()->println("]\n");
 
-            size_t idx = 0;
+            std::size_t idx = 0;
             for ( auto iter = options.begin(); iter != options.end(); ++iter, idx++ ) {
                 print("    [")->color(ANSIColor::YELLOW)->print(s(idx), true)->println("] " + (*iter));
             }
@@ -1129,7 +1145,7 @@ namespace nslib {
             std::cin >> inputStr;
 
             bool inputValid = true;
-            size_t input = 0;
+            std::size_t input = 0;
             try {
                 input = std::stoi(inputStr);
             } catch (std::invalid_argument&) {
@@ -1205,7 +1221,7 @@ namespace nslib {
         Verbosity _verb = Verbosity::INFO;
 
         /** The current width of the viewport. */
-        size_t _vpWidth = 70;
+        std::size_t _vpWidth = 70;
 
         /** True if we are capturing output into an internal buffer. */
         bool _isCapturing = false;
@@ -1219,7 +1235,7 @@ namespace nslib {
         std::stack<Verbosity> _verbLimits;
 
         /** Number of layers the Console is muted. */
-        size_t _muteStack = 0;
+        std::size_t _muteStack = 0;
 
         /** Output a string to the default stream. */
         Console* output(const std::string& v) {

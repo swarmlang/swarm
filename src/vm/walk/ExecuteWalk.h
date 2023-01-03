@@ -17,8 +17,21 @@ namespace swarmc::Runtime {
      */
     class ExecuteWalk : public ISA::ISAWalk<ISA::Reference*>, public IUsesLogger {
     public:
-        explicit ExecuteWalk(VirtualMachine* vm) : ISA::ISAWalk<ISA::Reference*>(), IUsesLogger("vm"), _vm(vm) {}
-        ~ExecuteWalk() override = default;
+        explicit ExecuteWalk(VirtualMachine* vm) : ISA::ISAWalk<ISA::Reference*>(), IUsesLogger("vm"), _vm(vm) {
+            _typeOfExceptionHandler = new Type::Lambda1(
+                Type::Primitive::of(Type::Intrinsic::NUMBER),
+                Type::Primitive::of(Type::Intrinsic::VOID)
+            );
+            _typeOfExceptionDiscriminator = new Type::Lambda1(
+                Type::Primitive::of(Type::Intrinsic::NUMBER),
+                Type::Primitive::of(Type::Intrinsic::BOOLEAN)
+            );
+        }
+
+        ~ExecuteWalk() override {
+            delete _typeOfExceptionHandler;
+            delete _typeOfExceptionDiscriminator;
+        }
 
         ISA::Reference* walkOne(ISA::Instruction* inst) override;
 
@@ -51,6 +64,8 @@ namespace swarmc::Runtime {
 
     protected:
         VirtualMachine* _vm;
+        Type::Type* _typeOfExceptionHandler;
+        Type::Type* _typeOfExceptionDiscriminator;
 
         [[nodiscard]] std::string toString() const override;
 

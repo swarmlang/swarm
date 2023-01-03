@@ -1,28 +1,40 @@
 #include <optional>
 #include <cassert>
 #include "../../Configuration.h"
+#include "../../errors/RuntimeError.h"
 #include "fabric.h"
 
 namespace swarmc::Runtime {
 
     void Fabric::publish(IResource* resource) {
-        // FIXME: these should generate runtime exceptionss
-
         // We can only publish resources we own
-        assert(resource->owner() == _global->getNodeId());
+        if ( resource->owner() != _global->getNodeId() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidPrivilegedResourceOperation,
+                "Cannot publish resource owned by a different node (owner: " + s(resource->owner()) + ", current: " + s(_global->getNodeId()) + ")"
+            );
+        }
 
         // We can't "re-publish" existing resources
         auto key = Configuration::FABRIC_PREFIX + resource->id();
-        assert(_global->getKeyValue(key) != std::nullopt);
+        if ( _global->getKeyValue(key) != std::nullopt ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::RepublishExistingResource,
+                "Cannot publish resource (" + s(resource) + "): the resource is already published"
+            );
+        }
 
         _global->putKeyValue(key, resource->owner());
     }
 
     void Fabric::unpublish(IResource* resource) {
-        // FIXME: this should generate a runtime exception
-
         // We can only unpublish rsources we own
-        assert(resource->owner() == _global->getNodeId());
+        if ( resource->owner() != _global->getNodeId() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidPrivilegedResourceOperation,
+                "Cannot un-publish resource owned by a different node (owner: " + s(resource->owner()) + ", current: " + s(_global->getNodeId()) + ")"
+            );
+        }
 
         auto key = Configuration::FABRIC_PREFIX + resource->id();
         _global->dropKeyValue(key);

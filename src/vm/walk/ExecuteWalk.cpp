@@ -939,7 +939,13 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkPushExceptionHandler1(PushExceptionHandler1* i) {
         verbose("pushexhandler " + i->first()->toString());
         auto handler = ensureFunction(_vm->resolve(i->first()));
-        // FIXME: type check handler function
+
+        if ( !handler->type()->isAssignableTo(_typeOfExceptionHandler) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidExceptionHandlerType,
+                "Exception handler callback has invalid type (expected: " + s(_typeOfExceptionHandler) + ", got: " + s(handler->type()) + ")"
+            );
+        }
 
         auto id = _vm->pushExceptionHandler(handler->fn());
         return new StringReference(id);
@@ -948,15 +954,28 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkPushExceptionHandler2(PushExceptionHandler2* i) {
         verbose("pushexhandler " + i->first()->toString() + " " + i->second()->toString());
         auto handler = ensureFunction(_vm->resolve(i->first()));
-        // FIXME: type check handler function
         auto discriminator = _vm->resolve(i->second());
+
+        if ( !handler->type()->isAssignableTo(_typeOfExceptionHandler) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidExceptionHandlerType,
+                "Exception handler callback has invalid type (expected: " + s(_typeOfExceptionHandler) + ", got: " + s(handler->type()) + ")"
+            );
+        }
 
         ExceptionHandlerId id;
         if ( discriminator->tag() == ReferenceTag::NUMBER ) {
             id = _vm->pushExceptionHandler(static_cast<std::size_t>(ensureNumber(discriminator)->value()), handler->fn());
         } else {
             auto discriminatorFn = ensureFunction(discriminator);
-            // FIXME: type check discriminator function
+
+            if ( !discriminatorFn->type()->isAssignableTo(_typeOfExceptionDiscriminator) ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::InvalidExceptionHandlerType,
+                    "Exception handler discriminator has invalid type (expected: " + s(_typeOfExceptionDiscriminator) + ", got: " + s(discriminatorFn->type()) + ")"
+                );
+            }
+
             id = _vm->pushExceptionHandler(discriminatorFn->fn(), handler->fn());
         }
 

@@ -24,6 +24,11 @@ namespace swarmc::Errors {
         ResumeOutsideExHandler = 19,
         AttemptedCloneOfNonReplicableResource = 20,
         InvalidValueTypeForEnum = 21,
+        InvalidPrivilegedResourceOperation = 22,
+        RepublishExistingResource = 23,
+        InvalidOrMissingFilePath = 24,
+        InvalidExceptionHandlerType = 25,
+        AcquireLockMaxAttemptsExceeded = 26,
     };
 
 }
@@ -47,6 +52,12 @@ namespace nslib {
         if ( v == swarmc::Errors::RuntimeExCode::StreamEmpty ) return "RuntimeExCode(StreamEmpty, code: 18)";
         if ( v == swarmc::Errors::RuntimeExCode::ResumeOutsideExHandler ) return "RuntimeExCode(ResumeOutsideExHandler, code: 19)";
         if ( v == swarmc::Errors::RuntimeExCode::AttemptedCloneOfNonReplicableResource ) return "RuntimeExCode(AttemptedCloneOfNonReplicableResource, code: 20)";
+        if ( v == swarmc::Errors::RuntimeExCode::InvalidValueTypeForEnum ) return "RuntimeExCode(InvalidValueTypeForEnum, code: 21)";
+        if ( v == swarmc::Errors::RuntimeExCode::InvalidPrivilegedResourceOperation ) return "RuntimeExCode(InvalidPrivilegedResourceOperation, code: 22)";
+        if ( v == swarmc::Errors::RuntimeExCode::RepublishExistingResource ) return "RuntimeExCode(RepublishExistingResource, code: 23)";
+        if ( v == swarmc::Errors::RuntimeExCode::InvalidOrMissingFilePath ) return "RuntimeExCode(InvalidOrMissingFilePath, code: 24)";
+        if ( v == swarmc::Errors::RuntimeExCode::InvalidExceptionHandlerType ) return "RuntimeExCode(InvalidExceptionHandlerType, code: 25)";
+        if ( v == swarmc::Errors::RuntimeExCode::AcquireLockMaxAttemptsExceeded ) return "RuntimeExCode(AcquireLockMaxAttemptsExceeded, code: 26)";
         return "RuntimeExCode(UNKNOWN" + s((std::size_t) v) + ")";
     }
 

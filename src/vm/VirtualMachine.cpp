@@ -29,7 +29,7 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::restore(ScopeFrame* scope) {
-        if ( _scope != scope ) delete _scope;  // FIXME: delete parent chain?
+        if ( _scope != scope ) delete _scope;
         _scope = scope;
     }
 
@@ -173,7 +173,7 @@ namespace swarmc::Runtime {
     void VirtualMachine::lock(LocationReference* loc) {
         if ( hasLock(loc) ) {
             logger->warn("Attempted to acquire lock that is already held by the requesting control: " + loc->toString());
-            return;  // FIXME: should this raise an error?
+            return;
         }
 
         auto scopeLoc = _scope->map(loc);
@@ -189,14 +189,16 @@ namespace swarmc::Runtime {
             return;
         }
 
-        // FIXME: should this throw a runtime error?
-        throw Errors::SwarmError("Unable to acquire lock for location (" + scopeLoc->toString() + ") from store (" + store->toString() + ") -- max retries exceeded");
+        throw Errors::RuntimeError(
+            Errors::RuntimeExCode::AcquireLockMaxAttemptsExceeded,
+            "Unable to acquire lock for location (" + scopeLoc->toString() + ") from store (" + store->toString() + ") -- max retries exceeded"
+        );
     }
 
     void VirtualMachine::unlock(LocationReference* loc) {
         if ( !hasLock(loc) ) {
             logger->warn("Attempted to release lock that is not held by the requesting control: " + loc->toString());
-            return;  // FIXME: should this raise an error?
+            return;
         }
 
         for ( auto it = _locks.begin(); it != _locks.end(); ++it ) {
@@ -208,7 +210,7 @@ namespace swarmc::Runtime {
             }
         }
 
-        // FIXME: should this throw a runtime error?
+        // This shouldn't be possible. If you're here, good luck.
         throw Errors::SwarmError("Unable to release lock for location (" + loc->toString() + ")");
     }
 
@@ -265,7 +267,7 @@ namespace swarmc::Runtime {
         // However, `executeCall()` is called from outside the normal instruction pipeline, so we
         // need to allow `step()` to advance, otherwise the first instruction will be executed
         // twice.
-        _shouldAdvance = !singleStep;  // fixme: !isInteractive
+        _shouldAdvance = !singleStep;
 
         // FIXME: need to allow debugger to step through this
         while ( !_state->isEndOfProgram() && !c->hasReturned() && !singleStep ) step();

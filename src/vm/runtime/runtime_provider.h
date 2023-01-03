@@ -33,7 +33,7 @@ namespace swarmc::Runtime {
         [[nodiscard]] virtual IProvider* provider() const = 0;
 
         /** Get the IResource instances that need to be acquired to execute this call. */
-        [[nodiscard]] virtual Resources needsResources() const { return {}; }  // FIXME: Should we move this to IFunctionCall itself?
+        [[nodiscard]] virtual Resources needsResources() const { return {}; }  // TODO: Should we move this to IFunctionCall itself?
 
         /**
          * Execute the native function.

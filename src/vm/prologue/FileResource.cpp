@@ -13,9 +13,16 @@ namespace swarmc::Runtime::Prologue {
 
         auto file = (FileResource*) resource->resource();
 
-        // Read the contents of the file from the path
-        // FIXME: raise exception if fh is bad
+        // Try to open the file
         std::ifstream fh(file->path());
+        if ( !fh ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidOrMissingFilePath,
+                "Unable to open path to file: " + file->path() + "(" + strerror(errno) + ")"
+            );
+        }
+
+        // Read the contents of the file from the path
         auto content = nslib::stl::readStreamContents(fh);
 
         // Set the contents as the return value of the call

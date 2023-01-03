@@ -318,7 +318,7 @@ namespace swarmc::ISA {
         }
 
         bool isEqualTo(const Reference* other) const override {
-            return false;  // FIXME: can this be implemented by pushing equality into the IFunction implementation?
+            return false;  // function equality is undefined
         }
 
         [[nodiscard]] FunctionReference* copy() const override {

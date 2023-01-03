@@ -266,3 +266,8 @@ Exception codes `0` through `499` are reserved by the SVM for exceptions generat
 | 19   | Attempted to `resume` outside exception handler context                             |
 | 20   | Attempted to clone a non-replicable resource                                        |
 | 21   | Invalid value for `enumeration` insert                                              |
+| 22   | Attempted to perform privileged operation on resource not owned by current control  |
+| 23   | Attempted to re-publish an existing resource                                        |
+| 24   | Attempted to open invalid or missing file path                                      |
+| 25   | Exception handler has invalid type                                                  |
+| 26   | Exceeded max attempts when acquiring lock                                           |
