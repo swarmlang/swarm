@@ -24,7 +24,7 @@ namespace swarmc::Runtime {
 //    using CallStackFrame = std::pair<pc_t, ISA::Instruction*>;
 //    using CallStack = std::stack<CallStackFrame>;
     using ExceptionHandlerId = std::string;
-    using ExceptionSelector = std::pair<std::optional<size_t>, IFunction*>;
+    using ExceptionSelector = std::pair<std::optional<std::size_t>, IFunction*>;
     using ExceptionHandler = std::tuple<ExceptionHandlerId, ExceptionSelector, IFunction*>;
     using ExceptionHandlers = std::stack<ExceptionHandler>;
 
@@ -33,7 +33,7 @@ namespace swarmc::Runtime {
         return selector.first == std::nullopt && selector.second == nullptr;
     }
 
-    inline bool exceptionHandlerIsCode(ExceptionHandler h, size_t code) {
+    inline bool exceptionHandlerIsCode(ExceptionHandler h, std::size_t code) {
         auto selector = std::get<1>(h);
         return selector.first != std::nullopt && selector.first == code;
     }
@@ -105,7 +105,7 @@ namespace swarmc::Runtime {
             return id;
         }
 
-        ExceptionHandlerId pushExceptionHandler(size_t code, IFunction* handler) {
+        ExceptionHandlerId pushExceptionHandler(std::size_t code, IFunction* handler) {
             auto id = getNextHandlerId();
             _handlers.emplace(id, std::make_pair(std::make_optional(code), nullptr), handler);
             return id;
@@ -119,7 +119,7 @@ namespace swarmc::Runtime {
 
         // FIXME: write test for pushing/popping these by ID
         void popExceptionHandler(const ExceptionHandlerId& id) {
-            nslib::stl::erase<ExceptionHandler>(_handlers, [id](size_t, ExceptionHandler h) {
+            nslib::stl::erase<ExceptionHandler>(_handlers, [id](std::size_t, ExceptionHandler h) {
                 return std::get<0>(h) == id;
             });
         }

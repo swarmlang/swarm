@@ -14,7 +14,7 @@ namespace swarmc::Runtime {
 
 namespace swarmc::Runtime::Debug {
 
-    enum class DebuggerCommand: size_t {
+    enum class DebuggerCommand: std::size_t {
         PING,
         STEP,
         RUN,
@@ -24,7 +24,7 @@ namespace swarmc::Runtime::Debug {
         EXIT,
     };
 
-    enum class DebuggerDataPrefix: size_t {
+    enum class DebuggerDataPrefix: std::size_t {
         PONG,
         STEP,
         STEP_ERROR,

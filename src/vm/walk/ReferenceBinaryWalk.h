@@ -20,23 +20,23 @@ namespace swarmc::ISA {
     protected:
         binn* walkLocationReference(LocationReference* ref) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ref->tag());
-            binn_map_set_uint64(obj, BC_AFFINITY, (size_t) ref->affinity());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
+            binn_map_set_uint64(obj, BC_AFFINITY, (std::size_t) ref->affinity());
             binn_map_set_str(obj, BC_NAME, strdup(ref->name().c_str()));
             return obj;
         }
 
         binn* walkTypeReference(TypeReference* ref) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ref->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
             binn_map_set_map(obj, BC_TYPE, walkType(ref->value()));
             return obj;
         }
 
         binn* walkFunctionReference(FunctionReference* ref) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ref->tag());
-            binn_map_set_uint64(obj, BC_BACKEND, (size_t) ref->fn()->backend());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
+            binn_map_set_uint64(obj, BC_BACKEND, (std::size_t) ref->fn()->backend());
             binn_map_set_str(obj, BC_NAME, strdup(ref->fn()->name().c_str()));
 
             auto params = binn_list();
@@ -52,7 +52,7 @@ namespace swarmc::ISA {
 
         binn* walkStreamReference(StreamReference* ref) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ref->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
             binn_map_set_str(obj, BC_ID, strdup(ref->stream()->id().c_str()));
             binn_map_set_map(obj, BC_TYPE, walkType(ref->stream()->innerType()));
             return obj;

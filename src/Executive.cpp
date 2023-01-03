@@ -104,7 +104,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
     bool noInputFile = false;
 
     bool skipOne = false;
-    for ( size_t i = 0; i < params.size(); i += 1 ) {
+    for ( std::size_t i = 0; i < params.size(); i += 1 ) {
         if ( skipOne ) {
             skipOne = false;
             continue;

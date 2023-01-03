@@ -25,7 +25,7 @@ void Block::setRetOutEdge(ReturnEdge* edge) { _retOutEdge = edge; }
 
 std::string Block::serialize() const {
     std::string c = std::to_string(_copy), idx = std::to_string(_idx);
-    std::string out = "\t\"" + id() + ":" + c + ":" + idx 
+    std::string out = "\t\"" + id() + ":" + c + ":" + idx
         + "\" [shape=rectangle,label=\"" + id() + ":" + c + ":" + idx + "\\n";
     for ( auto i : *instructions() ) {
         out += i->toString() + "\\n";
@@ -39,16 +39,16 @@ std::string Block::serialize() const {
 
 std::string AmbiguousFunctionBlock::serialize() const {
     std::string c = std::to_string(_copy), i = std::to_string(_idx);
-    std::string out = "\t\"" + id() + ":" + c + ":" + i 
+    std::string out = "\t\"" + id() + ":" + c + ":" + i
         + "\" [shape=rectangle,label=\"AmbiguousFunction:" + id() + ":" + c + ":" + i + "\"]\n";
     if ( _retOutEdge != nullptr ) out += _retOutEdge->serialize();
     return out;
 }
 
-std::pair<Block*,Block*> CFGFunction::makeCopy(size_t i, std::vector<Block*>* blocks, std::stack<CFGFunction*>* callStack) const {
+std::pair<Block*,Block*> CFGFunction::makeCopy(std::size_t i, std::vector<Block*>* blocks, std::stack<CFGFunction*>* callStack) const {
     std::vector<Block*> newblocks;
     std::unordered_map<Block*, Block*> copyOf;
-    
+
     for ( auto b : *_blocks ) {
         Block* copy = b->copy(i);
         newblocks.push_back(copy);
@@ -80,7 +80,7 @@ std::pair<Block*,Block*> CFGFunction::makeCopy(size_t i, std::vector<Block*>* bl
 }
 
 ControlFlowGraph::ControlFlowGraph(ISA::Instructions* instrs) {
-    // get mappings of instruction order for ease 
+    // get mappings of instruction order for ease
     auto cfg = CFGBuild(instrs);
     _instrs = cfg._instrs;
     _blocks = cfg._blocks;
@@ -111,7 +111,7 @@ ISA::Instructions* ControlFlowGraph::reconstruct() const {
     return instrs;
 }
 
-ISA::Instructions* ControlFlowGraph::reconstruct(Block* block, size_t fDepth) const {
+ISA::Instructions* ControlFlowGraph::reconstruct(Block* block, std::size_t fDepth) const {
     auto instrs = new ISA::Instructions();
 
     if ( fDepth == 0 ) {

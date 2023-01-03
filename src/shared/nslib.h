@@ -34,7 +34,7 @@ namespace nslib {
         static std::uniform_int_distribution<> distribution2(8, 11);
         static std::uniform_real_distribution<double> realDistribution(1, 0);
 
-        static size_t DETERMINISTIC_UUID_LAST = 0;
+        static std::size_t DETERMINISTIC_UUID_LAST = 0;
         static bool USE_DETERMINISTIC_UUIDS = false;
     }
 
@@ -64,7 +64,7 @@ namespace nslib {
 
 
     /** ANSI-supported colors. */
-    enum class ANSIColor: size_t {
+    enum class ANSIColor: std::size_t {
         BLACK,
         GREY,
         RED,
@@ -93,7 +93,7 @@ namespace nslib {
 
 
     /** Log message verbosity levels. */
-    enum class Verbosity: size_t {
+    enum class Verbosity: std::size_t {
         SUCCESS = 6,
         ERROR = 5,
         WARNING = 4,
@@ -435,7 +435,7 @@ namespace nslib {
     namespace stl {
         namespace priv {
             template <typename ElemT>
-            void erase(std::stack<ElemT>& s, std::function<bool(size_t, ElemT)> d, size_t current) {
+            void erase(std::stack<ElemT>& s, std::function<bool(std::size_t, ElemT)> d, std::size_t current) {
                 if ( s.empty() ) {
                     return;
                 }

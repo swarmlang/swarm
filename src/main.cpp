@@ -1,3 +1,4 @@
+#include <climits>
 #include "Executive.h"
 
 int main(int argc, char** argv) {

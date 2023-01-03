@@ -6,7 +6,7 @@
 
 namespace swarmc::Errors {
 
-    enum class RuntimeExCode : size_t {
+    enum class RuntimeExCode : std::size_t {
         InvalidArgumentType = 5,
         TypeError = 6,
         InvalidReferenceImplementation = 7,
@@ -23,6 +23,7 @@ namespace swarmc::Errors {
         StreamEmpty = 18,
         ResumeOutsideExHandler = 19,
         AttemptedCloneOfNonReplicableResource = 20,
+        InvalidValueTypeForEnum = 21,
     };
 
 }
@@ -46,7 +47,7 @@ namespace nslib {
         if ( v == swarmc::Errors::RuntimeExCode::StreamEmpty ) return "RuntimeExCode(StreamEmpty, code: 18)";
         if ( v == swarmc::Errors::RuntimeExCode::ResumeOutsideExHandler ) return "RuntimeExCode(ResumeOutsideExHandler, code: 19)";
         if ( v == swarmc::Errors::RuntimeExCode::AttemptedCloneOfNonReplicableResource ) return "RuntimeExCode(AttemptedCloneOfNonReplicableResource, code: 20)";
-        return "RuntimeExCode(UNKNOWN" + s((size_t) v) + ")";
+        return "RuntimeExCode(UNKNOWN" + s((std::size_t) v) + ")";
     }
 
 }

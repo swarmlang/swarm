@@ -10,7 +10,7 @@ void CFGBuild::buildBlocks() {
     _blocks->push_back(new Block("Top", Block::BlockType::BLOCK, 0));
     bstack.push(_blocks->back());
     if ( _instrs->empty() ) return;
-    for ( size_t i = 0; i < _instrs->size(); i++ ) {
+    for ( std::size_t i = 0; i < _instrs->size(); i++ ) {
         if ( _instrs->at(i)->tag() == ISA::Tag::BEGINFN ) {
             std::string name = ((ISA::BeginFunction*)_instrs->at(i))->first()->fqName();
             auto fstart = new Block(name, Block::BlockType::FUNCTION, i);
@@ -21,8 +21,8 @@ void CFGBuild::buildBlocks() {
             _nameMap->insert({ name, cfgf });
             callStack.push(cfgf);
             bstack.top()->addInstruction(_instrs->at(i));
-        } else if ( _instrs->at(i)->tag() == ISA::Tag::RETURN0 
-                || _instrs->at(i)->tag() == ISA::Tag::RETURN1 ) 
+        } else if ( _instrs->at(i)->tag() == ISA::Tag::RETURN0
+                || _instrs->at(i)->tag() == ISA::Tag::RETURN1 )
         {
             bstack.top()->addInstruction(_instrs->at(i));
             callStack.top()->setEnd(bstack.top());
@@ -31,7 +31,7 @@ void CFGBuild::buildBlocks() {
             callStack.pop();
         } else {
             bstack.top()->addInstruction(_instrs->at(i));
-            auto instr = _instrs->at(i)->tag() == ISA::Tag::ASSIGNEVAL 
+            auto instr = _instrs->at(i)->tag() == ISA::Tag::ASSIGNEVAL
                 ? ((ISA::AssignEval*)_instrs->at(i))->second()
                 : _instrs->at(i);
 
@@ -43,7 +43,7 @@ void CFGBuild::buildBlocks() {
                 || instr->tag() == ISA::Tag::CALLELSE1
                 || instr->tag() == ISA::Tag::WITH
                 || instr->tag() == ISA::Tag::ENUMERATE
-                || instr->tag() == ISA::Tag::WHILE ) 
+                || instr->tag() == ISA::Tag::WHILE )
             {
                 std::string name;
                 bool cond = true;
@@ -52,28 +52,28 @@ void CFGBuild::buildBlocks() {
                     assert(((ISA::Call0*)instr)->first()->tag() == ISA::ReferenceTag::LOCATION);
                     name = ((ISA::LocationReference*)((ISA::Call0*)instr)->first())->fqName();
                     cond = false;
-                    break; 
+                    break;
                 case ISA::Tag::CALL1:
                     assert(((ISA::Call1*)instr)->first()->tag() == ISA::ReferenceTag::LOCATION);
                     name = ((ISA::LocationReference*)((ISA::Call1*)instr)->first())->fqName();
                     cond = false;
-                    break; 
+                    break;
                 case ISA::Tag::CALLIF0:
                     assert(((ISA::CallIf0*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION);
                     name = ((ISA::LocationReference*)((ISA::CallIf0*)instr)->second())->fqName();
-                    break; 
+                    break;
                 case ISA::Tag::CALLIF1:
                     assert(((ISA::CallIf1*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION);
                     name = ((ISA::LocationReference*)((ISA::CallIf1*)instr)->second())->fqName();
-                    break; 
+                    break;
                 case ISA::Tag::CALLELSE0:
                     assert(((ISA::CallElse0*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION);
                     name = ((ISA::LocationReference*)((ISA::CallElse0*)instr)->second())->fqName();
-                    break; 
+                    break;
                 case ISA::Tag::CALLELSE1:
                     assert(((ISA::CallElse1*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION);
                     name = ((ISA::LocationReference*)((ISA::CallElse1*)instr)->second())->fqName();
-                    break;  
+                    break;
                 case ISA::Tag::WITH:
                     name = ((ISA::With*)instr)->second()->fqName();
                     cond = false;
@@ -87,9 +87,9 @@ void CFGBuild::buildBlocks() {
                     cond = false;
                     break;
                 default:
-                    break; 
+                    break;
                 }
-                
+
                 assert(!bstack.empty());
                 Block* previous = bstack.top();
                 // postcall block
@@ -138,7 +138,7 @@ void CFGBuild::buildBlocks() {
 //     if ( _instrs->size() == 0 ) return;
 //     _nameMap->insert({_instrs->at(0), "Top"});
 //     _prevInstr->insert({_instrs->at(0), nullptr});
-//     for ( size_t i = 0; i < _instrs->size(); i++ ) {
+//     for ( std::size_t i = 0; i < _instrs->size(); i++ ) {
 //         if ( _instrs->at(i)->tag() == ISA::Tag::BEGINFN ) {
 //             /* BEGINFN
 //              * Next instr = the instruction after the corresponding return
@@ -153,8 +153,8 @@ void CFGBuild::buildBlocks() {
 //             if ( i != _instrs->size() - 1 ) {
 //                 _nameMap->insert({_instrs->at(i + 1), ((ISA::BeginFunction*)_instrs->at(i))->first()->fqName()});
 //             }
-//         } else if ( _instrs->at(i)->tag() == ISA::Tag::RETURN0 
-//                 || _instrs->at(i)->tag() == ISA::Tag::RETURN1 ) 
+//         } else if ( _instrs->at(i)->tag() == ISA::Tag::RETURN0
+//                 || _instrs->at(i)->tag() == ISA::Tag::RETURN1 )
 //         {
 //             /* RETURN
 //              * Next instr = nullptr

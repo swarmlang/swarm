@@ -9,12 +9,12 @@ using namespace nslib;
 
 namespace swarmc::Runtime::Debug {
 
-    using Position = std::tuple<std::string, size_t, size_t>;
+    using Position = std::tuple<std::string, std::size_t, std::size_t>;
 
     class Metadata : public IStringable {
     public:
 
-        void addMapping(size_t pc, const std::string& file, size_t line, size_t col) {
+        void addMapping(std::size_t pc, const std::string& file, size_t line, size_t col) {
             _sourceMap[pc] = std::make_tuple(file, line, col);
         }
 

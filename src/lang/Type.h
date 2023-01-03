@@ -20,7 +20,7 @@ namespace Type {
 
 namespace Type {
 
-    enum class Intrinsic: size_t {
+    enum class Intrinsic: std::size_t {
         STRING,
         NUMBER,
         BOOLEAN,

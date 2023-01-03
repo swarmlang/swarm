@@ -29,7 +29,7 @@ namespace swarmc::Runtime {
         } catch (Errors::RuntimeError& e) {
             std::string msg = e.what();
             logger->error(msg);
-            _vm->raise((size_t) e.code());
+            _vm->raise((std::size_t) e.code());
         }
 
         return nullptr;
@@ -339,8 +339,13 @@ namespace swarmc::Runtime {
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->first());
 
-        // fixme: eventually this should generate a runtime error
-        assert(value->type()->isAssignableTo(enumeration->type()->values()));
+        if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidValueTypeForEnum,
+                "Cannot append value to enum: invalid type (expected: " + s(enumeration->type()->values()) + ", got: " + s(value->type()) + ")"
+            );
+        }
+
         enumeration->append(value);
 
         return nullptr;
@@ -351,8 +356,13 @@ namespace swarmc::Runtime {
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->first());
 
-        // fixme: eventually this should generate a runtime error
-        assert(value->type()->isAssignableTo(enumeration->type()->values()));
+        if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
+            throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::InvalidValueTypeForEnum,
+                    "Cannot prepend value to enum: invalid type (expected: " + s(enumeration->type()->values()) + ", got: " + s(value->type()) + ")"
+            );
+        }
+
         enumeration->prepend(value);
 
         return nullptr;
@@ -369,14 +379,14 @@ namespace swarmc::Runtime {
         auto enumeration = ensureEnumeration(_vm->resolve(i->first()));
         auto idx = ensureNumber(_vm->resolve(i->second()));
 
-        if ( static_cast<size_t>(idx->value()) >= enumeration->length() ) {
+        if ( static_cast<std::size_t>(idx->value()) >= enumeration->length() ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::EnumIndexOutOfBounds,
                 "Index " + s(idx->value()) + " out of bounds for enumeration " + s(enumeration)
             );
         }
 
-        return enumeration->get(static_cast<size_t>(idx->value()));
+        return enumeration->get(static_cast<std::size_t>(idx->value()));
     }
 
     Reference* ExecuteWalk::walkEnumSet(EnumSet* i) {
@@ -385,7 +395,7 @@ namespace swarmc::Runtime {
         auto idx = ensureNumber(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->third());
 
-        if ( static_cast<size_t>(idx->value()) > enumeration->length() ) {
+        if ( static_cast<std::size_t>(idx->value()) > enumeration->length() ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::EnumIndexOutOfBounds,
                 "Index " + s(idx->value()) + " out of bounds for enumeration " + s(enumeration)
@@ -399,7 +409,7 @@ namespace swarmc::Runtime {
             );
         }
 
-        enumeration->set(static_cast<size_t>(idx->value()), value);
+        enumeration->set(static_cast<std::size_t>(idx->value()), value);
         return nullptr;
     }
 
@@ -423,7 +433,7 @@ namespace swarmc::Runtime {
 
         _vm->enterQueueContext();
 
-        for ( size_t idx = 0; idx < enumeration->length(); idx += 1 ) {
+        for ( std::size_t idx = 0; idx < enumeration->length(); idx += 1 ) {
             auto elem = enumeration->get(idx);
             auto call = callback->fn()
                 ->curry(elem)
@@ -896,7 +906,7 @@ namespace swarmc::Runtime {
         verbose("strslicefrom " + i->first()->toString() + " " + i->second()->toString());
         auto str = ensureString(_vm->resolve(i->first()));
         auto from = ensureNumber(_vm->resolve(i->second()));
-        return new StringReference(str->value().substr(static_cast<size_t>(from->value())));
+        return new StringReference(str->value().substr(static_cast<std::size_t>(from->value())));
     }
 
     Reference* ExecuteWalk::walkStringSliceFromTo(StringSliceFromTo* i) {
@@ -906,7 +916,7 @@ namespace swarmc::Runtime {
         auto str = ensureString(_vm->resolve(i->first()));
         auto from = ensureNumber(_vm->resolve(i->second()));
         auto to = ensureNumber(_vm->resolve(i->third()));
-        return new StringReference(str->value().substr(static_cast<size_t>(from->value()), static_cast<size_t>(to->value())));
+        return new StringReference(str->value().substr(static_cast<std::size_t>(from->value()), static_cast<std::size_t>(to->value())));
     }
 
     Reference* ExecuteWalk::walkTypeOf(TypeOf* i) {
@@ -943,7 +953,7 @@ namespace swarmc::Runtime {
 
         ExceptionHandlerId id;
         if ( discriminator->tag() == ReferenceTag::NUMBER ) {
-            id = _vm->pushExceptionHandler(static_cast<size_t>(ensureNumber(discriminator)->value()), handler->fn());
+            id = _vm->pushExceptionHandler(static_cast<std::size_t>(ensureNumber(discriminator)->value()), handler->fn());
         } else {
             auto discriminatorFn = ensureFunction(discriminator);
             // FIXME: type check discriminator function
@@ -963,7 +973,7 @@ namespace swarmc::Runtime {
     Reference* ExecuteWalk::walkRaise(Raise* i) {
         verbose("raise " + i->first()->toString());
         auto id = ensureNumber(_vm->resolve(i->first()));
-        _vm->raise(static_cast<size_t>(id->value()));
+        _vm->raise(static_cast<std::size_t>(id->value()));
         return nullptr;
     }
 

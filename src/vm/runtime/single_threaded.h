@@ -31,7 +31,7 @@ namespace swarmc::Runtime::SingleThreaded {
             return nslib::uuid();
         }
 
-        size_t getId() override {
+        std::size_t getId() override {
             return _id++;
         }
 
@@ -61,7 +61,7 @@ namespace swarmc::Runtime::SingleThreaded {
         }
 
     protected:
-        size_t _id = 0;
+        std::size_t _id = 0;
         std::map<std::string, std::string> _map;
     };
 

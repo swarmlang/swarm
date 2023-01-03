@@ -105,7 +105,7 @@ namespace swarmc::Runtime {
     }
 
     IProviderFunction* VirtualMachine::loadProviderFunction(const std::string& name) {
-        size_t idx = 0;
+        std::size_t idx = 0;
         for ( auto it = _providers.rbegin(); it != _providers.rend(); ++it, --idx ) {
             auto provider = _providers.at(idx);
             auto fn = provider->loadFunction(name);
@@ -355,7 +355,7 @@ namespace swarmc::Runtime {
         }
     }
 
-    std::pair<ScopeFrame*, IFunction*> VirtualMachine::getExceptionHandler(size_t code) {
+    std::pair<ScopeFrame*, IFunction*> VirtualMachine::getExceptionHandler(std::size_t code) {
         auto scope = _scope;
         while ( scope != nullptr ) {
             auto handlers = scope->getExceptionHandlers();
@@ -400,7 +400,7 @@ namespace swarmc::Runtime {
         return {nullptr, nullptr};
     }
 
-    void VirtualMachine::raise(size_t code) {
+    void VirtualMachine::raise(std::size_t code) {
         auto handler = getExceptionHandler(code);
 
         if ( handler.first == nullptr || handler.second == nullptr ) {

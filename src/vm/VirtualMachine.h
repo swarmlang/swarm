@@ -292,7 +292,7 @@ namespace swarmc::Runtime {
             return _scope->pushExceptionHandler(selector, handler);
         }
 
-        virtual ExceptionHandlerId pushExceptionHandler(size_t code, IFunction* handler) {
+        virtual ExceptionHandlerId pushExceptionHandler(std::size_t code, IFunction* handler) {
             return _scope->pushExceptionHandler(code, handler);
         }
 
@@ -304,9 +304,9 @@ namespace swarmc::Runtime {
             _scope->popExceptionHandler(id);
         }
 
-        virtual std::pair<ScopeFrame*, IFunction*> getExceptionHandler(size_t code);
+        virtual std::pair<ScopeFrame*, IFunction*> getExceptionHandler(std::size_t code);
 
-        virtual void raise(size_t code);
+        virtual void raise(std::size_t code);
 
         virtual ScopeFrame* getExceptionFrame();
 

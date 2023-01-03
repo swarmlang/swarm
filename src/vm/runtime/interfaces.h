@@ -12,7 +12,7 @@ using namespace nslib;
 namespace swarmc::ISA {
     class Reference;
     class LocationReference;
-    enum class Affinity: size_t;
+    enum class Affinity: std::size_t;
 }
 
 namespace swarmc::Type {
@@ -30,7 +30,7 @@ namespace swarmc::Runtime {
     class IQueue;
 
     using SchedulingFilters = std::map<std::string, std::string>;
-    using JobID = size_t;
+    using JobID = std::size_t;
     using QueueContextID = std::string;
     using Stores = std::vector<IStorageInterface*>;
     using Locks = std::vector<IStorageLock*>;
@@ -38,7 +38,7 @@ namespace swarmc::Runtime {
     using NodeID = std::string;
 
     /** Tracks the status of a queued function call. */
-    enum class JobState: size_t {
+    enum class JobState: std::size_t {
         UNKNOWN = 1 << 0,
         PENDING = 1 << 1,
         RUNNING = 1 << 2,
@@ -61,7 +61,7 @@ namespace swarmc::Runtime {
         virtual std::string getUuid() = 0;
 
         /** This should return a globally-monotonic, unique numeric identifier. */
-        virtual size_t getId() = 0;
+        virtual std::size_t getId() = 0;
 
         /** This should use a source of randomness to generate a random double on [0,1]. */
         virtual double random() = 0;

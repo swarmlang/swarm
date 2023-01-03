@@ -34,7 +34,7 @@ namespace swarmc::ISA {
 
         binn* walkPosition(PositionAnnotation* position) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) position->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) position->tag());
             binn_map_set_map(obj, BC_FIRST, _ref.walk(position->first()));
             binn_map_set_map(obj, BC_SECOND, _ref.walk(position->second()));
             binn_map_set_map(obj, BC_THIRD, _ref.walk(position->third()));
@@ -43,7 +43,7 @@ namespace swarmc::ISA {
 
         binn* walkPlus(Plus* plus) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) plus->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) plus->tag());
             binn_map_set_map(obj, BC_FIRST, _ref.walk(plus->first()));
             binn_map_set_map(obj, BC_SECOND, _ref.walk(plus->second()));
             return obj;
@@ -51,7 +51,7 @@ namespace swarmc::ISA {
 
         binn* walkMinus(Minus* minus) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) minus->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) minus->tag());
             binn_map_set_map(obj, BC_FIRST, _ref.walk(minus->first()));
             binn_map_set_map(obj, BC_SECOND, _ref.walk(minus->second()));
             return obj;
@@ -59,7 +59,7 @@ namespace swarmc::ISA {
 
         binn* walkTimes(Times* times) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) times->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) times->tag());
             binn_map_set_map(obj, BC_FIRST, _ref.walk(times->first()));
             binn_map_set_map(obj, BC_SECOND, _ref.walk(times->second()));
             return obj;
@@ -67,7 +67,7 @@ namespace swarmc::ISA {
 
         binn* walkDivide(Divide* divide) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) divide->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) divide->tag());
             binn_map_set_map(obj, BC_FIRST, _ref.walk(divide->first()));
             binn_map_set_map(obj, BC_SECOND, _ref.walk(divide->second()));
             return obj;
@@ -75,7 +75,7 @@ namespace swarmc::ISA {
 
         binn* walkPower(Power* power) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) power->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) power->tag());
             binn_map_set_map(obj, BC_FIRST, _ref.walk(power->first()));
             binn_map_set_map(obj, BC_SECOND, _ref.walk(power->second()));
             return obj;

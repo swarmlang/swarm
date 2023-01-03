@@ -62,7 +62,7 @@ namespace swarmc::ISA {
             return walkFunctionReference(backend, name, params);
         }
 
-        FunctionReference* walkFunctionReference(size_t backend, const std::string& name, std::vector<Reference*> params);
+        FunctionReference* walkFunctionReference(std::size_t backend, const std::string& name, std::vector<Reference*> params);
 
         StreamReference* walkStreamReference(binn* obj) {
             auto id = binn_map_str(obj, BC_ID);

@@ -4,7 +4,7 @@
 
 namespace swarmc::ISA {
 
-    FunctionReference* BinaryReferenceWalk::walkFunctionReference(size_t backend, const std::string& name, std::vector<Reference*> params) {
+    FunctionReference* BinaryReferenceWalk::walkFunctionReference(std::size_t backend, const std::string& name, std::vector<Reference*> params) {
         if ( _vm == nullptr ) {
             throw Errors::SwarmError("Cannot deserialize FunctionReference without VirtualMachine environment.");
         }

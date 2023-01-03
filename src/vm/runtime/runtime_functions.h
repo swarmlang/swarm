@@ -22,7 +22,7 @@ namespace swarmc::Runtime {
     using CallVector = std::vector<std::pair<const Type::Type*, ISA::Reference*>>;
 
     /** The VM mechanisms used to perform a function call. */
-    enum class FunctionBackend: size_t {
+    enum class FunctionBackend: std::size_t {
         FB_INLINE,  // jumps to an inline function body in the program
         FB_PROVIDER,  // calls an external, native function implementation
     };
@@ -75,7 +75,7 @@ namespace swarmc::Runtime {
         CallVector _vector;
         const Type::Type* _returnType;
         ISA::Reference* _returnValue = nullptr;
-        size_t _paramIndex = 0;
+        std::size_t _paramIndex = 0;
         bool _returned = false;
     };
 

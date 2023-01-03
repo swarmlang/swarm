@@ -47,12 +47,12 @@ namespace swarmc::Runtime {
     }
 
     void State::extractMetadata() {
-        size_t pc = 0;
+        std::size_t pc = 0;
         _is.erase(std::remove_if(_is.begin(), _is.end(), [&pc, this](ISA::Instruction* i) {
             pc += 1;
             if ( i->tag() == ISA::Tag::POSITION ) {
                 auto pos = (ISA::PositionAnnotation*) i;
-                _meta.addMapping(pc, pos->first()->value(), static_cast<size_t>(pos->second()->value()), static_cast<size_t>(pos->third()->value()));
+                _meta.addMapping(pc, pos->first()->value(), static_cast<std::size_t>(pos->second()->value()), static_cast<std::size_t>(pos->third()->value()));
                 return true;
             }
 

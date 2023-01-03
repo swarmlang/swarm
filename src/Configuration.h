@@ -22,7 +22,7 @@ public:
     static int LOCK_MAX_RETRIES;
     static int WAITER_SLEEP_uS;
 
-    static size_t ENUMERATION_UNROLLING_LIMIT;
+    static std::size_t ENUMERATION_UNROLLING_LIMIT;
 
     static bool THREAD_EXIT;
     static std::map<std::string, std::string> QUEUE_FILTERS;

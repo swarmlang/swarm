@@ -24,7 +24,7 @@ namespace swarmc::ISA {
     using Instructions = std::vector<Instruction*>;
 
     /** Unique identifiers for each instruction. */
-    enum class Tag: size_t {
+    enum class Tag: std::size_t {
         POSITION,
         BEGINFN,
         FNPARAM,
@@ -104,7 +104,7 @@ namespace swarmc::ISA {
     };
 
     /** Places where values can be stored. */
-    enum class Affinity: size_t {
+    enum class Affinity: std::size_t {
         LOCAL,
         SHARED,
         FUNCTION,
@@ -112,7 +112,7 @@ namespace swarmc::ISA {
     };
 
     /** Broad types of references built-in to the runtime. */
-    enum class ReferenceTag: size_t {
+    enum class ReferenceTag: std::size_t {
         LOCATION,
         TYPE,
         STRING,
@@ -498,22 +498,22 @@ namespace swarmc::ISA {
         }
 
         /** Returns true if this enumeration has an item at the given index. */
-        [[nodiscard]] virtual bool has(size_t i) const {
+        [[nodiscard]] virtual bool has(std::size_t i) const {
             return _items.size() > i;
         }
 
         /** Returns the item at the given index. */
-        [[nodiscard]] virtual Reference* get(size_t i) const {
+        [[nodiscard]] virtual Reference* get(std::size_t i) const {
             return _items.at(i);
         }
 
         /** Inserts the given item into the enumeration at the specified index. */
-        virtual void set(size_t i, Reference* value) {
+        virtual void set(std::size_t i, Reference* value) {
             _items[i] = value;
         }
 
         /** Pre-allocate space for the given number of items. */
-        virtual void reserve(size_t len) {
+        virtual void reserve(std::size_t len) {
             _items.reserve(_items.size() + len);
         }
 
@@ -526,7 +526,7 @@ namespace swarmc::ISA {
             if ( other->tag() != tag() ) return false;
             auto ref = (EnumerationReference*) other;
             if ( ref->length() != length() ) return false;
-            for ( size_t i = 0; i < length(); i += 1 ) {
+            for ( std::size_t i = 0; i < length(); i += 1 ) {
                 if ( !get(i)->isEqualTo(ref->get(i)) ) {
                     return false;
                 }
@@ -579,7 +579,7 @@ namespace swarmc::ISA {
         }
 
         /** Get the number of entries in this map. */
-        [[nodiscard]] virtual size_t length() const {
+        [[nodiscard]] virtual std::size_t length() const {
             return _items.size();
         }
 

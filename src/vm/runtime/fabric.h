@@ -10,7 +10,7 @@ namespace swarmc::Runtime {
 
     class VirtualMachine;
 
-    enum class ResourceCategory: size_t {
+    enum class ResourceCategory: std::size_t {
         TUNNELED = 1 << 0,
         REPLICATED = 1 << 1,
         EXCLUSIVE = 1 << 2,

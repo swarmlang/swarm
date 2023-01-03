@@ -32,7 +32,7 @@ namespace swarmc::ISA {
             bool hasComment = false;
             bool hasCommentLeader = false;
 
-            for ( size_t i = 0; i < inputString.length(); i += 1 ) {
+            for ( std::size_t i = 0; i < inputString.length(); i += 1 ) {
                 auto c = inputString.at(i);
 
                 // Ignore tokens w/in comments
@@ -102,7 +102,7 @@ namespace swarmc::ISA {
         /** Parse a list of instructions from the given list of tokens. */
         virtual Instructions parse(std::vector<std::string>& tokens) {
             Instructions is;
-            for ( size_t i = 0; i < tokens.size(); ) {
+            for ( std::size_t i = 0; i < tokens.size(); ) {
                 i += parseOne(is, tokens, i);
             }
             return is;
@@ -113,7 +113,7 @@ namespace swarmc::ISA {
          * starting at the `startAt`-th token in `tokens`.
          * This function should return the number of tokens which were consumed from `tokens`.
          */
-        virtual size_t parseOne(Instructions& is, std::vector<std::string>& tokens, size_t startAt) {
+        virtual std::size_t parseOne(Instructions& is, std::vector<std::string>& tokens, std::size_t startAt) {
             try {
                 auto token = tokens.at(startAt);
                 auto leader = token.at(0);
