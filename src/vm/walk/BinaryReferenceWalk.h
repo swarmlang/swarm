@@ -36,6 +36,33 @@ namespace swarmc::ISA {
             throw Errors::SwarmError("Unable to deserialize binary reference with unknown or invalid reference tag.");
         }
 
+        [[nodiscard]] Type::Type* walkType(binn* obj) {
+            auto intrinsic = (Type::Intrinsic) binn_map_uint64(obj, BC_INTRINSIC);
+
+            if ( Type::Primitive::isPrimitive(intrinsic) )
+                return walkPrimitiveType(obj);
+
+            if ( intrinsic == Type::Intrinsic::AMBIGUOUS )
+                return walkAmbiguousType(obj);
+
+            if ( intrinsic == Type::Intrinsic::MAP )
+                return walkMapType(obj);
+
+            if ( intrinsic == Type::Intrinsic::ENUMERABLE )
+                return walkEnumerableType(obj);
+
+            if ( intrinsic == Type::Intrinsic::RESOURCE )
+                return walkResourceType(obj);
+
+            if ( intrinsic == Type::Intrinsic::STREAM )
+                return walkStreamType(obj);
+
+            if ( intrinsic == Type::Intrinsic::LAMBDA0 || intrinsic == Type::Intrinsic::LAMBDA1 )
+                return walkLambdaType(obj);
+
+            throw Errors::SwarmError("Cannot de-serialize unknown or invalid intrinsic type.");
+        }
+
     protected:
         Runtime::VirtualMachine* _vm;
 
@@ -82,33 +109,6 @@ namespace swarmc::ISA {
 
         BooleanReference* walkBooleanReference(binn* obj) {
             return new BooleanReference(binn_map_bool(obj, BC_VALUE));
-        }
-
-        Type::Type* walkType(binn* obj) {
-            auto intrinsic = (Type::Intrinsic) binn_map_uint64(obj, BC_INTRINSIC);
-
-            if ( Type::Primitive::isPrimitive(intrinsic) )
-                return walkPrimitiveType(obj);
-
-            if ( intrinsic == Type::Intrinsic::AMBIGUOUS )
-                return walkAmbiguousType(obj);
-
-            if ( intrinsic == Type::Intrinsic::MAP )
-                return walkMapType(obj);
-
-            if ( intrinsic == Type::Intrinsic::ENUMERABLE )
-                return walkEnumerableType(obj);
-
-            if ( intrinsic == Type::Intrinsic::RESOURCE )
-                return walkResourceType(obj);
-
-            if ( intrinsic == Type::Intrinsic::STREAM )
-                return walkStreamType(obj);
-
-            if ( intrinsic == Type::Intrinsic::LAMBDA0 || intrinsic == Type::Intrinsic::LAMBDA1 )
-                return walkLambdaType(obj);
-
-            throw Errors::SwarmError("Cannot de-serialize unknown or invalid intrinsic type.");
         }
 
         Type::Primitive* walkPrimitiveType(binn* obj) {

@@ -3,6 +3,7 @@
 
 #include <utility>
 #include <vector>
+#include "../../../mod/binn/src/binn.h"
 #include "../../shared/nslib.h"
 #include "../../errors/SwarmError.h"
 
@@ -32,11 +33,14 @@ namespace swarmc::Runtime {
      */
     class IFunctionCall : public IStringable {
     public:
-        IFunctionCall(FunctionBackend backend, CallVector vector, const Type::Type* returnType):
-            _backend(backend), _vector(std::move(vector)), _returnType(returnType) {}
+        IFunctionCall(FunctionBackend backend, std::string name, CallVector vector, const Type::Type* returnType):
+            _backend(backend), _name(std::move(name)), _vector(std::move(vector)), _returnType(returnType) {}
 
         /** Determines how the function call is performed. */
         virtual FunctionBackend backend() { return _backend; }
+
+        /** Get the name of the function. Used to load the call from serialization. */
+        virtual std::string name() { return _name; }
 
         /** Get the parameters already applied to this function call, paired with thier types. */
         virtual CallVector vector() { return _vector; }
@@ -70,8 +74,13 @@ namespace swarmc::Runtime {
             return _paramIndex < _vector.size();
         }
 
+        virtual binn* getExtraSerialData() {}
+
+        virtual void loadExtraSerialData(binn*) {}
+
     protected:
         FunctionBackend _backend;
+        std::string _name;
         CallVector _vector;
         const Type::Type* _returnType;
         ISA::Reference* _returnValue = nullptr;

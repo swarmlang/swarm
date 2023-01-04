@@ -75,10 +75,10 @@ namespace swarmc::Runtime {
         [[nodiscard]] ScopeFrame* overrideCall(IFunctionCall*) const;
 
         /** Get the parent of this scope. If this is the top-level, returns nullptr. */
-        ScopeFrame* parent() { return _parent; }
+        ScopeFrame* parent() const { return _parent; }
 
         /** Get the nearest call in the call stack. If top-level, returns nullptr. */
-        IFunctionCall* call() {
+        IFunctionCall* call() const {
             if ( _call != nullptr ) return _call;
             if ( _parent != nullptr ) return _parent->call();
             return nullptr;
@@ -173,6 +173,12 @@ namespace swarmc::Runtime {
         [[nodiscard]] bool shouldCaptureReturn() const {
             return _shouldCaptureReturn;
         }
+
+        std::map<std::string, ISA::LocationReference*> nameMap() const {
+            return _map;  // FIXME: remove this once we centralize the serializers
+        }
+
+        std::string id() const { return _id; }
     protected:
         ScopeFrame* _parent = nullptr;
         std::map<std::string, ISA::LocationReference*> _map;

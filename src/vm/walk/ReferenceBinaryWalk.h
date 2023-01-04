@@ -17,6 +17,52 @@ namespace swarmc::ISA {
             return "ReferenceBinaryWalk<>";
         }
 
+        [[nodiscard]] std::string walkToString(Reference* ref) {
+            auto binn = walk(ref);
+            void* buf = binn_release(binn);
+            char* bufstr = static_cast<char*>(buf);
+            std::size_t buflen = ceil((double) sizeof(buf) / (double) sizeof(char));
+            std::string s(bufstr, buflen);
+            return s;
+        }
+
+        [[nodiscard]] std::string walkToString(const Type::Type* type) {
+            auto binn = walkType(type);
+            void* buf = binn_release(binn);
+            char* bufstr = static_cast<char*>(buf);
+            std::size_t buflen = ceil((double) sizeof(buf) / (double) sizeof(char));
+            std::string s(bufstr, buflen);
+            return s;
+        }
+
+        [[nodiscard]] binn* walkType(const Type::Type* type) {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_INTRINSIC, (size_t) type->intrinsic());
+
+            if ( Type::Primitive::isPrimitive(type->intrinsic()) )
+                return walkPrimitiveType(obj, (Type::Primitive*) type);
+
+            if ( type->intrinsic() == Type::Intrinsic::AMBIGUOUS )
+                return walkAmbiguousType(obj, (Type::Ambiguous*) type);
+
+            if ( type->intrinsic() == Type::Intrinsic::MAP )
+                return walkMapType(obj, (Type::Map*) type);
+
+            if ( type->intrinsic() == Type::Intrinsic::ENUMERABLE )
+                return walkEnumerableType(obj, (Type::Enumerable*) type);
+
+            if ( type->intrinsic() == Type::Intrinsic::RESOURCE )
+                return walkResourceType(obj, (Type::Resource*) type);
+
+            if ( type->intrinsic() == Type::Intrinsic::STREAM )
+                return walkStreamType(obj, (Type::Stream*) type);
+
+            if ( type->intrinsic() == Type::Intrinsic::LAMBDA0 || type->intrinsic() == Type::Intrinsic::LAMBDA1 )
+                return walkLambdaType(obj, (Type::Lambda*) type);
+
+            throw Errors::SwarmError("Cannot serialize unknown or invalid intrinsic type: " + type->toString());
+        }
+
     protected:
         binn* walkLocationReference(LocationReference* ref) override {
             auto obj = binn_map();
@@ -77,34 +123,6 @@ namespace swarmc::ISA {
             binn_map_set_uint64(obj, BC_TAG, (size_t) ref->tag());
             binn_map_set_bool(obj, BC_VALUE, ref->value());
             return obj;
-        }
-
-        binn* walkType(const Type::Type* type) {
-            auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_INTRINSIC, (size_t) type->intrinsic());
-
-            if ( Type::Primitive::isPrimitive(type->intrinsic()) )
-                return walkPrimitiveType(obj, (Type::Primitive*) type);
-
-            if ( type->intrinsic() == Type::Intrinsic::AMBIGUOUS )
-                return walkAmbiguousType(obj, (Type::Ambiguous*) type);
-
-            if ( type->intrinsic() == Type::Intrinsic::MAP )
-                return walkMapType(obj, (Type::Map*) type);
-
-            if ( type->intrinsic() == Type::Intrinsic::ENUMERABLE )
-                return walkEnumerableType(obj, (Type::Enumerable*) type);
-
-            if ( type->intrinsic() == Type::Intrinsic::RESOURCE )
-                return walkResourceType(obj, (Type::Resource*) type);
-
-            if ( type->intrinsic() == Type::Intrinsic::STREAM )
-                return walkStreamType(obj, (Type::Stream*) type);
-
-            if ( type->intrinsic() == Type::Intrinsic::LAMBDA0 || type->intrinsic() == Type::Intrinsic::LAMBDA1 )
-                return walkLambdaType(obj, (Type::Lambda*) type);
-
-            throw Errors::SwarmError("Cannot serialize unknown or invalid intrinsic type: " + type->toString());
         }
 
         binn* walkPrimitiveType(binn* obj, const Type::Primitive* type) {

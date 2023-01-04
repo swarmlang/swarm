@@ -1,3 +1,6 @@
 [submodule "mod/binn"]
 	path = mod/binn
 	url = https://github.com/liteserver/binn
+[submodule "mod/ignite"]
+	path = mod/ignite
+	url = https://github.com/apache/ignite

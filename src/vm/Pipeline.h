@@ -6,6 +6,7 @@
 #include "isa_meta.h"
 #include "ISAParser.h"
 #include "runtime/single_threaded.h"
+#include "runtime/ignite.h"
 #include "VirtualMachine.h"
 #include "prologue/prologue_provider.h"
 #include "walk/ISABinaryWalk.h"

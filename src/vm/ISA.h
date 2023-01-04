@@ -768,6 +768,14 @@ namespace swarmc::ISA {
 
 namespace nslib {
 
+    inline std::string s(swarmc::ISA::Affinity v) {
+        if ( v == swarmc::ISA::Affinity::LOCAL ) return "Affinity(LOCAL)";
+        if ( v == swarmc::ISA::Affinity::SHARED ) return "Affinity(SHARED)";
+        if ( v == swarmc::ISA::Affinity::FUNCTION ) return "Affinity(FUNCTION)";
+        if ( v == swarmc::ISA::Affinity::PRIMITIVE ) return "Affinity(PRIMITIVE)";
+        return "Affinity(UNKNOWN)";
+    }
+
     inline std::string s(swarmc::ISA::ReferenceTag v) {
         if ( v == swarmc::ISA::ReferenceTag::LOCATION ) return "ReferenceTag(LOCATION)";
         if ( v == swarmc::ISA::ReferenceTag::TYPE ) return "ReferenceTag(TYPE)";
