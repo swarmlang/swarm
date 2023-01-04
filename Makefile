@@ -27,8 +27,9 @@ DEBUG_DEPS := $(DEBUG_OBJS:.o=.d)
 INC_DIRS := $(shell find $(SRC_DIRS) -type d)
 INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
-CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall
-CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++17 -Wall -DSWARM_DEBUG
+CXXFLAGS += -std=c++20
+CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall
+CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall -DSWARM_DEBUG
 #LDFLAGS ?= -lredis++ -lhiredis -pthread
 LDFLAGS ?= -lbinn -pthread
 

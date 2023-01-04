@@ -31,9 +31,9 @@ DIGIT [0-9]
 LETTER [a-zA-Z]
 ESCAPEE [ntr'"\\]
 STRELT (([\\]{ESCAPEE})|([^\\\n"]))
-/* 
+/*
 WHITESPACE [\040\t]
-BADESC [\\][^nt"\\\n]? 
+BADESC [\\][^nt"\\\n]?
 */
 
 %%
@@ -178,11 +178,11 @@ while {
 }
 
 true {
-	return makeBareToken(TokenKind::TRUE);
+	return makeBareToken(TokenKind::TTRUE);
 }
 
 false {
-	return makeBareToken(TokenKind::FALSE);
+	return makeBareToken(TokenKind::TFALSE);
 }
 
 fn {
