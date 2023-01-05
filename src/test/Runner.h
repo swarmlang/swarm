@@ -8,7 +8,6 @@
 #include "024_shared_variables.h"
 #include "031_symbol_walk.h"
 #include "034_basic_isa.h"
-#include "035_isa_serialize.h"
 #include "044_binary.h"
 
 namespace swarmc {
@@ -35,9 +34,6 @@ namespace Test {
                 return test.run();
             } else if ( name == "034_basic_isa" ) {
                 BasicISATest test;
-                return test.run();
-            } else if ( name == "035_isa_serialize" ) {
-                ISASerializationTest test;
                 return test.run();
             } else if ( name == "044_binary" ) {
                 BinarySerializeTest test;

@@ -118,8 +118,8 @@
 %token <transToken>      MAP
 %token <transToken>      IF
 %token <transToken>      WHILE
-%token <transToken>      TRUE
-%token <transToken>      FALSE
+%token <transToken>      TTRUE
+%token <transToken>      TFALSE
 %token <transToken>      CONTINUE
 %token <transToken>      BREAK
 %token <transToken>      RETURN
@@ -235,7 +235,7 @@ statement :
         i->assumeAndReduceStatements($6->reduceToStatements());
         $$ = i;
         delete $1; delete $2; delete $4; delete $5; delete $7;
-    } 
+    }
 
     | WHILE LPAREN expression RPAREN LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $7->position());
@@ -243,7 +243,7 @@ statement :
         w->assumeAndReduceStatements($6->reduceToStatements());
         $$ = w;
         delete $1; delete $2; delete $4; delete $5; delete $7;
-    } 
+    }
 
     | callExpression SEMICOLON {
         Position* pos = new Position($1->position(), $2->position());
@@ -552,7 +552,7 @@ expressionF :
     | LBRACKET RBRACKET OF type {
         Position* pos = new Position($1->position(), $4->position());
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
-        $$ = new EnumerationLiteralExpressionNode(pos, actuals, 
+        $$ = new EnumerationLiteralExpressionNode(pos, actuals,
             new TypeLiteral($4->position()->copy(), new Type::Enumerable($4->value())));
         delete $1; delete $2; delete $3; delete $4;
     }
@@ -690,12 +690,12 @@ term :
         delete $1;
     }
 
-    | TRUE {
+    | TTRUE {
         $$ = new BooleanLiteralExpressionNode($1->position()->copy(), true);
         delete $1;
     }
 
-    | FALSE {
+    | TFALSE {
         $$ = new BooleanLiteralExpressionNode($1->position()->copy(), false);
         delete $1;
     }

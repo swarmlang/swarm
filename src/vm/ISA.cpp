@@ -1,5 +1,22 @@
 #include "ISA.h"
 
+namespace nslib {
+    std::string s(swarmc::ISA::ReferenceTag v) {
+        if ( v == swarmc::ISA::ReferenceTag::LOCATION ) return "ReferenceTag(LOCATION)";
+        if ( v == swarmc::ISA::ReferenceTag::TYPE ) return "ReferenceTag(TYPE)";
+        if ( v == swarmc::ISA::ReferenceTag::STRING ) return "ReferenceTag(STRING)";
+        if ( v == swarmc::ISA::ReferenceTag::NUMBER ) return "ReferenceTag(NUMBER)";
+        if ( v == swarmc::ISA::ReferenceTag::BOOLEAN ) return "ReferenceTag(BOOLEAN)";
+        if ( v == swarmc::ISA::ReferenceTag::FUNCTION ) return "ReferenceTag(FUNCTION)";
+        if ( v == swarmc::ISA::ReferenceTag::STREAM ) return "ReferenceTag(STREAM)";
+        if ( v == swarmc::ISA::ReferenceTag::RESOURCE ) return "ReferenceTag(RESOURCE)";
+        if ( v == swarmc::ISA::ReferenceTag::ENUMERATION ) return "ReferenceTag(ENUMERATION)";
+        if ( v == swarmc::ISA::ReferenceTag::MAP ) return "ReferenceTag(MAP)";
+        if ( v == swarmc::ISA::ReferenceTag::VOID ) return "ReferenceTag(VOID)";
+        return "ReferenceTag(UNKNOWN)";
+    }
+}
+
 namespace swarmc::ISA {
 
     std::string Instruction::tagName(Tag tag) {

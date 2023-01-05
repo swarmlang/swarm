@@ -43,8 +43,8 @@ namespace swarmc::Lang {
             if (kind == Parser::token::ENUMERABLE) return "ENUMERABLE";
             if (kind == Parser::token::IF) return "IF";
             if (kind == Parser::token::WHILE) return "WHILE";
-            if (kind == Parser::token::TRUE) return "TRUE";
-            if (kind == Parser::token::FALSE) return "FALSE";
+            if (kind == Parser::token::TTRUE) return "TTRUE";
+            if (kind == Parser::token::TFALSE) return "TFALSE";
             if (kind == Parser::token::CONTINUE) return "CONTINUE";
             if (kind == Parser::token::BREAK) return "BREAK";
             if (kind == Parser::token::RETURN) return "RETURN";
@@ -83,7 +83,7 @@ namespace swarmc::Lang {
 
         static std::string semanticSymbolKindToString(SemanticSymbolKind kind) {
             if (kind == SemanticSymbolKind::VARIABLE) return "VARIABLE";
-            
+
             return "UNKNOWN";
         }
     };

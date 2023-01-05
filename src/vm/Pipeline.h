@@ -57,7 +57,7 @@ namespace swarmc::VM {
                 return ISA::BinaryISAWalk::readInput(*_input);
             }
 
-            return ISA::ISABinaryWalk::serialize(targetInstructions());
+            return ISA::ISABinaryWalk::serialize(targetInstructions(), nullptr);  // FIXME: nullptr for vm?
         }
 
         /** Print the loaded tokens from the SVI input stream to the given output stream. */

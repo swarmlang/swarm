@@ -9,18 +9,12 @@
 
 using namespace nslib;
 
-namespace swarmc {
-namespace Lang {
+namespace swarmc::Lang {
     class TypeLiteral;
 }
 
-namespace Type {
-    class Type;
-}
-
-namespace Type {
-
-    enum class Intrinsic: std::size_t {
+namespace swarmc::Type {
+    enum class Intrinsic : std::size_t {
         STRING,
         NUMBER,
         BOOLEAN,
@@ -38,8 +32,14 @@ namespace Type {
         CONTRADICTION,
         OPAQUE,
     };
+}
 
-    class Type : public IStringable {
+namespace nslib {
+    [[nodiscard]] std::string s(swarmc::Type::Intrinsic v);
+}
+
+namespace swarmc::Type {
+    class Type : public IStringable, public serial::ISerializable {
     public:
         static std::string intrinsicString(Intrinsic intrinsic) {
             if ( intrinsic == Intrinsic::STRING ) return "STRING";
@@ -61,6 +61,10 @@ namespace Type {
         }
 
         ~Type() override = default;
+
+        [[nodiscard]] serial::tag_t getSerialKey() const override {
+            return s(intrinsic());
+        }
 
         [[nodiscard]] virtual Type* copy() const = 0;
 
@@ -117,6 +121,10 @@ namespace Type {
         }
 
         explicit Primitive(Intrinsic intrinsic) : _intrinsic(intrinsic) {}
+
+        [[nodiscard]] serial::tag_t getSerialKey() const override {
+            return "Type::Primitive";
+        }
 
         [[nodiscard]] Primitive* copy() const override {
             auto inst = Primitive::of(_intrinsic);
@@ -416,7 +424,6 @@ namespace Type {
     protected:
         const Type* _param;
     };
-}
 }
 
 #endif

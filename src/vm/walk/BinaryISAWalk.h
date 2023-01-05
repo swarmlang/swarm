@@ -6,8 +6,8 @@
 #include "../../../mod/binn/src/binn.h"
 #include "../../shared/nslib.h"
 #include "../isa_meta.h"
-#include "./BinaryReferenceWalk.h"
 #include "binary_const.h"
+#include "../Wire.h"
 
 using namespace nslib;
 
@@ -19,9 +19,7 @@ namespace swarmc::ISA {
 
     class BinaryISAWalk : public IStringable {
     public:
-        explicit BinaryISAWalk(Runtime::VirtualMachine* vm = nullptr) {
-            _ref = BinaryReferenceWalk(vm);
-        }
+        explicit BinaryISAWalk(Runtime::VirtualMachine* vm = nullptr): _vm(vm) {}
 
         [[nodiscard]] std::string toString() const override {
             return "BinaryISAWalk<>";
@@ -143,22 +141,22 @@ namespace swarmc::ISA {
         }
 
     protected:
-        BinaryReferenceWalk _ref;
+        VirtualMachine* _vm;
 
         NumberReference* walkNumberReference(binn* obj) {
-            auto ref = _ref.walk(obj);
+            auto ref = Wire::references()->produce(obj, _vm);
             assert(ref->tag() == ReferenceTag::NUMBER);
             return (NumberReference*) ref;
         }
 
         StringReference* walkStringReference(binn* obj) {
-            auto ref = _ref.walk(obj);
+            auto ref = Wire::references()->produce(obj, _vm);
             assert(ref->tag() == ReferenceTag::STRING);
             return (StringReference*) ref;
         }
 
         LocationReference* walkLocationReference(binn* obj) {
-            auto ref = _ref.walk(obj);
+            auto ref = Wire::references()->produce(obj, _vm);
             assert(ref->tag() == ReferenceTag::LOCATION);
             return (LocationReference*) ref;
         }
@@ -173,151 +171,151 @@ namespace swarmc::ISA {
 
         Plus* walkPlus(binn* obj) {
             return new Plus(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Minus* walkMinus(binn* obj) {
             return new Minus(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Times* walkTimes(binn* obj) {
             return new Times(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Divide* walkDivide(binn* obj) {
             return new Divide(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Power* walkPower(binn* obj) {
             return new Power(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Mod* walkMod(binn* obj) {
             return new Mod(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
-        
+
         Negative* walkNegative(binn* obj) {
             return new Negative(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         GreaterThan* walkGreaterThan(binn* obj) {
             return new GreaterThan(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         GreaterThanOrEqual* walkGreaterThanOrEqual(binn* obj) {
             return new GreaterThanOrEqual(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         LessThan* walkLessThan(binn* obj) {
             return new LessThan(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         LessThanOrEqual* walkLessThanOrEqual(binn* obj) {
             return new LessThanOrEqual(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         And* walkAnd(binn* obj) {
             return new And(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Or* walkOr(binn* obj) {
             return new Or(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Xor* walkXor(binn* obj) {
             return new Xor(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Nand* walkNand(binn* obj) {
             return new Nand(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Nor* walkNor(binn* obj) {
             return new Nor(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Not* walkNot(binn* obj) {
             return new Not(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         While* walkWhile(binn* obj) {
             return new While(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
                 walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
             );
         }
 
         With* walkWith(binn* obj) {
             return new With(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
                 walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
             );
         }
 
         EnumInit* walkEnumInit(binn* obj) {
             return new EnumInit(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         EnumAppend* walkEnumAppend(binn* obj) {
             return new EnumAppend(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
                 walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
             );
         }
 
         EnumPrepend* walkEnumPrepend(binn* obj) {
             return new EnumPrepend(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
                 walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
             );
         }
@@ -331,21 +329,21 @@ namespace swarmc::ISA {
         EnumGet* walkEnumGet(binn* obj) {
             return new EnumGet(
                 walkLocationReference((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         EnumSet* walkEnumSet(binn* obj) {
             return new EnumSet(
                 walkLocationReference((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND)),
-                _ref.walk((binn*) binn_map_map(obj, BC_THIRD))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
             );
         }
 
         Enumerate* walkEnumerate(binn* obj) {
             return new Enumerate(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
                 walkLocationReference((binn*) binn_map_map(obj, BC_SECOND)),
                 walkLocationReference((binn*) binn_map_map(obj, BC_THIRD))
             );
@@ -354,7 +352,7 @@ namespace swarmc::ISA {
         BeginFunction* walkBeginFunction(binn* obj) {
             auto bf = new BeginFunction(
                 binn_map_str(obj, BC_NAME),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
 
             if ( binn_map_bool(obj, BC_ISPURE) ) {
@@ -366,7 +364,7 @@ namespace swarmc::ISA {
 
         FunctionParam* walkFunctionParam(binn* obj) {
             return new FunctionParam(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
                 walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
             );
         }
@@ -377,100 +375,100 @@ namespace swarmc::ISA {
 
         Return1* walkReturn1(binn* obj) {
             return new Return1(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         Curry* walkCurry(binn* obj) {
             return new Curry(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         Call0* walkCall0(binn* obj) {
             return new Call0(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         Call1* walkCall1(binn* obj) {
             return new Call1(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         CallIf0* walkCallIf0(binn* obj) {
             return new CallIf0(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         CallIf1* walkCallIf1(binn* obj) {
             return new CallIf1(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND)),
-                _ref.walk((binn*) binn_map_map(obj, BC_THIRD))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
             );
         }
 
         CallElse0* walkCallElse0(binn* obj) {
             return new CallElse0(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         CallElse1* walkCallElse1(binn* obj) {
             return new CallElse1(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND)),
-                _ref.walk((binn*) binn_map_map(obj, BC_THIRD))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
             );
         }
 
         PushCall0* walkPushCall0(binn* obj) {
             return new PushCall0(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         PushCall1* walkPushCall1(binn* obj) {
             return new PushCall1(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         PushCallIf0* walkPushCallIf0(binn* obj) {
             return new PushCallIf0(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         PushCallIf1* walkPushCallIf1(binn* obj) {
             return new PushCallIf1(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND)),
-                _ref.walk((binn*) binn_map_map(obj, BC_THIRD))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
             );
         }
 
         PushCallElse0* walkPushCallElse0(binn* obj) {
             return new PushCallElse0(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         PushCallElse1* walkPushCallElse1(binn* obj) {
             return new PushCallElse1(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND)),
-                _ref.walk((binn*) binn_map_map(obj, BC_THIRD))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
             );
         }
 
@@ -484,21 +482,21 @@ namespace swarmc::ISA {
 
         MapInit* walkMapInit(binn* obj) {
             return new MapInit(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         MapSet* walkMapSet(binn* obj) {
             return new MapSet(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
                 walkLocationReference((binn*) binn_map_map(obj, BC_THIRD))
             );
         }
 
         MapGet* walkMapGet(binn* obj) {
             return new MapGet(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
                 walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
             );
         }
@@ -518,14 +516,14 @@ namespace swarmc::ISA {
         Typify* walkTypify(binn* obj) {
             return new Typify(
                 walkLocationReference((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         AssignValue* walkAssignValue(binn* obj) {
             return new AssignValue(
                 walkLocationReference((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
@@ -550,8 +548,8 @@ namespace swarmc::ISA {
 
         IsEqual* walkIsEqual(binn* obj) {
             return new IsEqual(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
@@ -563,14 +561,14 @@ namespace swarmc::ISA {
 
         StreamInit* walkStreamInit(binn* obj) {
             return new StreamInit(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         StreamPush* walkStreamPush(binn* obj) {
             return new StreamPush(
                 walkLocationReference((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
@@ -602,42 +600,42 @@ namespace swarmc::ISA {
 
         StringConcat* walkStringConcat(binn* obj) {
             return new StringConcat(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         StringLength* walkStringLength(binn* obj) {
             return new StringLength(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         StringSliceFrom* walkStringSliceFrom(binn* obj) {
             return new StringSliceFrom(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
         StringSliceFromTo* walkStringSliceFromTo(binn* obj) {
             return new StringSliceFromTo(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND)),
-                _ref.walk((binn*) binn_map_map(obj, BC_THIRD))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
             );
         }
 
         TypeOf* walkTypeOf(binn* obj) {
             return new TypeOf(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         IsCompatible* walkIsCompatible(binn* obj) {
             return new IsCompatible(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST)),
-                _ref.walk((binn*) binn_map_map(obj, BC_SECOND))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)
             );
         }
 
@@ -656,13 +654,13 @@ namespace swarmc::ISA {
 
         PopExceptionHandler* walkPopExceptionHandler(binn* obj) {
             return new PopExceptionHandler(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 
         Raise* walkRaise(binn* obj) {
             return new Raise(
-                _ref.walk((binn*) binn_map_map(obj, BC_FIRST))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
 

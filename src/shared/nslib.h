@@ -1,6 +1,10 @@
 #ifndef NSLIB_H
 #define NSLIB_H
 
+#ifndef NSLIB_BINN_H_PATH
+#define NSLIB_BINN_H_PATH "../../mod/binn/src/binn.h"
+#endif
+
 #include <random>
 #include <stack>
 #include <map>
@@ -23,6 +27,11 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/shm.h>
+#include NSLIB_BINN_H_PATH
+
+#define NSLIB_SERIAL_TAG 0
+#define NSLIB_SERIAL_DATA 1
+#define NSLIB_SERIAL_VERSION 2
 
 namespace nslib {
 
@@ -78,6 +87,16 @@ namespace nslib {
 
         return s.str();
     }
+
+
+    class NSLibException : public std::logic_error, public IStringable {
+    public:
+        explicit NSLibException(const std::string& message) : std::logic_error(message) {}
+
+        [[nodiscard]] std::string toString() const override {
+            return what();
+        }
+    };
 
 
     /** ANSI-supported colors. */
@@ -1302,6 +1321,118 @@ namespace nslib {
     /** Get a random double between 0 and 1. */
     inline double rand() {
         return priv::realDistribution(priv::eng);
+    }
+
+
+    /** A factory-pattern serialization library. */
+    namespace serial {
+        /** Each child-class has a unique tag. */
+        using tag_t = std::string;
+
+        /** Helper interface for a class which can be serialized */
+        class ISerializable {
+        public:
+            [[nodiscard]] virtual tag_t getSerialKey() const = 0;
+
+            [[nodiscard]] virtual binn* getExtraSerialData() const { return binn_map(); }
+
+            virtual void loadExtraSerialData(binn*) {}
+        };
+
+        namespace priv {
+            /** Concept uniting the ISerializable interface w/ some other Class */
+            template <typename Class, class T>
+            concept Serializable = requires(T& obj) {
+                { std::is_base_of_v<ISerializable, T> };
+                { std::is_base_of_v<Class, T> };
+            };
+        }
+
+        /** Thrown by Factory when a conflicting producer/reducer is registered. */
+        class DuplicateTagException : public NSLibException {
+        public:
+            explicit DuplicateTagException(const tag_t& tag) : NSLibException("Cannot register duplicate tag with Factory: " + s(tag)) {}
+        };
+
+        /**
+         * The boss. Collects functions mapping some tag_t tag between binn* and child
+         * classes of Class.
+         * @tparam Class
+         */
+        template <typename Class, typename Passthrough>
+        class Factory : public IStringable {
+        public:
+            Factory() = default;
+
+            using Producer = std::function<Class*(binn*, Passthrough)>;
+            using Reducer = std::function<binn*(const Class*, Passthrough)>;
+
+            /** Register a function which instantiates Class instances w/ the given tag. */
+            void registerProducer(tag_t tag, Producer producer) {
+                if ( hasProducer(tag) ) {
+                    throw DuplicateTagException(tag);
+                }
+
+                _producers.insert({ tag, producer });
+            }
+
+            /** Register a function which creates binn* instances for Classes w/ the given tag. */
+            void registerReducer(tag_t tag, Reducer producer) {
+                if ( hasReducer(tag) ) {
+                    throw DuplicateTagException(tag);
+                }
+
+                _reducers.insert({ tag, producer });
+            }
+
+            /** True if a producer w/ that tag has been registered. */
+            [[nodiscard]] bool hasProducer(tag_t tag) {
+                return _producers.find(tag) != _producers.end();
+            }
+
+            /** True if a reducer w/ that tag has been registered. */
+            [[nodiscard]] bool hasReducer(tag_t tag) {
+                return _reducers.find(tag) != _reducers.end();
+            }
+
+            /** Load a Class instance from the serialized data. */
+            [[nodiscard]] Class* produce(binn* data, Passthrough p) {
+                tag_t tag = binn_map_str(data, NSLIB_SERIAL_TAG);
+                auto iter = _producers.find(tag);
+                if ( iter == _producers.end() ) {
+                    return nullptr;
+                }
+
+                auto obj = (binn*) binn_map_object(data, NSLIB_SERIAL_DATA); // FIXME?
+                return ((*iter).second)(obj, p);
+            }
+
+            /** Serialize an object. */
+            [[nodiscard]] binn* reduce(priv::Serializable<Class> auto obj, Passthrough p) {
+                return reduce(obj->getSerialKey(), obj, p);
+            }
+
+            /** Serialize an object w/ the given tag. */
+            [[nodiscard]] binn* reduce(tag_t tag, const Class* obj, Passthrough p) {
+                auto iter = _reducers.find(tag);
+                if ( iter == _reducers.end() ) {
+                    return nullptr;
+                }
+
+                auto data = ((*iter).second)(obj, p);
+                auto binn = binn_map();
+                binn_map_set_str(binn, NSLIB_SERIAL_TAG, strdup(tag.c_str()));
+                binn_map_set_object(binn, NSLIB_SERIAL_DATA, data);
+                return binn;
+            }
+
+            [[nodiscard]] std::string toString() const override {
+                return "nslib::serial::Factory<>";
+            }
+        protected:
+            std::map<tag_t, Producer> _producers;
+            std::map<tag_t, Reducer> _reducers;
+        };
     }
 }
 

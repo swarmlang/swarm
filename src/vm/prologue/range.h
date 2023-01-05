@@ -10,8 +10,8 @@ namespace swarmc::Runtime::Prologue {
 
     class RangeFunctionCall : public PrologueFunctionCall {
     public:
-        RangeFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        RangeFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "RANGE", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 

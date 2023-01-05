@@ -19,34 +19,47 @@ namespace swarmc::ISA {
 
 namespace swarmc::Runtime {
 
-    using FormalTypes = std::vector<const Type::Type*>;
-    using CallVector = std::vector<std::pair<const Type::Type*, ISA::Reference*>>;
+    using FormalTypes = std::vector<const Type::Type *>;
+    using CallVector = std::vector<std::pair<const Type::Type *, ISA::Reference *>>;
 
     /** The VM mechanisms used to perform a function call. */
-    enum class FunctionBackend: std::size_t {
+    enum class FunctionBackend : std::size_t {
         FB_INLINE,  // jumps to an inline function body in the program
         FB_PROVIDER,  // calls an external, native function implementation
     };
 
+}
+
+namespace nslib {
+    [[nodiscard]] std::string s(swarmc::Runtime::FunctionBackend v);
+}
+
+namespace swarmc::Runtime {
+
     /**
      * Represents a function call (which may be in-progress or completed).
      */
-    class IFunctionCall : public IStringable {
+    class IFunctionCall : public IStringable, public serial::ISerializable {
     public:
         IFunctionCall(FunctionBackend backend, std::string name, CallVector vector, const Type::Type* returnType):
             _backend(backend), _name(std::move(name)), _vector(std::move(vector)), _returnType(returnType) {}
 
         /** Determines how the function call is performed. */
-        virtual FunctionBackend backend() { return _backend; }
+        [[nodiscard]] virtual FunctionBackend backend() const { return _backend; }
+
+        /** Get the name of the function. Used to load the call from serialization. */
+        [[nodiscard]] virtual std::string name() const { return _name; }
+
+        [[nodiscard]] serial::tag_t getSerialKey() const override { return s(_backend); }
 
         /** Get the name of the function. Used to load the call from serialization. */
         virtual std::string name() { return _name; }
 
         /** Get the parameters already applied to this function call, paired with thier types. */
-        virtual CallVector vector() { return _vector; }
+        virtual CallVector vector() const { return _vector; }
 
         /** Get the return type of this function call. */
-        virtual const Type::Type* returnType() { return _returnType; }
+        virtual const Type::Type* returnType() const { return _returnType; }
 
         /** Set the value returned by the execution of this call. */
         virtual void setReturn(ISA::Reference* value) { _returnValue = value; }
@@ -94,20 +107,11 @@ namespace swarmc::Runtime {
     class InlineFunctionCall : public IFunctionCall {
     public:
         InlineFunctionCall(std::string name, CallVector vector, const Type::Type* returnType) :
-                IFunctionCall(FunctionBackend::FB_INLINE, std::move(vector), returnType), _name(std::move(name)) {}
-
-        /**
-         * Get the identifier name of the function.
-         * e.g. if you want to jump to `beginfn f:MY_FN`, `name` is `MY_FN`.
-         */
-        [[nodiscard]] std::string name() const { return _name; }
+                IFunctionCall(FunctionBackend::FB_INLINE, std::move(name), std::move(vector), returnType) {}
 
         [[nodiscard]] std::string toString() const override {
             return "InlineFunctionCall<f:" + _name + ">";
         }
-
-    protected:
-        std::string _name;
     };
 
 

@@ -8,8 +8,8 @@ namespace swarmc::Runtime::Prologue {
 
     class ResourceTFunctionCall : public PrologueFunctionCall {
     public:
-        ResourceTFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        ResourceTFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "RESOURCE_T", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 

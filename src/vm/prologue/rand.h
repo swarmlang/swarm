@@ -10,8 +10,8 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomFunctionCall : public PrologueFunctionCall {
     public:
-        RandomFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        RandomFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "RANDOM", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -37,8 +37,8 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomVectorFunctionCall : public PrologueFunctionCall {
     public:
-        RandomVectorFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        RandomVectorFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "RANDOM_VECTOR", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -64,8 +64,8 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomMatrixFunctionCall : public PrologueFunctionCall {
     public:
-        RandomMatrixFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        RandomMatrixFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "RANDOM_MATRIX", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 

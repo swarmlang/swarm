@@ -45,8 +45,8 @@ namespace swarmc::Runtime::Prologue {
 
     class ReadFileFunctionCall : public PrologueFunctionCall {
     public:
-        ReadFileFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        ReadFileFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "READ_FILE", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -75,8 +75,8 @@ namespace swarmc::Runtime::Prologue {
 
     class OpenFileFunctionCall : public PrologueFunctionCall {
     public:
-        OpenFileFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        OpenFileFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "OPEN_FILE", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -102,8 +102,8 @@ namespace swarmc::Runtime::Prologue {
 
     class FileTFunctionCall : public PrologueFunctionCall {
     public:
-        FileTFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-                PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        FileTFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+                PrologueFunctionCall(provider, "FILE_T", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
