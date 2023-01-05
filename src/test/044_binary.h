@@ -9,6 +9,9 @@
 #include "../vm/Pipeline.h"
 #include "../vm/walk/BinaryISAWalk.h"
 #include "../vm/walk/ISABinaryWalk.h"
+#include "../vm/Wire.h"
+
+using namespace nslib;
 
 namespace swarmc::Test {
 
@@ -70,6 +73,15 @@ namespace swarmc::Test {
             pipeline4.targetISARepresentation(sbiISA);
 
 //            console->output(sbiOutput);
+
+            // Test nslib::serial's encoding
+            auto t = new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::STRING));
+            auto b = Wire::types()->reduce(t, nullptr);
+            auto t2 = Wire::types()->produce(b, nullptr);
+            if ( s(t) != s(t2) ) {
+                console->error("nslib::serial encoding bad");
+                return false;
+            }
 
             return (sviOutput == sbiOutput) && (sviISA.str() == sbiISA.str());
         }
