@@ -15,6 +15,7 @@ using namespace nslib;
 
 namespace swarmc::Runtime {
 
+    class Wire;
     class VirtualMachine;
     class InlineFunction;
     class IFunctionCall;
@@ -50,7 +51,7 @@ namespace swarmc::Runtime {
     /**
      * A linked-list style dynamic scope data structure used by the VM.
      */
-    class ScopeFrame : public IStringable {
+    class ScopeFrame : public IStringable, public serial::ISerializable {
     public:
         ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent) : _parent(parent), _global(global) {
             _id = std::move(id);
@@ -59,6 +60,10 @@ namespace swarmc::Runtime {
             _id = std::move(id);
         }
         ~ScopeFrame() override = default;
+
+        [[nodiscard]] serial::tag_t getSerialKey() const override {
+            return "swarm::Runtime::ScopeFrame";
+        }
 
         /** Make this instance the parent scope of the given location. */
         void shadow(ISA::LocationReference*);
@@ -75,10 +80,10 @@ namespace swarmc::Runtime {
         [[nodiscard]] ScopeFrame* overrideCall(IFunctionCall*) const;
 
         /** Get the parent of this scope. If this is the top-level, returns nullptr. */
-        ScopeFrame* parent() { return _parent; }
+        ScopeFrame* parent() const { return _parent; }
 
         /** Get the nearest call in the call stack. If top-level, returns nullptr. */
-        IFunctionCall* call() {
+        IFunctionCall* call() const {
             if ( _call != nullptr ) return _call;
             if ( _parent != nullptr ) return _parent->call();
             return nullptr;
@@ -173,6 +178,10 @@ namespace swarmc::Runtime {
         [[nodiscard]] bool shouldCaptureReturn() const {
             return _shouldCaptureReturn;
         }
+
+        [[nodiscard]] std::string id() const { return _id; }
+
+        [[nodiscard]] std::map<std::string, ISA::LocationReference*> nameMap() const { return _map; }
     protected:
         ScopeFrame* _parent = nullptr;
         std::map<std::string, ISA::LocationReference*> _map;
@@ -188,6 +197,8 @@ namespace swarmc::Runtime {
         [[nodiscard]] ExceptionHandlerId getNextHandlerId() const {
             return _global->getUuid();
         }
+
+        friend class Wire;
     };
 
 
@@ -197,13 +208,15 @@ namespace swarmc::Runtime {
      *
      * Provides helpers for jumps, calls, and loading inline functions.
      */
-    class State : public IStringable {
+    class State : public IStringable, serial::ISerializable {
     public:
-        explicit State(ISA::Instructions is) : _is(std::move(is)) {
-            initialize();
-        }
+        explicit State(ISA::Instructions is) : State(std::move(is), true) {}
 
         ~State() override = default;
+
+        [[nodiscard]] serial::tag_t getSerialKey() const override {
+            return "swarm::Runtime::State";
+        }
 
         /** Get the current instruction. */
         ISA::Instruction* current() {
@@ -342,6 +355,14 @@ namespace swarmc::Runtime {
             return _meta;
         }
     protected:
+        State(ISA::Instructions is, bool shouldInitialize) : _is(std::move(is)) {
+            if ( shouldInitialize ) initialize();
+        }
+
+        static State* withoutInitialization(ISA::Instructions is) {
+            return new State(is, false);
+        }
+
         ISA::Instructions _is;
         std::map<std::string, pc_t> _fJumps;
         std::map<std::string, pc_t> _fSkips;
@@ -357,6 +378,8 @@ namespace swarmc::Runtime {
 
         void extractMetadata();
         void annotate();
+
+        friend class Wire;
     };
 
 }

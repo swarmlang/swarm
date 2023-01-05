@@ -21,10 +21,10 @@ namespace swarmc::ISA {
 
     class Instruction;
 
-    using Instructions = std::vector<Instruction*>;
+    using Instructions = std::vector<Instruction *>;
 
     /** Unique identifiers for each instruction. */
-    enum class Tag: std::size_t {
+    enum class Tag : std::size_t {
         POSITION,
         BEGINFN,
         FNPARAM,
@@ -104,7 +104,7 @@ namespace swarmc::ISA {
     };
 
     /** Places where values can be stored. */
-    enum class Affinity: std::size_t {
+    enum class Affinity : std::size_t {
         LOCAL,
         SHARED,
         FUNCTION,
@@ -112,7 +112,7 @@ namespace swarmc::ISA {
     };
 
     /** Broad types of references built-in to the runtime. */
-    enum class ReferenceTag: std::size_t {
+    enum class ReferenceTag : std::size_t {
         LOCATION,
         TYPE,
         STRING,
@@ -125,10 +125,18 @@ namespace swarmc::ISA {
         MAP,
         VOID,
     };
+}
+
+namespace nslib {
+
+    [[nodiscard]] std::string s(swarmc::ISA::ReferenceTag v);
+
+}
 
 
+namespace swarmc::ISA {
     /** A reference is a construct that resolves to a value at runtime. */
-    class Reference : public IStringable {
+    class Reference : public IStringable, public serial::ISerializable {
     public:
         explicit Reference(ReferenceTag tag) : _tag(tag) {}
         ~Reference() override = default;
@@ -143,6 +151,10 @@ namespace swarmc::ISA {
 
         [[nodiscard]] ReferenceTag tag() const {
             return _tag;
+        }
+
+        [[nodiscard]] serial::tag_t getSerialKey() const override {
+            return s(tag());
         }
 
     protected:
@@ -237,7 +249,7 @@ namespace swarmc::ISA {
             return Type::Stream::of(_stream->innerType());
         }
 
-        Runtime::IStream* stream() {
+        Runtime::IStream* stream() const {
             return _stream;
         }
 
@@ -764,25 +776,6 @@ namespace swarmc::ISA {
         TSecond* _second;
         TThird* _third;
     };
-}
-
-namespace nslib {
-
-    inline std::string s(swarmc::ISA::ReferenceTag v) {
-        if ( v == swarmc::ISA::ReferenceTag::LOCATION ) return "ReferenceTag(LOCATION)";
-        if ( v == swarmc::ISA::ReferenceTag::TYPE ) return "ReferenceTag(TYPE)";
-        if ( v == swarmc::ISA::ReferenceTag::STRING ) return "ReferenceTag(STRING)";
-        if ( v == swarmc::ISA::ReferenceTag::NUMBER ) return "ReferenceTag(NUMBER)";
-        if ( v == swarmc::ISA::ReferenceTag::BOOLEAN ) return "ReferenceTag(BOOLEAN)";
-        if ( v == swarmc::ISA::ReferenceTag::FUNCTION ) return "ReferenceTag(FUNCTION)";
-        if ( v == swarmc::ISA::ReferenceTag::STREAM ) return "ReferenceTag(STREAM)";
-        if ( v == swarmc::ISA::ReferenceTag::RESOURCE ) return "ReferenceTag(RESOURCE)";
-        if ( v == swarmc::ISA::ReferenceTag::ENUMERATION ) return "ReferenceTag(ENUMERATION)";
-        if ( v == swarmc::ISA::ReferenceTag::MAP ) return "ReferenceTag(MAP)";
-        if ( v == swarmc::ISA::ReferenceTag::VOID ) return "ReferenceTag(VOID)";
-        return "ReferenceTag(UNKNOWN)";
-    }
-
 }
 
 #endif

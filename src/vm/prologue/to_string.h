@@ -9,8 +9,8 @@ namespace swarmc::Runtime::Prologue {
 
     class NumberToStringFunctionCall : public PrologueFunctionCall {
     public:
-        NumberToStringFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        NumberToStringFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "NUMBER_TO_STRING", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -36,8 +36,8 @@ namespace swarmc::Runtime::Prologue {
 
     class BooleanToStringFunctionCall : public PrologueFunctionCall {
     public:
-        BooleanToStringFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        BooleanToStringFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, "BOOLEAN_TO_STRING", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 

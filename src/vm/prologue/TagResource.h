@@ -53,8 +53,8 @@ namespace swarmc::Runtime::Prologue {
 
     class TagFunctionCall : public PrologueFunctionCall {
     public:
-        TagFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-                PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        TagFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+                PrologueFunctionCall(provider, "TAG", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -81,8 +81,8 @@ namespace swarmc::Runtime::Prologue {
 
     class TagTFunctionCall : public PrologueFunctionCall {
     public:
-        TagTFunctionCall(IProvider* provider, CallVector vector, const Type::Type* returnType):
-                PrologueFunctionCall(provider, std::move(vector), returnType) {}
+        TagTFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+                PrologueFunctionCall(provider, "TAG_T", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 

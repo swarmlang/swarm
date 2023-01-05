@@ -14,8 +14,8 @@ namespace swarmc::Runtime::Prologue {
 
     class TrigFunctionCall : public PrologueFunctionCall {
     public:
-        TrigFunctionCall(TrigOperation op, IProvider* provider, CallVector vector, const Type::Type* returnType):
-            PrologueFunctionCall(provider, std::move(vector), returnType), _op(op) {}
+        TrigFunctionCall(TrigOperation op, std::string name, IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+            PrologueFunctionCall(provider, std::move(name), vector, returnType), _op(op) {}
 
         void execute(VirtualMachine*) override;
 

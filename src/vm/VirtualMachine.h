@@ -15,6 +15,7 @@
 #include "walk/ExecuteWalk.h"
 #include "debug/Debugger.h"
 #include "../errors/RuntimeError.h"
+#include "Wire.h"
 
 using namespace nslib;
 
