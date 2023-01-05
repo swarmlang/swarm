@@ -50,7 +50,7 @@ namespace swarmc::Runtime {
             return _scope;
         }
 
-        static Factory<State, void*>* states() {
+        static Factory<State, VirtualMachine*>* states() {
             if ( _state == nullptr ) {
                 _state = buildStates();
             }
@@ -62,13 +62,13 @@ namespace swarmc::Runtime {
         static inline Factory<ISA::Reference, VirtualMachine*>* _reference = nullptr;
         static inline Factory<IFunctionCall, VirtualMachine*>* _call = nullptr;
         static inline Factory<ScopeFrame, VirtualMachine*>* _scope = nullptr;
-        static inline Factory<State, void*>* _state = nullptr;
+        static inline Factory<State, VirtualMachine*>* _state = nullptr;
 
         static Factory<Type::Type, void*>* buildTypes();
         static Factory<ISA::Reference, VirtualMachine*>* buildReferences();
         static Factory<IFunctionCall, VirtualMachine*>* buildCalls();
         static Factory<ScopeFrame, VirtualMachine*>* buildScopes();
-        static Factory<State, void*>* buildStates();
+        static Factory<State, VirtualMachine*>* buildStates();
     };
 
 }

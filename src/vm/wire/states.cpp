@@ -12,10 +12,10 @@ using namespace swarmc::ISA;
 
 namespace swarmc::Runtime {
 
-    Factory<State, void*>* Wire::buildStates() {
-        auto factory = new Factory<State, void*>;
+    Factory<State, VirtualMachine*>* Wire::buildStates() {
+        auto factory = new Factory<State, VirtualMachine*>;
 
-        factory->registerReducer("swarm::Runtime::State", [](const State* state, auto) {
+        factory->registerReducer("swarm::Runtime::State", [](const State* state, auto vm) {
             auto fJumpsKeys = binn_list();
             auto fJumpsValues = binn_list();
             int fJumpsLen = 0;
@@ -35,7 +35,7 @@ namespace swarmc::Runtime {
             }
 
             // FIXME: change this to use Wire once converted
-            ISABinaryWalk isaBinaryWalk;
+            ISABinaryWalk isaBinaryWalk(vm);
             auto is = binn_list();
             for ( auto i : state->_is ) {
                 binn_list_add_map(is, isaBinaryWalk.walkOne(i));
