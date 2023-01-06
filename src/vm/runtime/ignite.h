@@ -14,11 +14,6 @@ namespace swarmc::Runtime {
     class VirtualMachine;
 }
 
-namespace swarmc::ISA {
-    class ReferenceBinaryWalk;
-    class BinaryReferenceWalk;
-}
-
 namespace swarmc::Runtime::Ignite {
 
     using KVString = cache::CacheClient<std::string, std::string>;
@@ -189,7 +184,7 @@ namespace swarmc::Runtime::Ignite {
 
     class StorageInterface : public IStorageInterface {
     public:
-        StorageInterface(Runtime* runtime, ISA::Affinity affinity);
+        StorageInterface(Runtime* runtime, VirtualMachine* vm, ISA::Affinity affinity);
 
         ISA::Reference* load(ISA::LocationReference* loc) override;
 
@@ -217,11 +212,10 @@ namespace swarmc::Runtime::Ignite {
 
     protected:
         Runtime* _runtime;
+        VirtualMachine* _vm;
         ISA::Affinity _affinity;
         std::string _uuid;
         KVString _cache;
-        ISA::ReferenceBinaryWalk* _ref;
-        ISA::BinaryReferenceWalk* _bin;
     };
 
 
@@ -304,12 +298,6 @@ namespace swarmc::Runtime::Ignite {
         Runtime* _runtime;
         VirtualMachine* _vm;
         QueueContextID _context;
-        ISA::BinaryReferenceWalk* _bin;
-        ISA::ReferenceBinaryWalk* _ref;
-
-        binn* serializeCall(IFunctionCall* call);
-
-        binn* serializeScope(const ScopeFrame* scope);
     };
 
 }

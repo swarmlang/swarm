@@ -3,9 +3,11 @@
 
 #include <utility>
 #include <vector>
-#include "../../../mod/binn/src/binn.h"
 #include "../../shared/nslib.h"
 #include "../../errors/SwarmError.h"
+
+struct binn_struct;
+typedef binn_struct binn;
 
 using namespace nslib;
 
@@ -86,10 +88,6 @@ namespace swarmc::Runtime {
         virtual bool hasParamsRemaining() {
             return _paramIndex < _vector.size();
         }
-
-        virtual binn* getExtraSerialData() {}
-
-        virtual void loadExtraSerialData(binn*) {}
 
     protected:
         FunctionBackend _backend;
