@@ -53,6 +53,7 @@ protected:
     std::string outputCFGTo;
     std::string flagFilterFile;
     std::string inputFile;
+    std::vector<std::string> externalProviders;
     std::istream* _input = nullptr;
 
     int debugOutputTokens();

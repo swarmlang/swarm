@@ -20,6 +20,7 @@
 using namespace nslib;
 
 namespace swarmc::Runtime {
+    class ProviderModule;
 
     /** The Swarm runtime virtual machine (aka "the runtime"). */
     class VirtualMachine : public IStringable, public IUsesLogger {
@@ -78,6 +79,12 @@ namespace swarmc::Runtime {
          */
         void addProvider(IProvider* provider) {
             _providers.push_back(provider);
+        }
+
+        void addExternalProvider(dynamic::Module<ProviderModule>* m);
+
+        void addExternalProvider(const std::string& path) {
+            addExternalProvider(new dynamic::Module<ProviderModule>(path));
         }
 
         void useStreamDriver(IStreamDriver* driver) {
@@ -354,6 +361,7 @@ namespace swarmc::Runtime {
         Queues _queues;
         Locks _locks;
         Providers _providers;
+        std::vector<dynamic::Module<ProviderModule>*> _externalProviders;
         IStreamDriver* _streams = nullptr;
         ScopeFrame* _scope = nullptr;
         ExecuteWalk* _exec = nullptr;

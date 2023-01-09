@@ -5,6 +5,12 @@
 #define NSLIB_BINN_H_PATH "../../mod/binn/src/binn.h"
 #endif
 
+#ifndef NSLIB_DL_OPTS
+#define NSLIB_DL_OPTS (RTLD_NOW)
+#endif
+
+#include <dlfcn.h>
+
 #include <random>
 #include <stack>
 #include <map>
@@ -1323,6 +1329,12 @@ namespace nslib {
         return priv::realDistribution(priv::eng);
     }
 
+    /** Returns true if the given path exists. */
+    inline bool file_exists(const std::string& path) {
+        struct stat s{};
+        return stat(path.c_str(), &s) == 0;
+    }
+
 
     /** A factory-pattern serialization library. */
     namespace serial {
@@ -1432,6 +1444,79 @@ namespace nslib {
         protected:
             std::map<tag_t, Producer> _producers;
             std::map<tag_t, Reducer> _reducers;
+        };
+    }
+
+    /** A simple library for loading dynamic modules. */
+    namespace dynamic {
+        /** The type of a handle to a loaded module. */
+        using import_t = void*;
+
+        class ModuleException : public NSLibException {
+        public:
+            explicit ModuleException(const std::string& path, const std::string& reason) : NSLibException("Unable to load module at path (" + path + "): " + reason) {}
+        };
+
+        /**
+         * Loads & manages a dynamic module. This module exports a function that,
+         * when called, returns a pointer to an instance of type T.
+         * @tparam T
+         */
+        template <typename T>
+        class Module : public IStringable {
+        public:
+            /**
+             * @param path The FS path to the compiled module
+             * @param factorySymbol The name of the function that produces T* (i.e. of type () => T*)
+             */
+            explicit Module(std::string path, std::string factorySymbol = "factory") :
+                _path(std::move(path)), _factorySymbol(std::move(factorySymbol)) {}
+
+            ~Module() override {
+                if ( _handle != nullptr ) {
+                    dlclose(_handle);
+                    _handle = nullptr;
+                }
+            }
+
+            /** Instantiate T* from the module by calling the factory function. */
+            [[nodiscard]] T* produce() {
+                if ( _handle == nullptr ) {
+                    open();
+                }
+
+                auto factory = dlsym(_handle, _factorySymbol.c_str());
+                if ( factory == nullptr ) {
+                    throw ModuleException(_path, "Could not open the factory symbol (" + _factorySymbol + ")");
+                }
+
+                typedef T* (*factory_t)();
+                auto factory_f = reinterpret_cast<factory_t>(reinterpret_cast<import_t>(factory));
+                return factory_f();
+            }
+
+            [[nodiscard]] std::string toString() const override {
+                return "nslib::dynamic::Module<" + _path + ">";
+            }
+
+        protected:
+            std::string _path;
+            std::string _factorySymbol;
+            import_t _handle = nullptr;
+
+            /** Load the handle to the dynamic module. */
+            void open() {
+                if ( !file_exists(_path) ) {
+                    throw ModuleException(_path, "The file does not exist or could not be opened");
+                }
+
+                _handle = dlopen(_path.c_str(), NSLIB_DL_OPTS);
+
+                if ( _handle == nullptr ) {
+                    std::string e = dlerror();
+                    throw ModuleException(_path, "The dynamic library handle could not be loaded (" + e + ")");
+                }
+            }
         };
     }
 }

@@ -1,2 +1,2 @@
-$l:ft <- call f:FILE_T
-$l:frt <- call f:RESOURCE_T $l:ft
+$l:str <- call f:HELLO_WORLD
+out $l:str

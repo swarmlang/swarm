@@ -2,6 +2,7 @@
 #define SWARMVM_PIPELINE
 
 #include <iostream>
+#include <utility>
 #include "../shared/nslib.h"
 #include "isa_meta.h"
 #include "ISAParser.h"
@@ -10,6 +11,7 @@
 #include "prologue/prologue_provider.h"
 #include "walk/ISABinaryWalk.h"
 #include "walk/BinaryISAWalk.h"
+#include "runtime/external.h"
 
 using namespace nslib;
 
@@ -30,6 +32,10 @@ namespace swarmc::VM {
 
         ~Pipeline() override {
             delete _parser;
+        }
+
+        void setExternalProviders(std::vector<std::string> p) {
+            _externalProviders = std::move(p);
         }
 
         /** Get a list of loaded tokens from the SVI input stream. */
@@ -93,6 +99,10 @@ namespace swarmc::VM {
                 vm->addProvider(new Prologue::Provider(vm->global()));
             }
 
+            for ( const auto& path : _externalProviders ) {
+                vm->addExternalProvider(path);
+            }
+
             vm->initialize(is);
             return vm;
         }
@@ -115,6 +125,7 @@ namespace swarmc::VM {
         std::istream* _input;
         ISA::Parser* _parser;
         bool _isBinary;
+        std::vector<std::string> _externalProviders;
     };
 
 }

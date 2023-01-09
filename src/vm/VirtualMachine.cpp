@@ -1,8 +1,14 @@
 #include "../errors/SwarmError.h"
 #include "VirtualMachine.h"
+#include "runtime/external.h"
 
 namespace swarmc::Runtime {
     using namespace swarmc::ISA;
+
+    void VirtualMachine::addExternalProvider(dynamic::Module<ProviderModule>* m) {
+        _externalProviders.push_back(m);
+        addProvider(m->produce()->build(global()));
+    }
 
     IStorageInterface* VirtualMachine::getStore(LocationReference* loc) {
         Stores::size_type idx = _stores.size() - 1;
@@ -105,9 +111,8 @@ namespace swarmc::Runtime {
     }
 
     IProviderFunction* VirtualMachine::loadProviderFunction(const std::string& name) {
-        std::size_t idx = 0;
-        for ( auto it = _providers.rbegin(); it != _providers.rend(); ++it, --idx ) {
-            auto provider = _providers.at(idx);
+        for ( auto it = _providers.rbegin(); it != _providers.rend(); ++it ) {
+            auto provider = *it;
             auto fn = provider->loadFunction(name);
             if ( fn != nullptr ) return fn;
         }

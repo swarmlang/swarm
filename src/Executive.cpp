@@ -167,6 +167,17 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagRunTestName = name;
             skipOne = true;
             noInputFile = true;
+        } else if ( arg == "--external-provider" ) {
+            if ( i+1 >= params.size() ) {
+                logger->error("Missing required parameter for --external-provider. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+
+            std::string path = params.at(i+1);
+            logger->debug("Will load external provider from: " + path);
+            externalProviders.push_back(path);
+            skipOne = true;
         } else if ( arg == "--binary" ) {
             if ( i+1 >= params.size() ) {
                 logger->error("Missing required parameter for --binary. Pass --help for more info.");
@@ -336,6 +347,10 @@ void Executive::printUsage() {
 
     console->bold()->print("  --without-prologue  :  ", true)
         ->println("Exclude the Prologue provider from the runtime")
+        ->println();
+
+    console->bold()->print("  --external-provider <PATH>  :  ", true)
+        ->println("Load an external provider from the given path into the runtime")
         ->println();
 
     console->bold()->print("  --log-target <NAME>  :  ", true)
@@ -543,6 +558,7 @@ int Executive::debugOutputCFG() {
 
 int Executive::executeLocalSVI() {
     swarmc::VM::Pipeline pipeline(_input);
+    pipeline.setExternalProviders(externalProviders);
 
     if ( flagInteractiveDebug ) {
         pipeline.targetInteractiveDebugger();

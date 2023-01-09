@@ -31,7 +31,7 @@ CXXFLAGS += -std=c++20
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall
 CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall -DSWARM_DEBUG
 #LDFLAGS ?= -lredis++ -lhiredis -pthread
-LDFLAGS ?= -lbinn -pthread
+LDFLAGS ?= -rdynamic -ldl -lbinn -pthread
 
 $(TARGET_EXEC): $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
 	$(EBIN) $@
