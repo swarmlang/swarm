@@ -25,7 +25,6 @@
   - beginfn followed by return0
 - Runtime
   - threaded listener for `s:STDOUT` and `s:STDERR` streams
-  - resources
 - remove RESOURCE type from lexing (added so I could test WITH statements)
 - change map access back to [] (check for lval type in name analysis to avoid parsing conflict)
 - some form of exception/error system (e.g. exceptions, error values, ...?)
@@ -40,8 +39,9 @@
     typeof $l:a
     ```
   - Do we care to support this?
-- Modify provider API to support custom stream implementations.
-  - File operations, e.g.
+- Providers:
+  - Custom types (opaque only?)
+  - Custom resource & stream implementations
 - Tiered call queues (e.g. a local one for fast, multi-thread calls and a distributed one for longer batch jobs)
 - Sci-comp natives
   - Map-reduce
@@ -63,7 +63,6 @@
     log(a);
     ```
 - FUTURE: (hilariously low priority) blockchain-based distributed drivers
-- FUTURE: backplane that tunnels resource requests to the appropriate nodes
 - FUTURE: separate fetch/execute/writeback threads for runtime
 - FUTURE: Serialize ISA to SVI code
 - FUTURE: Swarm module package manager?
