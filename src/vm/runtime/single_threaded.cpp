@@ -79,8 +79,24 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
 
+    QueueJob::QueueJob(
+            JobID id, JobState jobState, IFunctionCall *call, ScopeFrame *scope, State *vmState):
+                _id(id), _jobState(jobState), _call(useref(call)), _scope(useref(scope)), _vmState(useref(vmState)) {}
+
+    QueueJob::~QueueJob() noexcept {
+        freeref(_call);
+        freeref(_scope);
+        freeref(_vmState);
+    }
+
+
     std::string QueueJob::toString() const {
         return "SingleThreaded::QueueJob<id: " + std::to_string(_id) + ", call: " + _call->toString() + ">";
+    }
+
+
+    QueueJob* Queue::build(IFunctionCall* call, const ScopeFrame* scope, const State* state) {
+        return new QueueJob(_nextId++, JobState::PENDING, call, scope->copy(), state->copy());
     }
 
 

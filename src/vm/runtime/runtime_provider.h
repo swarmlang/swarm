@@ -69,7 +69,7 @@ namespace swarmc::Runtime {
      * A plugin which provides external/native resources to the runtime VM.
      * At the moment, providers may add external functions.
      */
-    class IProvider : public IStringable {
+    class IProvider : public IStringable, public IRefCountable {
     public:
         ~IProvider() override = default;
 

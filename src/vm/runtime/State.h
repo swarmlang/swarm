@@ -51,15 +51,19 @@ namespace swarmc::Runtime {
     /**
      * A linked-list style dynamic scope data structure used by the VM.
      */
-    class ScopeFrame : public IStringable, public serial::ISerializable {
+    class ScopeFrame : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
-        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent) : _parent(parent), _global(global) {
+        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent) : _parent(useref(parent)), _global(useref(global)) {
             _id = std::move(id);
         }
-        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent, IFunctionCall* call) : _parent(parent), _call(call), _global(global) {
+        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent, IFunctionCall* call) : _parent(useref(parent)), _call(useref(call)), _global(useref(global)) {
             _id = std::move(id);
         }
-        ~ScopeFrame() override = default;
+        ~ScopeFrame() override {
+            freeref(_global);
+            freeref(_parent);
+            freeref(_call);
+        }
 
         [[nodiscard]] serial::tag_t getSerialKey() const override {
             return "swarm::Runtime::ScopeFrame";
@@ -94,38 +98,43 @@ namespace swarmc::Runtime {
         /** Create a deep copy of this scope. */
         [[nodiscard]] ScopeFrame* copy() const {
             auto copy = new ScopeFrame(_global, _id, _parent == nullptr ? nullptr : _parent->copy());
-            copy->_map = _map;
-            copy->_call = _call;
-            copy->_handlers = _handlers;
+            copy->_map = _map;  // FIXME: useref
+            copy->_call = _call == nullptr ? nullptr : useref(_call);
             copy->_returnTo = _returnTo;
             copy->_isExceptionFrame = _isExceptionFrame;
             copy->_shouldCaptureReturn = _shouldCaptureReturn;
-            copy->_return = _return;
+            copy->_return = _return == nullptr ? nullptr : useref(_return);
+
+            copy->_handlers = _handlers;
+            stl::stackLoop<ExceptionHandler>(_handlers, [](ExceptionHandler e) { useref(unpackExceptionHandler(std::move(e))); });
+
             return copy;
         }
 
         ExceptionHandlerId pushExceptionHandler(IFunction* selector, IFunction* handler) {
             auto id = getNextHandlerId();
-            _handlers.emplace(id, std::make_pair(std::nullopt, selector), handler);
+            _handlers.emplace(id, std::make_pair(std::nullopt, useref(selector)), useref(handler));
             return id;
         }
 
         ExceptionHandlerId pushExceptionHandler(std::size_t code, IFunction* handler) {
             auto id = getNextHandlerId();
-            _handlers.emplace(id, std::make_pair(std::make_optional(code), nullptr), handler);
+            _handlers.emplace(id, std::make_pair(std::make_optional(code), nullptr), useref(handler));
             return id;
         }
 
         ExceptionHandlerId pushExceptionHandler(IFunction* handler) {
             auto id = getNextHandlerId();
-            _handlers.emplace(id, std::make_pair(std::nullopt, nullptr), handler);
+            _handlers.emplace(id, std::make_pair(std::nullopt, nullptr), useref(handler));
             return id;
         }
 
         // TODO: write test for pushing/popping these by ID
         void popExceptionHandler(const ExceptionHandlerId& id) {
             nslib::stl::erase<ExceptionHandler>(_handlers, [id](std::size_t, ExceptionHandler h) {
-                return std::get<0>(h) == id;
+                auto shouldFree = std::get<0>(h) == id;
+                if ( shouldFree ) freeref(unpackExceptionHandler(h));
+                return shouldFree;
             });
         }
 
@@ -160,7 +169,8 @@ namespace swarmc::Runtime {
         }
 
         void setReturnCall(IFunctionCall* call) {
-            _return = call;
+            freeref(_return);
+            _return = useref(call);
         }
 
         [[nodiscard]] IFunctionCall* getReturnCall() const {
@@ -168,6 +178,7 @@ namespace swarmc::Runtime {
         }
 
         void clearReturnCall() {
+            freeref(_return);
             _return = nullptr;
         }
 
@@ -208,7 +219,7 @@ namespace swarmc::Runtime {
      *
      * Provides helpers for jumps, calls, and loading inline functions.
      */
-    class State : public IStringable, serial::ISerializable {
+    class State : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
         explicit State(ISA::Instructions is) : State(std::move(is), true) {}
 
@@ -360,7 +371,7 @@ namespace swarmc::Runtime {
         }
 
         static State* withoutInitialization(ISA::Instructions is) {
-            return new State(is, false);
+            return new State(std::move(is), false);
         }
 
         ISA::Instructions _is;

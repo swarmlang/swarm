@@ -47,7 +47,11 @@ namespace swarmc::Runtime::Prologue {
 
     class Provider : public IProvider {
     public:
-        explicit Provider(IGlobalServices* global) : _global(global) {}
+        explicit Provider(IGlobalServices* global) : _global(useref(global)) {}
+
+        ~Provider() override {
+            freeref(_global);
+        }
 
         PrologueFunction* loadFunction(std::string name) override;
 

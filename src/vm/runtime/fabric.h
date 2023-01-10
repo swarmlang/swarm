@@ -35,9 +35,13 @@ namespace swarmc::Runtime {
     };
 
 
-    class Fabric : public IStringable {
+    class Fabric : public IStringable, public IRefCountable {
     public:
-        explicit Fabric(IGlobalServices* global) : _global(global) {}
+        explicit Fabric(IGlobalServices* global) : _global(useref(global)) {}
+
+        ~Fabric() override {
+            freeref(_global);
+        }
 
         virtual void publish(IResource*);
 

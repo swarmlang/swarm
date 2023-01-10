@@ -53,7 +53,7 @@ namespace swarmc::Runtime {
      *
      * IGlobalServices abstracts these operations.
      */
-    class IGlobalServices : public IStringable {
+    class IGlobalServices : public IStringable, public IRefCountable {
     public:
         ~IGlobalServices() override = default;
 
@@ -94,7 +94,7 @@ namespace swarmc::Runtime {
     };
 
     /** Represents a lock acquired by some control. */
-    class IStorageLock : public IStringable {
+    class IStorageLock : public IStringable, public IRefCountable {
     public:
         ~IStorageLock() override = default;
 
@@ -108,7 +108,7 @@ namespace swarmc::Runtime {
     /**
      * Interface for VM variable storage backends.
      */
-    class IStorageInterface : public IStringable {
+    class IStorageInterface : public IStringable, public IRefCountable {
     public:
         ~IStorageInterface() override = default;
 
@@ -173,7 +173,7 @@ namespace swarmc::Runtime {
 
 
     /** Interface for a deferred function call queue. */
-    class IQueue : public IStringable {
+    class IQueue : public IStringable, public IRefCountable {
     public:
         ~IQueue() override = default;
 
@@ -206,7 +206,7 @@ namespace swarmc::Runtime {
     };
 
 
-    class IStream : public IStringable {
+    class IStream : public IStringable, public IRefCountable {
     public:
         ~IStream() override = default;
 
@@ -228,7 +228,7 @@ namespace swarmc::Runtime {
     };
 
 
-    class IStreamDriver : public IStringable {
+    class IStreamDriver : public IStringable, public IRefCountable {
     public:
         virtual IStream* open(const std::string&, const Type::Type*) = 0;
     };

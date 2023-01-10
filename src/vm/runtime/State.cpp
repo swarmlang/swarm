@@ -38,7 +38,7 @@ namespace swarmc::Runtime {
 
     ScopeFrame* ScopeFrame::overrideCall(IFunctionCall* fc) const {
         auto frame = copy();
-        frame->_call = fc;
+        frame->_call = useref(fc);
         return frame;
     }
 

@@ -38,7 +38,7 @@ namespace swarmc::Runtime {
     /**
      * Represents a function call (which may be in-progress or completed).
      */
-    class IFunctionCall : public IStringable, public serial::ISerializable {
+    class IFunctionCall : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
         IFunctionCall(FunctionBackend backend, std::string name, CallVector vector, const Type::Type* returnType):
             _backend(backend), _name(std::move(name)), _vector(std::move(vector)), _returnType(returnType) {}
@@ -110,7 +110,7 @@ namespace swarmc::Runtime {
     /**
      * Represents a function which may be called by the runtime.
      */
-    class IFunction : public IStringable {
+    class IFunction : public IStringable, public IRefCountable {
     public:
         ~IFunction() override = default;
 

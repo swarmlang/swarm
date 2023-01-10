@@ -15,7 +15,7 @@ namespace swarmc::Runtime {
     /**
      * ISA walk which uses the virtual machine to execute SVI instructions.
      */
-    class ExecuteWalk : public ISA::ISAWalk<ISA::Reference*>, public IUsesLogger {
+    class ExecuteWalk : public ISA::ISAWalk<ISA::Reference*>, public IUsesLogger, public IRefCountable {
     public:
         explicit ExecuteWalk(VirtualMachine* vm) : ISA::ISAWalk<ISA::Reference*>(), IUsesLogger("vm"), _vm(vm) {
             _typeOfExceptionHandler = new Type::Lambda1(

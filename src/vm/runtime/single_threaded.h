@@ -114,7 +114,11 @@ namespace swarmc::Runtime::SingleThreaded {
     public:
         StorageLock(StorageInterface* store, ISA::LocationReference* loc) {
             _loc = loc;
-            _store = store;
+            _store = useref(store);
+        }
+
+        ~StorageLock() override {
+            freeref(_store);
         }
 
         [[nodiscard]] ISA::LocationReference* location() const override;
@@ -135,8 +139,9 @@ namespace swarmc::Runtime::SingleThreaded {
      */
     class QueueJob : public IQueueJob {
     public:
-        QueueJob(JobID id, JobState jobState, IFunctionCall* call, const ScopeFrame* scope, const State* vmState):
-            _id(id), _jobState(jobState), _call(call), _scope(scope), _vmState(vmState) {}
+        QueueJob(JobID id, JobState jobState, IFunctionCall* call, ScopeFrame* scope, State* vmState);
+
+        ~QueueJob() noexcept override;
 
         [[nodiscard]] JobID id() const override { return _id; }
 
@@ -159,8 +164,8 @@ namespace swarmc::Runtime::SingleThreaded {
         JobState _jobState;
         IFunctionCall* _call;
         SchedulingFilters _filters;
-        const ScopeFrame* _scope;
-        const State* _vmState;
+        ScopeFrame* _scope;
+        State* _vmState;
     };
 
 
@@ -181,9 +186,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
         bool shouldHandle(IFunctionCall* call) override { return true; }
 
-        QueueJob* build(IFunctionCall* call, const ScopeFrame* scope, const State* state) override {
-            return new QueueJob(_nextId++, JobState::PENDING, call, scope, state);
-        }
+        QueueJob* build(IFunctionCall* call, const ScopeFrame* scope, const State* state) override;
 
         void push(IQueueJob* job) override;
 

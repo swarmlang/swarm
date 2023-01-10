@@ -1002,6 +1002,7 @@ namespace swarmc::Runtime {
 
         // Get the scope where the exception handler was registered
         auto scope = _vm->getExceptionFrame();
+        auto scopeRef = localref(scope);
         if ( scope == nullptr ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::ResumeOutsideExHandler,

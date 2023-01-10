@@ -35,16 +35,22 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::restore(ScopeFrame* scope) {
-        if ( _scope != scope ) delete _scope;
-        _scope = scope;
+        if ( _scope != scope ) {
+            freeref(_scope);
+            _scope = useref(scope);
+        }
     }
 
     void VirtualMachine::restore(ScopeFrame* scope, State* state) {
-        delete _scope;
-        _scope = scope;
+        if ( _scope != scope ) {
+            freeref(_scope);
+            _scope = useref(scope);
+        }
 
-        delete _state;
-        _state = state;
+        if ( _state != state ) {
+            freeref(_state);
+            _state = useref(state);
+        }
     }
 
     Reference* VirtualMachine::loadFromStore(LocationReference* loc) {
@@ -190,7 +196,7 @@ namespace swarmc::Runtime {
                 continue;
             }
 
-            _locks.push_back(lock);
+            _locks.push_back(useref(lock));
             return;
         }
 
@@ -211,6 +217,7 @@ namespace swarmc::Runtime {
             if ( lock->location()->is(loc) ) {
                 lock->release();
                 _locks.erase(it);
+                freeref(lock);
                 return;
             }
         }
@@ -228,22 +235,27 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::enterScope() {
-        _scope = _scope->newChild();
+        auto scope = useref(_scope->newChild());
+        freeref(_scope);
+        _scope = scope;
     }
 
     void VirtualMachine::enterCallScope(IFunctionCall* call) {
-        _scope = _scope->newCall(call);
+        auto scope = useref(_scope->newCall(call));
+        freeref(_scope);
+        _scope = scope;
     }
 
     void VirtualMachine::inheritCallScope(IFunctionCall* call) {
-        _scope = _scope->overrideCall(call);
+        auto scope = useref(_scope->overrideCall(call));
+        freeref(_scope);  // FIXME?
+        _scope = scope;
     }
 
     void VirtualMachine::exitScope() {
-        // FIXME - this likely needs to do better cleanup work
         auto old = _scope;
-        _scope = _scope->parent();
-        delete old;
+        _scope = useref(_scope->parent());
+        freeref(old);
     }
 
     void VirtualMachine::call(IFunctionCall* fc) {
@@ -344,7 +356,7 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::returnToCaller(bool shouldJump) {
-        auto call = getCall();
+        auto call = useref(getCall());
         if ( call == nullptr ) {
             throw Errors::SwarmError("Unable to return from caller: no call in progress.");
         }
@@ -353,13 +365,21 @@ namespace swarmc::Runtime {
         call->setReturned();
 
         // Jump back to the caller's site
-        if ( shouldJump ) _scope = _state->jumpReturn(_scope);
-        else exitScope();
+        if ( shouldJump ) {
+            auto old = _scope;
+            _scope = useref(_state->jumpReturn(_scope));
+            freeref(old);
+        }
+        else {
+            exitScope();
+        }
 
         // Make the returned IFunctionCall available to the caller
         if ( _scope->shouldCaptureReturn() ) {
             _scope->setReturnCall(call);
         }
+
+        freeref(call);
     }
 
     std::pair<ScopeFrame*, IFunction*> VirtualMachine::getExceptionHandler(std::size_t code) {

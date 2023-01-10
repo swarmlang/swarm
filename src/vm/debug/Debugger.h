@@ -36,7 +36,7 @@ namespace swarmc::Runtime::Debug {
         RUN_ERROR,
     };
 
-    class Debugger : public IStringable {
+    class Debugger : public IStringable, public IRefCountable {
     public:
         [[nodiscard]] Metadata& meta() { return _meta; }
 

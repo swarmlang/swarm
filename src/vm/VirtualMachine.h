@@ -25,15 +25,16 @@ namespace swarmc::Runtime {
     /** The Swarm runtime virtual machine (aka "the runtime"). */
     class VirtualMachine : public IStringable, public IUsesLogger {
     public:
-        explicit VirtualMachine(IGlobalServices* global) : IUsesLogger("vm"), _global(global) {
-            _exec = new ExecuteWalk(this);
-            _fabric = new Fabric(_global);
+        explicit VirtualMachine(IGlobalServices* global) : IUsesLogger("vm"), _global(useref(global)) {
+            _exec = useref(new ExecuteWalk(this));
+            _fabric = useref(new Fabric(_global));
             _queueContexts.push(_global->getUuid());
         }
 
         ~VirtualMachine() override {
-            delete _exec;
-            delete _fabric;
+            freeref(_global);
+            freeref(_exec);
+            freeref(_fabric);
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -51,10 +52,10 @@ namespace swarmc::Runtime {
 
         /** Load a set of parsed instructions into the runtime. */
         void initialize(ISA::Instructions is) {
-            _state = new State(std::move(is));
-            _scope = new ScopeFrame(_global, nslib::uuid(), nullptr);
-            _localOut = new LocalOutputStream();
-            _localErr = new LocalErrorStream();
+            _state = useref(new State(std::move(is)));
+            _scope = useref(new ScopeFrame(_global, nslib::uuid(), nullptr));
+            _localOut = useref(new LocalOutputStream());
+            _localErr = useref(new LocalErrorStream());
         }
 
         /**
@@ -62,7 +63,7 @@ namespace swarmc::Runtime {
          * The runtime will give higher priority to an interface the later it is added.
          */
         void addStore(IStorageInterface* store) {
-            _stores.push_back(store);
+            _stores.push_back(useref(store));
         }
 
         /**
@@ -70,7 +71,7 @@ namespace swarmc::Runtime {
          * The runtime will give higher priority to an interface the later it is added.
          */
         void addQueue(IQueue* queue) {
-            _queues.push_back(queue);
+            _queues.push_back(useref(queue));
         }
 
         /**
@@ -78,7 +79,7 @@ namespace swarmc::Runtime {
          * The runtime will give higher priority to a provider the later it is added.
          */
         void addProvider(IProvider* provider) {
-            _providers.push_back(provider);
+            _providers.push_back(useref(provider));
         }
 
         void addExternalProvider(dynamic::Module<ProviderModule>* m);
@@ -88,25 +89,28 @@ namespace swarmc::Runtime {
         }
 
         void useStreamDriver(IStreamDriver* driver) {
-            _streams = driver;
+            _streams = useref(driver);
         }
 
         /** Reset the VM to an uninitialized state. */
         void cleanup() {
-//            if ( _state != nullptr ) delete _state;
+            freeref(_state);
             _state = nullptr;
 
-//            if ( _scope != nullptr ) delete _scope;
+            freeref(_scope);
             _scope = nullptr;
 
-//            if ( _streams != nullptr ) delete _streams;
+            freeref(_streams);
             _streams = nullptr;
 
-//            if ( _sharedErr != nullptr ) delete _sharedErr;
+            freeref(_sharedErr);
             _sharedErr = nullptr;
 
-//            if ( _sharedOut != nullptr ) delete _sharedOut;
+            freeref(_sharedOut);
             _sharedOut = nullptr;
+
+            freeref(_debugger);
+            _debugger = nullptr;
 
             for ( auto lock : _locks ) lock->release();
             _locks.clear();
@@ -114,8 +118,8 @@ namespace swarmc::Runtime {
             _stores.clear();
             _providers.clear();
 
-            delete _localErr;
-            delete _localOut;
+            freeref(_localErr);
+            freeref(_localOut);
         }
 
         virtual void restore(ScopeFrame*);
@@ -124,7 +128,7 @@ namespace swarmc::Runtime {
         virtual void restore(ScopeFrame*, State*);
 
         virtual void attachDebugger(Debug::Debugger* debugger) {
-            _debugger = debugger;
+            _debugger = useref(debugger);
             _debugger->setMetadata(_state->getMetadata());
         }
 
@@ -258,7 +262,7 @@ namespace swarmc::Runtime {
 
         virtual IStream* getSharedOutput() {
             if ( _sharedOut == nullptr ) {
-                _sharedOut = _streams->open("s:STDOUT", Type::Primitive::of(Type::Intrinsic::STRING));
+                _sharedOut = useref(_streams->open("s:STDOUT", Type::Primitive::of(Type::Intrinsic::STRING)));
             }
 
             return _sharedOut;
@@ -266,7 +270,7 @@ namespace swarmc::Runtime {
 
         virtual IStream* getSharedError() {
             if ( _sharedErr == nullptr ) {
-                _sharedErr = _streams->open("s:STDERR", Type::Primitive::of(Type::Intrinsic::STRING));
+                _sharedErr = useref(_streams->open("s:STDERR", Type::Primitive::of(Type::Intrinsic::STRING)));
             }
 
             return _sharedErr;
@@ -321,17 +325,23 @@ namespace swarmc::Runtime {
         /** Make a deep copy of this instance. */
         [[nodiscard]] VirtualMachine* copy() const {
             auto copy = new VirtualMachine(_global);
-            copy->_state = _state->copy();
-            copy->_queues = _queues;
-            copy->_locks = _locks;
-            copy->_scope = _scope->copy();
+            copy->_state = useref(_state->copy());
+            copy->_scope = useref(_scope->copy());
             copy->_queueContexts = _queueContexts;
-            copy->_providers = _providers;
-            copy->_streams = _streams;
+            copy->_streams = useref(_streams);
             copy->_localOut = new LocalOutputStream();
             copy->_localErr = new LocalErrorStream();
-            copy->_sharedOut = _sharedOut;
-            copy->_sharedErr = _sharedErr;
+            copy->_sharedOut = useref(_sharedOut);
+            copy->_sharedErr = useref(_sharedErr);
+
+            copy->_queues = _queues;
+            for ( auto e : _queues ) useref(e);
+
+            copy->_locks = _locks;
+            for ( auto e : _locks ) useref(e);
+
+            copy->_providers = _providers;
+            for ( auto e : _providers ) useref(e);
 
             Stores stores;
             for ( auto store : _stores ) stores.push_back(store->copy());
