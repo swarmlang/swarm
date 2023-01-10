@@ -21,4 +21,8 @@ namespace nslib {
         Logging::get()->output(_tag, v, p);
     }
 
+    RefHandle localref(IRefCountable* ref) {
+        return RefHandle(ref);
+    }
+
 }

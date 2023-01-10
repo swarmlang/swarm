@@ -474,6 +474,13 @@ namespace nslib {
     }
 
 
+    template<typename T>
+    T* unlessNull(T* v, std::function<T*(T*)> f) {
+        if ( v != nullptr ) return f(v);
+        return f;
+    }
+
+
     namespace stl {
         namespace priv {
             template <typename ElemT>
@@ -520,6 +527,13 @@ namespace nslib {
                 s.pop();
                 fn(elem);
             }
+        }
+
+        template<typename InputT, typename OutputT>
+        inline std::vector<OutputT> map(std::vector<InputT> v, std::function<OutputT(InputT)> f) {
+            std::vector<OutputT> out;
+            std::transform(v.begin(), v.end(), out, f);
+            return out;
         }
     }
 
@@ -1519,6 +1533,80 @@ namespace nslib {
             }
         };
     }
+
+
+    /* Some ref-count memory management helpers: */
+
+    /** Trait interface which adds a reference count. */
+    class IRefCountable {
+    public:
+        IRefCountable() : _nslibRefCount(0) {}
+        virtual ~IRefCountable() = default;
+
+        /**
+         * WARNING: DO NOT CALL DIRECTLY
+         * Instead, call `useref(...)`.
+         * Increment the reference count.
+         */
+        void nslibIncRef() { _nslibRefCount += 1; }
+
+        /**
+         * WARNING: DO NOT CALL DIRECTLY
+         * Instead, call `freeref(...)`.
+         * Decrement the reference count.
+         */
+        void nslibDecRef() { _nslibRefCount -= 1; }
+
+        /** If true, the instance can be deleted. */
+        [[nodiscard]] bool nslibShouldFree() const { return _nslibRefCount < 1; }
+    private:
+        std::size_t _nslibRefCount;
+    };
+
+
+    namespace priv {
+        /** Concept uniting the IRefCountable interface w/ some other type T */
+        template <class T>
+        concept RefCountable = requires(T& obj) {
+            { std::is_base_of_v<IRefCountable, T> };
+        };
+    }
+
+    /** Open a new reference to some instance. */
+    auto useref(priv::RefCountable auto r) {
+        if ( r == nullptr ) return r;
+        r->nslibIncRef();
+        return r;
+    }
+
+    /** Release a reference to some instance. */
+    void freeref(priv::RefCountable auto r) {
+        if ( r == nullptr ) return;
+        r->nslibDecRef();
+        if ( r->nslibShouldFree() ) delete r;
+    }
+
+    /**
+     * A helper for automatically opening/releasing a reference in a scope.
+     * @example
+     * ```cpp
+     * void myfunc(SomeClass* c) {
+     *  auto cRef = localref(c);
+     *  // ...
+     *  // cRef will be released at the end of this call
+     * }
+     * ```
+     */
+    class RefHandle {
+    public:
+        explicit RefHandle(IRefCountable* ref) : _ref(useref(ref)) {}
+        virtual ~RefHandle() { freeref(_ref); }
+    protected:
+        IRefCountable* _ref;
+    };
+
+    /** Creates a RefHandle on the stack. */
+    RefHandle localref(IRefCountable* ref);
 }
 
 #endif //NSLIB_H
