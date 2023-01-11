@@ -136,7 +136,7 @@ namespace nslib {
 
 namespace swarmc::ISA {
     /** A reference is a construct that resolves to a value at runtime. */
-    class Reference : public IStringable, public serial::ISerializable {
+    class Reference : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
         explicit Reference(ReferenceTag tag) : _tag(tag) {}
         ~Reference() override = default;
@@ -239,7 +239,11 @@ namespace swarmc::ISA {
 
     class StreamReference : public Reference {
     public:
-        explicit StreamReference(Runtime::IStream* stream) : Reference(ReferenceTag::STREAM), _stream(stream) {}
+        explicit StreamReference(Runtime::IStream* stream) : Reference(ReferenceTag::STREAM), _stream(useref(stream)) {}
+
+        ~StreamReference() override {
+            freeref(_stream);
+        }
 
         [[nodiscard]] std::string toString() const override {
             return "StreamReference<" + _stream->toString() + ">";
@@ -300,7 +304,11 @@ namespace swarmc::ISA {
     /** A function literal. */
     class FunctionReference : public Reference {
     public:
-        explicit FunctionReference(Runtime::IFunction* fn) : Reference(ReferenceTag::FUNCTION), _fn(fn) {}
+        explicit FunctionReference(Runtime::IFunction* fn) : Reference(ReferenceTag::FUNCTION), _fn(useref(fn)) {}
+
+        ~FunctionReference() override {
+            freeref(_fn);
+        }
 
         [[nodiscard]] std::string toString() const override {
             return "FunctionReference<" + _fn->toString() + ">";
@@ -491,6 +499,10 @@ namespace swarmc::ISA {
         explicit EnumerationReference(const Type::Type* innerType) :
             Reference(ReferenceTag::ENUMERATION), _innerType(innerType) {}
 
+        ~EnumerationReference() override {
+            for ( auto elem : _items ) freeref(elem);
+        }
+
         [[nodiscard]] std::string toString() const override {
             return "EnumerationReference<inner: " + _innerType->toString() + ", #items: " + std::to_string(_items.size()) + ">";
         }
@@ -501,12 +513,12 @@ namespace swarmc::ISA {
 
         /** Add an item to the end of this enumeration. */
         virtual void append(Reference* value) {
-            _items.push_back(value);
+            _items.push_back(useref(value));
         }
 
         /** Add an item to the beginning of this enumeration. */
         virtual void prepend(Reference* value) {
-            _items.insert(_items.begin(), value);
+            _items.insert(_items.begin(), useref(value));
         }
 
         /** Returns true if this enumeration has an item at the given index. */
@@ -521,7 +533,7 @@ namespace swarmc::ISA {
 
         /** Inserts the given item into the enumeration at the specified index. */
         virtual void set(std::size_t i, Reference* value) {
-            _items[i] = value;
+            _items[i] = useref(value);
         }
 
         /** Pre-allocate space for the given number of items. */
@@ -567,6 +579,10 @@ namespace swarmc::ISA {
         explicit MapReference(const Type::Type* innerType) :
                 Reference(ReferenceTag::MAP), _innerType(innerType) {}
 
+        ~MapReference() override {
+            for ( const auto& pair : _items ) freeref(pair.second);
+        }
+
         [[nodiscard]] std::string toString() const override {
             return "MapReference<inner: " + _innerType->toString() + ", #keys: " + std::to_string(_items.size()) + ">";
         }
@@ -582,7 +598,7 @@ namespace swarmc::ISA {
 
         /** Store the given element at the given key. */
         virtual void set(const std::string& key, Reference* value) {
-            _items.insert({key, value});
+            _items.insert({key, useref(value)});
         }
 
         /** Returns true if this map contains an element at the given key. */
@@ -734,6 +750,17 @@ namespace swarmc::ISA {
         TSecond* _second;
     };
 
+    class BinaryReferenceInstruction : public BinaryInstruction<Reference, Reference> {
+    public:
+        BinaryReferenceInstruction(Tag tag, Reference* first, Reference* second):
+            BinaryInstruction<Reference, Reference>(tag, useref(first), useref(second)) {}
+
+        ~BinaryReferenceInstruction() override {
+            freeref(_first);
+            freeref(_second);
+        }
+    };
+
     /** Class of instructions which take three parameters */
     template <typename TFirst, typename TSecond, typename TThird>
     class TrinaryInstruction : public Instruction {
@@ -775,6 +802,18 @@ namespace swarmc::ISA {
         TFirst* _first;
         TSecond* _second;
         TThird* _third;
+    };
+
+    class TrinaryReferenceInstruction : public TrinaryInstruction<Reference, Reference, Reference> {
+    public:
+        TrinaryReferenceInstruction(Tag tag, Reference* first, Reference* second, Reference* third):
+                TrinaryInstruction<Reference, Reference, Reference>(tag, useref(first), useref(second), useref(third)) {}
+
+        ~TrinaryReferenceInstruction() override {
+            freeref(_first);
+            freeref(_second);
+            freeref(_third);
+        }
     };
 }
 

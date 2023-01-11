@@ -29,6 +29,7 @@ namespace swarmc::Runtime::Prologue {
     }
 
     void Provider::call(VirtualMachine* vm, IProviderFunctionCall* call) {
+        GC_LOCAL_REF(call)
         call->execute(vm);
     }
 

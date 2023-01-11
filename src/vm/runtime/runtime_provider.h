@@ -27,7 +27,7 @@ namespace swarmc::Runtime {
     class IProviderFunctionCall : public IFunctionCall {
     public:
         IProviderFunctionCall(CallVector vector, std::string name, const Type::Type* returnType):
-                IFunctionCall(FunctionBackend::FB_PROVIDER, std::move(name), std::move(vector), returnType) {}
+            IFunctionCall(FunctionBackend::FB_PROVIDER, std::move(name), std::move(vector), returnType) {}
 
         /** Get the IProvider responsible for this function call. */
         [[nodiscard]] virtual IProvider* provider() const = 0;

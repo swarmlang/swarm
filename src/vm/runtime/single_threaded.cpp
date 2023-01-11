@@ -5,6 +5,11 @@
 
 namespace swarmc::Runtime::SingleThreaded {
 
+    StorageInterface::~StorageInterface() noexcept {
+        for ( const auto& e : _map ) freeref(e.second);
+        for ( const auto& e : _locks ) freeref(e.second);
+    }
+
     ISA::Reference* StorageInterface::load(ISA::LocationReference* loc) {
         auto iter = _map.find(loc->fqName());
         if ( iter == _map.end() ) return nullptr;
@@ -14,7 +19,7 @@ namespace swarmc::Runtime::SingleThreaded {
     void StorageInterface::store(ISA::LocationReference* loc, ISA::Reference* value) {
         if ( _types.find(loc->fqName()) == _types.end() ) _types[loc->fqName()] = value->type();
         assert(value->type()->isAssignableTo(_types[loc->fqName()]));
-        _map[loc->fqName()] = value;
+        _map[loc->fqName()] = useref(value);
     }
 
     bool StorageInterface::has(ISA::LocationReference* loc) {
@@ -26,7 +31,12 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
     void StorageInterface::drop(ISA::LocationReference* loc) {
-        _map.erase(loc->fqName());
+        auto mapIter = _map.find(loc->fqName());
+        if ( mapIter == _map.end() ) return;
+
+        freeref((*mapIter).second);
+        _map.erase(mapIter);
+
         _types.erase(loc->fqName());
     }
 
@@ -42,12 +52,14 @@ namespace swarmc::Runtime::SingleThreaded {
 
     IStorageLock* StorageInterface::acquire(ISA::LocationReference* loc) {
         if ( _locks.find(loc->fqName()) != _locks.end() ) return nullptr;
-        _locks[loc->fqName()] = new StorageLock(this, loc);
+        _locks[loc->fqName()] = useref(new StorageLock(this, loc));
         return _locks[loc->fqName()];
     }
 
     void StorageInterface::clear() {
+        for ( const auto& e : _map ) freeref(e.second);
         _map.clear();
+
         _types.clear();
     }
 
@@ -58,20 +70,35 @@ namespace swarmc::Runtime::SingleThreaded {
 
         // Otherwise, duplicate the store
         auto copy = new StorageInterface(_affinity);
-        copy->_map = _map;
-        copy->_types = _types;
-        // (don't duplicate locks, since the recipient won't hold them)
 
+        copy->_map = _map;
+        for ( const auto& e : copy->_map ) useref(e.second);
+
+        copy->_types = _types;
+
+        // (don't duplicate locks, since the recipient won't hold them)
         return copy;
     }
 
+
+    StorageLock::StorageLock(StorageInterface* store, ISA::LocationReference* loc) {
+        _store = useref(store);
+        _loc = useref(loc);
+    }
+
+    StorageLock::~StorageLock() noexcept {
+        freeref(_store);
+        freeref(_loc);
+    }
 
     ISA::LocationReference* StorageLock::location() const {
         return _loc;
     }
 
     void StorageLock::release() {
-        _store->_locks.erase(_loc->fqName());
+        auto lockIter = _store->_locks.find(_loc->fqName());
+        freeref((*lockIter).second);
+        _store->_locks.erase(lockIter);
     }
 
     std::string StorageLock::toString() const {
@@ -80,8 +107,8 @@ namespace swarmc::Runtime::SingleThreaded {
 
 
     QueueJob::QueueJob(
-            JobID id, JobState jobState, IFunctionCall *call, ScopeFrame *scope, State *vmState):
-                _id(id), _jobState(jobState), _call(useref(call)), _scope(useref(scope)), _vmState(useref(vmState)) {}
+        JobID id, JobState jobState, IFunctionCall *call, ScopeFrame *scope, State *vmState):
+            _id(id), _jobState(jobState), _call(useref(call)), _scope(useref(scope)), _vmState(useref(vmState)) {}
 
     QueueJob::~QueueJob() noexcept {
         freeref(_call);
@@ -109,15 +136,23 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
 
+    Stream::~Stream() noexcept {
+        while ( !_items.empty() ) {
+            freeref(_items.front());
+            _items.pop();
+        }
+    }
+
     void Stream::push(ISA::Reference* value) {
         assert(value->type()->isAssignableTo(_innerType));
-        _items.push(value);
+        _items.push(useref(value));
     }
 
     ISA::Reference* Stream::pop() {
         assert(!_items.empty());
         auto top = _items.front();
         _items.pop();
+        top->nslibDecRef();  // to undo the `useref`, but without freeing it
         return top;
     }
 

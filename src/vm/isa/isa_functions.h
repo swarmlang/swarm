@@ -10,8 +10,13 @@ namespace swarmc::ISA {
         BeginFunction(std::string name, Reference* returnType) :
             BinaryInstruction(
             Tag::BEGINFN,
-            new LocationReference(Affinity::FUNCTION, std::move(name)),
-            returnType) {}
+            useref(new LocationReference(Affinity::FUNCTION, std::move(name))),
+            useref(returnType)) {}
+
+        ~BeginFunction() override {
+            freeref(_first);
+            freeref(_second);
+        }
 
         [[nodiscard]] virtual bool isPure() const { return _isPure; }
 
@@ -26,7 +31,11 @@ namespace swarmc::ISA {
 
     class FunctionParam : public BinaryInstruction<Reference, LocationReference> {
     public:
-        FunctionParam(Reference* type, LocationReference* loc) : BinaryInstruction<Reference, LocationReference>(Tag::FNPARAM, type, loc) {}
+        FunctionParam(Reference* type, LocationReference* loc) : BinaryInstruction<Reference, LocationReference>(Tag::FNPARAM, useref(type), useref(loc)) {}
+        ~FunctionParam() override {
+            freeref(_first);
+            freeref(_second);
+        }
         [[nodiscard]] FunctionParam* copy() const override {
             return new FunctionParam(_first->copy(), _second->copy());
         }
@@ -34,7 +43,8 @@ namespace swarmc::ISA {
 
     class Return1 : public UnaryInstruction<Reference> {
     public:
-        explicit Return1(Reference* value) : UnaryInstruction<Reference>(Tag::RETURN1, value) {}
+        explicit Return1(Reference* value) : UnaryInstruction<Reference>(Tag::RETURN1, useref(value)) {}
+        ~Return1() override { freeref(_first); }
         [[nodiscard]] Return1* copy() const override {
             return new Return1(_first->copy());
         }
@@ -48,10 +58,14 @@ namespace swarmc::ISA {
         }
     };
 
-    class Curry : public BinaryInstruction<Reference, Reference> {
+    class Curry : public BinaryReferenceInstruction {
     public:
         Curry(Reference* fn, Reference* param) :
-            BinaryInstruction<Reference, Reference>(Tag::CURRY, fn, param) {}
+            BinaryReferenceInstruction(Tag::CURRY, useref(fn), useref(param)) {}
+        ~Curry() override {
+            freeref(_first);
+            freeref(_second);
+        }
         [[nodiscard]] Curry* copy() const override {
             return new Curry(_first->copy(), _second->copy());
         }
@@ -59,52 +73,53 @@ namespace swarmc::ISA {
 
     class Call0 : public UnaryInstruction<Reference> {
     public:
-        explicit Call0(Reference* fn) : UnaryInstruction<Reference>(Tag::CALL0, fn) {}
+        explicit Call0(Reference* fn) : UnaryInstruction<Reference>(Tag::CALL0, useref(fn)) {}
+        ~Call0() override { freeref(_first); }
         [[nodiscard]] Call0* copy() const override {
             return new Call0(_first->copy());
         }
     };
 
-    class Call1 : public BinaryInstruction<Reference, Reference> {
+    class Call1 : public BinaryReferenceInstruction {
     public:
         Call1(Reference* fn, Reference* param) :
-                BinaryInstruction<Reference, Reference>(Tag::CALL1, fn, param) {}
+                BinaryReferenceInstruction(Tag::CALL1, fn, param) {}
         [[nodiscard]] Call1* copy() const override {
             return new Call1(_first->copy(), _second->copy());
         }
     };
 
-    class CallIf0 : public BinaryInstruction<Reference, Reference> {
+    class CallIf0 : public BinaryReferenceInstruction {
     public:
         CallIf0(Reference* cond, Reference* fn) :
-                BinaryInstruction<Reference, Reference>(Tag::CALLIF0, cond, fn) {}
+                BinaryReferenceInstruction(Tag::CALLIF0, cond, fn) {}
         [[nodiscard]] CallIf0* copy() const override {
             return new CallIf0(_first->copy(), _second->copy());
         }
     };
 
-    class CallIf1 : public TrinaryInstruction<Reference, Reference, Reference> {
+    class CallIf1 : public TrinaryReferenceInstruction {
     public:
         CallIf1(Reference* cond, Reference* fn, Reference* param) :
-                TrinaryInstruction<Reference, Reference, Reference>(Tag::CALLIF1, cond, fn, param) {}
+                TrinaryReferenceInstruction(Tag::CALLIF1, cond, fn, param) {}
         [[nodiscard]] CallIf1* copy() const override {
             return new CallIf1(_first->copy(), _second->copy(), _third->copy());
         }
     };
 
-    class CallElse0 : public BinaryInstruction<Reference, Reference> {
+    class CallElse0 : public BinaryReferenceInstruction {
     public:
         CallElse0(Reference* cond, Reference* fn) :
-                BinaryInstruction<Reference, Reference>(Tag::CALLELSE0, cond, fn) {}
+                BinaryReferenceInstruction(Tag::CALLELSE0, cond, fn) {}
         [[nodiscard]] CallElse0* copy() const override {
             return new CallElse0(_first->copy(), _second->copy());
         }
     };
 
-    class CallElse1 : public TrinaryInstruction<Reference, Reference, Reference> {
+    class CallElse1 : public TrinaryReferenceInstruction {
     public:
         CallElse1(Reference* cond, Reference* fn, Reference* param) :
-                TrinaryInstruction<Reference, Reference, Reference>(Tag::CALLELSE1, cond, fn, param) {}
+                TrinaryReferenceInstruction(Tag::CALLELSE1, cond, fn, param) {}
         [[nodiscard]] CallElse1* copy() const override {
             return new CallElse1(_first->copy(), _second->copy(), _third->copy());
         }
@@ -112,52 +127,53 @@ namespace swarmc::ISA {
 
     class PushCall0 : public UnaryInstruction<Reference> {
     public:
-        explicit PushCall0(Reference* fn) : UnaryInstruction<Reference>(Tag::PUSHCALL0, fn) {}
+        explicit PushCall0(Reference* fn) : UnaryInstruction<Reference>(Tag::PUSHCALL0, useref(fn)) {}
+        ~PushCall0() override { freeref(_first); }
         [[nodiscard]] PushCall0* copy() const override {
             return new PushCall0(_first->copy());
         }
     };
 
-    class PushCall1 : public BinaryInstruction<Reference, Reference> {
+    class PushCall1 : public BinaryReferenceInstruction {
     public:
         PushCall1(Reference* fn, Reference* param) :
-                BinaryInstruction<Reference, Reference>(Tag::PUSHCALL1, fn, param) {}
+                BinaryReferenceInstruction(Tag::PUSHCALL1, fn, param) {}
         [[nodiscard]] PushCall1* copy() const override {
             return new PushCall1(_first->copy(), _second->copy());
         }
     };
 
-    class PushCallIf0 : public BinaryInstruction<Reference, Reference> {
+    class PushCallIf0 : public BinaryReferenceInstruction {
     public:
         PushCallIf0(Reference* cond, Reference* fn) :
-                BinaryInstruction<Reference, Reference>(Tag::PUSHCALLIF0, cond, fn) {}
+                BinaryReferenceInstruction(Tag::PUSHCALLIF0, cond, fn) {}
         [[nodiscard]] PushCallIf0* copy() const override {
             return new PushCallIf0(_first->copy(), _second->copy());
         }
     };
 
-    class PushCallIf1 : public TrinaryInstruction<Reference, Reference, Reference> {
+    class PushCallIf1 : public TrinaryReferenceInstruction {
     public:
         PushCallIf1(Reference* cond, Reference* fn, Reference* param) :
-                TrinaryInstruction<Reference, Reference, Reference>(Tag::PUSHCALLIF1, cond, fn, param) {}
+                TrinaryReferenceInstruction(Tag::PUSHCALLIF1, cond, fn, param) {}
         [[nodiscard]] PushCallIf1* copy() const override {
             return new PushCallIf1(_first->copy(), _second->copy(), _third->copy());
         }
     };
 
-    class PushCallElse0 : public BinaryInstruction<Reference, Reference> {
+    class PushCallElse0 : public BinaryReferenceInstruction {
     public:
         PushCallElse0(Reference* cond, Reference* fn) :
-                BinaryInstruction<Reference, Reference>(Tag::PUSHCALLELSE0, cond, fn) {}
+                BinaryReferenceInstruction(Tag::PUSHCALLELSE0, cond, fn) {}
         [[nodiscard]] PushCallElse0* copy() const override {
             return new PushCallElse0(_first->copy(), _second->copy());
         }
     };
 
-    class PushCallElse1 : public TrinaryInstruction<Reference, Reference, Reference> {
+    class PushCallElse1 : public TrinaryReferenceInstruction {
     public:
         PushCallElse1(Reference* cond, Reference* fn, Reference* param) :
-                TrinaryInstruction<Reference, Reference, Reference>(Tag::PUSHCALLELSE1, cond, fn, param) {}
+                TrinaryReferenceInstruction(Tag::PUSHCALLELSE1, cond, fn, param) {}
         [[nodiscard]] PushCallElse1* copy() const override {
             return new PushCallElse1(_first->copy(), _second->copy(), _third->copy());
         }

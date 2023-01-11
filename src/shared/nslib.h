@@ -9,6 +9,13 @@
 #define NSLIB_DL_OPTS (RTLD_NOW)
 #endif
 
+#define CONCAT(a, b) CONCAT_INNER(a, b)
+#define CONCAT_INNER(a, b) a ## b
+#define UNIQUE_NAME(base) CONCAT(base, __COUNTER__)
+
+/* Creates a unique local variable w/ a RefHandle. */
+#define GC_LOCAL_REF(ref) auto UNIQUE_NAME(refHandle) = localref(ref);
+
 #include <dlfcn.h>
 
 #include <random>

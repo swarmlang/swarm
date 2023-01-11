@@ -16,7 +16,11 @@ namespace swarmc::Runtime::Prologue {
     class PrologueFunctionCall : public IProviderFunctionCall {
     public:
         PrologueFunctionCall(IProvider* provider, std::string name, const CallVector& vector, const Type::Type* returnType) :
-            IProviderFunctionCall(vector, std::move(name), returnType), _provider(provider) {}
+            IProviderFunctionCall(vector, std::move(name), returnType), _provider(useref(provider)) {}
+
+        ~PrologueFunctionCall() override {
+            freeref(_provider);
+        }
 
         [[nodiscard]] IProvider* provider() const override { return _provider; }
     protected:
@@ -25,7 +29,11 @@ namespace swarmc::Runtime::Prologue {
 
     class PrologueFunction : public IProviderFunction {
     public:
-        PrologueFunction(std::string name, IProvider* provider) : IProviderFunction(std::move(name)), _provider(provider) {}
+        PrologueFunction(std::string name, IProvider* provider) : IProviderFunction(std::move(name)), _provider(useref(provider)) {}
+
+        ~PrologueFunction() override {
+            freeref(_provider);
+        }
 
         [[nodiscard]] IProvider* provider() const override { return _provider; }
 
@@ -37,7 +45,7 @@ namespace swarmc::Runtime::Prologue {
             return {};
         }
 
-        IFunction* curry(ISA::Reference* ref) const override {
+        IFunction* curry(ISA::Reference* ref) override {
             return new CurriedFunction(ref, this);
         }
 

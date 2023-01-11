@@ -71,6 +71,8 @@ namespace swarmc::Runtime::SingleThreaded {
     public:
         explicit StorageInterface(ISA::Affinity affinity) : _affinity(affinity) {}
 
+        ~StorageInterface() noexcept override;
+
         ISA::Reference* load(ISA::LocationReference* loc) override;
 
         void store(ISA::LocationReference* loc, ISA::Reference* value) override;
@@ -112,14 +114,9 @@ namespace swarmc::Runtime::SingleThreaded {
      */
     class StorageLock : public IStorageLock {
     public:
-        StorageLock(StorageInterface* store, ISA::LocationReference* loc) {
-            _loc = loc;
-            _store = useref(store);
-        }
+        StorageLock(StorageInterface* store, ISA::LocationReference* loc);
 
-        ~StorageLock() override {
-            freeref(_store);
-        }
+        ~StorageLock() noexcept override;
 
         [[nodiscard]] ISA::LocationReference* location() const override;
 
@@ -212,6 +209,8 @@ namespace swarmc::Runtime::SingleThreaded {
     class Stream : public IStream {
     public:
         Stream(std::string id, const Type::Type* innerType) : _id(std::move(id)), _innerType(innerType) {}
+
+        ~Stream() noexcept override;
 
         void open() override {}
 

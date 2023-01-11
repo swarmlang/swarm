@@ -98,12 +98,13 @@ namespace swarmc::Runtime {
         /** Create a deep copy of this scope. */
         [[nodiscard]] ScopeFrame* copy() const {
             auto copy = new ScopeFrame(_global, _id, _parent == nullptr ? nullptr : _parent->copy());
-            copy->_map = _map;  // FIXME: useref
             copy->_call = _call == nullptr ? nullptr : useref(_call);
             copy->_returnTo = _returnTo;
             copy->_isExceptionFrame = _isExceptionFrame;
             copy->_shouldCaptureReturn = _shouldCaptureReturn;
             copy->_return = _return == nullptr ? nullptr : useref(_return);
+            copy->_map = _map;
+            for ( const auto& e : copy->_map ) useref(e.second);
 
             copy->_handlers = _handlers;
             stl::stackLoop<ExceptionHandler>(_handlers, [](ExceptionHandler e) { useref(unpackExceptionHandler(std::move(e))); });
@@ -296,7 +297,7 @@ namespace swarmc::Runtime {
 
         /** Jump to the return location for the function currently in scope and pop the call stack. */
         ScopeFrame* jumpReturn(ScopeFrame* scope) {
-            ScopeFrame* current = scope;
+            ScopeFrame* current = useref(scope);
             while ( current != nullptr ) {
                 auto returnTo = current->getReturnPC();
 
@@ -314,10 +315,12 @@ namespace swarmc::Runtime {
                 if ( returnTo != std::nullopt && returnTo != _is.size() ) {
                     jump(*returnTo);
                     current->clearReturnPC();
+                    current->nslibDecRef();  // To undo the `useref`, but without freeing it.
                     return current;
                 }
 
-                current = current->parent();
+                GC_LOCAL_REF(current)  // To freeref(...) the popped scope after we grab the parent.
+                current = useref(current->parent());
             }
 
             // This case occurs as a result of exception handling. A resumed function can take the place
@@ -325,6 +328,7 @@ namespace swarmc::Runtime {
             // since it replaced the top-level control.
             // So, assume that means we've hit the end of valid control.
             jumpEnd();
+            scope->nslibDecRef();  // To undo the `useref`, but without freeing it.
             return scope;
         }
 

@@ -11,6 +11,7 @@ namespace swarmc::Runtime {
 
 
     void LocalOutputStream::push(ISA::Reference* value) {
+        GC_LOCAL_REF(value)
         assert(value->tag() == ISA::ReferenceTag::STRING);
         auto string = (ISA::StringReference*) value;
         console->info("[l] " + string->value());
@@ -18,6 +19,7 @@ namespace swarmc::Runtime {
 
 
     void LocalErrorStream::push(ISA::Reference* value) {
+        GC_LOCAL_REF(value)
         assert(value->tag() == ISA::ReferenceTag::STRING);
         auto string = (ISA::StringReference*) value;
         console->error("[l] " + string->value());

@@ -4,9 +4,8 @@
 namespace swarmc::Runtime::Prologue {
 
     void TagResource::acquire(VirtualMachine* vm) {
-        auto global = vm->global();
-        _old = global->getSchedulingFilters();
-        global->applySchedulingFilter(_key, _value);
+        _old = vm->global()->getSchedulingFilters();
+        vm->global()->applySchedulingFilter(_key, _value);
     }
 
     void TagResource::release(VirtualMachine* vm) {
@@ -25,8 +24,8 @@ namespace swarmc::Runtime::Prologue {
 
     FormalTypes TagFunction::paramTypes() const {
         return {
-                Type::Primitive::of(Type::Intrinsic::STRING),
-                Type::Primitive::of(Type::Intrinsic::STRING)
+            Type::Primitive::of(Type::Intrinsic::STRING),
+            Type::Primitive::of(Type::Intrinsic::STRING)
         };
     }
 

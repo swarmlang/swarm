@@ -141,7 +141,8 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::step() {
-        _exec->walkOne(_state->current());
+        auto result = _exec->walkOne(_state->current());
+        GC_LOCAL_REF(result)
 
         if ( !_state->isEndOfProgram() && _shouldAdvance ) {
             advance();
@@ -215,9 +216,9 @@ namespace swarmc::Runtime {
         for ( auto it = _locks.begin(); it != _locks.end(); ++it ) {
             auto lock = *it;
             if ( lock->location()->is(loc) ) {
+                GC_LOCAL_REF(lock);
                 lock->release();
                 _locks.erase(it);
-                freeref(lock);
                 return;
             }
         }
@@ -356,7 +357,8 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::returnToCaller(bool shouldJump) {
-        auto call = useref(getCall());
+        auto call = getCall();
+        GC_LOCAL_REF(call)
         if ( call == nullptr ) {
             throw Errors::SwarmError("Unable to return from caller: no call in progress.");
         }
@@ -378,8 +380,6 @@ namespace swarmc::Runtime {
         if ( _scope->shouldCaptureReturn() ) {
             _scope->setReturnCall(call);
         }
-
-        freeref(call);
     }
 
     std::pair<ScopeFrame*, IFunction*> VirtualMachine::getExceptionHandler(std::size_t code) {
@@ -404,16 +404,18 @@ namespace swarmc::Runtime {
                 auto discriminatorFn = unpackExceptionHandlerDiscriminator(handler);
                 if ( discriminatorFn != nullptr ) {
                     auto call = discriminatorFn->curry(new NumberReference(static_cast<double>(code)))->call();
+                    GC_LOCAL_REF(call)
 
                     copy([call](VirtualMachine* vm) {
                         vm->executeCall(call);
                     });
 
                     // the handler is type-checked before being pushed
+                    // FIXME: type memory leak
                     assert(call->returnType()->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)));
                     auto result = (BooleanReference*) call->getReturn();
+                    GC_LOCAL_REF(result)
                     auto resultValue = result->value();
-                    delete result;
 
                     if ( resultValue ) {
                         return {scope, unpackExceptionHandler(handler)};
@@ -458,6 +460,7 @@ namespace swarmc::Runtime {
         for ( auto pair : vector ) {
             auto type = pair.first;
             auto ref = pair.second;
+            // FIXME: type memory leak
             if ( !ref->type()->isAssignableTo(type) ) {
                 throw Errors::RuntimeError(
                     Errors::RuntimeExCode::InvalidArgumentType,

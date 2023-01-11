@@ -112,10 +112,16 @@ namespace swarmc::Runtime {
             freeref(_debugger);
             _debugger = nullptr;
 
-            for ( auto lock : _locks ) lock->release();
+            for ( auto lock : _locks ) {
+                lock->release();
+                freeref(lock);
+            }
             _locks.clear();
 
+            for ( auto store : _stores ) freeref(store);
             _stores.clear();
+
+            for ( auto provider : _providers ) freeref(provider);
             _providers.clear();
 
             freeref(_localErr);
@@ -344,7 +350,7 @@ namespace swarmc::Runtime {
             for ( auto e : _providers ) useref(e);
 
             Stores stores;
-            for ( auto store : _stores ) stores.push_back(store->copy());
+            for ( auto store : _stores ) stores.push_back(useref(store->copy()));
             copy->_stores = stores;
 
             return copy;

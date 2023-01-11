@@ -40,8 +40,9 @@ namespace swarmc::Runtime {
      */
     class IFunctionCall : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
-        IFunctionCall(FunctionBackend backend, std::string name, CallVector vector, const Type::Type* returnType):
-            _backend(backend), _name(std::move(name)), _vector(std::move(vector)), _returnType(returnType) {}
+        IFunctionCall(FunctionBackend backend, std::string name, CallVector vector, const Type::Type* returnType);
+
+        ~IFunctionCall() noexcept override;
 
         /** Determines how the function call is performed. */
         [[nodiscard]] virtual FunctionBackend backend() const { return _backend; }
@@ -52,13 +53,13 @@ namespace swarmc::Runtime {
         [[nodiscard]] serial::tag_t getSerialKey() const override { return s(_backend); }
 
         /** Get the parameters already applied to this function call, paired with thier types. */
-        virtual CallVector vector() const { return _vector; }
+        [[nodiscard]] virtual CallVector vector() const { return _vector; }
 
         /** Get the return type of this function call. */
-        virtual const Type::Type* returnType() const { return _returnType; }
+        [[nodiscard]] virtual const Type::Type* returnType() const { return _returnType; }
 
         /** Set the value returned by the execution of this call. */
-        virtual void setReturn(ISA::Reference* value) { _returnValue = value; }
+        virtual void setReturn(ISA::Reference* value);
 
         /** Get the value returned by the execution of this call. `nullptr` if the function has not returned. */
         [[nodiscard]] virtual ISA::Reference* getReturn() const { return _returnValue; }
@@ -121,7 +122,7 @@ namespace swarmc::Runtime {
         [[nodiscard]] virtual const Type::Type* returnType() const = 0;
 
         /** Get a new IFunction which contains the given parameter, curried into a partial application. */
-        [[nodiscard]] virtual IFunction* curry(ISA::Reference*) const = 0;
+        [[nodiscard]] virtual IFunction* curry(ISA::Reference*) = 0;
 
         /** Get a list of the parameters which have been curried thusfar, along with their types. */
         [[nodiscard]] virtual CallVector getCallVector() const = 0;
@@ -145,7 +146,9 @@ namespace swarmc::Runtime {
      */
     class CurriedFunction : public IFunction {
     public:
-        CurriedFunction(ISA::Reference* ref, const IFunction* upstream) : _ref(ref), _upstream(upstream) {}
+        CurriedFunction(ISA::Reference* ref, IFunction* upstream);
+
+        ~CurriedFunction() noexcept override;
 
         [[nodiscard]] FormalTypes paramTypes() const override {
             auto upstream = _upstream->paramTypes();
@@ -156,7 +159,7 @@ namespace swarmc::Runtime {
             return _upstream->returnType();
         }
 
-        IFunction* curry(ISA::Reference* ref) const override {
+        IFunction* curry(ISA::Reference* ref) override {
             return new CurriedFunction(ref, this);
         }
 
@@ -164,7 +167,7 @@ namespace swarmc::Runtime {
             // FIXME: validate type/param indices
             auto type = _upstream->paramTypes()[0];
             auto upstream = _upstream->getCallVector();
-            upstream.push_back({type, _ref});
+            upstream.emplace_back(type, _ref);
             return upstream;
         }
 
@@ -184,7 +187,7 @@ namespace swarmc::Runtime {
 
     protected:
         ISA::Reference* _ref;
-        const IFunction* _upstream;
+        IFunction* _upstream;
     };
 
 
@@ -205,7 +208,7 @@ namespace swarmc::Runtime {
             return _returnType;
         };
 
-        IFunction* curry(ISA::Reference* ref) const override {
+        IFunction* curry(ISA::Reference* ref) override {
             return new CurriedFunction(ref, this);
         }
 

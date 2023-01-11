@@ -5,55 +5,55 @@
 
 namespace swarmc::ISA {
 
-    class Plus : public BinaryInstruction<Reference, Reference> {
+    class Plus : public BinaryReferenceInstruction {
     public:
         Plus(Reference* lhs, Reference* rhs) :
-            BinaryInstruction<Reference, Reference>(Tag::PLUS, lhs, rhs) {}
+            BinaryReferenceInstruction(Tag::PLUS, lhs, rhs) {}
         [[nodiscard]] Plus* copy() const override {
             return new Plus(_first->copy(), _second->copy());
         }
     };
 
-    class Minus : public BinaryInstruction<Reference, Reference> {
+    class Minus : public BinaryReferenceInstruction {
     public:
         Minus(Reference* lhs, Reference* rhs) :
-            BinaryInstruction<Reference, Reference>(Tag::MINUS, lhs, rhs) {}
+            BinaryReferenceInstruction(Tag::MINUS, lhs, rhs) {}
         [[nodiscard]] Minus* copy() const override {
             return new Minus(_first->copy(), _second->copy());
         }
     };
 
-    class Times : public BinaryInstruction<Reference, Reference> {
+    class Times : public BinaryReferenceInstruction {
     public:
         Times(Reference* lhs, Reference* rhs) :
-            BinaryInstruction<Reference, Reference>(Tag::TIMES, lhs, rhs) {}
+            BinaryReferenceInstruction(Tag::TIMES, lhs, rhs) {}
         [[nodiscard]] Times* copy() const override {
             return new Times(_first->copy(), _second->copy());
         }
     };
 
-    class Divide : public BinaryInstruction<Reference, Reference> {
+    class Divide : public BinaryReferenceInstruction {
     public:
         Divide(Reference* lhs, Reference* rhs) :
-            BinaryInstruction<Reference, Reference>(Tag::DIVIDE, lhs, rhs) {}
+            BinaryReferenceInstruction(Tag::DIVIDE, lhs, rhs) {}
         [[nodiscard]] Divide* copy() const override {
             return new Divide(_first->copy(), _second->copy());
         }
     };
 
-    class Power : public BinaryInstruction<Reference, Reference> {
+    class Power : public BinaryReferenceInstruction {
     public:
         Power(Reference* lhs, Reference* rhs) :
-            BinaryInstruction<Reference, Reference>(Tag::POWER, lhs, rhs) {}
+            BinaryReferenceInstruction(Tag::POWER, lhs, rhs) {}
         [[nodiscard]] Power* copy() const override {
             return new Power(_first->copy(), _second->copy());
         }
     };
 
-    class Mod : public BinaryInstruction<Reference, Reference> {
+    class Mod : public BinaryReferenceInstruction {
     public:
         Mod(Reference* lhs, Reference* rhs) :
-            BinaryInstruction<Reference, Reference>(Tag::MOD, lhs, rhs) {}
+            BinaryReferenceInstruction(Tag::MOD, lhs, rhs) {}
         [[nodiscard]] Mod* copy() const override {
             return new Mod(_first->copy(), _second->copy());
         }
@@ -62,43 +62,46 @@ namespace swarmc::ISA {
     class Negative : public UnaryInstruction<Reference> {
     public:
         explicit Negative(Reference* value) :
-            UnaryInstruction<Reference>(Tag::NEG, value) {}
+            UnaryInstruction<Reference>(Tag::NEG, useref(value)) {}
+        ~Negative() override {
+            freeref(_first);
+        }
         [[nodiscard]] Negative* copy() const override {
             return new Negative(_first->copy());
         }
     };
 
-    class GreaterThan : public BinaryInstruction<Reference, Reference> {
+    class GreaterThan : public BinaryReferenceInstruction {
     public:
         GreaterThan(Reference* lhs, Reference* rhs) :
-                BinaryInstruction<Reference, Reference>(Tag::GT, lhs, rhs) {}
+                BinaryReferenceInstruction(Tag::GT, lhs, rhs) {}
         [[nodiscard]] GreaterThan* copy() const override {
             return new GreaterThan(_first->copy(), _second->copy());
         }
     };
 
-    class GreaterThanOrEqual : public BinaryInstruction<Reference, Reference> {
+    class GreaterThanOrEqual : public BinaryReferenceInstruction {
     public:
         GreaterThanOrEqual(Reference* lhs, Reference* rhs) :
-                BinaryInstruction<Reference, Reference>(Tag::GTE, lhs, rhs) {}
+                BinaryReferenceInstruction(Tag::GTE, lhs, rhs) {}
         [[nodiscard]] GreaterThanOrEqual* copy() const override {
             return new GreaterThanOrEqual(_first->copy(), _second->copy());
         }
     };
 
-    class LessThan : public BinaryInstruction<Reference, Reference> {
+    class LessThan : public BinaryReferenceInstruction {
     public:
         LessThan(Reference* lhs, Reference* rhs) :
-                BinaryInstruction<Reference, Reference>(Tag::LT, lhs, rhs) {}
+                BinaryReferenceInstruction(Tag::LT, lhs, rhs) {}
         [[nodiscard]] LessThan* copy() const override {
             return new LessThan(_first->copy(), _second->copy());
         }
     };
 
-    class LessThanOrEqual : public BinaryInstruction<Reference, Reference> {
+    class LessThanOrEqual : public BinaryReferenceInstruction {
     public:
         LessThanOrEqual(Reference* lhs, Reference* rhs) :
-                BinaryInstruction<Reference, Reference>(Tag::LTE, lhs, rhs) {}
+                BinaryReferenceInstruction(Tag::LTE, lhs, rhs) {}
         [[nodiscard]] LessThanOrEqual* copy() const override {
             return new LessThanOrEqual(_first->copy(), _second->copy());
         }

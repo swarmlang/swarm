@@ -286,6 +286,7 @@ namespace swarmc::Runtime {
                 "Invalid while callback " + s(callback) + " (expected: " + s(callbackType) + ", got: " + s(callback->type()) + ")"
             );
         }
+        delete callbackType;  // FIXME: GC_LOCAL_REF this eventually
 
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         if ( cond->value() ) {
@@ -294,6 +295,7 @@ namespace swarmc::Runtime {
             _vm->rewind();
 
             auto call = callback->fn()->call();
+            GC_LOCAL_REF(call);
             _vm->call(call);
         }
 
@@ -315,11 +317,15 @@ namespace swarmc::Runtime {
             );
         }
 
+        delete callbackType;  // FIXME: GC_LOCAL_REF this eventually
+
         // Open the resource
         resource->resource()->acquire(_vm);
 
         // Perform the call
         auto call = callback->fn()->curry(resource)->call();
+        GC_LOCAL_REF(call);
+
         _vm->pushCall(call);
         _vm->drain();
 
@@ -339,6 +345,7 @@ namespace swarmc::Runtime {
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->first());
 
+        // FIXME: type memory leak
         if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidValueTypeForEnum,
@@ -356,10 +363,11 @@ namespace swarmc::Runtime {
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->first());
 
+        // FIXME: type memory leak
         if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
             throw Errors::RuntimeError(
-                    Errors::RuntimeExCode::InvalidValueTypeForEnum,
-                    "Cannot prepend value to enum: invalid type (expected: " + s(enumeration->type()->values()) + ", got: " + s(value->type()) + ")"
+                Errors::RuntimeExCode::InvalidValueTypeForEnum,
+                "Cannot prepend value to enum: invalid type (expected: " + s(enumeration->type()->values()) + ", got: " + s(value->type()) + ")"
             );
         }
 
@@ -402,6 +410,7 @@ namespace swarmc::Runtime {
             );
         }
 
+        // FIXME: type memory leak
         if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
@@ -440,6 +449,8 @@ namespace swarmc::Runtime {
                 ->curry(new NumberReference(static_cast<double>(idx)))
                 ->call();
 
+            GC_LOCAL_REF(call);
+
             _vm->pushCall(call);
         }
 
@@ -465,9 +476,10 @@ namespace swarmc::Runtime {
             );
         }
 
-        auto param = _vm->resolve(call->popParam().second);
         auto loc = i->second();
+        auto param = _vm->resolve(call->popParam().second);
 
+        // FIXME: type memory leak
         if ( !param->type()->isAssignableTo(loc->type()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
@@ -497,6 +509,7 @@ namespace swarmc::Runtime {
     ISA::Reference* ExecuteWalk::walkReturn1(ISA::Return1* i) {
         verbose("return1 " + i->first()->toString());
         auto call = _vm->getCall();
+        GC_LOCAL_REF(call)
         if ( call == nullptr ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::ReturnOutsideCall,
@@ -506,6 +519,7 @@ namespace swarmc::Runtime {
 
         // Resolve the return value
         auto ref = _vm->resolve(i->first());
+        GC_LOCAL_REF(ref)
 
         // Validate the return type
         if ( !ref->type()->isAssignableTo(call->returnType()) ) {
@@ -657,6 +671,7 @@ namespace swarmc::Runtime {
         auto map = ensureMap(_vm->resolve(i->third()));
         auto value = _vm->resolve(i->second());
 
+        // FIXME: type memory leak
         ensureType(value, map->type()->values());
         map->set(key->value(), value);
         return nullptr;
@@ -702,10 +717,12 @@ namespace swarmc::Runtime {
         auto loc = i->first();
         auto value = _vm->resolve(i->second());
 
+        // FIXME: type memory leak
         if ( loc->type()->isAmbiguous() ) {
             loc->setType(value->type());
         }
 
+        // FIXME: type memory leak
         if ( !value->type()->isAssignableTo(loc->type()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
@@ -758,10 +775,14 @@ namespace swarmc::Runtime {
             );
         }
 
+        GC_LOCAL_REF(value);
+
+        // FIXME: type memory leak
         if ( loc->type()->isAmbiguous() ) {
             loc->setType(value->type());
         }
 
+        // FIXME: type memory leak
         if ( !value->type()->isAssignableTo(loc->type()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
@@ -818,6 +839,7 @@ namespace swarmc::Runtime {
             );
         }
 
+        // FIXME: type memory leak
         if ( !value->type()->isAssignableTo(stream->type()->inner()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
@@ -940,6 +962,7 @@ namespace swarmc::Runtime {
         verbose("pushexhandler " + i->first()->toString());
         auto handler = ensureFunction(_vm->resolve(i->first()));
 
+        // FIXME: type memory leak
         if ( !handler->type()->isAssignableTo(_typeOfExceptionHandler) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidExceptionHandlerType,
@@ -956,6 +979,7 @@ namespace swarmc::Runtime {
         auto handler = ensureFunction(_vm->resolve(i->first()));
         auto discriminator = _vm->resolve(i->second());
 
+        // FIXME: type memory leak
         if ( !handler->type()->isAssignableTo(_typeOfExceptionHandler) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidExceptionHandlerType,
@@ -969,6 +993,7 @@ namespace swarmc::Runtime {
         } else {
             auto discriminatorFn = ensureFunction(discriminator);
 
+            // FIXME: type memory leak
             if ( !discriminatorFn->type()->isAssignableTo(_typeOfExceptionDiscriminator) ) {
                 throw Errors::RuntimeError(
                     Errors::RuntimeExCode::InvalidExceptionHandlerType,
@@ -1002,7 +1027,7 @@ namespace swarmc::Runtime {
 
         // Get the scope where the exception handler was registered
         auto scope = _vm->getExceptionFrame();
-        auto scopeRef = localref(scope);
+        GC_LOCAL_REF(scope)
         if ( scope == nullptr ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::ResumeOutsideExHandler,
@@ -1014,6 +1039,9 @@ namespace swarmc::Runtime {
         // registered. This means that it is responsible for satisfying the return type
         // of that scope's IFunctionCall, if one exists.
         auto inheritedCall = scope->call();
+        GC_LOCAL_REF(inheritedCall)
+
+        // FIXME: type memory leak
         auto returnType = inheritedCall == nullptr ? Type::Primitive::of(Type::Intrinsic::VOID) : inheritedCall->returnType();
         auto fnType = new Type::Lambda0(returnType);
         if ( !fn->type()->isAssignableTo(fnType) ) {
