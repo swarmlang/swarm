@@ -127,6 +127,9 @@ namespace swarmc::Runtime {
             for ( auto provider : _providers ) freeref(provider);
             _providers.clear();
 
+            for ( auto queue : _queues ) freeref(queue);
+            _queues.clear();
+
             freeref(_localErr);
             freeref(_localOut);
         }
@@ -162,6 +165,8 @@ namespace swarmc::Runtime {
          * e.g. will take a LocationReference to a StringReference
          */
         virtual ISA::Reference* resolve(ISA::Reference*);
+
+        virtual InlineRefHandle<ISA::Reference> resolvei(ISA::Reference*);
 
         /** Get the instruction which will be executed during this step. */
         virtual ISA::Instruction* current();

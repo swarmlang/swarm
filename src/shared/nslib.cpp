@@ -3,6 +3,7 @@
 namespace nslib {
 
     bool Framework::_booted = false;
+    std::vector<std::function<void()>> Framework::_shutdownCallbacks;
     Console* Console::_global = nullptr;
 
     void Framework::boot() {

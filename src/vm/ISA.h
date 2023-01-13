@@ -170,6 +170,10 @@ namespace swarmc::ISA {
     public:
         LocationReference(Affinity affinity, std::string name) : Reference(ReferenceTag::LOCATION), _affinity(affinity), _name(std::move(name)) {}
 
+        ~LocationReference() override {
+            freeref(_type);
+        }
+
         /** Convert the given affinity value to a human-readable representation. */
         static std::string affinityString(Affinity a) {
             if ( a == Affinity::FUNCTION ) return "f";
@@ -661,7 +665,7 @@ namespace swarmc::ISA {
 
 
     /** Base class for instructions which are executed in the VM */
-    class Instruction : public IStringable {
+    class Instruction : public IStringable, public IRefCountable {
     public:
         explicit Instruction(Tag tag) : _tag(tag) {}
         ~Instruction() override = default;

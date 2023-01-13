@@ -148,7 +148,7 @@ namespace swarmc::Runtime {
 
 
     /** Tracking class for a single deferred function call. */
-    class IQueueJob : public IStringable {
+    class IQueueJob : public IStringable, public IRefCountable {
     public:
         ~IQueueJob() override = default;
 

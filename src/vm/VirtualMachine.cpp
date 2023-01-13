@@ -136,6 +136,10 @@ namespace swarmc::Runtime {
         return ref;
     }
 
+    InlineRefHandle<Reference> VirtualMachine::resolvei(Reference* ref) {
+        return inlineref<Reference>(resolve(ref));
+    }
+
     Instruction* VirtualMachine::current() {
         return _state->current();
     }

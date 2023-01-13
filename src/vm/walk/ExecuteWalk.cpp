@@ -102,6 +102,10 @@ namespace swarmc::Runtime {
         return (FunctionReference*) ref;
     }
 
+    InlineRefHandle<FunctionReference> ExecuteWalk::ensureFunction(const InlineRefHandle<Reference>& ref) {
+        return inlineref<FunctionReference>(ensureFunction(ref.get()));
+    }
+
     EnumerationReference* ExecuteWalk::ensureEnumeration(const Reference* ref) {
         verbose("ensureEnumeration: " + ref->toString());
         if ( ref->tag() != ReferenceTag::ENUMERATION ) {
@@ -460,7 +464,8 @@ namespace swarmc::Runtime {
 
             GC_LOCAL_REF(call);
 
-            _vm->pushCall(call);
+            auto job = _vm->pushCall(call);
+            GC_LOCAL_REF(job)
         }
 
         _vm->drain();
@@ -548,7 +553,7 @@ namespace swarmc::Runtime {
 
     Reference* ExecuteWalk::walkCurry(Curry* i) {
         verbose("curry " + i->first()->toString() + " " + i->second()->toString());
-        auto fn = ensureFunction(_vm->resolve(i->first()));
+        auto fn = ensureFunction(_vm->resolvei(i->first()));
         auto param = _vm->resolve(i->second());
         return new FunctionReference(fn->fn()->curry(param));
     }
@@ -951,7 +956,7 @@ namespace swarmc::Runtime {
         // FIXME: handle ambiguous type narrowing?
 
         verbose("typeof " + i->first()->toString());
-        auto opd = _vm->resolve(i->first());
+        auto opd = _vm->resolvei(i->first());
         return new TypeReference(opd->type());
     }
 

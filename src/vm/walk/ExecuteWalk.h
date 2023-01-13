@@ -52,6 +52,9 @@ namespace swarmc::Runtime {
         /** Cast the reference as a function value, or raise an exception. */
         virtual ISA::FunctionReference* ensureFunction(const ISA::Reference*);
 
+        /** Cast the reference as a function value, or raise an exception. */
+        virtual InlineRefHandle<ISA::FunctionReference> ensureFunction(const InlineRefHandle<ISA::Reference>& ref);
+
         /** Cast the reference as an enumeration, or raise an exception. */
         virtual ISA::EnumerationReference* ensureEnumeration(const ISA::Reference*);
 

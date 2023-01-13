@@ -23,14 +23,19 @@ int Executive::run(int argc, char **argv) {
     logger->debug("Debugging output enabled.");
 
     // Load in the CLI args. Fail if necessary.
-    if ( !this->parseArgs(params) ) return 1;
+    if ( !this->parseArgs(params) ) {
+        Framework::shutdown();
+        return 1;
+    }
 
     int result = 0;
 
     logger->debug("Got input file: " + inputFile);
 
     if ( flagRunTest ) {
-        return runTest();
+        auto c = runTest();
+        Framework::shutdown();
+        return c;
     }
 
     if ( flagOutputTokens ) {
@@ -88,6 +93,7 @@ int Executive::run(int argc, char **argv) {
 
     delete console;
     delete _input;
+    Framework::shutdown();
     return result;
 }
 

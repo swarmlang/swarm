@@ -114,8 +114,8 @@ namespace swarmc::Type {
                 return mapIter->second;
             }
 
-            // FIXME: need to freeref these when the program ends
             auto inst = useref(new Primitive(intrinsic));
+            GC_ON_SHUTDOWN(inst)
             _primitives[intrinsic] = inst;
             return inst;
         }

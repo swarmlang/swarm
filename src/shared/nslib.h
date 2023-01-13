@@ -19,6 +19,9 @@
 /* Disables ref counting on a variable */
 #define GC_NO_REF(ref) ref.nslibNoRef();
 
+/* Tags a variable to be cleaned up during application shutdown. */
+#define GC_ON_SHUTDOWN(ref) nslib::Framework::onShutdown([ref]() { freeref(ref); });
+
 #include <dlfcn.h>
 
 #include <random>
@@ -72,11 +75,17 @@ namespace nslib {
 
         static void shutdown() {
             if ( !_booted ) return;
+            for ( const auto& c : _shutdownCallbacks ) c();
+        }
+
+        static void onShutdown(std::function<void()> f) {
+            _shutdownCallbacks.push_back(f);
         }
 
     protected:
         Framework() = default;
         static bool _booted;
+        static std::vector<std::function<void()>> _shutdownCallbacks;
     };
 
 
@@ -1550,7 +1559,7 @@ namespace nslib {
     /** Trait interface which adds a reference count. */
     class IRefCountable {
     public:
-        IRefCountable() : _nslibRefCount(0) {}
+        IRefCountable() : _nslibRefCount(0), _nslibRefDisable(false) {}
         virtual ~IRefCountable() = default;
 
         /**
