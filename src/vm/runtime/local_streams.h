@@ -18,7 +18,7 @@ namespace swarmc::Runtime {
 
             bool isOpen() override { return true; }
 
-            const Type::Type* innerType() override;
+            Type::Type* innerType() override;
 
             ISA::Reference* pop() override { return nullptr; }
 

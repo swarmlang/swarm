@@ -22,7 +22,7 @@ namespace swarmc::Runtime::Prologue {
         return {Type::Primitive::of(Type::Intrinsic::NUMBER)};
     }
 
-    const Type::Type* TrigFunction::returnType() const {
+    Type::Type* TrigFunction::returnType() const {
         return Type::Primitive::of(Type::Intrinsic::NUMBER);
     }
 

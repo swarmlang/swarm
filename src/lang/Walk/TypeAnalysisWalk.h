@@ -10,7 +10,7 @@ namespace swarmc::Lang::Walk {
 
 class TypeAnalysisWalk : public Walk<bool> {
 public:
-    TypeAnalysisWalk() : Walk<bool>(), _whileCount(0), _funcCount(0), _types(new TypeTable()), 
+    TypeAnalysisWalk() : Walk<bool>(), _whileCount(0), _funcCount(0), _types(new TypeTable()),
         _funcTypes(new std::stack<const Type::Type*>()), _funcArgs(new std::stack<size_t>()) {}
 
     ~TypeAnalysisWalk() override {
@@ -131,7 +131,7 @@ protected:
         if ( !node->typeNode()->value()->isAssignableTo(typeOfValue)
             && typeOfValue->intrinsic() != Type::Intrinsic::ERROR
         ) {
-            
+
             Reporting::typeError(
                 node->position(),
                 "Attempted to initialize identifier of type " + node->typeNode()->value()->toString() + " with value of type " + typeOfValue->toString() + "."
@@ -161,7 +161,7 @@ protected:
                 node->position(),
                 "Attempted to call non-callable type " + baseTypeOfCallee->toString() + "."
             );
-        
+
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
@@ -190,7 +190,7 @@ protected:
             const Type::Type* expectedType = argTypes.at(i);
             const Type::Type* actualType = _types->getTypeOf(node->args()->at(i));
 
-            if ( !actualType->isAssignableTo(expectedType) 
+            if ( !actualType->isAssignableTo(expectedType)
                 && actualType->intrinsic() != Type::Intrinsic::ERROR
             ) {
                 Reporting::typeError(
@@ -222,7 +222,7 @@ protected:
                 node->position(),
                 "Attempted to call non-callable type " + node->expression()->type()->toString() + "."
             );
-        
+
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
@@ -251,7 +251,7 @@ protected:
             const Type::Type* expectedType = argTypes.at(i);
             const Type::Type* actualType = _types->getTypeOf(node->args()->at(i));
 
-            if ( !actualType->isAssignableTo(expectedType) 
+            if ( !actualType->isAssignableTo(expectedType)
                 && actualType->intrinsic() != Type::Intrinsic::ERROR
             ) {
                 Reporting::typeError(
@@ -313,7 +313,7 @@ protected:
 
         const Type::Type* actualLeftType = _types->getTypeOf(node->left());
         const Type::Type* actualRightType = _types->getTypeOf(node->right());
-        if ( !actualLeftType->isAssignableTo(actualRightType) 
+        if ( !actualLeftType->isAssignableTo(actualRightType)
             && actualLeftType->intrinsic() != Type::Intrinsic::ERROR
             && actualRightType->intrinsic() != Type::Intrinsic::ERROR
         ) {
@@ -432,7 +432,7 @@ protected:
             const Type::Type* expType = _types->getTypeOf(exp);
             if ( !hadFirst ) {
                 innerType = expType;
-                node->_type = new TypeLiteral(node->position()->copy(), new Type::Enumerable(innerType));
+                node->_type = new TypeLiteral(node->position()->copy(), new Type::Enumerable(innerType->copy()));
                 hadFirst = false;
             } else if ( !expType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
@@ -512,7 +512,7 @@ protected:
         bool flag = walk(node->condition());
 
         const Type::Type* condType = _types->getTypeOf(node->condition());
-        if ( !condType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)) 
+        if ( !condType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN))
             && condType->intrinsic() != Type::Intrinsic::ERROR
         ) {
             Reporting::typeError(
@@ -536,7 +536,7 @@ protected:
         bool flag = walk(node->condition());
 
         const Type::Type* condType = _types->getTypeOf(node->condition());
-        if ( !condType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)) 
+        if ( !condType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN))
             && condType->intrinsic() != Type::Intrinsic::ERROR
         ) {
             Reporting::typeError(
@@ -602,7 +602,7 @@ protected:
                 funcType = ((Type::Lambda*) funcType)->returns();
             }
         }
-        
+
         if ( node->value() == nullptr ) {
             if ( funcType->intrinsic() != Type::Intrinsic::VOID ) {
                 Reporting::typeError(
@@ -663,7 +663,7 @@ protected:
             if ( !hadFirst ) {
                 innerType = stmtType;
                 // FIXME: Doesn't accurately type check this statement because type of map is not known
-                node->_type = new TypeLiteral(node->position()->copy(), new Type::Map(innerType));
+                node->_type = new TypeLiteral(node->position()->copy(), new Type::Map(innerType->copy()));
                 hadFirst = false;
             } else if ( !stmtType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
@@ -697,7 +697,7 @@ protected:
         const Type::Type* typeOfValue = _types->getTypeOf(node->value());
         const Type::Type* typeOfDest = _types->getTypeOf(node->dest());
 
-        if ( !typeOfValue->isAssignableTo(typeOfDest) 
+        if ( !typeOfValue->isAssignableTo(typeOfDest)
             && typeOfValue->intrinsic() != Type::Intrinsic::ERROR
             && typeOfDest->intrinsic() != Type::Intrinsic::ERROR
         ) {

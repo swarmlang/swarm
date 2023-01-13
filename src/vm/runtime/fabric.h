@@ -23,7 +23,8 @@ namespace swarmc::Runtime {
         [[nodiscard]] virtual std::string id() const = 0;
         [[nodiscard]] virtual NodeID owner() const = 0;
         [[nodiscard]] virtual std::string name() const = 0;
-        [[nodiscard]] virtual const Type::Type* innerType() const = 0;
+        [[nodiscard]] virtual Type::Type* innerType() const = 0;
+        [[nodiscard]] virtual InlineRefHandle<Type::Type> innerTypei() const;
         [[nodiscard]] virtual SchedulingFilters getSchedulingFilters() const { return {}; }
 
         virtual void acquire(VirtualMachine*) {}

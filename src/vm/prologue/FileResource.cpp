@@ -39,7 +39,7 @@ namespace swarmc::Runtime::Prologue {
         return {Type::Resource::of(fileType())};
     }
 
-    const Type::Type* ReadFileFunction::returnType() const {
+    Type::Type* ReadFileFunction::returnType() const {
         return Type::Primitive::of(Type::Intrinsic::STRING);
     }
 
@@ -59,7 +59,7 @@ namespace swarmc::Runtime::Prologue {
         return {Type::Primitive::of(Type::Intrinsic::STRING)};
     }
 
-    const Type::Type* OpenFileFunction::returnType() const {
+    Type::Type* OpenFileFunction::returnType() const {
         return Type::Resource::of(fileType());
     }
 
@@ -76,7 +76,7 @@ namespace swarmc::Runtime::Prologue {
         return {};
     }
 
-    const Type::Type* FileTFunction::returnType() const {
+    Type::Type* FileTFunction::returnType() const {
         return Type::Primitive::of(Type::Intrinsic::TYPE);
     }
 

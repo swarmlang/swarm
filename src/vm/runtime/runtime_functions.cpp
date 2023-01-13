@@ -12,8 +12,8 @@ namespace nslib {
 namespace swarmc::Runtime {
 
     IFunctionCall::IFunctionCall(
-        FunctionBackend backend, std::string name, CallVector vector, const Type::Type* returnType):
-            _backend(backend), _name(std::move(name)), _vector(std::move(vector)), _returnType(returnType) {
+        FunctionBackend backend, std::string name, CallVector vector, Type::Type* returnType):
+            _backend(backend), _name(std::move(name)), _vector(std::move(vector)), _returnType(useref(returnType)) {
 
         for ( auto elem : _vector ) {
             useref(elem.second);
@@ -26,10 +26,19 @@ namespace swarmc::Runtime {
         }
 
         freeref(_returnValue);
+        freeref(_returnType);
+    }
+
+    InlineRefHandle<Type::Type> IFunctionCall::returnTypei() const {
+        return inlineref<Type::Type>(_returnType);
     }
 
     void IFunctionCall::setReturn(ISA::Reference* value) {
         _returnValue = useref(value);
+    }
+
+    InlineRefHandle<Type::Type> IFunction::returnTypei() const {
+        return inlineref<Type::Type>(returnType());
     }
 
     CurriedFunction::CurriedFunction(ISA::Reference* ref, IFunction* upstream):

@@ -567,6 +567,7 @@ int Executive::executeLocalSVI() {
 
     auto vm = pipeline.targetSingleThreaded();
     vm->execute();
+    vm->cleanup();
     delete vm;
     return 0;
 }

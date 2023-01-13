@@ -85,7 +85,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
         const Type::Type* typeOf(ISA::LocationReference* loc) override;
 
-        void typify(ISA::LocationReference* loc, const Type::Type* type) override;
+        void typify(ISA::LocationReference* loc, Type::Type* type) override;
 
         IStorageLock* acquire(ISA::LocationReference* loc) override;
 
@@ -100,7 +100,7 @@ namespace swarmc::Runtime::SingleThreaded {
     protected:
         ISA::Affinity _affinity;
         std::map<std::string, ISA::Reference*> _map;
-        std::map<std::string, const Type::Type*> _types;
+        std::map<std::string, Type::Type*> _types;
         std::map<std::string, StorageLock*> _locks;
 
         friend class StorageLock;
@@ -208,7 +208,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
     class Stream : public IStream {
     public:
-        Stream(std::string id, const Type::Type* innerType) : _id(std::move(id)), _innerType(innerType) {}
+        Stream(std::string id, Type::Type* innerType);
 
         ~Stream() noexcept override;
 
@@ -218,7 +218,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
         bool isOpen() override { return true; }
 
-        const Type::Type* innerType() override { return _innerType; }
+        Type::Type* innerType() override { return _innerType; }
 
         void push(ISA::Reference* value) override;
 
@@ -232,14 +232,14 @@ namespace swarmc::Runtime::SingleThreaded {
 
     protected:
         std::string _id;
-        const Type::Type* _innerType;
+        Type::Type* _innerType;
         std::queue<ISA::Reference*> _items;
     };
 
 
     class StreamDriver : public IStreamDriver {
     public:
-        IStream* open(const std::string& id, const Type::Type* innerType) override;
+        IStream* open(const std::string& id, Type::Type* innerType) override;
 
         [[nodiscard]] std::string toString() const override {
             return "SingleThreaded::StreamDriver<>";

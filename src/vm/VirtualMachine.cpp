@@ -227,7 +227,7 @@ namespace swarmc::Runtime {
         throw Errors::SwarmError("Unable to release lock for location (" + loc->toString() + ")");
     }
 
-    void VirtualMachine::typify(ISA::LocationReference* loc, const Type::Type* type) {
+    void VirtualMachine::typify(ISA::LocationReference* loc, Type::Type* type) {
         getStore(loc)->typify(loc, type);
     }
 
@@ -411,12 +411,15 @@ namespace swarmc::Runtime {
                     });
 
                     // the handler is type-checked before being pushed
-                    // FIXME: type memory leak
-                    assert(call->returnType()->isAssignableTo(Type::Primitive::of(Type::Intrinsic::BOOLEAN)));
+                    auto boolType = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+                    GC_LOCAL_REF(boolType)
+
+                    assert(call->returnTypei()->isAssignableTo(boolType));
+
                     auto result = (BooleanReference*) call->getReturn();
                     GC_LOCAL_REF(result)
-                    auto resultValue = result->value();
 
+                    auto resultValue = result->value();
                     if ( resultValue ) {
                         return {scope, unpackExceptionHandler(handler)};
                     }
@@ -460,8 +463,7 @@ namespace swarmc::Runtime {
         for ( auto pair : vector ) {
             auto type = pair.first;
             auto ref = pair.second;
-            // FIXME: type memory leak
-            if ( !ref->type()->isAssignableTo(type) ) {
+            if ( !ref->typei()->isAssignableTo(type) ) {
                 throw Errors::RuntimeError(
                     Errors::RuntimeExCode::InvalidArgumentType,
                     "Unable to make function call (" + call->toString() + ") - argument " + ref->toString() + " is not assignable to type " + type->toString()

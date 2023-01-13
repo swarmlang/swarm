@@ -15,7 +15,7 @@ namespace swarmc::Runtime::Prologue {
 
     class PrologueFunctionCall : public IProviderFunctionCall {
     public:
-        PrologueFunctionCall(IProvider* provider, std::string name, const CallVector& vector, const Type::Type* returnType) :
+        PrologueFunctionCall(IProvider* provider, std::string name, const CallVector& vector, Type::Type* returnType) :
             IProviderFunctionCall(vector, std::move(name), returnType), _provider(useref(provider)) {}
 
         ~PrologueFunctionCall() override {

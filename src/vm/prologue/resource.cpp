@@ -14,7 +14,7 @@ namespace swarmc::Runtime::Prologue {
         };
     }
 
-    const Type::Type* ResourceTFunction::returnType() const {
+    Type::Type* ResourceTFunction::returnType() const {
         return Type::Primitive::of(Type::Intrinsic::TYPE);
     }
 

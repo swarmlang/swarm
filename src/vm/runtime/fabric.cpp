@@ -3,8 +3,14 @@
 #include "../../Configuration.h"
 #include "../../errors/RuntimeError.h"
 #include "fabric.h"
+#include "../../lang/Type.h"
 
 namespace swarmc::Runtime {
+
+    InlineRefHandle<Type::Type> IResource::innerTypei() const {
+        return inlineref<Type::Type>(innerType());
+    }
+
 
     void Fabric::publish(IResource* resource) {
         // We can only publish resources we own

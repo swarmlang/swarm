@@ -8,7 +8,7 @@ namespace swarmc::Runtime::Prologue {
 
     class ResourceTFunctionCall : public PrologueFunctionCall {
     public:
-        ResourceTFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        ResourceTFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, "RESOURCE_T", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
@@ -24,7 +24,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 

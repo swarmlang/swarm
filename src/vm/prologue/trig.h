@@ -14,7 +14,7 @@ namespace swarmc::Runtime::Prologue {
 
     class TrigFunctionCall : public PrologueFunctionCall {
     public:
-        TrigFunctionCall(TrigOperation op, std::string name, IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        TrigFunctionCall(TrigOperation op, std::string name, IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, std::move(name), vector, returnType), _op(op) {}
 
         void execute(VirtualMachine*) override;
@@ -40,7 +40,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 

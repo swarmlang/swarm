@@ -54,7 +54,10 @@ namespace swarmc::Runtime {
         void initialize(ISA::Instructions is) {
             _state = useref(new State(std::move(is)));
             _scope = useref(new ScopeFrame(_global, nslib::uuid(), nullptr));
+            freeref(_localOut);
             _localOut = useref(new LocalOutputStream());
+
+            freeref(_localErr);
             _localErr = useref(new LocalErrorStream());
         }
 
@@ -188,7 +191,7 @@ namespace swarmc::Runtime {
         virtual void unlock(ISA::LocationReference*);
 
         /** Assert the type of the specified location in the appropriate storage driver. */
-        virtual void typify(ISA::LocationReference*, const Type::Type*);
+        virtual void typify(ISA::LocationReference*, Type::Type*);
 
         /** Shadow the given variable in the current scope. */
         virtual void shadow(ISA::LocationReference*);
@@ -282,7 +285,7 @@ namespace swarmc::Runtime {
             return _sharedErr;
         }
 
-        virtual IStream* getStream(const std::string& id, const Type::Type* innerType) {
+        virtual IStream* getStream(const std::string& id, Type::Type* innerType) {
             return _streams->open(id, innerType);
         }
 
@@ -335,8 +338,8 @@ namespace swarmc::Runtime {
             copy->_scope = useref(_scope->copy());
             copy->_queueContexts = _queueContexts;
             copy->_streams = useref(_streams);
-            copy->_localOut = new LocalOutputStream();
-            copy->_localErr = new LocalErrorStream();
+            copy->_localOut = useref(new LocalOutputStream());
+            copy->_localErr = useref(new LocalErrorStream());
             copy->_sharedOut = useref(_sharedOut);
             copy->_sharedErr = useref(_sharedErr);
 
@@ -359,6 +362,7 @@ namespace swarmc::Runtime {
         void copy(const std::function<void(VirtualMachine*)>& handler) const {
             auto vm = copy();
             handler(vm);
+            vm->cleanup();
             delete vm;
         }
 

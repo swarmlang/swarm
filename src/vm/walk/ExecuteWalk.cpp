@@ -15,12 +15,16 @@ namespace swarmc::Runtime {
     }
 
     void ExecuteWalk::ensureType(const Reference* ref, const Type::Type* type) {
-        if ( !ref->type()->isAssignableTo(type) ) {
+        if ( !ref->typei()->isAssignableTo(type) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Value " + s(ref) + " of type " + s(ref->type()) + " is not assignable to required type " + s(type)
+                "Value " + s(ref) + " of type " + s(ref->typei()) + " is not assignable to required type " + s(type)
             );
         }
+    }
+
+    void ExecuteWalk::ensureType(const Reference* ref, const InlineRefHandle<Type::Type>& type) {
+        ensureType(ref, type.get());
     }
 
     Reference* ExecuteWalk::walkOne(Instruction* inst) {
@@ -45,7 +49,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::NUMBER ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (NumberReference*) ref;
@@ -57,7 +61,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::BOOLEAN ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (BooleanReference*) ref;
@@ -69,7 +73,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::TYPE ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (TypeReference*) ref;
@@ -81,7 +85,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::STRING ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (StringReference*) ref;
@@ -92,7 +96,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::FUNCTION ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (FunctionReference*) ref;
@@ -103,7 +107,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::ENUMERATION ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (EnumerationReference*) ref;
@@ -114,7 +118,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::STREAM ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (StreamReference*) ref;
@@ -125,7 +129,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::MAP ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (MapReference*) ref;
@@ -136,7 +140,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::RESOURCE ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->type()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (ResourceReference*) ref;
@@ -276,17 +280,18 @@ namespace swarmc::Runtime {
 
         // create expected type for callback
         auto callbackType = new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID));
+        GC_LOCAL_REF(callbackType)
 
         // load callback function & validate the type
         auto callback = ensureFunction(_vm->resolve(i->second()));
+        GC_LOCAL_REF(callback)
 
-        if ( !callback->type()->isAssignableTo(callbackType) ) {
+        if ( !callback->typei()->isAssignableTo(callbackType) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::WhileCallbackTypeInvalid,
-                "Invalid while callback " + s(callback) + " (expected: " + s(callbackType) + ", got: " + s(callback->type()) + ")"
+                "Invalid while callback " + s(callback) + " (expected: " + s(callbackType) + ", got: " + s(callback->typei()) + ")"
             );
         }
-        delete callbackType;  // FIXME: GC_LOCAL_REF this eventually
 
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         if ( cond->value() ) {
@@ -307,23 +312,22 @@ namespace swarmc::Runtime {
         auto resource = ensureResource(_vm->resolve(i->first()));
 
         auto callbackType = new Type::Lambda1(resource->type(), Type::Primitive::of(Type::Intrinsic::VOID));
+        GC_LOCAL_REF(callbackType)
 
         auto callback = ensureFunction(_vm->resolve(i->second()));
 
-        if ( !callback->type()->isAssignableTo(callbackType) ) {
+        if ( !callback->typei()->isAssignableTo(callbackType) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::WithCallbackTypeInvalid,
-                "Invalid with callback " + s(callback) + " (expected: " + s(callbackType) + ", got: " + s(callback->type()) + ")"
+                "Invalid with callback " + s(callback) + " (expected: " + s(callbackType) + ", got: " + s(callback->typei()) + ")"
             );
         }
-
-        delete callbackType;  // FIXME: GC_LOCAL_REF this eventually
 
         // Open the resource
         resource->resource()->acquire(_vm);
 
         // Perform the call
-        auto call = callback->fn()->curry(resource)->call();
+        auto call = callback->fn()->curryi(resource)->call();
         GC_LOCAL_REF(call);
 
         _vm->pushCall(call);
@@ -345,11 +349,12 @@ namespace swarmc::Runtime {
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->first());
 
-        // FIXME: type memory leak
-        if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
+        auto enumType = enumeration->type();
+        GC_LOCAL_REF(enumType)
+        if ( !value->typei()->isAssignableTo(enumType->valuesi()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidValueTypeForEnum,
-                "Cannot append value to enum: invalid type (expected: " + s(enumeration->type()->values()) + ", got: " + s(value->type()) + ")"
+                "Cannot append value to enum: invalid type (expected: " + s(enumType->valuesi()) + ", got: " + s(value->typei()) + ")"
             );
         }
 
@@ -363,11 +368,12 @@ namespace swarmc::Runtime {
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto value = _vm->resolve(i->first());
 
-        // FIXME: type memory leak
-        if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
+        auto enumType = enumeration->type();
+        GC_LOCAL_REF(enumType)
+        if ( !value->typei()->isAssignableTo(enumType->valuesi()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidValueTypeForEnum,
-                "Cannot prepend value to enum: invalid type (expected: " + s(enumeration->type()->values()) + ", got: " + s(value->type()) + ")"
+                "Cannot prepend value to enum: invalid type (expected: " + s(enumType->valuesi()) + ", got: " + s(value->typei()) + ")"
             );
         }
 
@@ -410,11 +416,12 @@ namespace swarmc::Runtime {
             );
         }
 
-        // FIXME: type memory leak
-        if ( !value->type()->isAssignableTo(enumeration->type()->values()) ) {
+        auto enumType = enumeration->type();
+        GC_LOCAL_REF(enumType)
+        if ( !value->typei()->isAssignableTo(enumType->valuesi()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Element " + s(value) + " is incompatible with the type of the enumeration " + s(enumeration) + " (expected: " + s(enumeration->type()->values()) + ", got: " + s(value->type()) + ")"
+                "Element " + s(value) + " is incompatible with the type of the enumeration " + s(enumeration) + " (expected: " + s(enumType->valuesi()) + ", got: " + s(value->typei()) + ")"
             );
         }
 
@@ -427,16 +434,18 @@ namespace swarmc::Runtime {
         auto elemType = ensureType(_vm->resolve(i->first()));
         auto enumeration = ensureEnumeration(_vm->resolve(i->second()));
         auto callback = ensureFunction(_vm->resolve(i->third()));
+        GC_LOCAL_REF(callback)
 
-        Type::Primitive tVoid(Type::Intrinsic::VOID);
-        Type::Primitive tNum(Type::Intrinsic::NUMBER);
-        Type::Lambda1 callbackInner(&tNum, &tVoid);
+        Type::Lambda1 callbackInner(Type::Primitive::of(Type::Intrinsic::NUMBER), Type::Primitive::of(Type::Intrinsic::VOID));
+        GC_NO_REF(callbackInner)
+
         Type::Lambda1 callbackOuter(elemType->value(), &callbackInner);
+        GC_NO_REF(callbackOuter)
 
-        if ( !callback->type()->isAssignableTo(&callbackOuter) ) {
+        if ( !callback->typei()->isAssignableTo(&callbackOuter) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::EnumerateCallbackTypeInvalid,
-                "Invalid enumerate callback " + s(callback) + " (expected: " + s(callbackOuter) + ", got: " + s(callback->type()) + ")"
+                "Invalid enumerate callback " + s(callback) + " (expected: " + s(callbackOuter) + ", got: " + s(callback->typei()) + ")"
             );
         }
 
@@ -445,8 +454,8 @@ namespace swarmc::Runtime {
         for ( std::size_t idx = 0; idx < enumeration->length(); idx += 1 ) {
             auto elem = enumeration->get(idx);
             auto call = callback->fn()
-                ->curry(elem)
-                ->curry(new NumberReference(static_cast<double>(idx)))
+                ->curryi(elem)
+                ->curryi(new NumberReference(static_cast<double>(idx)))
                 ->call();
 
             GC_LOCAL_REF(call);
@@ -479,11 +488,10 @@ namespace swarmc::Runtime {
         auto loc = i->second();
         auto param = _vm->resolve(call->popParam().second);
 
-        // FIXME: type memory leak
-        if ( !param->type()->isAssignableTo(loc->type()) ) {
+        if ( !param->typei()->isAssignableTo(loc->typei()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Value " + s(param) + " has incompatible type for parameter " + s(loc) + " (expected: " + s(loc->type()) + ", got: " + s(param->type()) + ")"
+                "Value " + s(param) + " has incompatible type for parameter " + s(loc) + " (expected: " + s(loc->typei()) + ", got: " + s(param->typei()) + ")"
             );
         }
 
@@ -522,10 +530,10 @@ namespace swarmc::Runtime {
         GC_LOCAL_REF(ref)
 
         // Validate the return type
-        if ( !ref->type()->isAssignableTo(call->returnType()) ) {
+        if ( !ref->typei()->isAssignableTo(call->returnTypei()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Value " + s(ref) + " is incompatible with the return type of " + s(call) + " (expected: " + s(call->returnType()) + ", got: " + s(ref->type()) + ")"
+                "Value " + s(ref) + " is incompatible with the return type of " + s(call) + " (expected: " + s(call->returnTypei()) + ", got: " + s(ref->typei()) + ")"
             );
         }
 
@@ -557,7 +565,7 @@ namespace swarmc::Runtime {
         verbose("call1 " + i->first()->toString() + " " + i->second()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto param = _vm->resolve(i->second());
-        auto call = fn->fn()->curry(param)->call();
+        auto call = fn->fn()->curryi(param)->call();
         _vm->call(call);
         return nullptr;
     }
@@ -575,7 +583,7 @@ namespace swarmc::Runtime {
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         auto param = _vm->resolve(i->third());
-        if ( cond->value() ) _vm->call(fn->fn()->curry(param)->call());
+        if ( cond->value() ) _vm->call(fn->fn()->curryi(param)->call());
         return nullptr;
     }
 
@@ -592,7 +600,7 @@ namespace swarmc::Runtime {
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         auto param = _vm->resolve(i->third());
-        if ( !cond->value() ) _vm->call(fn->fn()->curry(param)->call());
+        if ( !cond->value() ) _vm->call(fn->fn()->curryi(param)->call());
         return nullptr;
     }
 
@@ -608,7 +616,7 @@ namespace swarmc::Runtime {
         verbose("pushcall1 " + i->first()->toString() + " " + i->second()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto param = _vm->resolve(i->second());
-        auto call = fn->fn()->curry(param)->call();
+        auto call = fn->fn()->curryi(param)->call();
         _vm->pushCall(call);
         return call->getReturn();
     }
@@ -626,7 +634,7 @@ namespace swarmc::Runtime {
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         auto param = _vm->resolve(i->third());
-        if ( cond->value() ) _vm->pushCall(fn->fn()->curry(param)->call());
+        if ( cond->value() ) _vm->pushCall(fn->fn()->curryi(param)->call());
         return nullptr;
     }
 
@@ -643,7 +651,7 @@ namespace swarmc::Runtime {
         auto cond = ensureBoolean(_vm->resolve(i->first()));
         auto fn = ensureFunction(_vm->resolve(i->second()));
         auto param = _vm->resolve(i->third());
-        if ( !cond->value() ) _vm->pushCall(fn->fn()->curry(param)->call());
+        if ( !cond->value() ) _vm->pushCall(fn->fn()->curryi(param)->call());
         return nullptr;
     }
 
@@ -671,8 +679,9 @@ namespace swarmc::Runtime {
         auto map = ensureMap(_vm->resolve(i->third()));
         auto value = _vm->resolve(i->second());
 
-        // FIXME: type memory leak
-        ensureType(value, map->type()->values());
+        auto mapType = map->type();
+        GC_LOCAL_REF(mapType)
+        ensureType(value, mapType->valuesi());
         map->set(key->value(), value);
         return nullptr;
     }
@@ -717,16 +726,14 @@ namespace swarmc::Runtime {
         auto loc = i->first();
         auto value = _vm->resolve(i->second());
 
-        // FIXME: type memory leak
-        if ( loc->type()->isAmbiguous() ) {
+        if ( loc->typei()->isAmbiguous() ) {
             loc->setType(value->type());
         }
 
-        // FIXME: type memory leak
-        if ( !value->type()->isAssignableTo(loc->type()) ) {
+        if ( !value->typei()->isAssignableTo(loc->typei()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Value " + s(value) + " has type which is incompatible with location " + s(loc) + " (expected: " + s(loc->type()) + ", got: " + s(value->type()) + ")"
+                "Value " + s(value) + " has type which is incompatible with location " + s(loc) + " (expected: " + s(loc->typei()) + ", got: " + s(value->typei()) + ")"
             );
         }
 
@@ -775,18 +782,16 @@ namespace swarmc::Runtime {
             );
         }
 
-        GC_LOCAL_REF(value);
+        GC_LOCAL_REF(value)
 
-        // FIXME: type memory leak
-        if ( loc->type()->isAmbiguous() ) {
+        if ( loc->typei()->isAmbiguous() ) {
             loc->setType(value->type());
         }
 
-        // FIXME: type memory leak
-        if ( !value->type()->isAssignableTo(loc->type()) ) {
+        if ( !value->typei()->isAssignableTo(loc->typei()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Value " + s(value) + " has type which is incompatible with location " + s(loc) + " (expected: " + s(loc->type()) + ", got: " + s(value->type()) + ")"
+                "Value " + s(value) + " has type which is incompatible with location " + s(loc) + " (expected: " + s(loc->typei()) + ", got: " + s(value->typei()) + ")"
             );
         }
 
@@ -839,11 +844,12 @@ namespace swarmc::Runtime {
             );
         }
 
-        // FIXME: type memory leak
-        if ( !value->type()->isAssignableTo(stream->type()->inner()) ) {
+        auto streamType = stream->type();
+        GC_LOCAL_REF(streamType)
+        if ( !value->typei()->isAssignableTo(streamType->inneri()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Value " + s(value) + " has incompatible type for stream " + s(stream->stream()) + " (expected: " + s(stream->type()->inner()) + ", got: " + s(value->type()) + ")"
+                "Value " + s(value) + " has incompatible type for stream " + s(stream->stream()) + " (expected: " + s(streamType->inneri()) + ", got: " + s(value->typei()) + ")"
             );
         }
 
@@ -955,18 +961,17 @@ namespace swarmc::Runtime {
         verbose("compatible " + i->first()->toString() + " " + i->second()->toString());
         auto lhs = _vm->resolve(i->first());
         auto rhs = _vm->resolve(i->second());
-        return new BooleanReference(rhs->type()->isAssignableTo(lhs->type()));
+        return new BooleanReference(rhs->typei()->isAssignableTo(lhs->typei()));
     }
 
     Reference* ExecuteWalk::walkPushExceptionHandler1(PushExceptionHandler1* i) {
         verbose("pushexhandler " + i->first()->toString());
         auto handler = ensureFunction(_vm->resolve(i->first()));
 
-        // FIXME: type memory leak
-        if ( !handler->type()->isAssignableTo(_typeOfExceptionHandler) ) {
+        if ( !handler->typei()->isAssignableTo(_typeOfExceptionHandler) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidExceptionHandlerType,
-                "Exception handler callback has invalid type (expected: " + s(_typeOfExceptionHandler) + ", got: " + s(handler->type()) + ")"
+                "Exception handler callback has invalid type (expected: " + s(_typeOfExceptionHandler) + ", got: " + s(handler->typei()) + ")"
             );
         }
 
@@ -979,11 +984,10 @@ namespace swarmc::Runtime {
         auto handler = ensureFunction(_vm->resolve(i->first()));
         auto discriminator = _vm->resolve(i->second());
 
-        // FIXME: type memory leak
-        if ( !handler->type()->isAssignableTo(_typeOfExceptionHandler) ) {
+        if ( !handler->typei()->isAssignableTo(_typeOfExceptionHandler) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidExceptionHandlerType,
-                "Exception handler callback has invalid type (expected: " + s(_typeOfExceptionHandler) + ", got: " + s(handler->type()) + ")"
+                "Exception handler callback has invalid type (expected: " + s(_typeOfExceptionHandler) + ", got: " + s(handler->typei()) + ")"
             );
         }
 
@@ -993,11 +997,10 @@ namespace swarmc::Runtime {
         } else {
             auto discriminatorFn = ensureFunction(discriminator);
 
-            // FIXME: type memory leak
-            if ( !discriminatorFn->type()->isAssignableTo(_typeOfExceptionDiscriminator) ) {
+            if ( !discriminatorFn->typei()->isAssignableTo(_typeOfExceptionDiscriminator) ) {
                 throw Errors::RuntimeError(
                     Errors::RuntimeExCode::InvalidExceptionHandlerType,
-                    "Exception handler discriminator has invalid type (expected: " + s(_typeOfExceptionDiscriminator) + ", got: " + s(discriminatorFn->type()) + ")"
+                    "Exception handler discriminator has invalid type (expected: " + s(_typeOfExceptionDiscriminator) + ", got: " + s(discriminatorFn->typei()) + ")"
                 );
             }
 
@@ -1041,13 +1044,16 @@ namespace swarmc::Runtime {
         auto inheritedCall = scope->call();
         GC_LOCAL_REF(inheritedCall)
 
-        // FIXME: type memory leak
         auto returnType = inheritedCall == nullptr ? Type::Primitive::of(Type::Intrinsic::VOID) : inheritedCall->returnType();
+        GC_LOCAL_REF(returnType)
+
         auto fnType = new Type::Lambda0(returnType);
-        if ( !fn->type()->isAssignableTo(fnType) ) {
+        GC_LOCAL_REF(fnType)
+
+        if ( !fn->typei()->isAssignableTo(fnType) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Resumed function " + s(fn) + " has type which is incompatible with the parent scope it subsumes " + s(inheritedCall) + " (expected: " + s(fnType) + ", got: " + s(fn->type()) + ")"
+                "Resumed function " + s(fn) + " has type which is incompatible with the parent scope it subsumes " + s(inheritedCall) + " (expected: " + s(fnType) + ", got: " + s(fn->typei()) + ")"
             );
         }
 

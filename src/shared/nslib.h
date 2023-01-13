@@ -16,6 +16,9 @@
 /* Creates a unique local variable w/ a RefHandle. */
 #define GC_LOCAL_REF(ref) auto UNIQUE_NAME(refHandle) = localref(ref);
 
+/* Disables ref counting on a variable */
+#define GC_NO_REF(ref) ref.nslibNoRef();
+
 #include <dlfcn.h>
 
 #include <random>
@@ -1564,10 +1567,13 @@ namespace nslib {
          */
         void nslibDecRef() { _nslibRefCount -= 1; }
 
+        void nslibNoRef() { _nslibRefDisable = true; }
+
         /** If true, the instance can be deleted. */
-        [[nodiscard]] bool nslibShouldFree() const { return _nslibRefCount < 1; }
+        [[nodiscard]] bool nslibShouldFree() const { return !_nslibRefDisable && _nslibRefCount < 1; }
     private:
         std::size_t _nslibRefCount;
+        bool _nslibRefDisable;
     };
 
 
@@ -1614,6 +1620,28 @@ namespace nslib {
 
     /** Creates a RefHandle on the stack. */
     RefHandle localref(IRefCountable* ref);
+
+    template <typename T>
+    class InlineRefHandle : public RefHandle {
+    public:
+        InlineRefHandle(T* inst, IRefCountable* ref) : RefHandle(ref), _inst(inst) {}
+
+        T* get() const { return _inst; }
+
+        T* operator->() { return get(); }
+    protected:
+        T* _inst;
+    };
+
+    template <typename T>
+    InlineRefHandle<T> inlineref(priv::RefCountable auto inst) {
+        return InlineRefHandle(inst, inst);
+    }
+
+    template <typename T>
+    [[nodiscard]] inline std::string s(const InlineRefHandle<T>& v) {
+        return s(v.get());
+    }
 }
 
 #endif //NSLIB_H

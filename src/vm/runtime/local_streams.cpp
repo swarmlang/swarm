@@ -5,7 +5,7 @@
 
 namespace swarmc::Runtime {
 
-    const Type::Type* LocalStream::innerType() {
+    Type::Type* LocalStream::innerType() {
         return Type::Primitive::of(Type::Intrinsic::STRING);
     }
 

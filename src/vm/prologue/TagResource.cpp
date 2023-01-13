@@ -29,7 +29,7 @@ namespace swarmc::Runtime::Prologue {
         };
     }
 
-    const Type::Type* TagFunction::returnType() const {
+    Type::Type* TagFunction::returnType() const {
         return Type::Resource::of(tagType());
     }
 
@@ -46,7 +46,7 @@ namespace swarmc::Runtime::Prologue {
         return {};
     }
 
-    const Type::Type* TagTFunction::returnType() const {
+    Type::Type* TagTFunction::returnType() const {
         return Type::Primitive::of(Type::Intrinsic::TYPE);
     }
 

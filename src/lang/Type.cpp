@@ -22,3 +22,13 @@ namespace nslib {
         return "Type::Intrinsic(UNKNOWN)";
     }
 }
+
+namespace swarmc::Type {
+
+    std::map<Intrinsic, Primitive*> Primitive::_primitives;
+
+    std::map<std::string, Opaque*> Opaque::_opaques;
+
+    Ambiguous* Ambiguous::_inst = nullptr;
+
+}

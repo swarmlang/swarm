@@ -15,7 +15,7 @@ namespace swarmc::Runtime::Prologue {
         return {Type::Primitive::of(Type::Intrinsic::NUMBER)};
     }
 
-    const Type::Type* NumberToStringFunction::returnType() const {
+    Type::Type* NumberToStringFunction::returnType() const {
         return Type::Primitive::of(Type::Intrinsic::STRING);
     }
 
@@ -34,7 +34,7 @@ namespace swarmc::Runtime::Prologue {
         return {Type::Primitive::of(Type::Intrinsic::BOOLEAN)};
     }
 
-    const Type::Type* BooleanToStringFunction::returnType() const {
+    Type::Type* BooleanToStringFunction::returnType() const {
         return Type::Primitive::of(Type::Intrinsic::STRING);
     }
 

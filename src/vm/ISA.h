@@ -142,7 +142,11 @@ namespace swarmc::ISA {
         ~Reference() override = default;
 
         /** Get the type of this reference. */
-        [[nodiscard]] virtual const Type::Type* type() const = 0;
+        [[nodiscard]] virtual Type::Type* type() const = 0;
+
+        [[nodiscard]] virtual InlineRefHandle<Type::Type> typei() const {
+            return inlineref<Type::Type>(type());
+        }
 
         /** Get copy of object */
         [[nodiscard]] virtual Reference* copy() const = 0;
@@ -203,15 +207,18 @@ namespace swarmc::ISA {
             return "Location<" + affinityString(_affinity) + ":" + _name + ">";
         }
 
-        [[nodiscard]] const Type::Type* type() const override {
+        [[nodiscard]] Type::Type* type() const override {
             if ( _type == nullptr )
                 return new Type::Ambiguous();
 
             return _type;
         }
 
-        void setType(const Type::Type* t) {
-            _type = t;
+        void setType(Type::Type* t) {
+            if ( _type != t ) {
+                freeref(_type);
+                _type = useref(t);
+            }
         }
 
         /** Returns true if the given location refers to the same place as this one. */
@@ -233,7 +240,7 @@ namespace swarmc::ISA {
     protected:
         Affinity _affinity;
         std::string _name;
-        const Type::Type* _type = nullptr;
+        Type::Type* _type = nullptr;
     };
 
 
@@ -249,11 +256,11 @@ namespace swarmc::ISA {
             return "StreamReference<" + _stream->toString() + ">";
         }
 
-        [[nodiscard]] const Type::Stream* type() const override {
+        [[nodiscard]] Type::Stream* type() const override {
             return Type::Stream::of(_stream->innerType());
         }
 
-        Runtime::IStream* stream() const {
+        [[nodiscard]] Runtime::IStream* stream() const {
             return _stream;
         }
 
@@ -281,7 +288,7 @@ namespace swarmc::ISA {
             return "ResourceReference<" + _resource->toString() + ">";
         }
 
-        [[nodiscard]] const Type::Resource* type() const override {
+        [[nodiscard]] Type::Resource* type() const override {
             return Type::Resource::of(_resource->innerType());
         }
 
@@ -314,7 +321,7 @@ namespace swarmc::ISA {
             return "FunctionReference<" + _fn->toString() + ">";
         }
 
-        [[nodiscard]] const Type::Type* type() const override {
+        [[nodiscard]] Type::Type* type() const override {
             auto params = _fn->paramTypes();
             auto returnType = _fn->returnType();
             if ( params.empty() ) {
@@ -353,20 +360,28 @@ namespace swarmc::ISA {
     /** A type literal */
     class TypeReference : public Reference {
     public:
-        explicit TypeReference(const Type::Type* type) : Reference(ReferenceTag::TYPE), _type(type) {}
+        explicit TypeReference(Type::Type* type) : Reference(ReferenceTag::TYPE), _type(useref(type)) {}
+
+        ~TypeReference() override {
+            freeref(_type);
+        }
 
         [[nodiscard]] std::string toString() const override {
             return "TypeReference<" + _type->toString() + ">";
         }
 
         /** Get the type of the reference itself (always of type type). */
-        [[nodiscard]] const Type::Type* type() const override {
+        [[nodiscard]] Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::TYPE);
         }
 
         /** Get the actual type this value is holding. */
-        [[nodiscard]] const Type::Type* value() const {
+        [[nodiscard]] Type::Type* value() const {
             return _type;
+        }
+
+        [[nodiscard]] InlineRefHandle<Type::Type> valuei() const {
+            return inlineref<Type::Type>(value());
         }
 
         bool isEqualTo(const Reference* other) const override {
@@ -380,7 +395,7 @@ namespace swarmc::ISA {
         }
 
     protected:
-        const Type::Type* _type;
+        Type::Type* _type;
     };
 
     class VoidReference : public Reference {
@@ -391,7 +406,7 @@ namespace swarmc::ISA {
             return "VoidReference<>";
         }
 
-        [[nodiscard]] const Type::Type* type() const override {
+        [[nodiscard]] Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::VOID);
         }
 
@@ -427,7 +442,7 @@ namespace swarmc::ISA {
             return "StringReference<" + _value + ">";
         }
 
-        [[nodiscard]] const Type::Type* type() const override {
+        [[nodiscard]] Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
@@ -447,7 +462,7 @@ namespace swarmc::ISA {
     public:
         explicit NumberReference(double value) : LiteralReference<double>(ReferenceTag::NUMBER, value) {}
 
-        [[nodiscard]] const Type::Type* type() const override {
+        [[nodiscard]] Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
@@ -476,7 +491,7 @@ namespace swarmc::ISA {
             return "BooleanReference<" + value + ">";
         }
 
-        [[nodiscard]] const Type::Type* type() const override {
+        [[nodiscard]] Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
@@ -496,18 +511,19 @@ namespace swarmc::ISA {
      */
     class EnumerationReference : public Reference {
     public:
-        explicit EnumerationReference(const Type::Type* innerType) :
-            Reference(ReferenceTag::ENUMERATION), _innerType(innerType) {}
+        explicit EnumerationReference(Type::Type* innerType) :
+            Reference(ReferenceTag::ENUMERATION), _innerType(useref(innerType)) {}
 
         ~EnumerationReference() override {
             for ( auto elem : _items ) freeref(elem);
+            freeref(_innerType);
         }
 
         [[nodiscard]] std::string toString() const override {
             return "EnumerationReference<inner: " + _innerType->toString() + ", #items: " + std::to_string(_items.size()) + ">";
         }
 
-        [[nodiscard]] const Type::Enumerable* type() const override {
+        [[nodiscard]] Type::Enumerable* type() const override {
             return new Type::Enumerable(_innerType);
         }
 
@@ -567,7 +583,7 @@ namespace swarmc::ISA {
         }
     protected:
         std::vector<Reference*> _items;
-        const Type::Type* _innerType;
+        Type::Type* _innerType;
     };
 
 
@@ -576,18 +592,19 @@ namespace swarmc::ISA {
      */
     class MapReference : public Reference {
     public:
-        explicit MapReference(const Type::Type* innerType) :
-                Reference(ReferenceTag::MAP), _innerType(innerType) {}
+        explicit MapReference(Type::Type* innerType) :
+                Reference(ReferenceTag::MAP), _innerType(useref(innerType)) {}
 
         ~MapReference() override {
             for ( const auto& pair : _items ) freeref(pair.second);
+            freeref(_innerType);
         }
 
         [[nodiscard]] std::string toString() const override {
             return "MapReference<inner: " + _innerType->toString() + ", #keys: " + std::to_string(_items.size()) + ">";
         }
 
-        [[nodiscard]] const Type::Map* type() const override {
+        [[nodiscard]] Type::Map* type() const override {
             return new Type::Map(_innerType);
         }
 
@@ -639,7 +656,7 @@ namespace swarmc::ISA {
 
     protected:
         std::map<std::string, Reference*> _items;
-        const Type::Type* _innerType;
+        Type::Type* _innerType;
     };
 
 
@@ -722,11 +739,11 @@ namespace swarmc::ISA {
     public:
         BinaryInstruction(Tag tag, TFirst* first, TSecond* second) : Instruction(tag), _first(first), _second(second) {}
 
-        virtual TFirst* first() const {
+        [[nodiscard]] virtual TFirst* first() const {
             return _first;
         }
 
-        virtual TSecond* second() const {
+        [[nodiscard]] virtual TSecond* second() const {
             return _second;
         }
 
@@ -767,15 +784,15 @@ namespace swarmc::ISA {
     public:
         TrinaryInstruction(Tag tag, TFirst* first, TSecond* second, TThird* third) : Instruction(tag), _first(first), _second(second), _third(third) {}
 
-        virtual TFirst* first() const {
+        [[nodiscard]] virtual TFirst* first() const {
             return _first;
         }
 
-        virtual TSecond* second() const {
+        [[nodiscard]] virtual TSecond* second() const {
             return _second;
         }
 
-        virtual TThird* third() const {
+        [[nodiscard]] virtual TThird* third() const {
             return _third;
         }
 

@@ -9,7 +9,7 @@ namespace swarmc::Runtime::Prologue {
 
     class NumberToStringFunctionCall : public PrologueFunctionCall {
     public:
-        NumberToStringFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        NumberToStringFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, "NUMBER_TO_STRING", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
@@ -25,7 +25,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
@@ -36,7 +36,7 @@ namespace swarmc::Runtime::Prologue {
 
     class BooleanToStringFunctionCall : public PrologueFunctionCall {
     public:
-        BooleanToStringFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        BooleanToStringFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, "BOOLEAN_TO_STRING", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
@@ -52,7 +52,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 

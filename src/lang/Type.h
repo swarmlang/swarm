@@ -39,7 +39,7 @@ namespace nslib {
 }
 
 namespace swarmc::Type {
-    class Type : public IStringable, public serial::ISerializable {
+    class Type : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
         static std::string intrinsicString(Intrinsic intrinsic) {
             if ( intrinsic == Intrinsic::STRING ) return "STRING";
@@ -96,6 +96,10 @@ namespace swarmc::Type {
 
         virtual bool isAssignableTo(const Type* other) const = 0;
 
+        virtual bool isAssignableTo(const InlineRefHandle<Type>& other) const {
+            return isAssignableTo(other.get());
+        }
+
     protected:
         bool _shared = false;
 
@@ -105,7 +109,15 @@ namespace swarmc::Type {
     class Primitive : public Type {
     public:
         static Primitive* of(Intrinsic intrinsic) {
-            return new Primitive(intrinsic);
+            auto mapIter = _primitives.find(intrinsic);
+            if ( mapIter != _primitives.end() ) {
+                return mapIter->second;
+            }
+
+            // FIXME: need to freeref these when the program ends
+            auto inst = useref(new Primitive(intrinsic));
+            _primitives[intrinsic] = inst;
+            return inst;
         }
 
         static bool isPrimitive(Intrinsic intrinsic) {
@@ -150,6 +162,7 @@ namespace swarmc::Type {
             return "Primitive<" + intrinsicString(_intrinsic) + ">";
         }
     protected:
+        static std::map<Intrinsic, Primitive*> _primitives;
         Intrinsic _intrinsic;
     };
 
@@ -157,7 +170,15 @@ namespace swarmc::Type {
     class Opaque : public Type {
     public:
         [[nodiscard]] static Opaque* of(const std::string& name) {
-            return new Opaque(name);
+            auto mapIter = _opaques.find(name);
+            if ( mapIter != _opaques.end() ) {
+                return mapIter->second;
+            }
+
+            // FIXME: need to freeref these when the program ends
+            auto inst = useref(new Opaque(name));
+            _opaques[name] = inst;
+            return inst;
         }
 
         explicit Opaque(std::string name) : _name(std::move(name)) {}
@@ -179,6 +200,7 @@ namespace swarmc::Type {
         }
 
     protected:
+        static std::map<std::string, Opaque*> _opaques;
         std::string _name;
     };
 
@@ -186,7 +208,11 @@ namespace swarmc::Type {
     class Ambiguous : public Type {
     public:
         static Ambiguous* of() {
-            return new Ambiguous();
+            if ( _inst == nullptr ) {
+                _inst = new Ambiguous();
+            }
+
+            return _inst;
         }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
@@ -204,18 +230,29 @@ namespace swarmc::Type {
         [[nodiscard]] Ambiguous* copy() const override {
             return Ambiguous::of();
         }
+
+    protected:
+        static Ambiguous* _inst;
     };
 
     class Map : public Type {
     public:
-        explicit Map(const Type* values) : _values(values) {}
+        explicit Map(Type* values) : _values(useref(values)) {}
+
+        ~Map() override {
+            freeref(_values);
+        }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::MAP;
         }
 
-        [[nodiscard]] const Type* values() const {
+        [[nodiscard]] Type* values() const {
             return _values;
+        }
+
+        [[nodiscard]] InlineRefHandle<Type> valuesi() const {
+            return inlineref<Type>(values());
         }
 
         [[nodiscard]] Map* copy() const override {
@@ -234,19 +271,27 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
     protected:
-        const Type* _values;
+        Type* _values;
     };
 
     class Enumerable : public Type {
     public:
-        explicit Enumerable(const Type* values) : _values(values) {}
+        explicit Enumerable(Type* values) : _values(useref(values)) {}
+
+        ~Enumerable() override {
+            freeref(_values);
+        }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::ENUMERABLE;
         }
 
-        [[nodiscard]] const Type* values() const {
+        [[nodiscard]] Type* values() const {
             return _values;
+        }
+
+        [[nodiscard]] InlineRefHandle<Type> valuesi() const {
+            return inlineref<Type>(_values);
         }
 
         [[nodiscard]] Enumerable* copy() const override {
@@ -265,23 +310,31 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
     protected:
-        const Type* _values;
+        Type* _values;
     };
 
     class Resource : public Type {
     public:
-        static Resource* of(const Type* inner) {
+        static Resource* of(Type* inner) {
             return new Resource(inner);
         }
 
-        explicit Resource(const Type* yields) : _yields(yields) {}
+        explicit Resource(Type* yields) : _yields(useref(yields)) {}
+
+        ~Resource() override {
+            freeref(_yields);
+        }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::RESOURCE;
         }
 
-        [[nodiscard]] const Type* yields() const {
+        [[nodiscard]] Type* yields() const {
             return _yields;
+        }
+
+        [[nodiscard]] InlineRefHandle<Type> yieldsi() const {
+            return inlineref<Type>(yields());
         }
 
         [[nodiscard]] Resource* copy() const override {
@@ -300,23 +353,31 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _yields->toString() + ">";
         }
     protected:
-        const Type* _yields;
+        Type* _yields;
     };
 
     class Stream : public Type {
     public:
-        static Stream* of(const Type* inner) {
+        static Stream* of(Type* inner) {
             return new Stream(inner);
         }
 
-        explicit Stream(const Type* inner) : _inner(inner) {}
+        explicit Stream(Type* inner) : _inner(useref(inner)) {}
+
+        ~Stream() override {
+            freeref(_inner);
+        }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::STREAM;
         }
 
-        [[nodiscard]] const Type* inner() const {
+        [[nodiscard]] Type* inner() const {
             return _inner;
+        }
+
+        [[nodiscard]] InlineRefHandle<Type> inneri() const {
+            return inlineref<Type>(inner());
         }
 
         [[nodiscard]] Stream* copy() const override {
@@ -336,15 +397,23 @@ namespace swarmc::Type {
         }
 
     protected:
-        const Type* _inner;
+        Type* _inner;
     };
 
     class Lambda : public Type {
     public:
-        explicit Lambda(const Type* returns): _returns(returns) {}
+        explicit Lambda(Type* returns): _returns(useref(returns)) {}
 
-        [[nodiscard]] const Type* returns() const {
+        ~Lambda() override {
+            freeref(_returns);
+        }
+
+        [[nodiscard]] Type* returns() const {
             return _returns;
+        }
+
+        [[nodiscard]] InlineRefHandle<Type> returnsi() const {
+            return inlineref<Type>(returns());
         }
 
         [[nodiscard]] virtual std::vector<const Type*> params() const {
@@ -352,12 +421,12 @@ namespace swarmc::Type {
         }
 
     protected:
-        const Type* _returns;
+        Type* _returns;
     };
 
     class Lambda0 : public Lambda {
     public:
-        explicit Lambda0(const Type* returns) : Lambda(returns) {}
+        explicit Lambda0(Type* returns) : Lambda(returns) {}
 
         [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::LAMBDA0;
@@ -382,14 +451,22 @@ namespace swarmc::Type {
 
     class Lambda1 : public Lambda {
     public:
-        explicit Lambda1(const Type* param, const Type* returns) : Lambda(returns), _param(param) {}
+        explicit Lambda1(Type* param, Type* returns) : Lambda(returns), _param(useref(param)) {}
+
+        ~Lambda1() override {
+            freeref(_param);
+        }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::LAMBDA1;
         }
 
-        [[nodiscard]] const Type* param() const {
+        [[nodiscard]] Type* param() const {
             return _param;
+        }
+
+        [[nodiscard]] InlineRefHandle<Type> parami() const {
+            return inlineref<Type>(_param);
         }
 
         [[nodiscard]] Lambda1* copy() const override {
@@ -422,7 +499,7 @@ namespace swarmc::Type {
         }
 
     protected:
-        const Type* _param;
+        Type* _param;
     };
 }
 

@@ -82,6 +82,8 @@ namespace swarmc::Runtime {
         /** Verify that the reference is assignable to the given type, or raise an exception. */
         virtual void ensureType(const ISA::Reference*, const Type::Type*);
 
+        virtual void ensureType(const ISA::Reference*, const InlineRefHandle<Type::Type>&);
+
         ISA::Reference* walkPosition(ISA::PositionAnnotation*) override;
         ISA::Reference* walkPlus(ISA::Plus*) override;
         ISA::Reference* walkMinus(ISA::Minus*) override;

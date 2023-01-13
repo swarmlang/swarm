@@ -1,4 +1,5 @@
 #include "interfaces.h"
+#include "../../lang/Type.h"
 
 namespace swarmc::Runtime {
     void IGlobalServices::applySchedulingFilter(const std::string &key, std::string value) {
@@ -29,5 +30,9 @@ namespace swarmc::Runtime {
             auto result = current.find(filter.first);
             return result != current.end() && (*result).second == filter.second;
         });
+    }
+
+    InlineRefHandle<Type::Type> IStream::innerTypei()  {
+        return inlineref<Type::Type>(innerType());
     }
 }

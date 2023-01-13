@@ -7,6 +7,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
     StorageInterface::~StorageInterface() noexcept {
         for ( const auto& e : _map ) freeref(e.second);
+        for ( const auto& e : _types ) freeref(e.second);
         for ( const auto& e : _locks ) freeref(e.second);
     }
 
@@ -17,8 +18,12 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
     void StorageInterface::store(ISA::LocationReference* loc, ISA::Reference* value) {
-        if ( _types.find(loc->fqName()) == _types.end() ) _types[loc->fqName()] = value->type();
-        assert(value->type()->isAssignableTo(_types[loc->fqName()]));
+        if ( _types.find(loc->fqName()) == _types.end() ) _types[loc->fqName()] = useref(value->type());
+        assert(value->typei()->isAssignableTo(_types[loc->fqName()]));
+
+        auto existing = _map.find(loc->fqName());
+        if ( existing != _map.end() && existing->second != value ) freeref(existing->second);
+
         _map[loc->fqName()] = useref(value);
     }
 
@@ -34,10 +39,14 @@ namespace swarmc::Runtime::SingleThreaded {
         auto mapIter = _map.find(loc->fqName());
         if ( mapIter == _map.end() ) return;
 
-        freeref((*mapIter).second);
+        freeref(mapIter->second);
         _map.erase(mapIter);
 
-        _types.erase(loc->fqName());
+        auto typeIter = _types.find(loc->fqName());
+        if ( typeIter != _types.end() ) {
+            freeref(typeIter->second);
+            _types.erase(typeIter);
+        }
     }
 
     const Type::Type* StorageInterface::typeOf(ISA::LocationReference* loc) {
@@ -46,8 +55,8 @@ namespace swarmc::Runtime::SingleThreaded {
         return iter->second;
     }
 
-    void StorageInterface::typify(ISA::LocationReference* loc, const Type::Type* type) {
-        _types[loc->fqName()] = type;
+    void StorageInterface::typify(ISA::LocationReference* loc, Type::Type* type) {
+        _types[loc->fqName()] = useref(type);
     }
 
     IStorageLock* StorageInterface::acquire(ISA::LocationReference* loc) {
@@ -60,6 +69,7 @@ namespace swarmc::Runtime::SingleThreaded {
         for ( const auto& e : _map ) freeref(e.second);
         _map.clear();
 
+        for ( const auto& e : _types ) freeref(e.second);
         _types.clear();
     }
 
@@ -75,6 +85,7 @@ namespace swarmc::Runtime::SingleThreaded {
         for ( const auto& e : copy->_map ) useref(e.second);
 
         copy->_types = _types;
+        for ( const auto& e : copy->_types ) useref(e.second);
 
         // (don't duplicate locks, since the recipient won't hold them)
         return copy;
@@ -136,6 +147,8 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
 
+    Stream::Stream(std::string id, Type::Type *innerType) : _id(std::move(id)), _innerType(useref(innerType)) {}
+
     Stream::~Stream() noexcept {
         while ( !_items.empty() ) {
             freeref(_items.front());
@@ -165,7 +178,7 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
 
-    IStream* StreamDriver::open(const std::string &id, const Type::Type* innerType) {
+    IStream* StreamDriver::open(const std::string &id, Type::Type* innerType) {
         return new Stream(id, innerType);
     }
 }

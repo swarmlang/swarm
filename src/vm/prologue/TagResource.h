@@ -7,9 +7,8 @@
 
 namespace swarmc::Runtime::Prologue {
 
-    inline const Type::Opaque* tagType() {
-        static auto inst = Type::Opaque::of("PROLOGUE::TAG");
-        return inst;
+    inline Type::Opaque* tagType() {
+        return Type::Opaque::of("PROLOGUE::TAG");
     }
 
     class TagResource : public IResource {
@@ -29,7 +28,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] std::string name() const override { return "PROLOGUE::TAG"; }
 
-        [[nodiscard]] const Type::Type* innerType() const override { return tagType(); }
+        [[nodiscard]] Type::Type* innerType() const override { return tagType(); }
 
         [[nodiscard]] SchedulingFilters getSchedulingFilters() const override {
             return {filter()};
@@ -53,8 +52,8 @@ namespace swarmc::Runtime::Prologue {
 
     class TagFunctionCall : public PrologueFunctionCall {
     public:
-        TagFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
-                PrologueFunctionCall(provider, "TAG", vector, returnType) {}
+        TagFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "TAG", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -69,7 +68,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
@@ -81,8 +80,8 @@ namespace swarmc::Runtime::Prologue {
 
     class TagTFunctionCall : public PrologueFunctionCall {
     public:
-        TagTFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
-                PrologueFunctionCall(provider, "TAG_T", vector, returnType) {}
+        TagTFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "TAG_T", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -97,7 +96,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 

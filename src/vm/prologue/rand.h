@@ -10,7 +10,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomFunctionCall : public PrologueFunctionCall {
     public:
-        RandomFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        RandomFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, "RANDOM", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
@@ -26,7 +26,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override { return {}; }
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
@@ -37,7 +37,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomVectorFunctionCall : public PrologueFunctionCall {
     public:
-        RandomVectorFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        RandomVectorFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, "RANDOM_VECTOR", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
@@ -53,7 +53,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
@@ -64,7 +64,7 @@ namespace swarmc::Runtime::Prologue {
 
     class RandomMatrixFunctionCall : public PrologueFunctionCall {
     public:
-        RandomMatrixFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        RandomMatrixFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, "RANDOM_MATRIX", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
@@ -80,7 +80,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 

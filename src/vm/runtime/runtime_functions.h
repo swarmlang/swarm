@@ -18,8 +18,8 @@ namespace swarmc::ISA {
 
 namespace swarmc::Runtime {
 
-    using FormalTypes = std::vector<const Type::Type *>;
-    using CallVector = std::vector<std::pair<const Type::Type *, ISA::Reference *>>;
+    using FormalTypes = std::vector<Type::Type*>;
+    using CallVector = std::vector<std::pair<Type::Type*, ISA::Reference*>>;
 
     /** The VM mechanisms used to perform a function call. */
     enum class FunctionBackend : std::size_t {
@@ -40,7 +40,7 @@ namespace swarmc::Runtime {
      */
     class IFunctionCall : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
-        IFunctionCall(FunctionBackend backend, std::string name, CallVector vector, const Type::Type* returnType);
+        IFunctionCall(FunctionBackend backend, std::string name, CallVector vector, Type::Type* returnType);
 
         ~IFunctionCall() noexcept override;
 
@@ -56,7 +56,9 @@ namespace swarmc::Runtime {
         [[nodiscard]] virtual CallVector vector() const { return _vector; }
 
         /** Get the return type of this function call. */
-        [[nodiscard]] virtual const Type::Type* returnType() const { return _returnType; }
+        [[nodiscard]] virtual Type::Type* returnType() const { return _returnType; }
+
+        [[nodiscard]] virtual InlineRefHandle<Type::Type> returnTypei() const;
 
         /** Set the value returned by the execution of this call. */
         virtual void setReturn(ISA::Reference* value);
@@ -88,7 +90,7 @@ namespace swarmc::Runtime {
         FunctionBackend _backend;
         std::string _name;
         CallVector _vector;
-        const Type::Type* _returnType;
+        Type::Type* _returnType;
         ISA::Reference* _returnValue = nullptr;
         std::size_t _paramIndex = 0;
         bool _returned = false;
@@ -99,8 +101,8 @@ namespace swarmc::Runtime {
      */
     class InlineFunctionCall : public IFunctionCall {
     public:
-        InlineFunctionCall(std::string name, CallVector vector, const Type::Type* returnType) :
-                IFunctionCall(FunctionBackend::FB_INLINE, std::move(name), std::move(vector), returnType) {}
+        InlineFunctionCall(std::string name, CallVector vector, Type::Type* returnType) :
+            IFunctionCall(FunctionBackend::FB_INLINE, std::move(name), std::move(vector), returnType) {}
 
         [[nodiscard]] std::string toString() const override {
             return "InlineFunctionCall<f:" + _name + ">";
@@ -119,10 +121,16 @@ namespace swarmc::Runtime {
         [[nodiscard]] virtual FormalTypes paramTypes() const = 0;
 
         /** Get the return type of this function. */
-        [[nodiscard]] virtual const Type::Type* returnType() const = 0;
+        [[nodiscard]] virtual Type::Type* returnType() const = 0;
+
+        [[nodiscard]] virtual InlineRefHandle<Type::Type> returnTypei() const;
 
         /** Get a new IFunction which contains the given parameter, curried into a partial application. */
         [[nodiscard]] virtual IFunction* curry(ISA::Reference*) = 0;
+
+        [[nodiscard]] virtual InlineRefHandle<IFunction> curryi(ISA::Reference* ref) {
+            return inlineref<IFunction>(curry(ref));
+        }
 
         /** Get a list of the parameters which have been curried thusfar, along with their types. */
         [[nodiscard]] virtual CallVector getCallVector() const = 0;
@@ -155,7 +163,7 @@ namespace swarmc::Runtime {
             return {upstream.begin() + 1, upstream.end()};
         }
 
-        [[nodiscard]] const Type::Type* returnType() const override {
+        [[nodiscard]] Type::Type* returnType() const override {
             return _upstream->returnType();
         }
 
@@ -197,14 +205,14 @@ namespace swarmc::Runtime {
      */
     class InlineFunction : public IFunction {
     public:
-        InlineFunction(std::string name, FormalTypes types, const Type::Type* returnType)
+        InlineFunction(std::string name, FormalTypes types, Type::Type* returnType)
             : _name(std::move(name)), _types(std::move(types)), _returnType(returnType) {}
 
         [[nodiscard]] FormalTypes paramTypes() const override {
             return _types;
         }
 
-        [[nodiscard]] const Type::Type* returnType() const override {
+        [[nodiscard]] Type::Type* returnType() const override {
             return _returnType;
         };
 
@@ -233,7 +241,7 @@ namespace swarmc::Runtime {
     protected:
         std::string _name;
         FormalTypes _types;
-        const Type::Type* _returnType;
+        Type::Type* _returnType;
     };
 
 }

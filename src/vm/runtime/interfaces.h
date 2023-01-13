@@ -131,7 +131,7 @@ namespace swarmc::Runtime {
         virtual const Type::Type* typeOf(ISA::LocationReference*) = 0;
 
         /** Constrain the given location to a specific type. */
-        virtual void typify(ISA::LocationReference*, const Type::Type*) = 0;
+        virtual void typify(ISA::LocationReference*, Type::Type*) = 0;
 
         /**
          * Attempt to acquire a lock for a particular storage location.
@@ -216,7 +216,9 @@ namespace swarmc::Runtime {
 
         virtual bool isOpen() = 0;
 
-        virtual const Type::Type* innerType() = 0;
+        virtual Type::Type* innerType() = 0;
+
+        virtual InlineRefHandle<Type::Type> innerTypei();
 
         virtual void push(ISA::Reference* value) = 0;
 
@@ -230,7 +232,7 @@ namespace swarmc::Runtime {
 
     class IStreamDriver : public IStringable, public IRefCountable {
     public:
-        virtual IStream* open(const std::string&, const Type::Type*) = 0;
+        virtual IStream* open(const std::string&, Type::Type*) = 0;
     };
 }
 

@@ -7,9 +7,8 @@
 
 namespace swarmc::Runtime::Prologue {
 
-    inline const Type::Opaque* fileType() {
-        static auto inst = Type::Opaque::of("PROLOGUE::FILE");
-        return inst;
+    inline Type::Opaque* fileType() {
+        return Type::Opaque::of("PROLOGUE::FILE");
     }
 
     class FileResource : public IResource {
@@ -29,7 +28,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] std::string name() const override { return "PROLOGUE::FILE"; }
 
-        [[nodiscard]] const Type::Type* innerType() const override {
+        [[nodiscard]] Type::Type* innerType() const override {
             return fileType();
         }
 
@@ -45,7 +44,7 @@ namespace swarmc::Runtime::Prologue {
 
     class ReadFileFunctionCall : public PrologueFunctionCall {
     public:
-        ReadFileFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        ReadFileFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, "READ_FILE", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
@@ -63,7 +62,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
@@ -75,7 +74,7 @@ namespace swarmc::Runtime::Prologue {
 
     class OpenFileFunctionCall : public PrologueFunctionCall {
     public:
-        OpenFileFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
+        OpenFileFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
             PrologueFunctionCall(provider, "OPEN_FILE", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
@@ -91,7 +90,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
@@ -102,8 +101,8 @@ namespace swarmc::Runtime::Prologue {
 
     class FileTFunctionCall : public PrologueFunctionCall {
     public:
-        FileTFunctionCall(IProvider* provider, const CallVector& vector, const Type::Type* returnType):
-                PrologueFunctionCall(provider, "FILE_T", vector, returnType) {}
+        FileTFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "FILE_T", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -118,7 +117,7 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 
-        [[nodiscard]] const Type::Type* returnType() const override;
+        [[nodiscard]] Type::Type* returnType() const override;
 
         [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
 
