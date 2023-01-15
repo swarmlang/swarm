@@ -225,7 +225,7 @@ namespace swarmc::Runtime {
         explicit State(ISA::Instructions is) : State(std::move(is), true) {}
 
         ~State() override {
-            for ( const auto& e : _is ) freeref(e);
+            for ( auto e : _is ) freeref(e);
         }
 
         [[nodiscard]] serial::tag_t getSerialKey() const override {
@@ -373,7 +373,7 @@ namespace swarmc::Runtime {
         }
     protected:
         State(ISA::Instructions is, bool shouldInitialize) : _is(std::move(is)) {
-            for ( const auto& e : _is ) useref(e);
+            for ( auto e : _is ) useref(e);
             if ( shouldInitialize ) initialize();
         }
 

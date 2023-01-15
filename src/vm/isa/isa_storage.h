@@ -34,10 +34,10 @@ namespace swarmc::ISA {
     class AssignEval : public BinaryInstruction<LocationReference, Instruction> {
     public:
         AssignEval(LocationReference* loc, Instruction* exe) :
-            BinaryInstruction<LocationReference, Instruction>(Tag::ASSIGNEVAL, useref(loc), exe) {}
+            BinaryInstruction<LocationReference, Instruction>(Tag::ASSIGNEVAL, useref(loc), useref(exe)) {}
         ~AssignEval() override {
             freeref(_first);
-            // FIXME: make instruction IRefCountable
+            freeref(_second);
         }
         [[nodiscard]] AssignEval* copy() const override {
             return new AssignEval(_first->copy(), _second->copy());

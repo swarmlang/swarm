@@ -1567,20 +1567,20 @@ namespace nslib {
          * Instead, call `useref(...)`.
          * Increment the reference count.
          */
-        void nslibIncRef() { _nslibRefCount += 1; }
+        virtual void nslibIncRef() { _nslibRefCount += 1; }
 
         /**
          * WARNING: DO NOT CALL DIRECTLY
          * Instead, call `freeref(...)`.
          * Decrement the reference count.
          */
-        void nslibDecRef() { _nslibRefCount -= 1; }
+        virtual void nslibDecRef() { _nslibRefCount -= 1; }
 
-        void nslibNoRef() { _nslibRefDisable = true; }
+        virtual void nslibNoRef() { _nslibRefDisable = true; }
 
         /** If true, the instance can be deleted. */
-        [[nodiscard]] bool nslibShouldFree() const { return !_nslibRefDisable && _nslibRefCount < 1; }
-    private:
+        [[nodiscard]] virtual bool nslibShouldFree() const { return !_nslibRefDisable && _nslibRefCount < 1; }
+    protected:
         std::size_t _nslibRefCount;
         bool _nslibRefDisable;
     };
