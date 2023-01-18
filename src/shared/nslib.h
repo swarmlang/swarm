@@ -1,6 +1,8 @@
 #ifndef NSLIB_H
 #define NSLIB_H
 
+//#define NSLIB_GC_TRACK
+
 #ifndef NSLIB_BINN_H_PATH
 #define NSLIB_BINN_H_PATH "../../mod/binn/src/binn.h"
 #endif
@@ -46,6 +48,7 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 #include <sys/shm.h>
+#include <execinfo.h>
 #include NSLIB_BINN_H_PATH
 
 #define NSLIB_SERIAL_TAG 0
@@ -242,6 +245,9 @@ namespace nslib {
         static Logging* get() {
             if ( _inst == nullptr ) {
                 _inst = new Logging();
+                Framework::onShutdown([]() {
+                    Logging::cleanup();
+                });
             }
 
             return _inst;
@@ -298,6 +304,15 @@ namespace nslib {
     protected:
         static inline Logging* _inst = nullptr;
         static inline bool _useTimestamps = false;
+
+        static void cleanup() {
+            if ( _inst == nullptr ) return;
+            for ( const auto& e : _inst->_loggers ) delete e.second;
+            _inst->_loggers.clear();
+            _inst->_targets.clear();
+            delete _inst;
+            _inst = nullptr;
+        }
 
         Logging() = default;
         Verbosity _verb = Verbosity::INFO;
@@ -490,6 +505,40 @@ namespace nslib {
             buf.append(s, prevPos, s.size() - prevPos);
             return buf;
         }
+
+        inline std::vector<std::string> split(const std::string& delimiter, std::string s) {
+            std::vector<std::string> v;
+
+            std::size_t i = 0;
+            while ((i = s.find(delimiter)) != std::string::npos) {
+                v.push_back(s.substr(0, i));
+                s.erase(0, i + delimiter.length());
+            }
+            v.push_back(s);
+
+            return v;
+        }
+    }
+
+
+    inline std::string trace() {
+        void* array[15];
+        char** strings;
+
+        auto size = backtrace(array, 15);
+        strings = backtrace_symbols(array, size);
+
+        if ( strings == nullptr ) {
+            return "(unable to obtain trace)";
+        }
+
+        std::stringstream s;
+        for ( std::size_t i = 0; i < size; i += 1 ) {
+            s << strings[i] << "\n";
+        }
+
+        free(strings);
+        return s.str();
     }
 
 
@@ -1556,6 +1605,10 @@ namespace nslib {
 
     /* Some ref-count memory management helpers: */
 
+#ifdef NSLIB_GC_TRACK
+    using GCTracks = std::map<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>;
+#endif
+
     /** Trait interface which adds a reference count. */
     class IRefCountable {
     public:
@@ -1567,14 +1620,69 @@ namespace nslib {
          * Instead, call `useref(...)`.
          * Increment the reference count.
          */
-        virtual void nslibIncRef() { _nslibRefCount += 1; }
+        virtual void nslibIncRef() {
+            _nslibRefCount += 1;
+
+#ifdef NSLIB_GC_TRACK
+            if ( !_registeredShutdown ) {
+                Framework::onShutdown([]() {
+                    if ( _tracks.empty() ) {
+                        std::cout << "NSLIB_GC_TRACK: All useref()/freeref() calls were balanced.\n";
+                        return;
+                    }
+
+                    std::cout << "There were unbalanced useref()/freeref() calls:\n";
+                    for ( const auto& ref : _tracks ) {
+                        std::cout << "\n\n\n=====================================\nIRefCountable<id: " + ref.first + ">:\n";
+                        std::cout << "------- useref() calls:\n";
+
+                        for ( const auto& trace : ref.second.first ) {
+                            std::cout << trace << "\n";
+                        }
+
+                        std::cout << "------- freeref() calls:\n";
+
+                        for ( const auto& trace : ref.second.second ) {
+                            std::cout << trace << "\n";
+                        }
+                    }
+                });
+                _registeredShutdown = true;
+            }
+            auto iter = _tracks.find(_nslibRefId);
+            if ( iter == _tracks.end() ) {
+                _tracks[_nslibRefId] = {{trace()}, {}};
+            } else {
+                iter->second.first.emplace_back(trace());  // FIXME: push back?
+            }
+#endif
+        }
 
         /**
          * WARNING: DO NOT CALL DIRECTLY
          * Instead, call `freeref(...)`.
          * Decrement the reference count.
          */
-        virtual void nslibDecRef() { _nslibRefCount -= 1; }
+        virtual void nslibDecRef() {
+            _nslibRefCount -= 1;
+
+#ifdef NSLIB_GC_TRACK
+            auto iter = _tracks.find(_nslibRefId);
+            if ( iter == _tracks.end() ) {
+                _tracks[_nslibRefId] = {{}, {trace()}};
+            } else {
+                iter->second.second.emplace_back(trace());  // FIXME: push back?
+
+                if ( nslibShouldFree() && iter->second.first.size() == iter->second.second.size() ) {
+                    _tracks.erase(iter);
+                }
+            }
+#endif
+        }
+
+#ifdef NSLIB_GC_TRACK
+        [[nodiscard]] static GCTracks nslibGCTracks() { return _tracks; }
+#endif
 
         virtual void nslibNoRef() { _nslibRefDisable = true; }
 
@@ -1583,6 +1691,12 @@ namespace nslib {
     protected:
         std::size_t _nslibRefCount;
         bool _nslibRefDisable;
+
+#ifdef NSLIB_GC_TRACK
+        std::string _nslibRefId = uuid();
+        static GCTracks _tracks;
+        static bool _registeredShutdown;
+#endif
     };
 
 

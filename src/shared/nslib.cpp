@@ -26,4 +26,9 @@ namespace nslib {
         return RefHandle(ref);
     }
 
+#ifdef NSLIB_GC_TRACK
+    GCTracks IRefCountable::_tracks;
+    bool IRefCountable::_registeredShutdown = false;
+#endif
+
 }

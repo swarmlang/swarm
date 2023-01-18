@@ -553,6 +553,10 @@ namespace swarmc::ISA {
 
         /** Inserts the given item into the enumeration at the specified index. */
         virtual void set(std::size_t i, Reference* value) {
+            if ( i < _items.size() ) {
+                freeref(_items[i]);
+            }
+
             _items[i] = useref(value);
         }
 

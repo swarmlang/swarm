@@ -11,6 +11,8 @@
 #include "../isa_meta.h"
 #include "../debug/Metadata.h"
 
+
+
 using namespace nslib;
 
 namespace swarmc::Runtime {
@@ -63,6 +65,7 @@ namespace swarmc::Runtime {
             freeref(_global);
             freeref(_parent);
             freeref(_call);
+            for ( const auto& e : _map ) freeref(e.second);
         }
 
         [[nodiscard]] serial::tag_t getSerialKey() const override {
@@ -321,8 +324,9 @@ namespace swarmc::Runtime {
                     return current;
                 }
 
-                GC_LOCAL_REF(current)  // To freeref(...) the popped scope after we grab the parent.
-                current = useref(current->parent());
+                auto parent = useref(current->parent());
+                freeref(current);
+                current = parent;
             }
 
             // This case occurs as a result of exception handling. A resumed function can take the place

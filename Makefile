@@ -29,7 +29,7 @@ INC_FLAGS := $(addprefix -I,$(INC_DIRS))
 
 CXXFLAGS += -std=c++20
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall
-CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall -DSWARM_DEBUG
+CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall -DSWARM_DEBUG #-DNSLIB_GC_TRACK
 #LDFLAGS ?= -lredis++ -lhiredis -pthread
 LDFLAGS ?= -rdynamic -ldl -lbinn -pthread
 
