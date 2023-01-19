@@ -24,6 +24,8 @@
 /* Tags a variable to be cleaned up during application shutdown. */
 #define GC_ON_SHUTDOWN(ref) nslib::Framework::onShutdown([ref]() { freeref(ref); });
 
+#define NS_DEFER() nslib::Defer UNIQUE_NAME(deferred)
+
 #include <dlfcn.h>
 
 #include <random>
@@ -1765,6 +1767,43 @@ namespace nslib {
     [[nodiscard]] inline std::string s(const InlineRefHandle<T>& v) {
         return s(v.get());
     }
+
+
+    /**
+     * A helper for deferring logic until function return a la GoLang.
+     * Prefer the NS_DEFER() macro instead of using this class directly:
+     *
+     * @example
+     * ```cpp
+     * void myFunc() {
+     *     NS_DEFER()(()[] {
+     *         std::cout << "Some cleanup work.\n";
+     *     });
+     *
+     *     std::cout << "Hello!\n";
+     * }
+     * ```
+     *
+     * This outputs:
+     *
+     * ```txt
+     * Hello!
+     * Some cleanup work.
+     * ```
+     */
+    class Defer : public IStringable {
+    public:
+        Defer(const std::function<void()>& callback) : _callback(callback) {}
+
+        ~Defer() override { _callback(); }
+
+        std::string toString() const override {
+            return "nslib::Defer<>";
+        }
+
+    protected:
+        std::function<void()> _callback;
+    };
 }
 
 #endif //NSLIB_H

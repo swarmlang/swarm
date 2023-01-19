@@ -190,7 +190,7 @@ namespace swarmc::Runtime {
         virtual bool hasLock(ISA::LocationReference*);
 
         /** Attempt to acquire a lock for the given location. */
-        virtual void lock(ISA::LocationReference*);
+        virtual bool lock(ISA::LocationReference*);
 
         /** Release the lock for the given location, if this VM holds it. */
         virtual void unlock(ISA::LocationReference*);

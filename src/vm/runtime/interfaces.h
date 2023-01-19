@@ -144,6 +144,9 @@ namespace swarmc::Runtime {
         virtual void clear() = 0;
 
         virtual IStorageInterface* copy() = 0;
+
+        /** Returns true if the VM should acquire locks before accessing variables in this store. */
+        [[nodiscard]] virtual bool shouldLockAccesses() const { return true; }
     };
 
 
