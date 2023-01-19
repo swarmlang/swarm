@@ -73,8 +73,8 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
-    if ( flagSingleThreaded && flagSVI ) {
-        int executeResult = executeLocalSVI();
+    if ( (flagSingleThreaded || flagMultiThreaded) && flagSVI ) {
+        int executeResult = executeLocalSVI(flagMultiThreaded);
         if ( executeResult != 0 ) {
             result = executeResult;
         }
@@ -198,8 +198,12 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             skipOne = true;
         } else if ( arg == "--locally" ) {
             Configuration::FORCE_LOCAL = true;
-            flagSingleThreaded = true;
+            flagSingleThreaded = !flagMultiThreaded;
             logger->debug("Will execute locally.");
+        } else if ( arg == "--locally-multithreaded" ) {
+            flagMultiThreaded = true;
+            flagSingleThreaded = false;
+            logger->debug("Will execute multithreaded");
         } else if ( arg == "--verbose" ) {
             flagVerbose = true;
             Configuration::DEBUG = true;
@@ -320,6 +324,10 @@ void Executive::printUsage() {
 
     console->bold()->print("  --locally  :  ", true)
         ->println("Evaluate the given Swarm program without connecting to remote executors.")
+        ->println();
+
+    console->bold()->print("  --locally-multithreaded", true)
+        ->println("Evaluate the given Swarm program without connecting to remote executors, but multithreaded.")
         ->println();
 
     console->bold()->print("  --binary  :  ", true)
@@ -562,7 +570,7 @@ int Executive::debugOutputCFG() {
     return 0;
 }
 
-int Executive::executeLocalSVI() {
+int Executive::executeLocalSVI(bool multithreaded) {
     swarmc::VM::Pipeline pipeline(_input);
     pipeline.setExternalProviders(externalProviders);
 
@@ -571,7 +579,7 @@ int Executive::executeLocalSVI() {
         return 0;
     }
 
-    auto vm = pipeline.targetSingleThreaded();
+    auto vm = multithreaded ? pipeline.targetMultiThreaded() : pipeline.targetSingleThreaded();
     vm->execute();
     vm->cleanup();
     delete vm;

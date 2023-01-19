@@ -32,6 +32,8 @@ public:
 
     inline static const std::string FABRIC_PREFIX = "fabric_resource_";
     inline static const std::string FABRIC_QUEUE_CONTEXT = "fabric";
+
+    static size_t MAX_THREADS;
 };
 
 #endif //SWARM_CONFIGURATION_H

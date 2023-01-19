@@ -7,6 +7,7 @@
 #include "isa_meta.h"
 #include "ISAParser.h"
 #include "runtime/single_threaded.h"
+#include "runtime/multi_threaded.h"
 #include "VirtualMachine.h"
 #include "prologue/prologue_provider.h"
 #include "walk/ISABinaryWalk.h"
@@ -94,6 +95,26 @@ namespace swarmc::VM {
             vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
             vm->addQueue(new SingleThreaded::Queue(vm));
             vm->useStreamDriver(new SingleThreaded::StreamDriver());
+
+            if ( Configuration::WITH_PROLOGUE ) {
+                vm->addProvider(new Prologue::Provider(vm->global()));
+            }
+
+            for ( const auto& path : _externalProviders ) {
+                vm->addExternalProvider(path);
+            }
+
+            vm->initialize(is);
+            return vm;
+        }
+
+        VirtualMachine* targetMultiThreaded() {
+            auto is = targetInstructions();
+            auto vm = new VirtualMachine(new MultiThreaded::GlobalServices());
+            vm->addStore(new MultiThreaded::SharedStorageInterface());
+            vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
+            vm->addQueue(new MultiThreaded::Queue(vm));
+            vm->useStreamDriver(new MultiThreaded::StreamDriver());
 
             if ( Configuration::WITH_PROLOGUE ) {
                 vm->addProvider(new Prologue::Provider(vm->global()));

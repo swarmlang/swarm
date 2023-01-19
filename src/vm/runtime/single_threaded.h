@@ -101,7 +101,7 @@ namespace swarmc::Runtime::SingleThreaded {
         ISA::Affinity _affinity;
         std::map<std::string, ISA::Reference*> _map;
         std::map<std::string, Type::Type*> _types;
-        std::map<std::string, StorageLock*> _locks;
+        std::map<std::string, IStorageLock*> _locks;
 
         friend class StorageLock;
     };

@@ -30,6 +30,7 @@ protected:
     bool flagOutputParse = false;
     bool flagRunTest = false;
     bool flagSingleThreaded = false;
+    bool flagMultiThreaded = false;
     bool flagDebugger = false;
     bool flagInteractiveDebug = false;
     bool flagVerbose = false;
@@ -63,7 +64,7 @@ protected:
     int debugOutputCFG();
     int runTest();
     int parseFilters();
-    int executeLocalSVI();
+    int executeLocalSVI(bool);
     int emitBinary();
 };
 
