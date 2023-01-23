@@ -199,6 +199,8 @@ namespace swarmc::Runtime::SingleThreaded {
             return "SingleThreaded::Queue<ctx: " + _context + ">";
         }
 
+        void tick() override {}
+
     protected:
         VirtualMachine* _vm;
         JobID _nextId = 0;

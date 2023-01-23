@@ -203,6 +203,8 @@ namespace swarmc::Runtime {
 
         /** Returns true if there are no pending jobs. */
         virtual bool isEmpty() = 0;
+
+        virtual void tick() = 0;
     };
 
 

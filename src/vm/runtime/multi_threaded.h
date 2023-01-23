@@ -112,6 +112,8 @@ namespace swarmc::Runtime::MultiThreaded {
             return "MultiThreaded::Queue<ctx: " + _context + ">";
         }
 
+        void tick() override;
+
     protected:
         VirtualMachine* _vm;
         JobID _nextId = 0;

@@ -311,6 +311,9 @@ namespace swarmc::Runtime {
          * TODO: use to execute queue jobs while idle
          */
         virtual void whileWaitingForDrain() {
+            for ( auto q : _queues ) {
+                q->tick();
+            }
             std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
         }
 

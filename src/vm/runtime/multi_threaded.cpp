@@ -1,4 +1,5 @@
 #include <cassert>
+#include <iostream>
 #include "swarm_thread.h"
 #include "multi_threaded.h"
 #include "../VirtualMachine.h"
@@ -7,6 +8,9 @@
 namespace swarmc::Runtime::MultiThreaded {
 
     size_t SwarmThread::CurrentThreads = 0;
+    std::mutex SwarmThread::CountMutex;
+    std::map<size_t, std::thread*> SwarmThread::Threads = std::map<size_t, std::thread*>();
+    std::map<size_t, bool> SwarmThread::Finished  = std::map<size_t, bool>();
 
     IStorageLock *SharedStorageInterface::acquire(ISA::LocationReference *loc) {
         if ( _locks.find(loc->fqName()) != _locks.end() ) return nullptr;
@@ -53,22 +57,45 @@ namespace swarmc::Runtime::MultiThreaded {
     }
 
     void Queue::push(IQueueJob* job) {
+        auto qlock = new std::lock_guard<std::mutex>(_qtex);
         if ( SwarmThread::moreThreads() ) {
-            SwarmThread::execute(_vm, job);
+            std::cout << "Create thread!\n";
+            auto vm = _vm->copy();
+            //SwarmThread::addThread(job->id(), new std::thread(SwarmThread::execute, vm, job));
+            SwarmThread::addThread(job->id(), nullptr);
+            SwarmThread::execute(vm, job);
+            
+            vm->cleanup();
+            delete vm;
         } else {
-            auto qlock = new std::lock_guard<std::mutex>(_qtex);
+            std::cout << "Push to queue!\n";
             _queue.push(job);
-            delete qlock;
         }
+        delete qlock;
     }
     
     IQueueJob* Queue::pop() {
+        std::cout << "Popping job: " << _queue.front()->toString() << "\n";
         auto lock = new std::lock_guard<std::mutex>(_qtex);
         assert(!_queue.empty());
         auto job = _queue.front();
         _queue.pop();
         delete lock;
         return job;
+    }
+
+    void Queue::tick() {
+        std::cout << "Tick!\n";
+        std::vector<size_t> finishedThreads;
+        for ( auto t : SwarmThread::getThreads() ) {
+            if ( SwarmThread::isFinished(t.first) ) {
+                finishedThreads.push_back(t.first);
+            }
+        }
+        for ( auto i : finishedThreads ) {
+            std::cout << "Thread Removed: " << i << "\n";
+            SwarmThread::cleanThread(i);
+        }
     }
 
     Stream::~Stream() noexcept {
