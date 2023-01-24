@@ -122,6 +122,8 @@ namespace swarmc::Runtime::MultiThreaded {
         QueueContextID _context;
         std::mutex _qtex;
         std::queue<IQueueJob*> _queue;
+        std::mutex _threadMutex;
+        std::vector<IThreadContext*> _threads;
     };
 
     class Stream : public IStream {

@@ -72,6 +72,164 @@ namespace nslib {
         static bool USE_DETERMINISTIC_UUIDS = false;
     }
 
+
+    /** An instance which has a string representation. */
+    class IStringable {
+    public:
+        virtual ~IStringable() = default;
+        [[nodiscard]] virtual std::string toString() const = 0;
+    };
+
+
+    class NSLibException : public std::logic_error, public IStringable {
+    public:
+        explicit NSLibException(const std::string& message) : std::logic_error(message) {}
+
+        [[nodiscard]] std::string toString() const override {
+            return what();
+        }
+    };
+
+
+    class ForeignThreadException : public NSLibException {
+    public:
+        ForeignThreadException() : NSLibException("Cannot load context for foreign thread. Make sure to create the threads with Framework::newThread(...).") {}
+    };
+
+
+    using ThreadID = std::size_t;
+
+    class IThreadContext {
+    public:
+        virtual ~IThreadContext() = default;
+
+        [[nodiscard]] virtual bool isReadyForJoin() = 0;
+
+        [[nodiscard]] virtual std::thread* baseThread() const = 0;
+
+        [[nodiscard]] virtual ThreadID getID() const = 0;
+
+        virtual void shutdown() = 0;
+
+        virtual void onShutdown(const std::function<void()>& f) = 0;
+
+        [[nodiscard]] virtual bool hasExited() = 0;
+
+        [[nodiscard]] virtual int exitCode() = 0;
+    };
+
+    class MainContext : public IThreadContext {
+    public:
+        bool isReadyForJoin() override { return false; }
+
+        std::thread* baseThread() const override { return nullptr; }
+
+        ThreadID getID() const override { return 0; }
+
+        void shutdown() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            for ( const auto& c : _shutdownCallbacks ) c();
+        }
+
+        void onShutdown(const std::function<void()>& f) override {
+            std::lock_guard<std::mutex> m(_mutex);
+            _shutdownCallbacks.push_back(f);
+        }
+
+        bool hasExited() override { return false; }
+
+        int exitCode() override { return 0; }
+
+    protected:
+        std::mutex _mutex;
+        std::vector<std::function<void()>> _shutdownCallbacks;
+    };
+
+    class ThreadContext : public IThreadContext {
+    public:
+        explicit ThreadContext(ThreadID id, const std::function<int()>& body) : _id(id) {
+            _thread = new std::thread(wrap(body));
+        }
+
+        [[nodiscard]] bool isReadyForJoin() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            return _thread->joinable() && _exited;
+        }
+
+        [[nodiscard]] std::thread* baseThread() const override {
+            return _thread;
+        }
+
+        [[nodiscard]] ThreadID getID() const override {
+            return _id;
+        }
+
+        void shutdown() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            for ( const auto& c : _shutdownCallbacks ) c();
+        }
+
+        void onShutdown(const std::function<void()>& f) override {
+            std::lock_guard<std::mutex> m(_mutex);
+            _shutdownCallbacks.push_back(f);
+        }
+
+        bool hasExited() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            return _exited;
+        }
+
+        int exitCode() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            return _exitCode;
+        }
+
+    protected:
+        ThreadID _id;
+        int _exitCode = 0;
+        bool _exited = false;
+        std::mutex _mutex;
+        std::vector<std::function<void()>> _shutdownCallbacks;
+        std::thread* _thread = nullptr;
+
+        std::function<void()> wrap(const std::function<int()>& body);
+    };
+
+
+    template <typename T>
+    class IContextualStorage {
+    public:
+        virtual ~IContextualStorage() = default;
+
+        virtual T produceNewForContext() = 0;
+
+        virtual void disposeOfElementForContext(T) = 0;
+
+        virtual T getFromContext();
+    protected:
+        std::map<std::thread::id, T> _ctxStore;
+        std::mutex _ctxStoreMutex;
+    };
+
+
+    template <typename T>
+    class IContextualRef {
+    public:
+        explicit IContextualRef(IContextualStorage<T*>* store) : _store(store) {}
+
+        virtual ~IContextualRef() = default;
+
+        virtual T* get() {
+            return _store->getFromContext();
+        }
+
+        T* operator->() { return get(); }
+
+    protected:
+        IContextualStorage<T*>* _store;
+    };
+
+
     class Framework {
     public:
         Framework(Framework& other) = delete;  // don't allow cloning
@@ -79,27 +237,81 @@ namespace nslib {
 
         static void boot();
 
+        static IThreadContext* newThread(const std::function<int()>& body) {
+            std::unique_lock<std::mutex> m(_mutex);
+
+            auto id = _lastThreadID++;
+            auto ctx = new ThreadContext(id, body);
+            _contexts[id] = ctx;
+            return ctx;
+        }
+
+        static void tickThreads() {
+            std::unique_lock<std::mutex> m(_mutex);
+            auto mapCopy = _contexts;
+            m.unlock();
+
+            for ( auto pair : mapCopy ) {
+                if ( pair.second->isReadyForJoin() ) {
+                    pair.second->baseThread()->join();
+                    m.lock();
+                    _contexts.erase(pair.first);
+                    m.unlock();
+                }
+            }
+        }
+
+        static IThreadContext* context() {
+            std::lock_guard<std::mutex> m(_mutex);
+
+            // Map the correct thread ID
+            auto idIter = _threadMap.find(std::this_thread::get_id());
+            if ( idIter == _threadMap.end() ) {
+                throw ForeignThreadException();
+            }
+
+            // Look up the context for the mapped thread ID
+            auto id = idIter->second;
+            return _contexts[id];
+        }
+
+        static bool isThread() {
+            return !isMainPID();
+        }
+
+        static std::string getThreadDisplay() {
+            std::ostringstream oss;
+            oss << std::this_thread::get_id();
+            return oss.str();
+        }
+
+        static bool isMainPID() {
+            std::lock_guard<std::mutex> m(_mutex);
+            return std::this_thread::get_id() == _mainPID;
+        }
+
         static void shutdown() {
+            std::lock_guard<std::mutex> m(_mutex);
             if ( !_booted ) return;
             for ( const auto& c : _shutdownCallbacks ) c();
         }
 
         static void onShutdown(std::function<void()> f) {
+            std::lock_guard<std::mutex> m(_mutex);
             _shutdownCallbacks.push_back(f);
         }
 
     protected:
         Framework() = default;
+        static ThreadID _lastThreadID;
         static bool _booted;
+        static std::thread::id _mainPID;
         static std::vector<std::function<void()>> _shutdownCallbacks;
-    };
+        static std::mutex _mutex;
+        static std::map<ThreadID, IThreadContext*> _contexts;
+        static std::map<std::thread::id, ThreadID> _threadMap;
 
-
-    /** An instance which has a string representation. */
-    class IStringable {
-    public:
-        virtual ~IStringable() = default;
-        [[nodiscard]] virtual std::string toString() const = 0;
+        friend class ThreadContext;
     };
 
 
@@ -118,16 +330,6 @@ namespace nslib {
 
         return s.str();
     }
-
-
-    class NSLibException : public std::logic_error, public IStringable {
-    public:
-        explicit NSLibException(const std::string& message) : std::logic_error(message) {}
-
-        [[nodiscard]] std::string toString() const override {
-            return what();
-        }
-    };
 
 
     /** ANSI-supported colors. */
@@ -826,6 +1028,37 @@ namespace nslib {
         };
     }
 
+    class Console;
+
+    class ConsoleService : public IContextualStorage<Console*> {
+    public:
+        ConsoleService(ConsoleService& other) = delete;  // don't allow cloning
+        void operator=(const ConsoleService&) = delete;  // don't allow assigning
+
+        static ConsoleService* get() {
+            if ( _inst == nullptr ) {
+                _inst = new ConsoleService();
+//                Framework::onShutdown([]() {
+//                    Logging::cleanup();
+//                });
+            }
+
+            return _inst;
+        }
+
+        static Console* getConsole() {
+            return get()->getFromContext();
+        }
+
+        Console* produceNewForContext() override;
+
+        void disposeOfElementForContext(Console*) override;
+    protected:
+        static inline ConsoleService* _inst = nullptr;
+
+        ConsoleService() = default;
+    };
+
 
     /**
      * Utility class for interacting with the Console window.
@@ -835,32 +1068,9 @@ namespace nslib {
         Console(Console& other) = delete;  // don't allow cloning
         void operator=(const Console&) = delete;  // don't allow assigning
 
-        ~Console() override {
-            std::lock_guard<std::mutex> gm(_globalMutex);
-        }
-
         /** Get the singleton Console instance. */
         static Console* get() {
-            std::lock_guard<std::mutex> gm(_globalMutex);
-            if ( _global == nullptr ) {
-                _global = new Console();
-                _mainPID = std::make_optional(std::this_thread::get_id());
-                return _global;
-            }
-
-            auto threadId = std::this_thread::get_id();
-            if ( threadId != *_mainPID ) {
-                auto iter = _threadCopies.find(threadId);
-                if ( iter != _threadCopies.end() ) {
-                    return iter->second;
-                }
-
-                auto threadInst = new Console();  // FIXME: copy settings
-                _threadCopies[threadId] = threadInst;
-                return threadInst;
-            }
-
-            return _global;
+            return ConsoleService::getConsole();
         }
 
         /** Output a string at the given verbosity. Satisfies ILogTarget. */
@@ -881,7 +1091,6 @@ namespace nslib {
 
         /** Set the maximum verbosity that should be displayed. */
         Console* setVerbosity(Verbosity v) {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _verb = v;
             return this;
         }
@@ -901,8 +1110,6 @@ namespace nslib {
             if ( color == ANSIColor::CYAN ) output(ANSI_BACKGROUND_CYAN);
             if ( color == ANSIColor::WHITE ) output(ANSI_BACKGROUND_WHITE);
             if ( color == ANSIColor::RESET ) output(ANSI_RESET_BACKGROUND_COLOR);
-
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_BACKGROUND_COLOR);
             });
@@ -921,8 +1128,6 @@ namespace nslib {
             if ( color == ANSIColor::CYAN ) output(ANSI_FOREGROUND_CYAN);
             if ( color == ANSIColor::WHITE ) output(ANSI_FOREGROUND_WHITE);
             if ( color == ANSIColor::RESET ) output(ANSI_RESET_FOREGROUND_COLOR);
-
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_FOREGROUND_COLOR);
             });
@@ -932,8 +1137,6 @@ namespace nslib {
         /** Start bolding text. */
         Console* bold() {
             output(ANSI_BOLD);
-
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_BOLD);
             });
@@ -943,8 +1146,6 @@ namespace nslib {
         /** Start underlining text. */
         Console* underline() {
             output(ANSI_UNDERLINE);
-
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_UNDERLINE);
             });
@@ -954,8 +1155,6 @@ namespace nslib {
         /** Invert background/foreground colors. */
         Console* invert() {
             output(ANSI_INVERSE);
-
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_INVERSE);
             });
@@ -964,27 +1163,19 @@ namespace nslib {
 
         /** Reset the last applied modifier. */
         Console* end() {
-            std::unique_lock<std::mutex> gm(_globalMutex);
             if ( !_cleanup.empty() ) {
-                gm.unlock();
                 _cleanup.top()(this);
-                gm.lock();
                 _cleanup.pop();
             }
-            gm.unlock();
             return this;
         }
 
         /** Reset all applied modifiers. */
         Console* reset() {
-            std::unique_lock<std::mutex> gm(_globalMutex);
             while ( !_cleanup.empty() ) {
-                gm.unlock();
                 _cleanup.top()(this);
-                gm.lock();
                 _cleanup.pop();
             }
-            gm.unlock();
             output(ANSI_RESET_ALL);
             return this;
         }
@@ -997,63 +1188,100 @@ namespace nslib {
 
         /** Output an error message. */
         Console* error(const std::string& p) {
-            return only(Verbosity::ERROR)
+            only(Verbosity::ERROR)
                 ->color(ANSIColor::RED)
-                ->print("   error ", true)
-                ->output(p + "\n")
+                ->print("   error ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
                 ->end();
         }
 
         /** Output an error message. */
         Console* success(const std::string& p) {
-            return only(Verbosity::INFO)
-                    ->color(ANSIColor::GREEN)
-                    ->print(" success ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::INFO)
+                ->color(ANSIColor::GREEN)
+                ->print(" success ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output a warning message. */
         Console* warn(const std::string& p) {
-            return only(Verbosity::WARNING)
-                    ->color(ANSIColor::YELLOW)
-                    ->print(" warning ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::WARNING)
+                ->color(ANSIColor::YELLOW)
+                ->print(" warning ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output an informational message. */
         Console* info(const std::string& p) {
-            return only(Verbosity::INFO)
-                    ->color(ANSIColor::BLUE)
-                    ->print("    info ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::INFO)
+                ->color(ANSIColor::BLUE)
+                ->print("    info ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output a debugging message. */
         Console* debug(const std::string& p) {
-            return only(Verbosity::DEBUG)
-                    ->color(ANSIColor::MAGENTA)->print("   debug ")->end()
-                    ->output(p + "\n")->end();
+            only(Verbosity::DEBUG)
+                ->color(ANSIColor::MAGENTA)
+                ->print("   debug ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output a verbose message. */
         Console* verbose(const std::string& p) {
-            return only(Verbosity::VERBOSE)
-                    ->color(ANSIColor::CYAN)
-                    ->print(" verbose ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::VERBOSE)
+                ->color(ANSIColor::CYAN)
+                ->print(" verbose ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output a trace message. */
         Console* trace(const std::string& p) {
-            return only(Verbosity::TRACE)
-                    ->color(ANSIColor::GREY)
-                    ->print("   trace ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::TRACE)
+                ->color(ANSIColor::GREY)
+                ->print("   trace ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Print a string to the default output, without a newline. */
@@ -1084,9 +1312,7 @@ namespace nslib {
 
         /** Show a progress bar. `value` should be a decimal percentage from 0 to 1. */
         Console* progress(double value) {
-            std::unique_lock<std::mutex> gm(_globalMutex);
             std::size_t width = _vpWidth - 5;
-            gm.unlock();
 
             std::size_t filled = static_cast<int>(static_cast<double>(width) * value);
             std::size_t percent = static_cast<int>(100 * value);
@@ -1108,7 +1334,6 @@ namespace nslib {
 
         /** Flush pending output to the streams. */
         Console* flush() {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             if ( !_isCapturing ) {
                 std::cout.flush();
                 std::cerr.flush();
@@ -1118,10 +1343,8 @@ namespace nslib {
 
         /** Temporarily mute output. */
         Console* mute() {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _muteStack += 1;
             _cleanup.emplace([](Console* c) {
-                std::lock_guard<std::mutex> cgm(_globalMutex);
                 c->_muteStack -= 1;
             });
             return this;
@@ -1129,10 +1352,8 @@ namespace nslib {
 
         /** Temporarily limit output to the given verbosity. */
         Console* only(Verbosity v) {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _verbLimits.push(v);
             _cleanup.emplace([](Console* c) {
-                std::lock_guard<std::mutex> cgm(_globalMutex);
                 c->_verbLimits.pop();
             });
             return this;
@@ -1145,7 +1366,6 @@ namespace nslib {
 
         /** Expand the width of the viewport to match the user's window. */
         Console* grow() {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             struct winsize w{};
             ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
             _vpWidth = w.ws_col;
@@ -1154,14 +1374,12 @@ namespace nslib {
 
         /** Temporarily capture output to an internal buffer. */
         Console* capture() {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _isCapturing = true;
             return this;
         }
 
         /** Stop capturing output and return the contents of the internal buffer. */
         std::string endCapture() {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             _isCapturing = false;
             auto s = _capture.str();
             _capture = std::stringstream();
@@ -1184,30 +1402,24 @@ namespace nslib {
                 ->color(ANSIColor::GREEN)->println("    " + message)
                 ->print("    > ");
 
-            std::unique_lock<std::mutex> gm(_globalMutex);
             std::cin >> std::noskipws;
 
             std::string check;
             check = std::cin.peek();
-            gm.unlock();
 
             println();
             if ( check == "\n" ) {
-                gm.lock();
                 std::string dump;
                 std::getline(std::cin, dump);
-                gm.unlock();
                 return "";
             }
 
-            gm.lock();
             std::string input;
             std::cin >> input;
 
             std::string dump;
             std::getline(std::cin, dump);
 
-            gm.unlock();
             return input;
         }
 
@@ -1217,30 +1429,24 @@ namespace nslib {
                     ->print(" [")->color(ANSIColor::YELLOW)->print(def)->reset()->println("]")
                     ->print("    > ");
 
-            std::unique_lock<std::mutex> gm(_globalMutex);
             std::cin >> std::noskipws;
 
             std::string check;
             check = std::cin.peek();
-            gm.unlock();
 
             println();
             if ( check == "\n" ) {
-                gm.lock();
                 std::string dump;
                 std::getline(std::cin, dump);
-                gm.unlock();
                 return def;
             }
 
-            gm.lock();
             std::string input;
             std::cin >> input;
 
             std::string dump;
             std::getline(std::cin, dump);
 
-            gm.unlock();
             return input;
         }
 
@@ -1385,7 +1591,6 @@ namespace nslib {
         std::string UNI_BLOCK_FULL = "█";
 
     protected:
-        static std::mutex _globalMutex;
         static std::optional<std::thread::id> _mainPID;
         static std::map<std::thread::id, Console*> _threadCopies;
 
@@ -1417,20 +1622,15 @@ namespace nslib {
 
         /** Output a string to the default stream. */
         Console* output(const std::string& v) {
-            std::unique_lock<std::mutex> gm(_globalMutex);
             if ( _muteStack > 0 ) return this;
             if ( !_verbLimits.empty() && _verbLimits.top() < _verb ) return this;
-            gm.unlock();
             auto& stream = getStreamFor(Verbosity::INFO);
-            gm.lock();
             stream << v;
-            gm.unlock();
             return this;
         }
 
         /** Returns true if the given verbosity should be displayed. */
         bool shouldOutput(Verbosity v) const {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             if ( _muteStack > 0 ) return false;
             if ( !_verbLimits.empty() ) return v >= _verbLimits.top();
             return v >= _verb;
@@ -1438,22 +1638,21 @@ namespace nslib {
 
         /** Get the stream used to show messages of the given verbosity. */
         std::ostream& getStreamFor(Verbosity verb) {
-            std::lock_guard<std::mutex> gm(_globalMutex);
             if ( _isCapturing ) return _capture;
             if ( verb == Verbosity::ERROR || verb == Verbosity::WARNING ) return std::cerr;
             return std::cout;
         }
+
+        friend class ConsoleService;
     };
 
     class IUsesConsole {
     public:
         virtual ~IUsesConsole() = default;
 
-        IUsesConsole() {
-            console = Console::get();
-        }
+        IUsesConsole() : console(ConsoleService::get()) {}
     protected:
-        Console* console;
+        IContextualRef<Console> console;
     };
 
     /** Get a UUIDv4-compatible string. */

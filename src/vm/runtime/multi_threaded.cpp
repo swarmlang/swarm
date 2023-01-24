@@ -57,12 +57,41 @@ namespace swarmc::Runtime::MultiThreaded {
     }
 
     void Queue::push(IQueueJob* job) {
+        std::unique_lock<std::mutex> threadLock(_threadMutex);
+
         auto qlock = new std::lock_guard<std::mutex>(_qtex);
-        if ( SwarmThread::moreThreads() ) {
-            std::cout << "Create thread!\n";
+        if ( _threads.size() < Configuration::MAX_THREADS ) {
+            std::cout << "Create thread! (host tid: " + Framework::getThreadDisplay() + ")\n";
             auto vm = _vm->copy();
+            auto scope = job->getScope()->copy();
+            auto state = job->getState()->copy();
+            auto call = job->getCall();
+
+            auto ctx = Framework::newThread([vm, scope, state, call] () {
+                std::cout << "thread execution! (host tid: " + s(Framework::context()->getID()) + ")\n";
+
+                Framework::context()
+                    ->onShutdown([vm]() {
+                        std::cout << "Cleaning up thread: " << Framework::context()->getID() << "\n";
+                        vm->cleanup();
+                        delete vm;
+                    });
+
+                Console::get()->debug("Got VM from queue: " + vm->toString());
+                std::cout << "Pre-restore\n";
+                vm->restore(scope, state);
+                std::cout << "post-restore\n";
+                vm->executeCall(call);
+                std::cout << "post-execute\n";
+
+                return 0;
+            });
+
+            _threads.push_back(ctx);
+            threadLock.unlock();
+
 //            SwarmThread::addThread(job->id(), new std::thread(SwarmThread::execute, vm, job));
-            SwarmThread::addThread(job->id(), new std::thread(SwarmThread::execute, vm, job, job->getScope()->copy(), job->getState()->copy(), job->getCall()));
+//            SwarmThread::addThread(job->id(), new std::thread(SwarmThread::execute, vm, job, job->getScope()->copy(), job->getState()->copy(), job->getCall()));
 //            SwarmThread::addThread(job->id(), nullptr);
 //            SwarmThread::execute(vm, job);
 
@@ -87,15 +116,16 @@ namespace swarmc::Runtime::MultiThreaded {
 
     void Queue::tick() {
         std::cout << "Tick!\n";
-        std::vector<size_t> finishedThreads;
-        for ( auto t : SwarmThread::getThreads() ) {
-            if ( SwarmThread::isFinished(t.first) ) {
-                finishedThreads.push_back(t.first);
+
+        Framework::tickThreads();
+
+        std::unique_lock<std::mutex> threadLock(_threadMutex);
+        std::unique_lock<std::mutex> queueLock(_qtex);
+        for ( auto iter = _threads.begin(); iter != _threads.end(); ++iter ) {
+            if ( (*iter)->hasExited() ) {
+                std::cout << "Thread removed: " << (*iter)->getID() << "\n";
+                _threads.erase(iter);
             }
-        }
-        for ( auto i : finishedThreads ) {
-            std::cout << "Thread Removed: " << i << "\n";
-            SwarmThread::cleanThread(i);
         }
     }
 

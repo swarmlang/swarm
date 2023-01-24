@@ -13,7 +13,7 @@ class SwarmThread {
 public:
 
     static void execute(VirtualMachine* vm, IQueueJob* job, ScopeFrame* scope, State* state, IFunctionCall* call) {
-        std::cout << "thread execution!\n";
+        std::cout << "thread execution! (host tid: " + Framework::getThreadDisplay() + ")\n";
 
         // Increment thread counter
         auto lock = new std::lock_guard<std::mutex>(CountMutex);
@@ -22,7 +22,7 @@ public:
         delete lock;
 
         // execute
-        //Console::get()->debug("Got VM from queue: " + vm->toString());
+        Console::get()->debug("Got VM from queue: " + vm->toString());
         std::cout << "Pre-restore\n";
         vm->restore(scope, state);
         std::cout << "post-restore\n";
