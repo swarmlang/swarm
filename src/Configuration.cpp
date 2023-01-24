@@ -28,4 +28,4 @@ std::map<std::string, std::string> Configuration::QUEUE_FILTERS;
 std::string Configuration::DEBUG_SERVER_DATA_PATH = "/tmp/swarm-debug.sock";
 std::string Configuration::DEBUG_SERVER_CMD_PATH = "/tmp/swarm-command.sock";
 
-size_t Configuration::MAX_THREADS = 4;
+size_t Configuration::MAX_THREADS = 1;

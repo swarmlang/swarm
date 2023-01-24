@@ -30,6 +30,7 @@ beginfn f:PUSH_INC p:VOID
 	pushcall f:INC
 	pushcall f:INC
 	pushcall f:INC
+	drain
 return
 
 call f:PUSH_INC

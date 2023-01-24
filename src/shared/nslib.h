@@ -51,6 +51,7 @@
 #include <sys/stat.h>
 #include <sys/shm.h>
 #include <execinfo.h>
+#include <mutex>
 #include NSLIB_BINN_H_PATH
 
 #define NSLIB_SERIAL_TAG 0
@@ -834,10 +835,29 @@ namespace nslib {
         Console(Console& other) = delete;  // don't allow cloning
         void operator=(const Console&) = delete;  // don't allow assigning
 
+        ~Console() override {
+            std::lock_guard<std::mutex> gm(_globalMutex);
+        }
+
         /** Get the singleton Console instance. */
         static Console* get() {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             if ( _global == nullptr ) {
                 _global = new Console();
+                _mainPID = std::make_optional(std::this_thread::get_id());
+                return _global;
+            }
+
+            auto threadId = std::this_thread::get_id();
+            if ( threadId != *_mainPID ) {
+                auto iter = _threadCopies.find(threadId);
+                if ( iter != _threadCopies.end() ) {
+                    return iter->second;
+                }
+
+                auto threadInst = new Console();  // FIXME: copy settings
+                _threadCopies[threadId] = threadInst;
+                return threadInst;
             }
 
             return _global;
@@ -861,6 +881,7 @@ namespace nslib {
 
         /** Set the maximum verbosity that should be displayed. */
         Console* setVerbosity(Verbosity v) {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _verb = v;
             return this;
         }
@@ -880,6 +901,8 @@ namespace nslib {
             if ( color == ANSIColor::CYAN ) output(ANSI_BACKGROUND_CYAN);
             if ( color == ANSIColor::WHITE ) output(ANSI_BACKGROUND_WHITE);
             if ( color == ANSIColor::RESET ) output(ANSI_RESET_BACKGROUND_COLOR);
+
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_BACKGROUND_COLOR);
             });
@@ -898,6 +921,8 @@ namespace nslib {
             if ( color == ANSIColor::CYAN ) output(ANSI_FOREGROUND_CYAN);
             if ( color == ANSIColor::WHITE ) output(ANSI_FOREGROUND_WHITE);
             if ( color == ANSIColor::RESET ) output(ANSI_RESET_FOREGROUND_COLOR);
+
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_FOREGROUND_COLOR);
             });
@@ -907,6 +932,8 @@ namespace nslib {
         /** Start bolding text. */
         Console* bold() {
             output(ANSI_BOLD);
+
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_BOLD);
             });
@@ -916,6 +943,8 @@ namespace nslib {
         /** Start underlining text. */
         Console* underline() {
             output(ANSI_UNDERLINE);
+
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_UNDERLINE);
             });
@@ -925,6 +954,8 @@ namespace nslib {
         /** Invert background/foreground colors. */
         Console* invert() {
             output(ANSI_INVERSE);
+
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _cleanup.emplace([](Console* c) {
                 c->output(c->ANSI_RESET_INVERSE);
             });
@@ -933,16 +964,27 @@ namespace nslib {
 
         /** Reset the last applied modifier. */
         Console* end() {
+            std::unique_lock<std::mutex> gm(_globalMutex);
             if ( !_cleanup.empty() ) {
+                gm.unlock();
                 _cleanup.top()(this);
+                gm.lock();
                 _cleanup.pop();
             }
+            gm.unlock();
             return this;
         }
 
         /** Reset all applied modifiers. */
         Console* reset() {
-            while ( !_cleanup.empty() ) end();
+            std::unique_lock<std::mutex> gm(_globalMutex);
+            while ( !_cleanup.empty() ) {
+                gm.unlock();
+                _cleanup.top()(this);
+                gm.lock();
+                _cleanup.pop();
+            }
+            gm.unlock();
             output(ANSI_RESET_ALL);
             return this;
         }
@@ -1042,7 +1084,10 @@ namespace nslib {
 
         /** Show a progress bar. `value` should be a decimal percentage from 0 to 1. */
         Console* progress(double value) {
+            std::unique_lock<std::mutex> gm(_globalMutex);
             std::size_t width = _vpWidth - 5;
+            gm.unlock();
+
             std::size_t filled = static_cast<int>(static_cast<double>(width) * value);
             std::size_t percent = static_cast<int>(100 * value);
             if ( value >= 1 ) {
@@ -1063,6 +1108,7 @@ namespace nslib {
 
         /** Flush pending output to the streams. */
         Console* flush() {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             if ( !_isCapturing ) {
                 std::cout.flush();
                 std::cerr.flush();
@@ -1072,8 +1118,10 @@ namespace nslib {
 
         /** Temporarily mute output. */
         Console* mute() {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _muteStack += 1;
             _cleanup.emplace([](Console* c) {
+                std::lock_guard<std::mutex> cgm(_globalMutex);
                 c->_muteStack -= 1;
             });
             return this;
@@ -1081,8 +1129,10 @@ namespace nslib {
 
         /** Temporarily limit output to the given verbosity. */
         Console* only(Verbosity v) {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _verbLimits.push(v);
             _cleanup.emplace([](Console* c) {
+                std::lock_guard<std::mutex> cgm(_globalMutex);
                 c->_verbLimits.pop();
             });
             return this;
@@ -1095,6 +1145,7 @@ namespace nslib {
 
         /** Expand the width of the viewport to match the user's window. */
         Console* grow() {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             struct winsize w{};
             ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
             _vpWidth = w.ws_col;
@@ -1103,12 +1154,14 @@ namespace nslib {
 
         /** Temporarily capture output to an internal buffer. */
         Console* capture() {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _isCapturing = true;
             return this;
         }
 
         /** Stop capturing output and return the contents of the internal buffer. */
         std::string endCapture() {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             _isCapturing = false;
             auto s = _capture.str();
             _capture = std::stringstream();
@@ -1131,24 +1184,30 @@ namespace nslib {
                 ->color(ANSIColor::GREEN)->println("    " + message)
                 ->print("    > ");
 
+            std::unique_lock<std::mutex> gm(_globalMutex);
             std::cin >> std::noskipws;
 
             std::string check;
             check = std::cin.peek();
+            gm.unlock();
 
             println();
             if ( check == "\n" ) {
+                gm.lock();
                 std::string dump;
                 std::getline(std::cin, dump);
+                gm.unlock();
                 return "";
             }
 
+            gm.lock();
             std::string input;
             std::cin >> input;
 
             std::string dump;
             std::getline(std::cin, dump);
 
+            gm.unlock();
             return input;
         }
 
@@ -1158,24 +1217,30 @@ namespace nslib {
                     ->print(" [")->color(ANSIColor::YELLOW)->print(def)->reset()->println("]")
                     ->print("    > ");
 
+            std::unique_lock<std::mutex> gm(_globalMutex);
             std::cin >> std::noskipws;
 
             std::string check;
             check = std::cin.peek();
+            gm.unlock();
 
             println();
             if ( check == "\n" ) {
+                gm.lock();
                 std::string dump;
                 std::getline(std::cin, dump);
+                gm.unlock();
                 return def;
             }
 
+            gm.lock();
             std::string input;
             std::cin >> input;
 
             std::string dump;
             std::getline(std::cin, dump);
 
+            gm.unlock();
             return input;
         }
 
@@ -1320,6 +1385,10 @@ namespace nslib {
         std::string UNI_BLOCK_FULL = "█";
 
     protected:
+        static std::mutex _globalMutex;
+        static std::optional<std::thread::id> _mainPID;
+        static std::map<std::thread::id, Console*> _threadCopies;
+
         /** The global console instance. */
         static Console* _global;
 
@@ -1348,15 +1417,20 @@ namespace nslib {
 
         /** Output a string to the default stream. */
         Console* output(const std::string& v) {
+            std::unique_lock<std::mutex> gm(_globalMutex);
             if ( _muteStack > 0 ) return this;
             if ( !_verbLimits.empty() && _verbLimits.top() < _verb ) return this;
+            gm.unlock();
             auto& stream = getStreamFor(Verbosity::INFO);
+            gm.lock();
             stream << v;
+            gm.unlock();
             return this;
         }
 
         /** Returns true if the given verbosity should be displayed. */
         bool shouldOutput(Verbosity v) const {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             if ( _muteStack > 0 ) return false;
             if ( !_verbLimits.empty() ) return v >= _verbLimits.top();
             return v >= _verb;
@@ -1364,6 +1438,7 @@ namespace nslib {
 
         /** Get the stream used to show messages of the given verbosity. */
         std::ostream& getStreamFor(Verbosity verb) {
+            std::lock_guard<std::mutex> gm(_globalMutex);
             if ( _isCapturing ) return _capture;
             if ( verb == Verbosity::ERROR || verb == Verbosity::WARNING ) return std::cerr;
             return std::cout;

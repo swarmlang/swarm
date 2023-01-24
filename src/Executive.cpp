@@ -91,7 +91,7 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
-    delete console;
+//    delete console;
     delete _input;
     Framework::shutdown();
     return result;

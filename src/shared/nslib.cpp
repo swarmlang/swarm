@@ -4,6 +4,9 @@ namespace nslib {
 
     bool Framework::_booted = false;
     std::vector<std::function<void()>> Framework::_shutdownCallbacks;
+    std::mutex Console::_globalMutex;
+    std::optional<std::thread::id> Console::_mainPID = std::nullopt;
+    std::map<std::thread::id, Console*> Console::_threadCopies;
     Console* Console::_global = nullptr;
 
     void Framework::boot() {

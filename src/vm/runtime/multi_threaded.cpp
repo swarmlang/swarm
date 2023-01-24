@@ -47,7 +47,7 @@ namespace swarmc::Runtime::MultiThreaded {
         freeref(_scope);
         freeref(_vmState);
     }
-    
+
     bool Queue::shouldHandle(IFunctionCall* call) {
         return true;
     }
@@ -61,19 +61,20 @@ namespace swarmc::Runtime::MultiThreaded {
         if ( SwarmThread::moreThreads() ) {
             std::cout << "Create thread!\n";
             auto vm = _vm->copy();
-            //SwarmThread::addThread(job->id(), new std::thread(SwarmThread::execute, vm, job));
-            SwarmThread::addThread(job->id(), nullptr);
-            SwarmThread::execute(vm, job);
-            
-            vm->cleanup();
-            delete vm;
+//            SwarmThread::addThread(job->id(), new std::thread(SwarmThread::execute, vm, job));
+            SwarmThread::addThread(job->id(), new std::thread(SwarmThread::execute, vm, job, job->getScope()->copy(), job->getState()->copy(), job->getCall()));
+//            SwarmThread::addThread(job->id(), nullptr);
+//            SwarmThread::execute(vm, job);
+
+//            vm->cleanup();
+//            delete vm;
         } else {
             std::cout << "Push to queue!\n";
             _queue.push(job);
         }
         delete qlock;
     }
-    
+
     IQueueJob* Queue::pop() {
         std::cout << "Popping job: " << _queue.front()->toString() << "\n";
         auto lock = new std::lock_guard<std::mutex>(_qtex);

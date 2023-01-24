@@ -33,6 +33,8 @@ namespace swarmc::Runtime::MultiThreaded {
         IStorageLock* acquire(ISA::LocationReference*) override;
 
         void clear() override;
+
+        bool shouldLockAccesses() const override { return true; }
     protected:
         std::map<std::string, std::mutex> _mutexes;
 
