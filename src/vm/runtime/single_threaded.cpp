@@ -1,4 +1,5 @@
 #include <cassert>
+#include "../../errors/InvalidStoreLocationError.h"
 #include "single_threaded.h"
 #include "../isa_meta.h"
 #include "../VirtualMachine.h"
@@ -13,7 +14,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
     ISA::Reference* StorageInterface::load(ISA::LocationReference* loc) {
         auto iter = _map.find(loc->fqName());
-        if ( iter == _map.end() ) return nullptr;
+        if ( iter == _map.end() ) throw Errors::InvalidStoreLocationError(s(loc), s(this));
         return iter->second;
     }
 

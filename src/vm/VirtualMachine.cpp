@@ -56,8 +56,12 @@ namespace swarmc::Runtime {
     Reference* VirtualMachine::loadFromStore(LocationReference* loc) {
         auto scopeLoc = _scope->map(loc);
         auto store = getStore(scopeLoc);
-        if ( !store->has(scopeLoc) ) {
-            throw Errors::SwarmError("Attempted to load undefined location (" + scopeLoc->toString() + ") from store (" + store->toString() + ")");
+
+        // FIXME: smarter locking (e.g. region awareness, atomic operation exemptions, &c.)
+        if ( store->shouldLockAccesses() && lock(loc) ) {
+            NS_DEFER()([loc, this]() {
+                unlock(loc);
+            });
         }
 
         return store->load(scopeLoc);
@@ -177,7 +181,15 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::store(LocationReference* loc, Reference* ref) {
         auto scopeLoc = _scope->map(loc);
-        getStore(scopeLoc)->store(scopeLoc, ref);
+        auto store = getStore(scopeLoc);
+
+        if ( store->shouldLockAccesses() && lock(loc) ) {
+            NS_DEFER()([loc, this]() {
+                unlock(loc);
+            });
+        }
+
+        store->store(scopeLoc, ref);
     }
 
     bool VirtualMachine::hasLock(LocationReference* loc) {
@@ -186,10 +198,17 @@ namespace swarmc::Runtime {
         });
     }
 
-    void VirtualMachine::lock(LocationReference* loc) {
+    /**
+     * Acquire a lock for the given location.
+     * Returns true if the lock was acquired for this operation,
+     * false if it was already held.
+     * @param loc
+     * @return
+     */
+    bool VirtualMachine::lock(LocationReference* loc) {
         if ( hasLock(loc) ) {
             logger->warn("Attempted to acquire lock that is already held by the requesting control: " + loc->toString());
-            return;
+            return false;
         }
 
         auto scopeLoc = _scope->map(loc);
@@ -202,7 +221,7 @@ namespace swarmc::Runtime {
             }
 
             _locks.push_back(useref(lock));
-            return;
+            return true;
         }
 
         throw Errors::RuntimeError(

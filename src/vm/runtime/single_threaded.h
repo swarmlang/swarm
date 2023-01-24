@@ -93,6 +93,8 @@ namespace swarmc::Runtime::SingleThreaded {
 
         IStorageInterface* copy() override;
 
+        [[nodiscard]] bool shouldLockAccesses() const override { return false; }
+
         [[nodiscard]] std::string toString() const override {
             return "SingleThreaded::StorageInterface<#loc: " + std::to_string(_map.size()) + ">";
         }
