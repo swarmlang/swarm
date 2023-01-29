@@ -121,10 +121,15 @@ namespace swarmc::Runtime::MultiThreaded {
 
         std::unique_lock<std::mutex> threadLock(_threadMutex);
         std::unique_lock<std::mutex> queueLock(_qtex);
-        for ( auto iter = _threads.begin(); iter != _threads.end(); ++iter ) {
+        std::cout << "# threads to tick: " << _threads.size() << "\n";
+        for ( auto iter = _threads.begin(); iter != _threads.end(); ) {
+            std::cout << "Tick Iter!\n";
             if ( (*iter)->hasExited() ) {
                 std::cout << "Thread removed: " << (*iter)->getID() << "\n";
-                _threads.erase(iter);
+                iter = _threads.erase(iter);
+                delete *iter;
+            } else {
+                ++iter;
             }
         }
     }
