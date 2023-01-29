@@ -1655,6 +1655,28 @@ namespace nslib {
         IContextualRef<Console> console;
     };
 
+
+    class ConsoleTarget : public ILogTarget, public IUsesConsole {
+    public:
+        explicit ConsoleTarget() = default;
+
+        void output(Verbosity v, std::string s) override {
+            if ( v == Verbosity::SUCCESS ) console->success(s);
+            if ( v == Verbosity::ERROR ) console->error(s);
+            if ( v == Verbosity::WARNING ) console->warn(s);
+            if ( v == Verbosity::INFO ) console->info(s);
+            if ( v == Verbosity::DEBUG ) console->debug(s);
+            if ( v == Verbosity::VERBOSE ) console->verbose(s);
+            if ( v == Verbosity::TRACE ) console->trace(s);
+            console->println(" ??????? " + s);
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "ConsoleTarget<>";
+        }
+    };
+
+
     /** Get a UUIDv4-compatible string. */
     inline std::string uuid() {
         if ( priv::USE_DETERMINISTIC_UUIDS ) {

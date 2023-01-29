@@ -39,3 +39,5 @@ build*
 swarmc_debug
 run_tests
 vgcore.*
+
+core-swarmc*

@@ -65,7 +65,7 @@ namespace nslib {
                 std::chrono::system_clock::now().time_since_epoch()).count();
         priv::generator.seed(epoch);
 
-        Logging::get()->addTarget(Console::get());
+        Logging::get()->addTarget(new ConsoleTarget);
 
         _booted = true;
     }
