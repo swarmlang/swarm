@@ -119,6 +119,8 @@ namespace swarmc::Runtime::MultiThreaded {
 
         Framework::tickThreads();
 
+        // FIXME: this needs to remove & mark jobs as completed once their threads exit
+
         std::unique_lock<std::mutex> threadLock(_threadMutex);
         std::unique_lock<std::mutex> queueLock(_qtex);
         std::cout << "# threads to tick: " << _threads.size() << "\n";
