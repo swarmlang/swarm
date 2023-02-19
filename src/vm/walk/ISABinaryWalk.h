@@ -91,7 +91,7 @@ namespace swarmc::ISA {
 
         binn* walkMod(Mod* mod) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) mod->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) mod->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(mod->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(mod->second(), _vm));
             return obj;
@@ -99,14 +99,14 @@ namespace swarmc::ISA {
 
         binn* walkNegative(Negative* neg) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) neg->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) neg->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(neg->first(), _vm));
             return obj;
         }
 
         binn* walkGreaterThan(GreaterThan* gt) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) gt->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) gt->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(gt->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(gt->second(), _vm));
             return obj;
@@ -114,7 +114,7 @@ namespace swarmc::ISA {
 
         binn* walkGreaterThanOrEqual(GreaterThanOrEqual* gte) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) gte->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) gte->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(gte->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(gte->second(), _vm));
             return obj;
@@ -122,7 +122,7 @@ namespace swarmc::ISA {
 
         binn* walkLessThan(LessThan* lt) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) lt->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) lt->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(lt->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(lt->second(), _vm));
             return obj;
@@ -130,7 +130,7 @@ namespace swarmc::ISA {
 
         binn* walkLessThanOrEqual(LessThanOrEqual* lte) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) lte->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) lte->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(lte->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(lte->second(), _vm));
             return obj;
@@ -138,7 +138,7 @@ namespace swarmc::ISA {
 
         binn* walkAnd(And* a) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) a->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) a->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(a->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(a->second(), _vm));
             return obj;
@@ -146,7 +146,7 @@ namespace swarmc::ISA {
 
         binn* walkOr(Or* o) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) o->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) o->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(o->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(o->second(), _vm));
             return obj;
@@ -154,7 +154,7 @@ namespace swarmc::ISA {
 
         binn* walkXor(Xor* x) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) x->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) x->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(x->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(x->second(), _vm));
             return obj;
@@ -162,7 +162,7 @@ namespace swarmc::ISA {
 
         binn* walkNand(Nand* n) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) n->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) n->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(n->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(n->second(), _vm));
             return obj;
@@ -170,7 +170,7 @@ namespace swarmc::ISA {
 
         binn* walkNor(Nor* n) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) n->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) n->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(n->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(n->second(), _vm));
             return obj;
@@ -178,14 +178,14 @@ namespace swarmc::ISA {
 
         binn* walkNot(Not* n) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) n->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) n->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(n->first(), _vm));
             return obj;
         }
 
         binn* walkWhile(While* w) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) w->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) w->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(w->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(w->second(), _vm));
             return obj;
@@ -193,7 +193,7 @@ namespace swarmc::ISA {
 
         binn* walkWith(With* w) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) w->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) w->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(w->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(w->second(), _vm));
             return obj;
@@ -201,14 +201,14 @@ namespace swarmc::ISA {
 
         binn* walkEnumInit(EnumInit* ei) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ei->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ei->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ei->first(), _vm));
             return obj;
         }
 
         binn* walkEnumAppend(EnumAppend* ea) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ea->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ea->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ea->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ea->second(), _vm));
             return obj;
@@ -216,7 +216,7 @@ namespace swarmc::ISA {
 
         binn* walkEnumPrepend(EnumPrepend* ep) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ep->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ep->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ep->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ep->second(), _vm));
             return obj;
@@ -224,14 +224,14 @@ namespace swarmc::ISA {
 
         binn* walkEnumLength(EnumLength* el) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) el->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) el->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(el->first(), _vm));
             return obj;
         }
 
         binn* walkEnumGet(EnumGet* eg) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) eg->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) eg->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(eg->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(eg->second(), _vm));
             return obj;
@@ -239,7 +239,7 @@ namespace swarmc::ISA {
 
         binn* walkEnumSet(EnumSet* es) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) es->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) es->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(es->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(es->second(), _vm));
             binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(es->third(), _vm));
@@ -248,7 +248,7 @@ namespace swarmc::ISA {
 
         binn* walkEnumerate(Enumerate* e) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) e->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) e->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(e->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(e->second(), _vm));
             binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(e->third(), _vm));
@@ -257,7 +257,7 @@ namespace swarmc::ISA {
 
         binn* walkBeginFunction(BeginFunction* bf) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) bf->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) bf->tag());
             binn_map_set_str(obj, BC_NAME, strdup(bf->first()->name().c_str()));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(bf->second(), _vm));
             binn_map_set_bool(obj, BC_ISPURE, bf->isPure());
@@ -266,7 +266,7 @@ namespace swarmc::ISA {
 
         binn* walkFunctionParam(FunctionParam* fp) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) fp->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) fp->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(fp->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(fp->second(), _vm));
             return obj;
@@ -274,20 +274,20 @@ namespace swarmc::ISA {
 
         binn* walkReturn0(Return0* r0) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) r0->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) r0->tag());
             return obj;
         }
 
         binn* walkReturn1(Return1* r1) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) r1->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) r1->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(r1->first(), _vm));
             return obj;
         }
 
         binn* walkCurry(Curry* c) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) c->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) c->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(c->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(c->second(), _vm));
             return obj;
@@ -295,14 +295,14 @@ namespace swarmc::ISA {
 
         binn* walkCall0(Call0* c0) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) c0->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) c0->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(c0->first(), _vm));
             return obj;
         }
 
         binn* walkCall1(Call1* c1) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) c1->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) c1->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(c1->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(c1->second(), _vm));
             return obj;
@@ -310,7 +310,7 @@ namespace swarmc::ISA {
 
         binn* walkCallIf0(CallIf0* ci0) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ci0->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ci0->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ci0->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ci0->second(), _vm));
             return obj;
@@ -318,7 +318,7 @@ namespace swarmc::ISA {
 
         binn* walkCallIf1(CallIf1* ci1) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ci1->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ci1->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ci1->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ci1->second(), _vm));
             binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(ci1->third(), _vm));
@@ -327,7 +327,7 @@ namespace swarmc::ISA {
 
         binn* walkCallElse0(CallElse0* ce0) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ce0->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ce0->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ce0->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ce0->second(), _vm));
             return obj;
@@ -335,7 +335,7 @@ namespace swarmc::ISA {
 
         binn* walkCallElse1(CallElse1* ce1) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ce1->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ce1->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ce1->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ce1->second(), _vm));
             binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(ce1->third(), _vm));
@@ -344,14 +344,14 @@ namespace swarmc::ISA {
 
         binn* walkPushCall0(PushCall0* pc0) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) pc0->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) pc0->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(pc0->first(), _vm));
             return obj;
         }
 
         binn* walkPushCall1(PushCall1* pc1) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) pc1->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) pc1->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(pc1->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(pc1->second(), _vm));
             return obj;
@@ -359,7 +359,7 @@ namespace swarmc::ISA {
 
         binn* walkPushCallIf0(PushCallIf0* pci0) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) pci0->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) pci0->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(pci0->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(pci0->second(), _vm));
             return obj;
@@ -367,7 +367,7 @@ namespace swarmc::ISA {
 
         binn* walkPushCallIf1(PushCallIf1* pci1) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) pci1->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) pci1->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(pci1->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(pci1->second(), _vm));
             binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(pci1->third(), _vm));
@@ -376,7 +376,7 @@ namespace swarmc::ISA {
 
         binn* walkPushCallElse0(PushCallElse0* pce0) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) pce0->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) pce0->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(pce0->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(pce0->second(), _vm));
             return obj;
@@ -384,7 +384,7 @@ namespace swarmc::ISA {
 
         binn* walkPushCallElse1(PushCallElse1* pce1) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) pce1->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) pce1->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(pce1->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(pce1->second(), _vm));
             binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(pce1->third(), _vm));
@@ -393,26 +393,26 @@ namespace swarmc::ISA {
 
         binn* walkDrain(Drain* drain) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG,  (size_t) drain->tag());
+            binn_map_set_uint64(obj, BC_TAG,  (std::size_t) drain->tag());
             return obj;
         }
 
         binn* walkExit(Exit* exit) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG,  (size_t) exit->tag());
+            binn_map_set_uint64(obj, BC_TAG,  (std::size_t) exit->tag());
             return obj;
         }
 
         binn* walkMapInit(MapInit* mi) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) mi->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) mi->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(mi->first(), _vm));
             return obj;
         }
 
         binn* walkMapSet(MapSet* ms) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ms->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ms->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ms->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ms->second(), _vm));
             binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(ms->third(), _vm));
@@ -421,7 +421,7 @@ namespace swarmc::ISA {
 
         binn* walkMapGet(MapGet* mg) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) mg->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) mg->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(mg->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(mg->second(), _vm));
             return obj;
@@ -429,21 +429,21 @@ namespace swarmc::ISA {
 
         binn* walkMapLength(MapLength* ml) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ml->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ml->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ml->first(), _vm));
             return obj;
         }
 
         binn* walkMapKeys(MapKeys* mk) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) mk->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) mk->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(mk->first(), _vm));
             return obj;
         }
 
         binn* walkTypify(Typify* t) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) t->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) t->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(t->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(t->second(), _vm));
             return obj;
@@ -451,7 +451,7 @@ namespace swarmc::ISA {
 
         binn* walkAssignValue(AssignValue* av) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) av->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) av->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(av->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(av->second(), _vm));
             return obj;
@@ -459,7 +459,7 @@ namespace swarmc::ISA {
 
         binn* walkAssignEval(AssignEval* ae) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ae->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ae->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ae->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, walkOne(ae->second()));
             return obj;
@@ -467,21 +467,21 @@ namespace swarmc::ISA {
 
         binn* walkLock(Lock* l) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) l->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) l->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(l->first(), _vm));
             return obj;
         }
 
         binn* walkUnlock(Unlock* ul) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ul->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ul->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ul->first(), _vm));
             return obj;
         }
 
         binn* walkIsEqual(IsEqual* ie) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ie->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ie->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ie->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ie->second(), _vm));
             return obj;
@@ -489,21 +489,21 @@ namespace swarmc::ISA {
 
         binn* walkScopeOf(ScopeOf* so) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) so->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) so->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(so->first(), _vm));
             return obj;
         }
 
         binn* walkStreamInit(StreamInit* si) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) si->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) si->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(si->first(), _vm));
             return obj;
         }
 
         binn* walkStreamPush(StreamPush* sp) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) sp->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) sp->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(sp->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(sp->second(), _vm));
             return obj;
@@ -511,21 +511,21 @@ namespace swarmc::ISA {
 
         binn* walkStreamPop(StreamPop* sp) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) sp->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) sp->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(sp->first(), _vm));
             return obj;
         }
 
         binn* walkStreamClose(StreamClose* sc) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) sc->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) sc->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(sc->first(), _vm));
             return obj;
         }
 
         binn* walkStreamEmpty(StreamEmpty* se) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) se->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) se->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(se->first(), _vm));
             return obj;
         }
@@ -540,7 +540,7 @@ namespace swarmc::ISA {
 
         binn* walkStringConcat(StringConcat* sc) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) sc->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) sc->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(sc->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(sc->second(), _vm));
             return obj;
@@ -548,14 +548,14 @@ namespace swarmc::ISA {
 
         binn* walkStringLength(StringLength* sl) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) sl->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) sl->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(sl->first(), _vm));
             return obj;
         }
 
         binn* walkStringSliceFrom(StringSliceFrom* ssf) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ssf->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ssf->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ssf->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ssf->second(), _vm));
             return obj;
@@ -563,7 +563,7 @@ namespace swarmc::ISA {
 
         binn* walkStringSliceFromTo(StringSliceFromTo* ssft) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ssft->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ssft->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ssft->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ssft->second(), _vm));
             binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(ssft->third(), _vm));
@@ -572,14 +572,14 @@ namespace swarmc::ISA {
 
         binn* walkTypeOf(TypeOf* to) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) to->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) to->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(to->first(), _vm));
             return obj;
         }
 
         binn* walkIsCompatible(IsCompatible* ic) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) ic->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ic->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ic->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ic->second(), _vm));
             return obj;
@@ -587,14 +587,14 @@ namespace swarmc::ISA {
 
         binn* walkPushExceptionHandler1(PushExceptionHandler1* peh) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) peh->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) peh->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(peh->first(), _vm));
             return obj;
         }
 
         binn* walkPushExceptionHandler2(PushExceptionHandler2* peh) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) peh->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) peh->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(peh->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(peh->second(), _vm));
             return obj;
@@ -602,22 +602,67 @@ namespace swarmc::ISA {
 
         binn* walkPopExceptionHandler(PopExceptionHandler* peh) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) peh->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) peh->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(peh->first(), _vm));
             return obj;
         }
 
         binn* walkRaise(Raise* peh) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) peh->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) peh->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(peh->first(), _vm));
             return obj;
         }
 
         binn* walkResume(Resume* peh) override {
             auto obj = binn_map();
-            binn_map_set_uint64(obj, BC_TAG, (size_t) peh->tag());
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) peh->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(peh->first(), _vm));
+            return obj;
+        }
+
+        binn* walkOTypeInit(OTypeInit* oti) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) oti->tag());
+            return obj;
+        }
+
+        binn* walkOTypeProp(OTypeProp* otp) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) otp->tag());
+            binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(otp->first(), _vm));
+            binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(otp->second(), _vm));
+            binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(otp->third(), _vm));
+            return obj;
+        }
+
+        binn* walkOTypeDel(OTypeDel* otd) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) otd->tag());
+            binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(otd->first(), _vm));
+            binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(otd->second(), _vm));
+            return obj;
+        }
+
+        binn* walkOTypeGet(OTypeGet* otg) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) otg->tag());
+            binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(otg->first(), _vm));
+            binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(otg->second(), _vm));
+            return obj;
+        }
+
+        binn* walkOTypeFinalize(OTypeFinalize* otf) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) otf->tag());
+            binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(otf->first(), _vm));
+            return obj;
+        }
+
+        binn* walkOTypeSubset(OTypeSubset* ots) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ots->tag());
+            binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ots->first(), _vm));
             return obj;
         }
     };

@@ -19,6 +19,8 @@ namespace nslib {
         if ( v == swarmc::Type::Intrinsic::AMBIGUOUS ) return "Type::Intrinsic(AMBIGUOUS)";
         if ( v == swarmc::Type::Intrinsic::CONTRADICTION ) return "Type::Intrinsic(CONTRADICTION)";
         if ( v == swarmc::Type::Intrinsic::OPAQUE ) return "Type::Intrinsic(OPAQUE)";
+        if ( v == swarmc::Type::Intrinsic::OBJECT_PROTO ) return "Type::Intrinsic(OBJECT_PROTO)";
+        if ( v == swarmc::Type::Intrinsic::OBJECT ) return "Type::Intrinsic(OBJECT)";
         return "Type::Intrinsic(UNKNOWN)";
     }
 }

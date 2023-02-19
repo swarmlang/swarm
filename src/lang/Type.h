@@ -6,6 +6,7 @@
 #include <vector>
 #include "../shared/nslib.h"
 #include "../errors/InvalidPrimitiveTypeInstantiation.h"
+#include "../errors/RuntimeError.h"
 
 using namespace nslib;
 
@@ -31,6 +32,10 @@ namespace swarmc::Type {
         AMBIGUOUS,
         CONTRADICTION,
         OPAQUE,
+        OTYPE_PROTO,
+        OTYPE,
+        OBJECT_PROTO,
+        OBJECT,
     };
 }
 
@@ -57,6 +62,10 @@ namespace swarmc::Type {
             if ( intrinsic == Intrinsic::RESOURCE ) return "RESOURCE";
             if ( intrinsic == Intrinsic::AMBIGUOUS ) return "AMBIGUOUS";
             if ( intrinsic == Intrinsic::OPAQUE ) return "OPAQUE";
+            if ( intrinsic == Intrinsic::OTYPE_PROTO ) return "OTYPE_PROTO";
+            if ( intrinsic == Intrinsic::OTYPE ) return "OTYPE";
+            if ( intrinsic == Intrinsic::OBJECT_PROTO ) return "OBJECT_PROTO";
+            if ( intrinsic == Intrinsic::OBJECT ) return "OBJECT";
             return "CONTRADICTION";
         }
 
@@ -129,6 +138,8 @@ namespace swarmc::Type {
                 || intrinsic == Intrinsic::VOID
                 || intrinsic == Intrinsic::UNIT
                 || intrinsic == Intrinsic::TYPE
+                || intrinsic == Intrinsic::OTYPE_PROTO
+                || intrinsic == Intrinsic::OTYPE
             );
         }
 
@@ -155,6 +166,11 @@ namespace swarmc::Type {
         bool isAssignableTo(const Type* other) const override {
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( !Primitive::isPrimitive(other->intrinsic()) ) return false;
+            if ( intrinsic() == Intrinsic::TYPE ) {
+                return other->intrinsic() == Intrinsic::TYPE
+                    || other->intrinsic() == Intrinsic::OTYPE
+                    || other->intrinsic() == Intrinsic::OTYPE_PROTO;
+            }
             return other->intrinsic() == intrinsic();
         }
 
@@ -500,6 +516,145 @@ namespace swarmc::Type {
 
     protected:
         Type* _param;
+    };
+
+    class Object : public Type {
+    public:
+        explicit Object(Object* parent = nullptr) : _parent(useref(parent)) {}
+
+        ~Object() override {
+            freeref(_parent);
+        }
+
+        [[nodiscard]] Intrinsic intrinsic() const override {
+            if ( _final ) return Intrinsic::OBJECT;
+            return Intrinsic::OBJECT_PROTO;
+        }
+
+        [[nodiscard]] Object* copy() const override {
+            auto inst = new Object;
+            inst->_final = _final;
+            inst->_parent = _parent;
+            inst->_properties = _properties;
+            for ( const auto& p : inst->_properties ) useref(p.second);
+            return inst;
+        }
+
+        [[nodiscard]] bool isFinal() const {
+            return _final;
+        }
+
+        [[nodiscard]] bool isAssignableTo(const Type* other) const override {
+            if ( other->intrinsic() != Intrinsic::OBJECT ) {
+                // Can only assign to finalized object types
+                return false;
+            }
+
+            if ( !_final ) {
+                // Cannot assign object prototypes
+                return false;
+            }
+
+            auto otherObject = dynamic_cast<const Object*>(other);
+            auto otherIter = otherObject->_properties.begin();
+            for ( ; otherIter != otherObject->_properties.end(); ++otherIter ) {
+                auto thisResult = _properties.find(otherIter->first);
+                if ( thisResult == _properties.end() ) {
+                    // We don't have a required property on the base type
+                    return false;
+                }
+
+                if ( !thisResult->second->isAssignableTo(otherIter->second) ) {
+                    // Our property has an incompatible type
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        Object* defineProperty(const std::string& name, Type* type) {
+            if ( _final ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::MutateFinalizedObject,
+                    "Cannot define property on finalized object type"
+                );
+            }
+
+            checkParentCompatibility(name, type);
+
+            auto existing = _properties.find(name);
+            if ( existing != _properties.end() ) {
+                freeref(existing->second);
+            }
+
+            _properties[name] = useref(type);
+            return this;
+        }
+
+        Object* deleteProperty(const std::string& name) {
+            if ( _final ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::MutateFinalizedObject,
+                    "Cannot delete property on finalized object type"
+                );
+            }
+
+            auto existing = _properties.find(name);
+            if ( existing != _properties.end() ) {
+                _properties.erase(existing);
+            }
+            return this;
+        }
+
+        [[nodiscard]] Type* getProperty(const std::string& name) {
+            auto match = _properties.find(name);
+            if ( match != _properties.end() ) {
+                return match->second;
+            }
+
+            if ( _parent != nullptr ) {
+                return _parent->getProperty(name);
+            }
+
+            return nullptr;
+        }
+
+        [[nodiscard]] Object* finalize() const {
+            auto inst = copy();
+            inst->_final = true;
+            return inst;
+        }
+
+        [[nodiscard]] std::map<std::string, Type*> getProperties() const {
+            return _properties;
+        }
+
+        [[nodiscard]] Object* getParent() const {
+            return _parent;
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "Type::Object<#prop: " + s(_properties.size()) + ", parent: " + s(_parent) + ">";
+        }
+    protected:
+        bool _final = false;
+        std::map<std::string, Type*> _properties;
+        Object* _parent = nullptr;
+
+        void checkParentCompatibility(const std::string& name, const Type* type) const {
+            if ( _parent == nullptr ) {
+                return;  // We are the parent.
+            }
+
+            auto parentMatch = _parent->getProperty(name);
+            if ( parentMatch != nullptr && !type->isAssignableTo(parentMatch) ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::ChildObjectTypeConflict,
+                    "Property '" + name + "' on child object type is not assignable to the parent type (expected: " + s(parentMatch) + ", got: " + s(type) + ")"
+                );
+            }
+        }
     };
 }
 

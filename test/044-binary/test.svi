@@ -93,3 +93,31 @@ $l:m <- strslice $l:k 0 6
 -- Equality tested elsewhere
 -- Streams tested elsewhere
 -- Exception handling tested elsewhere
+
+
+-- Construct the type of the o:SPEAK property:
+$l:SPEAK_T <- call f:LAMBDA0_T p:STRING
+
+-- Construct the object type:
+$l:ANIMAL_T_PROTO <- otypeinit
+otypeprop $l:ANIMAL_T_PROTO o:NAME p:STRING
+otypeprop $l:ANIMAL_T_PROTO o:SPEAK $l:SPEAK_T
+
+-- Finalize the object type:
+$l:ANIMAL_T <- otypefinalize $l:ANIMAL_T_PROTO
+
+$l:temp_a <- otypeget $l:ANIMAL_T o:SPEAK
+
+
+-- Construct the type of o:WAG_TAIL
+$l:WAG_TAIL_T <- call f:LAMBDA0_T p:VOID
+
+-- Construct the DOG_T object type
+$l:DOG_T_PROTO <- otypesubset $l:ANIMAL_T
+otypeprop $l:DOG_T_PROTO o:WAG_TAIL $l:WAG_TAIL_T
+
+-- Finalize the DOT_T type
+$l:DOG_T <- otypefinalize $l:DOG_T_PROTO
+
+$l:temp_b <- otypeget $l:DOG_T o:WAG_TAIL
+

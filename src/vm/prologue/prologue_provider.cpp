@@ -6,6 +6,7 @@
 #include "FileResource.h"
 #include "TagResource.h"
 #include "resource.h"
+#include "type_construction.h"
 
 namespace swarmc::Runtime::Prologue {
 
@@ -25,6 +26,8 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "RESOURCE_T" ) return new ResourceTFunction(this);
         if ( name == "FILE_T" ) return new FileTFunction(this);
         if ( name == "TAG_T" ) return new TagTFunction(this);
+        if ( name == "LAMBDA0_T" ) return new Lambda0Function(this);
+        if ( name == "LAMBDA1_T" ) return new Lambda1Function(this);
         return nullptr;
     }
 

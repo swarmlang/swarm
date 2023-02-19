@@ -1724,6 +1724,15 @@ namespace nslib {
         if ( r->nslibShouldFree() ) delete r;
     }
 
+    /** Release an old reference and use a new one, if they are different. */
+    auto swapref(priv::RefCountable auto oldRef, priv::RefCountable auto newRef) {
+        if ( oldRef != newRef ) {
+            useref(newRef);
+            freeref(oldRef);
+        }
+        return newRef;
+    }
+
     /**
      * A helper for automatically opening/releasing a reference in a scope.
      * @example

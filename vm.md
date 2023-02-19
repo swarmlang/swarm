@@ -184,6 +184,8 @@ EXPRESSION ::= curry | call
          | strconcat | strlength | strslice
          | plus | minus | times | divide | power | mod | neg
          | gt | gte | lt | lte
+         | otypeinit | otypeget | otypefinalize | otypesubset
+         | objinit | objget | objinstance | objcurry
 OPERATION ::= out | err | beginfn | fnparam | return
               | callif | callelse | pushcall | pushcallif | pushcallelse | drain | exit
               | streampush | streamclose
@@ -192,6 +194,8 @@ OPERATION ::= out | err | beginfn | fnparam | return
               | enumappend | enumprepend | enumerate
               | while | with
               | pushexhandler | popexhandler | raise | resume
+              | otypeprop | otypedel
+              | objset
 OPER ::= OPERATION LLOCS
 EXPR ::= EXPRESSION LLOCS
 RVAL ::= EXPR | LLOC
@@ -209,6 +213,8 @@ SVI ::= INST EOF | INST \n INSTS
   - `f:RANDOM`/`f:RANDOM_VECTOR n`/`f:RANDOM_MATRIX m n` - get a random number, enum of random numbers of length n, or matrix of random numbers of size m by n
   - `f:RANGE n m s` - get an enum of the range of numbers from n to m with step size s
   - `f:ID v` - the identity function (e.g. `f:ID 3 -> 3`)
+  - `f:LAMBDA0_T r` - constructs a lambda type of the form `() -> r`
+  - `f:LAMBDA1_T a r` - constructs a lambda type of the form `a -> r`
 
 ### Examples
 

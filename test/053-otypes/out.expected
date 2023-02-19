@@ -1,0 +1,45 @@
+[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/053-otypes/test.svi
+[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/053-otypes/test.svi
+[35m   debug [39m[vm] assigneval Location<l:SPEAK_T> CALL1<Location<f:LAMBDA0_T>, TypeReference<Primitive<STRING>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<f:LAMBDA0_T> TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<Lambda0Function<>>
+[35m   debug [39m[vm] provider call: Lambda0FunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:SPEAK_T> CALL1<Location<f:LAMBDA0_T>, TypeReference<Primitive<STRING>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:SPEAK_T> <- TypeReference<:: Primitive<STRING>>
+[35m   debug [39m[vm] assigneval Location<l:ANIMAL_T_PROTO> OTYPEINIT<>
+[35m   debug [39m[vm] Location<l:ANIMAL_T_PROTO> <- ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<:: Primitive<STRING>>
+[35m   debug [39m[vm] assigneval Location<l:ANIMAL_T> OTYPEFINALIZE<Location<l:ANIMAL_T_PROTO>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:ANIMAL_T> <- ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] assigneval Location<l:temp_a> OTYPEGET<Location<l:ANIMAL_T>, Location<o:SPEAK>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:temp_a> <- TypeReference<:: Primitive<STRING>>
+[35m   debug [39m[vm] assigneval Location<l:WAG_TAIL_T> CALL1<Location<f:LAMBDA0_T>, TypeReference<Primitive<VOID>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<f:LAMBDA0_T> TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<Lambda0Function<>>
+[35m   debug [39m[vm] provider call: Lambda0FunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:WAG_TAIL_T> CALL1<Location<f:LAMBDA0_T>, TypeReference<Primitive<VOID>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:WAG_TAIL_T> <- TypeReference<:: Primitive<VOID>>
+[35m   debug [39m[vm] assigneval Location<l:DOG_T_PROTO> OTYPESUBSET<Location<l:ANIMAL_T>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:DOG_T_PROTO> <- ObjectTypeReference<Type::Object<#prop: 0, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 0, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] ensureType: TypeReference<:: Primitive<VOID>>
+[35m   debug [39m[vm] assigneval Location<l:DOG_T> OTYPEFINALIZE<Location<l:DOG_T_PROTO>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] Location<l:DOG_T> <- ObjectTypeReference<Type::Object<#prop: 1, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] assigneval Location<l:temp_b> OTYPEGET<Location<l:DOG_T>, Location<o:WAG_TAIL>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] Location<l:temp_b> <- TypeReference<:: Primitive<VOID>>

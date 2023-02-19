@@ -72,11 +72,23 @@ namespace swarmc::Runtime {
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::TYPE));
         if ( ref->tag() != ReferenceTag::TYPE ) {
             throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::InvalidReferenceImplementation,
+                    "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+            );
+        }
+        return (TypeReference*) ref;
+    }
+
+    ObjectTypeReference* ExecuteWalk::ensureObjectType(const Reference* ref) {
+        verbose("ensureType: " + ref->toString());
+        ensureType(ref, Type::Primitive::of(Type::Intrinsic::TYPE));
+        if ( ref->tag() != ReferenceTag::OTYPE ) {
+            throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
                 "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
-        return (TypeReference*) ref;
+        return (ObjectTypeReference*) ref;
     }
 
     StringReference* ExecuteWalk::ensureString(const Reference* ref) {
@@ -1070,4 +1082,45 @@ namespace swarmc::Runtime {
 
         return nullptr;
     }
+
+    Reference* ExecuteWalk::walkOTypeInit(OTypeInit*) {
+        return new ObjectTypeReference(new Type::Object);
+    }
+
+    Reference* ExecuteWalk::walkOTypeProp(OTypeProp* i) {
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        auto oprop = i->second();
+        auto propType = ensureType(_vm->resolve(i->third()));
+
+        otype->otypei()->defineProperty(oprop->name(), propType->value());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkOTypeDel(OTypeDel* i) {
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        auto oprop = i->second();
+
+        otype->otypei()->deleteProperty(oprop->name());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkOTypeGet(OTypeGet* i) {
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        auto oprop = i->second();
+
+        auto propType = otype->otypei()->getProperty(oprop->name());
+        return new TypeReference(propType);
+    }
+
+    Reference* ExecuteWalk::walkOTypeFinalize(OTypeFinalize* i) {
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        auto finalized = otype->otypei()->finalize();
+        return new ObjectTypeReference(finalized);
+    }
+
+    Reference* ExecuteWalk::walkOTypeSubset(OTypeSubset* i) {
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        return new ObjectTypeReference(new Type::Object(otype->value()));
+    }
+
 }

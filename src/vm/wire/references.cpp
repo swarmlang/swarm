@@ -49,6 +49,25 @@ namespace swarmc::Runtime {
         });
 
 
+        // ObjectType references
+        factory->registerReducer(s(ReferenceTag::OTYPE), [](const Reference* baseRef, VirtualMachine*) {
+            auto ref = dynamic_cast<const ObjectTypeReference*>(baseRef);
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
+            binn_map_set_map(obj, BC_TYPE, types()->reduce(ref->value(), nullptr));
+            binn_map_set_map(obj, BC_EXTRA, ref->getExtraSerialData());
+            return obj;
+        });
+        factory->registerProducer(s(ReferenceTag::OTYPE), [](binn* obj, VirtualMachine*) {
+            auto baseType = types()->produce((binn*) binn_map_map(obj, BC_TYPE), nullptr);
+            assert(baseType->intrinsic() == Type::Intrinsic::OTYPE);
+            auto type = dynamic_cast<Type::Object*>(baseType);
+            auto ref = new ObjectTypeReference(type);
+            ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return ref;
+        });
+
+
         // Function references
         factory->registerReducer(s(ReferenceTag::FUNCTION), [factory](const Reference* baseRef, VirtualMachine* vm) {
             auto ref = dynamic_cast<const FunctionReference*>(baseRef);

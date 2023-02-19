@@ -29,6 +29,8 @@ namespace swarmc::Errors {
         InvalidOrMissingFilePath = 24,
         InvalidExceptionHandlerType = 25,
         AcquireLockMaxAttemptsExceeded = 26,
+        MutateFinalizedObject = 27,
+        ChildObjectTypeConflict = 28,
     };
 
 }
@@ -58,6 +60,8 @@ namespace nslib {
         if ( v == swarmc::Errors::RuntimeExCode::InvalidOrMissingFilePath ) return "RuntimeExCode(InvalidOrMissingFilePath, code: 24)";
         if ( v == swarmc::Errors::RuntimeExCode::InvalidExceptionHandlerType ) return "RuntimeExCode(InvalidExceptionHandlerType, code: 25)";
         if ( v == swarmc::Errors::RuntimeExCode::AcquireLockMaxAttemptsExceeded ) return "RuntimeExCode(AcquireLockMaxAttemptsExceeded, code: 26)";
+        if ( v == swarmc::Errors::RuntimeExCode::MutateFinalizedObject ) return "RuntimeExCode(MutateFinalizedObject, code: 27)";
+        if ( v == swarmc::Errors::RuntimeExCode::ChildObjectTypeConflict ) return "RuntimeExCode(ChildObjectTypeConflict, code: 28)";
         return "RuntimeExCode(UNKNOWN" + s((std::size_t) v) + ")";
     }
 

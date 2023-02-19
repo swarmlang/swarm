@@ -101,6 +101,12 @@ namespace swarmc::ISA {
         POPEXHANDLER,
         RAISE,
         RESUME,
+        OTYPEINIT,
+        OTYPEPROP,
+        OTYPEDEL,
+        OTYPEGET,
+        OTYPEFINALIZE,
+        OTYPESUBSET,
     };
 
     /** Places where values can be stored. */
@@ -109,6 +115,7 @@ namespace swarmc::ISA {
         SHARED,
         FUNCTION,
         PRIMITIVE,
+        OBJECTPROP,
     };
 
     /** Broad types of references built-in to the runtime. */
@@ -124,6 +131,8 @@ namespace swarmc::ISA {
         ENUMERATION,
         MAP,
         VOID,
+        OTYPE,
+        OBJECT,
     };
 }
 
@@ -180,6 +189,7 @@ namespace swarmc::ISA {
             if ( a == Affinity::LOCAL ) return "l";
             if ( a == Affinity::SHARED ) return "s";
             if ( a == Affinity::PRIMITIVE ) return "p";
+            if ( a == Affinity::OBJECTPROP ) return "o";
             return "UNKNOWN";
         }
 
@@ -380,16 +390,16 @@ namespace swarmc::ISA {
         }
 
         /** Get the actual type this value is holding. */
-        [[nodiscard]] Type::Type* value() const {
+        [[nodiscard]] virtual Type::Type* value() const {
             return _type;
         }
 
-        [[nodiscard]] InlineRefHandle<Type::Type> valuei() const {
+        [[nodiscard]] virtual InlineRefHandle<Type::Type> valuei() const {
             return inlineref<Type::Type>(value());
         }
 
         bool isEqualTo(const Reference* other) const override {
-            if ( other->tag() != ReferenceTag::TYPE ) return false;
+            if ( other->tag() != _tag ) return false;
             auto ref = (TypeReference*) other;
             return ref->type()->isAssignableTo(type()) && type()->isAssignableTo(ref->type());
         }
@@ -400,6 +410,44 @@ namespace swarmc::ISA {
 
     protected:
         Type::Type* _type;
+    };
+
+    class ObjectTypeReference : public TypeReference {
+    public:
+        explicit ObjectTypeReference(Type::Object* type) : TypeReference(type) {
+            _tag = ReferenceTag::OTYPE;
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "ObjectTypeReference<" + _type->toString() + ">";
+        }
+
+        [[nodiscard]] Type::Object* value() const override {
+            return dynamic_cast<Type::Object*>(_type);
+        }
+
+        [[nodiscard]] InlineRefHandle<Type::Object> otypei() const {
+            return inlineref<Type::Object>(value());
+        }
+
+        [[nodiscard]] bool isFinal() const {
+            return value()->isFinal();
+        }
+
+        void replace(Type::Object* type) {
+            if ( isFinal() ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::MutateFinalizedObject,
+                    "Cannot mutate finalized object type"
+                );
+            }
+
+            _type = swapref(_type, type);
+        }
+
+        void finalize() {
+            replace(value()->finalize());
+        }
     };
 
     class VoidReference : public Reference {

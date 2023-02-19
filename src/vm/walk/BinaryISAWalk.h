@@ -136,6 +136,12 @@ namespace swarmc::ISA {
             if ( tag == Tag::POPEXHANDLER ) return walkPopExceptionHandler(obj);
             if ( tag == Tag::RAISE ) return walkRaise(obj);
             if ( tag == Tag::RESUME ) return walkResume(obj);
+            if ( tag == Tag::OTYPEINIT ) return walkOTypeInit(obj);
+            if ( tag == Tag::OTYPEPROP ) return walkOTypeProp(obj);
+            if ( tag == Tag::OTYPEDEL ) return walkOTypeDel(obj);
+            if ( tag == Tag::OTYPEGET ) return walkOTypeGet(obj);
+            if ( tag == Tag::OTYPEFINALIZE ) return walkOTypeFinalize(obj);
+            if ( tag == Tag::OTYPESUBSET ) return walkOTypeSubset(obj);
 
             throw Errors::SwarmError("Unable to deserialize instruction with invalid or unknown tag.");
         }
@@ -667,6 +673,44 @@ namespace swarmc::ISA {
         Resume* walkResume(binn* obj) {
             return new Resume(
                 walkLocationReference((binn*) binn_map_map(obj, BC_FIRST))
+            );
+        }
+
+        OTypeInit* walkOTypeInit(binn*) {
+            return new OTypeInit;
+        }
+
+        OTypeProp* walkOTypeProp(binn* obj) {
+            return new OTypeProp(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                walkLocationReference((binn*) binn_map_map(obj, BC_SECOND)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
+            );
+        }
+
+        OTypeDel* walkOTypeDel(binn* obj) {
+            return new OTypeDel(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
+            );
+        }
+
+        OTypeGet* walkOTypeGet(binn* obj) {
+            return new OTypeGet(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
+            );
+        }
+
+        OTypeFinalize* walkOTypeFinalize(binn* obj) {
+            return new OTypeFinalize(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
+            );
+        }
+
+        OTypeSubset* walkOTypeSubset(binn* obj) {
+            return new OTypeSubset(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
     };

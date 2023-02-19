@@ -271,3 +271,5 @@ Exception codes `0` through `499` are reserved by the SVM for exceptions generat
 | 24   | Attempted to open invalid or missing file path                                      |
 | 25   | Exception handler has invalid type                                                  |
 | 26   | Exceeded max attempts when acquiring lock                                           |
+| 27   | Attempted to mutate a finalized object type                                         |
+| 28   | Child object property type conflicts with parent object property type               |

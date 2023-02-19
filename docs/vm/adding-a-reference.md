@@ -1,5 +1,5 @@
 
 - Create ReferenceTag in `ISA.h`
+  - Add to the ReferenceTag overload for nslib's `s()`
 - Create reference class in `ISA.h`
-- Add method to `ReferenceWalk.h`
-- Implement the method in any children of `ReferenceWalk`
+- Add reducer/producer for the new reference type in `vm/wire/references.cpp`

@@ -13,6 +13,8 @@ namespace nslib {
         if ( v == swarmc::ISA::ReferenceTag::ENUMERATION ) return "ReferenceTag(ENUMERATION)";
         if ( v == swarmc::ISA::ReferenceTag::MAP ) return "ReferenceTag(MAP)";
         if ( v == swarmc::ISA::ReferenceTag::VOID ) return "ReferenceTag(VOID)";
+        if ( v == swarmc::ISA::ReferenceTag::OTYPE ) return "ReferenceTag(OTYPE)";
+        if ( v == swarmc::ISA::ReferenceTag::OBJECT ) return "ReferenceTag(OBJECT)";
         return "ReferenceTag(UNKNOWN)";
     }
 }
@@ -96,6 +98,12 @@ namespace swarmc::ISA {
         if ( tag == Tag::POPEXHANDLER ) return "POPEXHANDLER";
         if ( tag == Tag::RAISE ) return "RAISE";
         if ( tag == Tag::RESUME ) return "RESUME";
+        if ( tag == Tag::OTYPEINIT ) return "OTYPEINIT";
+        if ( tag == Tag::OTYPEPROP ) return "OTYPEPROP";
+        if ( tag == Tag::OTYPEDEL ) return "OTYPEDEL";
+        if ( tag == Tag::OTYPEGET ) return "OTYPEGET";
+        if ( tag == Tag::OTYPEFINALIZE ) return "OTYPEFINALIZE";
+        if ( tag == Tag::OTYPESUBSET ) return "OTYPESUBSET";
         return "UNKNOWN";
     }
 
