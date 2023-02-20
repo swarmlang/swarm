@@ -1120,6 +1120,13 @@ namespace swarmc::Runtime {
 
     Reference* ExecuteWalk::walkOTypeSubset(OTypeSubset* i) {
         auto otype = ensureObjectType(_vm->resolve(i->first()));
+        if ( !otype->isFinal() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::SubsetNonFinalObjectType,
+                "Cannot create subset from incomplete object type " + s(otype->value())
+            );
+        }
+
         return new ObjectTypeReference(new Type::Object(otype->value()));
     }
 

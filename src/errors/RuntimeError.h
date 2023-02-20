@@ -31,6 +31,7 @@ namespace swarmc::Errors {
         AcquireLockMaxAttemptsExceeded = 26,
         MutateFinalizedObject = 27,
         ChildObjectTypeConflict = 28,
+        SubsetNonFinalObjectType = 29,
     };
 
 }
@@ -62,6 +63,7 @@ namespace nslib {
         if ( v == swarmc::Errors::RuntimeExCode::AcquireLockMaxAttemptsExceeded ) return "RuntimeExCode(AcquireLockMaxAttemptsExceeded, code: 26)";
         if ( v == swarmc::Errors::RuntimeExCode::MutateFinalizedObject ) return "RuntimeExCode(MutateFinalizedObject, code: 27)";
         if ( v == swarmc::Errors::RuntimeExCode::ChildObjectTypeConflict ) return "RuntimeExCode(ChildObjectTypeConflict, code: 28)";
+        if ( v == swarmc::Errors::RuntimeExCode::SubsetNonFinalObjectType ) return "RuntimeExCode(SubsetNonFinalObjectType, code: 29)";
         return "RuntimeExCode(UNKNOWN" + s((std::size_t) v) + ")";
     }
 

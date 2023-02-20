@@ -25,3 +25,22 @@ otypeprop $l:DOG_T_PROTO o:WAG_TAIL $l:WAG_TAIL_T
 $l:DOG_T <- otypefinalize $l:DOG_T_PROTO
 
 $l:temp_b <- otypeget $l:DOG_T o:WAG_TAIL
+
+
+
+-- Make sure subsetting an incomplete type triggers an exception
+beginfn f:HANDLER p:VOID
+    fnparam p:NUMBER $l:code
+    scopeof $l:msg
+    $l:msg <- call f:NUMBER_TO_STRING $l:code
+    $l:msg <- strconcat "Handled: " $l:msg
+    out $l:msg
+    resume f:RESUMED
+return
+
+pushexhandler f:HANDLER
+$l:BAD_T_PROTO <- otypesubset $l:ANIMAL_T_PROTO
+
+beginfn f:RESUMED p:VOID
+    out "Resumed."
+return
