@@ -1084,10 +1084,12 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkOTypeInit(OTypeInit*) {
+        verbose("otypeinit");
         return new ObjectTypeReference(new Type::Object);
     }
 
     Reference* ExecuteWalk::walkOTypeProp(OTypeProp* i) {
+        verbose("otypeprop " + s(i->first()) + " " + s(i->second()) + " " + s(i->third()));
         auto otype = ensureObjectType(_vm->resolve(i->first()));
         auto oprop = i->second();
         auto propType = ensureType(_vm->resolve(i->third()));
@@ -1097,6 +1099,7 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkOTypeDel(OTypeDel* i) {
+        verbose("otypedel " + s(i->first()) + " " + s(i->second()));
         auto otype = ensureObjectType(_vm->resolve(i->first()));
         auto oprop = i->second();
 
@@ -1105,24 +1108,34 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkOTypeGet(OTypeGet* i) {
+        verbose("otypeget " + s(i->first()) + " " + s(i->second()));
         auto otype = ensureObjectType(_vm->resolve(i->first()));
         auto oprop = i->second();
+
+        if ( !otype->isFinal() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::NonFinalObjectType,
+                "Cannot get property type from incomplete object type " + s(otype->value())
+            );
+        }
 
         auto propType = otype->otypei()->getProperty(oprop->name());
         return new TypeReference(propType);
     }
 
     Reference* ExecuteWalk::walkOTypeFinalize(OTypeFinalize* i) {
+        verbose("otypefinalize " + s(i->first()));
         auto otype = ensureObjectType(_vm->resolve(i->first()));
         auto finalized = otype->otypei()->finalize();
         return new ObjectTypeReference(finalized);
     }
 
     Reference* ExecuteWalk::walkOTypeSubset(OTypeSubset* i) {
+        verbose("otypesubset " + s(i->first()));
         auto otype = ensureObjectType(_vm->resolve(i->first()));
         if ( !otype->isFinal() ) {
             throw Errors::RuntimeError(
-                Errors::RuntimeExCode::SubsetNonFinalObjectType,
+                Errors::RuntimeExCode::NonFinalObjectType,
                 "Cannot create subset from incomplete object type " + s(otype->value())
             );
         }

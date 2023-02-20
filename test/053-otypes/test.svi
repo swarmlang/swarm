@@ -41,6 +41,23 @@ return
 pushexhandler f:HANDLER
 $l:BAD_T_PROTO <- otypesubset $l:ANIMAL_T_PROTO
 
+
+-- Make sure accessing an incomplete type triggers an exception
+beginfn f:HANDLER2 p:VOID
+    fnparam p:NUMBER $l:code
+    scopeof $l:msg
+    $l:msg <- call f:NUMBER_TO_STRING $l:code
+    $l:msg <- strconcat "Handled: " $l:msg
+    out $l:msg
+    resume f:RESUMED2
+return
+
 beginfn f:RESUMED p:VOID
     out "Resumed."
+    pushexhandler f:HANDLER2
+    otypeget $l:ANIMAL_T_PROTO o:SPEAK
+return
+
+beginfn f:RESUMED2 p:VOID
+    out "Resumed 2."
 return
