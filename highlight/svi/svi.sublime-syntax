@@ -1,0 +1,54 @@
+%YAML 1.2
+---
+name: svi
+scope: source.svi
+file_extensions: [ svi ]
+
+contexts:
+  main:
+    - match: '((\$l|\$s):[a-zA-Z0-9_]*)'
+      captures:
+        0: variable.svi
+    - match: '((o|p):[a-zA-Z0-9_]*)'
+      captures:
+        0: entity.name.type.svi
+    - match: '(f:[a-zA-Z0-9_]*)'
+      captures:
+        0: entity.name.function.svi
+    - match: '(<\-)'
+      captures:
+        0: punctuation.svi
+    - match: '(true|false)'
+      captures:
+        0: keyword.svi
+    - match: '(beginfn|fnparam|return|curry|callif|callelse|call|pushcallif|pushcallelse|pushcall|drain|exit|out|err|streaminit|streampush|streampop|streamclose|streamempty|typify|lock|unlock|equal|scopeof|typeof|compatible|nand|and|xor|nor|or|not|mapinit|mapset|mapget|maplength|mapkeys|enuminit|enumappend|enumprepend|enumlength|enumget|enumset|enumerate|strconcat|strlength|strslice|plus|minus|times|divide|power|mod|neg|gte|gt|lte|lt|while|with|pushexhandler|popexhandler|raise|resume|otypeinit|otypeprop|otypedel|otypeget|otypefinalize|otypesubset|objinit|objset|objget|objinstance|objcurry)'
+      captures:
+        0: keyword.svi
+    - include: numeric
+    - match: '(\")'
+      captures:
+        0: string.svi
+      push:
+        - match: '(\")'
+          pop: true
+          captures:
+            0: string.svi
+        - match: '(.)'
+          captures:
+            0: string.svi
+    - match: '(\-\-.*)'
+      captures:
+        0: comment.svi
+    - match: '(.)'
+      captures:
+        0: text.svi
+  numeric:
+    - match: '(\b\d+\.\d+)'
+      captures:
+        0: constant.numeric.svi
+    - match: '(\b\d+)'
+      captures:
+        0: constant.numeric.svi
+    - match: '(.)'
+      captures:
+        0: text.svi
