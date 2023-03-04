@@ -12,6 +12,7 @@ using namespace nslib;
 
 namespace swarmc::Lang {
     class TypeLiteral;
+    class LValNode;
 }
 
 namespace swarmc::Type {
@@ -77,12 +78,6 @@ namespace swarmc::Type {
 
         [[nodiscard]] virtual Type* copy() const = 0;
 
-        [[nodiscard]] virtual Type* copy(bool shared) const {
-            auto e = copy();
-            e->_shared = shared;
-            return e;
-        }
-
         [[nodiscard]] virtual Intrinsic intrinsic() const {
             return Intrinsic::CONTRADICTION;
         }
@@ -99,10 +94,6 @@ namespace swarmc::Type {
             return intrinsic() == Intrinsic::AMBIGUOUS;
         }
 
-        [[nodiscard]] virtual bool shared() const {
-            return _shared;
-        }
-
         virtual bool isAssignableTo(const Type* other) const = 0;
 
         virtual bool isAssignableTo(const InlineRefHandle<Type>& other) const {
@@ -110,8 +101,6 @@ namespace swarmc::Type {
         }
 
     protected:
-        bool _shared = false;
-
         friend class Lang::TypeLiteral;
     };
 
@@ -150,9 +139,7 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] Primitive* copy() const override {
-            auto inst = Primitive::of(_intrinsic);
-            inst->_shared = shared();
-            return inst;
+            return Primitive::of(_intrinsic);
         }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
@@ -231,6 +218,10 @@ namespace swarmc::Type {
             return _inst;
         }
 
+        static Ambiguous* partial(Lang::LValNode* lval) {
+            return new Ambiguous(lval);
+        }
+
         [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::AMBIGUOUS;
         }
@@ -247,8 +238,11 @@ namespace swarmc::Type {
             return Ambiguous::of();
         }
 
+        explicit Ambiguous(Lang::LValNode* lval = nullptr) : _lval(lval) {}
     protected:
+
         static Ambiguous* _inst;
+        Lang::LValNode* _lval;
     };
 
     class Map : public Type {
@@ -272,9 +266,7 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] Map* copy() const override {
-            auto inst = new Map(_values->copy());
-            inst->_shared = shared();
-            return inst;
+            return new Map(_values->copy());
         }
 
         bool isAssignableTo(const Type* other) const override {
@@ -311,9 +303,7 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] Enumerable* copy() const override {
-            auto inst = new Enumerable(_values->copy());
-            inst->_shared = shared();
-            return inst;
+            return new Enumerable(_values->copy());
         }
 
         bool isAssignableTo(const Type* other) const override {
@@ -354,9 +344,7 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] Resource* copy() const override {
-            auto inst = new Resource(_yields);
-            inst->_shared = shared();
-            return inst;
+            return new Resource(_yields);
         }
 
         bool isAssignableTo(const Type* other) const override {
@@ -397,9 +385,7 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] Stream* copy() const override {
-            auto inst = new Stream(_inner->copy());
-            inst->_shared = shared();
-            return inst;
+            return new Stream(_inner->copy());
         }
 
         bool isAssignableTo(const Type* other) const override {
@@ -449,9 +435,7 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] Lambda0* copy() const override {
-            auto inst = new Lambda0(_returns->copy());
-            inst->_shared = shared();
-            return inst;
+            return new Lambda0(_returns->copy());
         }
 
         bool isAssignableTo(const Type* other) const override {
@@ -486,9 +470,7 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] Lambda1* copy() const override {
-            auto inst = new Lambda1(_param->copy(), _returns->copy());
-            inst->_shared = shared();
-            return inst;
+            return new Lambda1(_param->copy(), _returns->copy());
         }
 
         bool isAssignableTo(const Type* other) const override {

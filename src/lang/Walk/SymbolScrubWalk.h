@@ -22,7 +22,7 @@ protected:
     }
 
     void walkExpressionStatementNode(ExpressionStatementNode* node) override {
-        return walk(node->expression());
+        walk(node->expression());
     }
 
     void walkIdentifierNode(IdentifierNode* node) override {
@@ -32,7 +32,7 @@ protected:
     }
 
     void walkMapAccessNode(MapAccessNode* node) override {
-        return walk(node->path());
+        walk(node->path());
     }
 
     void walkEnumerableAccessNode(EnumerableAccessNode* node) override {
@@ -59,7 +59,7 @@ protected:
     }
 
     void walkCallExpressionNode(CallExpressionNode* node) override {
-        walk(node->id());
+        walk(node->func());
 
         for ( auto arg : *node->args() ) {
             walk(arg);
@@ -124,11 +124,6 @@ protected:
         walk(node->right());
     }
 
-    void walkConcatenateNode(ConcatenateNode* node) override {
-        walk(node->left());
-        walk(node->right());
-    }
-
     void walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         walk(node->exp());
     }
@@ -179,13 +174,9 @@ protected:
         walkBlockStatementNode(node);
     }
 
-    void walkContinueNode(ContinueNode* node) override {
-        return;
-    }
+    void walkContinueNode(ContinueNode* node) override {}
 
-    void walkBreakNode(BreakNode* node) override {
-        return;
-    }
+    void walkBreakNode(BreakNode* node) override {}
 
     void walkReturnStatementNode(ReturnStatementNode* node) override {
         if ( node->value() != nullptr) {
@@ -224,6 +215,20 @@ protected:
     void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
         walk(node->left());
         walk(node->right());
+    }
+
+    void walkTypeBodyNode(TypeBodyNode* node) override {
+        for (auto decl : *node->declarations()) {
+            walk(decl);
+        }
+    }
+
+    void walkClassAccessNode(ClassAccessNode* node) override {
+        walk(node->path());
+    }
+
+    void walkIncludeStatementNode(IncludeStatementNode* node) override {
+        walk(node->path());
     }
 
     std::string toString() const override {

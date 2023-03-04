@@ -81,6 +81,7 @@
     std::vector<std::pair<TypeLiteral*, IdentifierNode*>>*  transFormals;
     std::vector<swarmc::Lang::MapStatementNode*>* transMapStatements;
     std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
+    std::vector<swarmc::Lang::DeclarationNode*>* transDeclarations;
     Shared*                             transShared;
 }
 
@@ -138,26 +139,29 @@
 %token <transToken>      DIVIDEASSIGN
 %token <transToken>      MODULUSASSIGN
 %token <transToken>      POWERASSIGN
-%token <transToken>      CATASSIGN
 %token <transToken>      ANDASSIGN
 %token <transToken>      ORASSIGN
 %token <transToken>      MODULUS
 %token <transToken>      POWER
-%token <transToken>      CAT
+%token <transToken>      DOT
 %token <transToken>      SHARED
 %token <transToken>      FN
 %token <transToken>      ARROW
 %token <transToken>      FNDEF
+%token <transToken>      INCLUDE
 
 /*    (attribute type)      (nonterminal)    */
 %type <transProgram>        program
+%type <transProgram>        includes
 %type <transProgram>        statements
 %type <transStatement>      statement
+%type <transDeclarations>   declarations
 %type <transID>             id
 %type <transLVal>           lval
 %type <transExpression>     expression
 %type <transExpression>     expressionF
 %type <transExpression>     term
+%type <transExpression>     callable
 %type <transAssignExpression> assignment
 %type <transCallExpression> callExpression
 %type <transIIFExpression>  iifExpression
@@ -165,13 +169,14 @@
 %type <transFormals>        formals
 %type <transFunction>       function
 %type <transType>           type
+%type <transType>           typeid
 %type <transDeclaration>    declaration
 %type <transMapStatement>   mapStatement
 %type <transMapStatements>  mapStatements
 %type <transShared>         shared
+%type <transLVal>           classAccess
 
 %precedence FNDEF
-%left CAT
 %left OR
 %left AND
 %nonassoc EQUAL NOTEQUAL LARROW LARROWEQUALS RARROW RARROWEQUALS
@@ -183,12 +188,24 @@
 %%
 
 program :
-    statements {
+    includes statements {
         $$ = $1;
+        for (auto stmt : *$2->reduceToStatements()) {
+            $$->pushStatement(stmt);
+        }
         *root = $$;
     }
 
+includes :
+    includes INCLUDE classAccess SEMICOLON {
+        $$ = $1;
+        $$->pushStatement(new IncludeStatementNode(new Position($2->position(), $3->position()), (ClassAccessNode*)$3));
+        delete $2;
+    }
 
+    | %empty {
+        $$ = new ProgramNode();
+    }
 
 statements :
     statements statement {
@@ -215,7 +232,7 @@ statement :
         Position* pos = new Position($1->position(), $11->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $8, $4->shared());
         auto t = new TypeLiteral($8->position()->copy(), Type::Primitive::of(Type::Intrinsic::NUMBER));
-        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy($7->shared()), $8->position()->copy()));
+        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy(), $8->position()->copy(), $7->shared()));
         e->assumeAndReduceStatements($10->reduceToStatements());
         $$ = e;
         delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11; delete t;
@@ -297,23 +314,37 @@ shared :
     }
 
 declaration :
-    shared type id ASSIGN expression {
-        auto p1 = $1->position() == nullptr ? $2->position() : $1->position();
-        Position* pos = new Position(p1, $5->position());
-        $2->setShared($1->shared());
-        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5);
+    SHARED typeid id ASSIGN expression {
+        Position* pos = new Position($1->position(), $5->position());
+        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5, true);
         $$ = var;
         delete $1; delete $4;
+    }
+
+    | typeid id ASSIGN expression {
+        Position* pos = new Position($1->position(), $4->position());
+        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $1, $2, $4, false);
+        $$ = var;
+        delete $3;
     }
 
     | shared FN id ASSIGN function {
         auto p1 = $1->position() == nullptr ? $2->position() : $1->position();
         Position* pos = new Position(p1, $5->position());
-        $5->typeNode()->setShared($1->shared());
-        $$ = new VariableDeclarationNode(pos, $5->typeNode(), $3, $5);
+        $$ = new VariableDeclarationNode(pos, $5->typeNode(), $3, $5, $1->shared());
         delete $1; delete $2; delete $4;
     }
 
+declarations :
+    declarations declaration {
+        $$ = $1;
+        $$->push_back($2);
+    }
+
+    | declaration {
+        $$ = new std::vector<DeclarationNode*>();
+        $$->push_back($1);
+    }
 
 assignment :
     lval ASSIGN expression {
@@ -364,13 +395,6 @@ assignment :
         delete $2;
     }
 
-    | lval CATASSIGN expression {
-        Position* pos = new Position($1->position(), $3->position());
-        auto r = new ConcatenateNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
-        delete $2;
-    }
-
     | lval ANDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new AndNode(pos, $1, $3);
@@ -403,13 +427,30 @@ lval :
         delete $2; delete $4;
     }
 
+    | classAccess {
+        $$ = $1;
+    }
+
+classAccess :
+    lval DOT id {
+        $$ = new ClassAccessNode(new Position($1->position(), $3->position()), $1, $3);
+        delete $2;
+    }
+
 id :
     ID {
         $$ = new IdentifierNode($1->position()->copy(), $1->identifier());
         delete $1;
     }
 
+typeid :
+    lval {
+        $$ = new TypeLiteral($1->position()->copy(), Type::Ambiguous::partial($1));
+    }
 
+    | type { 
+        $$ = $1; 
+    }
 
 type :
     STRING {
@@ -448,27 +489,26 @@ type :
         delete $1;
     }
 
-    | ENUMERABLE LARROW type RARROW {
+    | ENUMERABLE LARROW typeid RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new TypeLiteral(pos, new Type::Enumerable($3->value()));
         delete $1; delete $2; delete $4;
     }
 
-    | MAP LARROW type RARROW {
+    | MAP LARROW typeid RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new TypeLiteral(pos, new Type::Map($3->value()));
         delete $1; delete $2; delete $4;
     }
 
-    | type ARROW type {
+    | typeid ARROW typeid {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new TypeLiteral(pos, new Type::Lambda1($1->value(), $3->value()));
         delete $2;
     }
 
-
 function :
-    LPAREN formals RPAREN COLON type FNDEF LBRACE statements RBRACE {
+    LPAREN formals RPAREN COLON typeid FNDEF LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $9->position());
         Position* typepos = new Position($1->position(), $5->position());
 
@@ -484,7 +524,7 @@ function :
         delete $1; delete $3; delete $4; delete $6; delete $7; delete $9;
     }
 
-    | LPAREN RPAREN COLON type FNDEF LBRACE statements RBRACE {
+    | LPAREN RPAREN COLON typeid FNDEF LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
 
         FunctionNode* fn = new FunctionNode(
@@ -494,7 +534,7 @@ function :
         delete $1; delete $2; delete $3; delete $5; delete $6; delete $8;
     }
 
-    | LPAREN formals RPAREN COLON type FNDEF expressionF {
+    | LPAREN formals RPAREN COLON typeid FNDEF expressionF {
         Position* pos = new Position($1->position(), $7->position());
         Position* typepos = new Position($1->position(), $5->position());
 
@@ -512,7 +552,7 @@ function :
         delete $1; delete $3; delete $4; delete $6;
     }
 
-    | LPAREN RPAREN COLON type FNDEF expressionF {
+    | LPAREN RPAREN COLON typeid FNDEF expressionF {
         Position* pos = new Position($1->position(), $6->position());
 
         FunctionNode* fn = new FunctionNode(
@@ -524,10 +564,8 @@ function :
         delete $1; delete $2; delete $3; delete $5;
     }
 
-
-
 expression :
-    LBRACE RBRACE OF type {
+    LBRACE RBRACE OF typeid {
         Position* pos = new Position($1->position(), $4->position());
         std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
         $$ = new MapNode(pos, body, new TypeLiteral($4->position()->copy(), new Type::Map($4->value())));
@@ -540,6 +578,19 @@ expression :
         delete $1; delete $3;
     }
 
+    | LBRACE declarations RBRACE {
+        Position* pos = new Position($1->position(), $3->position());
+        auto t = new Type::Object();
+        for ( auto decl : *$2 ) {
+            if (decl->getName() == "VariableDeclarationNode") {
+                auto vdecl = (VariableDeclarationNode*)decl;
+                t->defineProperty(vdecl->id()->name(), vdecl->typeNode()->value());
+            }
+        }
+        $$ = new TypeBodyNode(pos, $2, t->finalize());
+        delete $1; delete $3; delete t;
+    }
+
     | expressionF {
         $$ = $1;
     }
@@ -549,7 +600,7 @@ expressionF :
         $$ = $1;
     }
 
-    | LBRACKET RBRACKET OF type {
+    | LBRACKET RBRACKET OF typeid {
         Position* pos = new Position($1->position(), $4->position());
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
         $$ = new EnumerationLiteralExpressionNode(pos, actuals,
@@ -608,12 +659,6 @@ expressionF :
     | expressionF POWER expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new PowerNode(pos, $1, $3);
-        delete $2;
-    }
-
-    | expressionF CAT expressionF {
-        Position* pos = new Position($1->position(), $3->position());
-        $$ = new ConcatenateNode(pos, $1, $3);
         delete $2;
     }
 
@@ -729,14 +774,14 @@ actuals :
     }
 
 formals :
-    id COLON type {
+    id COLON typeid {
         $$ = new std::vector<std::pair<TypeLiteral*, IdentifierNode*>>();
         auto t = std::pair<TypeLiteral*, IdentifierNode*>($3, $1);
         $$->push_back(t);
         delete $2;
     }
 
-    | formals COMMA id COLON type {
+    | formals COMMA id COLON typeid {
         $$ = $1;
         auto t = std::pair<TypeLiteral*, IdentifierNode*>($5, $3);
         $$->push_back(t);
@@ -770,17 +815,22 @@ mapStatement :
 
 
 callExpression :
-    id LPAREN RPAREN {
+    callable LPAREN RPAREN {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new CallExpressionNode(pos, $1, new std::vector<ExpressionNode*>());
         delete $2; delete $3;
     }
 
-    | id LPAREN actuals RPAREN {
+    | callable LPAREN actuals RPAREN {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new CallExpressionNode(pos, $1, $3);
         delete $2; delete $4;
     }
+
+callable :
+    callExpression { $$ = $1; }
+    | iifExpression { $$ = $1; }
+    | lval { $$ = $1; }
 
 iifExpression :
     LPAREN expression RPAREN LPAREN RPAREN {

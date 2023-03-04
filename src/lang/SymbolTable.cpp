@@ -10,7 +10,7 @@ namespace swarmc::Lang {
             Type::Primitive::of(Type::Intrinsic::NUMBER),
             Type::Primitive::of(Type::Intrinsic::STRING)
         );
-        auto numberToString = new PrologueFunctionSymbol("numberToString", typeNumToStr, new ProloguePosition("numberToString"));
+        auto numberToString = new PrologueFunctionSymbol("numberToString", typeNumToStr, new ProloguePosition("numberToString"), false);
         prologueScope->insert(numberToString);
 
         // booleanToString :: boolean -> string
@@ -18,7 +18,7 @@ namespace swarmc::Lang {
             Type::Primitive::of(Type::Intrinsic::BOOLEAN),
             Type::Primitive::of(Type::Intrinsic::STRING)
         );
-        auto booleanToString = new PrologueFunctionSymbol("booleanToString", typeBoolToStr, new ProloguePosition("booleanToString"));
+        auto booleanToString = new PrologueFunctionSymbol("booleanToString", typeBoolToStr, new ProloguePosition("booleanToString"), false);
         prologueScope->insert(booleanToString);
 
         // sin :: number -> number
@@ -26,22 +26,22 @@ namespace swarmc::Lang {
             Type::Primitive::of(Type::Intrinsic::NUMBER),
             Type::Primitive::of(Type::Intrinsic::STRING)
         );
-        auto sin = new PrologueFunctionSymbol("sin", typeNumToNum, new ProloguePosition("sin"));
+        auto sin = new PrologueFunctionSymbol("sin", typeNumToNum, new ProloguePosition("sin"), false);
         prologueScope->insert(sin);
 
         // cos :: number -> number
-        auto cos = new PrologueFunctionSymbol("cos", typeNumToNum, new ProloguePosition("cos"));
+        auto cos = new PrologueFunctionSymbol("cos", typeNumToNum, new ProloguePosition("cos"), false);
         prologueScope->insert(cos);
 
         // tan :: number -> number
-        auto tan = new PrologueFunctionSymbol("tan", typeNumToNum, new ProloguePosition("tan"));
+        auto tan = new PrologueFunctionSymbol("tan", typeNumToNum, new ProloguePosition("tan"), false);
         prologueScope->insert(tan);
 
         // random :: -> number
         auto nullaryNumber = new Type::Lambda0(
             Type::Primitive::of(Type::Intrinsic::NUMBER)
         );
-        auto random = new PrologueFunctionSymbol("random", nullaryNumber, new ProloguePosition("random"));
+        auto random = new PrologueFunctionSymbol("random", nullaryNumber, new ProloguePosition("random"), false);
         prologueScope->insert(random);
 
         // randomVector :: number -> (enumerable<number>)
@@ -52,7 +52,7 @@ namespace swarmc::Lang {
             Type::Primitive::of(Type::Intrinsic::NUMBER),
             typeEnumNum
         );
-        auto randomVector = new PrologueFunctionSymbol("randomVector", typeNumToEnumNum, new ProloguePosition("randomVector"));
+        auto randomVector = new PrologueFunctionSymbol("randomVector", typeNumToEnumNum, new ProloguePosition("randomVector"), false);
         prologueScope->insert(randomVector);
 
         // randomMatrix :: number -> number -> (enumerable<enumerable<number>>)
@@ -61,7 +61,7 @@ namespace swarmc::Lang {
             Type::Primitive::of(Type::Intrinsic::NUMBER),
             typeEnumEnumNum
         );
-        auto randomMatrix = new PrologueFunctionSymbol("randomMatrix", typeNumToEnumEnumNum, new ProloguePosition("randomMatrix"));
+        auto randomMatrix = new PrologueFunctionSymbol("randomMatrix", typeNumToEnumEnumNum, new ProloguePosition("randomMatrix"), false);
         prologueScope->insert(randomMatrix);
 
         // range :: number -> number -> number -> (enumerable<number>)
@@ -73,7 +73,7 @@ namespace swarmc::Lang {
             Type::Primitive::of(Type::Intrinsic::NUMBER),
             typeNumToNumToEnumNum
         );
-        auto range = new PrologueFunctionSymbol("range", typeNumToNumToNumToEnumNum, new ProloguePosition("range"));
+        auto range = new PrologueFunctionSymbol("range", typeNumToNumToNumToEnumNum, new ProloguePosition("range"), false);
         prologueScope->insert(range);
 
         return prologueScope;

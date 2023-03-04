@@ -147,7 +147,7 @@ protected:
 
     bool walkCallExpressionNode(CallExpressionNode* node) override {
         // Perform type analysis on the callable
-        bool flag = walk(node->id());
+        bool flag = walk(node->func());
 
         // Perform type analysis on the arguments
         for ( auto arg : *node->args() ) {
@@ -155,7 +155,7 @@ protected:
         }
 
         // Make sure the callee is actually a function type
-        const Type::Type* baseTypeOfCallee = _types->getTypeOf(node->id());
+        const Type::Type* baseTypeOfCallee = _types->getTypeOf(node->func());
         if ( !baseTypeOfCallee->isCallable() ) {
             Reporting::typeError(
                 node->position(),
@@ -354,7 +354,42 @@ protected:
     }
 
     bool walkAddNode(AddNode* node) override {
-        return walkPureBinaryExpression(node);
+        bool flag = walk(node->left());
+        flag = walk(node->right()) && flag;
+
+        const Type::Type* actualLeftType = _types->getTypeOf(node->left());
+        const Type::Type* actualRightType = _types->getTypeOf(node->right());
+
+        if ( actualLeftType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::NUMBER)) ) {
+            if ( !actualRightType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::NUMBER)) && actualRightType->intrinsic() != Type::Intrinsic::ERROR ) {
+                Reporting::typeError(
+                    node->position(),
+                    "Invalid type " + actualRightType->toString() + " of right-hand operand to expression (expected: Primitive<NUMBER>)."
+                );
+
+                flag = false;
+            }
+        } else if ( actualLeftType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::STRING)) ) {
+            if ( !actualRightType->isAssignableTo(Type::Primitive::of(Type::Intrinsic::STRING)) && actualRightType->intrinsic() != Type::Intrinsic::ERROR ) {
+                Reporting::typeError(
+                    node->position(),
+                    "Invalid type " + actualRightType->toString() + " of right-hand operand to expression (expected: Primitive<STRING>)."
+                );
+
+                flag = false;
+            }
+            node->setConcat(true);
+        } else {
+            Reporting::typeError(
+                node->position(),
+                "Invalid type " + actualLeftType->toString() + " of left-hand operand to expression (expected: Primitive<NUMBER> or Primitive<STRING>)."
+            );
+
+            flag = false;
+        }
+
+        _types->setTypeOf(node, flag ? node->resultType() : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
     }
 
     bool walkSubtractNode(SubtractNode* node) override {
@@ -374,10 +409,6 @@ protected:
     }
 
     bool walkPowerNode(PowerNode* node) override {
-        return walkPureBinaryExpression(node);
-    }
-
-    bool walkConcatenateNode(ConcatenateNode* node) override {
         return walkPureBinaryExpression(node);
     }
 
@@ -494,7 +525,7 @@ protected:
             flag = false;
         }
 
-        auto localType = ((Type::Resource*) type)->yields()->copy(node->_shared);
+        auto localType = ((Type::Resource*) type)->yields()->copy();
 
         _types->setTypeOf(node->local(), localType);
         node->local()->symbol()->_type = localType;  // local is implicitly defined, so need to set its type
@@ -737,6 +768,45 @@ protected:
 
     bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
         return walkPureBinaryExpression(node);
+    }
+
+    bool walkTypeBodyNode(TypeBodyNode* node) override {
+        bool flag = true;
+        for (auto d : *node->declarations()) {
+            flag = walk(d) || flag;
+        }
+        if ( flag ) {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::TYPE));
+        } else {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+        }
+        return flag;
+    }
+
+    bool walkClassAccessNode(ClassAccessNode* node) override {
+        bool pathresult = walk(node->path());
+        if ( !pathresult ) {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
+
+        const Type::Type* typeLVal = _types->getTypeOf(node->path());
+        if ( typeLVal->intrinsic() != Type::Intrinsic::OBJECT ) {
+            Reporting::typeError(
+                node->position(),
+                "Attempt to access property of variable of type " + Type::Type::intrinsicString(typeLVal->intrinsic()) 
+                + ": " + node->end()->name()
+            );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
+
+        _types->setTypeOf(node, ((Type::Object*) typeLVal)->getProperty(node->end()->name()));
+        return true;
+    }
+
+    bool walkIncludeStatementNode(IncludeStatementNode* node) override {
+        return true; // these should be removed by this point, should throw
     }
 
     [[nodiscard]] std::string toString() const override {

@@ -63,12 +63,11 @@ namespace swarmc::Lang {
             if (kind == Parser::token::DIVIDEASSIGN) return "DIVIDEASSIGN";
             if (kind == Parser::token::MODULUSASSIGN) return "MODULUSASSIGN";
             if (kind == Parser::token::POWERASSIGN) return "POWERASSIGN";
-            if (kind == Parser::token::CATASSIGN) return "CATASSIGN";
             if (kind == Parser::token::ANDASSIGN) return "ANDASSIGN";
             if (kind == Parser::token::ORASSIGN) return "ORASSIGN";
             if (kind == Parser::token::MODULUS) return "MODULUS";
             if (kind == Parser::token::POWER) return "POWER";
-            if (kind == Parser::token::CAT) return "CAT";
+            if (kind == Parser::token::DOT) return "DOT";
             if (kind == Parser::token::LARROWEQUALS) return "LARROWEQUALS";
             if (kind == Parser::token::RARROWEQUALS) return "RARROWEQUALS";
             if (kind == Parser::token::FN) return "FN";
@@ -77,6 +76,7 @@ namespace swarmc::Lang {
             if (kind == Parser::token::OF) return "OF";
             if (kind == Parser::token::TYPE) return "TYPE";
             if (kind == Parser::token::RESOURCE) return "RESOURCE";
+            if (kind == Parser::token::INCLUDE) return "INCLUDE";
 
             return "UNKNOWN";
         }

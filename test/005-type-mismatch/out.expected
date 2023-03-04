@@ -1,5 +1,5 @@
 [1m[31m[Type Error] [39m[22m[0m[1m[l: 2, c: 1] [22m[0mAttempted to initialize identifier of type Primitive<NUMBER> with value of type Primitive<STRING>.
-[0m[1m[31m[Type Error] [39m[22m[0m[1m[l: 5, c: 13] [22m[0mInvalid type Primitive<NUMBER> of left-hand operand to expression (expected: Primitive<STRING>).
+[0m[1m[31m[Type Error] [39m[22m[0m[1m[l: 5, c: 13] [22m[0mInvalid type Primitive<STRING> of right-hand operand to expression (expected: Primitive<NUMBER>).
 [0m[1m[31m[Type Error] [39m[22m[0m[1m[l: 9, c: 5] [22m[0mAttempted to initialize identifier of type Primitive<NUMBER> with value of type Primitive<STRING>.
 [0m[1m[31m[Syntax Error] [39m[22m[0m[1m[l: 14, c: 1] [22m[0mFound return statement outside of a function
 [0m[1m[31m[Syntax Error] [39m[22m[0m[1m[l: 20, c: 9] [22m[0mFound return statement outside of a function

@@ -26,4 +26,8 @@ namespace swarmc::Lang {
         return _path->lockable();
     }
 
+    SemanticSymbol* ClassAccessNode::lockable() const {
+        return _path->lockable();
+    }
+
 }

@@ -74,6 +74,7 @@ protected:
     void walkCallExpressionNode(CallExpressionNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
+        walk(node->func());
         for ( auto exp : *node->args() ) {
             walk(exp);
         }
@@ -162,14 +163,6 @@ protected:
     }
 
     void walkPowerNode(PowerNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->left());
-        walk(node->right());
-        pop_space();
-    }
-
-    void walkConcatenateNode(ConcatenateNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
         walk(node->left());
@@ -293,6 +286,26 @@ protected:
     }
 
     void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+    }
+
+    void walkTypeBodyNode(TypeBodyNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        for ( auto decl : *node->declarations() ) {
+            walk(decl);
+        }
+        pop_space();
+    }
+
+    void walkClassAccessNode(ClassAccessNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->path());
+        pop_space();
+    }
+
+    void walkIncludeStatementNode(IncludeStatementNode* node) override {
         _out << _prefix << node->toString() << std::endl;
     }
 

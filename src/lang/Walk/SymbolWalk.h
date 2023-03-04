@@ -68,7 +68,7 @@ protected:
     }
 
     SymbolMap* walkCallExpressionNode(CallExpressionNode* node) override {
-        auto map = new SymbolMap();
+        auto map = walk(node->func());
 
         for (auto i : *node->args()) {
             SymbolMap* m = walk(i);
@@ -182,16 +182,6 @@ protected:
     }
 
     SymbolMap* walkPowerNode(PowerNode* node) override {
-        SymbolMap* leftMap = walk(node->left());
-        SymbolMap* rightMap = walk(node->right());
-
-        leftMap->insert(rightMap->begin(), rightMap->end());
-        delete rightMap;
-
-        return leftMap;
-    }
-
-    SymbolMap* walkConcatenateNode(ConcatenateNode* node) override {
         SymbolMap* leftMap = walk(node->left());
         SymbolMap* rightMap = walk(node->right());
 
@@ -344,6 +334,24 @@ protected:
         delete rightMap;
 
         return leftMap;
+    }
+
+    SymbolMap* walkTypeBodyNode(TypeBodyNode* node) override {
+        return new SymbolMap();
+    }
+
+    SymbolMap* walkClassAccessNode(ClassAccessNode* node) override {
+        SymbolMap* path = walk(node->path());
+        SymbolMap* end = walk(node->end());
+
+        path->insert(end->begin(), end->end());
+        delete end;
+
+        return path;
+    }
+    
+    SymbolMap* walkIncludeStatementNode(IncludeStatementNode* node) override {
+        return walk(node->path());
     }
 
     [[nodiscard]] std::string toString() const override {

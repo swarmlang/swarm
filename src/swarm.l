@@ -73,6 +73,10 @@ return {
 	return makeBareToken(TokenKind::RETURN);
 }
 
+include {
+	return makeBareToken(TokenKind::INCLUDE);
+}
+
 "{" {
 	return makeBareToken(TokenKind::LBRACE);
 }
@@ -253,10 +257,6 @@ fn {
 	return makeBareToken(TokenKind::POWERASSIGN);
 }
 
-".=" {
-	return makeBareToken(TokenKind::CATASSIGN);
-}
-
 "&&=" {
 	return makeBareToken(TokenKind::ANDASSIGN);
 }
@@ -274,7 +274,7 @@ fn {
 }
 
 \. {
-	return makeBareToken(TokenKind::CAT);
+	return makeBareToken(TokenKind::DOT);
 }
 
 ({LETTER}|_)({LETTER}|{DIGIT}|_)* {
