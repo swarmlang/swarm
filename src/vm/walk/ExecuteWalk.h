@@ -49,6 +49,9 @@ namespace swarmc::Runtime {
         /** Cast the reference as an object type value, or raise an exception. */
         virtual ISA::ObjectTypeReference* ensureObjectType(const ISA::Reference*);
 
+        /** Cast the reference as an object value, or raise an exception. */
+        virtual ISA::ObjectReference* ensureObject(const ISA::Reference*);
+
         /** Cast the reference as a string, or raise an exception. */
         virtual ISA::StringReference* ensureString(const ISA::Reference*);
 
@@ -172,6 +175,11 @@ namespace swarmc::Runtime {
         ISA::Reference* walkOTypeGet(ISA::OTypeGet*) override;
         ISA::Reference* walkOTypeFinalize(ISA::OTypeFinalize*) override;
         ISA::Reference* walkOTypeSubset(ISA::OTypeSubset*) override;
+        ISA::Reference* walkObjInit(ISA::ObjInit*) override;
+        ISA::Reference* walkObjSet(ISA::ObjSet*) override;
+        ISA::Reference* walkObjGet(ISA::ObjGet*) override;
+        ISA::Reference* walkObjInstance(ISA::ObjInstance*) override;
+        ISA::Reference* walkObjCurry(ISA::ObjCurry*) override;
     };
 
 }

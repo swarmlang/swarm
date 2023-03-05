@@ -1,5 +1,4 @@
 [35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/047-nested-calls/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/047-nested-calls/test.svi
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER2>, TypeReference<Primitive<NUMBER>>>, pc: 4
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER1>, TypeReference<Primitive<NUMBER>>>, pc: 8
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER0>, TypeReference<Primitive<NUMBER>>>, pc: 12

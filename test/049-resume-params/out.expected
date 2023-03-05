@@ -1,5 +1,4 @@
 [35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/049-resume-params/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/049-resume-params/test.svi
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:HANDLER1>, TypeReference<Primitive<VOID>>>, pc: 10
 [35m   debug [39m[vm] assigneval Location<l:h1> PUSHEXHANDLER1<Location<f:HANDLER1>>
 [35m   debug [39m[vm] pushexhandler Location<f:HANDLER1>

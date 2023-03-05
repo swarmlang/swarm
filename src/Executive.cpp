@@ -30,7 +30,7 @@ int Executive::run(int argc, char **argv) {
 
     int result = 0;
 
-    logger->debug("Got input file: " + inputFile);
+    if ( !flagTestSuiteOutput ) logger->debug("Got input file: " + inputFile);
 
     if ( flagRunTest ) {
         auto c = runTest();
@@ -123,6 +123,8 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             usage = true;
         } else if ( failed ) {
             continue;
+        } else if ( arg == "--test-suite-output" ) {
+            flagTestSuiteOutput = true;
         } else if ( arg == "--dbg-output-tokens-to" ) {
             if ( i+1 >= params.size() ) {
                 logger->error("Missing required parameter for --dbg-output-tokens-to. Pass --help for more info.");
@@ -131,7 +133,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             }
 
             std::string outfile = params.at(i+1);
-            logger->debug("Token output file: " + outfile);
+            if ( !flagTestSuiteOutput ) logger->debug("Token output file: " + outfile);
 
             flagOutputTokens = true;
             flagOutputTokensTo = outfile;
@@ -146,7 +148,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             }
 
             std::string outfile = params.at(i+1);
-            logger->debug("Parse output file: " + outfile);
+            if ( !flagTestSuiteOutput ) logger->debug("Parse output file: " + outfile);
 
             flagOutputParse = true;
             flagOutputParseTo = outfile;
@@ -181,7 +183,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             }
 
             std::string path = params.at(i+1);
-            logger->debug("Will load external provider from: " + path);
+            if ( !flagTestSuiteOutput ) logger->debug("Will load external provider from: " + path);
             externalProviders.push_back(path);
             skipOne = true;
         } else if ( arg == "--binary" ) {
@@ -192,7 +194,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             }
 
             std::string name = params.at(i+1);
-            logger->debug("Will output binary to: " + name);
+            if ( !flagTestSuiteOutput ) logger->debug("Will output binary to: " + name);
             flagOutputBinary = true;
             outputBinaryTo = name;
             skipOne = true;
@@ -218,7 +220,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             }
 
             std::string name = params.at(i+1);
-            logger->debug("Will output results to: " + name);
+            if ( !flagTestSuiteOutput ) logger->debug("Will output results to: " + name);
             outputResultTo = name;
         } else if ( arg == "--dbg-use-d-guid" ) {
             nslib::priv::USE_DETERMINISTIC_UUIDS = true;
@@ -256,7 +258,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             }
 
             outputISATo = params.at(i+1);
-            logger->debug("Output file name: " + outputISATo);
+            if ( !flagTestSuiteOutput ) logger->debug("Output file name: " + outputISATo);
             skipOne = true;
             flagOutputISA = true;
         } else if ( arg == "--dbg-output-cfg-to" ) {
@@ -267,7 +269,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             }
 
             outputCFGTo = params.at(i+1);
-            logger->debug("Output file name: " + outputCFGTo);
+            if ( !flagTestSuiteOutput ) logger->debug("Output file name: " + outputCFGTo);
             skipOne = true;
             flagOutputCFG = true;
         } else if ( arg == "--no-remove-self-assigns" ) {
@@ -300,7 +302,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
     if ( !noInputFile ) {
         _input = new std::ifstream(inputFile);
         if ( _input->bad() ) {
-            logger->error("Could not open input file: " + inputFile);
+            if ( !flagTestSuiteOutput ) logger->error("Could not open input file: " + inputFile);
 
             delete _input;
             _input = nullptr;
@@ -372,8 +374,12 @@ void Executive::printUsage() {
             ->println();
 
     console->bold()->print("  --log-file <PATH>  :  ", true)
-            ->println("Enable logging to the specified file")
-            ->println();
+        ->println("Enable logging to the specified file")
+        ->println();
+
+    console->bold()->print("  --test-suite-output  :  ", true)
+        ->println("Format output for test suite analysis")
+        ->println();
 
     console->debug();
         console->bold()->print("  --dbg-output-tokens-to <OUTFILE>  :  ", true)

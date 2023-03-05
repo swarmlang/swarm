@@ -27,6 +27,8 @@ namespace nslib {
 
 namespace swarmc::Type {
 
+    std::size_t Type::_nextId = 0;
+
     std::map<Intrinsic, Primitive*> Primitive::_primitives;
 
     std::map<std::string, Opaque*> Opaque::_opaques;

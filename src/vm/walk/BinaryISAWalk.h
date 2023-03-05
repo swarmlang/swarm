@@ -713,6 +713,40 @@ namespace swarmc::ISA {
                 Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
             );
         }
+
+        ObjInit* walkObjInit(binn* obj) {
+            return new ObjInit(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
+            );
+        }
+
+        ObjSet* walkObjSet(binn* obj) {
+            return new ObjSet(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                walkLocationReference((binn*) binn_map_map(obj, BC_SECOND)),
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
+            );
+        }
+
+        ObjGet* walkObjGet(binn* obj) {
+            return new ObjGet(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
+            );
+        }
+
+        ObjInstance* walkObjInstance(binn* obj) {
+            return new ObjInstance(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
+            );
+        }
+
+        ObjCurry* walkObjCurry(binn* obj) {
+            return new ObjCurry(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
+                walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
+            );
+        }
     };
 
 }

@@ -24,7 +24,8 @@ Here we're going to declare a basic `ANIMAL` object type with a `o:NAME` propert
 
 ```text
 -- Construct the type of the o:SPEAK property:
-$l:SPEAK_T <- call f:LAMBDA0_T p:STRING
+$l:SPEAK_T_CALL <- curry f:LAMBDA1_T p:THIS
+$l:SPEAK_T <- call $l:SPEAK_T_CALL p:STRING
 
 -- Construct the object type:
 $l:ANIMAL_T_PROTO <- otypeinit
@@ -85,7 +86,8 @@ First, we construct the `DOG_T` type:
 
 ```text
 -- Construct the type of o:WAG_TAIL
-$l:WAG_TAIL_T <- call f:LAMBDA0_T p:VOID
+$l:WAG_TAIL_T_CALL <- curry f:LAMBDA1_T p:THIS
+$l:WAG_TAIL_T <- call $l:WAG_TAIL_T_CALL p:VOID
 
 -- Construct the DOG_T object type
 $l:DOG_T_PROTO <- otypesubset $l:ANIMAL_T

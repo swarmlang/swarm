@@ -1,5 +1,4 @@
 [35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/050-nested-exceptions/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/050-nested-exceptions/test.svi
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER_HANDLER>, TypeReference<Primitive<VOID>>>, pc: 4
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER_AFTER>, TypeReference<Primitive<NUMBER>>>, pc: 6
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER_THROW>, TypeReference<Primitive<VOID>>>, pc: 9

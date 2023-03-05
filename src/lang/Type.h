@@ -2,7 +2,9 @@
 #define SWARMC_TYPE_H
 
 #include <map>
+#include <set>
 #include <sstream>
+#include <utility>
 #include <vector>
 #include "../shared/nslib.h"
 #include "../errors/InvalidPrimitiveTypeInstantiation.h"
@@ -33,10 +35,10 @@ namespace swarmc::Type {
         AMBIGUOUS,
         CONTRADICTION,
         OPAQUE,
-        OTYPE_PROTO,
         OTYPE,
         OBJECT_PROTO,
         OBJECT,
+        THIS,
     };
 }
 
@@ -63,11 +65,15 @@ namespace swarmc::Type {
             if ( intrinsic == Intrinsic::RESOURCE ) return "RESOURCE";
             if ( intrinsic == Intrinsic::AMBIGUOUS ) return "AMBIGUOUS";
             if ( intrinsic == Intrinsic::OPAQUE ) return "OPAQUE";
-            if ( intrinsic == Intrinsic::OTYPE_PROTO ) return "OTYPE_PROTO";
             if ( intrinsic == Intrinsic::OTYPE ) return "OTYPE";
             if ( intrinsic == Intrinsic::OBJECT_PROTO ) return "OBJECT_PROTO";
             if ( intrinsic == Intrinsic::OBJECT ) return "OBJECT";
+            if ( intrinsic == Intrinsic::THIS ) return "THIS";
             return "CONTRADICTION";
+        }
+
+        Type() {
+            _id = _nextId++;
         }
 
         ~Type() override = default;
@@ -77,6 +83,13 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] virtual Type* copy() const = 0;
+
+        virtual void transform(std::function<Type*(Type*)> visitor) {
+            std::vector<std::size_t> visited;
+            transformRecursively(std::move(visitor), visited);
+        }
+
+        virtual void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>&) = 0;
 
         [[nodiscard]] virtual Intrinsic intrinsic() const {
             return Intrinsic::CONTRADICTION;
@@ -100,8 +113,14 @@ namespace swarmc::Type {
             return isAssignableTo(other.get());
         }
 
+        [[nodiscard]] virtual std::size_t getId() const {
+            return _id;
+        }
+
     protected:
         friend class Lang::TypeLiteral;
+        std::size_t _id;
+        static std::size_t _nextId;
     };
 
     class Primitive : public Type {
@@ -127,12 +146,12 @@ namespace swarmc::Type {
                 || intrinsic == Intrinsic::VOID
                 || intrinsic == Intrinsic::UNIT
                 || intrinsic == Intrinsic::TYPE
-                || intrinsic == Intrinsic::OTYPE_PROTO
                 || intrinsic == Intrinsic::OTYPE
+                || intrinsic == Intrinsic::THIS
             );
         }
 
-        explicit Primitive(Intrinsic intrinsic) : _intrinsic(intrinsic) {}
+        explicit Primitive(Intrinsic intrinsic) : Type(), _intrinsic(intrinsic) {}
 
         [[nodiscard]] serial::tag_t getSerialKey() const override {
             return "Type::Primitive";
@@ -140,6 +159,10 @@ namespace swarmc::Type {
 
         [[nodiscard]] Primitive* copy() const override {
             return Primitive::of(_intrinsic);
+        }
+
+        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
         }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
@@ -155,8 +178,7 @@ namespace swarmc::Type {
             if ( !Primitive::isPrimitive(other->intrinsic()) ) return false;
             if ( intrinsic() == Intrinsic::TYPE ) {
                 return other->intrinsic() == Intrinsic::TYPE
-                    || other->intrinsic() == Intrinsic::OTYPE
-                    || other->intrinsic() == Intrinsic::OTYPE_PROTO;
+                    || other->intrinsic() == Intrinsic::OTYPE;
             }
             return other->intrinsic() == intrinsic();
         }
@@ -184,7 +206,7 @@ namespace swarmc::Type {
             return inst;
         }
 
-        explicit Opaque(std::string name) : _name(std::move(name)) {}
+        explicit Opaque(std::string name) : Type(), _name(std::move(name)) {}
 
         [[nodiscard]] Intrinsic intrinsic() const override {
             return Intrinsic::OPAQUE;
@@ -200,6 +222,10 @@ namespace swarmc::Type {
 
         [[nodiscard]] Opaque* copy() const override {
             return Opaque::of(_name);
+        }
+
+        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
         }
 
     protected:
@@ -238,7 +264,11 @@ namespace swarmc::Type {
             return Ambiguous::of();
         }
 
-        explicit Ambiguous(Lang::LValNode* lval = nullptr) : _lval(lval) {}
+        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
+        }
+
+        explicit Ambiguous(Lang::LValNode* lval = nullptr) : Type(), _lval(lval) {}
     protected:
 
         static Ambiguous* _inst;
@@ -247,7 +277,7 @@ namespace swarmc::Type {
 
     class Map : public Type {
     public:
-        explicit Map(Type* values) : _values(useref(values)) {}
+        explicit Map(Type* values) : Type(), _values(useref(values)) {}
 
         ~Map() override {
             freeref(_values);
@@ -269,6 +299,16 @@ namespace swarmc::Type {
             return new Map(_values->copy());
         }
 
+        void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
+            if ( stl::contains(visited, _values->getId()) ) {
+                return;
+            }
+
+            _values->transformRecursively(visitor, visited);
+            _values = swapref(_values, visitor(_values));
+        }
+
         bool isAssignableTo(const Type* other) const override {
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::MAP ) return false;
@@ -284,7 +324,7 @@ namespace swarmc::Type {
 
     class Enumerable : public Type {
     public:
-        explicit Enumerable(Type* values) : _values(useref(values)) {}
+        explicit Enumerable(Type* values) : Type(), _values(useref(values)) {}
 
         ~Enumerable() override {
             freeref(_values);
@@ -306,6 +346,15 @@ namespace swarmc::Type {
             return new Enumerable(_values->copy());
         }
 
+        void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
+            if ( stl::contains(visited, _values->getId()) ) {
+                return;
+            }
+            _values->transformRecursively(visitor, visited);
+            _values = swapref(_values, visitor(_values));
+        }
+
         bool isAssignableTo(const Type* other) const override {
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::ENUMERABLE ) return false;
@@ -325,7 +374,7 @@ namespace swarmc::Type {
             return new Resource(inner);
         }
 
-        explicit Resource(Type* yields) : _yields(useref(yields)) {}
+        explicit Resource(Type* yields) : Type(), _yields(useref(yields)) {}
 
         ~Resource() override {
             freeref(_yields);
@@ -347,6 +396,15 @@ namespace swarmc::Type {
             return new Resource(_yields);
         }
 
+        void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
+            if ( stl::contains(visited, _yields->getId()) ) {
+                return;
+            }
+            _yields->transformRecursively(visitor, visited);
+            _yields = swapref(_yields, visitor(_yields));
+        }
+
         bool isAssignableTo(const Type* other) const override {
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::RESOURCE ) return false;
@@ -366,7 +424,7 @@ namespace swarmc::Type {
             return new Stream(inner);
         }
 
-        explicit Stream(Type* inner) : _inner(useref(inner)) {}
+        explicit Stream(Type* inner) : Type(), _inner(useref(inner)) {}
 
         ~Stream() override {
             freeref(_inner);
@@ -388,6 +446,15 @@ namespace swarmc::Type {
             return new Stream(_inner->copy());
         }
 
+        void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
+            if ( stl::contains(visited, _inner->getId()) ) {
+                return;
+            }
+            _inner->transformRecursively(visitor, visited);
+            _inner = swapref(_inner, visitor(_inner));
+        }
+
         bool isAssignableTo(const Type* other) const override {
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::STREAM ) return false;
@@ -404,7 +471,7 @@ namespace swarmc::Type {
 
     class Lambda : public Type {
     public:
-        explicit Lambda(Type* returns): _returns(useref(returns)) {}
+        explicit Lambda(Type* returns): Type(), _returns(useref(returns)) {}
 
         ~Lambda() override {
             freeref(_returns);
@@ -420,6 +487,15 @@ namespace swarmc::Type {
 
         [[nodiscard]] virtual std::vector<const Type*> params() const {
             return {};
+        }
+
+        void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
+            if ( stl::contains(visited, _returns->getId()) ) {
+                return;
+            }
+            _returns->transformRecursively(visitor, visited);
+            _returns = swapref(_returns, visitor(_returns));
         }
 
     protected:
@@ -473,6 +549,15 @@ namespace swarmc::Type {
             return new Lambda1(_param->copy(), _returns->copy());
         }
 
+        void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
+            Lambda::transformRecursively(visitor, visited);
+            if ( stl::contains(visited, _param->getId()) ) {
+                return;
+            }
+            _param->transformRecursively(visitor, visited);
+            _param = swapref(_param, visitor(_param));
+        }
+
         bool isAssignableTo(const Type* other) const override {
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::LAMBDA1 ) return false;
@@ -502,7 +587,7 @@ namespace swarmc::Type {
 
     class Object : public Type {
     public:
-        explicit Object(Object* parent = nullptr) : _parent(useref(parent)) {}
+        explicit Object(Object* parent = nullptr) : Type(), _parent(useref(parent)) {}
 
         ~Object() override {
             freeref(_parent);
@@ -522,6 +607,23 @@ namespace swarmc::Type {
             return inst;
         }
 
+        void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
+
+            if ( _parent != nullptr && !stl::contains(visited, _parent->getId()) ) {
+                _parent->transformRecursively(visitor, visited);
+            }
+
+            for (auto& _property : _properties) {
+                if ( stl::contains(visited, _property.second->getId()) ) {
+                    continue;
+                }
+
+                _property.second->transformRecursively(visitor, visited);
+                _property.second = swapref(_property.second, visitor(_property.second));
+            }
+        }
+
         [[nodiscard]] bool isFinal() const {
             return _final;
         }
@@ -533,8 +635,8 @@ namespace swarmc::Type {
             }
 
             if ( !_final ) {
-                // Cannot assign object prototypes
-                return false;
+                // Object prototypes can only be assigned to p:THIS in prototypical types
+                return other->intrinsic() == Intrinsic::THIS;
             }
 
             auto otherObject = dynamic_cast<const Object*>(other);
@@ -605,11 +707,29 @@ namespace swarmc::Type {
         [[nodiscard]] Object* finalize() const {
             auto inst = copy();
             inst->_final = true;
+
+            // Replace all instances of p:THIS with the actual object type
+            inst->transform([inst](Type* t) -> Type* {
+                if ( t->intrinsic() == Intrinsic::THIS ) {
+                    return inst;
+                }
+
+                return t;
+            });
+
             return inst;
         }
 
         [[nodiscard]] std::map<std::string, Type*> getProperties() const {
             return _properties;
+        }
+
+        [[nodiscard]] std::size_t numberOfProperties() const {
+            auto size = _properties.size();
+            if ( _parent != nullptr ) {
+                size += _parent->numberOfProperties();
+            }
+            return size;
         }
 
         [[nodiscard]] Object* getParent() const {

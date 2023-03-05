@@ -1,5 +1,4 @@
 [35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/051-file-io/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/051-file-io/test.svi
 [35m   debug [39m[vm] assignvalue Location<l:path> StringReference<test/051-file-io/test.txt>
 [35m   debug [39m[vm] Location<l:path> <- StringReference<test/051-file-io/test.txt>
 [35m   debug [39m[vm] assigneval Location<l:fh> CALL1<Location<f:OPEN_FILE>, Location<l:path>>

@@ -71,6 +71,65 @@ namespace swarmc::ISA {
         }
     };
 
+
+
+    class ObjInit : public UnaryInstruction<Reference> {
+    public:
+        explicit ObjInit(Reference* otype) : UnaryInstruction<Reference>(Tag::OBJINIT, useref(otype)) {}
+        ~ObjInit() override { freeref(_first); }
+        [[nodiscard]] ObjInit* copy() const override {
+            return new ObjInit(_first);
+        }
+    };
+
+    class ObjSet : public TrinaryInstruction<Reference, LocationReference, Reference> {
+    public:
+        ObjSet(Reference* obj, LocationReference* prop, Reference* value) :
+            TrinaryInstruction<Reference, LocationReference, Reference>(Tag::OBJSET, useref(obj), useref(prop), useref(value)) {}
+        ~ObjSet() override {
+            freeref(_first);
+            freeref(_second);
+            freeref(_third);
+        }
+        [[nodiscard]] ObjSet* copy() const override {
+            return new ObjSet(_first, _second, _third);
+        }
+    };
+
+    class ObjGet : public BinaryInstruction<Reference, LocationReference> {
+    public:
+        ObjGet(Reference* obj, LocationReference* prop) :
+            BinaryInstruction<Reference, LocationReference>(Tag::OBJGET, useref(obj), useref(prop)) {}
+        ~ObjGet() override {
+            freeref(_first);
+            freeref(_second);
+        }
+        [[nodiscard]] ObjGet* copy() const override {
+            return new ObjGet(_first, _second);
+        }
+    };
+
+    class ObjInstance : public UnaryInstruction<Reference> {
+    public:
+        explicit ObjInstance(Reference* obj) : UnaryInstruction<Reference>(Tag::OBJINSTANCE, useref(obj)) {}
+        ~ObjInstance() override { freeref(_first); }
+        [[nodiscard]] ObjInstance* copy() const override {
+            return new ObjInstance(_first);
+        }
+    };
+
+    class ObjCurry : public BinaryInstruction<Reference, LocationReference> {
+    public:
+        ObjCurry(Reference* obj, LocationReference* prop) :
+            BinaryInstruction<Reference, LocationReference>(Tag::OBJCURRY, useref(obj), useref(prop)) {}
+        ~ObjCurry() override {
+            freeref(_first);
+            freeref(_second);
+        }
+        [[nodiscard]] ObjCurry* copy() const override {
+            return new ObjCurry(_first, _second);
+        }
+    };
 }
 
 #endif //SWARM_ISA_OBJECTS_H

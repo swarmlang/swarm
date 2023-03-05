@@ -109,6 +109,11 @@ namespace swarmc::ISA {
             if ( inst->tag() == Tag::OTYPEGET ) return walkOTypeGet((OTypeGet*) inst);
             if ( inst->tag() == Tag::OTYPEFINALIZE ) return walkOTypeFinalize((OTypeFinalize*) inst);
             if ( inst->tag() == Tag::OTYPESUBSET ) return walkOTypeSubset((OTypeSubset*) inst);
+            if ( inst->tag() == Tag::OBJINIT ) return walkObjInit((ObjInit*) inst);
+            if ( inst->tag() == Tag::OBJSET ) return walkObjSet((ObjSet*) inst);
+            if ( inst->tag() == Tag::OBJGET ) return walkObjGet((ObjGet*) inst);
+            if ( inst->tag() == Tag::OBJINSTANCE ) return walkObjInstance((ObjInstance*) inst);
+            if ( inst->tag() == Tag::OBJCURRY ) return walkObjCurry((ObjCurry*) inst);
 
             throw Errors::SwarmError("Invalid instruction tag: " + inst->toString());
         }
@@ -196,6 +201,11 @@ namespace swarmc::ISA {
         virtual TReturn walkOTypeGet(OTypeGet*) = 0;
         virtual TReturn walkOTypeFinalize(OTypeFinalize*) = 0;
         virtual TReturn walkOTypeSubset(OTypeSubset*) = 0;
+        virtual TReturn walkObjInit(ObjInit*) = 0;
+        virtual TReturn walkObjSet(ObjSet*) = 0;
+        virtual TReturn walkObjGet(ObjGet*) = 0;
+        virtual TReturn walkObjInstance(ObjInstance*) = 0;
+        virtual TReturn walkObjCurry(ObjCurry*) = 0;
     };
 
 }

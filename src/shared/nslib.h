@@ -605,6 +605,11 @@ namespace nslib {
             std::transform(v.begin(), v.end(), out, f);
             return out;
         }
+
+        template<class ContainerT, class ElemT>
+        bool contains(ContainerT c, const ElemT& v) {
+            return std::find(c.begin(), c.end(), v) != c.end();
+        }
     }
 
 

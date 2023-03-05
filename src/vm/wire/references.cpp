@@ -68,6 +68,54 @@ namespace swarmc::Runtime {
         });
 
 
+        // Object references
+        factory->registerReducer(s(ReferenceTag::OBJECT), [factory](const Reference* baseRef, VirtualMachine* vm) {
+            auto ref = dynamic_cast<const ObjectReference*>(baseRef);
+            auto obj = binn_map();
+
+            auto propertyKeys = binn_list();
+            auto propertyValues = binn_list();
+            for ( const auto& p : ref->getProperties() ) {
+                binn_list_add_str(propertyKeys, strdup(p.first.c_str()));
+                binn_list_add_map(propertyValues, factory->reduce(p.second, vm));
+            }
+
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
+            binn_map_set_map(obj, BC_TYPE, types()->reduce(ref->type(), nullptr));
+            binn_map_set_map(obj, BC_EXTRA, ref->getExtraSerialData());
+            binn_map_set_bool(obj, BC_FINAL, ref->isFinal());
+            binn_map_set_list(obj, BC_OTYPE_K, propertyKeys);
+            binn_map_set_list(obj, BC_OTYPE_V, propertyValues);
+
+            return obj;
+        });
+        factory->registerProducer(s(ReferenceTag::OBJECT), [factory](binn* obj, VirtualMachine*) {
+            auto type = types()->produce((binn*) binn_map_map(obj, BC_TYPE), nullptr);
+            assert(type->intrinsic() == Type::Intrinsic::OBJECT);
+
+            auto otype = dynamic_cast<Type::Object*>(type);
+            auto inst = new ObjectReference(otype);
+
+            auto propertyKeys = binn_map_list(obj, BC_OTYPE_K);
+            auto propertyValues = binn_map_list(obj, BC_OTYPE_V);
+            binn_iter iter;
+            binn binnPropertyValue;
+            int i = -1;
+            binn_list_foreach(propertyValues, binnPropertyValue) {
+                i += 1;
+                auto key = binn_list_str(propertyKeys, i);
+                auto value = factory->produce(&binnPropertyValue, nullptr);
+                inst->setProperty(key, value);
+            }
+
+            if ( binn_map_bool(obj, BC_FINAL) ) {
+                inst = inst->finalize();
+            }
+            inst->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return inst;
+        });
+
+
         // Function references
         factory->registerReducer(s(ReferenceTag::FUNCTION), [factory](const Reference* baseRef, VirtualMachine* vm) {
             auto ref = dynamic_cast<const FunctionReference*>(baseRef);

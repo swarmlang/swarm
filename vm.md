@@ -159,6 +159,7 @@ Shared storage is global across all jobs that have access to a location.
     - `objcurry $lloc $oloc` - get a pre-curried reference to an object method
       - Most object methods take the object itself as the first parameter.
       - To aid this paradigm, `objcurry` returns an instance of the `$oloc` method on the `$lloc` object pre-curried with `$lloc`
+      - The type of `$oloc` must be `p:THIS :: ...`
       - It is equivalent to:
         ```text
         $l:method <- objget $lloc $oloc

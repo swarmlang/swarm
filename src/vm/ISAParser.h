@@ -613,6 +613,35 @@ namespace swarmc::ISA {
                     parseUnaryReference(instructionLeader, tokens, startAt+i)
                 ));
                 i += 1;
+            } else if ( instructionLeader == "objinit" ) {
+                is.push_back(new ISA::ObjInit(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "objset" ) {
+                is.push_back(new ISA::ObjSet(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1),
+                    parseUnaryReference(instructionLeader, tokens, startAt+i+2)
+                ));
+                i += 3;
+            } else if ( instructionLeader == "objget" ) {
+                is.push_back(new ISA::ObjGet(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1)
+                ));
+                i += 2;
+            } else if ( instructionLeader == "objinstance" ) {
+                is.push_back(new ISA::ObjInstance(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "objcurry" ) {
+                is.push_back(new ISA::ObjCurry(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1)
+                ));
+                i += 2;
             } else {
                 throw Errors::SwarmError("Malformed instruction: `" + instructionLeader + "` (unknown instruction tag)");
             }
@@ -765,7 +794,8 @@ namespace swarmc::ISA {
             else if ( token == "p:NUMBER" ) type = Type::Primitive::of(Type::Intrinsic::NUMBER);
             else if ( token == "p:STRING" ) type = Type::Primitive::of(Type::Intrinsic::STRING);
             else if ( token == "p:BOOLEAN" ) type = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
-            else throw Errors::SwarmError("Malformed primitive type name: `" + token + "` (expected one of p:TYPE, p:NUMBER, p:STRING, p:BOOLEAN, p:VOID)");
+            else if ( token == "p:THIS" ) type = Type::Primitive::of(Type::Intrinsic::THIS);
+            else throw Errors::SwarmError("Malformed primitive type name: `" + token + "` (expected one of p:TYPE, p:NUMBER, p:STRING, p:BOOLEAN, p:VOID, p:THIS)");
 
             return new ISA::TypeReference(type);
         }

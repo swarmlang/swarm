@@ -8,7 +8,7 @@ mkdir -p "run_tests/$1"
 
 TEST_DIR="$(realpath test/$1)"
 RUN_DIR="$(realpath run_tests/$1)"
-export SWARMC="$(realpath ./swarmc)"
+export SWARMC="$(realpath ./swarmc) --test-suite-output"
 export TESTSWARM="$(realpath $TEST_DIR/test.swarm)"
 export TESTSVI="$(realpath $TEST_DIR/test.svi)"
 export TESTJSON="$(realpath $TEST_DIR/test.json)"

@@ -104,6 +104,11 @@ namespace swarmc::ISA {
         if ( tag == Tag::OTYPEGET ) return "OTYPEGET";
         if ( tag == Tag::OTYPEFINALIZE ) return "OTYPEFINALIZE";
         if ( tag == Tag::OTYPESUBSET ) return "OTYPESUBSET";
+        if ( tag == Tag::OBJINIT ) return "OBJINIT";
+        if ( tag == Tag::OBJSET ) return "OBJSET";
+        if ( tag == Tag::OBJGET ) return "OBJGET";
+        if ( tag == Tag::OBJINSTANCE ) return "OBJINSTANCE";
+        if ( tag == Tag::OBJCURRY ) return "OBJCURRY";
         return "UNKNOWN";
     }
 

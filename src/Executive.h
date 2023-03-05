@@ -33,6 +33,7 @@ protected:
     bool flagMultiThreaded = false;
     bool flagDebugger = false;
     bool flagInteractiveDebug = false;
+    bool flagTestSuiteOutput = false;
     bool flagVerbose = false;
     bool flagClearQueue = false;
     bool flagWorkQueue = false;

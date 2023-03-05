@@ -1,5 +1,4 @@
 [35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/037-basic_execution/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/037-basic_execution/test.svi
 [35m   debug [39m[vm] assigneval Location<l:a> PLUS<NumberReference<3.000000>, NumberReference<4.000000>>
 [35m   debug [39m[vm] plus NumberReference<3.000000> NumberReference<4.000000>
 [35m   debug [39m[vm] ensureNumber: NumberReference<3.000000>
