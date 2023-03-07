@@ -121,6 +121,7 @@ namespace swarmc::Type {
         friend class Lang::TypeLiteral;
         std::size_t _id;
         static std::size_t _nextId;
+        static std::map<std::size_t, std::vector<std::size_t>> _assignableCache;
     };
 
     class Primitive : public Type {
@@ -310,6 +311,7 @@ namespace swarmc::Type {
         }
 
         bool isAssignableTo(const Type* other) const override {
+            if ( other->getId() == _id ) return true;
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::MAP ) return false;
             return _values->isAssignableTo(((Map*) other)->values());
@@ -406,6 +408,7 @@ namespace swarmc::Type {
         }
 
         bool isAssignableTo(const Type* other) const override {
+            if ( other->getId() == _id ) return true;
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::RESOURCE ) return false;
             return _yields->isAssignableTo(((Resource*) other)->yields());
@@ -456,6 +459,7 @@ namespace swarmc::Type {
         }
 
         bool isAssignableTo(const Type* other) const override {
+            if ( other->getId() == _id ) return true;
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::STREAM ) return false;
             return _inner->isAssignableTo(((Stream*) other)->inner());
@@ -515,6 +519,7 @@ namespace swarmc::Type {
         }
 
         bool isAssignableTo(const Type* other) const override {
+            if ( other->getId() == _id ) return true;
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::LAMBDA0 ) return false;
             return _returns->isAssignableTo(((Lambda0*) other)->returns());
@@ -559,6 +564,7 @@ namespace swarmc::Type {
         }
 
         bool isAssignableTo(const Type* other) const override {
+            if ( other->getId() == _id ) return true;
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::LAMBDA1 ) return false;
             return _returns->isAssignableTo(((Lambda1*) other)->returns()) && _param->isAssignableTo(((Lambda1*) other)->param());
@@ -629,10 +635,18 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] bool isAssignableTo(const Type* other) const override {
+            if ( other->getId() == _id ) return true;
+
             if ( other->intrinsic() != Intrinsic::OBJECT ) {
                 // Can only assign to finalized object types
                 return false;
             }
+
+            // FIXME: p:THIS blows this all to hell. And by hell, I mean off the end of the stack space.
+            // The problem:
+            // (1) p:THIS
+                // o:METHOD1 of type p:THIS :: p:STRING
+                    // Is p:THIS assignable to p:THIS? to check, goto (1)
 
             if ( !_final ) {
                 // Object prototypes can only be assigned to p:THIS in prototypical types
@@ -640,15 +654,16 @@ namespace swarmc::Type {
             }
 
             auto otherObject = dynamic_cast<const Object*>(other);
-            auto otherIter = otherObject->_properties.begin();
-            for ( ; otherIter != otherObject->_properties.end(); ++otherIter ) {
-                auto thisResult = _properties.find(otherIter->first);
-                if ( thisResult == _properties.end() ) {
+            auto properties = otherObject->getCollapsedProperties();
+            auto otherIter = properties.begin();
+            for ( ; otherIter != properties.end(); ++otherIter ) {
+                auto thisResult = getProperty(otherIter->first);
+                if ( thisResult == nullptr ) {
                     // We don't have a required property on the base type
                     return false;
                 }
 
-                if ( !thisResult->second->isAssignableTo(otherIter->second) ) {
+                if ( !thisResult->isAssignableTo(otherIter->second) ) {
                     // Our property has an incompatible type
                     return false;
                 }
@@ -691,7 +706,7 @@ namespace swarmc::Type {
             return this;
         }
 
-        [[nodiscard]] Type* getProperty(const std::string& name) {
+        [[nodiscard]] Type* getProperty(const std::string& name) const {
             auto match = _properties.find(name);
             if ( match != _properties.end() ) {
                 return match->second;
@@ -724,6 +739,11 @@ namespace swarmc::Type {
             return _properties;
         }
 
+        [[nodiscard]] std::map<std::string, Type*> getCollapsedProperties() const {
+            std::map<std::string, Type*> map;
+            return getCollapsedProperties(map);
+        }
+
         [[nodiscard]] std::size_t numberOfProperties() const {
             auto size = _properties.size();
             if ( _parent != nullptr ) {
@@ -743,6 +763,18 @@ namespace swarmc::Type {
         bool _final = false;
         std::map<std::string, Type*> _properties;
         Object* _parent = nullptr;
+
+        [[nodiscard]] std::map<std::string, Type*> getCollapsedProperties(std::map<std::string, Type*>& map) const {
+            if ( _parent != nullptr ) {
+                map = _parent->getCollapsedProperties(map);
+            }
+
+            for ( const auto& pair : _properties ) {
+                map[pair.first] = pair.second;
+            }
+
+            return map;
+        }
 
         void checkParentCompatibility(const std::string& name, const Type* type) const {
             if ( _parent == nullptr ) {

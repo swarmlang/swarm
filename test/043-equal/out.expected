@@ -1,4 +1,3 @@
-[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/043-equal/test.svi
 [35m   debug [39m[vm] assigneval Location<l:a> EQUAL<NumberReference<4.000000>, NumberReference<2.000000>>
 [35m   debug [39m[vm] equal NumberReference<4.000000> NumberReference<2.000000>
 [35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>

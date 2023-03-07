@@ -117,7 +117,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         }
 
         std::string arg = params.at(i);
-        logger->debug("Parsing argument: " + arg);
+        if ( !flagTestSuiteOutput ) logger->debug("Parsing argument: " + arg);
 
         if ( arg == "--help" ) {
             usage = true;

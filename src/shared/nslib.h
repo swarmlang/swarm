@@ -1620,7 +1620,11 @@ namespace nslib {
     class IRefCountable {
     public:
         IRefCountable() : _nslibRefCount(0), _nslibRefDisable(false) {}
-        virtual ~IRefCountable() = default;
+        virtual ~IRefCountable() {
+            for ( const auto& pair : _onFreeCallbacks ) {
+                pair.second();
+            }
+        }
 
         /**
          * WARNING: DO NOT CALL DIRECTLY
@@ -1695,9 +1699,24 @@ namespace nslib {
 
         /** If true, the instance can be deleted. */
         [[nodiscard]] virtual bool nslibShouldFree() const { return !_nslibRefDisable && _nslibRefCount < 1; }
+
+        virtual std::size_t nslibOnFree(std::function<void()> callback) {
+            auto id = _nextOnFreeCallbackId++;
+            _onFreeCallbacks[id] = std::move(callback);
+            return id;
+        }
+
+        virtual void nslibUnregisterOnFree(std::size_t id) {
+            auto iter = _onFreeCallbacks.find(id);
+            if ( iter != _onFreeCallbacks.end() ) {
+                _onFreeCallbacks.erase(iter);
+            }
+        }
     protected:
         std::size_t _nslibRefCount;
         bool _nslibRefDisable;
+        std::map<std::size_t, std::function<void()>> _onFreeCallbacks;
+        std::size_t _nextOnFreeCallbackId = 1;
 
 #ifdef NSLIB_GC_TRACK
         std::string _nslibRefId = uuid();
@@ -1780,6 +1799,41 @@ namespace nslib {
     template <typename T>
     [[nodiscard]] inline std::string s(const InlineRefHandle<T>& v) {
         return s(v.get());
+    }
+
+
+    /** Holds an IRefCountable, but does not prevent it from being garbage collected. */
+    template <typename T>
+    class WeakRef : public IStringable {
+    public:
+        WeakRef(T* inst, IRefCountable* ref) : _inst(inst), _ref(ref) {
+            _callbackId = ref->nslibOnFree([this]() {
+                _inst = nullptr;
+                _ref = nullptr;
+            });
+        }
+
+        ~WeakRef() override {
+            if ( _ref != nullptr ) {
+                _ref->nslibUnregisterOnFree(_callbackId);
+            }
+        }
+
+        [[nodiscard]] T* get() const { return _inst; }
+        T* operator->() { return get(); }
+
+        [[nodiscard]] std::string toString() const override {
+            return "WeakRef<" + s(_ref) + ">";
+        }
+    protected:
+        T* _inst;
+        IRefCountable* _ref;
+        std::size_t _callbackId = 0;
+    };
+
+    template <typename T>
+    WeakRef<T> weakref(priv::RefCountable auto inst) {
+        return WeakRef(inst, inst);
     }
 
 

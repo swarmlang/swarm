@@ -1,4 +1,3 @@
-[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/042-with/test.svi
 [35m   debug [39m[vm] assigneval Location<l:tag_call> CURRY<Location<f:TAG>, StringReference<mykey>>
 [35m   debug [39m[vm] curry Location<f:TAG> StringReference<mykey>
 [35m   debug [39m[vm] ensureFunction: FunctionReference<TagFunction<>>
@@ -46,6 +45,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:CB> (pc: 4)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:tag_rs_t>, Location<l:v>>
 [35m   debug [39m[vm] fnparam Location<l:tag_rs_t> Location<l:v>
+[35m   debug [39m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::TAG>>>
 [35m   debug [39m[vm] fnparam: Location<l:v> <- ResourceReference<Prologue::TagResource<mykey -> myvalue>>
 [35m   debug [39m[vm] scopeof Location<l:b>
 [35m   debug [39m[vm] assignvalue Location<l:b> Location<l:tag>

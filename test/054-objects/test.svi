@@ -1,0 +1,93 @@
+-- FIXME: replace with otypecurry
+$l:DISPLAY_NAME_T_CALL <- curry f:LAMBDA1_T p:THIS
+$l:DISPLAY_NAME_T <- call $l:DISPLAY_NAME_T_CALL p:STRING
+
+$l:BOOK_T_PROTO <- otypeinit
+otypeprop $l:BOOK_T_PROTO o:TITLE p:STRING
+otypeprop $l:BOOK_T_PROTO o:AUTHOR p:STRING
+otypeprop $l:BOOK_T_PROTO o:DISPLAY_NAME $l:DISPLAY_NAME_T
+$l:BOOK_T <- otypefinalize $l:BOOK_T_PROTO
+
+beginfn f:BOOK_DISPLAY_NAME p:STRING
+    fnparam $l:BOOK_T $l:this
+    scopeof $l:str1
+    scopeof $l:str2
+    $l:str1 <- objget $l:this o:TITLE
+    $l:str2 <- objget $l:this o:AUTHOR
+    $l:str1 <- strconcat $l:str1 " by "
+    $l:str1 <- strconcat $l:str1 $l:str2
+return $l:str1
+
+beginfn f:BOOK_CTOR $l:BOOK_T
+    fnparam p:STRING $l:title
+    fnparam p:STRING $l:author
+    scopeof $l:book_proto
+    scopeof $l:book
+    $l:book_proto <- objinit $l:BOOK_T
+    objset $l:book_proto o:TITLE $l:title
+    objset $l:book_proto o:AUTHOR $l:author
+    objset $l:book_proto o:DISPLAY_NAME f:BOOK_DISPLAY_NAME
+    $l:book <- objinstance $l:book_proto
+return $l:book
+
+
+
+$l:LIBRARY_BOOK_T_PROTO <- otypesubset $l:BOOK_T
+otypeprop $l:LIBRARY_BOOK_T_PROTO o:CALL_NUM p:STRING
+otypeprop $l:LIBRARY_BOOK_T_PROTO o:CHECKED_OUT p:BOOLEAN
+$l:LIBRARY_BOOK_T <- otypefinalize $l:LIBRARY_BOOK_T_PROTO
+
+beginfn f:LIBRARY_BOOK_DISPLAY_NAME p:STRING
+    fnparam $l:LIBRARY_BOOK_T $l:this
+    scopeof $l:str1
+    scopeof $l:str2
+    scopeof $l:checked
+    $l:str1 <- call f:BOOK_DISPLAY_NAME $l:this
+    $l:str1 <- strconcat $l:str1 " (call num: "
+    $l:str2 <- objget $l:this o:CALL_NUM
+    $l:str1 <- strconcat $l:str1 $l:str2
+    $l:str1 <- strconcat $l:str1 ", checked out? "
+    $l:checked <- objget $l:this o:CHECKED_OUT
+    $l:str2 <- call f:BOOLEAN_TO_STRING $l:checked
+    $l:str1 <- strconcat $l:str1 $l:str2
+    $l:str1 <- strconcat $l:str1 ")"
+return $l:str1
+
+beginfn f:LIBRARY_BOOK_CTOR $l:LIBRARY_BOOK_T
+    fnparam p:STRING $l:title
+    fnparam p:STRING $l:author
+    fnparam p:STRING $l:call_num
+    scopeof $l:book_proto
+    scopeof $l:book
+    $l:book_proto <- objinit $l:LIBRARY_BOOK_T
+    objset $l:book_proto o:TITLE $l:title
+    objset $l:book_proto o:AUTHOR $l:author
+    objset $l:book_proto o:CALL_NUM $l:call_num
+    objset $l:book_proto o:CHECKED_OUT false
+    objset $l:book_proto o:DISPLAY_NAME f:LIBRARY_BOOK_DISPLAY_NAME
+    $l:book <- objinstance $l:book_proto
+return $l:book
+
+
+
+beginfn f:PRINT_BOOK p:VOID
+    fnparam $l:BOOK_T $l:book
+    scopeof $l:str
+    scopeof $l:displayfn
+    $l:displayfn <- objcurry $l:book o:DISPLAY_NAME
+    $l:str <- call $l:displayfn
+    out $l:str
+return
+
+
+
+$l:book1_call <- curry f:BOOK_CTOR "The Martian"
+$l:book1 <- call $l:book1_call "Andy Weir"
+
+$l:book2_call1 <- curry f:LIBRARY_BOOK_CTOR "The Grapes of Wrath"
+$l:book2_call2 <- curry $l:book2_call1 "John Steinbeck"
+$l:book2 <- call $l:book2_call2 "813.52"
+
+
+call f:PRINT_BOOK $l:book1
+call f:PRINT_BOOK $l:book2

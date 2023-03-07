@@ -148,6 +148,11 @@ Shared storage is global across all jobs that have access to a location.
     - `otypefinalize $lloc` - returns a finalized version of the `$lloc` object type
     - `otypesubset $lloc` - returns a new `p:OTYPE_PROTO` which extends the `p:OTYPE` `$lloc`
       - Note: `$lloc` CANNOT be a `p:OTYPE_PROTO`
+    - `otypecurry $lloc` - shorthand for the following:
+      - ```text
+        $l:TEMP <- curry f:LAMBDA1_T p:THIS
+        call $l:TEMP $lloc
+        ```
   - Constructing/using objects
     - `objinit $lloc` - returns a prototype object instance of the object type `$lloc`
       - Return value is `p:OBJECT_PROTO`

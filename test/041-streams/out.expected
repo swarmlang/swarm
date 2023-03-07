@@ -1,4 +1,3 @@
-[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/041-streams/test.svi
 [35m   debug [39m[vm] assigneval Location<l:s> STREAMINIT<TypeReference<Primitive<STRING>>>
 [35m   debug [39m[vm] streaminit TypeReference<Primitive<STRING>>
 [35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>

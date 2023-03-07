@@ -70,10 +70,10 @@ namespace swarmc::Runtime {
     TypeReference* ExecuteWalk::ensureType(const Reference* ref) {
         verbose("ensureType: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::TYPE));
-        if ( ref->tag() != ReferenceTag::TYPE ) {
+        if ( ref->tag() != ReferenceTag::TYPE && ref->tag() != ReferenceTag::OTYPE ) {
             throw Errors::RuntimeError(
-                    Errors::RuntimeExCode::InvalidReferenceImplementation,
-                    "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (TypeReference*) ref;
@@ -514,12 +514,13 @@ namespace swarmc::Runtime {
         }
 
         auto loc = i->second();
+        auto paramType = ensureType(_vm->resolve(i->first()));
         auto param = _vm->resolve(call->popParam().second);
 
-        if ( !param->typei()->isAssignableTo(loc->typei()) ) {
+        if ( !param->typei()->isAssignableTo(paramType->value()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Value " + s(param) + " has incompatible type for parameter " + s(loc) + " (expected: " + s(loc->typei()) + ", got: " + s(param->typei()) + ")"
+                "Value " + s(param) + " has incompatible type for parameter " + s(loc) + " (expected: " + s(paramType->valuei()) + ", got: " + s(param->typei()) + ")"
             );
         }
 

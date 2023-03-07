@@ -1,4 +1,3 @@
-[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/040-return_capture/test.svi
 [35m   debug [39m[vm] assignvalue Location<s:i> NumberReference<1.000000>
 [35m   debug [39m[vm] Location<s:i> <- NumberReference<1.000000>
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:NEXT_ID>, TypeReference<Primitive<NUMBER>>>, pc: 6
