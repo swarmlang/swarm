@@ -1,0 +1,29 @@
+-- ctor1: :: this
+-- ctor2: number :: this
+-- regFunc: :: number :: this
+-- uninit: number
+
+-- :: this
+$l:CTOR1_T <- call f:LAMBDA0_T p:THIS
+
+-- number :: this
+$l:CTOR2_T_CALL <- curry f:LAMBDA1_T p:NUMBER
+$l:CTOR2_T <- call $l:CTOR2_T_CALL p:THIS
+
+-- :: number :: this
+$l:REG_FUNC_T <- call f:LAMBDA0_T $l:CTOR2_T
+
+-- Construct the otype
+$l:USER_DEFINED_T_PROTO <- otypeinit
+otypeprop $l:USER_DEFINED_T_PROTO o:CTOR1 $l:CTOR1_T
+otypeprop $l:USER_DEFINED_T_PROTO o:CTOR2 $l:CTOR2_T
+otypeprop $l:USER_DEFINED_T_PROTO o:REG_FUNC $l:REG_FUNC_T
+otypeprop $l:USER_DEFINED_T_PROTO o:UNINIT p:NUMBER
+
+$l:USER_DEFINED_T <- otypefinalize $l:USER_DEFINED_T_PROTO
+
+-- Enumerate the properties of the otype to check if p:THIS got replaced properly
+$l:A <- otypeget $l:USER_DEFINED_T o:CTOR1
+$l:B <- otypeget $l:USER_DEFINED_T o:CTOR2
+$l:C <- otypeget $l:USER_DEFINED_T o:REG_FUNC
+$l:D <- otypeget $l:USER_DEFINED_T o:UNINIT

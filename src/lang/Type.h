@@ -162,9 +162,7 @@ namespace swarmc::Type {
             return Primitive::of(_intrinsic);
         }
 
-        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
-        }
+        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {}
 
         [[nodiscard]] Intrinsic intrinsic() const override {
             if ( !isPrimitive(_intrinsic) ) {
@@ -225,9 +223,7 @@ namespace swarmc::Type {
             return Opaque::of(_name);
         }
 
-        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
-        }
+        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {}
 
     protected:
         static std::map<std::string, Opaque*> _opaques;
@@ -265,9 +261,7 @@ namespace swarmc::Type {
             return Ambiguous::of();
         }
 
-        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
-        }
+        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {}
 
         explicit Ambiguous(Lang::LValNode* lval = nullptr) : Type(), _lval(lval) {}
     protected:
@@ -301,7 +295,6 @@ namespace swarmc::Type {
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
             if ( stl::contains(visited, _values->getId()) ) {
                 return;
             }
@@ -349,7 +342,6 @@ namespace swarmc::Type {
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
             if ( stl::contains(visited, _values->getId()) ) {
                 return;
             }
@@ -399,7 +391,6 @@ namespace swarmc::Type {
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
             if ( stl::contains(visited, _yields->getId()) ) {
                 return;
             }
@@ -450,7 +441,6 @@ namespace swarmc::Type {
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
             if ( stl::contains(visited, _inner->getId()) ) {
                 return;
             }
@@ -494,7 +484,6 @@ namespace swarmc::Type {
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
             if ( stl::contains(visited, _returns->getId()) ) {
                 return;
             }
@@ -614,7 +603,7 @@ namespace swarmc::Type {
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
-            visited.push_back(_id);
+            visited.push_back(_id);  // otypes can create circular types, so add any objects we see to the visited list
 
             if ( _parent != nullptr && !stl::contains(visited, _parent->getId()) ) {
                 _parent->transformRecursively(visitor, visited);
