@@ -1,0 +1,141 @@
+[35m   debug [39m[vm] assigneval Location<l:SPEAK_T_CALL> CURRY<Location<f:LAMBDA1_T>, TypeReference<Primitive<THIS>>>
+[35m   debug [39m[vm] curry Location<f:LAMBDA1_T> TypeReference<Primitive<THIS>>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<Lambda1Function<>>
+[35m   debug [39m[vm] Location<l:SPEAK_T_CALL> <- FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<THIS>>>>
+[35m   debug [39m[vm] assigneval Location<l:SPEAK_T> CALL1<Location<l:SPEAK_T_CALL>, TypeReference<Primitive<STRING>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<l:SPEAK_T_CALL> TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<THIS>>>>
+[35m   debug [39m[vm] provider call: Lambda1FunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:SPEAK_T> CALL1<Location<l:SPEAK_T_CALL>, TypeReference<Primitive<STRING>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:SPEAK_T> <- TypeReference<Primitive<THIS> :: Primitive<STRING>>
+[35m   debug [39m[vm] assigneval Location<l:ANIMAL_T_PROTO> OTYPEINIT<>
+[35m   debug [39m[vm] otypeinit
+[35m   debug [39m[vm] Location<l:ANIMAL_T_PROTO> <- ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
+[35m   debug [39m[vm] otypeprop Location<l:ANIMAL_T_PROTO> Location<o:NAME> TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] otypeprop Location<l:ANIMAL_T_PROTO> Location<o:SPEAK> Location<l:SPEAK_T>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<THIS> :: Primitive<STRING>>
+[35m   debug [39m[vm] assigneval Location<l:ANIMAL_T> OTYPEFINALIZE<Location<l:ANIMAL_T_PROTO>>
+[35m   debug [39m[vm] otypefinalize Location<l:ANIMAL_T_PROTO>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:ANIMAL_T> <- ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] assigneval Location<l:temp_a> OTYPEGET<Location<l:ANIMAL_T>, Location<o:SPEAK>>
+[35m   debug [39m[vm] otypeget Location<l:ANIMAL_T> Location<o:SPEAK>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:temp_a> <- TypeReference<Type::Object<#prop: 2, parent: (nullptr)> :: Primitive<STRING>>
+[35m   debug [39m[vm] assigneval Location<l:WAG_TAIL_T_CALL> CURRY<Location<f:LAMBDA1_T>, TypeReference<Primitive<THIS>>>
+[35m   debug [39m[vm] curry Location<f:LAMBDA1_T> TypeReference<Primitive<THIS>>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<Lambda1Function<>>
+[35m   debug [39m[vm] Location<l:WAG_TAIL_T_CALL> <- FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<THIS>>>>
+[35m   debug [39m[vm] assigneval Location<l:WAG_TAIL_T> CALL1<Location<l:WAG_TAIL_T_CALL>, TypeReference<Primitive<VOID>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<l:WAG_TAIL_T_CALL> TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<THIS>>>>
+[35m   debug [39m[vm] provider call: Lambda1FunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:WAG_TAIL_T> CALL1<Location<l:WAG_TAIL_T_CALL>, TypeReference<Primitive<VOID>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:WAG_TAIL_T> <- TypeReference<Primitive<THIS> :: Primitive<VOID>>
+[35m   debug [39m[vm] assigneval Location<l:DOG_T_PROTO> OTYPESUBSET<Location<l:ANIMAL_T>>
+[35m   debug [39m[vm] otypesubset Location<l:ANIMAL_T>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:DOG_T_PROTO> <- ObjectTypeReference<Type::Object<#prop: 0, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] otypeprop Location<l:DOG_T_PROTO> Location<o:WAG_TAIL> Location<l:WAG_TAIL_T>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 0, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<THIS> :: Primitive<VOID>>
+[35m   debug [39m[vm] assigneval Location<l:DOG_T> OTYPEFINALIZE<Location<l:DOG_T_PROTO>>
+[35m   debug [39m[vm] otypefinalize Location<l:DOG_T_PROTO>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] Location<l:DOG_T> <- ObjectTypeReference<Type::Object<#prop: 1, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] assigneval Location<l:temp_b> OTYPEGET<Location<l:DOG_T>, Location<o:WAG_TAIL>>
+[35m   debug [39m[vm] otypeget Location<l:DOG_T> Location<o:WAG_TAIL>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: Type::Object<#prop: 2, parent: (nullptr)>>>
+[35m   debug [39m[vm] Location<l:temp_b> <- TypeReference<Type::Object<#prop: 1, parent: Type::Object<#prop: 2, parent: (nullptr)>> :: Primitive<VOID>>
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:HANDLER>, TypeReference<Primitive<VOID>>>, pc: 21
+[35m   debug [39m[vm] pushexhandler Location<f:HANDLER>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: HANDLER (#params: 1) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:HANDLER, rt: Primitive<VOID>>>
+[35m   debug [39m[vm] assigneval Location<l:BAD_T_PROTO> OTYPESUBSET<Location<l:ANIMAL_T_PROTO>>
+[35m   debug [39m[vm] otypesubset Location<l:ANIMAL_T_PROTO>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[31m   error [39m[0m[vm] Runtime error: Cannot create subset from incomplete object type Type::Object<#prop: 2, parent: (nullptr)> (RuntimeExCode(NonFinalObjectType, code: 29))
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:HANDLER> (pc: 13)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:code>>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[vm] fnparam: Location<l:code> <- NumberReference<29.000000>
+[35m   debug [39m[vm] scopeof Location<l:msg>
+[35m   debug [39m[vm] assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<f:NUMBER_TO_STRING> Location<l:code>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:msg> <- StringReference<29.000000>
+[35m   debug [39m[vm] assigneval Location<l:msg> STRCONCAT<StringReference<Handled: >, Location<l:msg>>
+[35m   debug [39m[vm] strconcat StringReference<Handled: > Location<l:msg>
+[35m   debug [39m[vm] ensureString: StringReference<Handled: >
+[35m   debug [39m[vm] ensureString: StringReference<29.000000>
+[35m   debug [39m[vm] Location<l:msg> <- StringReference<Handled: 29.000000>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> Location<l:msg>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] resume Location<f:RESUMED>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: RESUMED (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:RESUMED, rt: Primitive<VOID>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:RESUMED> (pc: 31)
+[35m   debug [39m[vm] next instruction for inline call: STREAMPUSH<Location<s:STDOUT>, StringReference<Resumed.>>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> StringReference<Resumed.>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] pushexhandler Location<f:HANDLER2>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: HANDLER2 (#params: 1) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:HANDLER2, rt: Primitive<VOID>>>
+[35m   debug [39m[vm] otypeget Location<l:ANIMAL_T_PROTO> Location<o:SPEAK>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[31m   error [39m[0m[vm] Runtime error: Cannot get property type from incomplete object type Type::Object<#prop: 2, parent: (nullptr)> (RuntimeExCode(NonFinalObjectType, code: 29))
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:HANDLER2> (pc: 23)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:code>>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[vm] fnparam: Location<l:code> <- NumberReference<29.000000>
+[35m   debug [39m[vm] scopeof Location<l:msg>
+[35m   debug [39m[vm] assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<f:NUMBER_TO_STRING> Location<l:code>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:msg> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:code>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:msg> <- StringReference<29.000000>
+[35m   debug [39m[vm] assigneval Location<l:msg> STRCONCAT<StringReference<Handled: >, Location<l:msg>>
+[35m   debug [39m[vm] strconcat StringReference<Handled: > Location<l:msg>
+[35m   debug [39m[vm] ensureString: StringReference<Handled: >
+[35m   debug [39m[vm] ensureString: StringReference<29.000000>
+[35m   debug [39m[vm] Location<l:msg> <- StringReference<Handled: 29.000000>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> Location<l:msg>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] resume Location<f:RESUMED2>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: RESUMED2 (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:RESUMED2, rt: Primitive<VOID>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:RESUMED2> (pc: 36)
+[35m   debug [39m[vm] next instruction for inline call: STREAMPUSH<Location<s:STDOUT>, StringReference<Resumed 2.>>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> StringReference<Resumed 2.>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] return0

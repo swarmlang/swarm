@@ -96,6 +96,60 @@ namespace swarmc::Runtime {
         });
 
 
+        // Object types
+        factory->registerReducer(s(Type::Intrinsic::OTYPE), [factory, common](const Type::Type* t, auto) {
+            auto o = dynamic_cast<const Type::Object*>(t);
+            auto binn = common(o, nullptr);
+
+            auto parent = o->getParent();
+            auto propertyKeys = binn_list();
+            auto propertyValues = binn_list();
+            for ( const auto& pair : o->getProperties() ) {
+                binn_list_add_str(propertyKeys, strdup(pair.first.c_str()));
+                binn_list_add_map(propertyValues, factory->reduce(pair.second, nullptr));
+            }
+
+            binn_map_set_bool(binn, BC_FINAL, o->isFinal());
+            binn_map_set_list(binn, BC_OTYPE_K, propertyKeys);
+            binn_map_set_list(binn, BC_OTYPE_V, propertyValues);
+            binn_map_set_bool(binn, BC_HAS_PARENT, parent != nullptr);
+
+            if ( parent != nullptr ) {
+                binn_map_set_map(binn, BC_PARENT, factory->reduce(parent, nullptr));
+            }
+
+            return binn;
+        });
+        factory->registerProducer(s(Type::Intrinsic::OTYPE), [factory](binn* obj, auto) {
+            auto isFinal = binn_map_bool(obj, BC_FINAL);
+            auto binnPropertyKeys = binn_map_list(obj, BC_OTYPE_K);
+            auto binnPropertyValues = binn_map_list(obj, BC_OTYPE_V);
+
+            Type::Object* parent = nullptr;
+            if ( binn_map_bool(obj, BC_HAS_PARENT) ) {
+                parent = dynamic_cast<Type::Object*>(factory->produce((binn*) binn_map_map(obj, BC_PARENT), nullptr));
+            }
+
+            auto type = new Type::Object(parent);
+            binn_iter iter;
+            binn binnPropertyValue;
+            int i = -1;
+            binn_list_foreach(binnPropertyValues, binnPropertyValue) {
+                i += 1;
+
+                auto key = binn_list_str(binnPropertyKeys, i);
+                auto value = factory->produce(&binnPropertyValue, nullptr);
+                type = type->defineProperty(key, value);
+            }
+
+            if ( isFinal ) {
+                type = type->finalize();
+            }
+
+            return type;
+        });
+
+
         // Lambda types
         auto lambdaReducer = [factory, common](const Type::Type* t, auto) {
             auto l = dynamic_cast<const Type::Lambda*>(t);

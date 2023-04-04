@@ -1,5 +1,3 @@
-[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/051-file-io/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/051-file-io/test.svi
 [35m   debug [39m[vm] assignvalue Location<l:path> StringReference<test/051-file-io/test.txt>
 [35m   debug [39m[vm] Location<l:path> <- StringReference<test/051-file-io/test.txt>
 [35m   debug [39m[vm] assigneval Location<l:fh> CALL1<Location<f:OPEN_FILE>, Location<l:path>>
@@ -44,6 +42,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:TEST> (pc: 4)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:file_rs_t>, Location<l:file>>
 [35m   debug [39m[vm] fnparam Location<l:file_rs_t> Location<l:file>
+[35m   debug [39m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::FILE>>>
 [35m   debug [39m[vm] fnparam: Location<l:file> <- ResourceReference<Prologue::FileResource<path: test/051-file-io/test.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>
 [35m   debug [39m[vm] scopeof Location<l:contents>
 [35m   debug [39m[vm] assigneval Location<l:contents> CALL1<Location<f:READ_FILE>, Location<l:file>>

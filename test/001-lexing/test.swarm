@@ -4,6 +4,7 @@ multiline * comment *-
 ends *-*
 here
 *--
+include Other.File;
 
 enumerable<number> t1 =  [1,2,3];
 shared enumerable<enumerable<string>> t2 = [] of enumerable<string>;
@@ -41,11 +42,13 @@ while (t3 > 0 && t3 >= -1 && t4 != "jinkies" && t3 < 5 && t3 <= 4) {
     t3 /= 1.0;
     t3 ^= 1;
     t3 %= 1;
-    t4 .= "s";
+    t4 += "s";
 }
 
 t3 = 1 + 2 - 3 / 4 % 1 ^ 5;
 bool t7 = true;
 t7 &&= false;
 t7 ||= true;
-t4 = t4 . t4;
+t4 = t4 + t4;
+
+

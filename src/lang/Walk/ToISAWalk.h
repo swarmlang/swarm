@@ -95,7 +95,7 @@ protected:
     }
 
     ISA::Instructions* walkCallExpressionNode(CallExpressionNode* node) override {
-        auto instrs = walk(node->id());
+        auto instrs = walk(node->func());
         auto floc = getLocFromAssign(instrs->back());
         if ( node->args()->empty() ) {
             auto call = new ISA::Call0(floc);
@@ -105,7 +105,7 @@ protected:
                 instrs->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), call));
             }
         } else {
-            auto fnType = node->id()->type();
+            auto fnType = node->func()->type();
             for ( auto arg : *node->args() ) {
                 auto evalarg = walk(arg);
                 instrs->insert(instrs->end(), evalarg->begin(), evalarg->end());
@@ -223,7 +223,11 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), new ISA::Plus(lhs, rhs)));
+        if ( node->concatenation() ) {
+            left->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), new ISA::StringConcat(lhs, rhs)));
+        } else {
+            left->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), new ISA::Plus(lhs, rhs)));
+        }
         delete right;
         return left;
     }
@@ -279,17 +283,6 @@ protected:
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
         left->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), new ISA::Power(lhs, rhs)));
-        delete right;
-        return left;
-    }
-
-    ISA::Instructions* walkConcatenateNode(ConcatenateNode* node) override {
-        auto left = walk(node->left());
-        auto right = walk(node->right());
-        auto lhs = getLocFromAssign(left->back());
-        auto rhs = getLocFromAssign(right->back());
-        left->insert(left->end(), right->begin(), right->end());
-        left->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), new ISA::StringConcat(lhs, rhs)));
         delete right;
         return left;
     }
@@ -741,6 +734,18 @@ protected:
         left->push_back(new ISA::AssignEval(makeLocation(ISA::Affinity::LOCAL), instr));
         delete right;
         return left;
+    }
+
+    ISA::Instructions* walkTypeBodyNode(TypeBodyNode* node) override {
+        return new ISA::Instructions();
+    }
+
+    ISA::Instructions* walkClassAccessNode(ClassAccessNode* node) override {
+        return new ISA::Instructions();
+    }
+
+    ISA::Instructions* walkIncludeStatementNode(IncludeStatementNode* node) override {
+        return new ISA::Instructions(); // FIXME should not exist, throw exception
     }
 
     [[nodiscard]] std::string toString() const override {

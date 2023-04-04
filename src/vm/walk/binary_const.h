@@ -41,5 +41,8 @@
 #define BC_REWIND_TO_HEAD 36
 #define BC_LENGTH 37
 #define BC_LENGTH2 38
+#define BC_FINAL 39
+#define BC_OTYPE_K 40
+#define BC_OTYPE_V 41
 
 #endif //SWARMVM_BINARY_CONST

@@ -19,11 +19,17 @@ namespace nslib {
         if ( v == swarmc::Type::Intrinsic::AMBIGUOUS ) return "Type::Intrinsic(AMBIGUOUS)";
         if ( v == swarmc::Type::Intrinsic::CONTRADICTION ) return "Type::Intrinsic(CONTRADICTION)";
         if ( v == swarmc::Type::Intrinsic::OPAQUE ) return "Type::Intrinsic(OPAQUE)";
+        if ( v == swarmc::Type::Intrinsic::OBJECT_PROTO ) return "Type::Intrinsic(OBJECT_PROTO)";
+        if ( v == swarmc::Type::Intrinsic::OBJECT ) return "Type::Intrinsic(OBJECT)";
         return "Type::Intrinsic(UNKNOWN)";
     }
 }
 
 namespace swarmc::Type {
+
+    std::size_t Type::_nextId = 0;
+
+    std::map<std::size_t, std::vector<std::size_t>> Type::_assignableCache;
 
     std::map<Intrinsic, Primitive*> Primitive::_primitives;
 

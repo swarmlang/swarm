@@ -1,0 +1,65 @@
+-- Construct the type of the o:SPEAK property:
+$l:SPEAK_T_CALL <- curry f:LAMBDA1_T p:THIS
+$l:SPEAK_T <- call $l:SPEAK_T_CALL p:STRING
+
+-- Construct the object type:
+$l:ANIMAL_T_PROTO <- otypeinit
+otypeprop $l:ANIMAL_T_PROTO o:NAME p:STRING
+otypeprop $l:ANIMAL_T_PROTO o:SPEAK $l:SPEAK_T
+
+-- Finalize the object type:
+$l:ANIMAL_T <- otypefinalize $l:ANIMAL_T_PROTO
+
+$l:temp_a <- otypeget $l:ANIMAL_T o:SPEAK
+
+
+
+
+-- Construct the type of o:WAG_TAIL
+$l:WAG_TAIL_T_CALL <- curry f:LAMBDA1_T p:THIS
+$l:WAG_TAIL_T <- call $l:WAG_TAIL_T_CALL p:VOID
+
+-- Construct the DOG_T object type
+$l:DOG_T_PROTO <- otypesubset $l:ANIMAL_T
+otypeprop $l:DOG_T_PROTO o:WAG_TAIL $l:WAG_TAIL_T
+
+-- Finalize the DOT_T type
+$l:DOG_T <- otypefinalize $l:DOG_T_PROTO
+
+$l:temp_b <- otypeget $l:DOG_T o:WAG_TAIL
+
+
+
+-- Make sure subsetting an incomplete type triggers an exception
+beginfn f:HANDLER p:VOID
+    fnparam p:NUMBER $l:code
+    scopeof $l:msg
+    $l:msg <- call f:NUMBER_TO_STRING $l:code
+    $l:msg <- strconcat "Handled: " $l:msg
+    out $l:msg
+    resume f:RESUMED
+return
+
+pushexhandler f:HANDLER
+$l:BAD_T_PROTO <- otypesubset $l:ANIMAL_T_PROTO
+
+
+-- Make sure accessing an incomplete type triggers an exception
+beginfn f:HANDLER2 p:VOID
+    fnparam p:NUMBER $l:code
+    scopeof $l:msg
+    $l:msg <- call f:NUMBER_TO_STRING $l:code
+    $l:msg <- strconcat "Handled: " $l:msg
+    out $l:msg
+    resume f:RESUMED2
+return
+
+beginfn f:RESUMED p:VOID
+    out "Resumed."
+    pushexhandler f:HANDLER2
+    otypeget $l:ANIMAL_T_PROTO o:SPEAK
+return
+
+beginfn f:RESUMED2 p:VOID
+    out "Resumed 2."
+return

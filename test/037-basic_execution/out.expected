@@ -1,5 +1,3 @@
-[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/037-basic_execution/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/037-basic_execution/test.svi
 [35m   debug [39m[vm] assigneval Location<l:a> PLUS<NumberReference<3.000000>, NumberReference<4.000000>>
 [35m   debug [39m[vm] plus NumberReference<3.000000> NumberReference<4.000000>
 [35m   debug [39m[vm] ensureNumber: NumberReference<3.000000>
@@ -217,8 +215,10 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:ENUM_BODY> (pc: 30)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<STRING>>, Location<l:elem>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<STRING>> Location<l:elem>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
 [35m   debug [39m[vm] fnparam: Location<l:elem> <- StringReference<Hello,>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:idx>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:idx> <- NumberReference<0.000000>
 [35m   debug [39m[vm] return0
 [35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:ENUM_BODY> | job: SingleThreaded::QueueJob<id: 1, call: InlineFunctionCall<f:ENUM_BODY>>
@@ -226,8 +226,10 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:ENUM_BODY> (pc: 30)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<STRING>>, Location<l:elem>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<STRING>> Location<l:elem>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
 [35m   debug [39m[vm] fnparam: Location<l:elem> <- StringReference<World!>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:idx>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:idx> <- NumberReference<1.000000>
 [35m   debug [39m[vm] return0
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:ADDER>, TypeReference<Primitive<NUMBER>>>, pc: 41
@@ -251,8 +253,10 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:ADDER> (pc: 35)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:rhs> <- NumberReference<1.000000>
 [35m   debug [39m[vm] scopeof Location<l:sum>
 [35m   debug [39m[vm] assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
@@ -273,8 +277,10 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:ADDER> (pc: 35)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:rhs> <- NumberReference<2.000000>
 [35m   debug [39m[vm] scopeof Location<l:sum>
 [35m   debug [39m[vm] assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
@@ -293,8 +299,10 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:ADDER> (pc: 35)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:rhs> <- NumberReference<2.000000>
 [35m   debug [39m[vm] scopeof Location<l:sum>
 [35m   debug [39m[vm] assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>
@@ -315,8 +323,10 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:ADDER> (pc: 35)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:rhs>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:rhs> <- NumberReference<2.000000>
 [35m   debug [39m[vm] scopeof Location<l:sum>
 [35m   debug [39m[vm] assigneval Location<l:sum> PLUS<Location<l:lhs>, Location<l:rhs>>

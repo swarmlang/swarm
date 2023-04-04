@@ -35,7 +35,6 @@ namespace swarmc::Lang::Walk {
             if ( node->getName() == "DivideNode" ) return walkDivideNode((DivideNode*) node);
             if ( node->getName() == "ModulusNode" ) return walkModulusNode((ModulusNode*) node);
             if ( node->getName() == "PowerNode" ) return walkPowerNode((PowerNode*) node);
-            if ( node->getName() == "ConcatenateNode" ) return walkConcatenateNode((ConcatenateNode*) node);
             if ( node->getName() == "NegativeExpressionNode" ) return walkNegativeExpressionNode((NegativeExpressionNode*) node);
             if ( node->getName() == "NotNode" ) return walkNotNode((NotNode*) node);
             if ( node->getName() == "EnumerationLiteralExpressionNode" ) return walkEnumerationLiteralExpressionNode((EnumerationLiteralExpressionNode*) node);
@@ -55,7 +54,10 @@ namespace swarmc::Lang::Walk {
             if ( node->getName() == "UnitNode" ) return walkUnitNode((UnitNode*) node);
             if ( node->getName() == "FunctionNode" ) return walkFunctionNode((FunctionNode*) node);
             if ( node->getName() == "NumericComparisonExpressionNode" ) return walkNumericComparisonExpressionNode((NumericComparisonExpressionNode*) node);
-            
+            if ( node->getName() == "TypeBodyNode" ) return walkTypeBodyNode((TypeBodyNode*) node);
+            if ( node->getName() == "ClassAccessNode" ) return walkClassAccessNode((ClassAccessNode*) node);
+            if ( node->getName() == "IncludeStatementNode") return walkIncludeStatementNode((IncludeStatementNode*) node);
+
             throw Errors::SwarmError("Invalid node type: " + node->getName());
         }
     protected:
@@ -79,7 +81,6 @@ namespace swarmc::Lang::Walk {
         virtual TReturn walkDivideNode(DivideNode* node) = 0;
         virtual TReturn walkModulusNode(ModulusNode* node) = 0;
         virtual TReturn walkPowerNode(PowerNode* node) = 0;
-        virtual TReturn walkConcatenateNode(ConcatenateNode* node) = 0;
         virtual TReturn walkNegativeExpressionNode(NegativeExpressionNode* node) = 0;
         virtual TReturn walkNotNode(NotNode* node) = 0;
         virtual TReturn walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) = 0;
@@ -101,6 +102,9 @@ namespace swarmc::Lang::Walk {
         virtual TReturn walkIntegerLiteralExpressionNode(IntegerLiteralExpressionNode* node) {
             return walkNumberLiteralExpressionNode(node);
         }
+        virtual TReturn walkTypeBodyNode(TypeBodyNode* node) = 0;
+        virtual TReturn walkClassAccessNode(ClassAccessNode* node) = 0;
+        virtual TReturn walkIncludeStatementNode(IncludeStatementNode* node) = 0;
 
         [[nodiscard]] std::string toString() const override = 0;
     };

@@ -62,14 +62,14 @@ while (t3 > 0 && t3 >= -1 && t4 != "jinkies" && t3 < 5 && t3 <= 4) {
     t3 /= 1.0;
     t3 ^= 1;
     t3 %= 1;
-    t4 .= "s";
+    t4 += "s";
 }
 
 t3 = 1 + (2 - 3) / -4 % 1 ^ 5;
 bool t7 = true;
 t7 &&= false;
 t7 ||= true;
-t4 = t4 . t4;
+t4 = t4 + t4;
 
 fn t8 = (arg1: number, arg2: type): type => {
     return number;
@@ -82,3 +82,4 @@ t10 = t9();
 t8 = ((): number->type->type => (a: number, b: type): type => string)();
 type->type t11 = t8(69);
 type t12 = t8(420, type);
+

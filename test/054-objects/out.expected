@@ -1,0 +1,325 @@
+[35m   debug [39m[vm] assigneval Location<l:DISPLAY_NAME_T_CALL> CURRY<Location<f:LAMBDA1_T>, TypeReference<Primitive<THIS>>>
+[35m   debug [39m[vm] curry Location<f:LAMBDA1_T> TypeReference<Primitive<THIS>>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<Lambda1Function<>>
+[35m   debug [39m[vm] Location<l:DISPLAY_NAME_T_CALL> <- FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<THIS>>>>
+[35m   debug [39m[vm] assigneval Location<l:DISPLAY_NAME_T> CALL1<Location<l:DISPLAY_NAME_T_CALL>, TypeReference<Primitive<STRING>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<l:DISPLAY_NAME_T_CALL> TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<THIS>>>>
+[35m   debug [39m[vm] provider call: Lambda1FunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:DISPLAY_NAME_T> CALL1<Location<l:DISPLAY_NAME_T_CALL>, TypeReference<Primitive<STRING>>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:DISPLAY_NAME_T> <- TypeReference<Primitive<THIS> :: Primitive<STRING>>
+[35m   debug [39m[vm] assigneval Location<l:BOOK_T_PROTO> OTYPEINIT<>
+[35m   debug [39m[vm] otypeinit
+[35m   debug [39m[vm] Location<l:BOOK_T_PROTO> <- ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
+[35m   debug [39m[vm] otypeprop Location<l:BOOK_T_PROTO> Location<o:TITLE> TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] otypeprop Location<l:BOOK_T_PROTO> Location<o:AUTHOR> TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] otypeprop Location<l:BOOK_T_PROTO> Location<o:DISPLAY_NAME> Location<l:DISPLAY_NAME_T>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<THIS> :: Primitive<STRING>>
+[35m   debug [39m[vm] assigneval Location<l:BOOK_T> OTYPEFINALIZE<Location<l:BOOK_T_PROTO>>
+[35m   debug [39m[vm] otypefinalize Location<l:BOOK_T_PROTO>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:BOOK_T> <- ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:BOOK_DISPLAY_NAME>, TypeReference<Primitive<STRING>>>, pc: 16
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:BOOK_CTOR>, Location<l:BOOK_T>>, pc: 27
+[35m   debug [39m[vm] assigneval Location<l:LIBRARY_BOOK_T_PROTO> OTYPESUBSET<Location<l:BOOK_T>>
+[35m   debug [39m[vm] otypesubset Location<l:BOOK_T>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:LIBRARY_BOOK_T_PROTO> <- ObjectTypeReference<Type::Object<#prop: 0, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] otypeprop Location<l:LIBRARY_BOOK_T_PROTO> Location<o:CALL_NUM> TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 0, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] otypeprop Location<l:LIBRARY_BOOK_T_PROTO> Location<o:CHECKED_OUT> TypeReference<Primitive<BOOLEAN>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<BOOLEAN>>
+[35m   debug [39m[vm] assigneval Location<l:LIBRARY_BOOK_T> OTYPEFINALIZE<Location<l:LIBRARY_BOOK_T_PROTO>>
+[35m   debug [39m[vm] otypefinalize Location<l:LIBRARY_BOOK_T_PROTO>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] Location<l:LIBRARY_BOOK_T> <- ObjectTypeReference<Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:LIBRARY_BOOK_DISPLAY_NAME>, TypeReference<Primitive<STRING>>>, pc: 46
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:LIBRARY_BOOK_CTOR>, Location<l:LIBRARY_BOOK_T>>, pc: 60
+[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:PRINT_BOOK>, TypeReference<Primitive<VOID>>>, pc: 68
+[35m   debug [39m[vm] assigneval Location<l:book1_call> CURRY<Location<f:BOOK_CTOR>, StringReference<The Martian>>
+[35m   debug [39m[vm] curry Location<f:BOOK_CTOR> StringReference<The Martian>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] load inline function: BOOK_CTOR (#params: 2) (returns: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:BOOK_CTOR, rt: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] Location<l:book1_call> <- FunctionReference<CurriedFunction<f: InlineFunction<f:BOOK_CTOR, rt: Type::Object<#prop: 3, parent: (nullptr)>>, ref: StringReference<The Martian>>>
+[35m   debug [39m[vm] assigneval Location<l:book1> CALL1<Location<l:book1_call>, StringReference<Andy Weir>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<l:book1_call> StringReference<Andy Weir>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:BOOK_CTOR, rt: Type::Object<#prop: 3, parent: (nullptr)>>, ref: StringReference<The Martian>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:BOOK_CTOR> (pc: 16)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<STRING>>, Location<l:title>>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<STRING>> Location<l:title>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] fnparam: Location<l:title> <- StringReference<The Martian>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<STRING>> Location<l:author>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] fnparam: Location<l:author> <- StringReference<Andy Weir>
+[35m   debug [39m[vm] scopeof Location<l:book_proto>
+[35m   debug [39m[vm] scopeof Location<l:book>
+[35m   debug [39m[vm] assigneval Location<l:book_proto> OBJINIT<Location<l:BOOK_T>>
+[35m   debug [39m[vm] objinit Location<l:BOOK_T>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] Location<l:book_proto> <- ObjectReference<final: false, type: Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] objset Location<l:book_proto> Location<o:TITLE> Location<l:title>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] objset Location<l:book_proto> Location<o:AUTHOR> Location<l:author>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] objset Location<l:book_proto> Location<o:DISPLAY_NAME> Location<f:BOOK_DISPLAY_NAME>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] load inline function: BOOK_DISPLAY_NAME (#params: 1) (returns: TypeReference<Primitive<STRING>>)
+[35m   debug [39m[vm] assigneval Location<l:book> OBJINSTANCE<Location<l:book_proto>>
+[35m   debug [39m[vm] objinstance Location<l:book_proto>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] Location<l:book> <- ObjectReference<final: true, type: Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] return1 Location<l:book>
+[35m   debug [39m[vm] assigneval Location<l:book1> CALL1<Location<l:book1_call>, StringReference<Andy Weir>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:book1> <- ObjectReference<final: true, type: Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] assigneval Location<l:book2_call1> CURRY<Location<f:LIBRARY_BOOK_CTOR>, StringReference<The Grapes of Wrath>>
+[35m   debug [39m[vm] curry Location<f:LIBRARY_BOOK_CTOR> StringReference<The Grapes of Wrath>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] load inline function: LIBRARY_BOOK_CTOR (#params: 3) (returns: ObjectTypeReference<Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:LIBRARY_BOOK_CTOR, rt: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>>
+[35m   debug [39m[vm] Location<l:book2_call1> <- FunctionReference<CurriedFunction<f: InlineFunction<f:LIBRARY_BOOK_CTOR, rt: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>, ref: StringReference<The Grapes of Wrath>>>
+[35m   debug [39m[vm] assigneval Location<l:book2_call2> CURRY<Location<l:book2_call1>, StringReference<John Steinbeck>>
+[35m   debug [39m[vm] curry Location<l:book2_call1> StringReference<John Steinbeck>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:LIBRARY_BOOK_CTOR, rt: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>, ref: StringReference<The Grapes of Wrath>>>
+[35m   debug [39m[vm] Location<l:book2_call2> <- FunctionReference<CurriedFunction<f: CurriedFunction<f: InlineFunction<f:LIBRARY_BOOK_CTOR, rt: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>, ref: StringReference<The Grapes of Wrath>>, ref: StringReference<John Steinbeck>>>
+[35m   debug [39m[vm] assigneval Location<l:book2> CALL1<Location<l:book2_call2>, StringReference<813.52>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<l:book2_call2> StringReference<813.52>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: CurriedFunction<f: InlineFunction<f:LIBRARY_BOOK_CTOR, rt: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>, ref: StringReference<The Grapes of Wrath>>, ref: StringReference<John Steinbeck>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:LIBRARY_BOOK_CTOR> (pc: 46)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<STRING>>, Location<l:title>>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<STRING>> Location<l:title>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] fnparam: Location<l:title> <- StringReference<The Grapes of Wrath>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<STRING>> Location<l:author>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] fnparam: Location<l:author> <- StringReference<John Steinbeck>
+[35m   debug [39m[vm] fnparam TypeReference<Primitive<STRING>> Location<l:call_num>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] fnparam: Location<l:call_num> <- StringReference<813.52>
+[35m   debug [39m[vm] scopeof Location<l:book_proto>
+[35m   debug [39m[vm] scopeof Location<l:book>
+[35m   debug [39m[vm] assigneval Location<l:book_proto> OBJINIT<Location<l:LIBRARY_BOOK_T>>
+[35m   debug [39m[vm] objinit Location<l:LIBRARY_BOOK_T>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] Location<l:book_proto> <- ObjectReference<final: false, type: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] objset Location<l:book_proto> Location<o:TITLE> Location<l:title>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] objset Location<l:book_proto> Location<o:AUTHOR> Location<l:author>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] objset Location<l:book_proto> Location<o:CALL_NUM> Location<l:call_num>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] objset Location<l:book_proto> Location<o:CHECKED_OUT> BooleanReference<false>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] objset Location<l:book_proto> Location<o:DISPLAY_NAME> Location<f:LIBRARY_BOOK_DISPLAY_NAME>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] load inline function: LIBRARY_BOOK_DISPLAY_NAME (#params: 1) (returns: TypeReference<Primitive<STRING>>)
+[35m   debug [39m[vm] assigneval Location<l:book> OBJINSTANCE<Location<l:book_proto>>
+[35m   debug [39m[vm] objinstance Location<l:book_proto>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] Location<l:book> <- ObjectReference<final: true, type: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] return1 Location<l:book>
+[35m   debug [39m[vm] assigneval Location<l:book2> CALL1<Location<l:book2_call2>, StringReference<813.52>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:book2> <- ObjectReference<final: true, type: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] call1 Location<f:PRINT_BOOK> Location<l:book1>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: PRINT_BOOK (#params: 1) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:PRINT_BOOK, rt: Primitive<VOID>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:PRINT_BOOK> (pc: 60)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:BOOK_T>, Location<l:book>>
+[35m   debug [39m[vm] fnparam Location<l:BOOK_T> Location<l:book>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] fnparam: Location<l:book> <- ObjectReference<final: true, type: Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] scopeof Location<l:str>
+[35m   debug [39m[vm] scopeof Location<l:displayfn>
+[35m   debug [39m[vm] assigneval Location<l:displayfn> OBJCURRY<Location<l:book>, Location<o:DISPLAY_NAME>>
+[35m   debug [39m[vm] objcurry Location<l:book> Location<o:DISPLAY_NAME>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:BOOK_DISPLAY_NAME, rt: Primitive<STRING>>>
+[35m   debug [39m[vm] Location<l:displayfn> <- FunctionReference<CurriedFunction<f: InlineFunction<f:BOOK_DISPLAY_NAME, rt: Primitive<STRING>>, ref: ObjectReference<final: true, type: Type::Object<#prop: 3, parent: (nullptr)>>>>
+[35m   debug [39m[vm] assigneval Location<l:str> CALL0<Location<l:displayfn>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call0 Location<l:displayfn>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:BOOK_DISPLAY_NAME, rt: Primitive<STRING>>, ref: ObjectReference<final: true, type: Type::Object<#prop: 3, parent: (nullptr)>>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:BOOK_DISPLAY_NAME> (pc: 7)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:BOOK_T>, Location<l:this>>
+[35m   debug [39m[vm] fnparam Location<l:BOOK_T> Location<l:this>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] fnparam: Location<l:this> <- ObjectReference<final: true, type: Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] scopeof Location<l:str1>
+[35m   debug [39m[vm] scopeof Location<l:str2>
+[35m   debug [39m[vm] assigneval Location<l:str1> OBJGET<Location<l:this>, Location<o:TITLE>>
+[35m   debug [39m[vm] objget Location<l:this> Location<o:TITLE>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Martian>
+[35m   debug [39m[vm] assigneval Location<l:str2> OBJGET<Location<l:this>, Location<o:AUTHOR>>
+[35m   debug [39m[vm] objget Location<l:this> Location<o:AUTHOR>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] Location<l:str2> <- StringReference<Andy Weir>
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, StringReference< by >>
+[35m   debug [39m[vm] strconcat Location<l:str1> StringReference< by >
+[35m   debug [39m[vm] ensureString: StringReference<The Martian>
+[35m   debug [39m[vm] ensureString: StringReference< by >
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Martian by >
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, Location<l:str2>>
+[35m   debug [39m[vm] strconcat Location<l:str1> Location<l:str2>
+[35m   debug [39m[vm] ensureString: StringReference<The Martian by >
+[35m   debug [39m[vm] ensureString: StringReference<Andy Weir>
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Martian by Andy Weir>
+[35m   debug [39m[vm] return1 Location<l:str1>
+[35m   debug [39m[vm] assigneval Location<l:str> CALL0<Location<l:displayfn>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:str> <- StringReference<The Martian by Andy Weir>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> Location<l:str>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] return0
+[35m   debug [39m[vm] call1 Location<f:PRINT_BOOK> Location<l:book2>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[vm] load inline function: PRINT_BOOK (#params: 1) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:PRINT_BOOK, rt: Primitive<VOID>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:PRINT_BOOK> (pc: 60)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:BOOK_T>, Location<l:book>>
+[35m   debug [39m[vm] fnparam Location<l:BOOK_T> Location<l:book>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] fnparam: Location<l:book> <- ObjectReference<final: true, type: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] scopeof Location<l:str>
+[35m   debug [39m[vm] scopeof Location<l:displayfn>
+[35m   debug [39m[vm] assigneval Location<l:displayfn> OBJCURRY<Location<l:book>, Location<o:DISPLAY_NAME>>
+[35m   debug [39m[vm] objcurry Location<l:book> Location<o:DISPLAY_NAME>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:LIBRARY_BOOK_DISPLAY_NAME, rt: Primitive<STRING>>>
+[35m   debug [39m[vm] Location<l:displayfn> <- FunctionReference<CurriedFunction<f: InlineFunction<f:LIBRARY_BOOK_DISPLAY_NAME, rt: Primitive<STRING>>, ref: ObjectReference<final: true, type: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>>>
+[35m   debug [39m[vm] assigneval Location<l:str> CALL0<Location<l:displayfn>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call0 Location<l:displayfn>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: InlineFunction<f:LIBRARY_BOOK_DISPLAY_NAME, rt: Primitive<STRING>>, ref: ObjectReference<final: true, type: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:LIBRARY_BOOK_DISPLAY_NAME> (pc: 31)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:LIBRARY_BOOK_T>, Location<l:this>>
+[35m   debug [39m[vm] fnparam Location<l:LIBRARY_BOOK_T> Location<l:this>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] fnparam: Location<l:this> <- ObjectReference<final: true, type: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] scopeof Location<l:str1>
+[35m   debug [39m[vm] scopeof Location<l:str2>
+[35m   debug [39m[vm] scopeof Location<l:checked>
+[35m   debug [39m[vm] assigneval Location<l:str1> CALL1<Location<f:BOOK_DISPLAY_NAME>, Location<l:this>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<f:BOOK_DISPLAY_NAME> Location<l:this>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[vm] load inline function: BOOK_DISPLAY_NAME (#params: 1) (returns: TypeReference<Primitive<STRING>>)
+[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:BOOK_DISPLAY_NAME, rt: Primitive<STRING>>>
+[35m   debug [39m[vm] inline call: InlineFunctionCall<f:BOOK_DISPLAY_NAME> (pc: 7)
+[35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:BOOK_T>, Location<l:this>>
+[35m   debug [39m[vm] fnparam Location<l:BOOK_T> Location<l:this>
+[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[vm] fnparam: Location<l:this> <- ObjectReference<final: true, type: Type::Object<#prop: 2, parent: Type::Object<#prop: 3, parent: (nullptr)>>>
+[35m   debug [39m[vm] scopeof Location<l:str1>
+[35m   debug [39m[vm] scopeof Location<l:str2>
+[35m   debug [39m[vm] assigneval Location<l:str1> OBJGET<Location<l:this>, Location<o:TITLE>>
+[35m   debug [39m[vm] objget Location<l:this> Location<o:TITLE>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath>
+[35m   debug [39m[vm] assigneval Location<l:str2> OBJGET<Location<l:this>, Location<o:AUTHOR>>
+[35m   debug [39m[vm] objget Location<l:this> Location<o:AUTHOR>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] Location<l:str2> <- StringReference<John Steinbeck>
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, StringReference< by >>
+[35m   debug [39m[vm] strconcat Location<l:str1> StringReference< by >
+[35m   debug [39m[vm] ensureString: StringReference<The Grapes of Wrath>
+[35m   debug [39m[vm] ensureString: StringReference< by >
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath by >
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, Location<l:str2>>
+[35m   debug [39m[vm] strconcat Location<l:str1> Location<l:str2>
+[35m   debug [39m[vm] ensureString: StringReference<The Grapes of Wrath by >
+[35m   debug [39m[vm] ensureString: StringReference<John Steinbeck>
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath by John Steinbeck>
+[35m   debug [39m[vm] return1 Location<l:str1>
+[35m   debug [39m[vm] assigneval Location<l:str1> CALL1<Location<f:BOOK_DISPLAY_NAME>, Location<l:this>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath by John Steinbeck>
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, StringReference< (call num: >>
+[35m   debug [39m[vm] strconcat Location<l:str1> StringReference< (call num: >
+[35m   debug [39m[vm] ensureString: StringReference<The Grapes of Wrath by John Steinbeck>
+[35m   debug [39m[vm] ensureString: StringReference< (call num: >
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath by John Steinbeck (call num: >
+[35m   debug [39m[vm] assigneval Location<l:str2> OBJGET<Location<l:this>, Location<o:CALL_NUM>>
+[35m   debug [39m[vm] objget Location<l:this> Location<o:CALL_NUM>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] Location<l:str2> <- StringReference<813.52>
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, Location<l:str2>>
+[35m   debug [39m[vm] strconcat Location<l:str1> Location<l:str2>
+[35m   debug [39m[vm] ensureString: StringReference<The Grapes of Wrath by John Steinbeck (call num: >
+[35m   debug [39m[vm] ensureString: StringReference<813.52>
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath by John Steinbeck (call num: 813.52>
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, StringReference<, checked out? >>
+[35m   debug [39m[vm] strconcat Location<l:str1> StringReference<, checked out? >
+[35m   debug [39m[vm] ensureString: StringReference<The Grapes of Wrath by John Steinbeck (call num: 813.52>
+[35m   debug [39m[vm] ensureString: StringReference<, checked out? >
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath by John Steinbeck (call num: 813.52, checked out? >
+[35m   debug [39m[vm] assigneval Location<l:checked> OBJGET<Location<l:this>, Location<o:CHECKED_OUT>>
+[35m   debug [39m[vm] objget Location<l:this> Location<o:CHECKED_OUT>
+[35m   debug [39m[vm] ensureObject: true
+[35m   debug [39m[vm] Location<l:checked> <- BooleanReference<false>
+[35m   debug [39m[vm] assigneval Location<l:str2> CALL1<Location<f:BOOLEAN_TO_STRING>, Location<l:checked>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumping to call
+[35m   debug [39m[vm] call1 Location<f:BOOLEAN_TO_STRING> Location<l:checked>
+[35m   debug [39m[vm] ensureFunction: FunctionReference<BooleanToStringFunction<>>
+[35m   debug [39m[vm] provider call: BooleanToStringFunctionCall<>
+[35m   debug [39m[vm] assigneval Location<l:str2> CALL1<Location<f:BOOLEAN_TO_STRING>, Location<l:checked>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:str2> <- StringReference<false>
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, Location<l:str2>>
+[35m   debug [39m[vm] strconcat Location<l:str1> Location<l:str2>
+[35m   debug [39m[vm] ensureString: StringReference<The Grapes of Wrath by John Steinbeck (call num: 813.52, checked out? >
+[35m   debug [39m[vm] ensureString: StringReference<false>
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath by John Steinbeck (call num: 813.52, checked out? false>
+[35m   debug [39m[vm] assigneval Location<l:str1> STRCONCAT<Location<l:str1>, StringReference<)>>
+[35m   debug [39m[vm] strconcat Location<l:str1> StringReference<)>
+[35m   debug [39m[vm] ensureString: StringReference<The Grapes of Wrath by John Steinbeck (call num: 813.52, checked out? false>
+[35m   debug [39m[vm] ensureString: StringReference<)>
+[35m   debug [39m[vm] Location<l:str1> <- StringReference<The Grapes of Wrath by John Steinbeck (call num: 813.52, checked out? false)>
+[35m   debug [39m[vm] return1 Location<l:str1>
+[35m   debug [39m[vm] assigneval Location<l:str> CALL0<Location<l:displayfn>>
+[35m   debug [39m[vm] assignEval: got call0 or call1
+[35m   debug [39m[vm] assignEval: jumped from return
+[35m   debug [39m[vm] Location<l:str> <- StringReference<The Grapes of Wrath by John Steinbeck (call num: 813.52, checked out? false)>
+[35m   debug [39m[vm] streampush Location<s:STDOUT> Location<l:str>
+[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[vm] return0

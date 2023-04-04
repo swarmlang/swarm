@@ -2,7 +2,7 @@
 number t1 = "hello";
 
 -- basic binary expression (should fail)
-string t2 = t1 . " world";
+string t2 = t1 + " world";
 
 -- function args used wrong (should fail)
 fn funct3 = (arg1: string, arg2: number): number => {

@@ -1,5 +1,3 @@
-[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/050-nested-exceptions/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/050-nested-exceptions/test.svi
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER_HANDLER>, TypeReference<Primitive<VOID>>>, pc: 4
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER_AFTER>, TypeReference<Primitive<NUMBER>>>, pc: 6
 [35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER_THROW>, TypeReference<Primitive<VOID>>>, pc: 9
@@ -15,6 +13,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER> (pc: 9)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<11.000000>
 [35m   debug [39m[vm] scopeof Location<l:cond>
 [35m   debug [39m[vm] assigneval Location<l:cond> LT<Location<l:in>, NumberReference<1.000000>>
@@ -48,6 +47,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER> (pc: 9)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<0.000000>
 [35m   debug [39m[vm] scopeof Location<l:cond>
 [35m   debug [39m[vm] assigneval Location<l:cond> LT<Location<l:in>, NumberReference<1.000000>>
@@ -72,6 +72,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER_HANDLER> (pc: 0)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:code>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:code> <- NumberReference<500.000000>
 [35m   debug [39m[vm] resume Location<f:INNER_AFTER>
 [35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
@@ -99,6 +100,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:OUTER> (pc: 35)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<0.000000>
 [35m   debug [39m[vm] scopeof Location<l:cond>
 [35m   debug [39m[vm] assigneval Location<l:cond> LT<Location<l:in>, NumberReference<5.000000>>
@@ -129,8 +131,10 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:OUTER_HANDLER> (pc: 18)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<0.000000>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:code> <- NumberReference<501.000000>
 [35m   debug [39m[vm] assigneval Location<l:in> CALL1<Location<f:INNER>, Location<l:in>>
 [35m   debug [39m[vm] assignEval: got call0 or call1
@@ -143,6 +147,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER> (pc: 9)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<0.000000>
 [35m   debug [39m[vm] scopeof Location<l:cond>
 [35m   debug [39m[vm] assigneval Location<l:cond> LT<Location<l:in>, NumberReference<1.000000>>
@@ -167,6 +172,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER_HANDLER> (pc: 0)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:code>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:code> <- NumberReference<500.000000>
 [35m   debug [39m[vm] resume Location<f:INNER_AFTER>
 [35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
@@ -192,6 +198,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:OUTER_AFTER> (pc: 26)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<420.000000>
 [35m   debug [39m[vm] scopeof Location<l:str>
 [35m   debug [39m[vm] assigneval Location<l:str> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:in>>
@@ -225,6 +232,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:OUTER> (pc: 35)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<4.000000>
 [35m   debug [39m[vm] scopeof Location<l:cond>
 [35m   debug [39m[vm] assigneval Location<l:cond> LT<Location<l:in>, NumberReference<5.000000>>
@@ -255,8 +263,10 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:OUTER_HANDLER> (pc: 18)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<4.000000>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:code>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:code> <- NumberReference<501.000000>
 [35m   debug [39m[vm] assigneval Location<l:in> CALL1<Location<f:INNER>, Location<l:in>>
 [35m   debug [39m[vm] assignEval: got call0 or call1
@@ -269,6 +279,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER> (pc: 9)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<4.000000>
 [35m   debug [39m[vm] scopeof Location<l:cond>
 [35m   debug [39m[vm] assigneval Location<l:cond> LT<Location<l:in>, NumberReference<1.000000>>
@@ -304,6 +315,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:OUTER_AFTER> (pc: 26)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<69.000000>
 [35m   debug [39m[vm] scopeof Location<l:str>
 [35m   debug [39m[vm] assigneval Location<l:str> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:in>>
@@ -337,6 +349,7 @@
 [35m   debug [39m[vm] inline call: InlineFunctionCall<f:OUTER> (pc: 35)
 [35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:in>>
 [35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:in>
+[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
 [35m   debug [39m[vm] fnparam: Location<l:in> <- NumberReference<10.000000>
 [35m   debug [39m[vm] scopeof Location<l:cond>
 [35m   debug [39m[vm] assigneval Location<l:cond> LT<Location<l:in>, NumberReference<5.000000>>

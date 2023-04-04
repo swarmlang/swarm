@@ -30,7 +30,7 @@ namespace Walk {
     /** Base class for names identified in code. */
     class SemanticSymbol : public IStringable {
     public:
-        SemanticSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : _name(std::move(name)), _type(type), _declaredAt(declaredAt) {
+        SemanticSymbol(std::string name, const Type::Type* type, const Position* declaredAt, bool shared) : _name(std::move(name)), _type(type), _declaredAt(declaredAt), _shared(shared) {
             _uuid = nslib::uuid();
         }
 
@@ -63,7 +63,7 @@ namespace Walk {
 
         /** Get the shared flag of this symbol */
         [[nodiscard]] virtual bool shared() const {
-            return _type->shared();
+            return _shared;
         }
 
         [[nodiscard]] virtual bool isPrologue() const {
@@ -75,6 +75,7 @@ namespace Walk {
         std::string _name;
         const Type::Type* _type;
         const Position* _declaredAt;
+        bool _shared;
 
         friend class Walk::TypeAnalysisWalk;
         friend class Walk::DeSerializeWalk;
@@ -84,7 +85,7 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class VariableSymbol : public SemanticSymbol {
     public:
-        VariableSymbol(std::string name, const Type::Type* type, const Position* declaredAt) : SemanticSymbol(std::move(name), type, declaredAt) {}
+        VariableSymbol(std::string name, const Type::Type* type, const Position* declaredAt, bool shared) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
 
         [[nodiscard]] SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::VARIABLE;
@@ -95,7 +96,7 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class FunctionSymbol : public SemanticSymbol {
     public:
-        FunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : SemanticSymbol(std::move(name), type, declaredAt) {}
+        FunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt, bool shared) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
 
         [[nodiscard]] SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::FUNCTION;
@@ -106,7 +107,7 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class PrologueFunctionSymbol : public FunctionSymbol {
     public:
-        PrologueFunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt) : FunctionSymbol(std::move(name), type, declaredAt) {}
+        PrologueFunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt, bool shared) : FunctionSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
 
         [[nodiscard]] bool isPrologue() const override { return true; }
     };
@@ -153,18 +154,18 @@ namespace Walk {
         }
 
         /** Add a new variable to this scope. */
-        void addVariable(std::string name, const Type::Type* type, const Position* declaredAt) {
-            insert(new VariableSymbol(std::move(name), type, declaredAt));
+        void addVariable(std::string name, const Type::Type* type, const Position* declaredAt, bool shared) {
+            insert(new VariableSymbol(std::move(name), type, declaredAt, std::move(shared)));
         }
 
         /** Add a new function to this scope. */
-        void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
-            insert(new FunctionSymbol(std::move(name), type, declaredAt));
+        void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt, bool shared) {
+            insert(new FunctionSymbol(std::move(name), type, declaredAt, std::move(shared)));
         }
 
         /** Add a new function to this scope as if it were from the Prologue. */
-        void addPrologueFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
-            insert(new PrologueFunctionSymbol(std::move(name), type, declaredAt));
+        void addPrologueFunction(std::string name, Type::Lambda* type, const Position* declaredAt, bool shared) {
+            insert(new PrologueFunctionSymbol(std::move(name), type, declaredAt, std::move(shared)));
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -243,13 +244,13 @@ namespace Walk {
         }
 
         /** Add a new variable to the current scope. */
-        void addVariable(std::string name, const Type::Type* type, const Position* declaredAt) {
-            return current()->addVariable(std::move(name), type, declaredAt);
+        void addVariable(std::string name, const Type::Type* type, const Position* declaredAt, bool shared) {
+            return current()->addVariable(std::move(name), type, declaredAt, std::move(shared));
         }
 
         /** Add a new function to the current scope. */
-        void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt) {
-            return current()->addFunction(std::move(name), type, declaredAt);
+        void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt, bool shared) {
+            return current()->addFunction(std::move(name), type, declaredAt, std::move(shared));
         }
 
         [[nodiscard]] std::string toString() const override {

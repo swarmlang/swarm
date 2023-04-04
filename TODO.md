@@ -18,6 +18,7 @@
 - ast optimization pass
   - removing statements coming after a return
   - simplification of trivial expressions
+  - name mangling to prevent imported modules from compiling to objects
 - assembly optimization pass
   - `X += -Y` can be optimized in the assembly
   - Propagate primitives values

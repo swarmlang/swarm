@@ -103,6 +103,17 @@ namespace swarmc::ISA {
             if ( inst->tag() == Tag::NAND ) return walkNand((Nand*) inst);
             if ( inst->tag() == Tag::NOR ) return walkNor((Nor*) inst);
             if ( inst->tag() == Tag::NOT ) return walkNot((Not*) inst);
+            if ( inst->tag() == Tag::OTYPEINIT ) return walkOTypeInit((OTypeInit*) inst);
+            if ( inst->tag() == Tag::OTYPEPROP ) return walkOTypeProp((OTypeProp*) inst);
+            if ( inst->tag() == Tag::OTYPEDEL ) return walkOTypeDel((OTypeDel*) inst);
+            if ( inst->tag() == Tag::OTYPEGET ) return walkOTypeGet((OTypeGet*) inst);
+            if ( inst->tag() == Tag::OTYPEFINALIZE ) return walkOTypeFinalize((OTypeFinalize*) inst);
+            if ( inst->tag() == Tag::OTYPESUBSET ) return walkOTypeSubset((OTypeSubset*) inst);
+            if ( inst->tag() == Tag::OBJINIT ) return walkObjInit((ObjInit*) inst);
+            if ( inst->tag() == Tag::OBJSET ) return walkObjSet((ObjSet*) inst);
+            if ( inst->tag() == Tag::OBJGET ) return walkObjGet((ObjGet*) inst);
+            if ( inst->tag() == Tag::OBJINSTANCE ) return walkObjInstance((ObjInstance*) inst);
+            if ( inst->tag() == Tag::OBJCURRY ) return walkObjCurry((ObjCurry*) inst);
 
             throw Errors::SwarmError("Invalid instruction tag: " + inst->toString());
         }
@@ -184,6 +195,17 @@ namespace swarmc::ISA {
         virtual TReturn walkPopExceptionHandler(PopExceptionHandler*) = 0;
         virtual TReturn walkRaise(Raise*) = 0;
         virtual TReturn walkResume(Resume*) = 0;
+        virtual TReturn walkOTypeInit(OTypeInit*) = 0;
+        virtual TReturn walkOTypeProp(OTypeProp*) = 0;
+        virtual TReturn walkOTypeDel(OTypeDel*) = 0;
+        virtual TReturn walkOTypeGet(OTypeGet*) = 0;
+        virtual TReturn walkOTypeFinalize(OTypeFinalize*) = 0;
+        virtual TReturn walkOTypeSubset(OTypeSubset*) = 0;
+        virtual TReturn walkObjInit(ObjInit*) = 0;
+        virtual TReturn walkObjSet(ObjSet*) = 0;
+        virtual TReturn walkObjGet(ObjGet*) = 0;
+        virtual TReturn walkObjInstance(ObjInstance*) = 0;
+        virtual TReturn walkObjCurry(ObjCurry*) = 0;
     };
 
 }

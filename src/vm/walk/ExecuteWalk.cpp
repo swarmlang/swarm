@@ -70,13 +70,36 @@ namespace swarmc::Runtime {
     TypeReference* ExecuteWalk::ensureType(const Reference* ref) {
         verbose("ensureType: " + ref->toString());
         ensureType(ref, Type::Primitive::of(Type::Intrinsic::TYPE));
-        if ( ref->tag() != ReferenceTag::TYPE ) {
+        if ( ref->tag() != ReferenceTag::TYPE && ref->tag() != ReferenceTag::OTYPE ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
                 "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
             );
         }
         return (TypeReference*) ref;
+    }
+
+    ObjectTypeReference* ExecuteWalk::ensureObjectType(const Reference* ref) {
+        verbose("ensureType: " + ref->toString());
+        ensureType(ref, Type::Primitive::of(Type::Intrinsic::TYPE));
+        if ( ref->tag() != ReferenceTag::OTYPE ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+            );
+        }
+        return (ObjectTypeReference*) ref;
+    }
+
+    ObjectReference* ExecuteWalk::ensureObject(const Reference* ref) {
+        verbose("ensureObject: " + s(ref));
+        if ( ref->tag() != ReferenceTag::OBJECT ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " must be an object"
+            );
+        }
+        return (ObjectReference*) ref;
     }
 
     StringReference* ExecuteWalk::ensureString(const Reference* ref) {
@@ -491,12 +514,13 @@ namespace swarmc::Runtime {
         }
 
         auto loc = i->second();
+        auto paramType = ensureType(_vm->resolve(i->first()));
         auto param = _vm->resolve(call->popParam().second);
 
-        if ( !param->typei()->isAssignableTo(loc->typei()) ) {
+        if ( !param->typei()->isAssignableTo(paramType->value()) ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::TypeError,
-                "Value " + s(param) + " has incompatible type for parameter " + s(loc) + " (expected: " + s(loc->typei()) + ", got: " + s(param->typei()) + ")"
+                "Value " + s(param) + " has incompatible type for parameter " + s(loc) + " (expected: " + s(paramType->valuei()) + ", got: " + s(param->typei()) + ")"
             );
         }
 
@@ -1070,4 +1094,110 @@ namespace swarmc::Runtime {
 
         return nullptr;
     }
+
+    Reference* ExecuteWalk::walkOTypeInit(OTypeInit*) {
+        verbose("otypeinit");
+        return new ObjectTypeReference(new Type::Object);
+    }
+
+    Reference* ExecuteWalk::walkOTypeProp(OTypeProp* i) {
+        verbose("otypeprop " + s(i->first()) + " " + s(i->second()) + " " + s(i->third()));
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        auto oprop = i->second();
+        auto propType = ensureType(_vm->resolve(i->third()));
+
+        otype->otypei()->defineProperty(oprop->name(), propType->value());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkOTypeDel(OTypeDel* i) {
+        verbose("otypedel " + s(i->first()) + " " + s(i->second()));
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        auto oprop = i->second();
+
+        otype->otypei()->deleteProperty(oprop->name());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkOTypeGet(OTypeGet* i) {
+        verbose("otypeget " + s(i->first()) + " " + s(i->second()));
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        auto oprop = i->second();
+
+        if ( !otype->isFinal() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::NonFinalObjectType,
+                "Cannot get property type from incomplete object type " + s(otype->value())
+            );
+        }
+
+        auto propType = otype->otypei()->getProperty(oprop->name());
+        return new TypeReference(propType);
+    }
+
+    Reference* ExecuteWalk::walkOTypeFinalize(OTypeFinalize* i) {
+        verbose("otypefinalize " + s(i->first()));
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        auto finalized = otype->otypei()->finalize();
+        return new ObjectTypeReference(finalized);
+    }
+
+    Reference* ExecuteWalk::walkOTypeSubset(OTypeSubset* i) {
+        verbose("otypesubset " + s(i->first()));
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        if ( !otype->isFinal() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::NonFinalObjectType,
+                "Cannot create subset from incomplete object type " + s(otype->value())
+            );
+        }
+
+        return new ObjectTypeReference(new Type::Object(otype->value()));
+    }
+
+    Reference* ExecuteWalk::walkObjInit(ObjInit* i) {
+        verbose("objinit " + s(i->first()));
+        auto otype = ensureObjectType(_vm->resolve(i->first()));
+        if ( !otype->isFinal() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::NonFinalObjectType,
+                "Cannot build object from incomplete object type " + s(otype->value())
+            );
+        }
+
+        return new ObjectReference(otype->value());
+    }
+
+    Reference* ExecuteWalk::walkObjSet(ObjSet* i) {
+        verbose("objset " + s(i->first()) + " " + s(i->second()) + " " + s(i->third()));
+        auto obj = ensureObject(_vm->resolve(i->first()));
+        auto prop = i->second();
+        auto val = _vm->resolve(i->third());
+
+        obj->setProperty(prop->name(), val);
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkObjGet(ObjGet* i) {
+        verbose("objget " + s(i->first()) + " " + s(i->second()));
+        auto obj = ensureObject(_vm->resolve(i->first()));
+        auto prop = i->second();
+
+        return obj->getProperty(prop->name());
+    }
+
+    Reference* ExecuteWalk::walkObjInstance(ObjInstance* i) {
+        verbose("objinstance " + s(i->first()));
+        auto obj = ensureObject(_vm->resolve(i->first()));
+        return obj->finalize();
+    }
+
+    Reference* ExecuteWalk::walkObjCurry(ObjCurry* i) {
+        verbose("objcurry " + s(i->first()) + " " + s(i->second()));
+        auto obj = ensureObject(_vm->resolve(i->first()));
+        auto propVal = obj->getProperty(i->second()->name());
+        auto fn = ensureFunction(propVal);
+        return new FunctionReference(fn->fn()->curry(obj));
+    }
+
 }

@@ -128,12 +128,12 @@ namespace swarmc::ISA {
         }
 
         /** Parse an ISA::Reference which consumes a single token from the tokens, starting at the `startAt`-th token. */
-        virtual ISA::Reference* parseUnaryReference(std::string const& leader, std::vector<std::string>& tokens, size_t startAt) {
+        virtual ISA::Reference* parseUnaryReference(std::string const& leader, std::vector<std::string>& tokens, std::size_t startAt) {
             if ( tokens.size() < startAt+1 ) throw Errors::SwarmError("Malformed instruction `" + leader + "` (expected 1 reference, got EOF)");
             return parseReference(tokens.at(startAt));
         }
 
-        virtual ISA::PositionAnnotation* parsePosition(const std::string& instructionLeader, std::vector<std::string>& tokens, size_t startAt) {
+        virtual ISA::PositionAnnotation* parsePosition(const std::string& instructionLeader, std::vector<std::string>& tokens, std::size_t startAt) {
             auto file = parseUnaryReference(instructionLeader, tokens, startAt);
             if ( file->tag() != ReferenceTag::STRING ) throw Errors::SwarmError("Malformed .position annotation (expected string, got " + file->toString() + ")");
 
@@ -150,8 +150,8 @@ namespace swarmc::ISA {
          * Parse a single instruction from the token stream and append it to `is`, starting at the `startAt`-th token.
          * Returns the number of tokens which were consumed from `tokens`.
          */
-        virtual size_t parseInstruction(Instructions& is, std::vector<std::string>& tokens, size_t startAt) {
-            size_t i = 1;
+        virtual std::size_t parseInstruction(Instructions& is, std::vector<std::string>& tokens, std::size_t startAt) {
+            std::size_t i = 1;
             auto instructionLeader = tokens.at(startAt);
 
             if ( instructionLeader == ".position" ) {
@@ -582,6 +582,66 @@ namespace swarmc::ISA {
                     parseLocationReference(instructionLeader, tokens, startAt+i)
                 ));
                 i += 1;
+            } else if ( instructionLeader == "otypeinit" ) {
+                is.push_back(new ISA::OTypeInit());
+            } else if ( instructionLeader == "otypeprop" ) {
+                is.push_back(new ISA::OTypeProp(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1),
+                    parseUnaryReference(instructionLeader, tokens, startAt+i+2)
+                ));
+                i += 3;
+            } else if ( instructionLeader == "otypedel" ) {
+                is.push_back(new ISA::OTypeDel(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1)
+                ));
+                i += 2;
+            } else if ( instructionLeader == "otypeget" ) {
+                is.push_back(new ISA::OTypeGet(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1)
+                ));
+                i += 2;
+            } else if ( instructionLeader == "otypefinalize" ) {
+                is.push_back(new ISA::OTypeFinalize(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "otypesubset" ) {
+                is.push_back(new ISA::OTypeSubset(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "objinit" ) {
+                is.push_back(new ISA::ObjInit(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "objset" ) {
+                is.push_back(new ISA::ObjSet(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1),
+                    parseUnaryReference(instructionLeader, tokens, startAt+i+2)
+                ));
+                i += 3;
+            } else if ( instructionLeader == "objget" ) {
+                is.push_back(new ISA::ObjGet(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1)
+                ));
+                i += 2;
+            } else if ( instructionLeader == "objinstance" ) {
+                is.push_back(new ISA::ObjInstance(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "objcurry" ) {
+                is.push_back(new ISA::ObjCurry(
+                    parseUnaryReference(instructionLeader, tokens, startAt+i),
+                    parseObjectPropertyReference(instructionLeader, tokens, startAt+i+1)
+                ));
+                i += 2;
             } else {
                 throw Errors::SwarmError("Malformed instruction: `" + instructionLeader + "` (unknown instruction tag)");
             }
@@ -593,11 +653,11 @@ namespace swarmc::ISA {
          * Parse a single assignment instruction from the list of tokens, starting at the `startAt`-th token.
          * Returns the number of tokens which were consumed from `tokens`.
          */
-        virtual size_t parseAssignment(Instructions& is, std::vector<std::string>& tokens, size_t startAt) {
+        virtual std::size_t parseAssignment(Instructions& is, std::vector<std::string>& tokens, std::size_t startAt) {
             // An assignment must consist of <lval> <larrow> <reference|instruction>
 
             // Parse the lval
-            size_t i = 1;
+            std::size_t i = 1;
             auto lvalToken = tokens.at(startAt);
             auto lval = parseLocation(lvalToken);
 
@@ -660,12 +720,22 @@ namespace swarmc::ISA {
          * Parse a location reference from the list of tokens starting at the `startAt`-th token.
          * Returns the ISA::LocationReference instance, and consumes a single token.
          */
-        virtual ISA::LocationReference* parseLocationReference(std::string const& leader, std::vector<std::string>& tokens, size_t startAt) {
+        virtual ISA::LocationReference* parseLocationReference(std::string const& leader, std::vector<std::string>& tokens, std::size_t startAt) {
             if ( tokens.size() < startAt+1 ) throw Errors::SwarmError("Malformed instruction `" + leader + "` (expected 1 reference, got EOF)");
             auto token = tokens.at(startAt);
             auto r = parseReference(token);
             if ( r->tag() != ReferenceTag::LOCATION ) throw Errors::SwarmError("Malformed instruction: `" + leader + "` (expected location, got `" + token + "`");
             return (ISA::LocationReference*) r;
+        }
+
+        /**
+         * Parse a location reference from the list of tokens starting at the `startAt`-th token,
+         * validating that the reference is an object-property affinity.
+         */
+        virtual ISA::LocationReference* parseObjectPropertyReference(std::string const& leader, std::vector<std::string>& tokens, std::size_t startAt) {
+            auto ref = parseLocationReference(leader, tokens, startAt);
+            if ( ref->affinity() != Affinity::OBJECTPROP ) throw Errors::SwarmError("Malformed instruction: `" + leader + "` (expected object property name, got affinity `" + LocationReference::affinityString(ref->affinity()) + "`");
+            return ref;
         }
 
         /** Returns true if the leading string of a token represents a LocationReference. */
@@ -677,7 +747,7 @@ namespace swarmc::ISA {
             if ( leader == "p:LAMBDA" ) return true;
             return (
                 leader.size() > 1
-                && leader.at(0) == 'f'
+                && (leader.at(0) == 'f' || leader.at(0) == 'o')
                 && leader.at(1) == ':'
             );
         }
@@ -724,7 +794,8 @@ namespace swarmc::ISA {
             else if ( token == "p:NUMBER" ) type = Type::Primitive::of(Type::Intrinsic::NUMBER);
             else if ( token == "p:STRING" ) type = Type::Primitive::of(Type::Intrinsic::STRING);
             else if ( token == "p:BOOLEAN" ) type = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
-            else throw Errors::SwarmError("Malformed primitive type name: `" + token + "` (expected one of p:TYPE, p:NUMBER, p:STRING, p:BOOLEAN, p:VOID)");
+            else if ( token == "p:THIS" ) type = Type::Primitive::of(Type::Intrinsic::THIS);
+            else throw Errors::SwarmError("Malformed primitive type name: `" + token + "` (expected one of p:TYPE, p:NUMBER, p:STRING, p:BOOLEAN, p:VOID, p:THIS)");
 
             return new ISA::TypeReference(type);
         }
@@ -732,7 +803,7 @@ namespace swarmc::ISA {
         /** Parse the LocationReference represented by the given token. */
         static ISA::LocationReference* parseLocation(std::string const& token) {
             if ( token.at(0) == '$' && (token.length() < 4 || token.at(2) != ':') ) throw Errors::SwarmError("Malformed location reference: `" + token + "` (expected form $_:_)");
-            if ( token.at(0) != '$' && (token.length() < 3 || token.at(1) != ':') ) throw Errors::SwarmError("Malformed location reference: `" + token + "` (expected form f:_ or p:_)");
+            if ( token.at(0) != '$' && (token.length() < 3 || token.at(1) != ':') ) throw Errors::SwarmError("Malformed location reference: `" + token + "` (expected form f:_ or o:_ or p:_)");
 
             auto location = token.at(0) == '$' ? token.at(1) : token.at(0);
             auto name = token.substr(token.at(0) == '$' ? 3 : 2);
@@ -742,7 +813,8 @@ namespace swarmc::ISA {
             else if ( location == 's' ) a = Affinity::SHARED;
             else if ( location == 'f' ) a = Affinity::FUNCTION;
             else if ( location == 'p' ) a = Affinity::PRIMITIVE;
-            else throw Errors::SwarmError("Invalid location affinity: `" + token + "` (expected l or s or f or p)");
+            else if ( location == 'o' ) a = Affinity::OBJECTPROP;
+            else throw Errors::SwarmError("Invalid location affinity: `" + token + "` (expected l or s or f or p or o)");
 
             return new ISA::LocationReference(a, name);
         }
@@ -775,10 +847,10 @@ namespace swarmc::ISA {
          * Returns the number of operands present in the token stream before another instruction
          * is encountered using a look-ahead, starting at the `startAt`-th token.
          */
-        virtual size_t countOperands(std::vector<std::string> const& tokens, size_t startAt) {
-            size_t n = 0;
+        virtual std::size_t countOperands(std::vector<std::string> const& tokens, std::size_t startAt) {
+            std::size_t n = 0;
 
-            for ( size_t i = startAt; i < tokens.size(); i += 1 ) {
+            for ( std::size_t i = startAt; i < tokens.size(); i += 1 ) {
                 if ( isReferenceLeader(tokens.at(i)) ) {
                     n += 1;
                     continue;

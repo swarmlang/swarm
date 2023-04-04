@@ -83,7 +83,7 @@ protected:
         bool valueResult;
         if ( node->value()->getName() == "FunctionNode" ) {
             // Add the declaration to the current scope
-            _symbols->addVariable(name, type, node->position());
+            _symbols->addVariable(name, type, node->position(), node->shared());
 
             // Check the RHS of the assignment
             valueResult = walk(node->value());
@@ -92,7 +92,7 @@ protected:
             valueResult = walk(node->value());
 
             // Add the declaration to the current scope
-            _symbols->addVariable(name, type, node->position());
+            _symbols->addVariable(name, type, node->position(), node->shared());
         }
 
         // Call this to attach the Symbol to the IdentifierNode
@@ -101,7 +101,7 @@ protected:
     }
 
     bool walkCallExpressionNode(CallExpressionNode* node) override {
-        bool flag = walk(node->id());
+        bool flag = walk(node->func());
 
         for ( auto arg : *node->args() ) {
             flag = walk(arg) && flag;
@@ -180,12 +180,6 @@ protected:
         return leftResult && rightResult;
     }
 
-    bool walkConcatenateNode(ConcatenateNode* node) override {
-        bool leftResult = walk(node->left());
-        bool rightResult = walk(node->right());
-        return leftResult && rightResult;
-    }
-
     bool walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         return walk(node->exp());
     }
@@ -229,13 +223,17 @@ protected:
             const Type::Type* enumType = node->enumerable()->type();
             if ( enumType->intrinsic() == Type::Intrinsic::ENUMERABLE ) {
                 auto enumGenericType = (Type::Enumerable*) enumType;
-                type = enumGenericType->values()->copy(node->_shared);
+                type = enumGenericType->values()->copy();
             }
 
             // Start a new scope in the body and add the local
             _symbols->enter();
             inScope = true;
-            _symbols->addVariable(name, type, pos);
+            _symbols->addVariable(name, type, pos, node->shared());
+            auto i = node->index();
+            if (i != nullptr) {
+                _symbols->insert(i->symbol());
+            }
         }
 
         flag = walk(node->local()) && flag;
@@ -261,7 +259,7 @@ protected:
             // Start a new scope in the body and add the local
             _symbols->enter();
             inScope = true;
-            _symbols->addVariable(name, type, pos);
+            _symbols->addVariable(name, type, pos, node->shared());
         }
 
         flag = walk(node->local()) && flag;
@@ -361,7 +359,7 @@ protected:
             }
 
             // Add the declaration to the current scope
-            _symbols->addVariable(name, type, formal.second->position());
+            _symbols->addVariable(name, type, formal.second->position(), false);
 
             // Call this to attach the Symbol to the IdentifierNode
             walk(formal.second);
@@ -380,6 +378,24 @@ protected:
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
+    }
+
+    bool walkTypeBodyNode(TypeBodyNode* node) override {
+        _symbols->enter();
+        bool flag = true;
+        for (auto decl : *node->declarations()) {
+            flag = walk(decl) && flag;
+        }
+        _symbols->leave();
+        return flag;
+    }
+
+    bool walkClassAccessNode(ClassAccessNode* node) override {
+        return walk(node->path());
+    }
+
+    bool walkIncludeStatementNode(IncludeStatementNode* node) override {
+        return true;
     }
 
     [[nodiscard]] std::string toString() const override {

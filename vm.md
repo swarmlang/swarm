@@ -133,6 +133,43 @@ Shared storage is global across all jobs that have access to a location.
   - `popexhandler $lloc` - pop the exception handler with the ID `$lloc`
   - `raise $lloc` - raise an exception with the code `$lloc`
   - `resume $lloc` - call the function `$lloc` from the scope where the exception handler was registered
+- Object types (note: currently proposed, not yet implemented)
+  - Primitives:
+    - `p:OTYPE_PROTO` - an object type which can be modified
+    - `p:OTYPE` - a finalized object type
+    - `p:OBJECT_PROTO` - an object which is being constructed
+    - `p:OBJECT` - a constructed object instance
+    - `o:*` - names of object properties (e.g. `o:MYPROP1`) -- these are referred to as `$oloc`
+  - Defining object types
+    - `otypeinit` - returns a new, empty object type
+    - `otypeprop $lloc1 $oloc $lloc2` - define the `$oloc` property on the object type `$lloc1` to have type `$lloc2`
+    - `otypedel $lloc $oloc` - remove the `$oloc` property from the object type `$lloc`
+    - `otypeget $lloc $oloc` - get the type of the `$oloc` property on the object type `$lloc`
+    - `otypefinalize $lloc` - returns a finalized version of the `$lloc` object type
+    - `otypesubset $lloc` - returns a new `p:OTYPE_PROTO` which extends the `p:OTYPE` `$lloc`
+      - Note: `$lloc` CANNOT be a `p:OTYPE_PROTO`
+    - `otypecurry $lloc` - shorthand for the following:
+      - ```text
+        $l:TEMP <- curry f:LAMBDA1_T p:THIS
+        call $l:TEMP $lloc
+        ```
+  - Constructing/using objects
+    - `objinit $lloc` - returns a prototype object instance of the object type `$lloc`
+      - Return value is `p:OBJECT_PROTO`
+    - `objset $lloc1 $oloc $lloc2` - sets the `$oloc` property on the `$lloc1` object to the value `$lloc2`
+    - `objget $lloc $oloc` - gets the value of the `$oloc` property on the `$lloc` object
+      - `$lloc` must be `p:OBJECT`
+    - `objinstance $lloc` - instantiates the `p:OBJECT_PROTO` at `$lloc` and returns the `p:OBJECT`
+      - Validates the object properties based on the object's type
+    - `objcurry $lloc $oloc` - get a pre-curried reference to an object method
+      - Most object methods take the object itself as the first parameter.
+      - To aid this paradigm, `objcurry` returns an instance of the `$oloc` method on the `$lloc` object pre-curried with `$lloc`
+      - The type of `$oloc` must be `p:THIS :: ...`
+      - It is equivalent to:
+        ```text
+        $l:method <- objget $lloc $oloc
+        $l:result <- curry $l:method $lloc
+        ```
 
 ### Grammar
 
@@ -153,6 +190,8 @@ EXPRESSION ::= curry | call
          | strconcat | strlength | strslice
          | plus | minus | times | divide | power | mod | neg
          | gt | gte | lt | lte
+         | otypeinit | otypeget | otypefinalize | otypesubset
+         | objinit | objget | objinstance | objcurry
 OPERATION ::= out | err | beginfn | fnparam | return
               | callif | callelse | pushcall | pushcallif | pushcallelse | drain | exit
               | streampush | streamclose
@@ -161,6 +200,8 @@ OPERATION ::= out | err | beginfn | fnparam | return
               | enumappend | enumprepend | enumerate
               | while | with
               | pushexhandler | popexhandler | raise | resume
+              | otypeprop | otypedel
+              | objset
 OPER ::= OPERATION LLOCS
 EXPR ::= EXPRESSION LLOCS
 RVAL ::= EXPR | LLOC
@@ -178,6 +219,8 @@ SVI ::= INST EOF | INST \n INSTS
   - `f:RANDOM`/`f:RANDOM_VECTOR n`/`f:RANDOM_MATRIX m n` - get a random number, enum of random numbers of length n, or matrix of random numbers of size m by n
   - `f:RANGE n m s` - get an enum of the range of numbers from n to m with step size s
   - `f:ID v` - the identity function (e.g. `f:ID 3 -> 3`)
+  - `f:LAMBDA0_T r` - constructs a lambda type of the form `() -> r`
+  - `f:LAMBDA1_T a r` - constructs a lambda type of the form `a -> r`
 
 ### Examples
 

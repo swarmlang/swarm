@@ -1,5 +1,3 @@
-[35m   debug [39m[main] Parsing argument: /home/garrettmills/Projects/swarm/test/039-prologue/test.svi
-[35m   debug [39m[main] Got input file: /home/garrettmills/Projects/swarm/test/039-prologue/test.svi
 [35m   debug [39m[vm] assigneval Location<l:a> CALL1<Location<f:SIN>, NumberReference<1.570796>>
 [35m   debug [39m[vm] assignEval: got call0 or call1
 [35m   debug [39m[vm] assignEval: jumping to call

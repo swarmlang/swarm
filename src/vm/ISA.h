@@ -101,6 +101,17 @@ namespace swarmc::ISA {
         POPEXHANDLER,
         RAISE,
         RESUME,
+        OTYPEINIT,
+        OTYPEPROP,
+        OTYPEDEL,
+        OTYPEGET,
+        OTYPEFINALIZE,
+        OTYPESUBSET,
+        OBJINIT,
+        OBJSET,
+        OBJGET,
+        OBJINSTANCE,
+        OBJCURRY,
     };
 
     /** Places where values can be stored. */
@@ -109,6 +120,7 @@ namespace swarmc::ISA {
         SHARED,
         FUNCTION,
         PRIMITIVE,
+        OBJECTPROP,
     };
 
     /** Broad types of references built-in to the runtime. */
@@ -124,6 +136,8 @@ namespace swarmc::ISA {
         ENUMERATION,
         MAP,
         VOID,
+        OTYPE,
+        OBJECT,
     };
 }
 
@@ -180,6 +194,7 @@ namespace swarmc::ISA {
             if ( a == Affinity::LOCAL ) return "l";
             if ( a == Affinity::SHARED ) return "s";
             if ( a == Affinity::PRIMITIVE ) return "p";
+            if ( a == Affinity::OBJECTPROP ) return "o";
             return "UNKNOWN";
         }
 
@@ -380,16 +395,16 @@ namespace swarmc::ISA {
         }
 
         /** Get the actual type this value is holding. */
-        [[nodiscard]] Type::Type* value() const {
+        [[nodiscard]] virtual Type::Type* value() const {
             return _type;
         }
 
-        [[nodiscard]] InlineRefHandle<Type::Type> valuei() const {
+        [[nodiscard]] virtual InlineRefHandle<Type::Type> valuei() const {
             return inlineref<Type::Type>(value());
         }
 
         bool isEqualTo(const Reference* other) const override {
-            if ( other->tag() != ReferenceTag::TYPE ) return false;
+            if ( other->tag() != _tag ) return false;
             auto ref = (TypeReference*) other;
             return ref->type()->isAssignableTo(type()) && type()->isAssignableTo(ref->type());
         }
@@ -400,6 +415,160 @@ namespace swarmc::ISA {
 
     protected:
         Type::Type* _type;
+    };
+
+    class ObjectTypeReference : public TypeReference {
+    public:
+        explicit ObjectTypeReference(Type::Object* type) : TypeReference(type) {
+            _tag = ReferenceTag::OTYPE;
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "ObjectTypeReference<" + _type->toString() + ">";
+        }
+
+        [[nodiscard]] Type::Object* value() const override {
+            return dynamic_cast<Type::Object*>(_type);
+        }
+
+        [[nodiscard]] InlineRefHandle<Type::Object> otypei() const {
+            return inlineref<Type::Object>(value());
+        }
+
+        [[nodiscard]] bool isFinal() const {
+            return value()->isFinal();
+        }
+
+        void replace(Type::Object* type) {
+            if ( isFinal() ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::MutateFinalizedObject,
+                    "Cannot mutate finalized object type"
+                );
+            }
+
+            _type = swapref(_type, type);
+        }
+
+        void finalize() {
+            replace(value()->finalize());
+        }
+    };
+
+    class ObjectReference : public Reference {
+    public:
+        explicit ObjectReference(Type::Object* type) : Reference(ReferenceTag::OBJECT), _type(useref(type)) {}
+
+        ~ObjectReference() override {
+            freeref(_type);
+        }
+
+        [[nodiscard]] bool isFinal() const {
+            return _final;
+        }
+
+        [[nodiscard]] Type::Object* type() const override {
+            return _type;
+        }
+
+        void setProperty(const std::string& name, Reference* value) {
+            auto requiredType = _type->getProperty(name);
+            if ( requiredType == nullptr ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::TypeError,
+                    "Cannot set property `" + name + "` on object as it does not exist on the base type: " + s(_type)
+                );
+            }
+
+            if ( !value->typei()->isAssignableTo(requiredType) ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::TypeError,
+                    "Cannot set property `" + name + "` to value `" + s(value) + "` as its type is incompatible (expected: " + s(requiredType) + ", got: " + s(value->typei()) + ")"
+                );
+            }
+
+            auto existing = _properties.find(name);
+            if ( existing != _properties.end() && existing->second != value ) {
+                freeref(existing->second);
+            }
+
+            _properties[name] = useref(value);
+        }
+
+        Reference* getProperty(const std::string& name) {
+            return _properties[name];
+        }
+
+        std::map<std::string, Reference*> getProperties() const {
+            return _properties;
+        }
+
+        [[nodiscard]] ObjectReference* finalize() const {
+            // If we have properties set, we know they are valid types,
+            // so we just need to check for missing properties.
+            if ( _properties.size() != _type->numberOfProperties() ) {
+                throw Errors::RuntimeError(
+                    Errors::RuntimeExCode::TypeError,
+                    "Cannot finalize object as it is missing one or more properties defined in the base type " + s(_type)
+                );
+            }
+
+            auto inst = copy();
+            inst->_final = true;
+            return inst;
+        }
+
+        [[nodiscard]] bool isEqualTo(const Reference* other) const override {
+            // The tags must be equal.
+            if ( other->tag() != ReferenceTag::OBJECT ) {
+                return false;
+            }
+
+            auto otherObject = dynamic_cast<const ObjectReference*>(other);
+            auto typei = otherObject->typei();
+
+            // The types must be equal.
+            if ( !typei->isAssignableTo(_type) || !_type->isAssignableTo(typei.get()) ) {
+                return false;
+            }
+
+            // The # of properties must be the same.
+            if ( _properties.size() != otherObject->_properties.size() ) {
+                return false;
+            }
+
+            // Every property must be equal.
+            for ( const auto& p : _properties ) {
+                auto otherP = otherObject->_properties.find(p.first);
+                if ( otherP == otherObject->_properties.end() ) {
+                    return false;
+                }
+
+                if ( !p.second->isEqualTo(otherP->second) ) {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        [[nodiscard]] ObjectReference* copy() const override {
+            auto inst = new ObjectReference(_type);
+            inst->_final = _final;
+            for ( const auto& p : _properties ) {
+                inst->_properties[p.first] = useref(p.second->copy());
+            }
+            return inst;
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "ObjectReference<final: " + s(_final) + ", type: " + s(_type) + ">";
+        }
+
+    protected:
+        Type::Object* _type;
+        bool _final = false;
+        std::map<std::string, Reference*> _properties;
     };
 
     class VoidReference : public Reference {
