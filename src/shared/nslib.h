@@ -2,6 +2,7 @@
 #define NSLIB_H
 
 //#define NSLIB_GC_TRACK
+#define NSLIB_GC_DEBUG_FREE
 
 #ifndef NSLIB_BINN_H_PATH
 #define NSLIB_BINN_H_PATH "../../mod/binn/src/binn.h"
@@ -27,7 +28,7 @@
 #define NS_DEFER() nslib::Defer UNIQUE_NAME(deferred)
 
 #include <dlfcn.h>
-
+#include <cassert>
 #include <random>
 #include <stack>
 #include <map>
@@ -52,6 +53,7 @@
 #include <sys/shm.h>
 #include <execinfo.h>
 #include <mutex>
+#include <typeinfo>
 #include NSLIB_BINN_H_PATH
 
 #define NSLIB_SERIAL_TAG 0
@@ -598,6 +600,7 @@ namespace nslib {
     inline std::string s(double v) { return std::to_string(v); }
     inline std::string s(long double v) { return std::to_string(v); }
     inline std::string s(bool v) { return v ? "true" : "false"; }
+    inline std::string s(const std::type_info& v) { return v.name(); }
     inline std::string s(IStringable& v) { return v.toString(); }
     inline std::string s(IStringable* v) {
         if ( v == nullptr ) return "(nullptr)";
@@ -1667,13 +1670,13 @@ namespace nslib {
 
         void output(Verbosity v, std::string s) override {
             if ( v == Verbosity::SUCCESS ) console->success(s);
-            if ( v == Verbosity::ERROR ) console->error(s);
-            if ( v == Verbosity::WARNING ) console->warn(s);
-            if ( v == Verbosity::INFO ) console->info(s);
-            if ( v == Verbosity::DEBUG ) console->debug(s);
-            if ( v == Verbosity::VERBOSE ) console->verbose(s);
-            if ( v == Verbosity::TRACE ) console->trace(s);
-            console->println(" ??????? " + s);
+            else if ( v == Verbosity::ERROR ) console->error(s);
+            else if ( v == Verbosity::WARNING ) console->warn(s);
+            else if ( v == Verbosity::INFO ) console->info(s);
+            else if ( v == Verbosity::DEBUG ) console->debug(s);
+            else if ( v == Verbosity::VERBOSE ) console->verbose(s);
+            else if ( v == Verbosity::TRACE ) console->trace(s);
+            else console->println(" ??????? " + s);
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -1912,6 +1915,13 @@ namespace nslib {
     using GCTracks = std::map<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>;
 #endif
 
+#ifdef NSLIB_GC_DEBUG_FREE
+    class UseAfterFreeException : public NSLibException {
+    public:
+        explicit UseAfterFreeException(const std::string& message) : NSLibException(message) {}
+    };
+#endif
+
     /** Trait interface which adds a reference count. */
     class IRefCountable {
     public:
@@ -1929,6 +1939,12 @@ namespace nslib {
          */
         virtual void nslibIncRef() {
             _nslibRefCount += 1;
+
+#ifdef NSLIB_GC_DEBUG_FREE
+            if ( _nslibWouldHaveFreed ) {
+                throw UseAfterFreeException("nslib: useref(...) called on object that was already freed by freeref(...) - free'd at: " + _nslibFreedAtTrace);
+            }
+#endif
 
 #ifdef NSLIB_GC_TRACK
             if ( !_registeredShutdown ) {
@@ -1996,6 +2012,15 @@ namespace nslib {
         /** If true, the instance can be deleted. */
         [[nodiscard]] virtual bool nslibShouldFree() const { return !_nslibRefDisable && _nslibRefCount < 1; }
 
+#ifdef NSLIB_GC_DEBUG_FREE
+        virtual void nslibMarkWouldHaveFreed() {
+            _nslibWouldHaveFreed = true;
+            _nslibFreedAtTrace = trace();
+        }
+
+        [[nodiscard]] virtual bool nslibWouldHaveFreed() const { return _nslibWouldHaveFreed; }
+#endif
+
         virtual std::size_t nslibOnFree(std::function<void()> callback) {
             auto id = _nextOnFreeCallbackId++;
             _onFreeCallbacks[id] = std::move(callback);
@@ -2013,6 +2038,11 @@ namespace nslib {
         bool _nslibRefDisable;
         std::map<std::size_t, std::function<void()>> _onFreeCallbacks;
         std::size_t _nextOnFreeCallbackId = 1;
+
+#ifdef NSLIB_GC_DEBUG_FREE
+        bool _nslibWouldHaveFreed = false;
+        std::string _nslibFreedAtTrace;
+#endif
 
 #ifdef NSLIB_GC_TRACK
         std::string _nslibRefId = uuid();
@@ -2041,7 +2071,13 @@ namespace nslib {
     void freeref(priv::RefCountable auto r) {
         if ( r == nullptr ) return;
         r->nslibDecRef();
-        if ( r->nslibShouldFree() ) delete r;
+        if ( r->nslibShouldFree() ) {
+#ifdef NSLIB_GC_DEBUG_FREE
+            r->nslibMarkWouldHaveFreed();
+#else
+            delete r;
+#endif
+        }
     }
 
     /** Release an old reference and use a new one, if they are different. */
@@ -2168,6 +2204,135 @@ namespace nslib {
     protected:
         std::function<void()> _callback;
     };
+
+
+
+    /* A simple event bus system inspired by https://github.com/dquist/EventBus */
+    namespace event {
+        using unsubscribe_t = std::function<void()>;
+
+        /** Base class for events. */
+        class Event : public IStringable {};
+
+        /** Listens for events of type T. */
+        template <class T>
+        class Listener : public IStringable, public IRefCountable {
+        public:
+            Listener() : IRefCountable() {
+                static_assert(std::is_base_of<Event, T>::value, "nslib::event::EventHandler<T>: T must extend Event");
+            }
+
+            virtual void handle(T&) = 0;
+
+            void dispatch(Event& e) {
+                handle(dynamic_cast<T&>(e));
+            }
+        };
+
+        namespace priv {
+            using listener_map_t = std::unordered_map<std::string, void* const>;
+
+            template <class T>
+            class LambdaListener : public Listener<T> {
+            public:
+                explicit LambdaListener(std::function<void(T&)> handler) : Listener<T>(), _handler(handler) {}
+
+                void handle(T& e) override {
+                    _handler(e);
+                }
+
+                [[nodiscard]] std::string toString() const override {
+                    return "nslib::event::priv::LambdaListener<T: " + s(typeid(T)) + ">";
+                }
+
+            protected:
+                std::function<void(T&)> _handler;
+            };
+        }
+
+        /** A simple event bus. */
+        class EventBus : public IStringable, public IRefCountable {
+        public:
+            static EventBus* get() {
+                if ( _global == nullptr ) {
+                    _global = useref(getNew("global"));
+                    Framework::onShutdown([]() {
+                        freeref(_global);
+                    });
+                }
+                return _global;
+            }
+
+            static EventBus* getNew(const std::string& name) {
+                return new EventBus(name);
+            }
+
+            explicit EventBus(std::string  name) : _name(std::move(name)) {}
+
+            /**
+             * Register a listener for events of type T.
+             * Returns a function which can be called to remove the listener.
+             */
+            template <class T>
+            unsubscribe_t listen(Listener<T>* listener) {
+                auto name = s(typeid(T));
+                priv::listener_map_t listeners = {};
+                auto found = _map.find(name);
+                if ( found != _map.end() ) {
+                    listeners = found->second;
+                }
+
+                auto listenerId = uuid();
+                listeners.insert({listenerId, useref(listener)});
+
+                _map[name] = listeners;
+
+                // The unsubscriber:
+                return [this, listenerId, listener]() {
+                    auto found = _map.find(s(typeid(T)));
+                    if ( found == _map.end() ) {
+                        return;
+                    }
+
+                    auto mappedListener = found->second.find(listenerId);
+                    if ( mappedListener == found->second.end() ) {
+                        return;
+                    }
+
+                    found->second.erase(mappedListener);
+                    freeref(listener);
+                };
+            }
+
+            template <class T>
+            unsubscribe_t listen(std::function<void(T&)> listener) {
+                return listen(new priv::LambdaListener<T>(listener));
+            }
+
+            /** Raise an event. */
+            void dispatch(Event& e) {
+                auto listeners = _map.find(s(typeid(e)));
+                if ( listeners == _map.end() ) {
+                    // No listeners registered for this event type
+                    return;
+                }
+
+                for ( const auto& listener : listeners->second ) {
+                    static_cast<Listener<Event>*>(listener.second)->dispatch(e);
+                }
+            }
+
+            [[nodiscard]] std::string toString() const override {
+                return "EventBus<name: " + _name + ">";
+            }
+
+        protected:
+            std::string _name;
+            std::unordered_map<std::string, priv::listener_map_t> _map;
+
+            static EventBus* _global;
+        };
+    }
 }
 
 #endif //NSLIB_H

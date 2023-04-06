@@ -119,13 +119,11 @@ namespace swarmc::Runtime::SingleThreaded {
 
 
     QueueJob::QueueJob(
-        JobID id, JobState jobState, IFunctionCall *call, ScopeFrame *scope, State *vmState):
-            _id(id), _jobState(jobState), _call(useref(call)), _scope(useref(scope)), _vmState(useref(vmState)) {}
+        JobID id, JobState jobState, IFunctionCall* call):
+            _id(id), _jobState(jobState), _call(useref(call)) {}
 
     QueueJob::~QueueJob() noexcept {
         freeref(_call);
-        freeref(_scope);
-        freeref(_vmState);
     }
 
 
@@ -134,16 +132,17 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
 
-    QueueJob* Queue::build(IFunctionCall* call, const ScopeFrame* scope, const State* state) {
-        return new QueueJob(_nextId++, JobState::PENDING, call, scope->copy(), state->copy());
+    QueueJob* Queue::build(IFunctionCall* call) {
+        return new QueueJob(_nextId++, JobState::PENDING, call);
     }
 
 
     void Queue::push(IQueueJob* job) {
         _vm->copy([job](VirtualMachine* vm) {
+            // FIXME: handle errors
             Console::get()->debug("Got VM from queue: " + vm->toString());
-            vm->restore(job->getScope()->copy(), job->getState()->copy());
             vm->executeCall(job->getCall());
+            job->setState(JobState::COMPLETE);
         });
     }
 

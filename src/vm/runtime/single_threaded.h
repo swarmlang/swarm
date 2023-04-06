@@ -138,7 +138,7 @@ namespace swarmc::Runtime::SingleThreaded {
      */
     class QueueJob : public IQueueJob {
     public:
-        QueueJob(JobID id, JobState jobState, IFunctionCall* call, ScopeFrame* scope, State* vmState);
+        QueueJob(JobID id, JobState jobState, IFunctionCall* call);
 
         ~QueueJob() noexcept override;
 
@@ -146,11 +146,9 @@ namespace swarmc::Runtime::SingleThreaded {
 
         [[nodiscard]] JobState state() const override { return _jobState; }
 
+        void setState(JobState state) override { _jobState = state; }
+
         [[nodiscard]] IFunctionCall* getCall() const override { return _call; }
-
-        [[nodiscard]] const ScopeFrame* getScope() const override { return _scope; }
-
-        [[nodiscard]] const State* getState() const override { return _vmState; }
 
         [[nodiscard]] std::string toString() const override;
 
@@ -163,8 +161,6 @@ namespace swarmc::Runtime::SingleThreaded {
         JobState _jobState;
         IFunctionCall* _call;
         SchedulingFilters _filters;
-        ScopeFrame* _scope;
-        State* _vmState;
     };
 
 
@@ -185,7 +181,7 @@ namespace swarmc::Runtime::SingleThreaded {
 
         bool shouldHandle(IFunctionCall* call) override { return true; }
 
-        QueueJob* build(IFunctionCall* call, const ScopeFrame* scope, const State* state) override;
+        QueueJob* build(IFunctionCall* call) override;
 
         void push(IQueueJob* job) override;
 

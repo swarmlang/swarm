@@ -29,7 +29,30 @@ namespace swarmc::Runtime {
 
     Reference* ExecuteWalk::walkOne(Instruction* inst) {
         try {
-            return ISAWalk<Reference*>::walkOne(inst);
+            // Instruction execution must be atomic across shared locations,
+            // so we need to lock all shared locations used by this instruction.
+
+            // Extract the shared locations
+            // FIXME: optimization pass - do this once when we load the instructions rather than before each execute
+            auto sharedLocs = _sharedLocations->walkOne(inst);
+
+            // Attempt to lock the necessary shared locations
+            SharedLocations locked;
+            for ( auto sharedLoc : sharedLocs ) {
+                if ( !_vm->hasLock(sharedLoc) && _vm->lock(sharedLoc) ) {
+                    locked.push_back(sharedLoc);
+                }
+            }
+
+            // Execute the instruction
+            auto result = ISAWalk<Reference*>::walkOne(inst);
+
+            // Release the held locks on shared locations
+            for ( auto sharedLoc : locked ) {
+                _vm->unlock(sharedLoc);
+            }
+
+            return result;
         } catch (Errors::RuntimeError& e) {
             std::string msg = e.what();
             logger->error(msg);

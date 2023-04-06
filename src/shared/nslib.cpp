@@ -12,6 +12,7 @@ namespace nslib {
     std::optional<std::thread::id> Console::_mainPID = std::nullopt;
     std::map<std::thread::id, Console*> Console::_threadCopies;
     Console* Console::_global = nullptr;
+    event::EventBus* event::EventBus::_global = nullptr;
 
     std::function<void()> ThreadContext::wrap(const std::function<int()>& body) {
         return [body, this]() {
@@ -35,13 +36,11 @@ namespace nslib {
         // Try to find an existing instance in the store
         auto iter = _ctxStore.find(std::this_thread::get_id());
         if ( iter != _ctxStore.end() ) {
-            std::cout << "Found existing instance for thread " << Framework::getThreadDisplay() << "\n";
             return iter->second;
         }
 
         // Otherwise, produce a new instance
         auto inst = produceNewForContext();
-        std::cout << "Creating new instance for thread " << Framework::getThreadDisplay() << "\n";
         _ctxStore[std::this_thread::get_id()] = inst;
         csm.unlock();
         Framework::context()
@@ -90,5 +89,6 @@ namespace nslib {
     GCTracks IRefCountable::_tracks;
     bool IRefCountable::_registeredShutdown = false;
 #endif
+
 
 }
