@@ -40,7 +40,14 @@ protected:
         auto instrs = new ISA::Instructions();
         ISA::Affinity affinity = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
         auto ref = makeLocation(affinity, "var_" + node->name());
-        instrs->push_back(useref(new ISA::AssignValue(ref, ref)));
+        // TODO: remove first case once import-based prologue is implemented
+        if ( node->symbol()->isPrologue() ) {
+            auto fref = makeLocation(ISA::Affinity::FUNCTION, ((Lang::PrologueFunctionSymbol*)node->symbol())->sviName());
+            instrs->push_back(useref(new ISA::AssignValue(ref, fref)));
+        } else {
+            // necessary for instructions that pull the location from the bottommost instruction
+            instrs->push_back(useref(new ISA::AssignValue(ref, ref)));
+        }
         return instrs;
     }
 
@@ -102,6 +109,44 @@ protected:
         ISA::Instructions* instrs;
         ISA::LocationReference* floc;
         Type::Type* fnType;
+
+        // TODO: remove this once import-based prologue gets implemented
+        if ( node->func()->getName() == "IdentifierNode" ) {
+            std::string name = ((IdentifierNode*)node->func())->name();
+            if ( name == "lLog" ) {
+                instrs = walk(node->args()->at(0));
+                instrs->push_back(useref(new ISA::StreamPush(
+                    makeLocation(ISA::Affinity::LOCAL, "STDOUT"),
+                    getLocFromAssign(instrs->back())
+                )));
+                return instrs;
+            }
+            if ( name == "lError" ) {
+                instrs = walk(node->args()->at(0));
+                instrs->push_back(useref(new ISA::StreamPush(
+                    makeLocation(ISA::Affinity::LOCAL, "STDERR"),
+                    getLocFromAssign(instrs->back())
+                )));
+                return instrs;
+            }
+            if ( name == "sLog" ) {
+                instrs = walk(node->args()->at(0));
+                instrs->push_back(useref(new ISA::StreamPush(
+                    makeLocation(ISA::Affinity::SHARED, "STDOUT"),
+                    getLocFromAssign(instrs->back())
+                )));
+                return instrs;
+            }
+            if ( name == "sError" ) {
+                instrs = walk(node->args()->at(0));
+                instrs->push_back(useref(new ISA::StreamPush(
+                    makeLocation(ISA::Affinity::SHARED, "STDERR"),
+                    getLocFromAssign(instrs->back())
+                )));
+                return instrs;
+            }
+        }
+
         if (!node->calling()) {
             instrs = walk(node->func());
             floc = getLocFromAssign(instrs->back());

@@ -150,9 +150,16 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class PrologueFunctionSymbol : public FunctionSymbol {
     public:
-        PrologueFunctionSymbol(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) : FunctionSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
+        PrologueFunctionSymbol(std::string name, Type::Lambda* type, Position* declaredAt, std::string sviName) : FunctionSymbol(std::move(name), type, declaredAt, false), _sviName(sviName) {}
 
         [[nodiscard]] bool isPrologue() const override { return true; }
+
+        std::string sviName() const {
+            return _sviName;
+        }
+    protected:
+        // TODO: remove once import-based prologue is implemented
+        std::string _sviName;
     };
 
 
@@ -214,8 +221,8 @@ namespace Walk {
         }
 
         /** Add a new function to this scope as if it were from the Prologue. */
-        void addPrologueFunction(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) {
-            insert(new PrologueFunctionSymbol(std::move(name), type, declaredAt, std::move(shared)));
+        void addPrologueFunction(std::string name, Type::Lambda* type, Position* declaredAt, std::string sviName) {
+            insert(new PrologueFunctionSymbol(std::move(name), type, declaredAt, std::move(sviName)));
         }
 
         [[nodiscard]] std::string toString() const override {
