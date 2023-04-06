@@ -33,7 +33,7 @@ enumerate t6{b} as shared var {
     }
 }
 
-enumerate t6{b} as v, i {   
+enumerate t6{b} as v, i {
 }
 
 enumerate t6{b} as shared v, i {

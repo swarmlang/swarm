@@ -655,8 +655,9 @@ protected:
             auto id = (IdentifierNode*) node->dest();
             auto aff = id->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
             if ( id->symbol()->isProperty() ) {
+                assert(!_constructing.empty());
                 instrs->push_back(useref(new ISA::ObjSet(
-                    determineType(((ObjectPropertySymbol*)id->symbol())->propertyOf()),
+                    _constructing.top(),
                     makeLocation(ISA::Affinity::OBJECTPROP, id->name()),
                     value
                 )));
@@ -855,28 +856,22 @@ protected:
         }
 
         // create finalized type
+        auto ofinal = makeNewTmp(ISA::Affinity::LOCAL);
         instrs->push_back(useref(
-            new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::OTypeFinalize(proto))
+            new ISA::AssignEval(ofinal, new ISA::OTypeFinalize(proto))
         ));
-
-        for (auto c : *node->constructors()) {
-            auto cinstrs = walk(c);
-            // remove unnecessary temp assignment
-            freeref(cinstrs->back());
-            cinstrs->pop_back();
-            _tempCounter--;
-            
-            instrs->insert(instrs->end(), cinstrs->begin(), cinstrs->end());
-            auto aff = c->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-            instrs->push_back(useref(new ISA::AssignValue(
-                makeLocation(aff, c->name()),
-                ((ISA::BeginFunction*)cinstrs->front())->first()
-            )));
-            delete cinstrs;
-        }
 
         // create type reference
         _typeMap.insert({ node->value(), useref(new ISA::TypeReference(node->value())) });
+
+        // walk constructors
+        for (auto c : *node->constructors()) {
+            auto cinstrs = walk(c);
+            instrs->insert(instrs->end(), cinstrs->begin(), cinstrs->end());
+            delete cinstrs;
+        }
+
+        instrs->push_back(useref(new ISA::AssignValue(ofinal, ofinal)));
 
         return instrs;
     }
@@ -900,7 +895,12 @@ protected:
 
     ISA::Instructions* walkConstructorNode(ConstructorNode* node) override {
         // FIXME: std::bad_alloc happens in this function when using test 030
+        auto obj = makeNewTmp(ISA::Affinity::LOCAL);
+
+        // add obj to stack so assignments know what obj to use
+        _constructing.push(obj);
         auto function = walk(node->func());
+        _constructing.pop();
         auto type = node->func()->type();
         while ( type->isCallable() ) {
             type = ((Type::Lambda*)type)->returns();
@@ -913,9 +913,7 @@ protected:
         while ( (*i)->tag() == ISA::Tag::FNPARAM ) i++;
 
         // initialize object
-        auto obj = makeNewTmp(ISA::Affinity::LOCAL);
         function->insert(i, useref(new ISA::AssignEval(obj, new ISA::ObjInit(new ISA::TypeReference(rettype)))));
-        std::cout << "\t\tinserted objinit\n";
 
         // insert default values
         for ( auto prop : ((Type::Object*)rettype)->getProperties() ) {
@@ -928,7 +926,6 @@ protected:
                 )));
             }
         }
-        std::cout << "\t\tinserted def values\n";
 
         // insert ObjInstance instruction right before the return
         auto j = function->rbegin();
@@ -937,7 +934,17 @@ protected:
             makeLocation(ISA::Affinity::LOCAL, "retVal"),
             new ISA::ObjInstance(obj)
         )));
-        std::cout << "\t\tinserted objinstance\n";
+
+         // remove unnecessary temp assignment
+        freeref(function->back());
+        function->pop_back();
+        _tempCounter--;
+
+        auto aff = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
+        function->push_back(useref(new ISA::AssignValue(
+            makeLocation(aff, node->name()),
+            ((ISA::BeginFunction*)function->front())->first()
+        )));
 
         return function;
     }
@@ -989,6 +996,9 @@ private:
 
     // used for keeping track of which type members have default values
     std::set<std::string> _objDefaults;
+
+    // used for assignments in constructors
+    std::stack<ISA::LocationReference*> _constructing;
 };
 
 }

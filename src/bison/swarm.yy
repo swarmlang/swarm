@@ -25,8 +25,8 @@
 	}
     class Shared {
     public:
-        Shared(swarmc::Lang::Position* pos, bool shared): _pos(pos), _shared(shared) {}
-        ~Shared() { if ( _pos != nullptr ) delete _pos; }
+        Shared(swarmc::Lang::Position* pos, bool shared): _pos(useref(pos)), _shared(shared) {}
+        ~Shared() { freeref(_pos); }
         swarmc::Lang::Position* position() const { return _pos; }
         bool shared() const { return _shared; }
     private:
@@ -260,11 +260,11 @@ statement :
     | ENUMERATE lval AS shared id COMMA shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $11->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $8, $4->shared());
-        auto t = new TypeLiteral($8->position(), Type::Primitive::of(Type::Intrinsic::NUMBER));
-        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy(), $8->position(), $7->shared()));
+        auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
+        $8->overrideSymbol(new VariableSymbol($8->name(), t, $8->position(), $7->shared()));
         e->assumeAndReduceStatements($10->reduceToStatements());
         $$ = e;
-        delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11; delete t;
+        delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11;
     }
 
     | WITH term AS shared id LBRACE statements RBRACE {

@@ -233,10 +233,11 @@ protected:
             _symbols->enter();
             inScope = true;
             _symbols->addVariable(name, type, pos, node->shared());
-            auto i = node->index();
-            if (i != nullptr) {
-                _symbols->insert(i->symbol());
-            }
+        }
+
+        auto i = node->index();
+        if (i != nullptr) {
+            _symbols->insert(i->symbol());
         }
 
         flag = walk(node->local()) && flag;
@@ -399,12 +400,12 @@ protected:
                     flag = false;
                 }
                 flag = walk(d->typeNode()) && flag;
-                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), node->value());
+                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position());
                 walk(d->id());
             } else if ( decl->getName() == "UninitializedVariableDeclarationNode" ) {
                 auto d = (UninitializedVariableDeclarationNode*)decl;
                 flag = walk(d->typeNode()) && flag;
-                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), node->value());
+                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position());
                 walk(d->id());
             }
         }

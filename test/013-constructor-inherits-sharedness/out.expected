@@ -1,15 +1,16 @@
-BEGINFN<Location<f:FUNC_2>, TypeReference<Type::Object<#prop: 1, parent: (nullptr)>>>
-ASSIGNEVAL<Location<l:tmp5>, OBJINIT<TypeReference<Type::Object<#prop: 1, parent: (nullptr)>>>>
+BEGINFN<Location<f:FUNC_3>, TypeReference<Type::Object<#prop: 1, parent: (nullptr)>>>
+ASSIGNEVAL<Location<l:tmp2>, OBJINIT<TypeReference<Type::Object<#prop: 1, parent: (nullptr)>>>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
-ASSIGNVALUE<Location<l:tmp3>, NumberReference<4.000000>>
-OBJSET<TypeReference<Type::Object<#prop: 1, parent: (nullptr)>>, Location<o:a>, Location<l:tmp3>>
-ASSIGNEVAL<Location<l:retVal>, OBJINSTANCE<Location<l:tmp5>>>
+ASSIGNVALUE<Location<l:tmp4>, NumberReference<4.000000>>
+OBJSET<Location<l:tmp2>, Location<o:a>, Location<l:tmp4>>
+ASSIGNEVAL<Location<l:retVal>, OBJINSTANCE<Location<l:tmp2>>>
 RETURN1<Location<l:retVal>>
 ASSIGNEVAL<Location<l:tmp0>, OTYPEINIT<>>
 OTYPEPROP<Location<l:tmp0>, Location<o:a>, TypeReference<Primitive<NUMBER>>>
 ASSIGNEVAL<Location<l:tmp1>, OTYPEFINALIZE<Location<l:tmp0>>>
-ASSIGNVALUE<Location<s:constructor1>, Location<f:FUNC_2>>
+ASSIGNVALUE<Location<s:constructor1>, Location<f:FUNC_3>>
+ASSIGNVALUE<Location<l:tmp1>, Location<l:tmp1>>
 ASSIGNVALUE<Location<s:var_UserDefined>, Location<l:tmp1>>
 [32m success [39m[0m[main] Compiled to ISA.

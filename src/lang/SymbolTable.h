@@ -31,7 +31,7 @@ namespace Walk {
     /** Base class for names identified in code. */
     class SemanticSymbol : public IStringable, public IRefCountable {
     public:
-        SemanticSymbol(std::string name, Type::Type* type, Position* declaredAt, bool shared) : _name(std::move(name)), _type(useref(type)), _declaredAt(useref(declaredAt)), _shared(shared) {
+        SemanticSymbol(std::string name, Type::Type* type, Position* declaredAt, bool shared) : _name(std::move(name)), _type(useref(type)), _declaredAt(useref(declaredAt)), _shared(std::move(shared)) {
             _uuid = nslib::uuid();
         }
 
@@ -120,19 +120,9 @@ namespace Walk {
 
     class ObjectPropertySymbol : public VariableSymbol {
     public:
-        ObjectPropertySymbol(std::string name, Type::Type* type, Position* declaredAt, Type::Type* propertyOf) : VariableSymbol(std::move(name), type, declaredAt, false), _propertyOf(useref(propertyOf)) {}
-        
-        ~ObjectPropertySymbol() {
-            freeref(_propertyOf);
-        }
+        ObjectPropertySymbol(std::string name, Type::Type* type, Position* declaredAt) : VariableSymbol(std::move(name), type, declaredAt, false) {}
 
         [[nodiscard]] bool isProperty() const override { return true; }
-
-        Type::Type* propertyOf() const {
-            return _propertyOf;
-        }
-    protected:
-        Type::Type* _propertyOf;
     };
 
 
@@ -211,8 +201,8 @@ namespace Walk {
             insert(new VariableSymbol(std::move(name), type, declaredAt, std::move(shared)));
         }
 
-        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, Type::Type* propertyOf) {
-            insert(new ObjectPropertySymbol(std::move(name), type, declaredAt, propertyOf));
+        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt) {
+            insert(new ObjectPropertySymbol(std::move(name), type, declaredAt));
         }
 
         /** Add a new function to this scope. */
@@ -305,8 +295,8 @@ namespace Walk {
             return current()->addVariable(std::move(name), type, declaredAt, std::move(shared));
         }
 
-        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, Type::Type* propertyOf) {
-            return current()->addObjectProperty(std::move(name), type, declaredAt, propertyOf);
+        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt) {
+            return current()->addObjectProperty(std::move(name), type, declaredAt);
         }
 
         /** Add a new function to the current scope. */

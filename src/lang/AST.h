@@ -342,8 +342,7 @@ namespace Walk {
         }
 
         void overrideSymbol(SemanticSymbol* sym) {
-            freeref(_symbol);
-            _symbol = useref(sym);
+            _symbol = swapref(_symbol, sym);
         }
 
         virtual bool shared() const override {
