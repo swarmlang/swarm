@@ -2,13 +2,6 @@
 
 namespace swarmc::CFG {
 
-Block::~Block() {
-    delete _instructions;
-    delete _callOutEdge;
-    delete _fallOutEdge;
-    delete _retOutEdge;
-}
-
 CallEdge* Block::getCallInEdge() const { return _callInEdge; }
 CallEdge* Block::getCallOutEdge() const { return _callOutEdge; }
 FallEdge* Block::getFallInEdge() const { return _fallInEdge; }
@@ -16,12 +9,12 @@ FallEdge* Block::getFallOutEdge() const { return _fallOutEdge; }
 ReturnEdge* Block::getRetInEdge() const { return _retInEdge; }
 ReturnEdge* Block::getRetOutEdge() const { return _retOutEdge; }
 
-void Block::setCallInEdge(CallEdge* edge) { _callInEdge = edge; }
-void Block::setCallOutEdge(CallEdge* edge) { _callOutEdge = edge; }
-void Block::setFallInEdge(FallEdge* edge) { _fallInEdge = edge; }
-void Block::setFallOutEdge(FallEdge* edge) { _fallOutEdge = edge; }
-void Block::setRetInEdge(ReturnEdge* edge) { _retInEdge = edge; }
-void Block::setRetOutEdge(ReturnEdge* edge) { _retOutEdge = edge; }
+void Block::setCallInEdge(CallEdge* edge) { _callInEdge = useref(edge); }
+void Block::setCallOutEdge(CallEdge* edge) { _callOutEdge = useref(edge); }
+void Block::setFallInEdge(FallEdge* edge) { _fallInEdge = useref(edge); }
+void Block::setFallOutEdge(FallEdge* edge) { _fallOutEdge = useref(edge); }
+void Block::setRetInEdge(ReturnEdge* edge) { _retInEdge = useref(edge); }
+void Block::setRetOutEdge(ReturnEdge* edge) { _retOutEdge = useref(edge); }
 
 std::string Block::serialize() const {
     std::string c = std::to_string(_copy), idx = std::to_string(_idx);
@@ -51,7 +44,7 @@ std::pair<Block*,Block*> CFGFunction::makeCopy(std::size_t i, std::vector<Block*
 
     for ( auto b : *_blocks ) {
         Block* copy = b->copy(i);
-        newblocks.push_back(copy);
+        newblocks.push_back(useref(copy));
         if (!callStack->empty()) callStack->top()->addBlock(copy);
         // create maps for copying edges
         copyOf.insert({ b, copy });
@@ -76,7 +69,7 @@ std::pair<Block*,Block*> CFGFunction::makeCopy(std::size_t i, std::vector<Block*
     }
 
     blocks->insert(blocks->end(), newblocks.begin(), newblocks.end());
-    return {copyOf.at(_start), copyOf.at(_end) };
+    return { copyOf.at(_start), copyOf.at(_end) };
 }
 
 ControlFlowGraph::ControlFlowGraph(ISA::Instructions* instrs) {
@@ -107,6 +100,7 @@ ISA::Instructions* ControlFlowGraph::reconstruct() const {
 
     auto main = reconstruct(_first, 0);
     instrs->insert(instrs->end(), main->begin(), main->end());
+    for (auto i : *instrs) useref(i);
 
     return instrs;
 }

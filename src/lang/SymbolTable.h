@@ -4,11 +4,11 @@
 #include <string>
 #include <iostream>
 #include <list>
-#include <stdexcept>
 #include <utility>
 #include "../shared/nslib.h"
 #include "Position.h"
 #include "Type.h"
+#include "../Reporting.h"
 
 using namespace nslib;
 
@@ -19,6 +19,7 @@ namespace Walk {
 }
 
     class WithStatement;
+    class ExpressionNode;
 
     /** Enum of the various possible things that a name may reference. */
     enum class SemanticSymbolKind {
@@ -28,14 +29,19 @@ namespace Walk {
 
 
     /** Base class for names identified in code. */
-    class SemanticSymbol : public IStringable {
+    class SemanticSymbol : public IStringable, public IRefCountable {
     public:
-        SemanticSymbol(std::string name, const Type::Type* type, const Position* declaredAt, bool shared) : _name(std::move(name)), _type(type), _declaredAt(declaredAt), _shared(shared) {
+        SemanticSymbol(std::string name, Type::Type* type, Position* declaredAt, bool shared) : _name(std::move(name)), _type(useref(type)), _declaredAt(useref(declaredAt)), _shared(shared) {
             _uuid = nslib::uuid();
         }
 
+        ~SemanticSymbol() {
+            freeref(_declaredAt);
+            freeref(_type);
+        }
+
         [[nodiscard]] std::string toString() const override {
-            return "SemanticSymbol<name: " + _name + ", type: " + _type->toString() + ", declaredAt: " + _declaredAt->start() + ", uuid: " + _uuid + ">";
+            return "SemanticSymbol<name: " + _name + ", type: " + ((_type)?_type->toString():"(nullptr)") + ", declaredAt: " + _declaredAt->start() + ", uuid: " + _uuid + ">";
         }
 
         /** The user-given name of the symbol. */
@@ -47,12 +53,12 @@ namespace Walk {
         [[nodiscard]] virtual SemanticSymbolKind kind() const = 0;
 
         /** The type of the symbol. */
-        [[nodiscard]] virtual const Type::Type* type() const {
+        [[nodiscard]] virtual Type::Type* type() const {
             return _type;
         }
 
         /** Get the position where this symbol was declared. */
-        [[nodiscard]] virtual const Position* declaredAt() const {
+        [[nodiscard]] virtual Position* declaredAt() const {
             return _declaredAt;
         }
 
@@ -70,11 +76,15 @@ namespace Walk {
             return false;
         }
 
+        [[nodiscard]] virtual bool isProperty() const { 
+            return false; 
+        }
+
     protected:
         std::string _uuid;
         std::string _name;
-        const Type::Type* _type;
-        const Position* _declaredAt;
+        Type::Type* _type;
+        Position* _declaredAt;
         bool _shared;
 
         friend class Walk::TypeAnalysisWalk;
@@ -85,18 +95,51 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class VariableSymbol : public SemanticSymbol {
     public:
-        VariableSymbol(std::string name, const Type::Type* type, const Position* declaredAt, bool shared) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
+        VariableSymbol(std::string name, Type::Type* type, Position* declaredAt, bool shared) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)), _value(nullptr) {}
+
+        ~VariableSymbol() {
+            freeref(_value);
+        }
 
         [[nodiscard]] SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::VARIABLE;
         }
+
+        TypeLiteral* getObjectType() const {
+            return _value;
+        }
+
+        void setObjectType(TypeLiteral* type);
+
+        void disambiguateType();
+
+    protected:
+        // used for type assignments
+        TypeLiteral* _value;
+    };
+
+    class ObjectPropertySymbol : public VariableSymbol {
+    public:
+        ObjectPropertySymbol(std::string name, Type::Type* type, Position* declaredAt, Type::Type* propertyOf) : VariableSymbol(std::move(name), type, declaredAt, false), _propertyOf(useref(propertyOf)) {}
+        
+        ~ObjectPropertySymbol() {
+            freeref(_propertyOf);
+        }
+
+        [[nodiscard]] bool isProperty() const override { return true; }
+
+        Type::Type* propertyOf() const {
+            return _propertyOf;
+        }
+    protected:
+        Type::Type* _propertyOf;
     };
 
 
     /** Semantic symbol implementation for names referencing variables. */
     class FunctionSymbol : public SemanticSymbol {
     public:
-        FunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt, bool shared) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
+        FunctionSymbol(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
 
         [[nodiscard]] SemanticSymbolKind kind() const override {
             return SemanticSymbolKind::FUNCTION;
@@ -107,7 +150,7 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class PrologueFunctionSymbol : public FunctionSymbol {
     public:
-        PrologueFunctionSymbol(std::string name, const Type::Lambda* type, const Position* declaredAt, bool shared) : FunctionSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
+        PrologueFunctionSymbol(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) : FunctionSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
 
         [[nodiscard]] bool isPrologue() const override { return true; }
     };
@@ -123,6 +166,9 @@ namespace Walk {
         }
 
         ~ScopeTable() override {
+            for (auto p : *_symbols) {
+                freeref(p.second);
+            }
             delete _symbols;
         }
 
@@ -143,7 +189,7 @@ namespace Walk {
                 return false;  // FIXME: generate exception
             }
 
-            _symbols->insert(std::make_pair(name, symbol));
+            _symbols->insert(std::make_pair(name, useref(symbol)));
             return true;
         }
 
@@ -154,17 +200,21 @@ namespace Walk {
         }
 
         /** Add a new variable to this scope. */
-        void addVariable(std::string name, const Type::Type* type, const Position* declaredAt, bool shared) {
+        void addVariable(std::string name, Type::Type* type, Position* declaredAt, bool shared) {
             insert(new VariableSymbol(std::move(name), type, declaredAt, std::move(shared)));
         }
 
+        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, Type::Type* propertyOf) {
+            insert(new ObjectPropertySymbol(std::move(name), type, declaredAt, propertyOf));
+        }
+
         /** Add a new function to this scope. */
-        void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt, bool shared) {
+        void addFunction(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) {
             insert(new FunctionSymbol(std::move(name), type, declaredAt, std::move(shared)));
         }
 
         /** Add a new function to this scope as if it were from the Prologue. */
-        void addPrologueFunction(std::string name, Type::Lambda* type, const Position* declaredAt, bool shared) {
+        void addPrologueFunction(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) {
             insert(new PrologueFunctionSymbol(std::move(name), type, declaredAt, std::move(shared)));
         }
 
@@ -244,12 +294,16 @@ namespace Walk {
         }
 
         /** Add a new variable to the current scope. */
-        void addVariable(std::string name, const Type::Type* type, const Position* declaredAt, bool shared) {
+        void addVariable(std::string name, Type::Type* type, Position* declaredAt, bool shared) {
             return current()->addVariable(std::move(name), type, declaredAt, std::move(shared));
         }
 
+        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, Type::Type* propertyOf) {
+            return current()->addObjectProperty(std::move(name), type, declaredAt, propertyOf);
+        }
+
         /** Add a new function to the current scope. */
-        void addFunction(std::string name, Type::Lambda* type, const Position* declaredAt, bool shared) {
+        void addFunction(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) {
             return current()->addFunction(std::move(name), type, declaredAt, std::move(shared));
         }
 

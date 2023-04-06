@@ -1,5 +1,6 @@
 - fix memory leaks
   - Type objects and semantic symbols
+- fix lexer position counter to account for escaped characters
 - not dogshit test suite
   - fuzzy testing with American Fuzzy Lop
   - runtime tests

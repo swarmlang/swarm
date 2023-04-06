@@ -41,9 +41,8 @@ protected:
     bool flagSVI = false;
     bool flagOutputISA = false;
     bool flagOutputCFG = false;
-    bool flagRemoveSelfAssign = true;
-    bool flagConstProp = true;
     bool flagOutputBinary = false;
+    unsigned int flagISAOptimizations = 0;
     std::string flagOutputTokensTo;
     std::string flagOutputParseTo;
     std::string flagOutputSerializeTo;

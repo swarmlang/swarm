@@ -30,4 +30,6 @@ namespace swarmc::Lang {
         return _path->lockable();
     }
 
+    size_t ConstructorNode::nameID = 0;
+
 }

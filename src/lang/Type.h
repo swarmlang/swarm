@@ -14,7 +14,7 @@ using namespace nslib;
 
 namespace swarmc::Lang {
     class TypeLiteral;
-    class LValNode;
+    class IdentifierNode;
 }
 
 namespace swarmc::Type {
@@ -116,6 +116,8 @@ namespace swarmc::Type {
         [[nodiscard]] virtual std::size_t getId() const {
             return _id;
         }
+
+        virtual Type* disambiguateStatically() { return this; }
 
     protected:
         friend class Lang::TypeLiteral;
@@ -241,8 +243,12 @@ namespace swarmc::Type {
             return _inst;
         }
 
-        static Ambiguous* partial(Lang::LValNode* lval) {
-            return new Ambiguous(lval);
+        static Ambiguous* partial(Lang::IdentifierNode* id) {
+            return new Ambiguous(id);
+        }
+
+        Lang::IdentifierNode* id() const {
+            return _typeid;
         }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
@@ -263,11 +269,14 @@ namespace swarmc::Type {
 
         void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {}
 
-        explicit Ambiguous(Lang::LValNode* lval = nullptr) : Type(), _lval(lval) {}
+        explicit Ambiguous(Lang::IdentifierNode* id = nullptr);
+        ~Ambiguous();
+
+        Type* disambiguateStatically() override;
     protected:
 
         static Ambiguous* _inst;
-        Lang::LValNode* _lval;
+        Lang::IdentifierNode* _typeid;
     };
 
     class Map : public Type {
@@ -313,6 +322,11 @@ namespace swarmc::Type {
         [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
+
+        Map* disambiguateStatically() override {
+            _values = _values->disambiguateStatically();
+            return this;
+        }
     protected:
         Type* _values;
     };
@@ -357,6 +371,11 @@ namespace swarmc::Type {
 
         [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
+        }
+
+        Enumerable* disambiguateStatically() override { 
+            _values = _values->disambiguateStatically();
+            return this; 
         }
     protected:
         Type* _values;
@@ -408,6 +427,11 @@ namespace swarmc::Type {
         [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic()) + "<" + _yields->toString() + ">";
         }
+
+        Resource* disambiguateStatically() override { 
+            _yields = _yields->disambiguateStatically();
+            return this;
+        }
     protected:
         Type* _yields;
     };
@@ -457,6 +481,11 @@ namespace swarmc::Type {
 
         [[nodiscard]] std::string toString() const override {
             return Type::intrinsicString(intrinsic()) + "<" + _inner->toString() + ">";
+        }
+
+        Stream* disambiguateStatically() override { 
+            _inner = _inner->disambiguateStatically();
+            return this;
         }
 
     protected:
@@ -517,6 +546,11 @@ namespace swarmc::Type {
         [[nodiscard]] std::string toString() const override {
             return ":: " + _returns->toString();
         }
+
+        Lambda0* disambiguateStatically() override { 
+            _returns = _returns->disambiguateStatically();
+            return this; 
+        }
     };
 
     class Lambda1 : public Lambda {
@@ -574,6 +608,12 @@ namespace swarmc::Type {
             }
 
             return p;
+        }
+
+        Lambda1* disambiguateStatically() override {
+            _param = _param->disambiguateStatically();
+            _returns = _returns->disambiguateStatically();
+            return this;
         }
 
     protected:
@@ -690,6 +730,7 @@ namespace swarmc::Type {
 
             auto existing = _properties.find(name);
             if ( existing != _properties.end() ) {
+                freeref(existing->second);
                 _properties.erase(existing);
             }
             return this;

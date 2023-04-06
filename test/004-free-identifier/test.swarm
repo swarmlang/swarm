@@ -36,3 +36,6 @@ map<number> t10 = {
     b: t9[0],
     c: t9[bad_value]
 };
+
+-- types
+FakeID t = 4;

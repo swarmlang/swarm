@@ -16,9 +16,9 @@ namespace swarmc::Lang {
      */
     class Token : public IStringable {
     public:
-        Token(Position* pos, int kind, std::string display) : _pos(pos), _kind(kind), _display(std::move(display)) {};
+        Token(Position* pos, int kind, std::string display) : _pos(useref(pos)), _kind(kind), _display(std::move(display)) {};
         ~Token() override {
-            delete _pos;
+            freeref(_pos);
         }
 
         [[nodiscard]] Position* position() const {

@@ -7,7 +7,7 @@ namespace swarmc::CFG {
 void CFGBuild::buildBlocks() {
     std::stack<Block*> bstack;
     std::stack<CFGFunction*> callStack;
-    _blocks->push_back(new Block("Top", Block::BlockType::BLOCK, 0));
+    _blocks->push_back(useref(new Block("Top", Block::BlockType::BLOCK, 0)));
     bstack.push(_blocks->back());
     if ( _instrs->empty() ) return;
     for ( std::size_t i = 0; i < _instrs->size(); i++ ) {
@@ -16,7 +16,7 @@ void CFGBuild::buildBlocks() {
             auto fstart = new Block(name, Block::BlockType::FUNCTION, i);
             auto cfgf = new CFGFunction(name, fstart);
             console->debug("Created function " + name);
-            _blocks->push_back(fstart);
+            _blocks->push_back(useref(fstart));
             bstack.push(fstart);
             _nameMap->insert({ name, cfgf });
             callStack.push(cfgf);
@@ -94,7 +94,7 @@ void CFGBuild::buildBlocks() {
                 Block* previous = bstack.top();
                 // postcall block
                 auto postcall = new Block("POSTCALL:" + name, Block::BlockType::BLOCK, i);
-                _blocks->push_back(postcall);
+                _blocks->push_back(useref(postcall));
                 bstack.push(postcall);
                 if (!callStack.empty()) callStack.top()->addBlock(postcall);
 
@@ -102,7 +102,7 @@ void CFGBuild::buildBlocks() {
                 if ( _nameMap->count(name) == 0 ) {
                     Block* am = new AmbiguousFunctionBlock(name, i);
                     console->debug("Created ambiguous function " + am->id());
-                    _blocks->push_back(am);
+                    _blocks->push_back(useref(am));
                     auto cedge = new CallEdge(previous, am);
                     previous->setCallOutEdge(cedge);
                     am->setCallInEdge(cedge);

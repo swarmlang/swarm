@@ -1,0 +1,4 @@
+
+number notAType = 3;
+
+notAType x = 2;

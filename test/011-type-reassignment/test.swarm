@@ -1,0 +1,19 @@
+
+type t1 = number;
+t1 = string; -- error
+
+type t2 = {
+    number a;
+};
+t2 = {  -- error
+    string b;
+};
+
+enumerable<type> ts1 = [number, string, bool];
+ts1[1] = bool; -- error
+
+map<type> ts2 = {
+    t1: t1,
+    t2: t2
+};
+ts2{t1} = number; -- error

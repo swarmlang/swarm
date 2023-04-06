@@ -273,9 +273,13 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             skipOne = true;
             flagOutputCFG = true;
         } else if ( arg == "--no-remove-self-assigns" ) {
-            flagRemoveSelfAssign = false;
+            flagISAOptimizations |= swarmc::ISAOptimizationType::REMOVESELFASSIGN;
         } else if ( arg == "--no-constant-propagation" ) {
-            flagConstProp = false;
+            flagISAOptimizations |= swarmc::ISAOptimizationType::CONSTANTPROPAGATION;
+        } else if ( arg == "--no-optimizations" ) {
+            flagISAOptimizations = swarmc::ISAOptimizationType::REMOVESELFASSIGN 
+                                | swarmc::ISAOptimizationType::CONSTANTPROPAGATION
+                                | swarmc::ISAOptimizationType::REMOVEDEADCODE;
         } else {
             // Is this the input file?
             if ( gotInputFile ) {
@@ -415,6 +419,10 @@ void Executive::printUsage() {
         console->bold()->print("  --no-constant-propagation: ", true)
             ->println("Disable constant propagation in the ISA")
             ->println();
+
+        console->bold()->print("  --no-optimizations", true)
+            ->println("Disable all optimizations")
+            ->println();
     console->end();
 
     console->bold()->println("FILTERS:")
@@ -540,9 +548,10 @@ int Executive::debugOutputISA() {
     }
 
     swarmc::Pipeline pipeline(_input);
+    pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
 
     try {
-        pipeline.targetISARepresentation(*stream, flagRemoveSelfAssign, flagConstProp);
+        pipeline.targetISARepresentation(*stream);
     } catch (swarmc::Errors::ParseError& e) {
         return e.exitCode;
     }
@@ -565,9 +574,10 @@ int Executive::debugOutputCFG() {
     }
 
     swarmc::Pipeline pipeline(_input);
+    pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
 
     try {
-        pipeline.targetCFGRepresentation(*stream, flagRemoveSelfAssign, flagConstProp);
+        pipeline.targetCFGRepresentation(*stream);
     } catch (swarmc::Errors::ParseError& e) {
         return e.exitCode;
     }
@@ -607,6 +617,16 @@ int Executive::emitBinary() {
         return 0;
     }
 
-    // FIXME: compile Swarm source to SVI, then emit as binary
+    swarmc::Pipeline pipeline(_input);
+    pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
+    auto binary = pipeline.targetBinary();
+    auto fh = fopen(outputBinaryTo.c_str(), "w");
+    if ( fh == nullptr ) {
+        logger->error("Could not open binary output file for writing: " + outputBinaryTo);
+        return 1;
+    }
+
+    fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
+    fclose(fh);
     return 1;
 }

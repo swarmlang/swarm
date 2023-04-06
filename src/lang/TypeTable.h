@@ -12,7 +12,7 @@ namespace swarmc::Lang {
 
     class ASTNode;
 
-    using TypeMap = std::map<const ASTNode*, const Type::Type*>;
+    using TypeMap = std::map<const ASTNode*, Type::Type*>;
 
     class TypeTable : public IStringable {
     public:
@@ -20,12 +20,12 @@ namespace swarmc::Lang {
 
         ~TypeTable() override = default;
 
-        void setTypeOf(const ASTNode* node, const Type::Type* type) {
+        void setTypeOf(const ASTNode* node, Type::Type* type) {
             _map[node] = type;
         }
 
-        const Type::Type* getTypeOf(const ASTNode* node) {
-            const Type::Type* type = _map[node];
+        Type::Type* getTypeOf(const ASTNode* node) {
+            Type::Type* type = _map[node];
             if ( type == nullptr ) {
                 throw Errors::SwarmError("Unable to determine type for node");
             }

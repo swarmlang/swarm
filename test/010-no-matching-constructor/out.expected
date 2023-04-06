@@ -1,0 +1,2 @@
+[1m[31m[Type Error] [39m[22m[0m[1m[l: 16, c: 27] [22m[0mNo UserDefined constructor matches the arguments: Primitive<NUMBER> -> Primitive<NUMBER> -> Type::Object<#prop: 1, parent: (nullptr)>
+[0m

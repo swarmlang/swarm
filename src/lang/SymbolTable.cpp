@@ -1,4 +1,5 @@
 #include "SymbolTable.h"
+#include "AST.h"
 
 namespace swarmc::Lang {
 
@@ -77,6 +78,29 @@ namespace swarmc::Lang {
         prologueScope->insert(range);
 
         return prologueScope;
+    }
+
+    void VariableSymbol::setObjectType(TypeLiteral* type) {
+        if ( _value != nullptr ) {
+            Reporting::typeError(
+                declaredAt(),
+                "Attempt to rebind value of type variable. "
+            );
+            return;
+        }
+        _value = useref(type);
+    }
+
+    void VariableSymbol::disambiguateType()  {
+        if ( _type->isAmbiguous() && _value != nullptr ) {
+            _type = useref(_value->value());
+            return;
+        }
+
+        Reporting::typeError(
+            _declaredAt,
+            "Unable to disambiguate type of variable " + _name
+        );
     }
 
 }

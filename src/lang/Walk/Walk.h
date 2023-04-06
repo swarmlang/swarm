@@ -57,6 +57,8 @@ namespace swarmc::Lang::Walk {
             if ( node->getName() == "TypeBodyNode" ) return walkTypeBodyNode((TypeBodyNode*) node);
             if ( node->getName() == "ClassAccessNode" ) return walkClassAccessNode((ClassAccessNode*) node);
             if ( node->getName() == "IncludeStatementNode") return walkIncludeStatementNode((IncludeStatementNode*) node);
+            if ( node->getName() == "ConstructorNode" ) return walkConstructorNode((ConstructorNode*)node);
+            if ( node->getName() == "UninitializedVariableDeclarationNode" ) return walkUninitializedVariableDeclarationNode((UninitializedVariableDeclarationNode*)node);
 
             throw Errors::SwarmError("Invalid node type: " + node->getName());
         }
@@ -105,6 +107,8 @@ namespace swarmc::Lang::Walk {
         virtual TReturn walkTypeBodyNode(TypeBodyNode* node) = 0;
         virtual TReturn walkClassAccessNode(ClassAccessNode* node) = 0;
         virtual TReturn walkIncludeStatementNode(IncludeStatementNode* node) = 0;
+        virtual TReturn walkConstructorNode(ConstructorNode* node) = 0;
+        virtual TReturn walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) = 0;
 
         [[nodiscard]] std::string toString() const override = 0;
     };
