@@ -1,69 +1,69 @@
-[35m   debug [39m[vm] assigneval Location<l:CTOR1_T> CALL1<Location<f:LAMBDA0_T>, TypeReference<Primitive<THIS>>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:LAMBDA0_T> TypeReference<Primitive<THIS>>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<Lambda0Function<>>
-[35m   debug [39m[vm] provider call: Lambda0FunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:CTOR1_T> CALL1<Location<f:LAMBDA0_T>, TypeReference<Primitive<THIS>>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:CTOR1_T> <- TypeReference<:: Primitive<THIS>>
-[35m   debug [39m[vm] assigneval Location<l:CTOR2_T_CALL> CURRY<Location<f:LAMBDA1_T>, TypeReference<Primitive<NUMBER>>>
-[35m   debug [39m[vm] curry Location<f:LAMBDA1_T> TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<Lambda1Function<>>
-[35m   debug [39m[vm] Location<l:CTOR2_T_CALL> <- FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<NUMBER>>>>
-[35m   debug [39m[vm] assigneval Location<l:CTOR2_T> CALL1<Location<l:CTOR2_T_CALL>, TypeReference<Primitive<THIS>>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<l:CTOR2_T_CALL> TypeReference<Primitive<THIS>>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<NUMBER>>>>
-[35m   debug [39m[vm] provider call: Lambda1FunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:CTOR2_T> CALL1<Location<l:CTOR2_T_CALL>, TypeReference<Primitive<THIS>>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:CTOR2_T> <- TypeReference<Primitive<NUMBER> :: Primitive<THIS>>
-[35m   debug [39m[vm] assigneval Location<l:REG_FUNC_T> CALL1<Location<f:LAMBDA0_T>, Location<l:CTOR2_T>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:LAMBDA0_T> Location<l:CTOR2_T>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<Lambda0Function<>>
-[35m   debug [39m[vm] provider call: Lambda0FunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:REG_FUNC_T> CALL1<Location<f:LAMBDA0_T>, Location<l:CTOR2_T>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:REG_FUNC_T> <- TypeReference<:: Primitive<NUMBER> :: Primitive<THIS>>
-[35m   debug [39m[vm] assigneval Location<l:USER_DEFINED_T_PROTO> OTYPEINIT<>
-[35m   debug [39m[vm] otypeinit
-[35m   debug [39m[vm] Location<l:USER_DEFINED_T_PROTO> <- ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
-[35m   debug [39m[vm] otypeprop Location<l:USER_DEFINED_T_PROTO> Location<o:CTOR1> Location<l:CTOR1_T>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
-[35m   debug [39m[vm] ensureType: TypeReference<:: Primitive<THIS>>
-[35m   debug [39m[vm] otypeprop Location<l:USER_DEFINED_T_PROTO> Location<o:CTOR2> Location<l:CTOR2_T>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: (nullptr)>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER> :: Primitive<THIS>>
-[35m   debug [39m[vm] otypeprop Location<l:USER_DEFINED_T_PROTO> Location<o:REG_FUNC> Location<l:REG_FUNC_T>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
-[35m   debug [39m[vm] ensureType: TypeReference<:: Primitive<NUMBER> :: Primitive<THIS>>
-[35m   debug [39m[vm] otypeprop Location<l:USER_DEFINED_T_PROTO> Location<o:UNINIT> TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] assigneval Location<l:USER_DEFINED_T> OTYPEFINALIZE<Location<l:USER_DEFINED_T_PROTO>>
-[35m   debug [39m[vm] otypefinalize Location<l:USER_DEFINED_T_PROTO>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] Location<l:USER_DEFINED_T> <- ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] assigneval Location<l:A> OTYPEGET<Location<l:USER_DEFINED_T>, Location<o:CTOR1>>
-[35m   debug [39m[vm] otypeget Location<l:USER_DEFINED_T> Location<o:CTOR1>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] Location<l:A> <- TypeReference<:: Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] assigneval Location<l:B> OTYPEGET<Location<l:USER_DEFINED_T>, Location<o:CTOR2>>
-[35m   debug [39m[vm] otypeget Location<l:USER_DEFINED_T> Location<o:CTOR2>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] Location<l:B> <- TypeReference<Primitive<NUMBER> :: Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] assigneval Location<l:C> OTYPEGET<Location<l:USER_DEFINED_T>, Location<o:REG_FUNC>>
-[35m   debug [39m[vm] otypeget Location<l:USER_DEFINED_T> Location<o:REG_FUNC>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] Location<l:C> <- TypeReference<:: Primitive<NUMBER> :: Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] assigneval Location<l:D> OTYPEGET<Location<l:USER_DEFINED_T>, Location<o:UNINIT>>
-[35m   debug [39m[vm] otypeget Location<l:USER_DEFINED_T> Location<o:UNINIT>
-[35m   debug [39m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
-[35m   debug [39m[vm] Location<l:D> <- TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] assigneval Location<l:CTOR1_T> CALL1<Location<f:LAMBDA0_T>, TypeReference<Primitive<THIS>>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:LAMBDA0_T> TypeReference<Primitive<THIS>>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<Lambda0Function<>>
+[35m   debug [39m[0m[vm] provider call: Lambda0FunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:CTOR1_T> CALL1<Location<f:LAMBDA0_T>, TypeReference<Primitive<THIS>>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:CTOR1_T> <- TypeReference<:: Primitive<THIS>>
+[35m   debug [39m[0m[vm] assigneval Location<l:CTOR2_T_CALL> CURRY<Location<f:LAMBDA1_T>, TypeReference<Primitive<NUMBER>>>
+[35m   debug [39m[0m[vm] curry Location<f:LAMBDA1_T> TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<Lambda1Function<>>
+[35m   debug [39m[0m[vm] Location<l:CTOR2_T_CALL> <- FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<NUMBER>>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:CTOR2_T> CALL1<Location<l:CTOR2_T_CALL>, TypeReference<Primitive<THIS>>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:CTOR2_T_CALL> TypeReference<Primitive<THIS>>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: Lambda1Function<>, ref: TypeReference<Primitive<NUMBER>>>>
+[35m   debug [39m[0m[vm] provider call: Lambda1FunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:CTOR2_T> CALL1<Location<l:CTOR2_T_CALL>, TypeReference<Primitive<THIS>>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:CTOR2_T> <- TypeReference<Primitive<NUMBER> :: Primitive<THIS>>
+[35m   debug [39m[0m[vm] assigneval Location<l:REG_FUNC_T> CALL1<Location<f:LAMBDA0_T>, Location<l:CTOR2_T>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:LAMBDA0_T> Location<l:CTOR2_T>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<Lambda0Function<>>
+[35m   debug [39m[0m[vm] provider call: Lambda0FunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:REG_FUNC_T> CALL1<Location<f:LAMBDA0_T>, Location<l:CTOR2_T>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:REG_FUNC_T> <- TypeReference<:: Primitive<NUMBER> :: Primitive<THIS>>
+[35m   debug [39m[0m[vm] assigneval Location<l:USER_DEFINED_T_PROTO> OTYPEINIT<>
+[35m   debug [39m[0m[vm] otypeinit
+[35m   debug [39m[0m[vm] Location<l:USER_DEFINED_T_PROTO> <- ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] otypeprop Location<l:USER_DEFINED_T_PROTO> Location<o:CTOR1> Location<l:CTOR1_T>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 0, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<:: Primitive<THIS>>
+[35m   debug [39m[0m[vm] otypeprop Location<l:USER_DEFINED_T_PROTO> Location<o:CTOR2> Location<l:CTOR2_T>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 1, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER> :: Primitive<THIS>>
+[35m   debug [39m[0m[vm] otypeprop Location<l:USER_DEFINED_T_PROTO> Location<o:REG_FUNC> Location<l:REG_FUNC_T>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 2, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<:: Primitive<NUMBER> :: Primitive<THIS>>
+[35m   debug [39m[0m[vm] otypeprop Location<l:USER_DEFINED_T_PROTO> Location<o:UNINIT> TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] assigneval Location<l:USER_DEFINED_T> OTYPEFINALIZE<Location<l:USER_DEFINED_T_PROTO>>
+[35m   debug [39m[0m[vm] otypefinalize Location<l:USER_DEFINED_T_PROTO>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] Location<l:USER_DEFINED_T> <- ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] assigneval Location<l:A> OTYPEGET<Location<l:USER_DEFINED_T>, Location<o:CTOR1>>
+[35m   debug [39m[0m[vm] otypeget Location<l:USER_DEFINED_T> Location<o:CTOR1>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] Location<l:A> <- TypeReference<:: Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] assigneval Location<l:B> OTYPEGET<Location<l:USER_DEFINED_T>, Location<o:CTOR2>>
+[35m   debug [39m[0m[vm] otypeget Location<l:USER_DEFINED_T> Location<o:CTOR2>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] Location<l:B> <- TypeReference<Primitive<NUMBER> :: Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] assigneval Location<l:C> OTYPEGET<Location<l:USER_DEFINED_T>, Location<o:REG_FUNC>>
+[35m   debug [39m[0m[vm] otypeget Location<l:USER_DEFINED_T> Location<o:REG_FUNC>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] Location<l:C> <- TypeReference<:: Primitive<NUMBER> :: Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] assigneval Location<l:D> OTYPEGET<Location<l:USER_DEFINED_T>, Location<o:UNINIT>>
+[35m   debug [39m[0m[vm] otypeget Location<l:USER_DEFINED_T> Location<o:UNINIT>
+[35m   debug [39m[0m[vm] ensureType: ObjectTypeReference<Type::Object<#prop: 4, parent: (nullptr)>>
+[35m   debug [39m[0m[vm] Location<l:D> <- TypeReference<Primitive<NUMBER>>

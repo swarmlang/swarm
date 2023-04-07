@@ -1,60 +1,60 @@
-[35m   debug [39m[vm] assignvalue Location<l:path> StringReference<test/051-file-io/test.txt>
-[35m   debug [39m[vm] Location<l:path> <- StringReference<test/051-file-io/test.txt>
-[35m   debug [39m[vm] assigneval Location<l:fh> CALL1<Location<f:OPEN_FILE>, Location<l:path>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:OPEN_FILE> Location<l:path>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<OpenFileFunction<>>
-[35m   debug [39m[vm] provider call: OpenFileFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:fh> CALL1<Location<f:OPEN_FILE>, Location<l:path>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:fh> <- ResourceReference<Prologue::FileResource<path: test/051-file-io/test.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>
-[35m   debug [39m[vm] assigneval Location<l:file_t> CALL0<Location<f:FILE_T>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call0 Location<f:FILE_T>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<FileTFunction<>>
-[35m   debug [39m[vm] provider call: FileTFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:file_t> CALL0<Location<f:FILE_T>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:file_t> <- TypeReference<Opaque<PROLOGUE::FILE>>
-[35m   debug [39m[vm] assigneval Location<l:file_rs_t> CALL1<Location<f:RESOURCE_T>, Location<l:file_t>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:RESOURCE_T> Location<l:file_t>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<ResourceTFunction<>>
-[35m   debug [39m[vm] provider call: ResourceTFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:file_rs_t> CALL1<Location<f:RESOURCE_T>, Location<l:file_t>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:file_rs_t> <- TypeReference<RESOURCE<Opaque<PROLOGUE::FILE>>>
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:TEST>, TypeReference<Primitive<VOID>>>, pc: 10
-[35m   debug [39m[vm] with Location<l:fh> Location<f:TEST>
-[35m   debug [39m[vm] ensureResource: ResourceReference<Prologue::FileResource<path: test/051-file-io/test.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>
-[35m   debug [39m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::FILE>>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: TEST (#params: 1) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:TEST, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:TEST> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:TEST>>
-[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:TEST> (pc: 4)
-[35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:file_rs_t>, Location<l:file>>
-[35m   debug [39m[vm] fnparam Location<l:file_rs_t> Location<l:file>
-[35m   debug [39m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::FILE>>>
-[35m   debug [39m[vm] fnparam: Location<l:file> <- ResourceReference<Prologue::FileResource<path: test/051-file-io/test.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>
-[35m   debug [39m[vm] scopeof Location<l:contents>
-[35m   debug [39m[vm] assigneval Location<l:contents> CALL1<Location<f:READ_FILE>, Location<l:file>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:READ_FILE> Location<l:file>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<ReadFileFunction<>>
-[35m   debug [39m[vm] provider call: ReadFileFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:contents> CALL1<Location<f:READ_FILE>, Location<l:file>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:contents> <- StringReference<Fubar!>
-[35m   debug [39m[vm] streampush Location<s:STDOUT> Location<l:contents>
-[35m   debug [39m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
-[35m   debug [39m[vm] return0
+[35m   debug [39m[0m[vm] assignvalue Location<l:path> StringReference<test/051-file-io/test.txt>
+[35m   debug [39m[0m[vm] Location<l:path> <- StringReference<test/051-file-io/test.txt>
+[35m   debug [39m[0m[vm] assigneval Location<l:fh> CALL1<Location<f:OPEN_FILE>, Location<l:path>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:OPEN_FILE> Location<l:path>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<OpenFileFunction<>>
+[35m   debug [39m[0m[vm] provider call: OpenFileFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:fh> CALL1<Location<f:OPEN_FILE>, Location<l:path>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:fh> <- ResourceReference<Prologue::FileResource<path: test/051-file-io/test.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>
+[35m   debug [39m[0m[vm] assigneval Location<l:file_t> CALL0<Location<f:FILE_T>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call0 Location<f:FILE_T>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<FileTFunction<>>
+[35m   debug [39m[0m[vm] provider call: FileTFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:file_t> CALL0<Location<f:FILE_T>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:file_t> <- TypeReference<Opaque<PROLOGUE::FILE>>
+[35m   debug [39m[0m[vm] assigneval Location<l:file_rs_t> CALL1<Location<f:RESOURCE_T>, Location<l:file_t>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:RESOURCE_T> Location<l:file_t>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<ResourceTFunction<>>
+[35m   debug [39m[0m[vm] provider call: ResourceTFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:file_rs_t> CALL1<Location<f:RESOURCE_T>, Location<l:file_t>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:file_rs_t> <- TypeReference<RESOURCE<Opaque<PROLOGUE::FILE>>>
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:TEST>, TypeReference<Primitive<VOID>>>, pc: 10
+[35m   debug [39m[0m[vm] with Location<l:fh> Location<f:TEST>
+[35m   debug [39m[0m[vm] ensureResource: ResourceReference<Prologue::FileResource<path: test/051-file-io/test.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::FILE>>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: TEST (#params: 1) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:TEST, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] pushCall - call: InlineFunctionCall<f:TEST> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:TEST>>
+[35m   debug [39m[0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:TEST> (pc: 4)
+[35m   debug [39m[0m[vm] next instruction for inline call: FNPARAM<Location<l:file_rs_t>, Location<l:file>>
+[35m   debug [39m[0m[vm] fnparam Location<l:file_rs_t> Location<l:file>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::FILE>>>
+[35m   debug [39m[0m[vm] fnparam: Location<l:file> <- ResourceReference<Prologue::FileResource<path: test/051-file-io/test.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>
+[35m   debug [39m[0m[vm] scopeof Location<l:contents>
+[35m   debug [39m[0m[vm] assigneval Location<l:contents> CALL1<Location<f:READ_FILE>, Location<l:file>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:READ_FILE> Location<l:file>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<ReadFileFunction<>>
+[35m   debug [39m[0m[vm] provider call: ReadFileFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:contents> CALL1<Location<f:READ_FILE>, Location<l:file>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:contents> <- StringReference<Fubar!>
+[35m   debug [39m[0m[vm] streampush Location<s:STDOUT> Location<l:contents>
+[35m   debug [39m[0m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>
+[35m   debug [39m[0m[vm] return0

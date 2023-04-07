@@ -1,62 +1,62 @@
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER2>, TypeReference<Primitive<NUMBER>>>, pc: 4
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER1>, TypeReference<Primitive<NUMBER>>>, pc: 8
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER0>, TypeReference<Primitive<NUMBER>>>, pc: 12
-[35m   debug [39m[vm] assigneval Location<l:two> CALL1<Location<f:INNER0>, NumberReference<1.000000>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:INNER0> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] load inline function: INNER0 (#params: 1) (returns: TypeReference<Primitive<NUMBER>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INNER0, rt: Primitive<NUMBER>>>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER0> (pc: 8)
-[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
-[35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
-[35m   debug [39m[vm] assigneval Location<l:lhs> CALL1<Location<f:INNER1>, Location<l:lhs>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:INNER1> Location<l:lhs>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] load inline function: INNER1 (#params: 1) (returns: TypeReference<Primitive<NUMBER>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INNER1, rt: Primitive<NUMBER>>>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER1> (pc: 4)
-[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
-[35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
-[35m   debug [39m[vm] assigneval Location<l:lhs> CALL1<Location<f:INNER2>, Location<l:lhs>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:INNER2> Location<l:lhs>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] load inline function: INNER2 (#params: 1) (returns: TypeReference<Primitive<NUMBER>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INNER2, rt: Primitive<NUMBER>>>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER2> (pc: 0)
-[35m   debug [39m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
-[35m   debug [39m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
-[35m   debug [39m[vm] assigneval Location<l:lhs> PLUS<Location<l:lhs>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<l:lhs> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:lhs> <- NumberReference<2.000000>
-[35m   debug [39m[vm] return1 Location<l:lhs>
-[35m   debug [39m[vm] assigneval Location<l:lhs> CALL1<Location<f:INNER2>, Location<l:lhs>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:lhs> <- NumberReference<2.000000>
-[35m   debug [39m[vm] return1 Location<l:lhs>
-[35m   debug [39m[vm] assigneval Location<l:lhs> CALL1<Location<f:INNER1>, Location<l:lhs>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:lhs> <- NumberReference<2.000000>
-[35m   debug [39m[vm] return1 Location<l:lhs>
-[35m   debug [39m[vm] assigneval Location<l:two> CALL1<Location<f:INNER0>, NumberReference<1.000000>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:two> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER2>, TypeReference<Primitive<NUMBER>>>, pc: 4
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER1>, TypeReference<Primitive<NUMBER>>>, pc: 8
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER0>, TypeReference<Primitive<NUMBER>>>, pc: 12
+[35m   debug [39m[0m[vm] assigneval Location<l:two> CALL1<Location<f:INNER0>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:INNER0> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] load inline function: INNER0 (#params: 1) (returns: TypeReference<Primitive<NUMBER>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INNER0, rt: Primitive<NUMBER>>>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INNER0> (pc: 8)
+[35m   debug [39m[0m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
+[35m   debug [39m[0m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:lhs> CALL1<Location<f:INNER1>, Location<l:lhs>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:INNER1> Location<l:lhs>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] load inline function: INNER1 (#params: 1) (returns: TypeReference<Primitive<NUMBER>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INNER1, rt: Primitive<NUMBER>>>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INNER1> (pc: 4)
+[35m   debug [39m[0m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
+[35m   debug [39m[0m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:lhs> CALL1<Location<f:INNER2>, Location<l:lhs>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:INNER2> Location<l:lhs>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] load inline function: INNER2 (#params: 1) (returns: TypeReference<Primitive<NUMBER>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INNER2, rt: Primitive<NUMBER>>>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INNER2> (pc: 0)
+[35m   debug [39m[0m[vm] next instruction for inline call: FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:lhs>>
+[35m   debug [39m[0m[vm] fnparam TypeReference<Primitive<NUMBER>> Location<l:lhs>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] fnparam: Location<l:lhs> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:lhs> PLUS<Location<l:lhs>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<l:lhs> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:lhs> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] return1 Location<l:lhs>
+[35m   debug [39m[0m[vm] assigneval Location<l:lhs> CALL1<Location<f:INNER2>, Location<l:lhs>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:lhs> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] return1 Location<l:lhs>
+[35m   debug [39m[0m[vm] assigneval Location<l:lhs> CALL1<Location<f:INNER1>, Location<l:lhs>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:lhs> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] return1 Location<l:lhs>
+[35m   debug [39m[0m[vm] assigneval Location<l:two> CALL1<Location<f:INNER0>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:two> <- NumberReference<2.000000>
