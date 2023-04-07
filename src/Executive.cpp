@@ -91,7 +91,7 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
-    delete console;
+//    delete console;
     delete _input;
     Framework::shutdown();
     return result;
@@ -203,6 +203,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagSingleThreaded = !flagMultiThreaded;
             logger->debug("Will execute locally.");
         } else if ( arg == "--locally-multithreaded" ) {
+            Configuration::FORCE_LOCAL = true;
             flagMultiThreaded = true;
             flagSingleThreaded = false;
             logger->debug("Will execute multithreaded");
@@ -432,7 +433,7 @@ void Executive::printUsage() {
 }
 
 int Executive::debugOutputTokens() {
-    std::ostream* stream = nullptr;
+    std::ostream* stream;
 
     if ( flagOutputTokensTo == "--" ) {
         stream = &std::cout;

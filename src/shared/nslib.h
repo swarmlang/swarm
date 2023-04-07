@@ -2,6 +2,7 @@
 #define NSLIB_H
 
 //#define NSLIB_GC_TRACK
+#define NSLIB_GC_DEBUG_FREE
 
 #ifndef NSLIB_BINN_H_PATH
 #define NSLIB_BINN_H_PATH "../../mod/binn/src/binn.h"
@@ -27,7 +28,7 @@
 #define NS_DEFER() nslib::Defer UNIQUE_NAME(deferred)
 
 #include <dlfcn.h>
-
+#include <cassert>
 #include <random>
 #include <stack>
 #include <map>
@@ -51,6 +52,8 @@
 #include <sys/stat.h>
 #include <sys/shm.h>
 #include <execinfo.h>
+#include <mutex>
+#include <typeinfo>
 #include NSLIB_BINN_H_PATH
 
 #define NSLIB_SERIAL_TAG 0
@@ -71,6 +74,175 @@ namespace nslib {
         static bool USE_DETERMINISTIC_UUIDS = false;
     }
 
+
+    /** An instance which has a string representation. */
+    class IStringable {
+    public:
+        virtual ~IStringable() = default;
+        [[nodiscard]] virtual std::string toString() const = 0;
+    };
+
+
+    class NSLibException : public std::logic_error, public IStringable {
+    public:
+        explicit NSLibException(const std::string& message) : std::logic_error(message) {}
+
+        [[nodiscard]] std::string toString() const override {
+            return what();
+        }
+    };
+
+
+    class ForeignThreadException : public NSLibException {
+    public:
+        ForeignThreadException() : NSLibException("Cannot load context for foreign thread. Make sure to create the threads with Framework::newThread(...).") {}
+    };
+
+
+    using ThreadID = std::size_t;
+
+    class IThreadContext {
+    public:
+        virtual ~IThreadContext() = default;
+
+        [[nodiscard]] virtual bool isReadyForJoin() = 0;
+
+        [[nodiscard]] virtual std::thread* baseThread() const = 0;
+
+        [[nodiscard]] virtual ThreadID getID() const {
+            return _threadNumber;
+        }
+
+        virtual void shutdown() = 0;
+
+        virtual void onShutdown(const std::function<void()>& f) = 0;
+
+        [[nodiscard]] virtual bool hasExited() = 0;
+
+        [[nodiscard]] virtual int exitCode() = 0;
+
+        static ThreadID getNextThreadNumber() {
+            std::unique_lock<std::mutex> lock(_threadNumberMutex);
+            return _nextThreadNumber++;
+        }
+
+    protected:
+        static std::mutex _threadNumberMutex;
+        static ThreadID _nextThreadNumber;
+
+        ThreadID _threadNumber;
+
+        IThreadContext() {
+            _threadNumber = getNextThreadNumber();
+        }
+    };
+
+    class MainContext : public IThreadContext {
+    public:
+        bool isReadyForJoin() override { return false; }
+
+        std::thread* baseThread() const override { return nullptr; }
+
+        void shutdown() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            for ( const auto& c : _shutdownCallbacks ) c();
+        }
+
+        void onShutdown(const std::function<void()>& f) override {
+            std::lock_guard<std::mutex> m(_mutex);
+            _shutdownCallbacks.push_back(f);
+        }
+
+        bool hasExited() override { return false; }
+
+        int exitCode() override { return 0; }
+
+    protected:
+        std::mutex _mutex;
+        std::vector<std::function<void()>> _shutdownCallbacks;
+    };
+
+    class ThreadContext : public IThreadContext {
+    public:
+        explicit ThreadContext(ThreadID id, const std::function<int()>& body) : _id(id) {
+            _thread = new std::thread(wrap(body));
+        }
+
+        [[nodiscard]] bool isReadyForJoin() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            return _thread->joinable() && _exited;
+        }
+
+        [[nodiscard]] std::thread* baseThread() const override {
+            return _thread;
+        }
+
+        void shutdown() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            for ( const auto& c : _shutdownCallbacks ) c();
+        }
+
+        void onShutdown(const std::function<void()>& f) override {
+            std::lock_guard<std::mutex> m(_mutex);
+            _shutdownCallbacks.push_back(f);
+        }
+
+        bool hasExited() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            return _exited;
+        }
+
+        int exitCode() override {
+            std::lock_guard<std::mutex> m(_mutex);
+            return _exitCode;
+        }
+
+    protected:
+        ThreadID _id;
+        int _exitCode = 0;
+        bool _exited = false;
+        std::mutex _mutex;
+        std::vector<std::function<void()>> _shutdownCallbacks;
+        std::thread* _thread = nullptr;
+
+        std::function<void()> wrap(const std::function<int()>& body);
+    };
+
+
+    template <typename T>
+    class IContextualStorage {
+    public:
+        virtual ~IContextualStorage() = default;
+
+        virtual T produceNewForContext() = 0;
+
+        virtual void disposeOfElementForContext(T) = 0;
+
+        virtual T getFromContext();
+    protected:
+        std::map<std::thread::id, T> _ctxStore;
+        std::mutex _ctxStoreMutex;
+    };
+
+
+    template <typename T>
+    class IContextualRef {
+    public:
+        explicit IContextualRef(IContextualStorage<T*>* store) : _store(store) {}
+
+        virtual ~IContextualRef() = default;
+
+        virtual T* get() {
+            return _store->getFromContext();
+        }
+
+        T* operator->() { return get(); }
+
+    protected:
+        IContextualStorage<T*>* _store;
+    };
+
+
     class Framework {
     public:
         Framework(Framework& other) = delete;  // don't allow cloning
@@ -78,27 +250,90 @@ namespace nslib {
 
         static void boot();
 
+        static IThreadContext* newThread(const std::function<int()>& body) {
+            std::unique_lock<std::mutex> m(_mutex);
+
+            auto id = _lastThreadID++;
+            auto ctx = new ThreadContext(id, body);
+            _contexts[id] = ctx;
+            return ctx;
+        }
+
+        static void tickThreads() {
+            std::unique_lock<std::mutex> m(_mutex);
+            auto mapCopy = _contexts;
+            m.unlock();
+
+            for ( auto pair : mapCopy ) {
+                if ( pair.second->isReadyForJoin() ) {
+                    pair.second->baseThread()->join();
+                    m.lock();
+                    _contexts.erase(pair.first);
+                    m.unlock();
+                }
+            }
+        }
+
+        static IThreadContext* context() {
+            std::lock_guard<std::mutex> m(_mutex);
+
+            // Map the correct thread ID
+            auto idIter = _threadMap.find(std::this_thread::get_id());
+            if ( idIter == _threadMap.end() ) {
+                throw ForeignThreadException();
+            }
+
+            // Look up the context for the mapped thread ID
+            auto id = idIter->second;
+            return _contexts[id];
+        }
+
+        static bool isThread() {
+            return !isMainPID();
+        }
+
+        static bool hasThreads() {
+            return _contexts.size() > 1;
+        }
+
+        static std::string getThreadDisplay() {
+            auto ctx = context();
+            std::ostringstream oss;
+            if ( ctx->getID() == 0 ) {
+                oss << "main";
+            } else {
+                oss << "worker_" << ctx->getID();
+            }
+            return oss.str();
+        }
+
+        static bool isMainPID() {
+            std::lock_guard<std::mutex> m(_mutex);
+            return std::this_thread::get_id() == _mainPID;
+        }
+
         static void shutdown() {
+            std::lock_guard<std::mutex> m(_mutex);
             if ( !_booted ) return;
             for ( const auto& c : _shutdownCallbacks ) c();
         }
 
         static void onShutdown(std::function<void()> f) {
+            std::lock_guard<std::mutex> m(_mutex);
             _shutdownCallbacks.push_back(f);
         }
 
     protected:
         Framework() = default;
+        static ThreadID _lastThreadID;
         static bool _booted;
+        static std::thread::id _mainPID;
         static std::vector<std::function<void()>> _shutdownCallbacks;
-    };
+        static std::mutex _mutex;
+        static std::map<ThreadID, IThreadContext*> _contexts;
+        static std::map<std::thread::id, ThreadID> _threadMap;
 
-
-    /** An instance which has a string representation. */
-    class IStringable {
-    public:
-        virtual ~IStringable() = default;
-        [[nodiscard]] virtual std::string toString() const = 0;
+        friend class ThreadContext;
     };
 
 
@@ -117,16 +352,6 @@ namespace nslib {
 
         return s.str();
     }
-
-
-    class NSLibException : public std::logic_error, public IStringable {
-    public:
-        explicit NSLibException(const std::string& message) : std::logic_error(message) {}
-
-        [[nodiscard]] std::string toString() const override {
-            return what();
-        }
-    };
 
 
     /** ANSI-supported colors. */
@@ -395,6 +620,7 @@ namespace nslib {
     inline std::string s(double v) { return std::to_string(v); }
     inline std::string s(long double v) { return std::to_string(v); }
     inline std::string s(bool v) { return v ? "true" : "false"; }
+    inline std::string s(const std::type_info& v) { return v.name(); }
     inline std::string s(IStringable& v) { return v.toString(); }
     inline std::string s(IStringable* v) {
         if ( v == nullptr ) return "(nullptr)";
@@ -830,6 +1056,37 @@ namespace nslib {
         };
     }
 
+    class Console;
+
+    class ConsoleService : public IContextualStorage<Console*> {
+    public:
+        ConsoleService(ConsoleService& other) = delete;  // don't allow cloning
+        void operator=(const ConsoleService&) = delete;  // don't allow assigning
+
+        static ConsoleService* get() {
+            if ( _inst == nullptr ) {
+                _inst = new ConsoleService();
+//                Framework::onShutdown([]() {
+//                    Logging::cleanup();
+//                });
+            }
+
+            return _inst;
+        }
+
+        static Console* getConsole() {
+            return get()->getFromContext();
+        }
+
+        Console* produceNewForContext() override;
+
+        void disposeOfElementForContext(Console*) override;
+    protected:
+        static inline ConsoleService* _inst = nullptr;
+
+        ConsoleService() = default;
+    };
+
 
     /**
      * Utility class for interacting with the Console window.
@@ -841,11 +1098,7 @@ namespace nslib {
 
         /** Get the singleton Console instance. */
         static Console* get() {
-            if ( _global == nullptr ) {
-                _global = new Console();
-            }
-
-            return _global;
+            return ConsoleService::getConsole();
         }
 
         /** Output a string at the given verbosity. Satisfies ILogTarget. */
@@ -947,7 +1200,10 @@ namespace nslib {
 
         /** Reset all applied modifiers. */
         Console* reset() {
-            while ( !_cleanup.empty() ) end();
+            while ( !_cleanup.empty() ) {
+                _cleanup.top()(this);
+                _cleanup.pop();
+            }
             output(ANSI_RESET_ALL);
             return this;
         }
@@ -960,63 +1216,100 @@ namespace nslib {
 
         /** Output an error message. */
         Console* error(const std::string& p) {
-            return only(Verbosity::ERROR)
+            only(Verbosity::ERROR)
                 ->color(ANSIColor::RED)
-                ->print("   error ", true)
-                ->output(p + "\n")
+                ->print("   error ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
                 ->end();
         }
 
         /** Output an error message. */
         Console* success(const std::string& p) {
-            return only(Verbosity::INFO)
-                    ->color(ANSIColor::GREEN)
-                    ->print(" success ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::INFO)
+                ->color(ANSIColor::GREEN)
+                ->print(" success ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output a warning message. */
         Console* warn(const std::string& p) {
-            return only(Verbosity::WARNING)
-                    ->color(ANSIColor::YELLOW)
-                    ->print(" warning ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::WARNING)
+                ->color(ANSIColor::YELLOW)
+                ->print(" warning ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output an informational message. */
         Console* info(const std::string& p) {
-            return only(Verbosity::INFO)
-                    ->color(ANSIColor::BLUE)
-                    ->print("    info ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::INFO)
+                ->color(ANSIColor::BLUE)
+                ->print("    info ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output a debugging message. */
         Console* debug(const std::string& p) {
-            return only(Verbosity::DEBUG)
-                    ->color(ANSIColor::MAGENTA)->print("   debug ")->end()
-                    ->output(p + "\n")->end();
+            only(Verbosity::DEBUG)
+                ->color(ANSIColor::MAGENTA)
+                ->print("   debug ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output a verbose message. */
         Console* verbose(const std::string& p) {
-            return only(Verbosity::VERBOSE)
-                    ->color(ANSIColor::CYAN)
-                    ->print(" verbose ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::VERBOSE)
+                ->color(ANSIColor::CYAN)
+                ->print(" verbose ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Output a trace message. */
         Console* trace(const std::string& p) {
-            return only(Verbosity::TRACE)
-                    ->color(ANSIColor::GREY)
-                    ->print("   trace ", true)
-                    ->output(p + "\n")
-                    ->end();
+            only(Verbosity::TRACE)
+                ->color(ANSIColor::GREY)
+                ->print("   trace ", true);
+
+            if ( Framework::isThread() ) {
+                print(" [" + Framework::getThreadDisplay() + "] ");
+            }
+
+            return output(p + "\n")
+                ->end();
         }
 
         /** Print a string to the default output, without a newline. */
@@ -1048,6 +1341,7 @@ namespace nslib {
         /** Show a progress bar. `value` should be a decimal percentage from 0 to 1. */
         Console* progress(double value) {
             std::size_t width = _vpWidth - 5;
+
             std::size_t filled = static_cast<int>(static_cast<double>(width) * value);
             std::size_t percent = static_cast<int>(100 * value);
             if ( value >= 1 ) {
@@ -1325,6 +1619,9 @@ namespace nslib {
         std::string UNI_BLOCK_FULL = "█";
 
     protected:
+        static std::optional<std::thread::id> _mainPID;
+        static std::map<std::thread::id, Console*> _threadCopies;
+
         /** The global console instance. */
         static Console* _global;
 
@@ -1373,18 +1670,40 @@ namespace nslib {
             if ( verb == Verbosity::ERROR || verb == Verbosity::WARNING ) return std::cerr;
             return std::cout;
         }
+
+        friend class ConsoleService;
     };
 
     class IUsesConsole {
     public:
         virtual ~IUsesConsole() = default;
 
-        IUsesConsole() {
-            console = Console::get();
-        }
+        IUsesConsole() : console(ConsoleService::get()) {}
     protected:
-        Console* console;
+        IContextualRef<Console> console;
     };
+
+
+    class ConsoleTarget : public ILogTarget, public IUsesConsole {
+    public:
+        explicit ConsoleTarget() = default;
+
+        void output(Verbosity v, std::string s) override {
+            if ( v == Verbosity::SUCCESS ) console->success(s);
+            else if ( v == Verbosity::ERROR ) console->error(s);
+            else if ( v == Verbosity::WARNING ) console->warn(s);
+            else if ( v == Verbosity::INFO ) console->info(s);
+            else if ( v == Verbosity::DEBUG ) console->debug(s);
+            else if ( v == Verbosity::VERBOSE ) console->verbose(s);
+            else if ( v == Verbosity::TRACE ) console->trace(s);
+            else console->println(" ??????? " + s);
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "ConsoleTarget<>";
+        }
+    };
+
 
     /** Get a UUIDv4-compatible string. */
     inline std::string uuid() {
@@ -1616,6 +1935,13 @@ namespace nslib {
     using GCTracks = std::map<std::string, std::pair<std::vector<std::string>, std::vector<std::string>>>;
 #endif
 
+#ifdef NSLIB_GC_DEBUG_FREE
+    class UseAfterFreeException : public NSLibException {
+    public:
+        explicit UseAfterFreeException(const std::string& message) : NSLibException(message) {}
+    };
+#endif
+
     /** Trait interface which adds a reference count. */
     class IRefCountable {
     public:
@@ -1633,6 +1959,12 @@ namespace nslib {
          */
         virtual void nslibIncRef() {
             _nslibRefCount += 1;
+
+#ifdef NSLIB_GC_DEBUG_FREE
+            if ( _nslibWouldHaveFreed ) {
+                throw UseAfterFreeException("nslib: useref(...) called on object that was already freed by freeref(...) - free'd at: " + _nslibFreedAtTrace);
+            }
+#endif
 
 #ifdef NSLIB_GC_TRACK
             if ( !_registeredShutdown ) {
@@ -1700,6 +2032,15 @@ namespace nslib {
         /** If true, the instance can be deleted. */
         [[nodiscard]] virtual bool nslibShouldFree() const { return !_nslibRefDisable && _nslibRefCount < 1; }
 
+#ifdef NSLIB_GC_DEBUG_FREE
+        virtual void nslibMarkWouldHaveFreed() {
+            _nslibWouldHaveFreed = true;
+            _nslibFreedAtTrace = trace();
+        }
+
+        [[nodiscard]] virtual bool nslibWouldHaveFreed() const { return _nslibWouldHaveFreed; }
+#endif
+
         virtual std::size_t nslibOnFree(std::function<void()> callback) {
             auto id = _nextOnFreeCallbackId++;
             _onFreeCallbacks[id] = std::move(callback);
@@ -1717,6 +2058,11 @@ namespace nslib {
         bool _nslibRefDisable;
         std::map<std::size_t, std::function<void()>> _onFreeCallbacks;
         std::size_t _nextOnFreeCallbackId = 1;
+
+#ifdef NSLIB_GC_DEBUG_FREE
+        bool _nslibWouldHaveFreed = false;
+        std::string _nslibFreedAtTrace;
+#endif
 
 #ifdef NSLIB_GC_TRACK
         std::string _nslibRefId = uuid();
@@ -1745,7 +2091,13 @@ namespace nslib {
     void freeref(priv::RefCountable auto r) {
         if ( r == nullptr ) return;
         r->nslibDecRef();
-        if ( r->nslibShouldFree() ) delete r;
+        if ( r->nslibShouldFree() ) {
+#ifdef NSLIB_GC_DEBUG_FREE
+            r->nslibMarkWouldHaveFreed();
+#else
+            delete r;
+#endif
+        }
     }
 
     /** Release an old reference and use a new one, if they are different. */
@@ -1872,6 +2224,135 @@ namespace nslib {
     protected:
         std::function<void()> _callback;
     };
+
+
+
+    /* A simple event bus system inspired by https://github.com/dquist/EventBus */
+    namespace event {
+        using unsubscribe_t = std::function<void()>;
+
+        /** Base class for events. */
+        class Event : public IStringable {};
+
+        /** Listens for events of type T. */
+        template <class T>
+        class Listener : public IStringable, public IRefCountable {
+        public:
+            Listener() : IRefCountable() {
+                static_assert(std::is_base_of<Event, T>::value, "nslib::event::EventHandler<T>: T must extend Event");
+            }
+
+            virtual void handle(T&) = 0;
+
+            void dispatch(Event& e) {
+                handle(dynamic_cast<T&>(e));
+            }
+        };
+
+        namespace priv {
+            using listener_map_t = std::unordered_map<std::string, void* const>;
+
+            template <class T>
+            class LambdaListener : public Listener<T> {
+            public:
+                explicit LambdaListener(std::function<void(T&)> handler) : Listener<T>(), _handler(handler) {}
+
+                void handle(T& e) override {
+                    _handler(e);
+                }
+
+                [[nodiscard]] std::string toString() const override {
+                    return "nslib::event::priv::LambdaListener<T: " + s(typeid(T)) + ">";
+                }
+
+            protected:
+                std::function<void(T&)> _handler;
+            };
+        }
+
+        /** A simple event bus. */
+        class EventBus : public IStringable, public IRefCountable {
+        public:
+            static EventBus* get() {
+                if ( _global == nullptr ) {
+                    _global = useref(getNew("global"));
+                    Framework::onShutdown([]() {
+                        freeref(_global);
+                    });
+                }
+                return _global;
+            }
+
+            static EventBus* getNew(const std::string& name) {
+                return new EventBus(name);
+            }
+
+            explicit EventBus(std::string  name) : _name(std::move(name)) {}
+
+            /**
+             * Register a listener for events of type T.
+             * Returns a function which can be called to remove the listener.
+             */
+            template <class T>
+            unsubscribe_t listen(Listener<T>* listener) {
+                auto name = s(typeid(T));
+                priv::listener_map_t listeners = {};
+                auto found = _map.find(name);
+                if ( found != _map.end() ) {
+                    listeners = found->second;
+                }
+
+                auto listenerId = uuid();
+                listeners.insert({listenerId, useref(listener)});
+
+                _map[name] = listeners;
+
+                // The unsubscriber:
+                return [this, listenerId, listener]() {
+                    auto found = _map.find(s(typeid(T)));
+                    if ( found == _map.end() ) {
+                        return;
+                    }
+
+                    auto mappedListener = found->second.find(listenerId);
+                    if ( mappedListener == found->second.end() ) {
+                        return;
+                    }
+
+                    found->second.erase(mappedListener);
+                    freeref(listener);
+                };
+            }
+
+            template <class T>
+            unsubscribe_t listen(std::function<void(T&)> listener) {
+                return listen(new priv::LambdaListener<T>(listener));
+            }
+
+            /** Raise an event. */
+            void dispatch(Event& e) {
+                auto listeners = _map.find(s(typeid(e)));
+                if ( listeners == _map.end() ) {
+                    // No listeners registered for this event type
+                    return;
+                }
+
+                for ( const auto& listener : listeners->second ) {
+                    static_cast<Listener<Event>*>(listener.second)->dispatch(e);
+                }
+            }
+
+            [[nodiscard]] std::string toString() const override {
+                return "EventBus<name: " + _name + ">";
+            }
+
+        protected:
+            std::string _name;
+            std::unordered_map<std::string, priv::listener_map_t> _map;
+
+            static EventBus* _global;
+        };
+    }
 }
 
 #endif //NSLIB_H

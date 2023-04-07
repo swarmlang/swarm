@@ -58,7 +58,7 @@ namespace swarmc::Runtime {
         auto store = getStore(scopeLoc);
 
         // FIXME: smarter locking (e.g. region awareness, atomic operation exemptions, &c.)
-        if ( store->shouldLockAccesses() && lock(loc) ) {
+        if ( store->shouldLockAccesses() && !hasLock(loc) && lock(loc) ) {
             NS_DEFER()([loc, this]() {
                 unlock(loc);
             });
@@ -183,7 +183,7 @@ namespace swarmc::Runtime {
         auto scopeLoc = _scope->map(loc);
         auto store = getStore(scopeLoc);
 
-        if ( store->shouldLockAccesses() && lock(loc) ) {
+        if ( store->shouldLockAccesses() && !hasLock(loc) && lock(loc) ) {
             NS_DEFER()([loc, this]() {
                 unlock(loc);
             });
@@ -208,6 +208,7 @@ namespace swarmc::Runtime {
     bool VirtualMachine::lock(LocationReference* loc) {
         if ( hasLock(loc) ) {
             logger->warn("Attempted to acquire lock that is already held by the requesting control: " + loc->toString());
+            logger->debug(trace());
             return false;
         }
 
@@ -335,7 +336,7 @@ namespace swarmc::Runtime {
     IQueueJob* VirtualMachine::pushCall(IFunctionCall* call) {
         // fixme: need to account for contexts!
         auto queue = getQueue(call);
-        auto job = queue->build(call, _scope, _state);
+        auto job = queue->build(call);
         verbose("pushCall - call: " + call->toString() + " | job: " + job->toString());
         queue->push(job);
         return job;

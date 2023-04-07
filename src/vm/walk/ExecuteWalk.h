@@ -5,6 +5,7 @@
 #include "../../shared/nslib.h"
 #include "../../lang/Type.h"
 #include "../ISAWalk.h"
+#include "./SharedLocationsWalk.h"
 
 using namespace nslib;
 
@@ -26,11 +27,13 @@ namespace swarmc::Runtime {
                 Type::Primitive::of(Type::Intrinsic::NUMBER),
                 Type::Primitive::of(Type::Intrinsic::BOOLEAN)
             );
+            _sharedLocations = new ISA::SharedLocationsWalk;
         }
 
         ~ExecuteWalk() override {
             delete _typeOfExceptionHandler;
             delete _typeOfExceptionDiscriminator;
+            delete _sharedLocations;
         }
 
         ISA::Reference* walkOne(ISA::Instruction* inst) override;
@@ -73,6 +76,7 @@ namespace swarmc::Runtime {
 
     protected:
         VirtualMachine* _vm;
+        ISA::SharedLocationsWalk* _sharedLocations;
         Type::Type* _typeOfExceptionHandler;
         Type::Type* _typeOfExceptionDiscriminator;
 

@@ -21,6 +21,27 @@ using namespace nslib;
 
 namespace swarmc::Runtime {
     class ProviderModule;
+    class VirtualMachine;
+
+    class VirtualMachineEvent : public event::Event {
+    public:
+        explicit VirtualMachineEvent(VirtualMachine* vm) : event::Event(), _vm(vm) {}
+
+        [[nodiscard]] VirtualMachine* getVM() const {
+            return _vm;
+        }
+    private:
+        VirtualMachine* _vm;
+    };
+
+    class VirtualMachineInitializingEvent : public VirtualMachineEvent {
+    public:
+        explicit VirtualMachineInitializingEvent(VirtualMachine* vm) : VirtualMachineEvent(vm) {}
+
+        [[nodiscard]] std::string toString() const override {
+            return "VirtualMachineInitializingEvent<>";
+        }
+    };
 
     /** The Swarm runtime virtual machine (aka "the runtime"). */
     class VirtualMachine : public IStringable, public IUsesLogger {
@@ -29,12 +50,14 @@ namespace swarmc::Runtime {
             _exec = useref(new ExecuteWalk(this));
             _fabric = useref(new Fabric(_global));
             _queueContexts.push(_global->getUuid());
+            _lifecycleEvents = useref(event::EventBus::getNew("swarmc::Runtime::VirtualMachine._lifecycleEvents"));
         }
 
         ~VirtualMachine() override {
             freeref(_global);
             freeref(_exec);
             freeref(_fabric);
+            freeref(_lifecycleEvents);
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -50,6 +73,8 @@ namespace swarmc::Runtime {
         /** Get the Fabric driver used by the runtime. */
         [[nodiscard]] virtual Fabric* fabric() const { return _fabric; }
 
+        [[nodiscard]] virtual event::EventBus* lifecycle() const { return _lifecycleEvents; }
+
         /** Load a set of parsed instructions into the runtime. */
         void initialize(ISA::Instructions is) {
             _state = useref(new State(std::move(is)));
@@ -59,6 +84,9 @@ namespace swarmc::Runtime {
 
             freeref(_localErr);
             _localErr = useref(new LocalErrorStream());
+
+            VirtualMachineInitializingEvent event(this);
+            _lifecycleEvents->dispatch(event);
         }
 
         /**
@@ -301,7 +329,7 @@ namespace swarmc::Runtime {
          * TODO: use to execute queue jobs while idle
          */
         virtual void whileWaitingForLock() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
+            std::this_thread::sleep_for(std::chrono::microseconds(Configuration::LOCK_SLEEP_uS));
         }
 
         /**
@@ -311,7 +339,10 @@ namespace swarmc::Runtime {
          * TODO: use to execute queue jobs while idle
          */
         virtual void whileWaitingForDrain() {
-            std::this_thread::sleep_for(std::chrono::milliseconds(Configuration::LOCK_SLEEP_uS));
+            for ( auto q : _queues ) {
+                q->tick();
+            }
+            std::this_thread::sleep_for(std::chrono::microseconds(Configuration::LOCK_SLEEP_uS));
         }
 
         virtual ExceptionHandlerId pushExceptionHandler(IFunction* selector, IFunction* handler) {
@@ -398,6 +429,7 @@ namespace swarmc::Runtime {
         IStream* _localErr = nullptr;
         IStream* _sharedOut = nullptr;
         IStream* _sharedErr = nullptr;
+        event::EventBus* _lifecycleEvents = nullptr;
         bool _shouldClearReturn = false;
         bool _shouldAdvance = true;
         bool _shouldRunToCompletion = false;

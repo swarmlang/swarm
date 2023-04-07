@@ -161,11 +161,9 @@ namespace swarmc::Runtime {
         /** Get the current status of this job. */
         [[nodiscard]] virtual JobState state() const = 0;
 
+        virtual void setState(JobState) = 0;
+
         [[nodiscard]] virtual IFunctionCall* getCall() const = 0;
-
-        [[nodiscard]] virtual const ScopeFrame* getScope() const = 0;
-
-        [[nodiscard]] virtual const State* getState() const = 0;
 
         virtual void setFilters(SchedulingFilters) = 0;
 
@@ -196,7 +194,7 @@ namespace swarmc::Runtime {
         virtual bool shouldHandle(IFunctionCall*) = 0;
 
         /** Given a function call and context, instantiate a new IQueueJob. */
-        virtual IQueueJob* build(IFunctionCall*, const ScopeFrame*, const State*) = 0;
+        virtual IQueueJob* build(IFunctionCall*) = 0;
 
         /** Push a call onto this queue. */
         virtual void push(IQueueJob*) = 0;
@@ -206,6 +204,8 @@ namespace swarmc::Runtime {
 
         /** Returns true if there are no pending jobs. */
         virtual bool isEmpty() = 0;
+
+        virtual void tick() = 0;
     };
 
 

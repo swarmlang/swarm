@@ -33,6 +33,8 @@ namespace swarmc::Runtime::MultiThreaded {
         IStorageLock* acquire(ISA::LocationReference*) override;
 
         void clear() override;
+
+        bool shouldLockAccesses() const override { return true; }
     protected:
         std::map<std::string, std::mutex> _mutexes;
 
@@ -58,7 +60,7 @@ namespace swarmc::Runtime::MultiThreaded {
 
     class QueueJob : public IQueueJob {
     public:
-        QueueJob(JobID id, JobState jobState, IFunctionCall *call, ScopeFrame *scope, State *vmState);
+        QueueJob(JobID id, JobState jobState, IFunctionCall *call, VirtualMachine* vm);
 
         ~QueueJob() noexcept override;
 
@@ -66,15 +68,15 @@ namespace swarmc::Runtime::MultiThreaded {
 
         [[nodiscard]] JobState state() const override { return _jobState; }
 
+        void setState(JobState state) override { _jobState = state; }
+
         [[nodiscard]] IFunctionCall* getCall() const override { return _call; }
-
-        [[nodiscard]] const ScopeFrame* getScope() const override { return _scope; }
-
-        [[nodiscard]] const State* getState() const override { return _vmState; }
 
         void setFilters(SchedulingFilters filters) override { _filters = filters; }
 
         [[nodiscard]] SchedulingFilters getFilters() const override { return _filters; }
+
+        [[nodiscard]] VirtualMachine* getVM() const { return _vm; }
 
         [[nodiscard]] std::string toString() const override {
             return "MultiThreaded::QueueJob<id: " + std::to_string(_id) + ", call: " + _call->toString() + ">";
@@ -84,13 +86,12 @@ namespace swarmc::Runtime::MultiThreaded {
         JobState _jobState;
         IFunctionCall* _call;
         SchedulingFilters _filters;
-        ScopeFrame* _scope;
-        State* _vmState;
+        VirtualMachine* _vm;
     };
 
     class Queue : public IQueue {
     public:
-        explicit Queue(VirtualMachine* vm) : _vm(vm) {}
+        explicit Queue(VirtualMachine* vm);
 
         void setContext(QueueContextID ctx) override {
             _context = ctx;
@@ -100,24 +101,40 @@ namespace swarmc::Runtime::MultiThreaded {
 
         bool shouldHandle(IFunctionCall*) override;
 
-        IQueueJob* build(IFunctionCall*, const ScopeFrame*, const State*) override;
+        IQueueJob* build(IFunctionCall*) override;
 
         void push(IQueueJob* job) override;
 
         IQueueJob* pop() override;
 
-        bool isEmpty() override { return _queue.empty(); }
+        bool isEmpty() override {
+            std::unique_lock<std::mutex> lock(_queueMutex);
+            return _queue.empty() && _jobsInProgress < 1;
+        }
 
         [[nodiscard]] std::string toString() const override {
             return "MultiThreaded::Queue<ctx: " + _context + ">";
         }
 
+        void tick() override;
+
     protected:
         VirtualMachine* _vm;
         JobID _nextId = 0;
         QueueContextID _context;
-        std::mutex _qtex;
+        std::mutex _queueMutex;
         std::queue<IQueueJob*> _queue;
+        std::mutex _threadMutex;
+        std::vector<IThreadContext*> _threads;
+        std::size_t _jobsInProgress = 0;
+
+        bool _shouldExit = false;
+
+        void spawnThreads();
+
+        IQueueJob* popForProcessing();
+
+        void decrementProcessingCount();
     };
 
     class Stream : public IStream {

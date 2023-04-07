@@ -1,0 +1,16 @@
+
+$s:j <- 0
+
+beginfn f:INC p:VOID
+    $s:j <- plus $s:j 1
+return
+
+pushcall f:INC
+pushcall f:INC
+pushcall f:INC
+pushcall f:INC
+pushcall f:INC
+drain
+
+streampush $l:STDOUT "After drain!"
+$s:j <- $s:j
