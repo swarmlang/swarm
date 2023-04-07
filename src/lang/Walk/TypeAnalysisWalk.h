@@ -275,7 +275,9 @@ protected:
                 "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
             );
 
-            flag = false;
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
         }
 
         Type::Type* nodeType = typeOfCallee;

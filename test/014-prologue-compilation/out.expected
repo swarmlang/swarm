@@ -1,0 +1,50 @@
+ASSIGNVALUE<Location<l:var_numberToString>, Location<f:NUMBER_TO_STRING>>
+ASSIGNVALUE<Location<l:tmp0>, NumberReference<3.000000>>
+ASSIGNEVAL<Location<l:tmp1>, CALL1<Location<l:var_numberToString>, Location<l:tmp0>>>
+ASSIGNVALUE<Location<l:var_s>, Location<l:tmp1>>
+ASSIGNVALUE<Location<l:var_booleanToString>, Location<f:BOOLEAN_TO_STRING>>
+ASSIGNVALUE<Location<l:tmp2>, BooleanReference<true>>
+ASSIGNEVAL<Location<l:tmp3>, CALL1<Location<l:var_booleanToString>, Location<l:tmp2>>>
+ASSIGNVALUE<Location<l:var_s>, Location<l:tmp3>>
+ASSIGNVALUE<Location<l:var_sin>, Location<f:SIN>>
+ASSIGNVALUE<Location<l:tmp4>, NumberReference<4.000000>>
+ASSIGNEVAL<Location<l:tmp5>, CALL1<Location<l:var_sin>, Location<l:tmp4>>>
+ASSIGNVALUE<Location<l:var_a>, Location<l:tmp5>>
+ASSIGNVALUE<Location<l:var_cos>, Location<f:COS>>
+ASSIGNVALUE<Location<l:var_a>, Location<l:var_a>>
+ASSIGNEVAL<Location<l:tmp6>, CALL1<Location<l:var_cos>, Location<l:var_a>>>
+ASSIGNVALUE<Location<l:var_a>, Location<l:tmp6>>
+ASSIGNVALUE<Location<l:var_tan>, Location<f:TAN>>
+ASSIGNVALUE<Location<l:var_a>, Location<l:var_a>>
+ASSIGNEVAL<Location<l:tmp7>, CALL1<Location<l:var_tan>, Location<l:var_a>>>
+ASSIGNVALUE<Location<l:var_a>, Location<l:tmp7>>
+ASSIGNVALUE<Location<l:var_random>, Location<f:RANDOM>>
+ASSIGNEVAL<Location<l:tmp8>, CALL0<Location<l:var_random>>>
+ASSIGNVALUE<Location<l:var_a>, Location<l:tmp8>>
+ASSIGNVALUE<Location<l:var_randomVector>, Location<f:RANDOM_VECTOR>>
+ASSIGNVALUE<Location<l:tmp9>, NumberReference<6.000000>>
+ASSIGNEVAL<Location<l:tmp10>, CALL1<Location<l:var_randomVector>, Location<l:tmp9>>>
+ASSIGNVALUE<Location<l:var_b>, Location<l:tmp10>>
+ASSIGNVALUE<Location<l:var_randomMatrix>, Location<f:RANDOM_MATRIX>>
+ASSIGNVALUE<Location<l:tmp11>, NumberReference<2.000000>>
+ASSIGNEVAL<Location<l:tmp12>, CURRY<Location<l:var_randomMatrix>, Location<l:tmp11>>>
+ASSIGNVALUE<Location<l:tmp13>, NumberReference<3.000000>>
+ASSIGNEVAL<Location<l:tmp14>, CALL1<Location<l:tmp12>, Location<l:tmp13>>>
+ASSIGNVALUE<Location<l:var_c>, Location<l:tmp14>>
+ASSIGNVALUE<Location<l:var_range>, Location<f:RANGE>>
+ASSIGNVALUE<Location<l:tmp15>, NumberReference<1.000000>>
+ASSIGNEVAL<Location<l:tmp16>, CURRY<Location<l:var_range>, Location<l:tmp15>>>
+ASSIGNVALUE<Location<l:tmp17>, NumberReference<2.000000>>
+ASSIGNEVAL<Location<l:tmp18>, CURRY<Location<l:tmp16>, Location<l:tmp17>>>
+ASSIGNVALUE<Location<l:tmp19>, NumberReference<1.000000>>
+ASSIGNEVAL<Location<l:tmp20>, CALL1<Location<l:tmp18>, Location<l:tmp19>>>
+ASSIGNVALUE<Location<l:var_b>, Location<l:tmp20>>
+ASSIGNVALUE<Location<l:var_s>, Location<l:var_s>>
+STREAMPUSH<Location<l:STDOUT>, Location<l:var_s>>
+ASSIGNVALUE<Location<l:var_s>, Location<l:var_s>>
+STREAMPUSH<Location<s:STDOUT>, Location<l:var_s>>
+ASSIGNVALUE<Location<l:var_s>, Location<l:var_s>>
+STREAMPUSH<Location<l:STDERR>, Location<l:var_s>>
+ASSIGNVALUE<Location<l:var_s>, Location<l:var_s>>
+STREAMPUSH<Location<s:STDERR>, Location<l:var_s>>
+[32m success [39m[0m[main] Compiled to ISA.

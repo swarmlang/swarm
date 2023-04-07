@@ -25,7 +25,7 @@ namespace swarmc::Lang {
         // sin :: number -> number
         auto typeNumToNum = new Type::Lambda1(
             Type::Primitive::of(Type::Intrinsic::NUMBER),
-            Type::Primitive::of(Type::Intrinsic::STRING)
+            Type::Primitive::of(Type::Intrinsic::NUMBER)
         );
         auto sin = new PrologueFunctionSymbol("sin", typeNumToNum, new ProloguePosition("sin"), "SIN");
         prologueScope->insert(sin);
@@ -62,7 +62,11 @@ namespace swarmc::Lang {
             Type::Primitive::of(Type::Intrinsic::NUMBER),
             typeEnumEnumNum
         );
-        auto randomMatrix = new PrologueFunctionSymbol("randomMatrix", typeNumToEnumEnumNum, new ProloguePosition("randomMatrix"), "RANDOM_MATRIX");
+        auto typeNumToNumToEnumEnumNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeNumToEnumEnumNum
+        );
+        auto randomMatrix = new PrologueFunctionSymbol("randomMatrix", typeNumToNumToEnumEnumNum, new ProloguePosition("randomMatrix"), "RANDOM_MATRIX");
         prologueScope->insert(randomMatrix);
 
         // range :: number -> number -> number -> (enumerable<number>)
