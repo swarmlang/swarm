@@ -1,140 +1,140 @@
-[35m   debug [39m[vm] assignvalue Location<l:i> NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:i> <- NumberReference<1.000000>
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER>, TypeReference<Primitive<VOID>>>, pc: 4
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:OUTER>, TypeReference<Primitive<VOID>>>, pc: 9
-[35m   debug [39m[vm] call0 Location<f:OUTER>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: OUTER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:OUTER, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:OUTER> (pc: 4)
-[35m   debug [39m[vm] next instruction for inline call: SCOPEOF<Location<l:i>>
-[35m   debug [39m[vm] scopeof Location<l:i>
-[35m   debug [39m[vm] assignvalue Location<l:i> NumberReference<5.000000>
-[35m   debug [39m[vm] Location<l:i> <- NumberReference<5.000000>
-[35m   debug [39m[vm] call0 Location<f:INNER>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: INNER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INNER, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INNER> (pc: 1)
-[35m   debug [39m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<l:i> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<5.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:i> <- NumberReference<6.000000>
-[35m   debug [39m[vm] return0
-[35m   debug [39m[vm] return0
-[35m   debug [39m[vm] assignvalue Location<l:i> Location<l:i>
-[35m   debug [39m[vm] Location<l:i> <- NumberReference<1.000000>
-[35m   debug [39m[vm] assignvalue Location<l:j> NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:j> <- NumberReference<1.000000>
-[35m   debug [39m[vm] assignvalue Location<s:k> NumberReference<1.000000>
-[35m   debug [39m[vm] Location<s:k> <- NumberReference<1.000000>
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:INC>, TypeReference<Primitive<VOID>>>, pc: 17
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:PUSH_INC>, TypeReference<Primitive<VOID>>>, pc: 24
-[35m   debug [39m[vm] call0 Location<f:PUSH_INC>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: PUSH_INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:PUSH_INC, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:PUSH_INC> (pc: 17)
-[35m   debug [39m[vm] next instruction for inline call: PUSHCALL0<Location<f:INC>>
-[35m   debug [39m[vm] pushcall0 Location<f:INC>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:INC>>
-[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
-[35m   debug [39m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<l:j> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:j> <- NumberReference<2.000000>
-[35m   debug [39m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<s:k> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<s:k> <- NumberReference<2.000000>
-[35m   debug [39m[vm] return0
-[35m   debug [39m[vm] pushcall0 Location<f:INC>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 1, call: InlineFunctionCall<f:INC>>
-[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
-[35m   debug [39m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<l:j> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:j> <- NumberReference<2.000000>
-[35m   debug [39m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<s:k> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<2.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<s:k> <- NumberReference<3.000000>
-[35m   debug [39m[vm] return0
-[35m   debug [39m[vm] pushcall0 Location<f:INC>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 2, call: InlineFunctionCall<f:INC>>
-[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
-[35m   debug [39m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<l:j> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:j> <- NumberReference<2.000000>
-[35m   debug [39m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<s:k> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<3.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<s:k> <- NumberReference<4.000000>
-[35m   debug [39m[vm] return0
-[35m   debug [39m[vm] pushcall0 Location<f:INC>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 3, call: InlineFunctionCall<f:INC>>
-[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
-[35m   debug [39m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<l:j> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:j> <- NumberReference<2.000000>
-[35m   debug [39m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<s:k> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<4.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<s:k> <- NumberReference<5.000000>
-[35m   debug [39m[vm] return0
-[35m   debug [39m[vm] pushcall0 Location<f:INC>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
-[35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 4, call: InlineFunctionCall<f:INC>>
-[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
-[35m   debug [39m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<l:j> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<l:j> <- NumberReference<2.000000>
-[35m   debug [39m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
-[35m   debug [39m[vm] plus Location<s:k> NumberReference<1.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<5.000000>
-[35m   debug [39m[vm] ensureNumber: NumberReference<1.000000>
-[35m   debug [39m[vm] Location<s:k> <- NumberReference<6.000000>
-[35m   debug [39m[vm] return0
-[35m   debug [39m[vm] return0
-[35m   debug [39m[vm] assignvalue Location<l:j> Location<l:j>
-[35m   debug [39m[vm] Location<l:j> <- NumberReference<1.000000>
-[35m   debug [39m[vm] assignvalue Location<s:k> Location<s:k>
-[35m   debug [39m[vm] Location<s:k> <- NumberReference<6.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:i> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:i> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:INNER>, TypeReference<Primitive<VOID>>>, pc: 4
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:OUTER>, TypeReference<Primitive<VOID>>>, pc: 9
+[35m   debug [39m[0m[vm] call0 Location<f:OUTER>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: OUTER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:OUTER, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:OUTER> (pc: 4)
+[35m   debug [39m[0m[vm] next instruction for inline call: SCOPEOF<Location<l:i>>
+[35m   debug [39m[0m[vm] scopeof Location<l:i>
+[35m   debug [39m[0m[vm] assignvalue Location<l:i> NumberReference<5.000000>
+[35m   debug [39m[0m[vm] Location<l:i> <- NumberReference<5.000000>
+[35m   debug [39m[0m[vm] call0 Location<f:INNER>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: INNER (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INNER, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INNER> (pc: 1)
+[35m   debug [39m[0m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:i>, PLUS<Location<l:i>, NumberReference<1.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:i> PLUS<Location<l:i>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<l:i> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<5.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:i> <- NumberReference<6.000000>
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0m[vm] assignvalue Location<l:i> Location<l:i>
+[35m   debug [39m[0m[vm] Location<l:i> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:j> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:j> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<s:k> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<s:k> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:INC>, TypeReference<Primitive<VOID>>>, pc: 17
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:PUSH_INC>, TypeReference<Primitive<VOID>>>, pc: 24
+[35m   debug [39m[0m[vm] call0 Location<f:PUSH_INC>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: PUSH_INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:PUSH_INC, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:PUSH_INC> (pc: 17)
+[35m   debug [39m[0m[vm] next instruction for inline call: PUSHCALL0<Location<f:INC>>
+[35m   debug [39m[0m[vm] pushcall0 Location<f:INC>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:INC>>
+[35m   debug [39m[0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
+[35m   debug [39m[0m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<l:j> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:j> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<s:k> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<s:k> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0m[vm] pushcall0 Location<f:INC>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 1, call: InlineFunctionCall<f:INC>>
+[35m   debug [39m[0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
+[35m   debug [39m[0m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<l:j> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:j> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<s:k> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<2.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<s:k> <- NumberReference<3.000000>
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0m[vm] pushcall0 Location<f:INC>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 2, call: InlineFunctionCall<f:INC>>
+[35m   debug [39m[0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
+[35m   debug [39m[0m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<l:j> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:j> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<s:k> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<3.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<s:k> <- NumberReference<4.000000>
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0m[vm] pushcall0 Location<f:INC>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 3, call: InlineFunctionCall<f:INC>>
+[35m   debug [39m[0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
+[35m   debug [39m[0m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<l:j> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:j> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<s:k> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<4.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<s:k> <- NumberReference<5.000000>
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0m[vm] pushcall0 Location<f:INC>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: INC (#params: 0) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:INC, rt: Primitive<VOID>>>
+[35m   debug [39m[0m[vm] pushCall - call: InlineFunctionCall<f:INC> | job: SingleThreaded::QueueJob<id: 4, call: InlineFunctionCall<f:INC>>
+[35m   debug [39m[0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:INC> (pc: 13)
+[35m   debug [39m[0m[vm] next instruction for inline call: ASSIGNEVAL<Location<l:j>, PLUS<Location<l:j>, NumberReference<1.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:j> PLUS<Location<l:j>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<l:j> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:j> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assigneval Location<s:k> PLUS<Location<s:k>, NumberReference<1.000000>>
+[35m   debug [39m[0m[vm] plus Location<s:k> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<5.000000>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<s:k> <- NumberReference<6.000000>
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0m[vm] assignvalue Location<l:j> Location<l:j>
+[35m   debug [39m[0m[vm] Location<l:j> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<s:k> Location<s:k>
+[35m   debug [39m[0m[vm] Location<s:k> <- NumberReference<6.000000>

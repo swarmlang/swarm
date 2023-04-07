@@ -1,3 +1,188 @@
+[0mCreated function f:FUNC_0
+[0mCreated function f:FUNC_2
+[0mCreated function f:FUNC_14
+[0mCreated function f:FUNC_18
+[0mCreated function f:FUNC_21
+[0mCreated function f:ENUM_25
+[0mCreated ambiguous function l:tmp27
+[0mCreated function f:WITH_31
+[0mCopied function f:WITH_31
+[0mCopied function f:ENUM_25
+[0mCreated function f:ENUM_35
+[0mCreated ambiguous function l:tmp37
+[0mCreated function f:WITH_41
+[0mCreated ambiguous function l:var_log
+[0mCopied function f:WITH_41
+[0mCopied function f:ENUM_35
+[0mCreated function f:ENUM_44
+[0mCopied function f:ENUM_44
+[0mCreated function f:ENUM_46
+[0mCopied function f:ENUM_46
+[0mCreated function f:ENUM_48
+[0mCopied function f:ENUM_48
+[0mCreated function f:ENUM_50
+[0mCopied function f:ENUM_50
+[0mCreated function f:WHILECOND_51
+[0mCreated function f:WHILE_67
+[0mCreated function f:IFBODY_68
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:IFBODY_68
+[0mCreated function f:SUBFUNC_71
+[0mCreated function f:IFBODY_72
+[0mCreated function f:FUNC_73
+[0mCreated function f:FUNC_75
+[0mCopied function f:IFBODY_72
+[0mCopied function f:SUBFUNC_71
+[0mCreated function f:SUBFUNC_83
+[0mCopied function f:SUBFUNC_83
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:WHILE_67
+[0mCreated function f:FUNC_116
+[0mCreated function f:FUNC_119
+[0mCreated ambiguous function l:tmp123
+[0mCreated ambiguous function s:var_t9
+[0mCreated function f:FUNC_127
+[0mCreated function f:FUNC_128
+[0mCreated ambiguous function l:tmp131
+[0mStarting Removal of Self-Assigns
+[0mRSA: block Block<id:Top, cpy:0, idx:0>
+[0mRSA: removed ASSIGNVALUE<Location<l:tmp4>, Location<l:tmp4>>
+[0mRSA: removed ASSIGNVALUE<Location<l:tmp8>, Location<l:tmp8>>
+[0mRSA: removed ASSIGNVALUE<Location<l:tmp11>, Location<l:tmp11>>
+[0mRSA: removed ASSIGNVALUE<Location<l:tmp13>, Location<l:tmp13>>
+[0mRSA: removed ASSIGNVALUE<Location<l:tmp17>, Location<l:tmp17>>
+[0mRSA: removed ASSIGNVALUE<Location<l:tmp12>, Location<l:tmp12>>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t6>, Location<s:var_t6>>
+[0mRSA: block Block<id:f:ENUM_25, cpy:1, idx:97>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_tag>, Location<l:var_tag>>
+[0mRSA: block AmbiguousFunctionBlock<id:l:tmp27, cpy:1, idx:97>
+[0mRSA: block Block<id:POSTCALL:l:tmp27, cpy:1, idx:97>
+[0mRSA: block Block<id:f:WITH_31, cpy:2, idx:97>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t1>, Location<l:var_t1>>
+[0mRSA: block Block<id:POSTCALL:f:WITH_31, cpy:1, idx:97>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_25, cpy:0, idx:97>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t6>, Location<s:var_t6>>
+[0mRSA: block Block<id:f:ENUM_35, cpy:1, idx:117>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_tag>, Location<l:var_tag>>
+[0mRSA: block AmbiguousFunctionBlock<id:l:tmp37, cpy:1, idx:117>
+[0mRSA: block Block<id:POSTCALL:l:tmp37, cpy:1, idx:117>
+[0mRSA: block Block<id:f:WITH_41, cpy:2, idx:117>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_log>, Location<l:var_log>>
+[0mRSA: block AmbiguousFunctionBlock<id:l:var_log, cpy:1, idx:117>
+[0mRSA: block Block<id:POSTCALL:l:var_log, cpy:2, idx:117>
+[0mRSA: block Block<id:POSTCALL:f:WITH_41, cpy:1, idx:117>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_35, cpy:0, idx:117>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t6>, Location<s:var_t6>>
+[0mRSA: block Block<id:f:ENUM_44, cpy:1, idx:124>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_44, cpy:0, idx:124>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t6>, Location<s:var_t6>>
+[0mRSA: block Block<id:f:ENUM_46, cpy:1, idx:131>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_46, cpy:0, idx:131>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t6>, Location<s:var_t6>>
+[0mRSA: block Block<id:f:ENUM_48, cpy:1, idx:138>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_48, cpy:0, idx:138>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t6>, Location<s:var_t6>>
+[0mRSA: block Block<id:f:ENUM_50, cpy:1, idx:145>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_50, cpy:0, idx:145>
+[0mRSA: block Block<id:f:WHILECOND_51, cpy:1, idx:247>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t4>, Location<s:var_t4>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: block Block<id:POSTCALL:f:WHILECOND_51, cpy:0, idx:247>
+[0mRSA: block Block<id:f:WHILE_67, cpy:1, idx:248>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: block Block<id:f:IFBODY_68, cpy:2, idx:248>
+[0mRSA: block Block<id:f:WHILECOND_51, cpy:3, idx:248>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t4>, Location<s:var_t4>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: block Block<id:POSTCALL:f:WHILECOND_51, cpy:2, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:IFBODY_68, cpy:1, idx:248>
+[0mRSA: block Block<id:f:SUBFUNC_71, cpy:2, idx:248>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: block Block<id:f:IFBODY_72, cpy:3, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:IFBODY_72, cpy:2, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:SUBFUNC_71, cpy:1, idx:248>
+[0mRSA: block Block<id:f:SUBFUNC_83, cpy:2, idx:248>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t4>, Location<s:var_t4>>
+[0mRSA: block Block<id:POSTCALL:f:SUBFUNC_83, cpy:1, idx:248>
+[0mRSA: block Block<id:f:WHILECOND_51, cpy:2, idx:248>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t4>, Location<s:var_t4>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+[0mRSA: block Block<id:POSTCALL:f:WHILECOND_51, cpy:1, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:WHILE_67, cpy:0, idx:248>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t7>, Location<l:var_t7>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t7>, Location<l:var_t7>>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t4>, Location<s:var_t4>>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t4>, Location<s:var_t4>>
+[0mRSA: removed ASSIGNVALUE<Location<l:var_t8>, Location<l:var_t8>>
+[0mRSA: block AmbiguousFunctionBlock<id:l:tmp123, cpy:0, idx:302>
+[0mRSA: block Block<id:POSTCALL:l:tmp123, cpy:0, idx:302>
+[0mRSA: removed ASSIGNVALUE<Location<s:var_t9>, Location<s:var_t9>>
+[0mRSA: block AmbiguousFunctionBlock<id:s:var_t9, cpy:0, idx:305>
+[0mRSA: block Block<id:POSTCALL:s:var_t9, cpy:0, idx:305>
+[0mRSA: block AmbiguousFunctionBlock<id:l:tmp131, cpy:0, idx:326>
+[0mRSA: block Block<id:POSTCALL:l:tmp131, cpy:0, idx:326>
+[0mStarting Removal of Self-Assigns
+[0mRSA: block Block<id:Top, cpy:0, idx:0>
+[0mRSA: block Block<id:f:ENUM_25, cpy:1, idx:97>
+[0mRSA: block AmbiguousFunctionBlock<id:l:tmp27, cpy:1, idx:97>
+[0mRSA: block Block<id:POSTCALL:l:tmp27, cpy:1, idx:97>
+[0mRSA: block Block<id:f:WITH_31, cpy:2, idx:97>
+[0mRSA: block Block<id:POSTCALL:f:WITH_31, cpy:1, idx:97>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_25, cpy:0, idx:97>
+[0mRSA: block Block<id:f:ENUM_35, cpy:1, idx:117>
+[0mRSA: block AmbiguousFunctionBlock<id:l:tmp37, cpy:1, idx:117>
+[0mRSA: block Block<id:POSTCALL:l:tmp37, cpy:1, idx:117>
+[0mRSA: block Block<id:f:WITH_41, cpy:2, idx:117>
+[0mRSA: block AmbiguousFunctionBlock<id:l:var_log, cpy:1, idx:117>
+[0mRSA: block Block<id:POSTCALL:l:var_log, cpy:2, idx:117>
+[0mRSA: block Block<id:POSTCALL:f:WITH_41, cpy:1, idx:117>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_35, cpy:0, idx:117>
+[0mRSA: block Block<id:f:ENUM_44, cpy:1, idx:124>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_44, cpy:0, idx:124>
+[0mRSA: block Block<id:f:ENUM_46, cpy:1, idx:131>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_46, cpy:0, idx:131>
+[0mRSA: block Block<id:f:ENUM_48, cpy:1, idx:138>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_48, cpy:0, idx:138>
+[0mRSA: block Block<id:f:ENUM_50, cpy:1, idx:145>
+[0mRSA: block Block<id:POSTCALL:f:ENUM_50, cpy:0, idx:145>
+[0mRSA: block Block<id:f:WHILECOND_51, cpy:1, idx:247>
+[0mRSA: block Block<id:POSTCALL:f:WHILECOND_51, cpy:0, idx:247>
+[0mRSA: block Block<id:f:WHILE_67, cpy:1, idx:248>
+[0mRSA: block Block<id:f:IFBODY_68, cpy:2, idx:248>
+[0mRSA: block Block<id:f:WHILECOND_51, cpy:3, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:WHILECOND_51, cpy:2, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:IFBODY_68, cpy:1, idx:248>
+[0mRSA: block Block<id:f:SUBFUNC_71, cpy:2, idx:248>
+[0mRSA: block Block<id:f:IFBODY_72, cpy:3, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:IFBODY_72, cpy:2, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:SUBFUNC_71, cpy:1, idx:248>
+[0mRSA: block Block<id:f:SUBFUNC_83, cpy:2, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:SUBFUNC_83, cpy:1, idx:248>
+[0mRSA: block Block<id:f:WHILECOND_51, cpy:2, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:WHILECOND_51, cpy:1, idx:248>
+[0mRSA: block Block<id:POSTCALL:f:WHILE_67, cpy:0, idx:248>
+[0mRSA: block AmbiguousFunctionBlock<id:l:tmp123, cpy:0, idx:302>
+[0mRSA: block Block<id:POSTCALL:l:tmp123, cpy:0, idx:302>
+[0mRSA: block AmbiguousFunctionBlock<id:s:var_t9, cpy:0, idx:305>
+[0mRSA: block Block<id:POSTCALL:s:var_t9, cpy:0, idx:305>
+[0mRSA: block AmbiguousFunctionBlock<id:l:tmp131, cpy:0, idx:326>
+[0mRSA: block Block<id:POSTCALL:l:tmp131, cpy:0, idx:326>
 digraph cfg {
 	"Top:0:0" [shape=rectangle,label="Top:0:0\nASSIGNVALUE<Location<l:tmp1>, Location<f:FUNC_0>>\nASSIGNVALUE<Location<l:var_tag>, Location<l:tmp1>>\nASSIGNVALUE<Location<l:tmp3>, Location<f:FUNC_2>>\nASSIGNVALUE<Location<l:var_log>, Location<l:tmp3>>\nASSIGNEVAL<Location<l:tmp4>, ENUMINIT<TypeReference<Primitive<NUMBER>>>>\nASSIGNVALUE<Location<l:tmp5>, NumberReference<1.000000>>\nENUMAPPEND<Location<l:tmp5>, Location<l:tmp4>>\nASSIGNVALUE<Location<l:tmp6>, NumberReference<2.000000>>\nENUMAPPEND<Location<l:tmp6>, Location<l:tmp4>>\nASSIGNVALUE<Location<l:tmp7>, NumberReference<3.000000>>\nENUMAPPEND<Location<l:tmp7>, Location<l:tmp4>>\nASSIGNVALUE<Location<l:var_t1>, Location<l:tmp4>>\nASSIGNEVAL<Location<l:tmp8>, ENUMINIT<TypeReference<ENUMERABLE<Primitive<STRING>>>>>\nASSIGNVALUE<Location<s:var_t2>, Location<l:tmp8>>\nASSIGNVALUE<Location<l:tmp9>, NumberReference<4.000000>>\nASSIGNVALUE<Location<l:var_t3>, Location<l:tmp9>>\nASSIGNVALUE<Location<l:tmp10>, StringReference<zoinks>>\nASSIGNVALUE<Location<s:var_t4>, Location<l:tmp10>>\nASSIGNEVAL<Location<l:tmp11>, MAPINIT<TypeReference<Primitive<NUMBER> :: Primitive<NUMBER>>>>\nASSIGNVALUE<Location<l:var_t5>, Location<l:tmp11>>\nASSIGNEVAL<Location<l:tmp12>, MAPINIT<TypeReference<ENUMERABLE<Primitive<NUMBER> :: Primitive<STRING>>>>>\nASSIGNEVAL<Location<l:tmp13>, ENUMINIT<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>>>\nASSIGNVALUE<Location<l:tmp16>, Location<f:FUNC_14>>\nENUMAPPEND<Location<l:tmp16>, Location<l:tmp13>>\nMAPSET<Location<l:mkey_a>, Location<l:tmp13>, Location<l:tmp12>>\nASSIGNEVAL<Location<l:tmp17>, ENUMINIT<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>>>\nASSIGNVALUE<Location<l:tmp20>, Location<f:FUNC_18>>\nENUMAPPEND<Location<l:tmp20>, Location<l:tmp17>>\nASSIGNVALUE<Location<l:tmp23>, Location<f:FUNC_21>>\nENUMAPPEND<Location<l:tmp23>, Location<l:tmp17>>\nMAPSET<Location<l:mkey_b>, Location<l:tmp17>, Location<l:tmp12>>\nASSIGNVALUE<Location<s:var_t6>, Location<l:tmp12>>\nASSIGNEVAL<Location<l:tmp24>, MAPGET<Location<l:mkey_b>, Location<s:var_t6>>>\nENUMERATE<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:tmp24>, Location<f:ENUM_25>>\n"]
 	"Top:0:0"->"f:ENUM_25:1:97" [label="call"]

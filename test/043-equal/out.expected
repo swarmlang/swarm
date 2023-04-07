@@ -1,103 +1,103 @@
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<NumberReference<4.000000>, NumberReference<2.000000>>
-[35m   debug [39m[vm] equal NumberReference<4.000000> NumberReference<2.000000>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<NumberReference<4.000000>, NumberReference<4.000000>>
-[35m   debug [39m[vm] equal NumberReference<4.000000> NumberReference<4.000000>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<true>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<StringReference<foo>, StringReference<bar>>
-[35m   debug [39m[vm] equal StringReference<foo> StringReference<bar>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<StringReference<foo>, StringReference<foo>>
-[35m   debug [39m[vm] equal StringReference<foo> StringReference<foo>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<true>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<BooleanReference<true>, BooleanReference<false>>
-[35m   debug [39m[vm] equal BooleanReference<true> BooleanReference<false>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<BooleanReference<true>, BooleanReference<true>>
-[35m   debug [39m[vm] equal BooleanReference<true> BooleanReference<true>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<true>
-[35m   debug [39m[vm] assigneval Location<l:enum1> ENUMINIT<TypeReference<Primitive<STRING>>>
-[35m   debug [39m[vm] enuminit TypeReference<Primitive<STRING>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
-[35m   debug [39m[vm] Location<l:enum1> <- EnumerationReference<inner: Primitive<STRING>, #items: 0>
-[35m   debug [39m[vm] enumappend StringReference<Hello> Location<l:enum1>
-[35m   debug [39m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 0>
-[35m   debug [39m[vm] assigneval Location<l:enum2> ENUMINIT<TypeReference<Primitive<STRING>>>
-[35m   debug [39m[vm] enuminit TypeReference<Primitive<STRING>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
-[35m   debug [39m[vm] Location<l:enum2> <- EnumerationReference<inner: Primitive<STRING>, #items: 0>
-[35m   debug [39m[vm] enumappend StringReference<Hello> Location<l:enum2>
-[35m   debug [39m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 0>
-[35m   debug [39m[vm] enumappend StringReference<World> Location<l:enum2>
-[35m   debug [39m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 1>
-[35m   debug [39m[vm] assigneval Location<l:enum3> ENUMINIT<TypeReference<Primitive<NUMBER>>>
-[35m   debug [39m[vm] enuminit TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<NUMBER>>
-[35m   debug [39m[vm] Location<l:enum3> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 0>
-[35m   debug [39m[vm] enumappend NumberReference<4.000000> Location<l:enum3>
-[35m   debug [39m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<NUMBER>, #items: 0>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<Location<l:enum1>, Location<l:enum2>>
-[35m   debug [39m[vm] equal Location<l:enum1> Location<l:enum2>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<Location<l:enum1>, Location<l:enum3>>
-[35m   debug [39m[vm] equal Location<l:enum1> Location<l:enum3>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>
-[35m   debug [39m[vm] enumappend StringReference<World> Location<l:enum1>
-[35m   debug [39m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 1>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<Location<l:enum1>, Location<l:enum2>>
-[35m   debug [39m[vm] equal Location<l:enum1> Location<l:enum2>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<true>
-[35m   debug [39m[vm] assigneval Location<l:map1> MAPINIT<TypeReference<Primitive<STRING>>>
-[35m   debug [39m[vm] mapinit TypeReference<Primitive<STRING>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
-[35m   debug [39m[vm] Location<l:map1> <- MapReference<inner: Primitive<STRING>, #keys: 0>
-[35m   debug [39m[vm] assigneval Location<l:map2> MAPINIT<TypeReference<Primitive<STRING>>>
-[35m   debug [39m[vm] mapinit TypeReference<Primitive<STRING>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<STRING>>
-[35m   debug [39m[vm] Location<l:map2> <- MapReference<inner: Primitive<STRING>, #keys: 0>
-[35m   debug [39m[vm] mapset StringReference<key1> StringReference<value1> Location<l:map1>
-[35m   debug [39m[vm] ensureString: StringReference<key1>
-[35m   debug [39m[vm] ensureMap: MapReference<inner: Primitive<STRING>, #keys: 0>
-[35m   debug [39m[vm] mapset StringReference<key1> StringReference<value1> Location<l:map2>
-[35m   debug [39m[vm] ensureString: StringReference<key1>
-[35m   debug [39m[vm] ensureMap: MapReference<inner: Primitive<STRING>, #keys: 0>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<Location<l:map1>, Location<l:map2>>
-[35m   debug [39m[vm] equal Location<l:map1> Location<l:map2>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<true>
-[35m   debug [39m[vm] mapset StringReference<key2> StringReference<value2> Location<l:map2>
-[35m   debug [39m[vm] ensureString: StringReference<key2>
-[35m   debug [39m[vm] ensureMap: MapReference<inner: Primitive<STRING>, #keys: 1>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<Location<l:map1>, Location<l:map2>>
-[35m   debug [39m[vm] equal Location<l:map1> Location<l:map2>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>
-[35m   debug [39m[vm] assigneval Location<l:rsc1_call> CURRY<Location<f:TAG>, StringReference<key>>
-[35m   debug [39m[vm] curry Location<f:TAG> StringReference<key>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<TagFunction<>>
-[35m   debug [39m[vm] Location<l:rsc1_call> <- FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<key>>>
-[35m   debug [39m[vm] assigneval Location<l:rsc1> CALL1<Location<l:rsc1_call>, StringReference<value1>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<l:rsc1_call> StringReference<value1>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<key>>>
-[35m   debug [39m[vm] provider call: TagFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:rsc1> CALL1<Location<l:rsc1_call>, StringReference<value1>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:rsc1> <- ResourceReference<Prologue::TagResource<key -> value1>>
-[35m   debug [39m[vm] assigneval Location<l:rsc2_call> CURRY<Location<f:TAG>, StringReference<key>>
-[35m   debug [39m[vm] curry Location<f:TAG> StringReference<key>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<TagFunction<>>
-[35m   debug [39m[vm] Location<l:rsc2_call> <- FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<key>>>
-[35m   debug [39m[vm] assigneval Location<l:rsc2> CALL1<Location<l:rsc1_call>, StringReference<value1>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<l:rsc1_call> StringReference<value1>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<key>>>
-[35m   debug [39m[vm] provider call: TagFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:rsc2> CALL1<Location<l:rsc1_call>, StringReference<value1>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:rsc2> <- ResourceReference<Prologue::TagResource<key -> value1>>
-[35m   debug [39m[vm] assigneval Location<l:a> EQUAL<Location<l:rsc1>, Location<l:rsc2>>
-[35m   debug [39m[vm] equal Location<l:rsc1> Location<l:rsc2>
-[35m   debug [39m[vm] Location<l:a> <- BooleanReference<false>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<NumberReference<4.000000>, NumberReference<2.000000>>
+[35m   debug [39m[0m[vm] equal NumberReference<4.000000> NumberReference<2.000000>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<false>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<NumberReference<4.000000>, NumberReference<4.000000>>
+[35m   debug [39m[0m[vm] equal NumberReference<4.000000> NumberReference<4.000000>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<true>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<StringReference<foo>, StringReference<bar>>
+[35m   debug [39m[0m[vm] equal StringReference<foo> StringReference<bar>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<false>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<StringReference<foo>, StringReference<foo>>
+[35m   debug [39m[0m[vm] equal StringReference<foo> StringReference<foo>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<true>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<BooleanReference<true>, BooleanReference<false>>
+[35m   debug [39m[0m[vm] equal BooleanReference<true> BooleanReference<false>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<false>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<BooleanReference<true>, BooleanReference<true>>
+[35m   debug [39m[0m[vm] equal BooleanReference<true> BooleanReference<true>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<true>
+[35m   debug [39m[0m[vm] assigneval Location<l:enum1> ENUMINIT<TypeReference<Primitive<STRING>>>
+[35m   debug [39m[0m[vm] enuminit TypeReference<Primitive<STRING>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[0m[vm] Location<l:enum1> <- EnumerationReference<inner: Primitive<STRING>, #items: 0>
+[35m   debug [39m[0m[vm] enumappend StringReference<Hello> Location<l:enum1>
+[35m   debug [39m[0m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 0>
+[35m   debug [39m[0m[vm] assigneval Location<l:enum2> ENUMINIT<TypeReference<Primitive<STRING>>>
+[35m   debug [39m[0m[vm] enuminit TypeReference<Primitive<STRING>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[0m[vm] Location<l:enum2> <- EnumerationReference<inner: Primitive<STRING>, #items: 0>
+[35m   debug [39m[0m[vm] enumappend StringReference<Hello> Location<l:enum2>
+[35m   debug [39m[0m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 0>
+[35m   debug [39m[0m[vm] enumappend StringReference<World> Location<l:enum2>
+[35m   debug [39m[0m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 1>
+[35m   debug [39m[0m[vm] assigneval Location<l:enum3> ENUMINIT<TypeReference<Primitive<NUMBER>>>
+[35m   debug [39m[0m[vm] enuminit TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<NUMBER>>
+[35m   debug [39m[0m[vm] Location<l:enum3> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 0>
+[35m   debug [39m[0m[vm] enumappend NumberReference<4.000000> Location<l:enum3>
+[35m   debug [39m[0m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<NUMBER>, #items: 0>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<Location<l:enum1>, Location<l:enum2>>
+[35m   debug [39m[0m[vm] equal Location<l:enum1> Location<l:enum2>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<false>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<Location<l:enum1>, Location<l:enum3>>
+[35m   debug [39m[0m[vm] equal Location<l:enum1> Location<l:enum3>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<false>
+[35m   debug [39m[0m[vm] enumappend StringReference<World> Location<l:enum1>
+[35m   debug [39m[0m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<STRING>, #items: 1>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<Location<l:enum1>, Location<l:enum2>>
+[35m   debug [39m[0m[vm] equal Location<l:enum1> Location<l:enum2>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<true>
+[35m   debug [39m[0m[vm] assigneval Location<l:map1> MAPINIT<TypeReference<Primitive<STRING>>>
+[35m   debug [39m[0m[vm] mapinit TypeReference<Primitive<STRING>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[0m[vm] Location<l:map1> <- MapReference<inner: Primitive<STRING>, #keys: 0>
+[35m   debug [39m[0m[vm] assigneval Location<l:map2> MAPINIT<TypeReference<Primitive<STRING>>>
+[35m   debug [39m[0m[vm] mapinit TypeReference<Primitive<STRING>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<STRING>>
+[35m   debug [39m[0m[vm] Location<l:map2> <- MapReference<inner: Primitive<STRING>, #keys: 0>
+[35m   debug [39m[0m[vm] mapset StringReference<key1> StringReference<value1> Location<l:map1>
+[35m   debug [39m[0m[vm] ensureString: StringReference<key1>
+[35m   debug [39m[0m[vm] ensureMap: MapReference<inner: Primitive<STRING>, #keys: 0>
+[35m   debug [39m[0m[vm] mapset StringReference<key1> StringReference<value1> Location<l:map2>
+[35m   debug [39m[0m[vm] ensureString: StringReference<key1>
+[35m   debug [39m[0m[vm] ensureMap: MapReference<inner: Primitive<STRING>, #keys: 0>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<Location<l:map1>, Location<l:map2>>
+[35m   debug [39m[0m[vm] equal Location<l:map1> Location<l:map2>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<true>
+[35m   debug [39m[0m[vm] mapset StringReference<key2> StringReference<value2> Location<l:map2>
+[35m   debug [39m[0m[vm] ensureString: StringReference<key2>
+[35m   debug [39m[0m[vm] ensureMap: MapReference<inner: Primitive<STRING>, #keys: 1>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<Location<l:map1>, Location<l:map2>>
+[35m   debug [39m[0m[vm] equal Location<l:map1> Location<l:map2>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<false>
+[35m   debug [39m[0m[vm] assigneval Location<l:rsc1_call> CURRY<Location<f:TAG>, StringReference<key>>
+[35m   debug [39m[0m[vm] curry Location<f:TAG> StringReference<key>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<TagFunction<>>
+[35m   debug [39m[0m[vm] Location<l:rsc1_call> <- FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<key>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:rsc1> CALL1<Location<l:rsc1_call>, StringReference<value1>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:rsc1_call> StringReference<value1>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<key>>>
+[35m   debug [39m[0m[vm] provider call: TagFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:rsc1> CALL1<Location<l:rsc1_call>, StringReference<value1>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:rsc1> <- ResourceReference<Prologue::TagResource<key -> value1>>
+[35m   debug [39m[0m[vm] assigneval Location<l:rsc2_call> CURRY<Location<f:TAG>, StringReference<key>>
+[35m   debug [39m[0m[vm] curry Location<f:TAG> StringReference<key>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<TagFunction<>>
+[35m   debug [39m[0m[vm] Location<l:rsc2_call> <- FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<key>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:rsc2> CALL1<Location<l:rsc1_call>, StringReference<value1>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:rsc1_call> StringReference<value1>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<key>>>
+[35m   debug [39m[0m[vm] provider call: TagFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:rsc2> CALL1<Location<l:rsc1_call>, StringReference<value1>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:rsc2> <- ResourceReference<Prologue::TagResource<key -> value1>>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> EQUAL<Location<l:rsc1>, Location<l:rsc2>>
+[35m   debug [39m[0m[vm] equal Location<l:rsc1> Location<l:rsc2>
+[35m   debug [39m[0m[vm] Location<l:a> <- BooleanReference<false>

@@ -1,54 +1,54 @@
-[35m   debug [39m[vm] assigneval Location<l:tag_call> CURRY<Location<f:TAG>, StringReference<mykey>>
-[35m   debug [39m[vm] curry Location<f:TAG> StringReference<mykey>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<TagFunction<>>
-[35m   debug [39m[vm] Location<l:tag_call> <- FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<mykey>>>
-[35m   debug [39m[vm] assigneval Location<l:tag> CALL1<Location<l:tag_call>, StringReference<myvalue>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<l:tag_call> StringReference<myvalue>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<mykey>>>
-[35m   debug [39m[vm] provider call: TagFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:tag> CALL1<Location<l:tag_call>, StringReference<myvalue>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:tag> <- ResourceReference<Prologue::TagResource<mykey -> myvalue>>
-[35m   debug [39m[vm] assigneval Location<l:tag_t> CALL0<Location<f:TAG_T>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call0 Location<f:TAG_T>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<TagTFunction<>>
-[35m   debug [39m[vm] provider call: TagTFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:tag_t> CALL0<Location<f:TAG_T>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:tag_t> <- TypeReference<Opaque<PROLOGUE::TAG>>
-[35m   debug [39m[vm] assigneval Location<l:tag_rs_t> CALL1<Location<f:RESOURCE_T>, Location<l:tag_t>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:RESOURCE_T> Location<l:tag_t>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<ResourceTFunction<>>
-[35m   debug [39m[vm] provider call: ResourceTFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:tag_rs_t> CALL1<Location<f:RESOURCE_T>, Location<l:tag_t>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:tag_rs_t> <- TypeReference<RESOURCE<Opaque<PROLOGUE::TAG>>>
-[35m   debug [39m[vm] Skipping uncalled function body: BEGINFN<Location<f:CB>, TypeReference<Primitive<VOID>>>, pc: 9
-[35m   debug [39m[vm] with Location<l:tag> Location<f:CB>
-[35m   debug [39m[vm] ensureResource: ResourceReference<Prologue::TagResource<mykey -> myvalue>>
-[35m   debug [39m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::TAG>>>
-[35m   debug [39m[vm] ensureType: TypeReference<Primitive<VOID>>
-[35m   debug [39m[vm] load inline function: CB (#params: 1) (returns: TypeReference<Primitive<VOID>>)
-[35m   debug [39m[vm] ensureFunction: FunctionReference<InlineFunction<f:CB, rt: Primitive<VOID>>>
-[35m   debug [39mApply scheduling filter: mykey -> myvalue
-[35m   debug [39m[vm] pushCall - call: InlineFunctionCall<f:CB> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:CB>>
-[35m   debug [39mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
-[35m   debug [39m[vm] inline call: InlineFunctionCall<f:CB> (pc: 4)
-[35m   debug [39m[vm] next instruction for inline call: FNPARAM<Location<l:tag_rs_t>, Location<l:v>>
-[35m   debug [39m[vm] fnparam Location<l:tag_rs_t> Location<l:v>
-[35m   debug [39m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::TAG>>>
-[35m   debug [39m[vm] fnparam: Location<l:v> <- ResourceReference<Prologue::TagResource<mykey -> myvalue>>
-[35m   debug [39m[vm] scopeof Location<l:b>
-[35m   debug [39m[vm] assignvalue Location<l:b> Location<l:tag>
-[35m   debug [39m[vm] Location<l:b> <- ResourceReference<Prologue::TagResource<mykey -> myvalue>>
-[35m   debug [39m[vm] return0
-[35m   debug [39mApply bulk scheduling filters.
+[35m   debug [39m[0m[vm] assigneval Location<l:tag_call> CURRY<Location<f:TAG>, StringReference<mykey>>
+[35m   debug [39m[0m[vm] curry Location<f:TAG> StringReference<mykey>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<TagFunction<>>
+[35m   debug [39m[0m[vm] Location<l:tag_call> <- FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<mykey>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tag> CALL1<Location<l:tag_call>, StringReference<myvalue>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:tag_call> StringReference<myvalue>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: TagFunction<>, ref: StringReference<mykey>>>
+[35m   debug [39m[0m[vm] provider call: TagFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tag> CALL1<Location<l:tag_call>, StringReference<myvalue>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tag> <- ResourceReference<Prologue::TagResource<mykey -> myvalue>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tag_t> CALL0<Location<f:TAG_T>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call0 Location<f:TAG_T>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<TagTFunction<>>
+[35m   debug [39m[0m[vm] provider call: TagTFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tag_t> CALL0<Location<f:TAG_T>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tag_t> <- TypeReference<Opaque<PROLOGUE::TAG>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tag_rs_t> CALL1<Location<f:RESOURCE_T>, Location<l:tag_t>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:RESOURCE_T> Location<l:tag_t>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<ResourceTFunction<>>
+[35m   debug [39m[0m[vm] provider call: ResourceTFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tag_rs_t> CALL1<Location<f:RESOURCE_T>, Location<l:tag_t>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tag_rs_t> <- TypeReference<RESOURCE<Opaque<PROLOGUE::TAG>>>
+[35m   debug [39m[0m[vm] Skipping uncalled function body: BEGINFN<Location<f:CB>, TypeReference<Primitive<VOID>>>, pc: 9
+[35m   debug [39m[0m[vm] with Location<l:tag> Location<f:CB>
+[35m   debug [39m[0m[vm] ensureResource: ResourceReference<Prologue::TagResource<mykey -> myvalue>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::TAG>>>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<Primitive<VOID>>
+[35m   debug [39m[0m[vm] load inline function: CB (#params: 1) (returns: TypeReference<Primitive<VOID>>)
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<InlineFunction<f:CB, rt: Primitive<VOID>>>
+[35m   debug [39m[0mApply scheduling filter: mykey -> myvalue
+[35m   debug [39m[0m[vm] pushCall - call: InlineFunctionCall<f:CB> | job: SingleThreaded::QueueJob<id: 0, call: InlineFunctionCall<f:CB>>
+[35m   debug [39m[0mGot VM from queue: Runtime::VirtualMachine<shouldAdvance: yes>
+[35m   debug [39m[0m[vm] inline call: InlineFunctionCall<f:CB> (pc: 4)
+[35m   debug [39m[0m[vm] next instruction for inline call: FNPARAM<Location<l:tag_rs_t>, Location<l:v>>
+[35m   debug [39m[0m[vm] fnparam Location<l:tag_rs_t> Location<l:v>
+[35m   debug [39m[0m[vm] ensureType: TypeReference<RESOURCE<Opaque<PROLOGUE::TAG>>>
+[35m   debug [39m[0m[vm] fnparam: Location<l:v> <- ResourceReference<Prologue::TagResource<mykey -> myvalue>>
+[35m   debug [39m[0m[vm] scopeof Location<l:b>
+[35m   debug [39m[0m[vm] assignvalue Location<l:b> Location<l:tag>
+[35m   debug [39m[0m[vm] Location<l:b> <- ResourceReference<Prologue::TagResource<mykey -> myvalue>>
+[35m   debug [39m[0m[vm] return0
+[35m   debug [39m[0mApply bulk scheduling filters.

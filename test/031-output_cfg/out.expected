@@ -1,3 +1,50 @@
+[0mCreated function f:FUNC_0
+[0mCreated function f:FUNC_2
+[0mCreated function f:FUNC_14
+[0mCreated function f:FUNC_18
+[0mCreated function f:FUNC_21
+[0mCreated function f:ENUM_25
+[0mCreated ambiguous function l:tmp27
+[0mCreated function f:WITH_31
+[0mCopied function f:WITH_31
+[0mCopied function f:ENUM_25
+[0mCreated function f:ENUM_35
+[0mCreated ambiguous function l:tmp37
+[0mCreated function f:WITH_41
+[0mCreated ambiguous function l:var_log
+[0mCopied function f:WITH_41
+[0mCopied function f:ENUM_35
+[0mCreated function f:ENUM_44
+[0mCopied function f:ENUM_44
+[0mCreated function f:ENUM_46
+[0mCopied function f:ENUM_46
+[0mCreated function f:ENUM_48
+[0mCopied function f:ENUM_48
+[0mCreated function f:ENUM_50
+[0mCopied function f:ENUM_50
+[0mCreated function f:WHILECOND_51
+[0mCreated function f:WHILE_67
+[0mCreated function f:IFBODY_68
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:IFBODY_68
+[0mCreated function f:SUBFUNC_71
+[0mCreated function f:IFBODY_72
+[0mCreated function f:FUNC_73
+[0mCreated function f:FUNC_75
+[0mCopied function f:IFBODY_72
+[0mCopied function f:SUBFUNC_71
+[0mCreated function f:SUBFUNC_83
+[0mCopied function f:SUBFUNC_83
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:WHILE_67
+[0mCreated function f:FUNC_116
+[0mCreated function f:FUNC_119
+[0mCreated ambiguous function l:tmp123
+[0mCreated ambiguous function s:var_t9
+[0mCreated function f:FUNC_127
+[0mCreated function f:FUNC_128
+[0mCreated ambiguous function l:tmp131
 digraph cfg {
 	"Top:0:0" [shape=rectangle,label="Top:0:0\nASSIGNVALUE<Location<l:tmp1>, Location<f:FUNC_0>>\nASSIGNVALUE<Location<l:var_tag>, Location<l:tmp1>>\nASSIGNVALUE<Location<l:tmp3>, Location<f:FUNC_2>>\nASSIGNVALUE<Location<l:var_log>, Location<l:tmp3>>\nASSIGNEVAL<Location<l:tmp4>, ENUMINIT<TypeReference<Primitive<NUMBER>>>>\nASSIGNVALUE<Location<l:tmp5>, NumberReference<1.000000>>\nENUMAPPEND<Location<l:tmp5>, Location<l:tmp4>>\nASSIGNVALUE<Location<l:tmp6>, NumberReference<2.000000>>\nENUMAPPEND<Location<l:tmp6>, Location<l:tmp4>>\nASSIGNVALUE<Location<l:tmp7>, NumberReference<3.000000>>\nENUMAPPEND<Location<l:tmp7>, Location<l:tmp4>>\nASSIGNVALUE<Location<l:tmp4>, Location<l:tmp4>>\nASSIGNVALUE<Location<l:var_t1>, Location<l:tmp4>>\nASSIGNEVAL<Location<l:tmp8>, ENUMINIT<TypeReference<ENUMERABLE<Primitive<STRING>>>>>\nASSIGNVALUE<Location<l:tmp8>, Location<l:tmp8>>\nASSIGNVALUE<Location<s:var_t2>, Location<l:tmp8>>\nASSIGNVALUE<Location<l:tmp9>, NumberReference<4.000000>>\nASSIGNVALUE<Location<l:var_t3>, Location<l:tmp9>>\nASSIGNVALUE<Location<l:tmp10>, StringReference<zoinks>>\nASSIGNVALUE<Location<s:var_t4>, Location<l:tmp10>>\nASSIGNEVAL<Location<l:tmp11>, MAPINIT<TypeReference<Primitive<NUMBER> :: Primitive<NUMBER>>>>\nASSIGNVALUE<Location<l:tmp11>, Location<l:tmp11>>\nASSIGNVALUE<Location<l:var_t5>, Location<l:tmp11>>\nASSIGNEVAL<Location<l:tmp12>, MAPINIT<TypeReference<ENUMERABLE<Primitive<NUMBER> :: Primitive<STRING>>>>>\nASSIGNEVAL<Location<l:tmp13>, ENUMINIT<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>>>\nASSIGNVALUE<Location<l:tmp16>, Location<f:FUNC_14>>\nENUMAPPEND<Location<l:tmp16>, Location<l:tmp13>>\nASSIGNVALUE<Location<l:tmp13>, Location<l:tmp13>>\nMAPSET<Location<l:mkey_a>, Location<l:tmp13>, Location<l:tmp12>>\nASSIGNEVAL<Location<l:tmp17>, ENUMINIT<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>>>\nASSIGNVALUE<Location<l:tmp20>, Location<f:FUNC_18>>\nENUMAPPEND<Location<l:tmp20>, Location<l:tmp17>>\nASSIGNVALUE<Location<l:tmp23>, Location<f:FUNC_21>>\nENUMAPPEND<Location<l:tmp23>, Location<l:tmp17>>\nASSIGNVALUE<Location<l:tmp17>, Location<l:tmp17>>\nMAPSET<Location<l:mkey_b>, Location<l:tmp17>, Location<l:tmp12>>\nASSIGNVALUE<Location<l:tmp12>, Location<l:tmp12>>\nASSIGNVALUE<Location<s:var_t6>, Location<l:tmp12>>\nASSIGNVALUE<Location<s:var_t6>, Location<s:var_t6>>\nASSIGNEVAL<Location<l:tmp24>, MAPGET<Location<l:mkey_b>, Location<s:var_t6>>>\nENUMERATE<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:tmp24>, Location<f:ENUM_25>>\n"]
 	"Top:0:0"->"f:ENUM_25:1:97" [label="call"]

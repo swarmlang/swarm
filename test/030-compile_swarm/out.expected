@@ -1,3 +1,51 @@
+[0mCreated function f:FUNC_0
+[0mCreated function f:FUNC_2
+[0mCreated function f:FUNC_14
+[0mCreated function f:FUNC_18
+[0mCreated function f:FUNC_21
+[0mCreated function f:ENUM_25
+[0mCreated ambiguous function l:tmp27
+[0mCreated function f:WITH_31
+[0mCopied function f:WITH_31
+[0mCopied function f:ENUM_25
+[0mCreated function f:ENUM_35
+[0mCreated ambiguous function l:tmp37
+[0mCreated function f:WITH_41
+[0mCreated ambiguous function l:var_log
+[0mCopied function f:WITH_41
+[0mCopied function f:ENUM_35
+[0mCreated function f:ENUM_44
+[0mCopied function f:ENUM_44
+[0mCreated function f:ENUM_46
+[0mCopied function f:ENUM_46
+[0mCreated function f:ENUM_48
+[0mCopied function f:ENUM_48
+[0mCreated function f:ENUM_50
+[0mCopied function f:ENUM_50
+[0mCreated function f:WHILECOND_51
+[0mCreated function f:WHILE_67
+[0mCreated function f:IFBODY_68
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:IFBODY_68
+[0mCreated function f:SUBFUNC_71
+[0mCreated function f:IFBODY_72
+[0mCreated function f:FUNC_73
+[0mCreated function f:FUNC_75
+[0mCopied function f:IFBODY_72
+[0mCopied function f:SUBFUNC_71
+[0mCreated function f:SUBFUNC_83
+[0mCopied function f:SUBFUNC_83
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:WHILECOND_51
+[0mCopied function f:WHILE_67
+[0mCreated function f:FUNC_116
+[0mCreated function f:FUNC_119
+[0mCreated ambiguous function l:tmp123
+[0mCreated ambiguous function s:var_t9
+[0mCreated function f:FUNC_127
+[0mCreated function f:FUNC_128
+[0mCreated ambiguous function l:tmp131
+[0mCreated ambiguous function l:tmp136
 BEGINFN<Location<f:FUNC_128>, TypeReference<Primitive<TYPE>>>
 FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_a>>
 FNPARAM<TypeReference<Primitive<TYPE>>, Location<l:arg_b>>

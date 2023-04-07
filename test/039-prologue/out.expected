@@ -1,105 +1,105 @@
-[35m   debug [39m[vm] assigneval Location<l:a> CALL1<Location<f:SIN>, NumberReference<1.570796>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:SIN> NumberReference<1.570796>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<TrigFunction<>>
-[35m   debug [39m[vm] provider call: NumberToStringFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:a> CALL1<Location<f:SIN>, NumberReference<1.570796>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:a> <- NumberReference<1.000000>
-[35m   debug [39m[vm] assigneval Location<l:b> CALL1<Location<f:COS>, NumberReference<1.047197>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:COS> NumberReference<1.047197>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<TrigFunction<>>
-[35m   debug [39m[vm] provider call: NumberToStringFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:b> CALL1<Location<f:COS>, NumberReference<1.047197>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:b> <- NumberReference<0.500000>
-[35m   debug [39m[vm] assigneval Location<l:c> CALL1<Location<f:TAN>, NumberReference<0.785398>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:TAN> NumberReference<0.785398>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<TrigFunction<>>
-[35m   debug [39m[vm] provider call: NumberToStringFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:c> CALL1<Location<f:TAN>, NumberReference<0.785398>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:c> <- NumberReference<1.000000>
-[35m   debug [39m[vm] call0 Location<f:RANDOM>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<RandomFunction<>>
-[35m   debug [39m[vm] provider call: RandomFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:e> CALL1<Location<f:RANDOM_VECTOR>, NumberReference<5.000000>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:RANDOM_VECTOR> NumberReference<5.000000>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<RandomVectorFunction<>>
-[35m   debug [39m[vm] provider call: RandomVectorFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:e> CALL1<Location<f:RANDOM_VECTOR>, NumberReference<5.000000>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:e> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 5>
-[35m   debug [39m[vm] assigneval Location<l:f_call> CURRY<Location<f:RANDOM_MATRIX>, NumberReference<5.000000>>
-[35m   debug [39m[vm] curry Location<f:RANDOM_MATRIX> NumberReference<5.000000>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<RandomMatrixFunction<>>
-[35m   debug [39m[vm] Location<l:f_call> <- FunctionReference<CurriedFunction<f: RandomMatrixFunction<>, ref: NumberReference<5.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:f> CALL1<Location<l:f_call>, NumberReference<5.000000>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<l:f_call> NumberReference<5.000000>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: RandomMatrixFunction<>, ref: NumberReference<5.000000>>>
-[35m   debug [39m[vm] provider call: RandomMatrixFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:f> CALL1<Location<l:f_call>, NumberReference<5.000000>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:f> <- EnumerationReference<inner: ENUMERABLE<Primitive<NUMBER>>, #items: 5>
-[35m   debug [39m[vm] assigneval Location<l:g_call0> CURRY<Location<f:RANGE>, NumberReference<2.000000>>
-[35m   debug [39m[vm] curry Location<f:RANGE> NumberReference<2.000000>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<RangeFunction<>>
-[35m   debug [39m[vm] Location<l:g_call0> <- FunctionReference<CurriedFunction<f: RangeFunction<>, ref: NumberReference<2.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:g_call1> CURRY<Location<l:g_call0>, NumberReference<10.000000>>
-[35m   debug [39m[vm] curry Location<l:g_call0> NumberReference<10.000000>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: RangeFunction<>, ref: NumberReference<2.000000>>>
-[35m   debug [39m[vm] Location<l:g_call1> <- FunctionReference<CurriedFunction<f: CurriedFunction<f: RangeFunction<>, ref: NumberReference<2.000000>>, ref: NumberReference<10.000000>>>
-[35m   debug [39m[vm] assigneval Location<l:g> CALL1<Location<l:g_call1>, NumberReference<3.000000>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<l:g_call1> NumberReference<3.000000>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<CurriedFunction<f: CurriedFunction<f: RangeFunction<>, ref: NumberReference<2.000000>>, ref: NumberReference<10.000000>>>
-[35m   debug [39m[vm] provider call: RangeFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:g> CALL1<Location<l:g_call1>, NumberReference<3.000000>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:g> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 3>
-[35m   debug [39m[vm] assigneval Location<l:h> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:c>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:NUMBER_TO_STRING> Location<l:c>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<NumberToStringFunction<>>
-[35m   debug [39m[vm] provider call: NumberToStringFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:h> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:c>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:h> <- StringReference<1.000000>
-[35m   debug [39m[vm] assigneval Location<l:i> CALL1<Location<f:BOOLEAN_TO_STRING>, BooleanReference<true>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:BOOLEAN_TO_STRING> BooleanReference<true>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<BooleanToStringFunction<>>
-[35m   debug [39m[vm] provider call: BooleanToStringFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:i> CALL1<Location<f:BOOLEAN_TO_STRING>, BooleanReference<true>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:i> <- StringReference<true>
-[35m   debug [39m[vm] assigneval Location<l:j> CALL1<Location<f:BOOLEAN_TO_STRING>, BooleanReference<false>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumping to call
-[35m   debug [39m[vm] call1 Location<f:BOOLEAN_TO_STRING> BooleanReference<false>
-[35m   debug [39m[vm] ensureFunction: FunctionReference<BooleanToStringFunction<>>
-[35m   debug [39m[vm] provider call: BooleanToStringFunctionCall<>
-[35m   debug [39m[vm] assigneval Location<l:j> CALL1<Location<f:BOOLEAN_TO_STRING>, BooleanReference<false>>
-[35m   debug [39m[vm] assignEval: got call0 or call1
-[35m   debug [39m[vm] assignEval: jumped from return
-[35m   debug [39m[vm] Location<l:j> <- StringReference<false>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> CALL1<Location<f:SIN>, NumberReference<1.570796>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:SIN> NumberReference<1.570796>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<TrigFunction<>>
+[35m   debug [39m[0m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:a> CALL1<Location<f:SIN>, NumberReference<1.570796>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:a> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:b> CALL1<Location<f:COS>, NumberReference<1.047197>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:COS> NumberReference<1.047197>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<TrigFunction<>>
+[35m   debug [39m[0m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:b> CALL1<Location<f:COS>, NumberReference<1.047197>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:b> <- NumberReference<0.500000>
+[35m   debug [39m[0m[vm] assigneval Location<l:c> CALL1<Location<f:TAN>, NumberReference<0.785398>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:TAN> NumberReference<0.785398>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<TrigFunction<>>
+[35m   debug [39m[0m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:c> CALL1<Location<f:TAN>, NumberReference<0.785398>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:c> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] call0 Location<f:RANDOM>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<RandomFunction<>>
+[35m   debug [39m[0m[vm] provider call: RandomFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:e> CALL1<Location<f:RANDOM_VECTOR>, NumberReference<5.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:RANDOM_VECTOR> NumberReference<5.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<RandomVectorFunction<>>
+[35m   debug [39m[0m[vm] provider call: RandomVectorFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:e> CALL1<Location<f:RANDOM_VECTOR>, NumberReference<5.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:e> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 5>
+[35m   debug [39m[0m[vm] assigneval Location<l:f_call> CURRY<Location<f:RANDOM_MATRIX>, NumberReference<5.000000>>
+[35m   debug [39m[0m[vm] curry Location<f:RANDOM_MATRIX> NumberReference<5.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<RandomMatrixFunction<>>
+[35m   debug [39m[0m[vm] Location<l:f_call> <- FunctionReference<CurriedFunction<f: RandomMatrixFunction<>, ref: NumberReference<5.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:f> CALL1<Location<l:f_call>, NumberReference<5.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:f_call> NumberReference<5.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: RandomMatrixFunction<>, ref: NumberReference<5.000000>>>
+[35m   debug [39m[0m[vm] provider call: RandomMatrixFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:f> CALL1<Location<l:f_call>, NumberReference<5.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:f> <- EnumerationReference<inner: ENUMERABLE<Primitive<NUMBER>>, #items: 5>
+[35m   debug [39m[0m[vm] assigneval Location<l:g_call0> CURRY<Location<f:RANGE>, NumberReference<2.000000>>
+[35m   debug [39m[0m[vm] curry Location<f:RANGE> NumberReference<2.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<RangeFunction<>>
+[35m   debug [39m[0m[vm] Location<l:g_call0> <- FunctionReference<CurriedFunction<f: RangeFunction<>, ref: NumberReference<2.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:g_call1> CURRY<Location<l:g_call0>, NumberReference<10.000000>>
+[35m   debug [39m[0m[vm] curry Location<l:g_call0> NumberReference<10.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: RangeFunction<>, ref: NumberReference<2.000000>>>
+[35m   debug [39m[0m[vm] Location<l:g_call1> <- FunctionReference<CurriedFunction<f: CurriedFunction<f: RangeFunction<>, ref: NumberReference<2.000000>>, ref: NumberReference<10.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:g> CALL1<Location<l:g_call1>, NumberReference<3.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:g_call1> NumberReference<3.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: CurriedFunction<f: RangeFunction<>, ref: NumberReference<2.000000>>, ref: NumberReference<10.000000>>>
+[35m   debug [39m[0m[vm] provider call: RangeFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:g> CALL1<Location<l:g_call1>, NumberReference<3.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:g> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 3>
+[35m   debug [39m[0m[vm] assigneval Location<l:h> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:c>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:NUMBER_TO_STRING> Location<l:c>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[0m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:h> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:c>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:h> <- StringReference<1.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:i> CALL1<Location<f:BOOLEAN_TO_STRING>, BooleanReference<true>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:BOOLEAN_TO_STRING> BooleanReference<true>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<BooleanToStringFunction<>>
+[35m   debug [39m[0m[vm] provider call: BooleanToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:i> CALL1<Location<f:BOOLEAN_TO_STRING>, BooleanReference<true>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:i> <- StringReference<true>
+[35m   debug [39m[0m[vm] assigneval Location<l:j> CALL1<Location<f:BOOLEAN_TO_STRING>, BooleanReference<false>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:BOOLEAN_TO_STRING> BooleanReference<false>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<BooleanToStringFunction<>>
+[35m   debug [39m[0m[vm] provider call: BooleanToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:j> CALL1<Location<f:BOOLEAN_TO_STRING>, BooleanReference<false>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:j> <- StringReference<false>
