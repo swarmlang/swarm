@@ -129,6 +129,11 @@ Constructors can be thought of as functions that return instances of the type. S
 Types can have multiple constructors. If two or more constructors have the same function signature, the compiler will always choose the first one, making the second dead code.  
 All uninitialized member variables must be initialized in *all* constructors.
 
+## Objects
+
+Objects are instances of user-defined types. To create an object, use the popular Java-esque syntax: `Person p = Person("George Washington", 291);`  
+Constructors cannot be partially applied, so all arguments to the constructor must be given.
+
 ## Other
 
 Swarm supports a few other generic programming-language-isms, such as `while` loops and `if` statements, `break` and `continue`. It currently does not support else statements.
