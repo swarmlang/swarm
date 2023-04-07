@@ -92,19 +92,22 @@ namespace swarmc::Runtime::MultiThreaded {
                     // Currently, the semantics of the VM guarantees that a Queue will only receive the instances of
                     // IQueueJob that its Queue::build(...) method returns, so we're safe to cast the IQueueJob* as
                     // QueueJob* here.
-                    auto job = dynamic_cast<QueueJob*>(pop());
+                    auto job = dynamic_cast<QueueJob*>(popForProcessing());
                     if ( job != nullptr ) {
                         auto call = job->getCall();
                         try {
                             Console::get()->debug("Running job: " + s(job));
                             job->getVM()->executeCall(call);
                             job->setState(JobState::COMPLETE);
+                            decrementProcessingCount();
                         } catch (Errors::SwarmError& rte) {
                             Console::get()->error("Thread error: " + s(rte));
                             job->setState(JobState::ERROR);
+                            decrementProcessingCount();
                         } catch (...) {
                             Console::get()->error("Unknown thread error!");
                             job->setState(JobState::ERROR);
+                            decrementProcessingCount();
                         }
                     }
 
@@ -121,6 +124,21 @@ namespace swarmc::Runtime::MultiThreaded {
         Framework::onShutdown([this]() {
             _shouldExit = true;
         });
+    }
+
+    IQueueJob* Queue::popForProcessing() {
+        std::unique_lock<std::mutex> queueLock(_queueMutex);
+        auto job = _queue.empty() ? nullptr : _queue.front();
+        if ( !_queue.empty() ) {
+            _queue.pop();
+            _jobsInProgress += 1;
+        }
+        return job;
+    }
+
+    void Queue::decrementProcessingCount() {
+        std::unique_lock<std::mutex> queueLock(_queueMutex);
+        _jobsInProgress -= 1;
     }
 
     Stream::~Stream() noexcept {

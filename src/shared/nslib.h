@@ -281,6 +281,10 @@ namespace nslib {
             return !isMainPID();
         }
 
+        static bool hasThreads() {
+            return _contexts.size() > 0;
+        }
+
         static std::string getThreadDisplay() {
             std::ostringstream oss;
             oss << std::this_thread::get_id();

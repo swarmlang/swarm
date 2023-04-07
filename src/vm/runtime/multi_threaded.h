@@ -107,7 +107,10 @@ namespace swarmc::Runtime::MultiThreaded {
 
         IQueueJob* pop() override;
 
-        bool isEmpty() override { return _queue.empty(); }
+        bool isEmpty() override {
+            std::unique_lock<std::mutex> lock(_queueMutex);
+            return _queue.empty() && _jobsInProgress < 1;
+        }
 
         [[nodiscard]] std::string toString() const override {
             return "MultiThreaded::Queue<ctx: " + _context + ">";
@@ -123,10 +126,15 @@ namespace swarmc::Runtime::MultiThreaded {
         std::queue<IQueueJob*> _queue;
         std::mutex _threadMutex;
         std::vector<IThreadContext*> _threads;
+        std::size_t _jobsInProgress = 0;
 
         bool _shouldExit = false;
 
         void spawnThreads();
+
+        IQueueJob* popForProcessing();
+
+        void decrementProcessingCount();
     };
 
     class Stream : public IStream {
