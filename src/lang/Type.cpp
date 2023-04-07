@@ -47,7 +47,7 @@ namespace swarmc::Type {
         }
         assert(sym->kind() == Lang::SemanticSymbolKind::VARIABLE);
         if (((Lang::VariableSymbol*)sym)->getObjectType() == nullptr) {
-            throw Errors::SwarmError(_typeid->name() + " at position " + _typeid->position()->toString() + " is not a type!");
+            throw Errors::SwarmError(_typeid->name() + " is not a type!");
         }
         auto value = useref(((Lang::VariableSymbol*)sym)->getObjectType()->value());
         freeref(this);

@@ -1,3 +1,0 @@
-terminate called after throwing an instance of 'swarmc::Errors::SwarmError'
-  what():  notAType at position [l: 4, c: 1]-[l: 4, c: 9] is not a type!
-/home/joemama/Documents/swarm/test/009-nonobject-instance/run: line 3: 714892 Aborted                 (core dumped) $SWARMC --dbg-output-parse-to -- $TESTSWARM

@@ -116,7 +116,13 @@ protected:
     }
 
     bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
-        node->_type = node->_type->disambiguateStatically();
+        try {
+            node->_type = node->_type->disambiguateStatically();
+        } catch (Errors::SwarmError& s) {
+            Reporting::typeError(node->position(), s.what());
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::TYPE));
         return true;
     }

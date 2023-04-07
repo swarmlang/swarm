@@ -33,6 +33,7 @@ namespace swarmc::VM {
                 input->seekg(i, std::istream::beg);
                 _isBinary = input->peek() == header[i];
             }
+            input->seekg(0, std::istream::beg);
         }
 
         ~Pipeline() override {
