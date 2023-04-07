@@ -121,6 +121,8 @@ namespace swarmc {
 
             Lang::Walk::ToISAWalk isaWalk;
             _isa = isaWalk.walk(_root);
+            delete _root;
+            _root = nullptr;
 
             return _isa;
         }

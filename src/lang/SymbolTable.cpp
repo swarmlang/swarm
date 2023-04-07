@@ -109,7 +109,7 @@ namespace swarmc::Lang {
 
     void VariableSymbol::disambiguateType()  {
         if ( _type->isAmbiguous() && _value != nullptr ) {
-            _type = useref(_value->value());
+            _type = swapref(_type, _value->value());
             return;
         }
 

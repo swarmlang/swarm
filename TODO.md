@@ -57,6 +57,7 @@
 - Support automatically determining which variables should be shared?
 - add unset instruction
 - generic types :(
+- make it so constructor nodes don't require rebuilding the entire instruction vector in ToISAWalk
 - update syntax highlighting
 - Syntax for deferred function calls
   - ```

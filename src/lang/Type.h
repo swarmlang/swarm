@@ -626,6 +626,7 @@ namespace swarmc::Type {
 
         ~Object() override {
             freeref(_parent);
+            for (auto p : _properties) freeref(p.second);
         }
 
         [[nodiscard]] Intrinsic intrinsic() const override {
@@ -634,11 +635,11 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] Object* copy() const override {
-            auto inst = new Object;
+            auto inst = new Object(_parent);
             inst->_final = _final;
-            inst->_parent = _parent;
-            inst->_properties = _properties;
-            for ( const auto& p : inst->_properties ) useref(p.second);
+            for ( const auto& p : _properties ) {
+                inst->_properties.insert({ p.first, useref(p.second->copy()) });
+            }
             return inst;
         }
 

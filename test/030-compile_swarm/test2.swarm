@@ -1,7 +1,0 @@
-type UserDefined = {
-    constructor() => {
-        a = 5;
-    };
-
-    number a = 2;
-};

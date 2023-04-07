@@ -14,19 +14,25 @@ namespace swarmc::Lang::Walk {
 class ToISAWalk : public Walk<ISA::Instructions*> {
 public:
     ToISAWalk() : Walk<ISA::Instructions*>(),
-        _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()) {}
+        _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()),
+        _typeMap(new std::map<std::string, ISA::TypeReference*>()),
+        _locMap(new std::map<std::string, ISA::LocationReference*>()) {}
 
     ~ToISAWalk() override {
         delete _whileConds;
-        for (auto p : _typeMap) freeref(p.second);
-        for (auto p : _locMap) freeref(p.second);
+        for (auto p : *_typeMap) freeref(p.second);
+        for (auto p : *_locMap) freeref(p.second);
+        delete _typeMap;
+        delete _locMap;
     }
 protected:
     ISA::Instructions* walkProgramNode(ProgramNode* node) override {
         auto instrs = new ISA::Instructions();
-        for ( auto stmt : *node->body() ) {
-            auto i = walk(stmt);
+        while ( node->body()->size() ) {
+            auto i = walk(node->body()->front());
             instrs->insert(instrs->end(), i->begin(), i->end());
+            freeref(node->body()->front());
+            node->body()->erase(node->body()->begin());
             delete i;
         }
         return instrs;
@@ -70,7 +76,7 @@ protected:
 
     ISA::Instructions* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
         auto instrs = new ISA::Instructions();
-        auto ref = new ISA::TypeReference(node->value());
+        auto ref = getTypeRef(node->value());
         instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL), ref)));
         return instrs;
     }
@@ -369,7 +375,7 @@ protected:
         auto loc = makeNewTmp(ISA::Affinity::LOCAL);
         assert(node->type()->intrinsic() == Type::Intrinsic::ENUMERABLE);
         auto innerType = ((Type::Enumerable*)node->type())->values();
-        auto map = new ISA::AssignEval(loc, new ISA::EnumInit(new ISA::TypeReference(innerType)));
+        auto map = new ISA::AssignEval(loc, new ISA::EnumInit(getTypeRef(innerType)));
         instrs->push_back(useref(map));
         for ( auto exp : *node->actuals() ) {
             auto expinstrs = walk(exp);
@@ -388,23 +394,23 @@ protected:
         auto enumLoc = getLocFromAssign(instrs->back());
 
         assert(node->enumerable()->type()->intrinsic() == Type::Intrinsic::ENUMERABLE);
-        auto elemType = new ISA::TypeReference(((Type::Enumerable*)node->enumerable()->type())->values());
+        auto elemType = getTypeRef(((Type::Enumerable*)node->enumerable()->type())->values());
 
         std::string name = "ENUM_" + std::to_string(_tempCounter++);
 
         _inFunction++;
-        instrs->push_back(useref(new ISA::BeginFunction(name, new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID)))));
+        instrs->push_back(useref(new ISA::BeginFunction(name, getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID)))));
         auto elemShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
         instrs->push_back(useref(new ISA::FunctionParam(elemType, makeLocation(elemShared, "arg_" + node->local()->name()))));
         if ( node->index() != nullptr ) {
             auto idxShared = node->index()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
             instrs->push_back(useref(new ISA::FunctionParam(
-                new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::NUMBER)),
+                getTypeRef(Type::Primitive::of(Type::Intrinsic::NUMBER)),
                 makeLocation(idxShared, "arg_" + node->index()->name())
             )));
         } else {
             instrs->push_back(useref(new ISA::FunctionParam(
-                new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::NUMBER)),
+                getTypeRef(Type::Primitive::of(Type::Intrinsic::NUMBER)),
                 makeLocation(ISA::Affinity::LOCAL, "UNUSEDarg_idx")
             )));
         }
@@ -432,13 +438,13 @@ protected:
         auto resLoc = getLocFromAssign(instrs->back());
 
         // get yield type
-        auto type = new ISA::TypeReference(node->local()->type()->copy());
+        auto type = getTypeRef(node->local()->type()->copy());
         auto typeLoc = makeNewTmp(ISA::Affinity::LOCAL);
         instrs->push_back(useref(new ISA::AssignValue(typeLoc, type)));
         std::string name = "WITH_" + std::to_string(_tempCounter++);
 
         _inFunction++;
-        instrs->push_back(useref(new ISA::BeginFunction(name, new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID)))));
+        instrs->push_back(useref(new ISA::BeginFunction(name, getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID)))));
         auto localShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
         instrs->push_back(useref(new ISA::FunctionParam(typeLoc, makeLocation(localShared, "res_" + node->local()->name()))));
 
@@ -463,7 +469,7 @@ protected:
         // build IF function (potentially need global scope? add to map if so)
         std::string name = "IFBODY_" + std::to_string(_tempCounter++);
         _inFunction++;
-        auto begin = new ISA::BeginFunction(name, new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID)));
+        auto begin = new ISA::BeginFunction(name, getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID)));
         instrs->push_back(useref(begin));
         for ( auto stmt : *node->body() ) {
             auto i = walk(stmt);
@@ -492,7 +498,7 @@ protected:
         // condition function
         _whileConds->push("WHILECOND_" + std::to_string(_tempCounter++));
         _inFunction++;
-        instrs->push_back(useref(new ISA::BeginFunction(_whileConds->top(), new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::BOOLEAN)))));
+        instrs->push_back(useref(new ISA::BeginFunction(_whileConds->top(), getTypeRef(Type::Primitive::of(Type::Intrinsic::BOOLEAN)))));
         auto cond = walk(node->condition());
         instrs->insert(instrs->end(), cond->begin(), cond->end());
         instrs->push_back(useref(new ISA::Return1(getLocFromAssign(instrs->back()))));
@@ -500,7 +506,7 @@ protected:
 
         // While function header
         std::string name = "WHILE_" + std::to_string(_tempCounter++);
-        auto retType = new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID));
+        auto retType = getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID));
         auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFBWhile");
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, retType)));
@@ -520,7 +526,7 @@ protected:
             if ( stmt->isBlock() ) {
                 auto subf = new ISA::Instructions();
                 auto funcname = "SUBFUNC_" + std::to_string(_tempCounter++);
-                auto voidtype = new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID));
+                auto voidtype = getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID));
                 _inFunction++;
                 subf->push_back(useref(new ISA::BeginFunction(funcname, voidtype)));
                 subfuncs.push(subf);
@@ -619,7 +625,7 @@ protected:
         auto loc = makeNewTmp(ISA::Affinity::LOCAL);
         assert(node->type()->intrinsic() == Type::Intrinsic::MAP);
         auto innerType = ((Type::Map*)node->type())->values();
-        auto map = new ISA::AssignEval(loc, new ISA::MapInit(new ISA::TypeReference(innerType)));
+        auto map = new ISA::AssignEval(loc, new ISA::MapInit(getTypeRef(innerType)));
         instrs->push_back(useref(map));
         for ( auto stmt : *node->body() ) {
             auto id = makeLocation(ISA::Affinity::LOCAL, "mkey_" + stmt->id()->name());
@@ -723,7 +729,7 @@ protected:
                 fnType = ((Type::Lambda*)fnType)->returns();
             }
         }
-        auto retType = determineType(fnType);
+        auto retType = getTypeRef(fnType);
         auto retVar = makeLocation(ISA::Affinity::LOCAL, "retVal");
         auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFB");
         _inFunction++;
@@ -731,7 +737,7 @@ protected:
 
         // formals
         for ( auto f : *node->formals() ) {
-            auto type = determineType(f.first->value());
+            auto type = getTypeRef(f.first->value());
             auto ref = makeLocation(ISA::Affinity::LOCAL, "arg_" + f.second->name());
             instrs->push_back(useref(new ISA::FunctionParam(type, ref)));
         }
@@ -754,7 +760,7 @@ protected:
             if ( stmt->isBlock() ) {
                 auto subf = new ISA::Instructions();
                 auto funcname = "SUBFUNC_" + std::to_string(_tempCounter++);
-                auto voidtype = new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::VOID));
+                auto voidtype = getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID));
                 _inFunction++;
                 subf->push_back(useref(new ISA::BeginFunction(funcname, voidtype)));
                 subfuncs.push(subf);
@@ -833,17 +839,6 @@ protected:
             if (prop->getName() == "VariableDeclarationNode") {
                 name = ((VariableDeclarationNode*)prop)->id()->name();
                 type = ((VariableDeclarationNode*)prop)->typeNode()->value();
-
-                // evaluate default value when the type is defined
-                auto eval = walk(((VariableDeclarationNode*)prop)->value());
-                instrs->insert(instrs->end(), eval->begin(), eval->end());
-                auto defname = "deval_" + std::to_string(node->value()->getId()) + "_" + name;
-                _objDefaults.insert(defname);
-                instrs->push_back(useref(new ISA::AssignValue(
-                    makeLocation(ISA::Affinity::LOCAL, defname),
-                    getLocFromAssign(instrs->back())
-                )));
-                delete eval;
             } else if (prop->getName() == "UninitializedVariableDeclarationNode") {
                 name = ((UninitializedVariableDeclarationNode*)prop)->id()->name();
                 type = ((UninitializedVariableDeclarationNode*)prop)->typeNode()->value();
@@ -851,7 +846,7 @@ protected:
             instrs->push_back(useref(new ISA::OTypeProp(
                 proto,
                 makeLocation(ISA::Affinity::OBJECTPROP, name),
-                determineType(type)
+                getTypeRef(type, node->value())
             )));
         }
 
@@ -862,7 +857,23 @@ protected:
         ));
 
         // create type reference
-        _typeMap.insert({ node->value(), useref(new ISA::TypeReference(node->value())) });
+        _typeMap->insert({ node->value()->toString(), useref(new ISA::TypeReference(node->value())) });
+
+        // get default values
+        for ( auto p : *node->declarations() ) {
+            if (p->getName() == "VariableDeclarationNode") {
+                auto pvd = (VariableDeclarationNode*)p;
+                auto eval = walk(pvd->value());
+                instrs->insert(instrs->end(), eval->begin(), eval->end());
+                auto defname = "deval_" + std::to_string(node->value()->getId()) + "_" + pvd->id()->name();
+                _objDefaults.insert(defname);
+                instrs->push_back(useref(new ISA::AssignValue(
+                    makeLocation(ISA::Affinity::LOCAL, defname),
+                    getLocFromAssign(instrs->back())
+                )));
+                delete eval;
+            }
+        }
 
         // walk constructors
         for (auto c : *node->constructors()) {
@@ -901,6 +912,8 @@ protected:
         _constructing.push(obj);
         auto function = walk(node->func());
         _constructing.pop();
+
+        // get object type
         auto type = node->func()->type();
         while ( type->isCallable() ) {
             type = ((Type::Lambda*)type)->returns();
@@ -926,7 +939,6 @@ protected:
 
         // insert default values
         for ( const auto& prop : rettype->getProperties() ) {
-            std::cout << "insert deval: " + prop.first + ": " + s(prop.second) + "\n";
             std::string defname = "deval_" + std::to_string(rettype->getId()) + "_" + prop.first;
             if ( _objDefaults.count(defname) ) {
                 auto a = useref(new ISA::ObjSet(
@@ -978,9 +990,7 @@ private:
     std::stack<std::string>* _whileConds;
 
     ISA::LocationReference* makeNewTmp(ISA::Affinity affinity) {
-        auto tmp = makeLocation(affinity, "tmp" + std::to_string(_tempCounter++));
-        _locMap.insert({ tmp->fqName() ,tmp });
-        return tmp;
+        return makeLocation(affinity, "tmp" + std::to_string(_tempCounter++));
     }
 
     static ISA::LocationReference* getLocFromAssign(ISA::Instruction* instr) {
@@ -991,24 +1001,38 @@ private:
         return ((ISA::AssignValue*)instr)->first();
     }
 
-    ISA::Reference* determineType(Type::Type* type) const {
-        if (type->intrinsic() != Type::Intrinsic::OBJECT) return new ISA::TypeReference(type);
-        if (_typeMap.count(type)) return _typeMap.at(type);
-        return new ISA::TypeReference(Type::Primitive::of(Type::Intrinsic::THIS));
+    ISA::Reference* getTypeRef(Type::Type* type, Type::Type* comp=nullptr) const {
+        auto tp = thisify(type, comp);
+        std::string tStr = tp->toString();
+        if (_typeMap->count(tStr)) return _typeMap->at(tStr);
+        auto t = new ISA::TypeReference(tp);
+        _typeMap->insert({ tStr, useref(t) });
+        return t;
+    }
+
+    Type::Type* thisify(Type::Type* type, Type::Type* comp) const {
+        if (comp == nullptr) return type;
+        if (type->isAssignableTo(comp)) return Type::Primitive::of(Type::Intrinsic::THIS);
+        auto t = type->copy();
+        t->transform([comp](Type::Type* t) -> Type::Type* {
+            if (t->isAssignableTo(comp)) return Type::Primitive::of(Type::Intrinsic::THIS);
+            return t;
+        });
+        return t;
     }
 
     ISA::LocationReference* makeLocation(ISA::Affinity aff, std::string name) {
         std::string n = ISA::LocationReference::affinityString(aff) + ":" + name;
-        if ( _locMap.count(n) ) {
-            return _locMap.at(n);
+        if ( _locMap->count(n) ) {
+            return _locMap->at(n);
         }
         auto tmp = useref(new ISA::LocationReference(aff, name));
-        _locMap.insert({ tmp->fqName(), tmp });
+        _locMap->insert({ tmp->fqName(), tmp });
         return tmp;
     }
 
-    std::map<Type::Type*, ISA::TypeReference*> _typeMap;
-    std::map<std::string, ISA::LocationReference*> _locMap;
+    std::map<std::string, ISA::TypeReference*>* _typeMap;
+    std::map<std::string, ISA::LocationReference*>* _locMap;
 
     // used for keeping track of which type members have default values
     std::set<std::string> _objDefaults;

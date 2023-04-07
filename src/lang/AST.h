@@ -866,6 +866,7 @@ namespace Walk {
         ~TypeBodyNode() {
             for (auto d : *_declarations) freeref(d);
             delete _declarations;
+            for (auto c : *_constructors) freeref(c);
             delete _constructors; // constructors is subset of _declarations and thus doesnt need to be emptied
         }
 
