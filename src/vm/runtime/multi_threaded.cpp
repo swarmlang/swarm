@@ -1,16 +1,10 @@
 #include <cassert>
 #include <iostream>
-#include "swarm_thread.h"
 #include "multi_threaded.h"
 #include "../VirtualMachine.h"
 #include "../../errors/ClearLockedReferences.h"
 
 namespace swarmc::Runtime::MultiThreaded {
-
-    size_t SwarmThread::CurrentThreads = 0;
-    std::mutex SwarmThread::CountMutex;
-    std::map<size_t, std::thread*> SwarmThread::Threads = std::map<size_t, std::thread*>();
-    std::map<size_t, bool> SwarmThread::Finished  = std::map<size_t, bool>();
 
     IStorageLock *SharedStorageInterface::acquire(ISA::LocationReference *loc) {
         if ( _locks.find(loc->fqName()) != _locks.end() ) return nullptr;

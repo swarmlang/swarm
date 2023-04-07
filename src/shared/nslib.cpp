@@ -13,6 +13,8 @@ namespace nslib {
     std::map<std::thread::id, Console*> Console::_threadCopies;
     Console* Console::_global = nullptr;
     event::EventBus* event::EventBus::_global = nullptr;
+    std::mutex IThreadContext::_threadNumberMutex;
+    ThreadID IThreadContext::_nextThreadNumber = 0;
 
     std::function<void()> ThreadContext::wrap(const std::function<int()>& body) {
         return [body, this]() {

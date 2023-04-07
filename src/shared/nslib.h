@@ -109,7 +109,9 @@ namespace nslib {
 
         [[nodiscard]] virtual std::thread* baseThread() const = 0;
 
-        [[nodiscard]] virtual ThreadID getID() const = 0;
+        [[nodiscard]] virtual ThreadID getID() const {
+            return _threadNumber;
+        }
 
         virtual void shutdown() = 0;
 
@@ -118,6 +120,21 @@ namespace nslib {
         [[nodiscard]] virtual bool hasExited() = 0;
 
         [[nodiscard]] virtual int exitCode() = 0;
+
+        static ThreadID getNextThreadNumber() {
+            std::unique_lock<std::mutex> lock(_threadNumberMutex);
+            return _nextThreadNumber++;
+        }
+
+    protected:
+        static std::mutex _threadNumberMutex;
+        static ThreadID _nextThreadNumber;
+
+        ThreadID _threadNumber;
+
+        IThreadContext() {
+            _threadNumber = getNextThreadNumber();
+        }
     };
 
     class MainContext : public IThreadContext {
@@ -125,8 +142,6 @@ namespace nslib {
         bool isReadyForJoin() override { return false; }
 
         std::thread* baseThread() const override { return nullptr; }
-
-        ThreadID getID() const override { return 0; }
 
         void shutdown() override {
             std::lock_guard<std::mutex> m(_mutex);
@@ -160,10 +175,6 @@ namespace nslib {
 
         [[nodiscard]] std::thread* baseThread() const override {
             return _thread;
-        }
-
-        [[nodiscard]] ThreadID getID() const override {
-            return _id;
         }
 
         void shutdown() override {
@@ -282,12 +293,17 @@ namespace nslib {
         }
 
         static bool hasThreads() {
-            return _contexts.size() > 0;
+            return _contexts.size() > 1;
         }
 
         static std::string getThreadDisplay() {
+            auto ctx = context();
             std::ostringstream oss;
-            oss << std::this_thread::get_id();
+            if ( ctx->getID() == 0 ) {
+                oss << "main";
+            } else {
+                oss << "worker_" << ctx->getID();
+            }
             return oss.str();
         }
 
