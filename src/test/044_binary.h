@@ -63,12 +63,12 @@ namespace swarmc::Test {
             // Execute the instructions from the SBI binary
             console->header("Interpreted SBI")->capture();
             std::ifstream binCode(binPath);
-            VM::Pipeline pipeline3(&binCode, true);
+            VM::Pipeline pipeline3(&binCode);
             pipeline3.targetSingleThreaded()->execute();
             std::string sbiOutput = console->endCapture();
             binCode.seekg(0, std::ifstream::beg);
 
-            VM::Pipeline pipeline5(&binCode, true);
+            VM::Pipeline pipeline5(&binCode);
             std::stringstream sbiISA;
             pipeline4.targetISARepresentation(sbiISA);
 

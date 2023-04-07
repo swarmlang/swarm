@@ -25,10 +25,14 @@ namespace swarmc::VM {
      */
     class Pipeline : public IStringable {
     public:
-        explicit Pipeline(std::istream* input, bool isBinary = false) {
+        explicit Pipeline(std::istream* input) {
             _input = input;
             _parser = new ISA::Parser(*input);
-            _isBinary = isBinary;
+            std::string header = "\x7fSVI";
+            for (int i = 0; i < 4; i++) {
+                input->seekg(i, std::istream::beg);
+                _isBinary = input->peek() == header[i];
+            }
         }
 
         ~Pipeline() override {

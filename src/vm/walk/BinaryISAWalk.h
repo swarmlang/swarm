@@ -33,7 +33,7 @@ namespace swarmc::ISA {
             void* buf = malloc(sizeof(char) * length);
             input.read(static_cast<char*>(buf), length);
 
-            return binn_open(buf);
+            return binn_open((char*)buf + 4);
         }
 
         static Instructions fromInput(std::istream& input) {

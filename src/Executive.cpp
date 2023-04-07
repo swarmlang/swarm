@@ -73,7 +73,7 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
-    if ( (flagSingleThreaded || flagMultiThreaded) && flagSVI ) {
+    if ( flagSingleThreaded || flagMultiThreaded ) {
         int executeResult = executeLocalSVI(flagMultiThreaded);
         if ( executeResult != 0 ) {
             result = executeResult;
@@ -333,7 +333,7 @@ void Executive::printUsage() {
         ->println("Evaluate the given Swarm program without connecting to remote executors.")
         ->println();
 
-    console->bold()->print("  --locally-multithreaded", true)
+    console->bold()->print("  --locally-multithreaded; ", true)
         ->println("Evaluate the given Swarm program without connecting to remote executors, but multithreaded.")
         ->println();
 
@@ -421,7 +421,7 @@ void Executive::printUsage() {
             ->println("Disable constant propagation in the ISA")
             ->println();
 
-        console->bold()->print("  --no-optimizations", true)
+        console->bold()->print("  --no-optimizations: ", true)
             ->println("Disable all optimizations")
             ->println();
     console->end();
@@ -627,6 +627,7 @@ int Executive::emitBinary() {
         return 1;
     }
 
+    fwrite("\x7fSVI", 1, 4, fh);
     fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
     fclose(fh);
     return 1;
