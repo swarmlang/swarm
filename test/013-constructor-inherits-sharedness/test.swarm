@@ -1,0 +1,8 @@
+
+shared type UserDefined = {
+    constructor() => {
+        a = 4;
+    };
+
+    number a;
+};

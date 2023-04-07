@@ -38,7 +38,7 @@ protected:
         }
 
         std::string name = node->name();
-        node->_symbol = _symbols->lookup(name);
+        node->_symbol = useref(_symbols->lookup(name));
 
         if ( node->_symbol == nullptr ) {
             Reporting::nameError(node->position(), "Use of free identifier \"" + name + "\".");
@@ -58,7 +58,7 @@ protected:
     }
 
     bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
-        return true;
+        return walkType(node->value());
     }
 
     bool walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {
@@ -69,9 +69,10 @@ protected:
         if ( node->id()->symbol() != nullptr ) {
             return walk(node->value());
         }
+        bool flag = walk(node->typeNode());
 
         std::string name = node->id()->name();
-        const Type::Type* type = node->typeNode()->value();
+        Type::Type* type = node->typeNode()->value();
 
         // Make sure the name isn't already declared in this scope
         if ( _symbols->isClashing(name) ) {
@@ -81,9 +82,11 @@ protected:
         }
 
         bool valueResult;
-        if ( node->value()->getName() == "FunctionNode" ) {
+        if ( node->value()->getName() == "FunctionNode" || node->value()->getName() == "TypeBodyNode" ) {
             // Add the declaration to the current scope
             _symbols->addVariable(name, type, node->position(), node->shared());
+            // Call this to attach the Symbol to the IdentifierNode
+            walk(node->id());
 
             // Check the RHS of the assignment
             valueResult = walk(node->value());
@@ -93,11 +96,11 @@ protected:
 
             // Add the declaration to the current scope
             _symbols->addVariable(name, type, node->position(), node->shared());
+            // Call this to attach the Symbol to the IdentifierNode
+            walk(node->id());
         }
 
-        // Call this to attach the Symbol to the IdentifierNode
-        walk(node->id());
-        return valueResult;
+        return flag && valueResult;
     }
 
     bool walkCallExpressionNode(CallExpressionNode* node) override {
@@ -217,23 +220,24 @@ protected:
         if ( node->local()->symbol() == nullptr ) {
             std::string name = node->local()->name();
             Position* pos = node->local()->position();
-            const Type::Type* type = nullptr;
+            Type::Type* type = nullptr;
 
             // Try to look up the generic type of the enumerable
-            const Type::Type* enumType = node->enumerable()->type();
+            Type::Type* enumType = node->enumerable()->type();
             if ( enumType->intrinsic() == Type::Intrinsic::ENUMERABLE ) {
                 auto enumGenericType = (Type::Enumerable*) enumType;
-                type = enumGenericType->values()->copy();
+                type = enumGenericType->values();
             }
 
             // Start a new scope in the body and add the local
             _symbols->enter();
             inScope = true;
             _symbols->addVariable(name, type, pos, node->shared());
-            auto i = node->index();
-            if (i != nullptr) {
-                _symbols->insert(i->symbol());
-            }
+        }
+
+        auto i = node->index();
+        if (i != nullptr) {
+            _symbols->insert(i->symbol());
         }
 
         flag = walk(node->local()) && flag;
@@ -349,7 +353,8 @@ protected:
         _symbols->enter();
         for ( auto formal : *node->formals() ) {
             std::string name = formal.second->name();
-            const Type::Type* type = formal.first->value();
+            Type::Type* type = formal.first->value();
+            flag = walk(formal.first);
 
             // Make sure the name isn't already declared in this scope
             if ( _symbols->isClashing(name) ) {
@@ -364,6 +369,7 @@ protected:
             // Call this to attach the Symbol to the IdentifierNode
             walk(formal.second);
         }
+        walk(node->typeNode());
 
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
@@ -384,18 +390,53 @@ protected:
         _symbols->enter();
         bool flag = true;
         for (auto decl : *node->declarations()) {
-            flag = walk(decl) && flag;
+            if ( decl->getName() == "VariableDeclarationNode" ) {
+                auto d = (VariableDeclarationNode*)decl;
+                if (d->shared()) {
+                    Reporting::nameError(
+                        d->position(),
+                        "Attempted to create a shared variable " + d->id()->name() + " within type body."
+                    );
+                    flag = false;
+                }
+                flag = walk(d->typeNode()) && flag;
+                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position());
+                walk(d->id());
+            } else if ( decl->getName() == "UninitializedVariableDeclarationNode" ) {
+                auto d = (UninitializedVariableDeclarationNode*)decl;
+                flag = walk(d->typeNode()) && flag;
+                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position());
+                walk(d->id());
+            }
+        }
+        for (auto c : *node->declarations()) {
+            if (c->getName() == "VariableDeclarationNode") {
+                flag = walk(((VariableDeclarationNode*)c)->value()) && flag;
+            } else {
+                flag = walk(c) && flag;
+            }
+        }
+        for (auto c : *node->constructors()) {
+            flag = walk(c) && flag;
         }
         _symbols->leave();
         return flag;
     }
 
     bool walkClassAccessNode(ClassAccessNode* node) override {
-        return walk(node->path());
+        return walk(node->path()); // property names cant be checked until type analysis
     }
 
     bool walkIncludeStatementNode(IncludeStatementNode* node) override {
         return true;
+    }
+
+    bool walkConstructorNode(ConstructorNode* node) override {
+        return walk(node->func());
+    }
+
+    bool walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
+        return true; // symbols should be added to scope during type body
     }
 
     [[nodiscard]] std::string toString() const override {
@@ -403,6 +444,30 @@ protected:
     }
 private:
     SymbolTable* _symbols;
+
+    bool walkType(Type::Type* type) {
+        if (type->intrinsic() == Type::Intrinsic::ENUMERABLE) {
+            return walkType(((Type::Enumerable*)type)->values());
+        }
+        if (type->intrinsic() == Type::Intrinsic::MAP) {
+            return walkType(((Type::Map*)type)->values());
+        }
+        if (type->intrinsic() == Type::Intrinsic::RESOURCE) {
+            return walkType(((Type::Resource*)type)->yields());
+        }
+        if (type->intrinsic() == Type::Intrinsic::LAMBDA0) {
+            return walkType(((Type::Lambda0*)type)->returns());
+        }
+        if (type->intrinsic() == Type::Intrinsic::LAMBDA1) {
+            bool flag = walkType(((Type::Lambda1*)type)->param());
+            return walkType(((Type::Lambda1*)type)->returns()) && flag;
+        }
+        if (type->isAmbiguous()) {
+            assert(((Type::Ambiguous*)type)->id() != nullptr);
+            return walk(((Type::Ambiguous*)type)->id());
+        }
+        return true;
+    }
 };
 
 }

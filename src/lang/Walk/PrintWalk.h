@@ -239,6 +239,11 @@ protected:
 
     void walkReturnStatementNode(ReturnStatementNode* node) override {
         _out << _prefix << node->toString() << std::endl;
+        if ( node->value() != nullptr ) {
+            push_space();
+            walk(node->value());
+            pop_space();
+        }
     }
 
     void walkMapStatementNode(MapStatementNode* node) override {
@@ -295,6 +300,9 @@ protected:
         for ( auto decl : *node->declarations() ) {
             walk(decl);
         }
+        for ( auto cons : *node->constructors() ) {
+            walk(cons);
+        }
         pop_space();
     }
 
@@ -307,6 +315,20 @@ protected:
 
     void walkIncludeStatementNode(IncludeStatementNode* node) override {
         _out << _prefix << node->toString() << std::endl;
+    }
+
+    void walkConstructorNode(ConstructorNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->func());
+        pop_space();
+    }
+
+    void walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->typeNode());
+        pop_space();
     }
 
     [[nodiscard]] std::string toString() const override {

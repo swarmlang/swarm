@@ -82,6 +82,7 @@ namespace swarmc::Lang {
                 }
 
                 out << lex.lexeme->toString() << std::endl;
+                delete lex.lexeme;
             }
         }
 

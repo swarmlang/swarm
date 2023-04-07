@@ -11,6 +11,7 @@
 #include "../lang/AST.h"
 #include "../lang/Walk/PrintWalk.h"
 #include "../lang/Walk/ToISAWalk.h"
+#include "../vm/walk/ISABinaryWalk.h"
 #include "../lang/Walk/NameAnalysisWalk.h"
 #include "../lang/Walk/TypeAnalysisWalk.h"
 #include "../vm/ISAParser.h"
@@ -28,6 +29,12 @@ namespace swarmc {
         AST_SYMBOLIC_TYPED,
     };
 
+    enum ISAOptimizationType {
+        REMOVESELFASSIGN = 0x1,
+        CONSTANTPROPAGATION = 0x2,
+        REMOVEDEADCODE = 0x4,
+    };
+
     class Pipeline : public IStringable {
     public:
         explicit Pipeline(std::istream* input) {
@@ -43,7 +50,9 @@ namespace swarmc {
             delete _parser;
 
             if ( _root != nullptr) {
-                for ( auto stmt : *_root->body() ) delete stmt;
+                for ( auto stmt : *_root->body() ) {
+                    freeref(stmt);
+                }
                 delete _root->body();
             }
 
@@ -53,6 +62,12 @@ namespace swarmc {
 
         [[nodiscard]] std::string toString() const override {
             return "Pipeline<>";
+        }
+
+        void setISAOptimizationLevel(unsigned int flags, bool b) {
+            if ( flags & REMOVESELFASSIGN ) flagRemoveSelfAssigns = b;
+            if ( flags & CONSTANTPROPAGATION ) flagConstantPropagation = b;
+            if ( flags & REMOVEDEADCODE ) flagRemoveDeadCode = b;
         }
 
         void targetTokenRepresentation(std::ostream& out) {
@@ -106,14 +121,16 @@ namespace swarmc {
 
             Lang::Walk::ToISAWalk isaWalk;
             _isa = isaWalk.walk(_root);
+            delete _root;
+            _root = nullptr;
 
             return _isa;
         }
 
-        void targetISAOptimized(bool rSelfAssign, bool litProp) {
+        void targetISAOptimized() {
             CFG::ControlFlowGraph c(targetISA());
 
-            c.optimize(rSelfAssign, litProp);
+            c.optimize(flagRemoveSelfAssigns, flagConstantPropagation);
 
             auto isa = c.reconstruct();
 
@@ -121,18 +138,18 @@ namespace swarmc {
             _isa = isa;
         }
 
-        void targetISARepresentation(std::ostream& out, bool rSelfAssign, bool litProp) {
-            targetISAOptimized(rSelfAssign, litProp);
+        void targetISARepresentation(std::ostream& out) {
+            targetISAOptimized();
 
             for ( auto instr : *_isa ) {
-                out << instr->toString() << "\n";
+                out << instr->toString() << std::endl;
             }
         }
 
-        void targetCFGRepresentation(std::ostream& out, bool rSelfAssign, bool litProp) {
+        void targetCFGRepresentation(std::ostream& out) {
             CFG::ControlFlowGraph c(targetISA());
 
-            c.optimize(rSelfAssign, litProp);
+            c.optimize(flagRemoveSelfAssigns, flagConstantPropagation);
 
             c.serialize(out);
 
@@ -142,12 +159,20 @@ namespace swarmc {
             _isa = isa;
         }
 
+        binn* targetBinary() {
+            targetISAOptimized();
+            return swarmc::ISA::ISABinaryWalk::serialize(*_isa, nullptr);
+        }
+
     protected:
         std::istream* _input;
         Lang::Scanner* _scanner;
         Lang::Parser* _parser;
         Lang::ProgramNode* _root;
         ISA::Instructions* _isa;
+        bool flagRemoveSelfAssigns = true;
+        bool flagConstantPropagation = true;
+        bool flagRemoveDeadCode = true;
     };
 
 }

@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-$SWARMC --no-constant-propagation --no-remove-self-assigns --dbg-output-isa-to -- $TESTSWARM
+$SWARMC --no-optimizations --dbg-output-isa-to -- $TESTSWARM

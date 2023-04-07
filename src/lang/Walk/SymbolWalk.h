@@ -337,7 +337,18 @@ protected:
     }
 
     SymbolMap* walkTypeBodyNode(TypeBodyNode* node) override {
-        return new SymbolMap();
+        SymbolMap* ret = new SymbolMap();
+        for (auto d : *node->declarations()) {
+            auto m = walk(d);
+            ret->insert(m->begin(), m->end());
+            delete m;
+        }
+        for (auto d : *node->constructors()) {
+            auto m = walk(d);
+            ret->insert(m->begin(), m->end());
+            delete m;
+        }
+        return ret;
     }
 
     SymbolMap* walkClassAccessNode(ClassAccessNode* node) override {
@@ -352,6 +363,14 @@ protected:
     
     SymbolMap* walkIncludeStatementNode(IncludeStatementNode* node) override {
         return walk(node->path());
+    }
+
+    SymbolMap* walkConstructorNode(ConstructorNode* node) override {
+        return walk(node->func());
+    }
+
+    SymbolMap* walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
+        return walk(node->id());
     }
 
     [[nodiscard]] std::string toString() const override {

@@ -193,6 +193,14 @@ fn {
 	return makeBareToken(TokenKind::FN);
 }
 
+constructor {
+	return makeBareToken(TokenKind::CONSTRUCTOR);
+}
+
+from {
+	return makeBareToken(TokenKind::FROM);
+}
+
 "=>" {
 	return makeBareToken(TokenKind::FNDEF);
 }
@@ -308,7 +316,8 @@ fn {
 }
 
 . {
-	Console::get()->error("Parse error, unexpected character");
+	std::string s(yytext), pos = "[" + std::to_string(lineNum) + ", " + std::to_string(colNum) + "]";
+	Console::get()->error("Lexing error, unexpected character " + s + " at position " + pos);
 	exit(1);
 }
 %%

@@ -18,20 +18,28 @@ class CallEdge;
 class FallEdge;
 class ReturnEdge;
 
-class Block : public IStringable {
+class Block : public IStringable, public IRefCountable {
 public:
     enum class BlockType {
         BLOCK, AMBIGUOUSFUNCTION, FUNCTION
     };
     
-    Block(std::string id, BlockType type, size_t i) : _id(std::move(id)), _copy(0), _idx(i), _type(type),
-        _instructions(new ISA::Instructions()), _callInEdge(nullptr), _callOutEdge(nullptr), 
-        _fallInEdge(nullptr), _fallOutEdge(nullptr), _retInEdge(nullptr), _retOutEdge(nullptr) {}
+    Block(std::string id, BlockType type, size_t i) : _id(std::move(id)), _copy(0), _idx(std::move(i)), _type(std::move(type)),
+        _instructions(new ISA::Instructions()) {}
 
-    ~Block() override;
+    ~Block() override {
+        for (auto i : *_instructions) freeref(i);
+        delete _instructions;
+        freeref(_callOutEdge);
+        freeref(_callInEdge);
+        freeref(_fallOutEdge);
+        freeref(_fallInEdge);
+        freeref(_retOutEdge);
+        freeref(_retInEdge);
+    }
 
     void addInstruction(ISA::Instruction* instr) {
-        _instructions->push_back(instr);
+        _instructions->push_back(useref(instr));
     }
 
     /* Returns name of node */
@@ -90,15 +98,15 @@ protected:
     size_t _idx;
     BlockType _type;
     ISA::Instructions* _instructions;
-    CallEdge* _callInEdge, * _callOutEdge;
-    FallEdge* _fallInEdge, * _fallOutEdge;
-    ReturnEdge* _retInEdge, * _retOutEdge;
+    CallEdge* _callInEdge = nullptr, * _callOutEdge = nullptr;
+    FallEdge* _fallInEdge = nullptr, * _fallOutEdge = nullptr;
+    ReturnEdge* _retInEdge = nullptr, * _retOutEdge = nullptr;
 
 };
 
 class AmbiguousFunctionBlock : public Block {
 public:
-    AmbiguousFunctionBlock(std::string id, size_t i) : Block(std::move(id), BlockType::AMBIGUOUSFUNCTION, i) {}
+    AmbiguousFunctionBlock(std::string id, size_t i) : Block(id, BlockType::AMBIGUOUSFUNCTION, i) {}
 
     [[nodiscard]] std::string toString() const override { return "AmbiguousFunction" + Block::toString(); }
 
@@ -113,8 +121,14 @@ public:
 
 class CFGFunction : public IStringable {
 public:
-    CFGFunction(std::string id, Block* start) : _id(std::move(id)), _start(start), _end(nullptr), _blocks(new std::vector<Block*>()) {
+    CFGFunction(std::string id, Block* start) : _id(std::move(id)), _start(useref(start)), _end(nullptr), _blocks(new std::vector<Block*>()) {
         _blocks->push_back(_start);
+    }
+
+    ~CFGFunction() {
+        for (auto b : *_blocks) freeref(b);
+        delete _blocks;
+        freeref(_end);
     }
 
     [[nodiscard]] std::string id() const { return _id; }
@@ -122,9 +136,9 @@ public:
     [[nodiscard]] Block* end() const { return _end; }
     void setEnd(Block* end) { 
         assert(_end == nullptr);
-        _end = end;
+        _end = useref(end);
     }
-    void addBlock(Block* block) { _blocks->push_back(block); }
+    void addBlock(Block* block) { _blocks->push_back(useref(block)); }
 
     [[nodiscard]] std::string toString() const override { return "CFGFunction<" + _id + ">"; }
 
@@ -140,13 +154,14 @@ private:
     std::vector<Block*>* _blocks;
 };
 
-class Edge : public IStringable {
+class Edge : public IStringable, public IRefCountable {
 public:
     enum class EdgeType {
         CALL, FALL, RETURN
     };
 
-    Edge(Block* source, Block* dest, EdgeType label) : _source(source), _destination(dest), _label(label) {}
+    Edge(Block* source, Block* dest, EdgeType label) : _source(useref(source)), _destination(useref(dest)), _label(std::move(label)) {}
+    ~Edge() { freeref(_source); freeref(_destination); }
 
     [[nodiscard]] Block* source() const { return _source; }
 
@@ -203,7 +218,7 @@ public:
     explicit ControlFlowGraph(ISA::Instructions*);
     
     ~ControlFlowGraph() {
-        for ( auto b : *_blocks ) delete b;
+        for ( auto b : *_blocks ) freeref(b);
         delete _blocks;
         for ( const auto& p : *_nameMap ) delete p.second;
         delete _nameMap;

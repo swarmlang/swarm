@@ -1,0 +1,10 @@
+
+type UserDefined = {
+    constructor() => {};
+    number a = 3;
+};
+
+UserDefined b = UserDefined();
+
+b.a = 2;
+b.b = 3; -- error

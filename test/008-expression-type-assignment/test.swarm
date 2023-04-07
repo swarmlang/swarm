@@ -1,0 +1,8 @@
+
+fn returnType = (): type => {
+    return number;
+};
+
+type good = number;
+-- this is potentially ambiguous
+type makeError = returnType();

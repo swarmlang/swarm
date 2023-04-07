@@ -48,6 +48,9 @@ protected:
 
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
+        } else if ( node->_symbol->type()->isAmbiguous() ) {
+            assert(node->_symbol->kind() == SemanticSymbolKind::VARIABLE);
+            ((VariableSymbol*)node->_symbol)->disambiguateType();
         }
 
         _types->setTypeOf(node, node->_symbol->type());
@@ -113,6 +116,7 @@ protected:
     }
 
     bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
+        node->_type = node->_type->disambiguateStatically();
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::TYPE));
         return true;
     }
@@ -123,18 +127,43 @@ protected:
     }
 
     bool walkVariableDeclarationNode(VariableDeclarationNode* node) override {
+        // update symbol with value of assignment for assignments to type variables
+        if ( node->id()->type()->intrinsic() == Type::Intrinsic::TYPE ) {
+            TypeLiteral* objtype = nullptr;
+            if ( node->value()->getName() == "TypeLiteral" || node->value()->getName() == "TypeBodyNode" ) {
+                objtype = (TypeLiteral*)node->value();
+            } else if ( node->value()->getName() == "IdentifierNode" ) {
+                assert(((IdentifierNode*)node->value())->symbol()->kind() == SemanticSymbolKind::VARIABLE);
+                objtype = ((VariableSymbol*)((IdentifierNode*)node->value())->symbol())->getObjectType();
+            } else {
+                Reporting::typeError(
+                    node->value()->position(),
+                    "Attempt to assign nontrivial value to a type variable."
+                );
+                _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+                return false;
+            }
+            assert(((VariableSymbol*)node->id()->symbol())->kind() == SemanticSymbolKind::VARIABLE);
+            ((VariableSymbol*)node->id()->symbol())->setObjectType(objtype);
+        } 
+
         bool flag = walk(node->typeNode());
+        // update the symbol of identifiers of object types
+        if ( node->id()->type()->isAmbiguous() ) {
+            assert(((VariableSymbol*)node->id()->symbol())->kind() == SemanticSymbolKind::VARIABLE);
+            ((VariableSymbol*)node->id()->symbol())->setObjectType(node->typeNode());
+        }
         flag = walk(node->id()) && flag;
         flag = walk(node->value()) && flag;
 
         const Type::Type* typeOfValue = _types->getTypeOf(node->value());
-        if ( !node->typeNode()->value()->isAssignableTo(typeOfValue)
+        if ( !node->id()->type()->isAssignableTo(typeOfValue)
             && typeOfValue->intrinsic() != Type::Intrinsic::ERROR
         ) {
 
             Reporting::typeError(
                 node->position(),
-                "Attempted to initialize identifier of type " + node->typeNode()->value()->toString() + " with value of type " + typeOfValue->toString() + "."
+                "Attempted to initialize identifier of type " + node->id()->type()->toString() + " with value of type " + typeOfValue->toString() + "."
             );
 
             flag = false;
@@ -157,16 +186,86 @@ protected:
         // Make sure the callee is actually a function type
         const Type::Type* baseTypeOfCallee = _types->getTypeOf(node->func());
         if ( !baseTypeOfCallee->isCallable() ) {
-            Reporting::typeError(
-                node->position(),
-                "Attempted to call non-callable type " + baseTypeOfCallee->toString() + "."
-            );
+            if ( node->func()->getName() == "IdentifierNode" && baseTypeOfCallee->intrinsic() == Type::Intrinsic::TYPE ) {
+                auto sym = ((IdentifierNode*)node->func())->symbol();
+                assert(sym->kind() == SemanticSymbolKind::VARIABLE);
+                if ( ((VariableSymbol*)sym)->getObjectType() == nullptr ) {
+                    Reporting::typeError(
+                        node->position(),
+                        "Attempted to create object instance of type " + ((IdentifierNode*)node->func())->name() + "."
+                    );
 
-            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
-            return false;
+                    _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+                    node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
+                    return false;
+                }
+
+                if ( ((VariableSymbol*)sym)->getObjectType()->getName() != "TypeBodyNode" ) {
+                    Reporting::typeError(
+                        node->position(),
+                        "Attempted to create object of type " + ((VariableSymbol*)sym)->getObjectType()->value()->toString() + "."
+                    );
+
+                    _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+                    node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
+                    return false;
+                }
+                auto tLit = (TypeBodyNode*)((VariableSymbol*)sym)->getObjectType();
+               
+                std::vector<const Type::Type*> paramtypes;
+                std::string typeString;
+                for (size_t i = 0; i < node->args()->size(); i++) {
+                    paramtypes.push_back(_types->getTypeOf(node->args()->at(i)));
+                    if (typeString != "") typeString += " -> ";
+                    typeString += paramtypes.back()->toString();
+                }
+                typeString += " -> " + tLit->value()->toString();
+
+                ConstructorNode* theconstructor = nullptr;
+                for (auto c : *((TypeBodyNode*)tLit)->constructors()) {
+                    // no partial applications of constructors
+                    if (paramtypes.size() != c->func()->formals()->size()) continue;
+                    for (size_t i = 0; i < paramtypes.size(); i++) {
+                        if (!paramtypes.at(i)->isAssignableTo(c->func()->formals()->at(i).first->value())) continue;
+                    }
+                    theconstructor = c;
+                    break;
+                }
+
+                if (theconstructor == nullptr) {
+                    Reporting::typeError(
+                        node->position(),
+                        "No " + ((IdentifierNode*)node->func())->name() + " constructor matches the arguments: " + typeString
+                    );
+
+                    _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+                    node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
+                    return false;
+                }
+
+                auto t = theconstructor->func()->type();
+                while (t->isCallable()) {
+                    t = ((Type::Lambda*)t)->returns();
+                }
+
+                _types->setTypeOf(node, flag ? t : Type::Primitive::of(Type::Intrinsic::ERROR));
+                node->_type = flag ? useref(t) : useref(Type::Primitive::of(Type::Intrinsic::ERROR));
+                node->_calling = useref(theconstructor);
+                return flag;
+
+            } else {
+                Reporting::typeError(
+                    node->position(),
+                    "Attempted to call non-callable type " + baseTypeOfCallee->toString() + "."
+                );
+
+                _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+                node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
+                return false;
+            }
         }
 
-        const Type::Lambda* typeOfCallee = (Type::Lambda*) baseTypeOfCallee;
+        Type::Lambda* typeOfCallee = (Type::Lambda*) baseTypeOfCallee;
         auto argTypes = typeOfCallee->params();
 
         // Make sure the # of arguments matches
@@ -176,10 +275,12 @@ protected:
                 "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
             );
 
-            flag = false;
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
         }
 
-        const Type::Type* nodeType = typeOfCallee;
+        Type::Type* nodeType = typeOfCallee;
 
         if ( nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
             nodeType = ((Type::Lambda*) nodeType)->returns();
@@ -206,6 +307,7 @@ protected:
         }
 
         _types->setTypeOf(node, flag ? nodeType : Type::Primitive::of(Type::Intrinsic::ERROR));
+        node->_type = useref(flag ? nodeType : Type::Primitive::of(Type::Intrinsic::ERROR));
         return flag;
     }
 
@@ -227,7 +329,7 @@ protected:
             return false;
         }
 
-        const Type::Lambda* typeOfCallee = (Type::Lambda*) node->expression()->type();
+        Type::Lambda* typeOfCallee = (Type::Lambda*) node->expression()->type();
         auto argTypes = typeOfCallee->params();
 
         // Make sure the # of arguments matches
@@ -240,7 +342,7 @@ protected:
             flag = false;
         }
 
-        const Type::Type* nodeType = typeOfCallee;
+        Type::Type* nodeType = typeOfCallee;
 
         if ( nodeType->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
             nodeType = ((Type::Lambda*) nodeType)->returns();
@@ -415,8 +517,8 @@ protected:
     bool walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         bool flag = walk(node->exp());
 
-        const Type::Type* numType = Type::Primitive::of(Type::Intrinsic::NUMBER);
-        const Type::Type* expType = _types->getTypeOf(node->exp());
+        Type::Type* numType = Type::Primitive::of(Type::Intrinsic::NUMBER);
+        Type::Type* expType = _types->getTypeOf(node->exp());
         if ( !expType->isAssignableTo(numType) && expType->intrinsic() != Type::Intrinsic::ERROR ) {
             Reporting::typeError(
                 node->position(),
@@ -432,8 +534,8 @@ protected:
     bool walkNotNode(NotNode* node) override {
         bool flag = walk(node->exp());
 
-        const Type::Type* boolType = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
-        const Type::Type* expType = _types->getTypeOf(node->exp());
+        Type::Type* boolType = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+        Type::Type* expType = _types->getTypeOf(node->exp());
         if ( !expType->isAssignableTo(boolType) && expType->intrinsic() != Type::Intrinsic::ERROR ) {
             Reporting::typeError(
                 node->position(),
@@ -449,7 +551,7 @@ protected:
     bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
         size_t idx = 0;
         bool hadFirst = false;
-        const Type::Type* innerType = nullptr;
+        Type::Type* innerType = nullptr;
         if (node->_type != nullptr) {
             assert(node->type()->intrinsic() == Type::Intrinsic::ENUMERABLE);
             innerType = ((Type::Enumerable*)node->type())->values();
@@ -460,10 +562,10 @@ protected:
         for ( auto exp : *node->actuals() ) {
             flag = walk(exp) && flag;
 
-            const Type::Type* expType = _types->getTypeOf(exp);
+            Type::Type* expType = _types->getTypeOf(exp);
             if ( !hadFirst ) {
                 innerType = expType;
-                node->_type = new TypeLiteral(node->position()->copy(), new Type::Enumerable(innerType->copy()));
+                node->_type = useref(new TypeLiteral(node->position(), new Type::Enumerable(innerType)));
                 hadFirst = false;
             } else if ( !expType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
@@ -525,10 +627,10 @@ protected:
             flag = false;
         }
 
-        auto localType = ((Type::Resource*) type)->yields()->copy();
+        auto localType = ((Type::Resource*) type)->yields();
 
         _types->setTypeOf(node->local(), localType);
-        node->local()->symbol()->_type = localType;  // local is implicitly defined, so need to set its type
+        node->local()->symbol()->_type = useref(localType);  // local is implicitly defined, so need to set its type
 
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
@@ -598,6 +700,7 @@ protected:
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
+        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
         return true;
     }
 
@@ -610,6 +713,7 @@ protected:
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
+        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
         return true;
     }
 
@@ -679,7 +783,7 @@ protected:
     bool walkMapNode(MapNode* node) override {
         size_t idx = 0;
         bool hadFirst = false;
-        const Type::Type* innerType = nullptr;
+        Type::Type* innerType = nullptr;
         if ( node->_type != nullptr ) {
             assert(node->type()->intrinsic() == Type::Intrinsic::MAP);
             innerType = ((Type::Map*)node->type())->values();
@@ -690,11 +794,11 @@ protected:
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
 
-            const Type::Type* stmtType = _types->getTypeOf(stmt);
+            Type::Type* stmtType = _types->getTypeOf(stmt);
             if ( !hadFirst ) {
                 innerType = stmtType;
                 // FIXME: Doesn't accurately type check this statement because type of map is not known
-                node->_type = new TypeLiteral(node->position()->copy(), new Type::Map(innerType->copy()));
+                node->_type = useref(new TypeLiteral(node->position(), new Type::Map(innerType)));
                 hadFirst = false;
             } else if ( !stmtType->isAssignableTo(innerType) ) {
                 Reporting::typeError(
@@ -728,7 +832,13 @@ protected:
         const Type::Type* typeOfValue = _types->getTypeOf(node->value());
         const Type::Type* typeOfDest = _types->getTypeOf(node->dest());
 
-        if ( !typeOfValue->isAssignableTo(typeOfDest)
+        if ( typeOfDest->intrinsic() == Type::Intrinsic::TYPE ) {
+            Reporting::typeError(
+                node->position(),
+                "Attempted to reassign variable of type " + Type::Type::intrinsicString(typeOfDest->intrinsic())
+            );
+            flag = false;
+        } else if ( !typeOfValue->isAssignableTo(typeOfDest)
             && typeOfValue->intrinsic() != Type::Intrinsic::ERROR
             && typeOfDest->intrinsic() != Type::Intrinsic::ERROR
         ) {
@@ -751,10 +861,19 @@ protected:
     }
 
     bool walkFunctionNode(FunctionNode* node) override {
+        bool flag = walk(node->typeNode());
+        //disambiguate the types of formals
+        for (auto f : *node->formals()) {
+            walk(f.first);
+            if ( f.first->value()->intrinsic() == Type::Intrinsic::OBJECT ) {
+                assert(f.second->symbol()->kind() == SemanticSymbolKind::VARIABLE);
+                ((VariableSymbol*)f.second->symbol())->setObjectType(f.first);
+            }
+            walk(f.second);
+        }
         _funcTypes->push(node->type());
         _funcArgs->push(node->formals()->size());
         _funcCount++;
-        bool flag = true;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
         }
@@ -775,6 +894,9 @@ protected:
         for (auto d : *node->declarations()) {
             flag = walk(d) || flag;
         }
+        for (auto c : *node->constructors()) {
+            flag = walk(c) || flag;
+        }
         if ( flag ) {
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::TYPE));
         } else {
@@ -790,23 +912,61 @@ protected:
             return false;
         }
 
-        const Type::Type* typeLVal = _types->getTypeOf(node->path());
-        if ( typeLVal->intrinsic() != Type::Intrinsic::OBJECT ) {
+        const Type::Type* parsedPathType = _types->getTypeOf(node->path());
+        const Type::Type* actualPathType;
+        if ( parsedPathType->intrinsic() == Type::Intrinsic::AMBIGUOUS && ((Type::Ambiguous*)parsedPathType)->id() != nullptr ) {
+            auto id = ((Type::Ambiguous*)parsedPathType)->id();
+            assert(id->symbol() != nullptr);
+            assert(id->symbol()->kind() == SemanticSymbolKind::VARIABLE);
+            auto t = ((VariableSymbol*)id->symbol())->getObjectType();
+
+            assert(t->getName() == "TypeLiteral" || t->getName() == "TypeBodyNode");
+            actualPathType = ((TypeLiteral*)t)->value();
+        } else {
+            actualPathType = parsedPathType;
+        }
+
+        if ( actualPathType->intrinsic() != Type::Intrinsic::OBJECT ) {
             Reporting::typeError(
                 node->position(),
-                "Attempt to access property of variable of type " + Type::Type::intrinsicString(typeLVal->intrinsic()) 
+                "Attempt to access property of variable of type " + Type::Type::intrinsicString(actualPathType->intrinsic()) 
                 + ": " + node->end()->name()
             );
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
         }
 
-        _types->setTypeOf(node, ((Type::Object*) typeLVal)->getProperty(node->end()->name()));
+        auto endType = ((Type::Object*) actualPathType)->getProperty(node->end()->name());
+        if ( endType == nullptr ) {
+            Reporting::typeError(
+                node->end()->position(),
+                node->end()->name() + " is not a member of type " + node->path()->toString() + "."
+            );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        } 
+
+        _types->setTypeOf(node, endType);
         return true;
     }
 
     bool walkIncludeStatementNode(IncludeStatementNode* node) override {
         return true; // these should be removed by this point, should throw
+    }
+
+    bool walkConstructorNode(ConstructorNode* node) override {
+        bool flag = walk(node->func());
+        _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
+        return flag;
+    }
+
+    bool walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
+        bool flag = walk(node->typeNode());
+        flag = walk(node->id()) && flag;
+
+        auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
+        _types->setTypeOf(node, type);
+        return flag;
     }
 
     [[nodiscard]] std::string toString() const override {

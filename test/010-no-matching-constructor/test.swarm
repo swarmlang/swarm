@@ -1,0 +1,16 @@
+
+type UserDefined = {
+    constructor() => {
+        a = 4;
+    };
+
+    constructor(n: number) => {
+        a = n;
+    };
+
+    number a;
+};
+
+UserDefined instance1 = UserDefined();
+UserDefined instance2 = UserDefined(3);
+UserDefined instancebad = UserDefined(1,2);

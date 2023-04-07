@@ -1,5 +1,5 @@
 #include "Type.h"
-
+#include "AST.h"
 
 namespace nslib {
     [[nodiscard]] std::string s(swarmc::Type::Intrinsic v) {
@@ -36,5 +36,22 @@ namespace swarmc::Type {
     std::map<std::string, Opaque*> Opaque::_opaques;
 
     Ambiguous* Ambiguous::_inst = nullptr;
+
+    Ambiguous::Ambiguous(Lang::IdentifierNode* id) : Type(), _typeid(useref(id)) {}
+    Ambiguous::~Ambiguous() { freeref(_typeid); }
+
+    Type* Ambiguous::disambiguateStatically() {
+        auto sym = _typeid->symbol();
+        if (sym == nullptr) {
+            throw Errors::SwarmError("Failed to disambiguate type at " + _typeid->position()->toString());
+        }
+        assert(sym->kind() == Lang::SemanticSymbolKind::VARIABLE);
+        if (((Lang::VariableSymbol*)sym)->getObjectType() == nullptr) {
+            throw Errors::SwarmError(_typeid->name() + " at position " + _typeid->position()->toString() + " is not a type!");
+        }
+        auto value = useref(((Lang::VariableSymbol*)sym)->getObjectType()->value());
+        freeref(this);
+        return value->disambiguateStatically();
+    } 
 
 }

@@ -1,5 +1,6 @@
 - fix memory leaks
   - Type objects and semantic symbols
+- fix lexer position counter to account for escaped characters
 - not dogshit test suite
   - fuzzy testing with American Fuzzy Lop
   - runtime tests
@@ -56,6 +57,7 @@
 - Support automatically determining which variables should be shared?
 - add unset instruction
 - generic types :(
+- make it so constructor nodes don't require rebuilding the entire instruction vector in ToISAWalk
 - update syntax highlighting
 - Syntax for deferred function calls
   - ```

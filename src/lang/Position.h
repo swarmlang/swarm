@@ -15,7 +15,7 @@ namespace swarmc::Lang {
     /**
      * Class representing a character range in the input file.
      */
-    class Position : public IStringable {
+    class Position : public IStringable, public IRefCountable {
     public:
         Position(size_t startLine, size_t endLine, size_t startCol, size_t endCol) :
             _startLine(startLine), _endLine(endLine), _startCol(startCol), _endCol(endCol) {};

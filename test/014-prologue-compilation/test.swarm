@@ -1,0 +1,16 @@
+string s = numberToString(3);
+s = booleanToString(true);
+
+number a = sin(4);
+a = cos(a);
+a = tan(a);
+a = random();
+
+enumerable<number> b = randomVector(6);
+enumerable<enumerable<number>> c = randomMatrix(2,3);
+b = range(1,2,1);
+
+lLog(s);
+sLog(s);
+lError(s);
+sError(s);

@@ -82,8 +82,8 @@ private:
                 std::string name = ((ISA::LocationReference*)uinstr->first())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
-                    //delete uinstr->first();
-                    uinstr->setFirst(v->copy());
+                    freeref(uinstr->first());
+                    uinstr->setFirst(v);
                     flag = true;
                     console->debug("CP: " + name + " found (" + v->toString() + ")!");
                 } else {
@@ -96,8 +96,8 @@ private:
                 std::string name = ((ISA::LocationReference*)binstr->first())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
-                    //delete binstr->first();
-                    binstr->setFirst(v->copy());
+                    freeref(binstr->first());
+                    binstr->setFirst(v);
                     flag = true;
                     console->debug("CP: " + name + " found (" + v->toString() + ")!");
                 } else {
@@ -108,8 +108,8 @@ private:
                 std::string name = ((ISA::LocationReference*)binstr->second())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
-                    //delete binstr->second();
-                    binstr->setSecond(v->copy());
+                    freeref(binstr->second());
+                    binstr->setSecond(v);
                     flag = true;
                     console->debug("CP: " + name + " found (" + v->toString() + ")!");
                 } else {
@@ -122,8 +122,8 @@ private:
                 std::string name = ((ISA::LocationReference*)tinstr->first())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
-                    //delete tinstr->first();
-                    tinstr->setFirst(v->copy());
+                    freeref(tinstr->first());
+                    tinstr->setFirst(v);
                     flag = true;
                     console->debug("CP: " + name + " found (" + v->toString() + ")!");
                 } else {
@@ -134,8 +134,8 @@ private:
                 std::string name = ((ISA::LocationReference*)tinstr->second())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
-                    //delete tinstr->second();
-                    tinstr->setSecond(v->copy());
+                    freeref(tinstr->second());
+                    tinstr->setSecond(v);
                     flag = true;
                     console->debug("CP: " + name + " found (" + v->toString() + ")!");
                 } else {
@@ -146,8 +146,8 @@ private:
                 std::string name = ((ISA::LocationReference*)tinstr->third())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
-                    //delete tinstr->third();
-                    tinstr->setThird(v->copy());
+                    freeref(tinstr->third());
+                    tinstr->setThird(v);
                     flag = true;
                     console->debug("CP: " + name + " found (" + v->toString() + ")!");
                 } else {
@@ -252,7 +252,7 @@ private:
                 if ( instr->second()->tag() == ISA::ReferenceTag::LOCATION ) {
                     if ( instr->first()->name() == ((ISA::LocationReference*)instr->second())->name() ) {
                         console->debug("RSA: removed " + instr->toString());
-                        delete block->instructions()->at(j);
+                        freeref(block->instructions()->at(j));
                         block->instructions()->erase(block->instructions()->begin() + (long)j);
                         j--;
                         flag = true;

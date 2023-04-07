@@ -5,4 +5,5 @@
 [0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 28, c: 31] [22m[0mUse of free identifier "arg2".
 [0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 31, c: 33] [22m[0mUse of free identifier "bad_value".
 [0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 37, c: 11] [22m[0mUse of free identifier "bad_value".
+[0m[1m[31m[Name Error] [39m[22m[0m[1m[l: 41, c: 1] [22m[0mUse of free identifier "FakeID".
 [0m

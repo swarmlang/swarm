@@ -25,8 +25,8 @@
 	}
     class Shared {
     public:
-        Shared(swarmc::Lang::Position* pos, bool shared): _pos(pos), _shared(shared) {}
-        ~Shared() { if ( _pos != nullptr ) delete _pos; }
+        Shared(swarmc::Lang::Position* pos, bool shared): _pos(useref(pos)), _shared(shared) {}
+        ~Shared() { freeref(_pos); }
         swarmc::Lang::Position* position() const { return _pos; }
         bool shared() const { return _shared; }
     private:
@@ -82,6 +82,7 @@
     std::vector<swarmc::Lang::MapStatementNode*>* transMapStatements;
     std::vector<swarmc::Lang::ExpressionNode*>* transExpressions;
     std::vector<swarmc::Lang::DeclarationNode*>* transDeclarations;
+    std::vector<swarmc::Lang::IdentifierNode*>* transIdentifiers;
     Shared*                             transShared;
 }
 
@@ -149,13 +150,15 @@
 %token <transToken>      ARROW
 %token <transToken>      FNDEF
 %token <transToken>      INCLUDE
+%token <transToken>      FROM
+%token <transToken>      CONSTRUCTOR
 
 /*    (attribute type)      (nonterminal)    */
 %type <transProgram>        program
 %type <transProgram>        includes
 %type <transProgram>        statements
 %type <transStatement>      statement
-%type <transDeclarations>   declarations
+%type <transDeclarations>   typeBody
 %type <transID>             id
 %type <transLVal>           lval
 %type <transExpression>     expression
@@ -168,6 +171,7 @@
 %type <transExpressions>    actuals
 %type <transFormals>        formals
 %type <transFunction>       function
+%type <transDeclaration>    funcConstr
 %type <transType>           type
 %type <transType>           typeid
 %type <transDeclaration>    declaration
@@ -175,6 +179,7 @@
 %type <transMapStatements>  mapStatements
 %type <transShared>         shared
 %type <transLVal>           classAccess
+%type <transIdentifiers>    includeSyms
 
 %precedence FNDEF
 %left OR
@@ -190,21 +195,45 @@
 program :
     includes statements {
         $$ = $1;
-        for (auto stmt : *$2->reduceToStatements()) {
-            $$->pushStatement(stmt);
-        }
+        $$->assumeAndReduceStatements($2->reduceToStatements());
         *root = $$;
     }
 
 includes :
     includes INCLUDE classAccess SEMICOLON {
         $$ = $1;
-        $$->pushStatement(new IncludeStatementNode(new Position($2->position(), $3->position()), (ClassAccessNode*)$3));
-        delete $2;
+        $$->pushStatement(new IncludeStatementNode(new Position($2->position(), $4->position()), (ClassAccessNode*)$3, nullptr));
+        delete $2; delete $4;
+    }
+
+    | includes FROM classAccess INCLUDE LBRACE includeSyms RBRACE SEMICOLON {
+        $$ = $1;
+        $$->pushStatement(new IncludeStatementNode(new Position($2->position(), $8->position()), (ClassAccessNode*)$3, $6));
+        delete $2; delete $4; delete $5; delete $7; delete $8;
+    }
+
+    | includes FROM classAccess INCLUDE id SEMICOLON {
+        $$ = $1;
+        auto ids = new std::vector<IdentifierNode*>();
+        ids->push_back(useref($5));
+        $$->pushStatement(new IncludeStatementNode(new Position($2->position(), $6->position()), (ClassAccessNode*)$3, ids));
+        delete $2; delete $4; delete $6;
     }
 
     | %empty {
         $$ = new ProgramNode();
+    }
+
+includeSyms :
+    includeSyms COMMA id {
+        $$ = $1;
+        $$->push_back(useref($3));
+        delete $2;
+    }
+
+    | id {
+        $$ = new std::vector<IdentifierNode*>();
+        $$->push_back(useref($1));
     }
 
 statements :
@@ -222,7 +251,7 @@ statements :
 statement :
     ENUMERATE lval AS shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
-        EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, nullptr, $4->shared());
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $4->shared());
         e->assumeAndReduceStatements($7->reduceToStatements());
         $$ = e;
         delete $1; delete $3; delete $4; delete $6; delete $8;
@@ -231,11 +260,11 @@ statement :
     | ENUMERATE lval AS shared id COMMA shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $11->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $8, $4->shared());
-        auto t = new TypeLiteral($8->position()->copy(), Type::Primitive::of(Type::Intrinsic::NUMBER));
-        $8->overrideSymbol(new VariableSymbol($8->name(), t->type()->copy(), $8->position()->copy(), $7->shared()));
+        auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
+        $8->overrideSymbol(new VariableSymbol($8->name(), t, $8->position(), $7->shared()));
         e->assumeAndReduceStatements($10->reduceToStatements());
         $$ = e;
-        delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11; delete t;
+        delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11;
     }
 
     | WITH term AS shared id LBRACE statements RBRACE {
@@ -318,6 +347,14 @@ declaration :
         Position* pos = new Position($1->position(), $5->position());
         VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5, true);
         $$ = var;
+
+        // pass sharedness to constructors
+        if ( $5->getName() == "TypeBodyNode" ) {
+            for ( auto c : *((TypeBodyNode*)$5)->constructors() ) {
+                c->setShared(true);
+            }
+        }
+
         delete $1; delete $4;
     }
 
@@ -335,15 +372,43 @@ declaration :
         delete $1; delete $2; delete $4;
     }
 
-declarations :
-    declarations declaration {
+typeBody :
+    typeBody declaration SEMICOLON {
         $$ = $1;
-        $$->push_back($2);
+        $$->push_back(useref($2));
+        delete $3;
     }
 
-    | declaration {
+    | typeBody typeid id SEMICOLON {
+        $$ = $1;
+        auto pos = new Position($2->position(), $3->position());
+        $$->push_back(useref(new UninitializedVariableDeclarationNode(pos, $2, $3)));
+        delete $4;
+    }
+
+    | typeBody funcConstr SEMICOLON {
+        $$ = $1;
+        $$->push_back(useref($2));
+        delete $3;
+    }
+
+    | declaration SEMICOLON {
         $$ = new std::vector<DeclarationNode*>();
-        $$->push_back($1);
+        $$->push_back(useref($1));
+        delete $2;
+    }
+
+    | typeid id SEMICOLON {
+        $$ = new std::vector<DeclarationNode*>();
+        auto pos = new Position($1->position(), $2->position());
+        $$->push_back(useref(new UninitializedVariableDeclarationNode(pos, $1, $2)));
+        delete $3;
+    }
+
+    | funcConstr SEMICOLON {
+        $$ = new std::vector<DeclarationNode*>();
+        $$->push_back(useref($1));
+        delete $2;
     }
 
 assignment :
@@ -356,56 +421,56 @@ assignment :
     | lval ADDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new AddNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
+        $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
     | lval MULTIPLYASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new MultiplyNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
+        $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
     | lval SUBTRACTASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new SubtractNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
+        $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
     | lval DIVIDEASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new DivideNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
+        $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
     | lval MODULUSASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new ModulusNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
+        $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
     | lval POWERASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new PowerNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
+        $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
     | lval ANDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new AndNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
+        $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
     | lval ORASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new OrNode(pos, $1, $3);
-        $$ = new AssignExpressionNode(pos->copy(), $1->copy(), r);
+        $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
@@ -439,13 +504,13 @@ classAccess :
 
 id :
     ID {
-        $$ = new IdentifierNode($1->position()->copy(), $1->identifier());
+        $$ = new IdentifierNode($1->position(), $1->identifier());
         delete $1;
     }
 
 typeid :
-    lval {
-        $$ = new TypeLiteral($1->position()->copy(), Type::Ambiguous::partial($1));
+    id {
+        $$ = new TypeLiteral($1->position(), Type::Ambiguous::partial($1));
     }
 
     | type { 
@@ -455,37 +520,38 @@ typeid :
 type :
     STRING {
         auto t = Type::Primitive::of(Type::Intrinsic::STRING);
-        $$ = new TypeLiteral($1->position()->copy(), t);
+        $$ = new TypeLiteral($1->position(), t);
         delete $1;
     }
 
     | NUMBER {
         auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
-        $$ = new TypeLiteral($1->position()->copy(), t);
+        $$ = new TypeLiteral($1->position(), t);
         delete $1;
     }
 
     | BOOL {
         auto t = Type::Primitive::of(Type::Intrinsic::BOOLEAN);
-        $$ = new TypeLiteral($1->position()->copy(), t);
+        $$ = new TypeLiteral($1->position(), t);
         delete $1;
     }
 
     | VOID {
         auto t = Type::Primitive::of(Type::Intrinsic::VOID);
-        $$ = new TypeLiteral($1->position()->copy(), t);
+        $$ = new TypeLiteral($1->position(), t);
         delete $1;
     }
 
     | TYPE {
         auto t = Type::Primitive::of(Type::Intrinsic::TYPE);
-        $$ = new TypeLiteral($1->position()->copy(), t);
+        $$ = new TypeLiteral($1->position(), t);
         delete $1;
     }
 
     | RESOURCE {
-        auto t = new Type::Resource(Type::Primitive::of(Type::Intrinsic::VOID));
-        $$ = new TypeLiteral($1->position()->copy(), t);
+        auto vod = Type::Primitive::of(Type::Intrinsic::VOID);
+        auto t = Type::Resource::of(vod);
+        $$ = new TypeLiteral($1->position(), t);
         delete $1;
     }
 
@@ -528,7 +594,7 @@ function :
         Position* pos = new Position($1->position(), $8->position());
 
         FunctionNode* fn = new FunctionNode(
-            pos, new TypeLiteral($4->position()->copy(), new Type::Lambda0($4->value())), new FormalList());
+            pos, new TypeLiteral($4->position(), new Type::Lambda0($4->value())), new FormalList());
         fn->assumeAndReduceStatements($7->reduceToStatements());
         $$ = fn;
         delete $1; delete $2; delete $3; delete $5; delete $6; delete $8;
@@ -564,11 +630,39 @@ function :
         delete $1; delete $2; delete $3; delete $5;
     }
 
+funcConstr :
+    CONSTRUCTOR LPAREN RPAREN FNDEF LBRACE statements RBRACE {
+        auto pos = new Position($1->position(), $7->position());
+        auto pos2 = new Position($2->position(), $7->position());
+        auto t = new TypeLiteral($1->position(), new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::THIS)));
+        auto func = new FunctionNode(pos2, t, new FormalList());
+        func->assumeAndReduceStatements($6->reduceToStatements());
+        $$ = new ConstructorNode(pos, func);
+        delete $1; delete $2; delete $3; delete $4; delete $5; delete $7;
+    }
+
+    | CONSTRUCTOR LPAREN formals RPAREN FNDEF LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $8->position());
+        Position* pos2 = new Position($2->position(), $8->position());
+        Position* typepos = new Position($1->position(), $4->position());
+
+        Type::Type* t = Type::Primitive::of(Type::Intrinsic::THIS);
+
+        for ( auto i = $3->rbegin(); i != $3->rend(); ++i ) {
+            t = new Type::Lambda1((*i).first->value(), t);
+        }
+
+        auto func = new FunctionNode(pos2, new TypeLiteral(typepos, t), $3);
+        func->assumeAndReduceStatements($7->reduceToStatements());
+        $$ = new ConstructorNode(pos, func);
+        delete $1; delete $2; delete $4; delete $5; delete $6; delete $8;
+    }
+
 expression :
     LBRACE RBRACE OF typeid {
         Position* pos = new Position($1->position(), $4->position());
         std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
-        $$ = new MapNode(pos, body, new TypeLiteral($4->position()->copy(), new Type::Map($4->value())));
+        $$ = new MapNode(pos, body, new TypeLiteral($4->position(), new Type::Map($4->value())));
         delete $1; delete $2; delete $3; delete $4;
     }
 
@@ -578,12 +672,15 @@ expression :
         delete $1; delete $3;
     }
 
-    | LBRACE declarations RBRACE {
+    | LBRACE typeBody RBRACE {
         Position* pos = new Position($1->position(), $3->position());
         auto t = new Type::Object();
         for ( auto decl : *$2 ) {
             if (decl->getName() == "VariableDeclarationNode") {
                 auto vdecl = (VariableDeclarationNode*)decl;
+                t->defineProperty(vdecl->id()->name(), vdecl->typeNode()->value());
+            } else if (decl->getName() == "UninitializedVariableDeclarationNode") {
+                auto vdecl = (UninitializedVariableDeclarationNode*)decl;
                 t->defineProperty(vdecl->id()->name(), vdecl->typeNode()->value());
             }
         }
@@ -604,7 +701,7 @@ expressionF :
         Position* pos = new Position($1->position(), $4->position());
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
         $$ = new EnumerationLiteralExpressionNode(pos, actuals,
-            new TypeLiteral($4->position()->copy(), new Type::Enumerable($4->value())));
+            new TypeLiteral($4->position(), new Type::Enumerable($4->value())));
         delete $1; delete $2; delete $3; delete $4;
     }
 
@@ -726,22 +823,22 @@ term :
     }
 
     | STRINGLITERAL {
-        $$ = new StringLiteralExpressionNode($1->position()->copy(), $1->value());
+        $$ = new StringLiteralExpressionNode($1->position(), $1->value());
         delete $1;
     }
 
     | NUMBERLITERAL {
-        $$ = new NumberLiteralExpressionNode($1->position()->copy(), $1->value());
+        $$ = new NumberLiteralExpressionNode($1->position(), $1->value());
         delete $1;
     }
 
     | TTRUE {
-        $$ = new BooleanLiteralExpressionNode($1->position()->copy(), true);
+        $$ = new BooleanLiteralExpressionNode($1->position(), true);
         delete $1;
     }
 
     | TFALSE {
-        $$ = new BooleanLiteralExpressionNode($1->position()->copy(), false);
+        $$ = new BooleanLiteralExpressionNode($1->position(), false);
         delete $1;
     }
 
@@ -763,27 +860,27 @@ term :
 actuals :
     expression {
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
-        actuals->push_back($1);
+        actuals->push_back(useref($1));
         $$ = actuals;
     }
 
     | actuals COMMA expression {
         $$ = $1;
-        $$->push_back($3);
+        $$->push_back(useref($3));
         delete $2;
     }
 
 formals :
     id COLON typeid {
         $$ = new std::vector<std::pair<TypeLiteral*, IdentifierNode*>>();
-        auto t = std::pair<TypeLiteral*, IdentifierNode*>($3, $1);
+        auto t = std::pair<TypeLiteral*, IdentifierNode*>(useref($3), useref($1));
         $$->push_back(t);
         delete $2;
     }
 
     | formals COMMA id COLON typeid {
         $$ = $1;
-        auto t = std::pair<TypeLiteral*, IdentifierNode*>($5, $3);
+        auto t = std::pair<TypeLiteral*, IdentifierNode*>(useref($5), useref($3));
         $$->push_back(t);
         delete $2; delete $4;
     }
@@ -793,12 +890,12 @@ formals :
 mapStatements :
     mapStatement {
         std::vector<MapStatementNode*>* stmts = new std::vector<MapStatementNode*>();
-        stmts->push_back($1);
+        stmts->push_back(useref($1));
         $$ = stmts;
     }
 
     | mapStatements COMMA mapStatement {
-        $1->push_back($3);
+        $1->push_back(useref($3));
         $$ = $1;
         delete $2;
     }
