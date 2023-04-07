@@ -663,7 +663,7 @@ protected:
                 )));
             } else {
                 instrs->push_back(useref(new ISA::AssignValue(
-                    makeLocation(aff, "var_" + id->name()), 
+                    makeLocation(aff, "var_" + id->name()),
                     value
                 )));
             }
@@ -849,7 +849,7 @@ protected:
                 type = ((UninitializedVariableDeclarationNode*)prop)->typeNode()->value();
             }
             instrs->push_back(useref(new ISA::OTypeProp(
-                proto, 
+                proto,
                 makeLocation(ISA::Affinity::OBJECTPROP, name),
                 determineType(type)
             )));
@@ -881,7 +881,7 @@ protected:
         auto obj = getLocFromAssign(instrs->back());
         instrs->push_back(useref(
             new ISA::AssignEval(
-                makeNewTmp(ISA::Affinity::LOCAL), 
+                makeNewTmp(ISA::Affinity::LOCAL),
                 new ISA::ObjGet(obj, makeLocation(ISA::Affinity::OBJECTPROP, node->end()->name()))
             )
         ));
@@ -908,45 +908,61 @@ protected:
         assert(type->intrinsic() == Type::Intrinsic::OBJECT);
         auto rettype = (Type::Object*)type;
 
-        // get insertion point
-        auto i = function->begin() + 1;
-        while ( (*i)->tag() == ISA::Tag::FNPARAM ) i++;
+        auto transformedFunction = new std::vector<ISA::Instruction*>;
+        while ( true ) {
+            if ( function->empty() ) break;
+            auto front = *function->begin();
+            if ( front->tag() == ISA::Tag::FNPARAM || front->tag() == ISA::Tag::BEGINFN ) {
+                transformedFunction->push_back(front);
+                function->erase(function->begin());
+                continue;
+            }
+
+            break;
+        }
 
         // initialize object
-        function->insert(i, useref(new ISA::AssignEval(obj, new ISA::ObjInit(new ISA::TypeReference(rettype)))));
+        transformedFunction->push_back(useref(new ISA::AssignEval(obj, new ISA::ObjInit(new ISA::TypeReference(rettype)))));
 
         // insert default values
-        for ( auto prop : ((Type::Object*)rettype)->getProperties() ) {
+        for ( const auto& prop : rettype->getProperties() ) {
+            std::cout << "insert deval: " + prop.first + ": " + s(prop.second) + "\n";
             std::string defname = "deval_" + std::to_string(rettype->getId()) + "_" + prop.first;
             if ( _objDefaults.count(defname) ) {
-                function->insert(i++, useref(new ISA::ObjSet(
-                    obj, 
+                auto a = useref(new ISA::ObjSet(
+                    obj,
                     makeLocation(ISA::Affinity::OBJECTPROP, prop.first),
                     makeLocation(ISA::Affinity::LOCAL, defname)
-                )));
+                ));
+                transformedFunction->push_back(a);
             }
         }
 
+        while ( !function->empty() ) {
+            transformedFunction->push_back(*function->begin());
+            function->erase(function->begin());
+        }
+
         // insert ObjInstance instruction right before the return
-        auto j = function->rbegin();
+        auto j = transformedFunction->rbegin();
         while ( (*j)->tag() != ISA::Tag::RETURN1 ) j++;
-        function->insert((++j).base(), useref(new ISA::AssignEval(
+        transformedFunction->insert((++j).base(), useref(new ISA::AssignEval(
             makeLocation(ISA::Affinity::LOCAL, "retVal"),
             new ISA::ObjInstance(obj)
         )));
 
          // remove unnecessary temp assignment
-        freeref(function->back());
-        function->pop_back();
+        freeref(transformedFunction->back());
+        transformedFunction->pop_back();
         _tempCounter--;
 
         auto aff = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        function->push_back(useref(new ISA::AssignValue(
+        transformedFunction->push_back(useref(new ISA::AssignValue(
             makeLocation(aff, node->name()),
-            ((ISA::BeginFunction*)function->front())->first()
+            ((ISA::BeginFunction*)transformedFunction->front())->first()
         )));
 
-        return function;
+        return transformedFunction;
     }
 
     ISA::Instructions* walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {

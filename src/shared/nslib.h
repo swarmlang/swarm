@@ -610,6 +610,14 @@ namespace nslib {
         bool contains(ContainerT c, const ElemT& v) {
             return std::find(c.begin(), c.end(), v) != c.end();
         }
+
+        template <typename ElemT>
+        ElemT popFront(std::vector<ElemT>& vec) {
+            assert(!vec.empty());
+            auto elem = *vec.front();
+            vec.erase(vec.begin());
+            return elem;
+        }
     }
 
 

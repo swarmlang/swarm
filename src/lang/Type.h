@@ -373,9 +373,9 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
 
-        Enumerable* disambiguateStatically() override { 
+        Enumerable* disambiguateStatically() override {
             _values = _values->disambiguateStatically();
-            return this; 
+            return this;
         }
     protected:
         Type* _values;
@@ -428,7 +428,7 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _yields->toString() + ">";
         }
 
-        Resource* disambiguateStatically() override { 
+        Resource* disambiguateStatically() override {
             _yields = _yields->disambiguateStatically();
             return this;
         }
@@ -483,7 +483,7 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _inner->toString() + ">";
         }
 
-        Stream* disambiguateStatically() override { 
+        Stream* disambiguateStatically() override {
             _inner = _inner->disambiguateStatically();
             return this;
         }
@@ -547,9 +547,9 @@ namespace swarmc::Type {
             return ":: " + _returns->toString();
         }
 
-        Lambda0* disambiguateStatically() override { 
+        Lambda0* disambiguateStatically() override {
             _returns = _returns->disambiguateStatically();
-            return this; 
+            return this;
         }
     };
 
@@ -714,6 +714,7 @@ namespace swarmc::Type {
             auto existing = _properties.find(name);
             if ( existing != _properties.end() ) {
                 freeref(existing->second);
+                _properties.erase(existing);
             }
 
             _properties[name] = useref(type);
