@@ -15,7 +15,7 @@ Example:
 `enumerable<number> nums = [1,2,3];`  
 *Note: To have an empty enumerable literal, you must ascribe a type to its values to prevent ambiguity.*  
 *Example:* `enumerable<number> nums = [] of number;`  
-To access the values of a map, use the `[]` operator.  
+To access the values of an enumerable, use the `[]` operator.  
 Example: `nums[1]`  
 - **Maps**  
 A map is an unordered set of mappings from identifiers to values. The types of the values must be declared similar to an enumerable.  
@@ -63,9 +63,9 @@ To call a function, simply call them as you would in Java or C. The thing being 
 | `sin` | Returns the sine of the angle. | `number -> number` | The angle in radians. |
 | `cos` | Returns the cosine of the angle. | `number -> number` | The angle in radians. |
 | `tan` | Returns the tangent of the angle. | `number -> number` | The angle in radians. |
-| `random` | Returns a random number. | `-> number` | N/A |
-| `randomVector` | Returns an enumerable of random numbers. | `number -> enumerable<number>` | The length of the enumerable to be generated. |
-| `randomMatrix` | Returns a matrix of random numbers. | `number -> number -> enumerable<enumerable<number>>` | The number of rows and the number of columns. |
+| `random` | Returns a random number in the range [0,1). | `-> number` | N/A |
+| `randomVector` | Returns an enumerable of random numbers in the range [0,1). | `number -> enumerable<number>` | The length of the enumerable to be generated. |
+| `randomMatrix` | Returns a matrix of random numbers in the range [0,1). | `number -> number -> enumerable<enumerable<number>>` | The number of rows and the number of columns. |
 | `range` | Returns an enumerable containing a range of numbers. | `number -> number -> number -> enumerable<number>` | The start number, the end number, and the step size. |
 | `lLog` | Logs a message to the local worker's console. | `string -> void` | The string to be logged. |
 | `sLog` | Logs a message to the master worker's console. | `string -> void` | The string to be logged. |
