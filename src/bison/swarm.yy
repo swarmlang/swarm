@@ -347,14 +347,6 @@ declaration :
         Position* pos = new Position($1->position(), $5->position());
         VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5, true);
         $$ = var;
-
-        // pass sharedness to constructors
-        if ( $5->getName() == "TypeBodyNode" ) {
-            for ( auto c : *((TypeBodyNode*)$5)->constructors() ) {
-                c->setShared(true);
-            }
-        }
-
         delete $1; delete $4;
     }
 

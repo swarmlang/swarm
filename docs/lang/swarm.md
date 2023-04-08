@@ -36,7 +36,7 @@ Swarm supports most of the basic operations on primitive values. The operators, 
 | Equality and Inequality | `x <op> y` |
 | Addition and Subtraction | `x <op> y` |
 | String Concatenation | `x + y` |
-| Multiplication and Division | `x <op> y` |
+| Multiplication, Division, and Modulus | `x <op> y` |
 | Exponentiation | `x ^ y` |
 
 ## Functions

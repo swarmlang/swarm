@@ -822,21 +822,10 @@ namespace Walk {
 
         std::string name() const {
             return _name;
-        }
-
-        bool shared() const {
-            return _shared;
-        }
-
-        void setShared(bool shared) {
-            _shared = shared;
-        }
-    
+        }    
     protected:
         FunctionNode* _func;
         std::string _name;
-        // needed to ensure constructors get shared when type does
-        bool _shared = false;
         static size_t nameID;
     };
 

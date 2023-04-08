@@ -159,8 +159,7 @@ protected:
             fnType = node->func()->type();
         } else {
             instrs = new ISA::Instructions();
-            auto aff = node->calling()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-            floc = makeLocation(aff, node->calling()->name());
+            floc = makeLocation(ISA::Affinity::LOCAL, node->calling()->name());
             fnType = node->calling()->func()->type();
         }
 
@@ -968,9 +967,8 @@ protected:
         transformedFunction->pop_back();
         _tempCounter--;
 
-        auto aff = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
         transformedFunction->push_back(useref(new ISA::AssignValue(
-            makeLocation(aff, node->name()),
+            makeLocation(ISA::Affinity::LOCAL, node->name()),
             ((ISA::BeginFunction*)transformedFunction->front())->first()
         )));
 
