@@ -14,8 +14,8 @@ namespace swarmc::Lang::Walk {
 class ToISAWalk : public Walk<ISA::Instructions*> {
 public:
     ToISAWalk() : Walk<ISA::Instructions*>(),
-        _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()),
-        _typeMap(new std::map<std::string, ISA::TypeReference*>()),
+        _tempCounter(0), _inFunction(0), _isMemberFunction(false), _whileConds(new std::stack<std::string>()),
+        _typeMap(new std::map<std::size_t, ISA::TypeReference*>()),
         _locMap(new std::map<std::string, ISA::LocationReference*>()) {}
 
     ~ToISAWalk() override {
@@ -89,8 +89,12 @@ protected:
     }
 
     ISA::Instructions* walkVariableDeclarationNode(VariableDeclarationNode* node) override {
+        if ( node->id()->symbol()->isProperty() && node->value()->getName() == "FunctionNode" ) {
+            _isMemberFunction = true;
+        }
         auto instrs = walk(node->value());
         auto vloc = getLocFromAssign(instrs->back());
+        _isMemberFunction = false;
 
         // Create location from variable name
         auto aff = node->id()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
@@ -728,11 +732,19 @@ protected:
                 fnType = ((Type::Lambda*)fnType)->returns();
             }
         }
+
         auto retType = getTypeRef(fnType);
         auto retVar = makeLocation(ISA::Affinity::LOCAL, "retVal");
         auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFB");
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, retType)));
+        if (_isMemberFunction) {
+            _constructing.push(makeNewTmp(ISA::Affinity::LOCAL));
+            instrs->push_back(useref(new ISA::FunctionParam(
+                getTypeRef(Type::Primitive::of(Type::Intrinsic::THIS)),
+                _constructing.top()
+            )));
+        }
 
         // formals
         for ( auto f : *node->formals() ) {
@@ -791,6 +803,7 @@ protected:
         } else {
             instrs->push_back(useref(new ISA::Return1(retVar)));
         }
+        _constructing.pop();
         _inFunction--;
 
         // needed for assignment
@@ -856,13 +869,18 @@ protected:
         ));
 
         // create type reference
-        _typeMap->insert({ node->value()->toString(), useref(new ISA::TypeReference(node->value())) });
+        _typeMap->insert({ node->value()->getId(), useref(new ISA::TypeReference(node->value())) });
 
         // get default values
         for ( auto p : *node->declarations() ) {
             if (p->getName() == "VariableDeclarationNode") {
                 auto pvd = (VariableDeclarationNode*)p;
-                auto eval = walk(pvd->value());
+                auto eval = walk(pvd);
+
+                // remove bad assign to variable name
+                freeref(eval->back());
+                eval->pop_back();
+                
                 instrs->insert(instrs->end(), eval->begin(), eval->end());
                 auto defname = "deval_" + std::to_string(node->value()->getId()) + "_" + pvd->id()->name();
                 _objDefaults.insert(defname);
@@ -940,12 +958,16 @@ protected:
         for ( const auto& prop : rettype->getProperties() ) {
             std::string defname = "deval_" + std::to_string(rettype->getId()) + "_" + prop.first;
             if ( _objDefaults.count(defname) ) {
-                auto a = useref(new ISA::ObjSet(
-                    obj,
-                    makeLocation(ISA::Affinity::OBJECTPROP, prop.first),
-                    makeLocation(ISA::Affinity::LOCAL, defname)
-                ));
-                transformedFunction->push_back(a);
+                auto p = makeLocation(ISA::Affinity::OBJECTPROP, prop.first);
+                auto deval = makeLocation(ISA::Affinity::LOCAL, defname);
+                if ( prop.second->isCallable() ) {
+                    auto a = useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Curry(deval, obj)));
+                    transformedFunction->push_back(a);
+                    auto b = useref(new ISA::ObjSet(obj, p, a->first()));
+                    transformedFunction->push_back(b);
+                } else {
+                    transformedFunction->push_back(new ISA::ObjSet(obj, p, deval));
+                }
             }
         }
 
@@ -984,7 +1006,7 @@ protected:
     }
 
 private:
-    int _tempCounter, _inFunction;
+    int _tempCounter, _inFunction, _isMemberFunction;
     std::stack<std::string>* _whileConds;
 
     ISA::LocationReference* makeNewTmp(ISA::Affinity affinity) {
@@ -1001,10 +1023,10 @@ private:
 
     ISA::Reference* getTypeRef(Type::Type* type, Type::Type* comp=nullptr) const {
         auto tp = thisify(type, comp);
-        std::string tStr = tp->toString();
-        if (_typeMap->count(tStr)) return _typeMap->at(tStr);
+        std::size_t id = tp->getId();
+        if (_typeMap->count(id)) return _typeMap->at(id);
         auto t = new ISA::TypeReference(tp);
-        _typeMap->insert({ tStr, useref(t) });
+        _typeMap->insert({ id, useref(t) });
         return t;
     }
 
@@ -1029,7 +1051,7 @@ private:
         return tmp;
     }
 
-    std::map<std::string, ISA::TypeReference*>* _typeMap;
+    std::map<std::size_t, ISA::TypeReference*>* _typeMap;
     std::map<std::string, ISA::LocationReference*>* _locMap;
 
     // used for keeping track of which type members have default values
