@@ -803,7 +803,7 @@ protected:
         } else {
             instrs->push_back(useref(new ISA::Return1(retVar)));
         }
-        _constructing.pop();
+        if (_isMemberFunction) _constructing.pop();
         _inFunction--;
 
         // needed for assignment
@@ -922,7 +922,6 @@ protected:
     }
 
     ISA::Instructions* walkConstructorNode(ConstructorNode* node) override {
-        // FIXME: std::bad_alloc happens in this function when using test 030
         auto obj = makeNewTmp(ISA::Affinity::LOCAL);
 
         // add obj to stack so assignments know what obj to use
