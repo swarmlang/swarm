@@ -5,6 +5,7 @@
 #include "Walk.h"
 #include "../TypeTable.h"
 #include "../../Reporting.h"
+#include "ValidConstructorWalk.h"
 
 namespace swarmc::Lang::Walk {
 
@@ -898,10 +899,11 @@ protected:
     bool walkTypeBodyNode(TypeBodyNode* node) override {
         bool flag = true;
         for (auto d : *node->declarations()) {
-            flag = walk(d) || flag;
+            flag = walk(d) && flag;
         }
         for (auto c : *node->constructors()) {
-            flag = walk(c) || flag;
+            flag = walk(c) && flag;
+            flag = ValidConstructorWalk::isValidConstructor(node, c) && flag;
         }
         if ( flag ) {
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::TYPE));
