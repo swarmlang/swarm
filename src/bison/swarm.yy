@@ -5,7 +5,6 @@
 %define api.namespace{swarmc::Lang}
 %define api.parser.class {Parser}
 %define parse.error verbose
-%output "parser.cc"
 %token-table
 
 %code requires{

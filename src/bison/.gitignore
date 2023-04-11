@@ -1,4 +1,6 @@
 grammar.hh
+parser_debug.cc
 parser.cc
+parser_debug.output
 parser.output
 stack.hh
