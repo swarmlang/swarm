@@ -142,6 +142,11 @@ namespace swarmc::ISA {
             if ( tag == Tag::OTYPEGET ) return walkOTypeGet(obj);
             if ( tag == Tag::OTYPEFINALIZE ) return walkOTypeFinalize(obj);
             if ( tag == Tag::OTYPESUBSET ) return walkOTypeSubset(obj);
+            if ( tag == Tag::OBJCURRY ) return walkObjCurry(obj);
+            if ( tag == Tag::OBJGET ) return walkObjGet(obj);
+            if ( tag == Tag::OBJSET ) return walkObjSet(obj);
+            if ( tag == Tag::OBJINSTANCE ) return walkObjInstance(obj);
+            if ( tag == Tag::OBJINIT ) return walkObjInit(obj);
 
             throw Errors::SwarmError("Unable to deserialize instruction with invalid or unknown tag.");
         }
