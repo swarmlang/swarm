@@ -29,6 +29,7 @@ namespace Walk {
     class IdentifierNode;
     class ClassAccessNode;
     class ConstructorNode;
+    class TypeBodyNode;
 
     using StatementList = std::vector<StatementNode*>;
     using ExpressionList = std::vector<ExpressionNode*>;
@@ -796,10 +797,13 @@ namespace Walk {
 
     class ConstructorNode final : public DeclarationNode {
     public:
-        ConstructorNode(Position* pos, FunctionNode* func) : DeclarationNode(pos), _func(useref(func)) {
+        ConstructorNode(Position* pos, FunctionNode* func) : DeclarationNode(pos), _func(useref(func)), _partOfType(nullptr) {
             _name = "constructor" + std::to_string(++ConstructorNode::nameID);
         }
-        ~ConstructorNode() { useref(_func); }
+        ~ConstructorNode() { 
+            freeref(_func);
+            freeref(_partOfType);
+        }
 
         virtual std::string getName() const override {
             return "ConstructorNode";
@@ -823,10 +827,17 @@ namespace Walk {
         std::string name() const {
             return _name;
         }    
+
+        Type::Object* partOf() const {
+            return _partOfType;
+        }
     protected:
         FunctionNode* _func;
+        Type::Object* _partOfType;
         std::string _name;
         static size_t nameID;
+
+        friend swarmc::Lang::TypeBodyNode;
     };
 
     class TypeBodyNode final : public TypeLiteral {
@@ -837,14 +848,7 @@ namespace Walk {
             for ( auto d : *decls ) {
                 if ( d->getName() == "ConstructorNode" ) {
                     _constructors->push_back((ConstructorNode*)d);
-                    //remove THIS from constructors
-                    ((ConstructorNode*)d)->func()->type()->transform([type](Type::Type* t) -> Type::Type* {
-                        if ( t->intrinsic() == Type::Intrinsic::THIS ) {
-                            return type;
-                        }
-
-                        return t;
-                    });
+                    ((ConstructorNode*)d)->_partOfType = useref(type);
                 } else {
                     _declarations->push_back(d);
                 }
@@ -871,6 +875,9 @@ namespace Walk {
             auto decls = new DeclarationList();
             for ( auto d : *_declarations ) {
                 decls->push_back(useref(d->copy()));
+            }
+            for ( auto c : *_constructors ) {
+                decls->push_back(useref(c->copy()));
             }
             return new TypeBodyNode(position(), decls, (Type::Object*)_type);
         }

@@ -929,19 +929,23 @@ protected:
         auto function = walk(node->func());
         _constructing.pop();
 
-        // get object type
-        auto type = node->func()->type();
-        while ( type->isCallable() ) {
-            type = ((Type::Lambda*)type)->returns();
-        }
-        assert(type->intrinsic() == Type::Intrinsic::OBJECT);
-        auto rettype = (Type::Object*)type;
+        assert(node->partOf() != nullptr);
+        auto rettype = node->partOf();
 
         auto transformedFunction = new std::vector<ISA::Instruction*>;
+
+        // change ret type to object from void
+        transformedFunction->push_back(useref(new ISA::BeginFunction(
+            ((ISA::BeginFunction*)function->front())->first()->name(),
+            getTypeRef(rettype)
+        )));
+        freeref(function->front());
+        function->erase(function->begin());
+
         while ( true ) {
             if ( function->empty() ) break;
             auto front = *function->begin();
-            if ( front->tag() == ISA::Tag::FNPARAM || front->tag() == ISA::Tag::BEGINFN ) {
+            if ( front->tag() == ISA::Tag::FNPARAM ) {
                 transformedFunction->push_back(front);
                 function->erase(function->begin());
                 continue;
@@ -977,11 +981,16 @@ protected:
 
         // insert ObjInstance instruction right before the return
         auto j = transformedFunction->rbegin();
-        while ( (*j)->tag() != ISA::Tag::RETURN1 ) j++;
-        transformedFunction->insert((++j).base(), useref(new ISA::AssignEval(
+        do { j++; } while ( (*j)->tag() != ISA::Tag::RETURN0 );
+        transformedFunction->insert((j + 1).base(), useref(new ISA::AssignEval(
             makeLocation(ISA::Affinity::LOCAL, "retVal"),
             new ISA::ObjInstance(obj)
         )));
+        // change return0 to return retval
+        freeref(*(j - 1));
+        *(j - 1) = useref(new ISA::Return1(
+            makeLocation(ISA::Affinity::LOCAL, "retVal")
+        ));
 
          // remove unnecessary temp assignment
         freeref(transformedFunction->back());

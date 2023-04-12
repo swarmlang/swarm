@@ -115,7 +115,7 @@ protected:
     void walkAssignExpressionNode(AssignExpressionNode* node) override {
         if ( node->dest()->getName() == "IdentifierNode" ) {
             auto dest = (IdentifierNode*)node->dest();
-            if ( _symbols.count(dest->symbol()) && _inTopLayer ) {
+            if ( _symbols.count(dest->symbol()) ) {
                 _symbols.erase(dest->symbol());
             }
 
@@ -133,9 +133,11 @@ protected:
 
     void walkBlockStatementNode(BlockStatementNode* node) {
         _inTopLayer = false;
+        auto before = _symbols;
         for (auto stmt : *node->body()) {
             walk(stmt);
         }
+        _symbols = before;
         _inTopLayer = true;
     }
 

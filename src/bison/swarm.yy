@@ -625,7 +625,7 @@ funcConstr :
     CONSTRUCTOR LPAREN RPAREN FNDEF LBRACE statements RBRACE {
         auto pos = new Position($1->position(), $7->position());
         auto pos2 = new Position($2->position(), $7->position());
-        auto t = new TypeLiteral($1->position(), new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::THIS)));
+        auto t = new TypeLiteral($1->position(), new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID)));
         auto func = new FunctionNode(pos2, t, new FormalList());
         func->assumeAndReduceStatements($6->reduceToStatements());
         $$ = new ConstructorNode(pos, func);
@@ -637,7 +637,7 @@ funcConstr :
         Position* pos2 = new Position($2->position(), $8->position());
         Position* typepos = new Position($1->position(), $4->position());
 
-        Type::Type* t = Type::Primitive::of(Type::Intrinsic::THIS);
+        Type::Type* t = Type::Primitive::of(Type::Intrinsic::VOID);
 
         for ( auto i = $3->rbegin(); i != $3->rend(); ++i ) {
             t = new Type::Lambda1((*i).first->value(), t);
