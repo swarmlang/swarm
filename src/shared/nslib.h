@@ -54,6 +54,7 @@
 #include <execinfo.h>
 #include <mutex>
 #include <typeinfo>
+#include <string_view>
 #include NSLIB_BINN_H_PATH
 
 #define NSLIB_SERIAL_TAG 0
@@ -631,6 +632,32 @@ namespace nslib {
     inline std::string s(std::optional<T> v) {
         if ( v == std::nullopt ) return "(none)";
         return s(*v);
+    }
+
+    inline std::string s(std::string_view v) { return std::string(v); }
+
+    template <typename T>
+    constexpr auto getTypeName() -> std::string_view {
+#if defined(__clang__)
+        constexpr auto prefix = std::string_view{"[T = "};
+        constexpr auto suffix = "]";
+        constexpr auto function = std::string_view{__PRETTY_FUNCTION__};
+#elif defined(__GNUC__)
+        constexpr auto prefix = std::string_view{"with T = "};
+        constexpr auto suffix = "; ";
+        constexpr auto function = std::string_view{__PRETTY_FUNCTION__};
+#elif defined(_MSC_VER)
+        constexpr auto prefix = std::string_view{"getTypeName<"};
+        constexpr auto suffix = ">(void)";
+        constexpr auto function = std::string_view{__FUNCSIG__};
+#else
+# error Unsupported compiler
+#endif
+        const auto start = function.find(prefix) + prefix.size();
+        const auto end = function.find(suffix);
+        const auto size = end - start;
+
+        return function.substr(start, size);
     }
 
 
@@ -1782,6 +1809,20 @@ namespace nslib {
             explicit DuplicateTagException(const tag_t& tag) : NSLibException("Cannot register duplicate tag with Factory: " + s(tag)) {}
         };
 
+        /** Thrown by Factory when no producer can be found for a tag. */
+        template <typename Class>
+        class MissingProducerError : public NSLibException {
+        public:
+            explicit MissingProducerError(const tag_t& tag) : NSLibException("Cannot find a producer yielding type " + s(getTypeName<Class>()) + " for tag " + tag) {}
+        };
+
+        /** Thrown by Factory when no reducer can be found for a tag. */
+        template <typename Class>
+        class MissingReducerError : public NSLibException {
+        public:
+            explicit MissingReducerError(const tag_t& tag) : NSLibException("Cannot find a reducer accepting type " + s(getTypeName<Class>()) + " for tag " + tag) {}
+        };
+
         /**
          * The boss. Collects functions mapping some tag_t tag between binn* and child
          * classes of Class.
@@ -1828,7 +1869,7 @@ namespace nslib {
                 tag_t tag = binn_map_str(data, NSLIB_SERIAL_TAG);
                 auto iter = _producers.find(tag);
                 if ( iter == _producers.end() ) {
-                    return nullptr;
+                    throw MissingProducerError<Class>(tag);
                 }
 
                 auto obj = (binn*) binn_map_object(data, NSLIB_SERIAL_DATA); // FIXME?
@@ -1844,7 +1885,7 @@ namespace nslib {
             [[nodiscard]] binn* reduce(tag_t tag, const Class* obj, Passthrough p) {
                 auto iter = _reducers.find(tag);
                 if ( iter == _reducers.end() ) {
-                    return nullptr;
+                    throw MissingReducerError<Class>(tag);
                 }
 
                 auto data = ((*iter).second)(obj, p);
