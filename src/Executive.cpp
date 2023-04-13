@@ -630,5 +630,5 @@ int Executive::emitBinary() {
     fwrite("\x7fSVI", 1, 4, fh);
     fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
     fclose(fh);
-    return 1;
+    return 0;
 }
