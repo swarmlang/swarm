@@ -250,13 +250,13 @@ protected:
                     return false;
                 }
 
-                auto t = theconstructor->func()->type();
-                while (t->isCallable()) {
-                    t = ((Type::Lambda*)t)->returns();
+                if (flag) {
+                    _types->setTypeOf(node, theconstructor->partOf());
+                    node->_type = useref(theconstructor->partOf());
+                } else {
+                    _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+                    node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
                 }
-
-                _types->setTypeOf(node, flag ? t : Type::Primitive::of(Type::Intrinsic::ERROR));
-                node->_type = flag ? useref(t) : useref(Type::Primitive::of(Type::Intrinsic::ERROR));
                 node->_calling = useref(theconstructor);
                 return flag;
 
