@@ -19,6 +19,7 @@ EBIN := $(ECHO) green "    BIN "
 BISON_FILES := src/bison/grammar.hh src/bison/parser.cc src/bison/parser.output src/bison/stack.hh src/bison/parser_debug.cc src/bison/parser_debug.output
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
+HEADERS := $(shell find $(SRC_DIRS) -name *.hpp -or -name *.h)
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 DEBUG_OBJS := $(SRCS:%=$(DEBUG_BUILD_DIR)/%.o)
@@ -33,7 +34,7 @@ CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall -DSWARM_DEBUG #-DNSL
 #LDFLAGS ?= -lredis++ -lhiredis -pthread
 LDFLAGS ?= -rdynamic -ldl -lbinn -pthread
 
-$(TARGET_EXEC): $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
+$(TARGET_EXEC): $(OBJS) $(HEADERS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
 	$(EBIN) $@
 	$(Q)$(CXX) $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o -o $@ $(LDFLAGS)
 
@@ -41,7 +42,7 @@ $(TARGET_EXEC): $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
 all: $(TARGET_EXEC) debug
 
 # c++ sources
-$(BUILD_DIR)/%.cpp.o: %.cpp src/bison/parser.cc
+$(BUILD_DIR)/%.cpp.o: %.cpp %.h src/bison/parser.cc
 	$(Q)$(MKDIR_P) $(dir $@)
 	$(ECXX) $<
 	$(Q)$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
@@ -62,12 +63,12 @@ $(BUILD_DIR)/parser.o: src/bison/parser.cc
 
 
 # Build a version with debugging enabled. Should be (mostly) non-clashing with the release version
-debug: $(DEBUG_OBJS) $(DEBUG_BUILD_DIR)/parser_debug.o $(DEBUG_BUILD_DIR)/lexer.o
+debug: $(DEBUG_OBJS) $(HEADERS) $(DEBUG_BUILD_DIR)/parser_debug.o $(DEBUG_BUILD_DIR)/lexer.o
 	$(EBIN) $(TARGET_EXEC)_debug
 	$(Q)$(CXX) $(DEBUG_OBJS) $(DEBUG_BUILD_DIR)/lexer.o $(DEBUG_BUILD_DIR)/parser_debug.o -o $(TARGET_EXEC)_debug $(LDFLAGS) $(CPPFLAGS_debug)
 
 # c++ sources for debug
-$(DEBUG_BUILD_DIR)/%.cpp.o: %.cpp src/bison/parser_debug.cc
+$(DEBUG_BUILD_DIR)/%.cpp.o: %.cpp %.h src/bison/parser_debug.cc
 	$(Q)$(MKDIR_P) $(dir $@)
 	$(ECXX) $<
 	$(Q)$(CXX) $(CPPFLAGS_debug) $(CPPFLAGS_debug) -c $< -o $@
