@@ -20,6 +20,8 @@ BISON_FILES := src/bison/grammar.hh src/bison/parser.cc src/bison/parser.output 
 
 SRCS := $(shell find $(SRC_DIRS) -name *.cpp -or -name *.c -or -name *.s)
 HEADERS := $(shell find $(SRC_DIRS) -name *.hpp -or -name *.h)
+SRCS_CPP_HEADERS := $(SRCS:.cpp=.h)
+MISSING_CPP_HEADERS := $(filter-out $(HEADERS),$(SRCS_CPP_HEADERS))
 OBJS := $(SRCS:%=$(BUILD_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 DEBUG_OBJS := $(SRCS:%=$(DEBUG_BUILD_DIR)/%.o)
@@ -40,6 +42,14 @@ $(TARGET_EXEC): $(OBJS) $(HEADERS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
 
 .PHONY: all
 all: $(TARGET_EXEC) debug
+
+.PHONY: info
+info:
+	@echo HEADERS $(HEADERS)
+	@echo SRCS_CPP_HEADERS $(SRCS_CPP_HEADERS)
+	@echo MISSING_CPP_HEADERS $(MISSING_CPP_HEADERS)
+
+$(MISSING_CPP_HEADERS):
 
 # c++ sources
 $(BUILD_DIR)/%.cpp.o: %.cpp %.h src/bison/parser.cc
