@@ -60,7 +60,7 @@ namespace swarmc::Runtime {
         });
         factory->registerProducer(s(ReferenceTag::OTYPE), [](binn* obj, VirtualMachine*) {
             auto baseType = types()->produce((binn*) binn_map_map(obj, BC_TYPE), nullptr);
-            assert(baseType->intrinsic() == Type::Intrinsic::OTYPE);
+            assert(baseType->intrinsic() == Type::Intrinsic::OBJECT);
             auto type = dynamic_cast<Type::Object*>(baseType);
             auto ref = new ObjectTypeReference(type);
             ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));

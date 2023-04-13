@@ -113,3 +113,9 @@ namespace swarmc::ISA {
     }
 
 }
+
+namespace nslib {
+    std::string s(swarmc::ISA::Tag t) {
+        return swarmc::ISA::Instruction::tagName(t);
+    }
+}

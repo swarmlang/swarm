@@ -97,7 +97,9 @@ namespace swarmc::Runtime {
 
 
         // Object types
-        factory->registerReducer(s(Type::Intrinsic::OTYPE), [factory, common](const Type::Type* t, auto) {
+        // FIXME: also serialize OBJECT_PROTO??
+        // FIXME: remove OTYPE intrinsic??
+        factory->registerReducer(s(Type::Intrinsic::OBJECT), [factory, common](const Type::Type* t, auto) {
             auto o = dynamic_cast<const Type::Object*>(t);
             auto binn = common(o, nullptr);
 
@@ -120,7 +122,7 @@ namespace swarmc::Runtime {
 
             return binn;
         });
-        factory->registerProducer(s(Type::Intrinsic::OTYPE), [factory](binn* obj, auto) {
+        factory->registerProducer(s(Type::Intrinsic::OBJECT), [factory](binn* obj, auto) {
             auto isFinal = binn_map_bool(obj, BC_FINAL);
             auto binnPropertyKeys = binn_map_list(obj, BC_OTYPE_K);
             auto binnPropertyValues = binn_map_list(obj, BC_OTYPE_V);
@@ -131,15 +133,24 @@ namespace swarmc::Runtime {
             }
 
             auto type = new Type::Object(parent);
+            std::vector<std::string> propertyKeys;
+            std::vector<Type::Type*> propertyValues;
+
             binn_iter iter;
             binn binnPropertyValue;
-            int i = -1;
             binn_list_foreach(binnPropertyValues, binnPropertyValue) {
-                i += 1;
+                propertyValues.push_back(factory->produce(&binnPropertyValue, nullptr));
+            }
 
-                auto key = binn_list_str(binnPropertyKeys, i);
-                auto value = factory->produce(&binnPropertyValue, nullptr);
-                type = type->defineProperty(key, value);
+            binn binnPropertyKey;
+            binn_list_foreach(binnPropertyKeys, binnPropertyKey) {
+                std::string key = binn_get_str(&binnPropertyKey);
+                propertyKeys.push_back(key);
+            }
+
+            assert(propertyValues.size() == propertyKeys.size());
+            for ( std::size_t i = 0; i < propertyValues.size(); i += 1 ) {
+                type->defineProperty(propertyKeys[i], propertyValues[i]);
             }
 
             if ( isFinal ) {

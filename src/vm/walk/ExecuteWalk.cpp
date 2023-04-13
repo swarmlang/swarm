@@ -72,7 +72,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::NUMBER ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::NUMBER) + ")"
             );
         }
         return (NumberReference*) ref;
@@ -84,7 +84,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::BOOLEAN ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::BOOLEAN) + ")"
             );
         }
         return (BooleanReference*) ref;
@@ -96,7 +96,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::TYPE && ref->tag() != ReferenceTag::OTYPE ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::TYPE) + " or " + s(ReferenceTag::OTYPE) + ")"
             );
         }
         return (TypeReference*) ref;
@@ -108,7 +108,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::OTYPE ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::OTYPE) + ")"
             );
         }
         return (ObjectTypeReference*) ref;
@@ -131,7 +131,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::STRING ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::STRING) + ")"
             );
         }
         return (StringReference*) ref;
@@ -142,7 +142,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::FUNCTION ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::FUNCTION) + ")"
             );
         }
         return (FunctionReference*) ref;
@@ -157,7 +157,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::ENUMERATION ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::ENUMERATION) + ")"
             );
         }
         return (EnumerationReference*) ref;
@@ -168,7 +168,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::STREAM ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::STREAM) + ")"
             );
         }
         return (StreamReference*) ref;
@@ -179,7 +179,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::MAP ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::MAP) + ")"
             );
         }
         return (MapReference*) ref;
@@ -190,7 +190,7 @@ namespace swarmc::Runtime {
         if ( ref->tag() != ReferenceTag::RESOURCE ) {
             throw Errors::RuntimeError(
                 Errors::RuntimeExCode::InvalidReferenceImplementation,
-                "Reference " + s(ref) + " has type " + s(ref->typei()) + " but invalid tag " + s(ref->tag())
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::RESOURCE) + ")"
             );
         }
         return (ResourceReference*) ref;

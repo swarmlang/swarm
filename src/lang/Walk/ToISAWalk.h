@@ -869,7 +869,7 @@ protected:
         ));
 
         // create type reference
-        _typeMap->insert({ node->value()->getId(), useref(new ISA::TypeReference(node->value())) });
+        _typeMap->insert({ node->value()->getId(), useref(new ISA::ObjectTypeReference((Type::Object*) node->value())) });
 
         // get default values
         for ( auto p : *node->declarations() ) {
@@ -880,7 +880,7 @@ protected:
                 // remove bad assign to variable name
                 freeref(eval->back());
                 eval->pop_back();
-                
+
                 instrs->insert(instrs->end(), eval->begin(), eval->end());
                 auto defname = "deval_" + std::to_string(node->value()->getId()) + "_" + pvd->id()->name();
                 _objDefaults.insert(defname);
@@ -955,7 +955,7 @@ protected:
         }
 
         // initialize object
-        transformedFunction->push_back(useref(new ISA::AssignEval(obj, new ISA::ObjInit(new ISA::TypeReference(rettype)))));
+        transformedFunction->push_back(useref(new ISA::AssignEval(obj, new ISA::ObjInit(new ISA::ObjectTypeReference(rettype)))));
 
         // insert default values
         for ( const auto& prop : rettype->getProperties() ) {

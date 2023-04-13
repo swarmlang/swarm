@@ -35,7 +35,6 @@ namespace swarmc::Type {
         AMBIGUOUS,
         CONTRADICTION,
         OPAQUE,
-        OTYPE,
         OBJECT_PROTO,
         OBJECT,
         THIS,
@@ -65,7 +64,6 @@ namespace swarmc::Type {
             if ( intrinsic == Intrinsic::RESOURCE ) return "RESOURCE";
             if ( intrinsic == Intrinsic::AMBIGUOUS ) return "AMBIGUOUS";
             if ( intrinsic == Intrinsic::OPAQUE ) return "OPAQUE";
-            if ( intrinsic == Intrinsic::OTYPE ) return "OTYPE";
             if ( intrinsic == Intrinsic::OBJECT_PROTO ) return "OBJECT_PROTO";
             if ( intrinsic == Intrinsic::OBJECT ) return "OBJECT";
             if ( intrinsic == Intrinsic::THIS ) return "THIS";
@@ -149,7 +147,6 @@ namespace swarmc::Type {
                 || intrinsic == Intrinsic::VOID
                 || intrinsic == Intrinsic::UNIT
                 || intrinsic == Intrinsic::TYPE
-                || intrinsic == Intrinsic::OTYPE
                 || intrinsic == Intrinsic::THIS
             );
         }
@@ -179,7 +176,7 @@ namespace swarmc::Type {
             if ( !Primitive::isPrimitive(other->intrinsic()) ) return false;
             if ( intrinsic() == Intrinsic::TYPE ) {
                 return other->intrinsic() == Intrinsic::TYPE
-                    || other->intrinsic() == Intrinsic::OTYPE;
+                    || other->intrinsic() == Intrinsic::OBJECT;  // FIXME: is the type of an otype object?
             }
             return other->intrinsic() == intrinsic();
         }
