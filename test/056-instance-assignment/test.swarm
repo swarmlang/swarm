@@ -1,0 +1,9 @@
+type UD = {
+    constructor() => {
+        n = 5;
+    };
+
+    number n = 2;
+};
+
+UD();

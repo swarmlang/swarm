@@ -41,3 +41,4 @@ run_tests
 vgcore.*
 
 core-swarmc*
+test.sbi
