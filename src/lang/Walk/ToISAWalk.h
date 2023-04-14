@@ -50,6 +50,11 @@ protected:
         if ( node->symbol()->isPrologue() ) {
             auto fref = makeLocation(ISA::Affinity::FUNCTION, ((Lang::PrologueFunctionSymbol*)node->symbol())->sviName());
             instrs->push_back(useref(new ISA::AssignValue(ref, fref)));
+        } else if ( node->symbol()->isProperty() ) { // use objget to get property values
+            instrs->push_back(useref(new ISA::AssignEval(ref, new ISA::ObjGet(
+                _constructing.top(), 
+                makeLocation(ISA::Affinity::OBJECTPROP, node->name()))
+            )));
         } else {
             // necessary for instructions that pull the location from the bottommost instruction
             instrs->push_back(useref(new ISA::AssignValue(ref, ref)));
