@@ -1256,10 +1256,13 @@ namespace nslib {
                 ->print("   error ", true);
 
             if ( Framework::isThread() ) {
-                print(" [" + Framework::getThreadDisplay() + "] ");
+                only(Verbosity::ERROR)
+                    ->print(" [" + Framework::getThreadDisplay() + "] ")
+                    ->end();
             }
 
-            return output(p + "\n")
+            return only(Verbosity::ERROR)
+                ->output(p + "\n")
                 ->end();
         }
 
@@ -1270,10 +1273,13 @@ namespace nslib {
                 ->print(" success ", true);
 
             if ( Framework::isThread() ) {
-                print(" [" + Framework::getThreadDisplay() + "] ");
+                only(Verbosity::INFO)
+                    ->print(" [" + Framework::getThreadDisplay() + "] ")
+                    ->end();
             }
 
-            return output(p + "\n")
+            return only(Verbosity::INFO)
+                ->output(p + "\n")
                 ->end();
         }
 
@@ -1284,10 +1290,13 @@ namespace nslib {
                 ->print(" warning ", true);
 
             if ( Framework::isThread() ) {
-                print(" [" + Framework::getThreadDisplay() + "] ");
+                only(Verbosity::WARNING)
+                    ->print(" [" + Framework::getThreadDisplay() + "] ")
+                    ->end();
             }
 
-            return output(p + "\n")
+            return only(Verbosity::WARNING)
+                ->output(p + "\n")
                 ->end();
         }
 
@@ -1298,10 +1307,13 @@ namespace nslib {
                 ->print("    info ", true);
 
             if ( Framework::isThread() ) {
-                print(" [" + Framework::getThreadDisplay() + "] ");
+                only(Verbosity::INFO)
+                    ->print(" [" + Framework::getThreadDisplay() + "] ")
+                    ->end();
             }
 
-            return output(p + "\n")
+            return only(Verbosity::INFO)
+                ->output(p + "\n")
                 ->end();
         }
 
@@ -1312,10 +1324,13 @@ namespace nslib {
                 ->print("   debug ", true);
 
             if ( Framework::isThread() ) {
-                print(" [" + Framework::getThreadDisplay() + "] ");
+                only(Verbosity::DEBUG)
+                    ->print(" [" + Framework::getThreadDisplay() + "] ")
+                    ->end();
             }
 
-            return output(p + "\n")
+            return only(Verbosity::DEBUG)
+                ->output(p + "\n")
                 ->end();
         }
 
@@ -1326,10 +1341,13 @@ namespace nslib {
                 ->print(" verbose ", true);
 
             if ( Framework::isThread() ) {
-                print(" [" + Framework::getThreadDisplay() + "] ");
+                only(Verbosity::VERBOSE)
+                    ->print(" [" + Framework::getThreadDisplay() + "] ")
+                    ->end();
             }
 
-            return output(p + "\n")
+            return only(Verbosity::VERBOSE)
+                ->output(p + "\n")
                 ->end();
         }
 
@@ -1340,10 +1358,13 @@ namespace nslib {
                 ->print("   trace ", true);
 
             if ( Framework::isThread() ) {
-                print(" [" + Framework::getThreadDisplay() + "] ");
+                only(Verbosity::TRACE)
+                    ->print(" [" + Framework::getThreadDisplay() + "] ")
+                    ->end();
             }
 
-            return output(p + "\n")
+            return only(Verbosity::TRACE)
+                ->output(p + "\n")
                 ->end();
         }
 
