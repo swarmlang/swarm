@@ -2,6 +2,7 @@
 #define SWARMC_CFG_OPTIMIZE
 
 #include "cfg.h"
+#include "../errors/SwarmError.h"
 
 namespace swarmc::CFG {
 
@@ -239,7 +240,11 @@ public:
     static bool optimize(ControlFlowGraph* graph) {
         RemoveSelfAssign rsa;
         Console::get()->debug("Starting Removal of Self-Assigns");
-        return rsa.execute(graph->first());
+        bool flag = false;
+
+        for (auto b : *graph->blocks()) rsa.execute(b);
+
+        return flag;
     }
 private:
     bool execute(Block* block) {
@@ -261,15 +266,10 @@ private:
             }
         }
 
-        if ( block->getCallOutEdge() != nullptr ) {
-            flag = execute(block->getCallOutEdge()->destination()) || flag;
-        } else if ( block->getRetOutEdge() != nullptr ) {
-            flag = execute(block->getRetOutEdge()->destination()) || flag;
-        }
-
         return flag;
     }
 };
+
 }
 
 #endif

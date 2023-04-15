@@ -42,6 +42,16 @@ public:
         _instructions->push_back(useref(instr));
     }
 
+    void removeInstruction(ISA::Instruction* instr) {
+        for (auto i = _instructions->begin(); i != _instructions->end(); i++) {
+            if (*i == instr) {
+                freeref(*i);
+                _instructions->erase(i);
+                break;
+            }
+        }
+    }
+
     /* Returns name of node */
     [[nodiscard]] std::string id() const { return _id; }
 
@@ -235,6 +245,7 @@ public:
 
     [[nodiscard]] Block* first() const { return _first; }
     [[nodiscard]] Block* last() const { return _last; }
+    [[nodiscard]] std::vector<Block*>* blocks() const { return _blocks; }
     [[nodiscard]] std::unordered_map<std::string, CFGFunction*>* getNameMap() const { return _nameMap; }
 private:
     Block* _first = nullptr;
