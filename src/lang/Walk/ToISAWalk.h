@@ -14,7 +14,7 @@ namespace swarmc::Lang::Walk {
 class ToISAWalk : public Walk<ISA::Instructions*> {
 public:
     ToISAWalk() : Walk<ISA::Instructions*>(),
-        _tempCounter(0), _inFunction(0), _isMemberFunction(false), _whileConds(new std::stack<std::string>()),
+        _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()),
         _typeMap(new std::map<std::size_t, ISA::TypeReference*>()),
         _locMap(new std::map<std::string, ISA::LocationReference*>()) {}
 
@@ -52,7 +52,7 @@ protected:
             instrs->push_back(useref(new ISA::AssignValue(ref, fref)));
         } else if ( node->symbol()->isProperty() ) { // use objget to get property values
             instrs->push_back(useref(new ISA::AssignEval(ref, new ISA::ObjGet(
-                _constructing.top(), 
+                _constructing.top().first, 
                 makeLocation(ISA::Affinity::OBJECTPROP, node->name()))
             )));
         } else {
@@ -94,12 +94,8 @@ protected:
     }
 
     ISA::Instructions* walkVariableDeclarationNode(VariableDeclarationNode* node) override {
-        if ( node->id()->symbol()->isProperty() && node->value()->getName() == "FunctionNode" ) {
-            _isMemberFunction = true;
-        }
         auto instrs = walk(node->value());
         auto vloc = getLocFromAssign(instrs->back());
-        _isMemberFunction = false;
 
         // Create location from variable name
         auto aff = node->id()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
@@ -409,17 +405,17 @@ protected:
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID)))));
         auto elemShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        instrs->push_back(useref(new ISA::FunctionParam(elemType, makeLocation(elemShared, "arg_" + node->local()->name()))));
+        instrs->push_back(useref(new ISA::FunctionParam(elemType, makeLocation(elemShared, "var_" + node->local()->name()))));
         if ( node->index() != nullptr ) {
             auto idxShared = node->index()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
             instrs->push_back(useref(new ISA::FunctionParam(
                 getTypeRef(Type::Primitive::of(Type::Intrinsic::NUMBER)),
-                makeLocation(idxShared, "arg_" + node->index()->name())
+                makeLocation(idxShared, "var_" + node->index()->name())
             )));
         } else {
             instrs->push_back(useref(new ISA::FunctionParam(
                 getTypeRef(Type::Primitive::of(Type::Intrinsic::NUMBER)),
-                makeLocation(ISA::Affinity::LOCAL, "UNUSEDarg_idx")
+                makeLocation(ISA::Affinity::LOCAL, "UNUSEDvar_idx")
             )));
         }
 
@@ -671,7 +667,7 @@ protected:
             if ( id->symbol()->isProperty() ) {
                 assert(!_constructing.empty());
                 instrs->push_back(useref(new ISA::ObjSet(
-                    _constructing.top(),
+                    _constructing.top().first,
                     makeLocation(ISA::Affinity::OBJECTPROP, id->name()),
                     value
                 )));
@@ -743,18 +739,18 @@ protected:
         auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFB");
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, retType)));
-        if (_isMemberFunction) {
-            _constructing.push(makeNewTmp(ISA::Affinity::LOCAL));
+        if ( !_isMemberFunctionOf.empty() ) {
+            _constructing.push(std::make_pair(makeNewTmp(ISA::Affinity::LOCAL), _isMemberFunctionOf.top()));
             instrs->push_back(useref(new ISA::FunctionParam(
-                getTypeRef(Type::Primitive::of(Type::Intrinsic::THIS)),
-                _constructing.top()
+                getTypeRef(_isMemberFunctionOf.top()),
+                _constructing.top().first
             )));
         }
 
         // formals
         for ( auto f : *node->formals() ) {
             auto type = getTypeRef(f.first->value());
-            auto ref = makeLocation(ISA::Affinity::LOCAL, "arg_" + f.second->name());
+            auto ref = makeLocation(ISA::Affinity::LOCAL, "var_" + f.second->name());
             instrs->push_back(useref(new ISA::FunctionParam(type, ref)));
         }
 
@@ -808,7 +804,7 @@ protected:
         } else {
             instrs->push_back(useref(new ISA::Return1(retVar)));
         }
-        if (_isMemberFunction) _constructing.pop();
+        if ( !_isMemberFunctionOf.empty() ) _constructing.pop();
         _inFunction--;
 
         // needed for assignment
@@ -877,6 +873,7 @@ protected:
         _typeMap->insert({ node->value()->getId(), useref(new ISA::ObjectTypeReference((Type::Object*) node->value())) });
 
         // get default values
+        _isMemberFunctionOf.push((Type::Object*)node->value());
         for ( auto p : *node->declarations() ) {
             if (p->getName() == "VariableDeclarationNode") {
                 auto pvd = (VariableDeclarationNode*)p;
@@ -896,6 +893,7 @@ protected:
                 delete eval;
             }
         }
+        _isMemberFunctionOf.pop();
 
         // walk constructors
         for (auto c : *node->constructors()) {
@@ -930,7 +928,7 @@ protected:
         auto obj = makeNewTmp(ISA::Affinity::LOCAL);
 
         // add obj to stack so assignments know what obj to use
-        _constructing.push(obj);
+        _constructing.push(std::make_pair(obj, node->partOf()));
         auto function = walk(node->func());
         _constructing.pop();
 
@@ -1019,8 +1017,7 @@ protected:
     }
 
 private:
-    int _tempCounter, _inFunction, _isMemberFunction;
-    std::stack<std::string>* _whileConds;
+    int _tempCounter, _inFunction;
 
     ISA::LocationReference* makeNewTmp(ISA::Affinity affinity) {
         return makeLocation(affinity, "tmp" + std::to_string(_tempCounter++));
@@ -1034,7 +1031,7 @@ private:
         return ((ISA::AssignValue*)instr)->first();
     }
 
-    ISA::Reference* getTypeRef(Type::Type* type, Type::Type* comp=nullptr) const {
+    ISA::TypeReference* getTypeRef(Type::Type* type, Type::Type* comp=nullptr) const {
         auto tp = thisify(type, comp);
         std::size_t id = tp->getId();
         if (_typeMap->count(id)) return _typeMap->at(id);
@@ -1064,6 +1061,8 @@ private:
         return tmp;
     }
 
+    std::stack<std::string>* _whileConds;
+    std::stack<Type::Object*> _isMemberFunctionOf;
     std::map<std::size_t, ISA::TypeReference*>* _typeMap;
     std::map<std::string, ISA::LocationReference*>* _locMap;
 
@@ -1071,7 +1070,7 @@ private:
     std::set<std::string> _objDefaults;
 
     // used for assignments in constructors
-    std::stack<ISA::LocationReference*> _constructing;
+    std::stack<std::pair<ISA::LocationReference*,Type::Object*>> _constructing;
 };
 
 }
