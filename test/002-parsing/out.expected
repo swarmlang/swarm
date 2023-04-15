@@ -182,12 +182,12 @@ ProgramNode<#body: 30>
               ClassAccessNode<path: IdentifierNode<name: orig> id: uninit>
                 IdentifierNode<name: orig>
       ConstructorNode<name: constructor1>
-        FunctionNode<type: Type<:: Type::Object<#prop: 3, parent: (nullptr)>>>
+        FunctionNode<type: Type<:: Primitive<VOID>>>
           ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: uninit>>>
             AssignExpressionNode<lval: IdentifierNode<name: uninit>>
               NumberLiteralExpressionNode<#value: 5.000000>
       ConstructorNode<name: constructor2>
-        FunctionNode<type: Type<Primitive<NUMBER> :: Type::Object<#prop: 3, parent: (nullptr)>>>
+        FunctionNode<type: Type<Primitive<NUMBER> :: Primitive<VOID>>>
           ExpressionStatementNode<AssignExpressionNode<lval: IdentifierNode<name: uninit>>>
             AssignExpressionNode<lval: IdentifierNode<name: uninit>>
               NumberLiteralExpressionNode<#value: 5.000000>

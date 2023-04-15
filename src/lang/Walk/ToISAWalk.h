@@ -182,7 +182,7 @@ protected:
                 assert(fnType->isCallable());
 
                 // curry or call func in sequence
-                if (((Type::Lambda*)fnType)->returns()->intrinsic() == Type::Intrinsic::VOID) {
+                if (((Type::Lambda*)fnType)->returns()->intrinsic() == Type::Intrinsic::VOID && !node->calling()) {
                     auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
                     instrs->push_back(useref(call));
                 } else if (((Type::Lambda*)fnType)->returns()->isCallable()) {

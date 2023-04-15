@@ -1,53 +1,49 @@
-BEGINFN<Location<f:IFBODY_147>, TypeReference<Primitive<VOID>>>
+BEGINFN<Location<f:IFBODY_152>, TypeReference<Primitive<VOID>>>
 ASSIGNVALUE<Location<l:var_n>, Location<l:var_n>>
-OBJSET<Location<l:tmp144>, Location<o:uninit>, Location<l:var_n>>
+OBJSET<Location<l:tmp149>, Location<o:uninit>, Location<l:var_n>>
 RETURN0<>
-BEGINFN<Location<f:FUNC_145>, TypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_n>>
-ASSIGNEVAL<Location<l:tmp144>, OBJINIT<TypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>>
-OBJSET<Location<l:tmp144>, Location<o:copy>, Location<l:deval_47_copy>>
-OBJSET<Location<l:tmp144>, Location<o:regFunc>, Location<l:deval_47_regFunc>>
-SCOPEOF<Location<l:retVal>>
-SCOPEOF<Location<l:CFB>>
-ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
-ASSIGNVALUE<Location<l:tmp146>, NumberReference<5.000000>>
-OBJSET<Location<l:tmp144>, Location<o:uninit>, Location<l:tmp146>>
-ASSIGNVALUE<Location<l:var_n>, Location<l:var_n>>
-ASSIGNVALUE<Location<l:tmp148>, NumberReference<5.000000>>
-ASSIGNEVAL<Location<l:tmp149>, GT<Location<l:var_n>, Location<l:tmp148>>>
-CALLIF0<Location<l:tmp149>, Location<f:IFBODY_147>>
-ASSIGNEVAL<Location<l:retVal>, OBJINSTANCE<Location<l:tmp144>>>
-RETURN1<Location<l:retVal>>
 BEGINFN<Location<f:ENUM_48>, TypeReference<Primitive<VOID>>>
-FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:arg_v>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<s:arg_i>>
+FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:var_v>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<s:var_i>>
 RETURN0<>
 BEGINFN<Location<f:FUNC_2>, TypeReference<Primitive<VOID>>>
-FNPARAM<TypeReference<Primitive<STRING>>, Location<l:arg_s>>
+FNPARAM<TypeReference<Primitive<STRING>>, Location<l:var_s>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
 RETURN0<>
 BEGINFN<Location<f:ENUM_50>, TypeReference<Primitive<VOID>>>
-FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<s:arg_v>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<s:arg_i>>
+FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<s:var_v>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<s:var_i>>
 RETURN0<>
 BEGINFN<Location<f:FUNC_0>, TypeReference<RESOURCE<Primitive<VOID>>>>
-FNPARAM<TypeReference<Primitive<STRING>>, Location<l:arg_s>>
-FNPARAM<TypeReference<Primitive<STRING>>, Location<l:arg_s2>>
+FNPARAM<TypeReference<Primitive<STRING>>, Location<l:var_s>>
+FNPARAM<TypeReference<Primitive<STRING>>, Location<l:var_s2>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
+RETURN1<Location<l:retVal>>
+BEGINFN<Location<f:FUNC_145>, ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>
+ASSIGNEVAL<Location<l:tmp144>, OBJINIT<ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>>
+ASSIGNEVAL<Location<l:tmp148>, CURRY<Location<l:deval_46_copy>, Location<l:tmp144>>>
+OBJSET<Location<l:tmp144>, Location<o:copy>, Location<l:tmp148>>
+ASSIGNEVAL<Location<l:tmp149>, CURRY<Location<l:deval_46_regFunc>, Location<l:tmp144>>>
+OBJSET<Location<l:tmp144>, Location<o:regFunc>, Location<l:tmp149>>
+SCOPEOF<Location<l:CFB>>
+ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
+ASSIGNVALUE<Location<l:tmp146>, NumberReference<5.000000>>
+OBJSET<Location<l:tmp144>, Location<o:uninit>, Location<l:tmp146>>
+ASSIGNEVAL<Location<l:retVal>, OBJINSTANCE<Location<l:tmp144>>>
 RETURN1<Location<l:retVal>>
 BEGINFN<Location<f:IFBODY_68>, TypeReference<Primitive<VOID>>>
 ASSIGNEVAL<Location<l:whileCond>, CALL0<Location<f:WHILECOND_51>>>
 ASSIGNVALUE<Location<l:CFBWhile>, BooleanReference<true>>
 RETURN0<>
 BEGINFN<Location<f:ENUM_46>, TypeReference<Primitive<VOID>>>
-FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<s:arg_v>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_i>>
+FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<s:var_v>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_i>>
 RETURN0<>
 BEGINFN<Location<f:FUNC_18>, TypeReference<Primitive<STRING>>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_arg1>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_arg1>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
@@ -55,9 +51,37 @@ ASSIGNVALUE<Location<l:CFB>, BooleanReference<true>>
 ASSIGNVALUE<Location<l:tmp19>, StringReference<goodbye>>
 ASSIGNVALUE<Location<l:retVal>, Location<l:tmp19>>
 RETURN1<Location<l:retVal>>
+BEGINFN<Location<f:FUNC_134>, ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>
+FNPARAM<ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>, Location<l:tmp135>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_i>>
+SCOPEOF<Location<l:retVal>>
+SCOPEOF<Location<l:CFB>>
+ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
+ASSIGNVALUE<Location<l:CFB>, BooleanReference<true>>
+ASSIGNVALUE<Location<l:var_i>, Location<l:var_i>>
+ASSIGNEVAL<Location<l:tmp136>, CALL1<Location<l:constructor2>, Location<l:var_i>>>
+ASSIGNVALUE<Location<l:retVal>, Location<l:tmp136>>
+RETURN1<Location<l:retVal>>
+BEGINFN<Location<f:ENUM_35>, TypeReference<Primitive<VOID>>>
+FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<s:var_var>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:UNUSEDvar_idx>>
+ASSIGNVALUE<Location<l:var_tag>, Location<l:var_tag>>
+ASSIGNVALUE<Location<l:tmp36>, StringReference<tag>>
+ASSIGNEVAL<Location<l:tmp37>, CURRY<Location<l:var_tag>, Location<l:tmp36>>>
+ASSIGNVALUE<Location<l:tmp38>, StringReference<str>>
+ASSIGNEVAL<Location<l:tmp39>, CALL1<Location<l:tmp37>, Location<l:tmp38>>>
+ASSIGNVALUE<Location<l:tmp40>, TypeReference<Primitive<VOID>>>
+WITH<Location<l:tmp39>, Location<f:WITH_41>>
+RETURN0<>
+BEGINFN<Location<f:WITH_41>, TypeReference<Primitive<VOID>>>
+FNPARAM<Location<l:tmp40>, Location<s:res_w>>
+ASSIGNVALUE<Location<l:var_log>, Location<l:var_log>>
+ASSIGNVALUE<Location<l:tmp42>, StringReference<string>>
+CALL1<Location<l:var_log>, Location<l:tmp42>>
+RETURN0<>
 BEGINFN<Location<f:ENUM_25>, TypeReference<Primitive<VOID>>>
-FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:arg_joe>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:UNUSEDarg_idx>>
+FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:var_joe>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:UNUSEDvar_idx>>
 ASSIGNVALUE<Location<l:var_tag>, Location<l:var_tag>>
 ASSIGNVALUE<Location<l:tmp26>, StringReference<mama>>
 ASSIGNEVAL<Location<l:tmp27>, CURRY<Location<l:var_tag>, Location<l:tmp26>>>
@@ -66,6 +90,23 @@ ASSIGNEVAL<Location<l:tmp29>, CALL1<Location<l:tmp27>, Location<l:tmp28>>>
 ASSIGNVALUE<Location<l:tmp30>, TypeReference<Primitive<VOID>>>
 WITH<Location<l:tmp29>, Location<f:WITH_31>>
 RETURN0<>
+BEGINFN<Location<f:FUNC_150>, ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_n>>
+ASSIGNEVAL<Location<l:tmp149>, OBJINIT<ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>>
+ASSIGNEVAL<Location<l:tmp157>, CURRY<Location<l:deval_46_copy>, Location<l:tmp149>>>
+OBJSET<Location<l:tmp149>, Location<o:copy>, Location<l:tmp157>>
+ASSIGNEVAL<Location<l:tmp158>, CURRY<Location<l:deval_46_regFunc>, Location<l:tmp149>>>
+OBJSET<Location<l:tmp149>, Location<o:regFunc>, Location<l:tmp158>>
+SCOPEOF<Location<l:CFB>>
+ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
+ASSIGNVALUE<Location<l:tmp151>, NumberReference<5.000000>>
+OBJSET<Location<l:tmp149>, Location<o:uninit>, Location<l:tmp151>>
+ASSIGNVALUE<Location<l:var_n>, Location<l:var_n>>
+ASSIGNVALUE<Location<l:tmp153>, NumberReference<5.000000>>
+ASSIGNEVAL<Location<l:tmp154>, GT<Location<l:var_n>, Location<l:tmp153>>>
+CALLIF0<Location<l:tmp154>, Location<f:IFBODY_152>>
+ASSIGNEVAL<Location<l:retVal>, OBJINSTANCE<Location<l:tmp149>>>
+RETURN1<Location<l:retVal>>
 BEGINFN<Location<f:SUBFUNC_83>, TypeReference<Primitive<VOID>>>
 ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
 ASSIGNVALUE<Location<l:tmp84>, NumberReference<0.100000>>
@@ -97,11 +138,11 @@ ASSIGNEVAL<Location<l:tmp97>, STRCONCAT<Location<s:var_t4>, Location<l:tmp96>>>
 ASSIGNVALUE<Location<s:var_t4>, Location<l:tmp97>>
 RETURN0<>
 BEGINFN<Location<f:ENUM_44>, TypeReference<Primitive<VOID>>>
-FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:arg_v>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_i>>
+FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<l:var_v>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_i>>
 RETURN0<>
 BEGINFN<Location<f:FUNC_21>, TypeReference<Primitive<STRING>>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_arg1>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_arg1>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
@@ -110,7 +151,7 @@ ASSIGNVALUE<Location<l:tmp22>, StringReference<zoinks>>
 ASSIGNVALUE<Location<l:retVal>, Location<l:tmp22>>
 RETURN1<Location<l:retVal>>
 BEGINFN<Location<f:FUNC_14>, TypeReference<Primitive<STRING>>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_arg1>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_arg1>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
@@ -160,19 +201,14 @@ CALLELSE0<Location<l:CFBWhile>, Location<f:SUBFUNC_71>>
 CALLELSE0<Location<l:CFBWhile>, Location<f:SUBFUNC_83>>
 CALLELSE0<Location<l:CFBWhile>, Location<f:WHILECOND_51>>
 RETURN0<>
-BEGINFN<Location<f:SUBFUNC_71>, TypeReference<Primitive<VOID>>>
-ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
-ASSIGNVALUE<Location<l:tmp81>, NumberReference<1.000000>>
-ASSIGNEVAL<Location<l:tmp82>, EQUAL<Location<l:var_t3>, Location<l:tmp81>>>
-CALLIF0<Location<l:tmp82>, Location<f:IFBODY_72>>
-RETURN0<>
 BEGINFN<Location<f:FUNC_132>, TypeReference<Primitive<NUMBER> :: Type::Object<#prop: 3, parent: (nullptr)>>>
+FNPARAM<ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>, Location<l:tmp133>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<true>>
-ASSIGNVALUE<Location<l:tmp135>, Location<f:FUNC_133>>
-ASSIGNVALUE<Location<l:retVal>, Location<l:tmp135>>
+ASSIGNVALUE<Location<l:tmp137>, Location<f:FUNC_134>>
+ASSIGNVALUE<Location<l:retVal>, Location<l:tmp137>>
 RETURN1<Location<l:retVal>>
 BEGINFN<Location<f:IFBODY_72>, TypeReference<Primitive<VOID>>>
 SCOPEOF<Location<l:var_func>>
@@ -216,8 +252,8 @@ ASSIGNVALUE<Location<l:tmp125>, Location<f:FUNC_123>>
 ASSIGNVALUE<Location<l:retVal>, Location<l:tmp125>>
 RETURN1<Location<l:retVal>>
 BEGINFN<Location<f:FUNC_116>, TypeReference<Primitive<TYPE>>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_arg1>>
-FNPARAM<TypeReference<Primitive<TYPE>>, Location<l:arg_arg2>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_arg1>>
+FNPARAM<TypeReference<Primitive<TYPE>>, Location<l:var_arg2>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
@@ -226,8 +262,8 @@ ASSIGNVALUE<Location<l:tmp117>, TypeReference<Primitive<NUMBER>>>
 ASSIGNVALUE<Location<l:retVal>, Location<l:tmp117>>
 RETURN1<Location<l:retVal>>
 BEGINFN<Location<f:FUNC_123>, TypeReference<Primitive<TYPE>>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_a>>
-FNPARAM<TypeReference<Primitive<TYPE>>, Location<l:arg_b>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_a>>
+FNPARAM<TypeReference<Primitive<TYPE>>, Location<l:var_b>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
@@ -235,54 +271,23 @@ ASSIGNVALUE<Location<l:CFB>, BooleanReference<true>>
 ASSIGNVALUE<Location<l:tmp124>, TypeReference<Primitive<STRING>>>
 ASSIGNVALUE<Location<l:retVal>, Location<l:tmp124>>
 RETURN1<Location<l:retVal>>
-BEGINFN<Location<f:FUNC_133>, TypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:arg_i>>
-SCOPEOF<Location<l:retVal>>
-SCOPEOF<Location<l:CFB>>
-ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
-ASSIGNVALUE<Location<l:CFB>, BooleanReference<true>>
-ASSIGNVALUE<Location<l:var_i>, Location<l:var_i>>
-ASSIGNEVAL<Location<l:tmp134>, CALL1<Location<l:constructor2>, Location<l:var_i>>>
-ASSIGNVALUE<Location<l:retVal>, Location<l:tmp134>>
-RETURN1<Location<l:retVal>>
-BEGINFN<Location<f:FUNC_137>, TypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>
-FNPARAM<TypeReference<Type::Object<#prop: 3, parent: (nullptr)>>, Location<l:arg_orig>>
+BEGINFN<Location<f:SUBFUNC_71>, TypeReference<Primitive<VOID>>>
+ASSIGNVALUE<Location<l:var_t3>, Location<l:var_t3>>
+ASSIGNVALUE<Location<l:tmp81>, NumberReference<1.000000>>
+ASSIGNEVAL<Location<l:tmp82>, EQUAL<Location<l:var_t3>, Location<l:tmp81>>>
+CALLIF0<Location<l:tmp82>, Location<f:IFBODY_72>>
+RETURN0<>
+BEGINFN<Location<f:FUNC_139>, ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>
+FNPARAM<ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>, Location<l:tmp140>>
+FNPARAM<ObjectTypeReference<Type::Object<#prop: 3, parent: (nullptr)>>, Location<l:var_orig>>
 SCOPEOF<Location<l:retVal>>
 SCOPEOF<Location<l:CFB>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
 ASSIGNVALUE<Location<l:CFB>, BooleanReference<true>>
 ASSIGNVALUE<Location<l:var_orig>, Location<l:var_orig>>
-ASSIGNEVAL<Location<l:tmp138>, OBJGET<Location<l:var_orig>, Location<o:uninit>>>
-ASSIGNEVAL<Location<l:tmp139>, CALL1<Location<l:constructor2>, Location<l:tmp138>>>
-ASSIGNVALUE<Location<l:retVal>, Location<l:tmp139>>
-RETURN1<Location<l:retVal>>
-BEGINFN<Location<f:ENUM_35>, TypeReference<Primitive<VOID>>>
-FNPARAM<TypeReference<Primitive<NUMBER> :: Primitive<STRING>>, Location<s:arg_var>>
-FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:UNUSEDarg_idx>>
-ASSIGNVALUE<Location<l:var_tag>, Location<l:var_tag>>
-ASSIGNVALUE<Location<l:tmp36>, StringReference<tag>>
-ASSIGNEVAL<Location<l:tmp37>, CURRY<Location<l:var_tag>, Location<l:tmp36>>>
-ASSIGNVALUE<Location<l:tmp38>, StringReference<str>>
-ASSIGNEVAL<Location<l:tmp39>, CALL1<Location<l:tmp37>, Location<l:tmp38>>>
-ASSIGNVALUE<Location<l:tmp40>, TypeReference<Primitive<VOID>>>
-WITH<Location<l:tmp39>, Location<f:WITH_41>>
-RETURN0<>
-BEGINFN<Location<f:WITH_41>, TypeReference<Primitive<VOID>>>
-FNPARAM<Location<l:tmp40>, Location<s:res_w>>
-ASSIGNVALUE<Location<l:var_log>, Location<l:var_log>>
-ASSIGNVALUE<Location<l:tmp42>, StringReference<string>>
-CALL1<Location<l:var_log>, Location<l:tmp42>>
-RETURN0<>
-BEGINFN<Location<f:FUNC_142>, TypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>
-ASSIGNEVAL<Location<l:tmp141>, OBJINIT<TypeReference<Type::Object<#prop: 3, parent: (nullptr)>>>>
-OBJSET<Location<l:tmp141>, Location<o:copy>, Location<l:deval_47_copy>>
-OBJSET<Location<l:tmp141>, Location<o:regFunc>, Location<l:deval_47_regFunc>>
-SCOPEOF<Location<l:retVal>>
-SCOPEOF<Location<l:CFB>>
-ASSIGNVALUE<Location<l:CFB>, BooleanReference<false>>
-ASSIGNVALUE<Location<l:tmp143>, NumberReference<5.000000>>
-OBJSET<Location<l:tmp141>, Location<o:uninit>, Location<l:tmp143>>
-ASSIGNEVAL<Location<l:retVal>, OBJINSTANCE<Location<l:tmp141>>>
+ASSIGNEVAL<Location<l:tmp141>, OBJGET<Location<l:var_orig>, Location<o:uninit>>>
+ASSIGNEVAL<Location<l:tmp142>, CALL1<Location<l:constructor2>, Location<l:tmp141>>>
+ASSIGNVALUE<Location<l:retVal>, Location<l:tmp142>>
 RETURN1<Location<l:retVal>>
 ASSIGNVALUE<Location<l:tmp1>, Location<f:FUNC_0>>
 ASSIGNVALUE<Location<l:var_tag>, Location<l:tmp1>>
@@ -387,21 +392,21 @@ OTYPEPROP<Location<l:tmp130>, Location<o:uninit>, TypeReference<Primitive<NUMBER
 OTYPEPROP<Location<l:tmp130>, Location<o:regFunc>, TypeReference<:: Primitive<NUMBER> :: Primitive<THIS>>>
 OTYPEPROP<Location<l:tmp130>, Location<o:copy>, TypeReference<Primitive<THIS> :: Primitive<THIS>>>
 ASSIGNEVAL<Location<l:tmp131>, OTYPEFINALIZE<Location<l:tmp130>>>
-ASSIGNVALUE<Location<l:tmp136>, Location<f:FUNC_132>>
-ASSIGNVALUE<Location<l:deval_47_regFunc>, Location<l:tmp136>>
-ASSIGNVALUE<Location<l:tmp140>, Location<f:FUNC_137>>
-ASSIGNVALUE<Location<l:deval_47_copy>, Location<l:tmp140>>
-ASSIGNVALUE<Location<l:constructor1>, Location<f:FUNC_142>>
-ASSIGNVALUE<Location<l:constructor2>, Location<f:FUNC_145>>
+ASSIGNVALUE<Location<l:tmp138>, Location<f:FUNC_132>>
+ASSIGNVALUE<Location<l:deval_46_regFunc>, Location<l:tmp138>>
+ASSIGNVALUE<Location<l:tmp143>, Location<f:FUNC_139>>
+ASSIGNVALUE<Location<l:deval_46_copy>, Location<l:tmp143>>
+ASSIGNVALUE<Location<l:constructor1>, Location<f:FUNC_145>>
+ASSIGNVALUE<Location<l:constructor2>, Location<f:FUNC_150>>
 ASSIGNVALUE<Location<l:tmp131>, Location<l:tmp131>>
 ASSIGNVALUE<Location<l:var_UserDefined>, Location<l:tmp131>>
 SCOPEOF<Location<l:var_obj>>
-ASSIGNEVAL<Location<l:tmp151>, CALL0<Location<l:constructor1>>>
-ASSIGNVALUE<Location<l:var_obj>, Location<l:tmp151>>
+ASSIGNEVAL<Location<l:tmp158>, CALL0<Location<l:constructor1>>>
+ASSIGNVALUE<Location<l:var_obj>, Location<l:tmp158>>
 ASSIGNVALUE<Location<l:var_obj>, Location<l:var_obj>>
-ASSIGNEVAL<Location<l:tmp152>, OBJGET<Location<l:var_obj>, Location<o:regFunc>>>
-ASSIGNEVAL<Location<l:tmp153>, CALL0<Location<l:tmp152>>>
-ASSIGNVALUE<Location<l:tmp154>, NumberReference<4.000000>>
-ASSIGNEVAL<Location<l:tmp155>, CALL1<Location<l:tmp153>, Location<l:tmp154>>>
-ASSIGNVALUE<Location<l:var_obj>, Location<l:tmp155>>
+ASSIGNEVAL<Location<l:tmp159>, OBJGET<Location<l:var_obj>, Location<o:regFunc>>>
+ASSIGNEVAL<Location<l:tmp160>, CALL0<Location<l:tmp159>>>
+ASSIGNVALUE<Location<l:tmp161>, NumberReference<4.000000>>
+ASSIGNEVAL<Location<l:tmp162>, CALL1<Location<l:tmp160>, Location<l:tmp161>>>
+ASSIGNVALUE<Location<l:var_obj>, Location<l:tmp162>>
 [32m success [39m[0m[main] Compiled to ISA.
