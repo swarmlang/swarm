@@ -7,3 +7,6 @@ $l:root <- 3
 $l:cuberoot <- curry f:NTH_ROOT $l:root
 
 $l:three <- call $l:cuberoot 27
+
+$l:vec <- call f:RANDOM_VECTOR 10
+$l:vec_count <- call f:COUNT $l:vec

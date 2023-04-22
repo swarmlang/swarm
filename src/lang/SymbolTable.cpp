@@ -113,6 +113,15 @@ namespace swarmc::Lang {
         auto serror = new PrologueFunctionSymbol("sError", typeStrVoid, new ProloguePosition("sError"), "null");
         prologueScope->insert(serror);
 
+        // count :: enumerable<ambiguous> :: number
+        auto typeEnumAny = new Type::Enumerable(Type::Ambiguous::of());
+        auto typeEnumAnyToNum = new Type::Lambda1(
+            typeEnumAny,
+            Type::Primitive::of(Type::Intrinsic::NUMBER)
+        );
+        auto count = new PrologueFunctionSymbol("count", typeEnumAnyToNum, new ProloguePosition("count"), "COUNT");
+        prologueScope->insert(count);
+
         return prologueScope;
     }
 

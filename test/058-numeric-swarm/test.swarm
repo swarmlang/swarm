@@ -8,6 +8,10 @@ number->number cubeRoot = nthRoot(root);
 
 number three = cubeRoot(27);
 
+enumerable<number> vec = randomVector(11);
+number vecCount = count(vec);
+
 lLog(numberToString(floored));
 lLog(numberToString(ceilinged));
 lLog(numberToString(three));
+lLog(numberToString(vecCount));

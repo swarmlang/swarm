@@ -36,3 +36,23 @@
 [35m   debug [39m[0m[vm] assignEval: got call0 or call1
 [35m   debug [39m[0m[vm] assignEval: jumped from return
 [35m   debug [39m[0m[vm] Location<l:three> <- NumberReference<3.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:vec> CALL1<Location<f:RANDOM_VECTOR>, NumberReference<10.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:RANDOM_VECTOR> NumberReference<10.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<RandomVectorFunction<>>
+[35m   debug [39m[0m[vm] provider call: RandomVectorFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:vec> CALL1<Location<f:RANDOM_VECTOR>, NumberReference<10.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:vec> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 10>
+[35m   debug [39m[0m[vm] assigneval Location<l:vec_count> CALL1<Location<f:COUNT>, Location<l:vec>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:COUNT> Location<l:vec>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CountFunction<>>
+[35m   debug [39m[0m[vm] provider call: CountFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:vec_count> CALL1<Location<f:COUNT>, Location<l:vec>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:vec_count> <- NumberReference<10.000000>

@@ -74,6 +74,7 @@ To call a function, simply call them as you would in Java or C. The thing being 
 | `floor`           | Round a number DOWN to the nearest integer.                 | `number -> number`                                   | The number to take the floor of.                                 |
 | `ceiling`         | Round a number UP to the nearest integer.                   | `number -> number`                                   | The number to take the ceiling of.                               |
 | `nthRoot`         | Take the nth-root of the specified number.                  | `number -> number -> number`                         | The root to take (e.g. 2 is square root) and the number to root. |
+| `count`           | Count the number of elements in an enumerable.              | `enumerable<_> -> number`                            | The enumerable to find the size of.                              |
 
 ## Variable Declarations
 

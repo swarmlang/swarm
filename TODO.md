@@ -71,3 +71,5 @@
 - FUTURE: Swarm module package manager?
 - Fabric: rewrite Stream as a resource
 - SVM: automatic parallelization of SVI code and wait on join
+- SVM: only lock reads if there are writes in the instruction
+- Function to create a zeroed matrix of a certain type

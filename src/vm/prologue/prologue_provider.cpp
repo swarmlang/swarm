@@ -8,6 +8,7 @@
 #include "resource.h"
 #include "type_construction.h"
 #include "numeric.h"
+#include "count.h"
 
 namespace swarmc::Runtime::Prologue {
 
@@ -32,6 +33,7 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "FLOOR" ) return new FloorFunction(this);
         if ( name == "CEILING" ) return new CeilingFunction(this);
         if ( name == "NTH_ROOT" ) return new NthRootFunction(this);
+        if ( name == "COUNT" ) return new CountFunction(this);
         return nullptr;
     }
 
