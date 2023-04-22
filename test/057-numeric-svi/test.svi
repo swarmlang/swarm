@@ -1,0 +1,9 @@
+$l:num <- 4.3
+
+$l:floored <- call f:FLOOR $l:num
+$l:ceilinged <- call f:CEILING $l:num
+
+$l:root <- 3
+$l:cuberoot <- curry f:NTH_ROOT $l:root
+
+$l:three <- call $l:cuberoot 27

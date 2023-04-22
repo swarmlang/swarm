@@ -1,0 +1,103 @@
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[35m   debug [39m[0m[vm] assignvalue Location<l:tmp0> NumberReference<4.300000>
+[35m   debug [39m[0m[vm] Location<l:tmp0> <- NumberReference<4.300000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_num> Location<l:tmp0>
+[35m   debug [39m[0m[vm] Location<l:var_num> <- NumberReference<4.300000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_floor> Location<f:FLOOR>
+[35m   debug [39m[0m[vm] Location<l:var_floor> <- FunctionReference<FloorFunction<>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp1> CALL1<Location<f:FLOOR>, Location<l:tmp0>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:FLOOR> Location<l:tmp0>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<FloorFunction<>>
+[35m   debug [39m[0m[vm] provider call: FloorFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp1> CALL1<Location<f:FLOOR>, Location<l:tmp0>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp1> <- NumberReference<4.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_floored> Location<l:tmp1>
+[35m   debug [39m[0m[vm] Location<l:var_floored> <- NumberReference<4.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_ceiling> Location<f:CEILING>
+[35m   debug [39m[0m[vm] Location<l:var_ceiling> <- FunctionReference<CeilingFunction<>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp2> CALL1<Location<f:CEILING>, Location<l:var_num>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:CEILING> Location<l:var_num>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CeilingFunction<>>
+[35m   debug [39m[0m[vm] provider call: CeilingFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp2> CALL1<Location<f:CEILING>, Location<l:var_num>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp2> <- NumberReference<5.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_ceilinged> Location<l:tmp2>
+[35m   debug [39m[0m[vm] Location<l:var_ceilinged> <- NumberReference<5.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp3> NumberReference<3.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp3> <- NumberReference<3.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_root> Location<l:tmp3>
+[35m   debug [39m[0m[vm] Location<l:var_root> <- NumberReference<3.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_nthRoot> Location<f:NTH_ROOT>
+[35m   debug [39m[0m[vm] Location<l:var_nthRoot> <- FunctionReference<NthRootFunction<>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp4> CURRY<Location<f:NTH_ROOT>, Location<l:tmp3>>
+[35m   debug [39m[0m[vm] curry Location<f:NTH_ROOT> Location<l:tmp3>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<NthRootFunction<>>
+[35m   debug [39m[0m[vm] Location<l:tmp4> <- FunctionReference<CurriedFunction<f: NthRootFunction<>, ref: NumberReference<3.000000>>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_cubeRoot> Location<l:tmp4>
+[35m   debug [39m[0m[vm] Location<l:var_cubeRoot> <- FunctionReference<CurriedFunction<f: NthRootFunction<>, ref: NumberReference<3.000000>>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp5> NumberReference<27.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp5> <- NumberReference<27.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp6> CALL1<Location<l:tmp4>, Location<l:tmp5>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:tmp4> Location<l:tmp5>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: NthRootFunction<>, ref: NumberReference<3.000000>>>
+[35m   debug [39m[0m[vm] provider call: NthRootFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp6> CALL1<Location<l:tmp4>, Location<l:tmp5>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp6> <- NumberReference<3.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_three> Location<l:tmp6>
+[35m   debug [39m[0m[vm] Location<l:var_three> <- NumberReference<3.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_numberToString> Location<f:NUMBER_TO_STRING>
+[35m   debug [39m[0m[vm] Location<l:var_numberToString> <- FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp7> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:var_floored>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:NUMBER_TO_STRING> Location<l:var_floored>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[0m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp7> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:var_floored>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp7> <- StringReference<4.000000>
+[35m   debug [39m[0m[vm] streampush Location<l:STDOUT> Location<l:tmp7>
+[35m   debug [39m[0m[vm] ensureStream: StreamReference<LocalOutputStream<>>
+[34m    info [39m[0m[l] 4.000000
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_numberToString> Location<f:NUMBER_TO_STRING>
+[35m   debug [39m[0m[vm] Location<l:var_numberToString> <- FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp8> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:var_ceilinged>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:NUMBER_TO_STRING> Location<l:var_ceilinged>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[0m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp8> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:var_ceilinged>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp8> <- StringReference<5.000000>
+[35m   debug [39m[0m[vm] streampush Location<l:STDOUT> Location<l:tmp8>
+[35m   debug [39m[0m[vm] ensureStream: StreamReference<LocalOutputStream<>>
+[34m    info [39m[0m[l] 5.000000
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_numberToString> Location<f:NUMBER_TO_STRING>
+[35m   debug [39m[0m[vm] Location<l:var_numberToString> <- FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp9> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:var_three>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:NUMBER_TO_STRING> Location<l:var_three>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<NumberToStringFunction<>>
+[35m   debug [39m[0m[vm] provider call: NumberToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp9> CALL1<Location<f:NUMBER_TO_STRING>, Location<l:var_three>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp9> <- StringReference<3.000000>
+[35m   debug [39m[0m[vm] streampush Location<l:STDOUT> Location<l:tmp9>
+[35m   debug [39m[0m[vm] ensureStream: StreamReference<LocalOutputStream<>>
+[34m    info [39m[0m[l] 3.000000

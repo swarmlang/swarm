@@ -38,6 +38,14 @@ namespace swarmc::Lang {
         auto tan = new PrologueFunctionSymbol("tan", typeNumToNum, new ProloguePosition("tan"), "TAN");
         prologueScope->insert(tan);
 
+        // floor :: number -> number
+        auto floor = new PrologueFunctionSymbol("floor", typeNumToNum, new ProloguePosition("floor"), "FLOOR");
+        prologueScope->insert(floor);
+
+        // ceiling :: number -> number
+        auto ceiling = new PrologueFunctionSymbol("ceiling", typeNumToNum, new ProloguePosition("ceiling"), "CEILING");
+        prologueScope->insert(ceiling);
+
         // random :: -> number
         auto nullaryNumber = new Type::Lambda0(
             Type::Primitive::of(Type::Intrinsic::NUMBER)
@@ -80,6 +88,14 @@ namespace swarmc::Lang {
         );
         auto range = new PrologueFunctionSymbol("range", typeNumToNumToNumToEnumNum, new ProloguePosition("range"), "RANGE");
         prologueScope->insert(range);
+
+        // nthRoot :: number -> number -> number
+        auto typeNumToNumToNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeNumToNum
+        );
+        auto nthRoot = new PrologueFunctionSymbol("nthRoot", typeNumToNumToNum, new ProloguePosition("nthRoot"), "NTH_ROOT");
+        prologueScope->insert(nthRoot);
 
         auto typeStrVoid = new Type::Lambda1(
             Type::Primitive::of(Type::Intrinsic::STRING),

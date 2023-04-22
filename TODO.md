@@ -70,3 +70,4 @@
 - FUTURE: Serialize ISA to SVI code
 - FUTURE: Swarm module package manager?
 - Fabric: rewrite Stream as a resource
+- SVM: automatic parallelization of SVI code and wait on join

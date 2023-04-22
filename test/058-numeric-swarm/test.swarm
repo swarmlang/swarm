@@ -1,0 +1,13 @@
+number num = 4.3;
+
+number floored = floor(num);
+number ceilinged = ceiling(num);
+
+number root = 3;
+number->number cubeRoot = nthRoot(root);
+
+number three = cubeRoot(27);
+
+lLog(numberToString(floored));
+lLog(numberToString(ceilinged));
+lLog(numberToString(three));

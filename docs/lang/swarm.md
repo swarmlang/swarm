@@ -56,21 +56,24 @@ To call a function, simply call them as you would in Java or C. The thing being 
 
 ## Prologue functions
 
-| **Name** | **Description** | **Type** | **Arguments** |
-|----------|-----------------|----------|---------------|
-| `numberToString` | Converts a number to a string. | `number -> string` | The number to convert. |
-| `booleanToString` | Converts a boolean to a string. | `bool -> string` | The boolean to convert. |
-| `sin` | Returns the sine of the angle. | `number -> number` | The angle in radians. |
-| `cos` | Returns the cosine of the angle. | `number -> number` | The angle in radians. |
-| `tan` | Returns the tangent of the angle. | `number -> number` | The angle in radians. |
-| `random` | Returns a random number in the range [0,1). | `-> number` | N/A |
-| `randomVector` | Returns an enumerable of random numbers in the range [0,1). | `number -> enumerable<number>` | The length of the enumerable to be generated. |
-| `randomMatrix` | Returns a matrix of random numbers in the range [0,1). | `number -> number -> enumerable<enumerable<number>>` | The number of rows and the number of columns. |
-| `range` | Returns an enumerable containing a range of numbers. | `number -> number -> number -> enumerable<number>` | The start number, the end number, and the step size. |
-| `lLog` | Logs a message to the local worker's console. | `string -> void` | The string to be logged. |
-| `sLog` | Logs a message to the master worker's console. | `string -> void` | The string to be logged. |
-| `lError` | Logs an error to the local worker's console. | `string -> void` | The string to be logged. |
-| `sError` | Logs an error to the master worker's console. | `string -> void` | The string to be logged. |
+| **Name**          | **Description**                                             | **Type**                                             | **Arguments**                                                    |
+|-------------------|-------------------------------------------------------------|------------------------------------------------------|------------------------------------------------------------------|
+| `numberToString`  | Converts a number to a string.                              | `number -> string`                                   | The number to convert.                                           |
+| `booleanToString` | Converts a boolean to a string.                             | `bool -> string`                                     | The boolean to convert.                                          |
+| `sin`             | Returns the sine of the angle.                              | `number -> number`                                   | The angle in radians.                                            |
+| `cos`             | Returns the cosine of the angle.                            | `number -> number`                                   | The angle in radians.                                            |
+| `tan`             | Returns the tangent of the angle.                           | `number -> number`                                   | The angle in radians.                                            |
+| `random`          | Returns a random number in the range [0,1).                 | `-> number`                                          | N/A                                                              |
+| `randomVector`    | Returns an enumerable of random numbers in the range [0,1). | `number -> enumerable<number>`                       | The length of the enumerable to be generated.                    |
+| `randomMatrix`    | Returns a matrix of random numbers in the range [0,1).      | `number -> number -> enumerable<enumerable<number>>` | The number of rows and the number of columns.                    |
+| `range`           | Returns an enumerable containing a range of numbers.        | `number -> number -> number -> enumerable<number>`   | The start number, the end number, and the step size.             |
+| `lLog`            | Logs a message to the local worker's console.               | `string -> void`                                     | The string to be logged.                                         |
+| `sLog`            | Logs a message to the master worker's console.              | `string -> void`                                     | The string to be logged.                                         |
+| `lError`          | Logs an error to the local worker's console.                | `string -> void`                                     | The string to be logged.                                         |
+| `sError`          | Logs an error to the master worker's console.               | `string -> void`                                     | The string to be logged.                                         |
+| `floor`           | Round a number DOWN to the nearest integer.                 | `number -> number`                                   | The number to take the floor of.                                 |
+| `ceiling`         | Round a number UP to the nearest integer.                   | `number -> number`                                   | The number to take the ceiling of.                               |
+| `nthRoot`         | Take the nth-root of the specified number.                  | `number -> number -> number`                         | The root to take (e.g. 2 is square root) and the number to root. |
 
 ## Variable Declarations
 
