@@ -1,0 +1,58 @@
+[35m   debug [39m[0m[vm] assignvalue Location<l:num> NumberReference<4.300000>
+[35m   debug [39m[0m[vm] Location<l:num> <- NumberReference<4.300000>
+[35m   debug [39m[0m[vm] assigneval Location<l:floored> CALL1<Location<f:FLOOR>, Location<l:num>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:FLOOR> Location<l:num>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<FloorFunction<>>
+[35m   debug [39m[0m[vm] provider call: FloorFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:floored> CALL1<Location<f:FLOOR>, Location<l:num>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:floored> <- NumberReference<4.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:ceilinged> CALL1<Location<f:CEILING>, Location<l:num>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:CEILING> Location<l:num>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CeilingFunction<>>
+[35m   debug [39m[0m[vm] provider call: CeilingFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:ceilinged> CALL1<Location<f:CEILING>, Location<l:num>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:ceilinged> <- NumberReference<5.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:root> NumberReference<3.000000>
+[35m   debug [39m[0m[vm] Location<l:root> <- NumberReference<3.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:cuberoot> CURRY<Location<f:NTH_ROOT>, Location<l:root>>
+[35m   debug [39m[0m[vm] curry Location<f:NTH_ROOT> Location<l:root>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<NthRootFunction<>>
+[35m   debug [39m[0m[vm] Location<l:cuberoot> <- FunctionReference<CurriedFunction<f: NthRootFunction<>, ref: NumberReference<3.000000>>>
+[35m   debug [39m[0m[vm] assigneval Location<l:three> CALL1<Location<l:cuberoot>, NumberReference<27.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:cuberoot> NumberReference<27.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: NthRootFunction<>, ref: NumberReference<3.000000>>>
+[35m   debug [39m[0m[vm] provider call: NthRootFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:three> CALL1<Location<l:cuberoot>, NumberReference<27.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:three> <- NumberReference<3.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:vec> CALL1<Location<f:RANDOM_VECTOR>, NumberReference<10.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:RANDOM_VECTOR> NumberReference<10.000000>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<RandomVectorFunction<>>
+[35m   debug [39m[0m[vm] provider call: RandomVectorFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:vec> CALL1<Location<f:RANDOM_VECTOR>, NumberReference<10.000000>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:vec> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 10>
+[35m   debug [39m[0m[vm] assigneval Location<l:vec_count> CALL1<Location<f:COUNT>, Location<l:vec>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:COUNT> Location<l:vec>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CountFunction<>>
+[35m   debug [39m[0m[vm] provider call: CountFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:vec_count> CALL1<Location<f:COUNT>, Location<l:vec>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:vec_count> <- NumberReference<10.000000>
