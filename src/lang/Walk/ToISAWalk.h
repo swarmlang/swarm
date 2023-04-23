@@ -367,6 +367,21 @@ protected:
         return instrs;
     }
 
+    ISA::Instructions* walkSqrtNode(SqrtNode* node) override {
+        auto instrs = walk(node->exp());
+        auto loc = getLocFromAssign(instrs->back());
+        auto curried = makeNewTmp(ISA::Affinity::LOCAL);
+        instrs->push_back(useref(new ISA::AssignEval(curried, new ISA::Curry(
+            makeLocation(ISA::Affinity::FUNCTION, "NTH_ROOT"),
+            new ISA::NumberReference(2)
+        ))));
+        instrs->push_back(useref(new ISA::AssignEval(
+            makeNewTmp(ISA::Affinity::LOCAL),
+            new ISA::Call1(curried, loc)
+        )));
+        return instrs;
+    }
+
     ISA::Instructions* walkNotNode(NotNode* node) override {
         auto instrs = walk(node->exp());
         auto loc = getLocFromAssign(instrs->back());

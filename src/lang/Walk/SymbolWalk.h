@@ -195,6 +195,10 @@ protected:
         return walk(node->exp());
     }
 
+    SymbolMap* walkSqrtNode(SqrtNode* node) override {
+        return walk(node->exp());
+    }
+
     SymbolMap* walkNotNode(NotNode* node) override {
         return walk(node->exp());
     }

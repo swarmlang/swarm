@@ -79,6 +79,8 @@ namespace swarmc::Lang {
             if (kind == Parser::token::INCLUDE) return "INCLUDE";
             if (kind == Parser::token::CONSTRUCTOR) return "CONSTRUCTOR";
             if (kind == Parser::token::FROM) return "FROM";
+            if (kind == Parser::token::SQRT) return "SQRT";
+            if (kind == Parser::token::WILDCARD) return "WILDCARD";
 
             return "UNKNOWN";
         }

@@ -175,6 +175,8 @@ protected:
 
     void walkNegativeExpressionNode(NegativeExpressionNode* node) override {}
 
+    void walkSqrtNode(SqrtNode* node) override {}
+
     void walkNotNode(NotNode* node) override {}
 
     void walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {}

@@ -177,6 +177,13 @@ protected:
         pop_space();
     }
 
+    void walkSqrtNode(SqrtNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->exp());
+        pop_space();
+    }
+
     void walkNotNode(NotNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();

@@ -187,6 +187,10 @@ protected:
         return walk(node->exp());
     }
 
+    bool walkSqrtNode(SqrtNode* node) override {
+        return walk(node->exp());
+    }
+
     bool walkNotNode(NotNode* node) override {
         return walk(node->exp());
     }

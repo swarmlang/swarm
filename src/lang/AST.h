@@ -1425,6 +1425,27 @@ namespace Walk {
         }
     };
 
+    class SqrtNode final : public UnaryExpressionNode {
+    public:
+        SqrtNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
+    
+        virtual std::string getName() const override {
+            return "SqrtNode";
+        }
+
+        virtual std::string toString() const override {
+            return "SqrtNode<>";
+        }
+
+        virtual SqrtNode* copy() const override {
+            return new SqrtNode(position(), _exp->copy());
+        }
+
+        virtual Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
+        }
+    };
+
     /** AST node referencing boolean negation of an expression. */
     class NotNode final : public UnaryExpressionNode {
     public:

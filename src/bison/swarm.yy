@@ -151,6 +151,8 @@
 %token <transToken>      INCLUDE
 %token <transToken>      FROM
 %token <transToken>      CONSTRUCTOR
+%token <transToken>      SQRT
+%token <transToken>      WILDCARD
 
 /*    (attribute type)      (nonterminal)    */
 %type <transProgram>        program
@@ -266,12 +268,38 @@ statement :
         delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11;
     }
 
+    | ENUMERATE lval AS WILDCARD LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $7->position());
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, new IdentifierNode($4->position(), "_"), false);
+        e->assumeAndReduceStatements($6->reduceToStatements());
+        $$ = e;
+        delete $1; delete $3; delete $4; delete $5; delete $7;
+    }
+
+    | ENUMERATE lval AS WILDCARD COMMA shared id LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $10->position());
+        EnumerationStatement* e = new EnumerationStatement(pos, $2, new IdentifierNode($4->position(), "_"), $7, false);
+        auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
+        $7->overrideSymbol(new VariableSymbol($7->name(), t, $7->position(), $6->shared()));
+        e->assumeAndReduceStatements($9->reduceToStatements());
+        $$ = e;
+        delete $1; delete $3; delete $4; delete $5; delete $6; delete $8; delete $10;
+    }
+
     | WITH term AS shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
         WithStatement* w = new WithStatement(pos, $2, $5, $4->shared());
         w->assumeAndReduceStatements($7->reduceToStatements());
         $$ = w;
         delete $1; delete $3; delete $4; delete $6; delete $8;
+    }
+
+    | WITH term AS WILDCARD LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $7->position());
+        WithStatement* w = new WithStatement(pos, $2, new IdentifierNode($4->position(), "_"), false);
+        w->assumeAndReduceStatements($6->reduceToStatements());
+        $$ = w;
+        delete $1; delete $3; delete $4; delete $5; delete $7;
     }
 
     | IF LPAREN expression RPAREN LBRACE statements RBRACE {
@@ -795,6 +823,12 @@ expressionF :
     | NOT term {
         Position* pos = new Position($1->position(), $2->position());
         $$ = new NotNode(pos, $2);
+        delete $1;
+    }
+
+    | SQRT term {
+        Position* pos = new Position($1->position(), $2->position());
+        $$ = new SqrtNode(pos, $2);
         delete $1;
     }
 

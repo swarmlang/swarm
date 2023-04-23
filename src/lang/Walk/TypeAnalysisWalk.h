@@ -538,6 +538,23 @@ protected:
         return flag;
     }
 
+    bool walkSqrtNode(SqrtNode* node) override {
+        bool flag = walk(node->exp());
+
+        Type::Type* numType = Type::Primitive::of(Type::Intrinsic::NUMBER);
+        Type::Type* expType = _types->getTypeOf(node->exp());
+        if ( !expType->isAssignableTo(numType) && expType->intrinsic() != Type::Intrinsic::ERROR ) {
+            Reporting::typeError(
+                node->position(),
+                "Attempted to perform square root operation on non-numeric expression."
+            );
+            flag = false;
+        }
+
+        _types->setTypeOf(node, flag ? numType : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
+    }
+
     bool walkNotNode(NotNode* node) override {
         bool flag = walk(node->exp());
 

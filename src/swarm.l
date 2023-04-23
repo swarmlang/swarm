@@ -281,11 +281,19 @@ from {
 	return makeBareToken(TokenKind::POWER);
 }
 
+"_/" {
+	return makeBareToken(TokenKind::SQRT);
+}
+
+"_" {
+	return makeBareToken(TokenKind::WILDCARD);
+}
+
 \. {
 	return makeBareToken(TokenKind::DOT);
 }
 
-({LETTER}|_)({LETTER}|{DIGIT}|_)* {
+({LETTER}({LETTER}|{DIGIT}|_)*)|(_*({LETTER}|{DIGIT})({LETTER}|{DIGIT}|_)*) {
 	return makeIDToken();
 }
 
