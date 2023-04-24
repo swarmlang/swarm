@@ -49,9 +49,6 @@ protected:
 
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
-        } else if ( node->_symbol->type()->isAmbiguous() ) {
-            assert(node->_symbol->kind() == SemanticSymbolKind::VARIABLE);
-            ((VariableSymbol*)node->_symbol)->disambiguateType();
         }
 
         _types->setTypeOf(node, node->_symbol->type());
@@ -117,13 +114,6 @@ protected:
     }
 
     bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
-        try {
-            node->_type = node->_type->disambiguateStatically();
-        } catch (Errors::SwarmError& s) {
-            Reporting::typeError(node->position(), s.what());
-            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
-            return false;
-        }
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::TYPE));
         return true;
     }
@@ -134,32 +124,7 @@ protected:
     }
 
     bool walkVariableDeclarationNode(VariableDeclarationNode* node) override {
-        // update symbol with value of assignment for assignments to type variables
-        if ( node->id()->type()->intrinsic() == Type::Intrinsic::TYPE ) {
-            TypeLiteral* objtype = nullptr;
-            if ( node->value()->getName() == "TypeLiteral" || node->value()->getName() == "TypeBodyNode" ) {
-                objtype = (TypeLiteral*)node->value();
-            } else if ( node->value()->getName() == "IdentifierNode" ) {
-                assert(((IdentifierNode*)node->value())->symbol()->kind() == SemanticSymbolKind::VARIABLE);
-                objtype = ((VariableSymbol*)((IdentifierNode*)node->value())->symbol())->getObjectType();
-            } else {
-                Reporting::typeError(
-                    node->value()->position(),
-                    "Attempt to assign nontrivial value to a type variable."
-                );
-                _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
-                return false;
-            }
-            assert(((VariableSymbol*)node->id()->symbol())->kind() == SemanticSymbolKind::VARIABLE);
-            ((VariableSymbol*)node->id()->symbol())->setObjectType(objtype);
-        } 
-
         bool flag = walk(node->typeNode());
-        // update the symbol of identifiers of object types
-        if ( node->id()->type()->isAmbiguous() ) {
-            assert(((VariableSymbol*)node->id()->symbol())->kind() == SemanticSymbolKind::VARIABLE);
-            ((VariableSymbol*)node->id()->symbol())->setObjectType(node->typeNode());
-        }
         flag = walk(node->id()) && flag;
         flag = walk(node->value()) && flag;
 
@@ -886,15 +851,6 @@ protected:
 
     bool walkFunctionNode(FunctionNode* node) override {
         bool flag = walk(node->typeNode());
-        //disambiguate the types of formals
-        for (auto f : *node->formals()) {
-            walk(f.first);
-            if ( f.first->value()->intrinsic() == Type::Intrinsic::OBJECT ) {
-                assert(f.second->symbol()->kind() == SemanticSymbolKind::VARIABLE);
-                ((VariableSymbol*)f.second->symbol())->setObjectType(f.first);
-            }
-            walk(f.second);
-        }
         _funcTypes->push(node->type());
         _funcArgs->push(node->formals()->size());
         _funcCount++;
