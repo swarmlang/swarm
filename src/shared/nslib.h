@@ -2,7 +2,8 @@
 #define NSLIB_H
 
 //#define NSLIB_GC_TRACK
-#define NSLIB_GC_DEBUG_FREE
+//#define NSLIB_GC_DEBUG_FREE
+#define NSLIB_GC_NO_FREE
 
 #ifndef NSLIB_BINN_H_PATH
 #define NSLIB_BINN_H_PATH "../../mod/binn/src/binn.h"
@@ -2165,7 +2166,9 @@ namespace nslib {
 #ifdef NSLIB_GC_DEBUG_FREE
             r->nslibMarkWouldHaveFreed();
 #else
+#ifndef NSLIB_GC_NO_FREE
             delete r;
+#endif
 #endif
         }
     }

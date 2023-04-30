@@ -53,6 +53,10 @@ namespace swarmc::Lang {
         auto random = new PrologueFunctionSymbol("random", nullaryNumber, new ProloguePosition("random"), "RANDOM");
         prologueScope->insert(random);
 
+        // time :: -> number
+        auto time = new PrologueFunctionSymbol("time", nullaryNumber, new ProloguePosition("time"), "TIME");
+        prologueScope->insert(time);
+
         // randomVector :: number -> (enumerable<number>)
         auto typeEnumNum = new Type::Enumerable(
             Type::Primitive::of(Type::Intrinsic::NUMBER)

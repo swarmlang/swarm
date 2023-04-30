@@ -9,6 +9,8 @@
 #include "type_construction.h"
 #include "numeric.h"
 #include "count.h"
+#include "time_helpers.h"
+
 
 namespace swarmc::Runtime::Prologue {
 
@@ -34,6 +36,7 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "CEILING" ) return new CeilingFunction(this);
         if ( name == "NTH_ROOT" ) return new NthRootFunction(this);
         if ( name == "COUNT" ) return new CountFunction(this);
+        if ( name == "TIME" ) return new TimeFunction(this);
         return nullptr;
     }
 

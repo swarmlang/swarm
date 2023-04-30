@@ -66,6 +66,9 @@ namespace swarmc::Runtime {
         /** This should use a source of randomness to generate a random double on [0,1]. */
         virtual double random() = 0;
 
+        /** Get the current UNIX time in fractional seconds. */
+        virtual double getCurrentTime() = 0;
+
         virtual NodeID getNodeId() = 0;
 
         virtual void putKeyValue(const std::string& key, const std::string& value) = 0;

@@ -5,6 +5,7 @@
 #include <queue>
 #include <random>
 #include <utility>
+#include <chrono>
 #include "../../shared/nslib.h"
 #include "interfaces.h"
 
@@ -33,6 +34,13 @@ namespace swarmc::Runtime::SingleThreaded {
 
         std::size_t getId() override {
             return _id++;
+        }
+
+        double getCurrentTime() override {
+            auto now = std::chrono::system_clock::now();
+            auto unixTime = now.time_since_epoch();
+            auto unixTimeMs = std::chrono::duration_cast<std::chrono::milliseconds>(unixTime);
+            return ((double) unixTimeMs.count()) / ((double) 1000);
         }
 
         double random() override {
