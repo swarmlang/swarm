@@ -42,6 +42,8 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "ZERO_MATRIX" ) return new ZeroMatrixFunction(this);
         if ( name == "VECTOR_TO_STRING" ) return new VectorToStringFunction(this);
         if ( name == "MATRIX_TO_STRING" ) return new MatrixToStringFunction(this);
+        if ( name == "SUBVECTOR" ) return new SubVectorFunction(this);
+        if ( name == "SUBMATRIX" ) return new SubMatrixFunction(this);
         return nullptr;
     }
 

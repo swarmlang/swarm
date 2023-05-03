@@ -150,6 +150,46 @@ namespace swarmc::Lang {
         auto count = new PrologueFunctionSymbol("count", typeEnumAnyToNum, new ProloguePosition("count"), "COUNT");
         prologueScope->insert(count);
 
+        // subVector :: number -> number -> enumerable<number> -> enumerable<number>
+        auto typeEnumNumToEnumNum = new Type::Lambda1(
+            typeEnumNum,
+            typeEnumNum
+        );
+        auto typeNumToEnumNumToEnumNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeEnumNumToEnumNum
+        );
+        auto typeNumToNumToEnumNumToEnumNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeNumToEnumNumToEnumNum
+        );
+        auto subVector = new PrologueFunctionSymbol("subVector", typeNumToNumToEnumNumToEnumNum, new ProloguePosition("subVector"), "SUBVECTOR");
+        prologueScope->insert(subVector);
+
+        // subMatrix :: number -> number -> number -> number -> enumerable<number> -> enumerable<number>
+        auto typeEnumEnumNumToEnumEnumNum = new Type::Lambda1(
+            typeEnumEnumNum,
+            typeEnumEnumNum
+        );
+        auto typeNumToEnumEnumNumToEnumEnumNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeEnumEnumNumToEnumEnumNum
+        );
+        auto typeNumToNumToEnumEnumNumToEnumEnumNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeNumToEnumEnumNumToEnumEnumNum
+        );
+        auto typeNumToNumToNumToEnumEnumNumToEnumEnumNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeNumToNumToEnumEnumNumToEnumEnumNum
+        );
+        auto typeNumToNumToNumToNumToEnumEnumNumToEnumEnumNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeNumToNumToNumToEnumEnumNumToEnumEnumNum
+        );
+        auto subMatrix = new PrologueFunctionSymbol("subMatrix", typeNumToNumToNumToNumToEnumEnumNumToEnumEnumNum, new ProloguePosition("subMatrix"), "SUBMATRIX");
+        prologueScope->insert(subMatrix);
+
         return prologueScope;
     }
 

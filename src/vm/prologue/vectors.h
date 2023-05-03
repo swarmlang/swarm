@@ -69,6 +69,78 @@ namespace swarmc::Runtime::Prologue {
         }
     };
 
+    class SubVectorFunctionCall : public PrologueFunctionCall {
+    public:
+        SubVectorFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType) :
+            PrologueFunctionCall(provider, "SUBVECTOR", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "SubVectorFunctionCall<>";
+        }
+    };
+
+    class SubVectorFunction : public PrologueFunction {
+    public:
+        explicit SubVectorFunction(IProvider* provider) : PrologueFunction("SUBVECTOR", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override {
+            return {
+                Type::Primitive::of(Type::Intrinsic::NUMBER),  // startAt
+                Type::Primitive::of(Type::Intrinsic::NUMBER),  // length
+                new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::NUMBER)),  // vector
+            };
+        }
+
+        [[nodiscard]] Type::Type* returnType() const override {
+            return new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::NUMBER));
+        }
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "SubVectorFunction<>";
+        }
+    };
+
+    class SubMatrixFunctionCall : public PrologueFunctionCall {
+    public:
+        SubMatrixFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType) :
+            PrologueFunctionCall(provider, "SUBMATRIX", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "SubMatrixFunctionCall<>";
+        }
+    };
+
+    class SubMatrixFunction : public PrologueFunction {
+    public:
+        explicit SubMatrixFunction(IProvider* provider) : PrologueFunction("SUBMATRIX", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override {
+            return {
+                Type::Primitive::of(Type::Intrinsic::NUMBER),  // x0
+                Type::Primitive::of(Type::Intrinsic::NUMBER),  // x1
+                Type::Primitive::of(Type::Intrinsic::NUMBER),  // y0
+                Type::Primitive::of(Type::Intrinsic::NUMBER),  // y1
+                new Type::Enumerable(new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::NUMBER))),  // matrix
+            };
+        }
+
+        [[nodiscard]] Type::Type* returnType() const override {
+            return new Type::Enumerable(new Type::Enumerable(Type::Primitive::of(Type::Intrinsic::NUMBER)));
+        }
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "SubMatrixFunction<>";
+        }
+    };
+
 }
 
 #endif //SWARMVM_VECTORS

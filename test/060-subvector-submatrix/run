@@ -1,0 +1,5 @@
+#!/bin/bash -e
+
+$SWARMC --binary test.sbi $TESTSWARM
+$SWARMC --locally --verbose test.sbi
+rm -rf test.sbi
