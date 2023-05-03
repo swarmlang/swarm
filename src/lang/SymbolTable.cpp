@@ -68,6 +68,10 @@ namespace swarmc::Lang {
         auto randomVector = new PrologueFunctionSymbol("randomVector", typeNumToEnumNum, new ProloguePosition("randomVector"), "RANDOM_VECTOR");
         prologueScope->insert(randomVector);
 
+        // zeroVector :: number -> (enumerable<number>)
+        auto zeroVector = new PrologueFunctionSymbol("zeroVector", typeNumToEnumNum, new ProloguePosition("zeroVector"), "ZERO_VECTOR");
+        prologueScope->insert(zeroVector);
+
         // randomMatrix :: number -> number -> (enumerable<enumerable<number>>)
         auto typeEnumEnumNum = new Type::Enumerable(typeEnumNum);
         auto typeNumToEnumEnumNum = new Type::Lambda1(
@@ -80,6 +84,26 @@ namespace swarmc::Lang {
         );
         auto randomMatrix = new PrologueFunctionSymbol("randomMatrix", typeNumToNumToEnumEnumNum, new ProloguePosition("randomMatrix"), "RANDOM_MATRIX");
         prologueScope->insert(randomMatrix);
+
+        // zeroMatrix :: number -> number -> (enumerable<enumerable<number>>)
+        auto zeroMatrix = new PrologueFunctionSymbol("zeroMatrix", typeNumToNumToEnumEnumNum, new ProloguePosition("zeroMatrix"), "ZERO_MATRIX");
+        prologueScope->insert(zeroMatrix);
+
+        // vectorToString :: (enumerable<number>) -> string
+        auto typeEnumNumToString = new Type::Lambda1(
+            typeEnumNum,
+            Type::Primitive::of(Type::Intrinsic::STRING)
+        );
+        auto vectorToString = new PrologueFunctionSymbol("vectorToString", typeEnumNumToString, new ProloguePosition("vectorToString"), "VECTOR_TO_STRING");
+        prologueScope->insert(vectorToString);
+
+        // matrixToString :: (enumerable<enumerable<number>>) -> string
+        auto typeEnumEnumNumToString = new Type::Lambda1(
+            typeEnumEnumNum,
+            Type::Primitive::of(Type::Intrinsic::STRING)
+        );
+        auto matrixToString = new PrologueFunctionSymbol("matrixToString", typeEnumEnumNumToString, new ProloguePosition("matrixToString"), "MATRIX_TO_STRING");
+        prologueScope->insert(matrixToString);
 
         // range :: number -> number -> number -> (enumerable<number>)
         auto typeNumToNumToEnumNum = new Type::Lambda1(

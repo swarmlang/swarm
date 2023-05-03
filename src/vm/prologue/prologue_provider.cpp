@@ -10,6 +10,7 @@
 #include "numeric.h"
 #include "count.h"
 #include "time_helpers.h"
+#include "vectors.h"
 
 
 namespace swarmc::Runtime::Prologue {
@@ -37,6 +38,10 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "NTH_ROOT" ) return new NthRootFunction(this);
         if ( name == "COUNT" ) return new CountFunction(this);
         if ( name == "TIME" ) return new TimeFunction(this);
+        if ( name == "ZERO_VECTOR" ) return new ZeroVectorFunction(this);
+        if ( name == "ZERO_MATRIX" ) return new ZeroMatrixFunction(this);
+        if ( name == "VECTOR_TO_STRING" ) return new VectorToStringFunction(this);
+        if ( name == "MATRIX_TO_STRING" ) return new MatrixToStringFunction(this);
         return nullptr;
     }
 

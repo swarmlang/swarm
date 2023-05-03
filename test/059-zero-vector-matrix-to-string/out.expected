@@ -1,0 +1,105 @@
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[35m   debug [39m[0m[vm] assignvalue Location<l:tmp0> TypeReference<ENUMERABLE<Primitive<NUMBER>>>
+[35m   debug [39m[0m[vm] Location<l:tmp0> <- TypeReference<ENUMERABLE<Primitive<NUMBER>>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_Vector> Location<l:tmp0>
+[35m   debug [39m[0m[vm] Location<l:var_Vector> <- TypeReference<ENUMERABLE<Primitive<NUMBER>>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp1> TypeReference<ENUMERABLE<ENUMERABLE<Primitive<NUMBER>>>>
+[35m   debug [39m[0m[vm] Location<l:tmp1> <- TypeReference<ENUMERABLE<ENUMERABLE<Primitive<NUMBER>>>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_Matrix> Location<l:tmp1>
+[35m   debug [39m[0m[vm] Location<l:var_Matrix> <- TypeReference<ENUMERABLE<ENUMERABLE<Primitive<NUMBER>>>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_zeroVector> Location<f:ZERO_VECTOR>
+[35m   debug [39m[0m[vm] Location<l:var_zeroVector> <- FunctionReference<ZeroVectorFunction<>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp2> NumberReference<5.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp2> <- NumberReference<5.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp3> CALL1<Location<f:ZERO_VECTOR>, Location<l:tmp2>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:ZERO_VECTOR> Location<l:tmp2>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<ZeroVectorFunction<>>
+[35m   debug [39m[0m[vm] provider call: ZeroVectorFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp3> CALL1<Location<f:ZERO_VECTOR>, Location<l:tmp2>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp3> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 5>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_fiveZeros> Location<l:tmp3>
+[35m   debug [39m[0m[vm] Location<l:var_fiveZeros> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 5>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_zeroMatrix> Location<f:ZERO_MATRIX>
+[35m   debug [39m[0m[vm] Location<l:var_zeroMatrix> <- FunctionReference<ZeroMatrixFunction<>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp4> NumberReference<5.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp4> <- NumberReference<5.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp5> CURRY<Location<f:ZERO_MATRIX>, Location<l:tmp4>>
+[35m   debug [39m[0m[vm] curry Location<f:ZERO_MATRIX> Location<l:tmp4>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<ZeroMatrixFunction<>>
+[35m   debug [39m[0m[vm] Location<l:tmp5> <- FunctionReference<CurriedFunction<f: ZeroMatrixFunction<>, ref: NumberReference<5.000000>>>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp6> NumberReference<5.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp6> <- NumberReference<5.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp7> CALL1<Location<l:tmp5>, Location<l:tmp6>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<l:tmp5> Location<l:tmp6>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: ZeroMatrixFunction<>, ref: NumberReference<5.000000>>>
+[35m   debug [39m[0m[vm] provider call: ZeroMatrixFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp7> CALL1<Location<l:tmp5>, Location<l:tmp6>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp7> <- EnumerationReference<inner: ENUMERABLE<Primitive<NUMBER>>, #items: 5>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_fiveByFiveZeros> Location<l:tmp7>
+[35m   debug [39m[0m[vm] Location<l:var_fiveByFiveZeros> <- EnumerationReference<inner: ENUMERABLE<Primitive<NUMBER>>, #items: 5>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp8> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp8> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp9> NumberReference<2.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp9> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] enumset Location<l:var_fiveZeros> Location<l:tmp9> Location<l:tmp8>
+[35m   debug [39m[0m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<NUMBER>, #items: 5>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp10> NumberReference<1.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp10> <- NumberReference<1.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp11> NumberReference<2.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp11> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:tmp12> NumberReference<2.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp12> <- NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp13> ENUMGET<Location<l:tmp7>, Location<l:tmp12>>
+[35m   debug [39m[0m[vm] enumget Location<l:tmp7> Location<l:tmp12>
+[35m   debug [39m[0m[vm] ensureEnumeration: EnumerationReference<inner: ENUMERABLE<Primitive<NUMBER>>, #items: 5>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<2.000000>
+[35m   debug [39m[0m[vm] Location<l:tmp13> <- EnumerationReference<inner: Primitive<NUMBER>, #items: 5>
+[35m   debug [39m[0m[vm] enumset Location<l:tmp13> Location<l:tmp11> Location<l:tmp10>
+[35m   debug [39m[0m[vm] ensureEnumeration: EnumerationReference<inner: Primitive<NUMBER>, #items: 5>
+[35m   debug [39m[0m[vm] ensureNumber: NumberReference<2.000000>
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_vectorToString> Location<f:VECTOR_TO_STRING>
+[35m   debug [39m[0m[vm] Location<l:var_vectorToString> <- FunctionReference<VectorToStringFunction<>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp14> CALL1<Location<f:VECTOR_TO_STRING>, Location<l:var_fiveZeros>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:VECTOR_TO_STRING> Location<l:var_fiveZeros>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<VectorToStringFunction<>>
+[35m   debug [39m[0m[vm] provider call: VectorToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp14> CALL1<Location<f:VECTOR_TO_STRING>, Location<l:var_fiveZeros>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp14> <- StringReference<[0, 0, 1, 0, 0]>
+[35m   debug [39m[0m[vm] streampush Location<l:STDOUT> Location<l:tmp14>
+[35m   debug [39m[0m[vm] ensureStream: StreamReference<LocalOutputStream<>>
+[34m    info [39m[0m[l] [0, 0, 1, 0, 0]
+[35m   debug [39m[0m[vm] assignvalue Location<l:var_matrixToString> Location<f:MATRIX_TO_STRING>
+[35m   debug [39m[0m[vm] Location<l:var_matrixToString> <- FunctionReference<MatrixToStringFunction<>>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp15> CALL1<Location<f:MATRIX_TO_STRING>, Location<l:var_fiveByFiveZeros>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:MATRIX_TO_STRING> Location<l:var_fiveByFiveZeros>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<MatrixToStringFunction<>>
+[35m   debug [39m[0m[vm] provider call: MatrixToStringFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:tmp15> CALL1<Location<f:MATRIX_TO_STRING>, Location<l:var_fiveByFiveZeros>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:tmp15> <- StringReference<[[0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0],
+[0, 0, 1, 0, 0],
+[0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0]]>
+[35m   debug [39m[0m[vm] streampush Location<l:STDOUT> Location<l:tmp15>
+[35m   debug [39m[0m[vm] ensureStream: StreamReference<LocalOutputStream<>>
+[34m    info [39m[0m[l] [[0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0],
+[0, 0, 1, 0, 0],
+[0, 0, 0, 0, 0],
+[0, 0, 0, 0, 0]]

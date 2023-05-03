@@ -1,0 +1,11 @@
+type Vector = enumerable<number>;
+type Matrix = enumerable<Vector>;
+
+Vector fiveZeros = zeroVector(5);
+Matrix fiveByFiveZeros = zeroMatrix(5, 5);
+
+fiveZeros[2] = 1;
+fiveByFiveZeros[2][2] = 1;
+
+lLog(vectorToString(fiveZeros));
+lLog(matrixToString(fiveByFiveZeros));

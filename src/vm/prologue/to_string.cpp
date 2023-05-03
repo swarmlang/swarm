@@ -1,3 +1,4 @@
+#include <sstream>
 #include "to_string.h"
 #include "../../lang/Type.h"
 #include "../ISA.h"
@@ -41,6 +42,72 @@ namespace swarmc::Runtime::Prologue {
     PrologueFunctionCall* BooleanToStringFunction::call(CallVector vector) const {
         auto returnType = Type::Primitive::of(Type::Intrinsic::STRING);
         return new BooleanToStringFunctionCall(_provider, vector, returnType);
+    }
+
+    void VectorToStringFunctionCall::execute(VirtualMachine*) {
+        std::stringstream s;
+        auto vector = (ISA::EnumerationReference*) _vector.at(0).second;
+
+        bool isFirst = true;
+        s << "[";
+
+        for ( std::size_t i = 0; i < vector->length(); i += 1 ) {
+            auto item = (ISA::NumberReference*) vector->get(i);
+
+            if ( !isFirst ) {
+                s << ", ";
+            }
+
+            s << item->value();
+            isFirst = false;
+        }
+
+        s << "]";
+        setReturn(new ISA::StringReference(s.str()));
+    }
+
+    PrologueFunctionCall* VectorToStringFunction::call(CallVector vector) const {
+        return new VectorToStringFunctionCall(_provider, vector, returnType());
+    }
+
+    void MatrixToStringFunctionCall::execute(VirtualMachine*) {
+        std::stringstream s;
+        auto vector = (ISA::EnumerationReference*) _vector.at(0).second;
+
+        bool isFirstOuter = true;
+        s << "[";
+
+        for ( std::size_t i = 0; i < vector->length(); i += 1 ) {
+            auto item = (ISA::EnumerationReference*) vector->get(i);
+
+            if ( !isFirstOuter ) {
+                s << ",\n";
+            }
+
+            s << "[";
+
+            bool isFirstInner = true;
+            for ( std::size_t j = 0; j < item->length(); j += 1 ) {
+                auto elem = (ISA::NumberReference*) item->get(j);
+
+                if ( !isFirstInner ) {
+                    s << ", ";
+                }
+
+                s << elem->value();
+                isFirstInner = false;
+            }
+
+            s << "]";
+            isFirstOuter = false;
+        }
+
+        s << "]";
+        setReturn(new ISA::StringReference(s.str()));
+    }
+
+    PrologueFunctionCall* MatrixToStringFunction::call(CallVector vector) const {
+        return new MatrixToStringFunctionCall(_provider, vector, returnType());
     }
 
 }
