@@ -197,7 +197,7 @@ namespace swarmc::Runtime::SingleThreaded {
             return nullptr;
         }
 
-        bool isEmpty() override {
+        bool isEmpty(QueueContextID) override {
             return true;
         }
 

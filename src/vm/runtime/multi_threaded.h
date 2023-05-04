@@ -94,10 +94,17 @@ namespace swarmc::Runtime::MultiThreaded {
         explicit Queue(VirtualMachine* vm);
 
         void setContext(QueueContextID ctx) override {
+            std::unique_lock<std::mutex> queueLock(_queueMutex);
             _context = ctx;
+            if ( _contextJobsInProgress.find(_context) == _contextJobsInProgress.end() ) {
+                _contextJobsInProgress[_context] = 0;
+            }
         }
 
-        QueueContextID getContext() override { return _context; }
+        QueueContextID getContext() override {
+            std::unique_lock<std::mutex> queueLock(_queueMutex);
+            return _context;
+        }
 
         bool shouldHandle(IFunctionCall*) override;
 
@@ -107,9 +114,10 @@ namespace swarmc::Runtime::MultiThreaded {
 
         IQueueJob* pop() override;
 
-        bool isEmpty() override {
+        bool isEmpty(QueueContextID context) override {
             std::unique_lock<std::mutex> lock(_queueMutex);
-            return _queue.empty() && _jobsInProgress < 1;
+            auto queueIter = _contextQueues.find(context);
+            return (queueIter == _contextQueues.end() || queueIter->second.empty()) && _contextJobsInProgress[context] == 0;
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -118,23 +126,27 @@ namespace swarmc::Runtime::MultiThreaded {
 
         void tick() override;
 
+        void tryToProcessJob();
+
     protected:
         VirtualMachine* _vm;
         JobID _nextId = 0;
         QueueContextID _context;
         std::mutex _queueMutex;
-        std::queue<IQueueJob*> _queue;
         std::mutex _threadMutex;
         std::vector<IThreadContext*> _threads;
-        std::size_t _jobsInProgress = 0;
+        std::map<QueueContextID, std::queue<IQueueJob*>> _contextQueues;
+        std::map<QueueContextID, std::size_t> _contextJobsInProgress;
 
         bool _shouldExit = false;
 
         void spawnThreads();
 
-        IQueueJob* popForProcessing();
+        std::pair<IQueueJob*, QueueContextID> popForProcessing();
 
-        void decrementProcessingCount();
+        IQueueJob* popForProcessingFromContext(const QueueContextID&);
+
+        void decrementProcessingCount(const QueueContextID&);
     };
 
     class Stream : public IStream {

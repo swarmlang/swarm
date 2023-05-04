@@ -14,6 +14,7 @@ bool Configuration::WITH_PROLOGUE = true;
 int Configuration::REDIS_PORT = 6379;
 
 int Configuration::QUEUE_SLEEP_uS = 1000;
+//int Configuration::QUEUE_SLEEP_uS = 100000000;
 int Configuration::DEBUG_QUEUE_SLEEP_uS = 1000000;
 int Configuration::LOCK_SLEEP_uS = 1000;
 int Configuration::LOCK_MAX_RETRIES = 1000000;

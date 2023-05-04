@@ -57,18 +57,64 @@ namespace swarmc::Runtime::MultiThreaded {
 
     void Queue::push(IQueueJob* job) {
         std::unique_lock<std::mutex> queueLock(_queueMutex);
-        _queue.push(job);
+
+        auto queueIter = _contextQueues.find(_context);
+        if ( queueIter == _contextQueues.end() ) {
+            std::queue<IQueueJob*> queue;
+            queue.push(job);
+            _contextQueues[_context] = queue;
+            return;
+        }
+
+        queueIter->second.push(job);
     }
 
     IQueueJob* Queue::pop() {
         std::unique_lock<std::mutex> queueLock(_queueMutex);
-        auto job = _queue.empty() ? nullptr : _queue.front();
-        if ( !_queue.empty() ) _queue.pop();
+
+        auto queueIter = _contextQueues.find(_context);
+        if ( queueIter == _contextQueues.end() || queueIter->second.empty() ) {
+            return nullptr;
+        }
+
+        auto job = queueIter->second.front();
+        queueIter->second.pop();
         return job;
     }
 
     void Queue::tick() {
+        // This is called while we are waiting for jobs to drain.
+        // So, try to process any pending jobs here so we can wait productively.
+        // This also helps avoid infinite waiting loops.
+        tryToProcessJob();
+
+        // Also, tick threads to keep nslib happy
         Framework::tickThreads();
+    }
+
+    void Queue::tryToProcessJob() {
+        // Currently, the semantics of the VM guarantees that a Queue will only receive the instances of
+        // IQueueJob that its Queue::build(...) method returns, so we're safe to cast the IQueueJob* as
+        // QueueJob* here.
+        auto jobPair = popForProcessing();
+        auto job = dynamic_cast<QueueJob*>(jobPair.first);
+        if ( job != nullptr ) {
+            auto call = job->getCall();
+            try {
+                Console::get()->debug("Running job: " + s(job));
+                job->getVM()->executeCall(call);
+                job->setState(JobState::COMPLETE);
+                decrementProcessingCount(jobPair.second);
+            } catch (Errors::SwarmError& rte) {
+                Console::get()->error("Thread error: " + s(rte));
+                job->setState(JobState::ERROR);
+                decrementProcessingCount(jobPair.second);
+            } catch (...) {
+                Console::get()->error("Unknown thread error!");
+                job->setState(JobState::ERROR);
+                decrementProcessingCount(jobPair.second);
+            }
+        }
     }
 
     void Queue::spawnThreads() {
@@ -83,28 +129,7 @@ namespace swarmc::Runtime::MultiThreaded {
                 Console::get()->debug("Started worker thread.");
 
                 while ( !_shouldExit ) {
-                    // Currently, the semantics of the VM guarantees that a Queue will only receive the instances of
-                    // IQueueJob that its Queue::build(...) method returns, so we're safe to cast the IQueueJob* as
-                    // QueueJob* here.
-                    auto job = dynamic_cast<QueueJob*>(popForProcessing());
-                    if ( job != nullptr ) {
-                        auto call = job->getCall();
-                        try {
-                            Console::get()->debug("Running job: " + s(job));
-                            job->getVM()->executeCall(call);
-                            job->setState(JobState::COMPLETE);
-                            decrementProcessingCount();
-                        } catch (Errors::SwarmError& rte) {
-                            Console::get()->error("Thread error: " + s(rte));
-                            job->setState(JobState::ERROR);
-                            decrementProcessingCount();
-                        } catch (...) {
-                            Console::get()->error("Unknown thread error!");
-                            job->setState(JobState::ERROR);
-                            decrementProcessingCount();
-                        }
-                    }
-
+                    tryToProcessJob();
                     std::this_thread::sleep_for(std::chrono::microseconds(Configuration::QUEUE_SLEEP_uS));
                 }
 
@@ -120,19 +145,42 @@ namespace swarmc::Runtime::MultiThreaded {
         });
     }
 
-    IQueueJob* Queue::popForProcessing() {
+    std::pair<IQueueJob*, QueueContextID> Queue::popForProcessing() {
         std::unique_lock<std::mutex> queueLock(_queueMutex);
-        auto job = _queue.empty() ? nullptr : _queue.front();
-        if ( !_queue.empty() ) {
-            _queue.pop();
-            _jobsInProgress += 1;
+
+        // Try to pop a job from the current context first
+        auto job = popForProcessingFromContext(_context);
+        if ( job != nullptr ) {
+            return {job, _context};
         }
+
+        // Otherwise, run any jobs pending in other contexts
+        for ( const auto& pair : _contextQueues ) {
+            auto otherJob = popForProcessingFromContext(pair.first);
+            if ( otherJob != nullptr ) {
+                return {otherJob, pair.first};
+            }
+        }
+
+        return {nullptr, _context};
+    }
+
+    IQueueJob* Queue::popForProcessingFromContext(const QueueContextID& context) {
+        auto queueIter = _contextQueues.find(context);
+        if ( queueIter == _contextQueues.end() || queueIter->second.empty() ) {
+            return nullptr;
+        }
+
+        auto job = queueIter->second.front();
+        queueIter->second.pop();
+        _contextJobsInProgress[context] += 1;
+
         return job;
     }
 
-    void Queue::decrementProcessingCount() {
+    void Queue::decrementProcessingCount(const QueueContextID& context) {
         std::unique_lock<std::mutex> queueLock(_queueMutex);
-        _jobsInProgress -= 1;
+        _contextJobsInProgress[context] -= 1;
     }
 
     Stream::~Stream() noexcept {

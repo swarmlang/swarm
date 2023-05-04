@@ -206,7 +206,7 @@ namespace swarmc::Runtime {
         virtual IQueueJob* pop() = 0;
 
         /** Returns true if there are no pending jobs. */
-        virtual bool isEmpty() = 0;
+        virtual bool isEmpty(QueueContextID) = 0;
 
         virtual void tick() = 0;
     };

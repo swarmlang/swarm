@@ -344,7 +344,7 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::drain() {
         for ( auto queue : _queues ) {
-            while ( !queue->isEmpty() ) {
+            while ( !queue->isEmpty(_queueContexts.top()) ) {
                 whileWaitingForDrain();
             }
         }
