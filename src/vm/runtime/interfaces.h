@@ -29,6 +29,8 @@ namespace swarmc::Runtime {
     class IStorageInterface;
     class IQueue;
 
+    class VirtualMachine;
+
     using SchedulingFilters = std::map<std::string, std::string>;
     using JobID = std::size_t;
     using QueueContextID = std::string;
@@ -197,10 +199,10 @@ namespace swarmc::Runtime {
         virtual bool shouldHandle(IFunctionCall*) = 0;
 
         /** Given a function call and context, instantiate a new IQueueJob. */
-        virtual IQueueJob* build(IFunctionCall*) = 0;
+        virtual IQueueJob* build(VirtualMachine*, IFunctionCall*) = 0;
 
         /** Push a call onto this queue. */
-        virtual void push(IQueueJob*) = 0;
+        virtual void push(VirtualMachine*, IQueueJob*) = 0;
 
         /** Remove the next pending job from the queue and return it. */
         virtual IQueueJob* pop() = 0;

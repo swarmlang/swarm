@@ -336,9 +336,9 @@ namespace swarmc::Runtime {
     IQueueJob* VirtualMachine::pushCall(IFunctionCall* call) {
         // fixme: need to account for contexts!
         auto queue = getQueue(call);
-        auto job = queue->build(call);
+        auto job = queue->build(this, call);
         verbose("pushCall - call: " + call->toString() + " | job: " + job->toString());
-        queue->push(job);
+        queue->push(this, job);
         return job;
     }
 

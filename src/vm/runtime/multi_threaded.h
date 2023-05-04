@@ -91,7 +91,7 @@ namespace swarmc::Runtime::MultiThreaded {
 
     class Queue : public IQueue {
     public:
-        explicit Queue(VirtualMachine* vm);
+        explicit Queue(VirtualMachine*);
 
         void setContext(QueueContextID ctx) override {
             std::unique_lock<std::mutex> queueLock(_queueMutex);
@@ -108,9 +108,9 @@ namespace swarmc::Runtime::MultiThreaded {
 
         bool shouldHandle(IFunctionCall*) override;
 
-        IQueueJob* build(IFunctionCall*) override;
+        IQueueJob* build(VirtualMachine*, IFunctionCall*) override;
 
-        void push(IQueueJob* job) override;
+        void push(VirtualMachine*, IQueueJob*) override;
 
         IQueueJob* pop() override;
 
@@ -129,7 +129,6 @@ namespace swarmc::Runtime::MultiThreaded {
         void tryToProcessJob();
 
     protected:
-        VirtualMachine* _vm;
         JobID _nextId = 0;
         QueueContextID _context;
         std::mutex _queueMutex;

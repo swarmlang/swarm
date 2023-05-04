@@ -41,8 +41,8 @@ namespace swarmc::Runtime::MultiThreaded {
         delete _vm;
     }
 
-    Queue::Queue(VirtualMachine* vm) : _vm(vm) {
-        _vm->lifecycle()->listen<VirtualMachineInitializingEvent>([this](VirtualMachineInitializingEvent& e) {
+    Queue::Queue(VirtualMachine* vm) {
+        vm->lifecycle()->listen<VirtualMachineInitializingEvent>([this](VirtualMachineInitializingEvent& e) {
             spawnThreads();
         });
     }
@@ -51,11 +51,11 @@ namespace swarmc::Runtime::MultiThreaded {
         return true;
     }
 
-    IQueueJob* Queue::build(IFunctionCall* call) {
-        return new QueueJob(_nextId++, JobState::PENDING, call, _vm->copy());
+    IQueueJob* Queue::build(VirtualMachine* vm, IFunctionCall* call) {
+        return new QueueJob(_nextId++, JobState::PENDING, call, vm->copy());
     }
 
-    void Queue::push(IQueueJob* job) {
+    void Queue::push(VirtualMachine*, IQueueJob* job) {
         std::unique_lock<std::mutex> queueLock(_queueMutex);
 
         auto queueIter = _contextQueues.find(_context);

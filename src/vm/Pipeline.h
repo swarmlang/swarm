@@ -98,7 +98,7 @@ namespace swarmc::VM {
             auto vm = new VirtualMachine(new SingleThreaded::GlobalServices());
             vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::SHARED));
             vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
-            vm->addQueue(new SingleThreaded::Queue(vm));
+            vm->addQueue(new SingleThreaded::Queue());
             vm->useStreamDriver(new SingleThreaded::StreamDriver());
 
             if ( Configuration::WITH_PROLOGUE ) {

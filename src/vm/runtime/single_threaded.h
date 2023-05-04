@@ -179,7 +179,7 @@ namespace swarmc::Runtime::SingleThreaded {
      */
     class Queue : public IQueue {
     public:
-        explicit Queue(VirtualMachine* vm) : _vm(vm) {}
+        Queue() = default;
 
         void setContext(QueueContextID ctx) override {
             _context = ctx;
@@ -189,9 +189,9 @@ namespace swarmc::Runtime::SingleThreaded {
 
         bool shouldHandle(IFunctionCall* call) override { return true; }
 
-        QueueJob* build(IFunctionCall* call) override;
+        QueueJob* build(VirtualMachine*, IFunctionCall*) override;
 
-        void push(IQueueJob* job) override;
+        void push(VirtualMachine*, IQueueJob*) override;
 
         IQueueJob* pop() override {
             return nullptr;
@@ -208,7 +208,6 @@ namespace swarmc::Runtime::SingleThreaded {
         void tick() override {}
 
     protected:
-        VirtualMachine* _vm;
         JobID _nextId = 0;
         QueueContextID _context;
     };

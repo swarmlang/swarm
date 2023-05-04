@@ -132,16 +132,15 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
 
-    QueueJob* Queue::build(IFunctionCall* call) {
+    QueueJob* Queue::build(VirtualMachine*, IFunctionCall* call) {
         return new QueueJob(_nextId++, JobState::PENDING, call);
     }
 
-
-    void Queue::push(IQueueJob* job) {
-        _vm->copy([job](VirtualMachine* vm) {
+    void Queue::push(VirtualMachine* vm, IQueueJob* job) {
+        vm->copy([job](VirtualMachine* clonedVm) {
             // FIXME: handle errors
-            Console::get()->debug("Got VM from queue: " + vm->toString());
-            vm->executeCall(job->getCall());
+            Console::get()->debug("Got VM from queue: " + clonedVm->toString());
+            clonedVm->executeCall(job->getCall());
             job->setState(JobState::COMPLETE);
         });
     }
