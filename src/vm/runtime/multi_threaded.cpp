@@ -61,12 +61,12 @@ namespace swarmc::Runtime::MultiThreaded {
         auto queueIter = _contextQueues.find(_context);
         if ( queueIter == _contextQueues.end() ) {
             std::queue<IQueueJob*> queue;
-            queue.push(job);
+            queue.push(useref(job));
             _contextQueues[_context] = queue;
             return;
         }
 
-        queueIter->second.push(job);
+        queueIter->second.push(useref(job));
     }
 
     IQueueJob* Queue::pop() {
@@ -79,6 +79,7 @@ namespace swarmc::Runtime::MultiThreaded {
 
         auto job = queueIter->second.front();
         queueIter->second.pop();
+        releaseref(job);
         return job;
     }
 
@@ -89,7 +90,7 @@ namespace swarmc::Runtime::MultiThreaded {
         tryToProcessJob();
 
         // Also, tick threads to keep nslib happy
-        Framework::tickThreads();
+        Framework::tick();
     }
 
     void Queue::tryToProcessJob() {
@@ -99,6 +100,7 @@ namespace swarmc::Runtime::MultiThreaded {
         auto jobPair = popForProcessing();
         auto job = dynamic_cast<QueueJob*>(jobPair.first);
         if ( job != nullptr ) {
+            GC_LOCAL_REF(job)
             auto call = job->getCall();
             try {
                 Console::get()->debug("Running job: " + s(job));
@@ -140,7 +142,7 @@ namespace swarmc::Runtime::MultiThreaded {
         }
 
         // Trigger the worker threads to exit when the main thread shuts down.
-        Framework::onShutdown([this]() {
+        Framework::onShuttingDown([this]() {
             _shouldExit = true;
         });
     }
@@ -199,7 +201,7 @@ namespace swarmc::Runtime::MultiThreaded {
         assert(!_items.empty());
         auto top = _items.front();
         _items.pop();
-        top->nslibDecRef();  // to undo the `useref`, but without freeing it
+        releaseref(top);
         return top;
     }
 

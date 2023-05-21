@@ -3,7 +3,7 @@
 
 //#define NSLIB_GC_TRACK
 //#define NSLIB_GC_DEBUG_FREE
-#define NSLIB_GC_NO_FREE
+//#define NSLIB_GC_NO_FREE
 
 #ifndef NSLIB_BINN_H_PATH
 #define NSLIB_BINN_H_PATH "../../mod/binn/src/binn.h"
@@ -21,10 +21,12 @@
 #define GC_LOCAL_REF(ref) auto UNIQUE_NAME(refHandle) = localref(ref);
 
 /* Disables ref counting on a variable */
-#define GC_NO_REF(ref) ref.nslibNoRef();
+#define GC_NO_REF(ref) ref.nslibNoRef(*ref.nslibGCMutex());
 
 /* Tags a variable to be cleaned up during application shutdown. */
 #define GC_ON_SHUTDOWN(ref) nslib::Framework::onShutdown([ref]() { freeref(ref); });
+
+#define NS_DELETE_ON_SHUTDOWN(ref) nslib::Framework::onShutdown([ref]() { delete ref; });
 
 #define NS_DEFER() nslib::Defer UNIQUE_NAME(deferred)
 
@@ -170,6 +172,11 @@ namespace nslib {
             _thread = new std::thread(wrap(body));
         }
 
+        ~ThreadContext() override {
+            _thread->join();
+            delete _thread;
+        }
+
         [[nodiscard]] bool isReadyForJoin() override {
             std::lock_guard<std::mutex> m(_mutex);
             return _thread->joinable() && _exited;
@@ -253,16 +260,20 @@ namespace nslib {
         static void boot();
 
         static IThreadContext* newThread(const std::function<int()>& body) {
-            std::unique_lock<std::mutex> m(_mutex);
-
+            std::lock_guard<std::recursive_mutex> m(_mutex);
             auto id = _lastThreadID++;
             auto ctx = new ThreadContext(id, body);
             _contexts[id] = ctx;
             return ctx;
         }
 
+        static void tick() {
+            tickCleanups();
+            tickThreads();
+        }
+
         static void tickThreads() {
-            std::unique_lock<std::mutex> m(_mutex);
+            std::unique_lock<std::recursive_mutex> m(_mutex);
             auto mapCopy = _contexts;
             m.unlock();
 
@@ -277,7 +288,7 @@ namespace nslib {
         }
 
         static IThreadContext* context() {
-            std::lock_guard<std::mutex> m(_mutex);
+            std::lock_guard<std::recursive_mutex> tmm(_threadMapMutex);
 
             // Map the correct thread ID
             auto idIter = _threadMap.find(std::this_thread::get_id());
@@ -310,28 +321,80 @@ namespace nslib {
         }
 
         static bool isMainPID() {
-            std::lock_guard<std::mutex> m(_mutex);
             return std::this_thread::get_id() == _mainPID;
         }
 
         static void shutdown() {
-            std::lock_guard<std::mutex> m(_mutex);
+            std::lock_guard<std::recursive_mutex> m(_mutex);
             if ( !_booted ) return;
+            for ( const auto& c : _shuttingDownCallbacks ) c();
+            _shutdown = true;
+            shutdownThreads();
             for ( const auto& c : _shutdownCallbacks ) c();
         }
 
-        static void onShutdown(std::function<void()> f) {
-            std::lock_guard<std::mutex> m(_mutex);
+        static void shutdownThreads() {
+            // FIXME: there's still a deadlock when joining threads, even though
+            // those threads should have already _exited.
+            return;
+
+            for ( auto it = _contexts.begin(); it != _contexts.end(); ++it ) {
+                while ( it->second->baseThread() != nullptr && !it->second->hasExited() ) {
+                    tick();
+                    std::this_thread::sleep_for(std::chrono::milliseconds(10));
+                }
+
+                delete it->second;
+                it = _contexts.erase(it);
+            }
+        }
+
+        static void onShutdown(const std::function<void()>& f) {
+            if ( _shutdown ) return f();
+            std::lock_guard<std::recursive_mutex> m(_mutex);
+            if ( _shutdown ) return f();
             _shutdownCallbacks.push_back(f);
+        }
+
+        static void onShuttingDown(const std::function<void()>& f) {
+            if ( _shutdown ) return f();
+            std::lock_guard<std::recursive_mutex> m(_mutex);
+            if ( _shutdown ) return f();
+            _shuttingDownCallbacks.push_back(f);
+        }
+
+        static void cleanup(const std::function<bool()>& callback) {
+            auto success = callback();
+            if ( !success ) {
+                std::lock_guard<std::mutex> m(_cleanupMutex);
+                _cleanupCallbacks.push_back(callback);
+            }
+        }
+
+        static void tickCleanups() {
+            std::lock_guard<std::mutex> m(_cleanupMutex);
+            for ( auto iter = _cleanupCallbacks.begin(); iter != _cleanupCallbacks.end(); ++iter ) {
+                auto callback = *iter;
+                auto success = callback();
+                if ( success ) {
+                    // The cleanup was successful, so remove the callback from the list
+                    iter = _cleanupCallbacks.erase(iter);
+                }
+            }
         }
 
     protected:
         Framework() = default;
         static ThreadID _lastThreadID;
         static bool _booted;
+        static bool _shutdown;
         static std::thread::id _mainPID;
         static std::vector<std::function<void()>> _shutdownCallbacks;
-        static std::mutex _mutex;
+        static std::vector<std::function<void()>> _shuttingDownCallbacks;
+        static std::vector<std::function<bool()>> _cleanupCallbacks;
+        static std::recursive_mutex _mutex;
+        static std::recursive_mutex _threadMapMutex;
+        static std::mutex _cleanupMutex;
         static std::map<ThreadID, IThreadContext*> _contexts;
         static std::map<std::thread::id, ThreadID> _threadMap;
 
@@ -2000,6 +2063,95 @@ namespace nslib {
     }
 
 
+
+    /**
+     * An STL-compatible mutex wrapper that keeps track of the number of locks currently
+     * holding it. Includes logic for automatically destroying the instance once all locks
+     * are released & the owner's reference is gone.
+     *
+     * Should be compatible with any STL mutex.
+     *
+     * Used by IRefCountable.
+     *
+     * @example
+     * ```cpp
+     * TrackableMutex<std::mutex> m;
+     * std::lock_guard<TrackableMutex<std:mutex>> guard(m);
+     * ```
+     *
+     * @tparam T
+     */
+    template <class T>
+    class TrackableMutex : public IStringable {
+    public:
+        /** Satisfies STL. */
+        void lock() {
+            _mutex.lock();
+            _count += 1;  // we hold the mutex now
+        }
+
+        /** Satisfies STL. */
+        void unlock() {
+            _count -= 1;  // we hold the mutex currently
+            _mutex.unlock();
+            tryfree();
+        }
+
+        /** Satisfies STL. */
+        bool try_lock() {
+            if ( _mutex.try_lock() ) {
+                _count += 1;  // we got the mutex
+                return true;
+            }
+            return false;
+        }
+
+        /** Satisfies STL for mutex implementations that support it. */
+        template <class U = T>
+        typename std::enable_if<std::is_member_function_pointer<decltype(&U::native_handle)>::value>::type
+        native_handle() {
+            return _mutex.native_handle();
+        }
+
+        /** Return the number of locks holding this mutex. */
+        std::size_t holders() {
+            return _count;
+        }
+
+        /** Mark this mutex as having been released by its owner. Free game for deletion. */
+        void release() {
+            _owned = false;
+            tryfree();
+        }
+
+        /** Returns true if this mutex is still owned by some parent object. */
+        [[nodiscard]] bool owned() const {
+            return _owned;
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "TrackableMutex<" + s(getTypeName<T>()) + ">";
+        }
+    protected:
+        T _mutex;
+        std::size_t _count = 0;
+        bool _owned = true;
+
+        void tryfree() {
+            if ( _count < 1 && !_owned ) {
+                delete this;
+            }
+        }
+    };
+
+    /** Alias for a tracked, recursive mutex. */
+    using rtmutex_t = TrackableMutex<std::recursive_mutex>;
+
+    /** Alias for a tracked mutex. */
+    using tmutex_t = TrackableMutex<std::mutex>;
+
+
+
     /* Some ref-count memory management helpers: */
 
 #ifdef NSLIB_GC_TRACK
@@ -2016,11 +2168,12 @@ namespace nslib {
     /** Trait interface which adds a reference count. */
     class IRefCountable {
     public:
-        IRefCountable() : _nslibRefCount(0), _nslibRefDisable(false) {}
+        IRefCountable() : _nslibGCMutex(new rtmutex_t), _nslibRefCount(0), _nslibRefDisable(false) {}
         virtual ~IRefCountable() {
             for ( const auto& pair : _onFreeCallbacks ) {
                 pair.second();
             }
+            _nslibGCMutex->release();
         }
 
         /**
@@ -2028,7 +2181,8 @@ namespace nslib {
          * Instead, call `useref(...)`.
          * Increment the reference count.
          */
-        virtual void nslibIncRef() {
+        virtual void nslibIncRef(rtmutex_t& gcMutex) {
+            std::lock_guard<rtmutex_t> guard(gcMutex);
             _nslibRefCount += 1;
 
 #ifdef NSLIB_GC_DEBUG_FREE
@@ -2077,7 +2231,8 @@ namespace nslib {
          * Instead, call `freeref(...)`.
          * Decrement the reference count.
          */
-        virtual void nslibDecRef() {
+        virtual void nslibDecRef(rtmutex_t& gcMutex) {
+            std::lock_guard<rtmutex_t> guard(gcMutex);
             _nslibRefCount -= 1;
 
 #ifdef NSLIB_GC_TRACK
@@ -2087,7 +2242,7 @@ namespace nslib {
             } else {
                 iter->second.second.emplace_back(trace());  // FIXME: push back?
 
-                if ( nslibShouldFree() && iter->second.first.size() == iter->second.second.size() ) {
+                if ( nslibShouldFree(*nslibGCMutex()) && iter->second.first.size() == iter->second.second.size() ) {
                     _tracks.erase(iter);
                 }
             }
@@ -2098,10 +2253,16 @@ namespace nslib {
         [[nodiscard]] static GCTracks nslibGCTracks() { return _tracks; }
 #endif
 
-        virtual void nslibNoRef() { _nslibRefDisable = true; }
+        virtual void nslibNoRef(rtmutex_t& gcMutex) {
+            std::lock_guard<rtmutex_t> guard(gcMutex);
+            _nslibRefDisable = true;
+        }
 
         /** If true, the instance can be deleted. */
-        [[nodiscard]] virtual bool nslibShouldFree() const { return !_nslibRefDisable && _nslibRefCount < 1; }
+        [[nodiscard]] virtual bool nslibShouldFree(rtmutex_t& gcMutex) const {
+            std::lock_guard<rtmutex_t> guard(gcMutex);
+            return !_nslibRefDisable && _nslibRefCount < 1;
+        }
 
 #ifdef NSLIB_GC_DEBUG_FREE
         virtual void nslibMarkWouldHaveFreed() {
@@ -2124,7 +2285,12 @@ namespace nslib {
                 _onFreeCallbacks.erase(iter);
             }
         }
+
+        [[nodiscard]] rtmutex_t* nslibGCMutex() {
+            return _nslibGCMutex;
+        }
     protected:
+        rtmutex_t* _nslibGCMutex;
         std::size_t _nslibRefCount;
         bool _nslibRefDisable;
         std::map<std::size_t, std::function<void()>> _onFreeCallbacks;
@@ -2154,15 +2320,17 @@ namespace nslib {
     /** Open a new reference to some instance. */
     auto useref(priv::RefCountable auto r) {
         if ( r == nullptr ) return r;
-        r->nslibIncRef();
+        std::lock_guard<rtmutex_t> guard(*r->nslibGCMutex());
+        r->nslibIncRef(*r->nslibGCMutex());
         return r;
     }
 
-    /** Release a reference to some instance. */
+    /** Release a reference to some instance and clean it up if necessary. */
     void freeref(priv::RefCountable auto r) {
         if ( r == nullptr ) return;
-        r->nslibDecRef();
-        if ( r->nslibShouldFree() ) {
+        std::lock_guard<rtmutex_t> guard(*r->nslibGCMutex());
+        r->nslibDecRef(*r->nslibGCMutex());
+        if ( r->nslibShouldFree(*r->nslibGCMutex()) ) {
 #ifdef NSLIB_GC_DEBUG_FREE
             r->nslibMarkWouldHaveFreed();
 #else
@@ -2171,6 +2339,13 @@ namespace nslib {
 #endif
 #endif
         }
+    }
+
+    /** Release a reference to some instance but DO NOT clean it up. */
+    void releaseref(priv::RefCountable auto r) {
+        if ( r == nullptr ) return;
+        std::lock_guard<rtmutex_t> guard(*r->nslibGCMutex());
+        r->nslibDecRef(*r->nslibGCMutex());
     }
 
     /** Release an old reference and use a new one, if they are different. */
@@ -2361,6 +2536,14 @@ namespace nslib {
             }
 
             explicit EventBus(std::string  name) : _name(std::move(name)) {}
+
+            ~EventBus() override {
+                for ( const auto& outer : _map ) {
+                    for ( const auto& inner : outer.second ) {
+                        freeref(static_cast<Listener<Event>*>(inner.second));
+                    }
+                }
+            }
 
             /**
              * Register a listener for events of type T.

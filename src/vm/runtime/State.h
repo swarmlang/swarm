@@ -320,7 +320,7 @@ namespace swarmc::Runtime {
                 if ( returnTo != std::nullopt && returnTo != _is.size() ) {
                     jump(*returnTo);
                     current->clearReturnPC();
-                    current->nslibDecRef();  // To undo the `useref`, but without freeing it.
+                    releaseref(current);
                     return current;
                 }
 
@@ -334,7 +334,7 @@ namespace swarmc::Runtime {
             // since it replaced the top-level control.
             // So, assume that means we've hit the end of valid control.
             jumpEnd();
-            scope->nslibDecRef();  // To undo the `useref`, but without freeing it.
+            releaseref(scope);
             return scope;
         }
 

@@ -164,7 +164,7 @@ namespace swarmc::Runtime::SingleThreaded {
         assert(!_items.empty());
         auto top = _items.front();
         _items.pop();
-        top->nslibDecRef();  // to undo the `useref`, but without freeing it
+        releaseref(top);
         return top;
     }
 
