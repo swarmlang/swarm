@@ -521,6 +521,19 @@ namespace Walk {
             return _type;
         }
 
+        bool disambiguateValue() {
+            auto temp = _type;
+            try {
+                _type = useref(_type->disambiguateStatically());
+                freeref(temp);
+            } catch (swarmc::Errors::SwarmError& e) {
+                std::string m(e.what());
+                Reporting::nameError(this->position(), m);
+                return false;
+            }
+            return true;
+        }
+
         std::string toString() const override {
             return "Type<" + _type->toString() + ">";
         }

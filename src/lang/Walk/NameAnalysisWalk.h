@@ -70,22 +70,10 @@ protected:
             return walk(node->value());
         }
         bool flag = walk(node->typeNode());
+        flag = node->typeNode()->disambiguateValue() && flag;
         std::string name = node->id()->name();
-        
-        if ( node->typeNode()->value()->intrinsic() == Type::Intrinsic::AMBIGUOUS ) {
-            walk(((Type::Ambiguous*)node->typeNode()->value())->id());
-            auto ts = ((Type::Ambiguous*)node->typeNode()->value())->id()->symbol();
-            assert( ts->kind() == SemanticSymbolKind::VARIABLE );
-            try {
-                node->typeNode()->_type = ((VariableSymbol*)ts)->getObjectType()->value()->disambiguateStatically();
-            } catch (Errors::SwarmError& s) {
-                Reporting::typeError(node->position(), s.what());
-                return false;
-            }
-        }
 
         Type::Type* type = node->typeNode()->value();
-
 
         // Make sure the name isn't already declared in this scope
         if ( _symbols->isClashing(name) ) {
@@ -95,41 +83,40 @@ protected:
         }
 
         bool valueResult;
-        if ( node->value()->getName() == "FunctionNode" || node->value()->getName() == "TypeBodyNode" ) {
+        if ( node->value()->getName() == "FunctionNode" || node->typeNode()->value()->intrinsic() == Type::Intrinsic::TYPE ) {
             // Add the declaration to the current scope
             _symbols->addVariable(name, type, node->position(), node->shared());
+
+            if ( node->typeNode()->value()->intrinsic() == Type::Intrinsic::TYPE ) {
+                // attach actual value of type to the symbol, for disambiguation of instances of this type
+                TypeLiteral* objtype = nullptr;
+                if ( node->value()->getName() == "TypeLiteral" || node->value()->getName() == "TypeBodyNode" ) {
+                    objtype = (TypeLiteral*)node->value();
+                } else if ( node->value()->getName() == "IdentifierNode" ) {
+                    assert(((IdentifierNode*)node->value())->symbol()->kind() == SemanticSymbolKind::VARIABLE);
+                    objtype = ((VariableSymbol*)((IdentifierNode*)node->value())->symbol())->getObjectType();
+                } else {
+                    Reporting::typeError(
+                        node->value()->position(),
+                        "Attempt to assign nontrivial value to a type variable."
+                    );
+                    return false;
+                }
+                auto sym = (VariableSymbol*)_symbols->lookup(name);
+                sym->setObjectType(objtype);
+            }
+            
             // Call this to attach the Symbol to the IdentifierNode
             walk(node->id());
-
             // Check the RHS of the assignment
             valueResult = walk(node->value());
         } else {
             // Check the RHS of the assignment
             valueResult = walk(node->value());
-
             // Add the declaration to the current scope
             _symbols->addVariable(name, type, node->position(), node->shared());
             // Call this to attach the Symbol to the IdentifierNode
             walk(node->id());
-        }
-
-        // update symbol with value of assignment for assignments to type variables
-        if ( node->id()->type()->intrinsic() == Type::Intrinsic::TYPE ) {
-            TypeLiteral* objtype = nullptr;
-            if ( node->value()->getName() == "TypeLiteral" || node->value()->getName() == "TypeBodyNode" ) {
-                objtype = (TypeLiteral*)node->value();
-            } else if ( node->value()->getName() == "IdentifierNode" ) {
-                assert(((IdentifierNode*)node->value())->symbol()->kind() == SemanticSymbolKind::VARIABLE);
-                objtype = ((VariableSymbol*)((IdentifierNode*)node->value())->symbol())->getObjectType();
-            } else {
-                Reporting::nameError(
-                    node->value()->position(),
-                    "Attempt to assign nontrivial value to a type variable."
-                );
-                return false;
-            }
-            assert(((VariableSymbol*)node->id()->symbol())->kind() == SemanticSymbolKind::VARIABLE);
-            ((VariableSymbol*)node->id()->symbol())->setObjectType(objtype);
         }
 
         return flag && valueResult;
@@ -388,9 +375,14 @@ protected:
         bool flag = true;
         _symbols->enter();
         for ( auto formal : *node->formals() ) {
+            bool t = formal.first->disambiguateValue() && flag;
+            if ( !t ) {
+                Reporting::nameError(formal.first->position(), "Identifier at " + formal.first->position()->toString() + " does not refer to a type!");
+                flag = false;
+            }
+            flag = walk(formal.first) && flag;
             std::string name = formal.second->name();
             Type::Type* type = formal.first->value();
-            flag = walk(formal.first);
 
             // Make sure the name isn't already declared in this scope
             if ( _symbols->isClashing(name) ) {
@@ -406,13 +398,7 @@ protected:
             walk(formal.second);
         }
         walk(node->typeNode());
-
-        //disambiguate the types of formals
-        for (auto f : *node->formals()) {
-            walk(f.first);
-            f.first->_type = f.first->value()->disambiguateStatically();
-            walk(f.second);
-        }
+        flag = node->typeNode()->disambiguateValue() && flag;
 
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
@@ -443,11 +429,13 @@ protected:
                     flag = false;
                 }
                 flag = walk(d->typeNode()) && flag;
+                flag = d->typeNode()->disambiguateValue() && flag;
                 _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position());
                 walk(d->id());
             } else if ( decl->getName() == "UninitializedVariableDeclarationNode" ) {
                 auto d = (UninitializedVariableDeclarationNode*)decl;
                 flag = walk(d->typeNode()) && flag;
+                flag = d->typeNode()->disambiguateValue() && flag;
                 _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position());
                 walk(d->id());
             }

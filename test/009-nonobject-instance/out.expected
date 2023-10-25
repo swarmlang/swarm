@@ -1,2 +1,2 @@
-[1m[31m[Type Error] [39m[22m[0m[1m[l: 4, c: 1] [22m[0mnotAType is not a type!
+[1m[31m[Name Error] [39m[22m[0m[1m[l: 4, c: 1] [22m[0mnotAType is not a type!
 [0m

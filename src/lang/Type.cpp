@@ -50,7 +50,6 @@ namespace swarmc::Type {
             throw Errors::SwarmError(_typeid->name() + " is not a type!");
         }
         auto value = useref(((Lang::VariableSymbol*)sym)->getObjectType()->value());
-        freeref(this);
         return value->disambiguateStatically();
     } 
 
