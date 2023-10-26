@@ -903,7 +903,7 @@ namespace nslib {
         inline std::string readStreamContents(std::istream& fh) {
             std::stringstream ss;
             std::string s;
-            while ( std::getline(fh, s) ) ss << s;
+            while ( std::getline(fh, s) ) ss << s << std::endl;
             return ss.str();
         }
 

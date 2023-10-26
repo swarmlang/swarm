@@ -1,0 +1,26 @@
+BEGINFN<Location<f:WITH_9>, TypeReference<Primitive<VOID>>>
+FNPARAM<Location<l:tmp8>, Location<l:var_file2>>
+ASSIGNVALUE<Location<l:var_file_append>, Location<f:APPEND_FILE>>
+ASSIGNVALUE<Location<l:var_file2>, Location<l:var_file2>>
+ASSIGNEVAL<Location<l:tmp10>, CURRY<Location<l:var_file_append>, Location<l:var_file2>>>
+ASSIGNVALUE<Location<l:var_file_read>, Location<f:READ_FILE>>
+ASSIGNVALUE<Location<l:var_file>, Location<l:var_file>>
+ASSIGNEVAL<Location<l:tmp11>, CALL1<Location<l:var_file_read>, Location<l:var_file>>>
+CALL1<Location<l:tmp10>, Location<l:tmp11>>
+RETURN0<>
+BEGINFN<Location<f:WITH_4>, TypeReference<Primitive<VOID>>>
+FNPARAM<Location<l:tmp3>, Location<l:var_file>>
+ASSIGNVALUE<Location<l:var_file_open>, Location<f:OPEN_FILE>>
+ASSIGNVALUE<Location<l:tmp5>, StringReference<out.txt>>
+ASSIGNEVAL<Location<l:tmp6>, CALL1<Location<l:var_file_open>, Location<l:tmp5>>>
+ASSIGNEVAL<Location<l:tmp7>, CALL0<Location<f:FILE_T>>>
+ASSIGNEVAL<Location<l:tmp8>, CALL1<Location<f:RESOURCE_T>, Location<l:tmp7>>>
+WITH<Location<l:tmp6>, Location<f:WITH_9>>
+RETURN0<>
+ASSIGNVALUE<Location<l:var_file_open>, Location<f:OPEN_FILE>>
+ASSIGNVALUE<Location<l:tmp0>, StringReference<test.txt>>
+ASSIGNEVAL<Location<l:tmp1>, CALL1<Location<l:var_file_open>, Location<l:tmp0>>>
+ASSIGNEVAL<Location<l:tmp2>, CALL0<Location<f:FILE_T>>>
+ASSIGNEVAL<Location<l:tmp3>, CALL1<Location<f:RESOURCE_T>, Location<l:tmp2>>>
+WITH<Location<l:tmp1>, Location<f:WITH_4>>
+[32m success [39m[0m[main] Compiled to ISA.

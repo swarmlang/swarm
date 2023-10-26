@@ -72,6 +72,66 @@ namespace swarmc::Runtime::Prologue {
     };
 
 
+    class WriteFileFunctionCall : public PrologueFunctionCall {
+    public:
+        WriteFileFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "WRITE_FILE", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] Resources needsResources() const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "WriteFileFunctionCall<>";
+        }
+    };
+
+    class WriteFileFunction : public PrologueFunction {
+    public:
+        explicit WriteFileFunction(IProvider* provider) : PrologueFunction("WRITE_FILE", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override;
+
+        [[nodiscard]] Type::Type* returnType() const override;
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "WriteFileFunction<>";
+        }
+    };
+
+
+    class AppendFileFunctionCall : public PrologueFunctionCall {
+    public:
+        AppendFileFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "APPEND_FILE", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] Resources needsResources() const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "AppendFileFunctionCall<>";
+        }
+    };
+
+    class AppendFileFunction : public PrologueFunction {
+    public:
+        explicit AppendFileFunction(IProvider* provider) : PrologueFunction("APPEND_FILE", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override;
+
+        [[nodiscard]] Type::Type* returnType() const override;
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "AppendFileFunction<>";
+        }
+    };
+
+
     class OpenFileFunctionCall : public PrologueFunctionCall {
     public:
         OpenFileFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):

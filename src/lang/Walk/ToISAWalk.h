@@ -458,9 +458,9 @@ protected:
         static auto resFunc = new ISA::LocationReference(ISA::Affinity::FUNCTION, "RESOURCE_T");
 
         // get yield type
-        auto type = getTypeRef(node->local()->type()->copy());
-        assert(node->local()->type()->intrinsic() == Type::Intrinsic::OPAQUE);
-        auto opaque = ((Type::Opaque*)node->local()->type())->toString();
+        assert(node->local()->type()->intrinsic() == Type::Intrinsic::RESOURCE);
+        auto resource = (Type::Resource*)node->local()->type();
+        auto opaque = ((Type::Opaque*)resource->yields())->toString();
         auto tagLoc = makeNewTmp(ISA::Affinity::LOCAL);
         instrs->push_back(useref(new ISA::AssignEval(tagLoc, new ISA::Call0(_opaqueVals.at(opaque)))));
         auto typeLoc = makeNewTmp(ISA::Affinity::LOCAL);
@@ -470,7 +470,7 @@ protected:
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID)))));
         auto localShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        instrs->push_back(useref(new ISA::FunctionParam(typeLoc, makeLocation(localShared, "res_" + node->local()->name()))));
+        instrs->push_back(useref(new ISA::FunctionParam(typeLoc, makeLocation(localShared, "var_" + node->local()->name()))));
 
         // walk body
         for ( auto stmt : *node->body() ) {
@@ -1094,6 +1094,7 @@ private:
 
     std::unordered_map<std::string, ISA::LocationReference*> _opaqueVals = {
         { "Opaque<PROLOGUE::TAG>", new ISA::LocationReference(ISA::Affinity::FUNCTION, "TAG_T") },
+        { "Opaque<PROLOGUE::FILE>", new ISA::LocationReference(ISA::Affinity::FUNCTION, "FILE_T") }
     };
 };
 

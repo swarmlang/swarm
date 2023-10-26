@@ -1,0 +1,14 @@
+
+$l:file <- call f:OPEN_FILE "ex.txt"
+
+$l:write_curry <- curry f:WRITE_FILE $l:file
+call $l:write_curry "text\n"
+
+$l:file2 <- call f:OPEN_FILE "ex.txt"
+
+$l:write_curry <- curry f:APPEND_FILE $l:file2
+call $l:write_curry "more text\n"
+
+$l:contents <- call $f:READ_FILE $l:file
+out $l:contents
+

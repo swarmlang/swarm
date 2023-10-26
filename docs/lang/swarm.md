@@ -82,6 +82,11 @@ To call a function, simply call them as you would in Java or C. The thing being 
 | `time`            | Get the current UNIX timestamp in fractional seconds        | `-> number`                                                                         | N/A                                                                                                                                            |
 | `subVector`       | Get a slice of a numeric enumeration.                       | `number -> number -> enumerable<number> -> enumerable<number>`                      | The element index to start the slice at, the length of the slice, and the vector to slice.                                                     |
 | `subMatrix`       | Get a slice of a nested numeric enumeration.                | `number -> number -> number -> number -> enumerable<number> -> enumerable<number>`  | Row index to start at, row index to end at (non-inclusive), column index to start at, column index to end at (non-inclusive), matrix to slice. |
+| `tag` | Create a remote executor filter | `string -> string -> Resource<Opaque<PROLOGUE::TAG>>` | Filter key, filter value
+| `file_open` | Create a file resource | `string -> Resource<Opaque<PROLOGUE::FILE>>` | The file path |
+| `file_read` | Read from a file | `Resource<Opaque<PROLOGUE::FILE>> -> string` | File to be read from |
+| `file_write` | Write to a file | `Resource<Opaque<PROLOGUE::FILE>> -> string -> void` | File to be written to, contents to write |
+| `file_append` | Appends to a file | `Resource<Opaque<PROLOGUE::FILE>> -> string -> void` | File to be written to, contents to write |
 
 ## Variable Declarations
 

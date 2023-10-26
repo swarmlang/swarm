@@ -1,0 +1,47 @@
+[35m   debug [39m[0m[vm] assigneval Location<l:file> CALL1<Location<f:OPEN_FILE>, StringReference<ex.txt>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:OPEN_FILE> StringReference<ex.txt>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<OpenFileFunction<>>
+[35m   debug [39m[0m[vm] provider call: OpenFileFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:file> CALL1<Location<f:OPEN_FILE>, StringReference<ex.txt>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:file> <- ResourceReference<Prologue::FileResource<path: ex.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>
+[35m   debug [39m[0m[vm] assigneval Location<l:write_curry> CURRY<Location<f:WRITE_FILE>, Location<l:file>>
+[35m   debug [39m[0m[vm] curry Location<f:WRITE_FILE> Location<l:file>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<WriteFileFunction<>>
+[35m   debug [39m[0m[vm] Location<l:write_curry> <- FunctionReference<CurriedFunction<f: WriteFileFunction<>, ref: ResourceReference<Prologue::FileResource<path: ex.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>>>
+[35m   debug [39m[0m[vm] call1 Location<l:write_curry> StringReference<textn>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: WriteFileFunction<>, ref: ResourceReference<Prologue::FileResource<path: ex.txt, owner: singlethreaded::localhost, id: 7dd7fe26-518c-4019-acde-9ffda9e71ed2>>>>
+[35m   debug [39m[0m[vm] provider call: WriteFileFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:file2> CALL1<Location<f:OPEN_FILE>, StringReference<ex.txt>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:OPEN_FILE> StringReference<ex.txt>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<OpenFileFunction<>>
+[35m   debug [39m[0m[vm] provider call: OpenFileFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:file2> CALL1<Location<f:OPEN_FILE>, StringReference<ex.txt>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:file2> <- ResourceReference<Prologue::FileResource<path: ex.txt, owner: singlethreaded::localhost, id: 0245bfec-242e-4c68-9ed8-9d759d74c250>>
+[35m   debug [39m[0m[vm] assigneval Location<l:write_curry> CURRY<Location<f:APPEND_FILE>, Location<l:file2>>
+[35m   debug [39m[0m[vm] curry Location<f:APPEND_FILE> Location<l:file2>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<AppendFileFunction<>>
+[35m   debug [39m[0m[vm] Location<l:write_curry> <- FunctionReference<CurriedFunction<f: AppendFileFunction<>, ref: ResourceReference<Prologue::FileResource<path: ex.txt, owner: singlethreaded::localhost, id: 0245bfec-242e-4c68-9ed8-9d759d74c250>>>>
+[35m   debug [39m[0m[vm] call1 Location<l:write_curry> StringReference<more textn>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<CurriedFunction<f: AppendFileFunction<>, ref: ResourceReference<Prologue::FileResource<path: ex.txt, owner: singlethreaded::localhost, id: 0245bfec-242e-4c68-9ed8-9d759d74c250>>>>
+[35m   debug [39m[0m[vm] provider call: AppendFileFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:contents> CALL1<Location<f:READ_FILE>, Location<l:file>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumping to call
+[35m   debug [39m[0m[vm] call1 Location<f:READ_FILE> Location<l:file>
+[35m   debug [39m[0m[vm] ensureFunction: FunctionReference<ReadFileFunction<>>
+[35m   debug [39m[0m[vm] provider call: ReadFileFunctionCall<>
+[35m   debug [39m[0m[vm] assigneval Location<l:contents> CALL1<Location<f:READ_FILE>, Location<l:file>>
+[35m   debug [39m[0m[vm] assignEval: got call0 or call1
+[35m   debug [39m[0m[vm] assignEval: jumped from return
+[35m   debug [39m[0m[vm] Location<l:contents> <- StringReference<textnmore textn
+>
+[35m   debug [39m[0m[vm] streampush Location<s:STDOUT> Location<l:contents>
+[35m   debug [39m[0m[vm] ensureStream: StreamReference<SingleThreaded::Stream<of: Primitive<STRING>>>

@@ -48,6 +48,86 @@ namespace swarmc::Runtime::Prologue {
     }
 
 
+    void WriteFileFunctionCall::execute(VirtualMachine* vm) {
+        // Load the resource and make a few sanity checks. These should be guaranteed by the VM, but just in case.
+        auto resource = (ISA::ResourceReference*) _vector.at(0).second;
+        assert(resource->resource()->name() == "PROLOGUE::FILE");
+
+        auto file = (FileResource*) resource->resource();
+
+        // Try to open the file
+        std::ofstream fh(file->path());
+        if ( !fh ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidOrMissingFilePath,
+                "Unable to open path to file: " + file->path() + "(" + strerror(errno) + ")"
+            );
+        }
+
+        auto content = (ISA::StringReference*) _vector.at(1).second;
+
+        fh << content->value();
+    }
+
+    Resources WriteFileFunctionCall::needsResources() const {
+        auto resource = (ISA::ResourceReference*) _vector.at(0).second;
+        return {resource->resource()};
+    }
+
+
+    FormalTypes WriteFileFunction::paramTypes() const {
+        return {Type::Resource::of(fileType()), Type::Primitive::of(Type::Intrinsic::STRING)};
+    }
+
+    Type::Type* WriteFileFunction::returnType() const {
+        return Type::Primitive::of(Type::Intrinsic::VOID);
+    }
+
+    PrologueFunctionCall* WriteFileFunction::call(CallVector v) const {
+        return new WriteFileFunctionCall(_provider, v, returnType());
+    }
+
+
+    void AppendFileFunctionCall::execute(VirtualMachine* vm) {
+        // Load the resource and make a few sanity checks. These should be guaranteed by the VM, but just in case.
+        auto resource = (ISA::ResourceReference*) _vector.at(0).second;
+        assert(resource->resource()->name() == "PROLOGUE::FILE");
+
+        auto file = (FileResource*) resource->resource();
+
+        // Try to open the file
+        std::ofstream fh(file->path(), std::ios_base::app);
+        if ( !fh ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidOrMissingFilePath,
+                "Unable to open path to file: " + file->path() + "(" + strerror(errno) + ")"
+            );
+        }
+
+        auto content = (ISA::StringReference*) _vector.at(1).second;
+
+        fh << content->value();
+    }
+
+    Resources AppendFileFunctionCall::needsResources() const {
+        auto resource = (ISA::ResourceReference*) _vector.at(0).second;
+        return {resource->resource()};
+    }
+
+
+    FormalTypes AppendFileFunction::paramTypes() const {
+        return {Type::Resource::of(fileType()), Type::Primitive::of(Type::Intrinsic::STRING)};
+    }
+
+    Type::Type* AppendFileFunction::returnType() const {
+        return Type::Primitive::of(Type::Intrinsic::VOID);
+    }
+
+    PrologueFunctionCall* AppendFileFunction::call(CallVector v) const {
+        return new AppendFileFunctionCall(_provider, v, returnType());
+    }
+
+
     void OpenFileFunctionCall::execute(VirtualMachine*) {
         auto global = _provider->global();
         auto path = (ISA::StringReference*) _vector.at(0).second;

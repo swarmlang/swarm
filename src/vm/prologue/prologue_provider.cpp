@@ -28,6 +28,8 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "TAG" ) return new TagFunction(this);
         if ( name == "OPEN_FILE" ) return new OpenFileFunction(this);
         if ( name == "READ_FILE" ) return new ReadFileFunction(this);
+        if ( name == "WRITE_FILE" ) return new WriteFileFunction(this);
+        if ( name == "APPEND_FILE" ) return new AppendFileFunction(this);
         if ( name == "RESOURCE_T" ) return new ResourceTFunction(this);
         if ( name == "FILE_T" ) return new FileTFunction(this);
         if ( name == "TAG_T" ) return new TagTFunction(this);

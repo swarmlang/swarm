@@ -1,3 +1,4 @@
 #!/bin/bash -e
 
 $SWARMC --locally --verbose --svi $TESTSVI
+rm "ex.txt"

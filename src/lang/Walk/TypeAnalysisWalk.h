@@ -631,9 +631,9 @@ protected:
             }
         }
 
-        _types->setTypeOf(node->local(), localType);
-        if ( localType->intrinsic() != Type::Intrinsic::ERROR) {
-            node->local()->symbol()->_type = useref(localType);  // local is implicitly defined, so need to set its type
+        _types->setTypeOf(node->local(), type);
+        if ( localType->intrinsic() != Type::Intrinsic::ERROR ) {
+            node->local()->symbol()->_type = useref(type);  // local is implicitly defined, so need to set its type
         }
 
         for ( auto stmt : *node->body() ) {

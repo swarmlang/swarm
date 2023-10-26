@@ -200,6 +200,35 @@ namespace swarmc::Lang {
         auto tag = new PrologueFunctionSymbol("tag", typeStringStringTag, new ProloguePosition("tag"), "TAG");
         prologueScope->insert(tag);
 
+        auto fileType = new Type::Resource(Type::Opaque::of("PROLOGUE::FILE"));
+
+        auto typeStringFile = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::STRING),
+            fileType
+        );
+        auto file_open = new PrologueFunctionSymbol("file_open", typeStringFile, new ProloguePosition("file_open"), "OPEN_FILE");
+        prologueScope->insert(file_open);
+
+        auto typeFileString = new Type::Lambda1(
+            fileType,
+            Type::Primitive::of(Type::Intrinsic::STRING)
+        );
+        auto file_read = new PrologueFunctionSymbol("file_read", typeFileString, new ProloguePosition("file_read"), "READ_FILE");
+        prologueScope->insert(file_read);
+
+        auto typeFileStringVoid = new Type::Lambda1(
+            fileType,
+            new Type::Lambda1(
+                Type::Primitive::of(Type::Intrinsic::STRING),
+                Type::Primitive::of(Type::Intrinsic::VOID)
+            )
+        );
+        auto file_write = new PrologueFunctionSymbol("file_write", typeFileStringVoid, new ProloguePosition("file_write"), "WRITE_FILE");
+        prologueScope->insert(file_write);
+
+        auto file_append = new PrologueFunctionSymbol("file_append", typeFileStringVoid, new ProloguePosition("file_append"), "APPEND_FILE");
+        prologueScope->insert(file_append);
+
         return prologueScope;
     }
 

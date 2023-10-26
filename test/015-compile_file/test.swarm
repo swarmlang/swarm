@@ -1,0 +1,5 @@
+with file_open("test.txt") as file {
+    with file_open("out.txt") as file2 {
+        file_append(file2, file_read(file));
+    }
+}
