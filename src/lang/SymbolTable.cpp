@@ -190,6 +190,16 @@ namespace swarmc::Lang {
         auto subMatrix = new PrologueFunctionSymbol("subMatrix", typeNumToNumToNumToNumToEnumEnumNumToEnumEnumNum, new ProloguePosition("subMatrix"), "SUBMATRIX");
         prologueScope->insert(subMatrix);
 
+        auto typeStringStringTag = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::STRING),
+            new Type::Lambda1(
+                Type::Primitive::of(Type::Intrinsic::STRING),
+                new Type::Resource(Type::Opaque::of("PROLOGUE::TAG"))
+            )
+        );
+        auto tag = new PrologueFunctionSymbol("tag", typeStringStringTag, new ProloguePosition("tag"), "TAG");
+        prologueScope->insert(tag);
+
         return prologueScope;
     }
 

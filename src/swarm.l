@@ -157,10 +157,6 @@ type {
 	return makeBareToken(TokenKind::TYPE);
 }
 
-resource {
-	return makeBareToken(TokenKind::RESOURCE);
-}
-
 [0-9]+([.][0-9]+)? {
 	return makeNumberLiteralToken();
 }

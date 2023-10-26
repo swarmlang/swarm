@@ -8,7 +8,6 @@ include Other.File;
 from Other.Other.File include { some, ids };
 from Other.Other.File include id2;
 
-fn tag = (s: string, s2: string): resource => {};
 fn log = (s: string): void => {};
 
 enumerable<number> t1 =  [1,2,3];

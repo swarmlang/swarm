@@ -1,0 +1,4 @@
+
+with tag("region", "sweden") as tag_resource {
+    lLog("Running in Sweden");
+}

@@ -1,0 +1,14 @@
+BEGINFN<Location<f:WITH_6>, TypeReference<Primitive<VOID>>>
+FNPARAM<Location<l:tmp5>, Location<l:res_tag_resource>>
+ASSIGNVALUE<Location<l:tmp7>, StringReference<Running in Sweden>>
+STREAMPUSH<Location<l:STDOUT>, Location<l:tmp7>>
+RETURN0<>
+ASSIGNVALUE<Location<l:var_tag>, Location<f:TAG>>
+ASSIGNVALUE<Location<l:tmp0>, StringReference<region>>
+ASSIGNEVAL<Location<l:tmp1>, CURRY<Location<l:var_tag>, Location<l:tmp0>>>
+ASSIGNVALUE<Location<l:tmp2>, StringReference<sweden>>
+ASSIGNEVAL<Location<l:tmp3>, CALL1<Location<l:tmp1>, Location<l:tmp2>>>
+ASSIGNEVAL<Location<l:tmp4>, CALL0<Location<f:TAG_T>>>
+ASSIGNEVAL<Location<l:tmp5>, CALL1<Location<f:RESOURCE_T>, Location<l:tmp4>>>
+WITH<Location<l:tmp3>, Location<f:WITH_6>>
+[32m success [39m[0m[main] Compiled to ISA.

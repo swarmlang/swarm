@@ -567,13 +567,6 @@ type :
         delete $1;
     }
 
-    | RESOURCE {
-        auto vod = Type::Primitive::of(Type::Intrinsic::VOID);
-        auto t = Type::Resource::of(vod);
-        $$ = new TypeLiteral($1->position(), t);
-        delete $1;
-    }
-
     | ENUMERABLE LARROW typeid RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new TypeLiteral(pos, new Type::Enumerable($3->value()));

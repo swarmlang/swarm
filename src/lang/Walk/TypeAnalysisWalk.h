@@ -602,11 +602,12 @@ protected:
 
     bool walkWithStatement(WithStatement* node) override {
         bool flag = walk(node->resource());
+        Type::Type* localType = nullptr;
 
-        const Type::Type* type = _types->getTypeOf(node->resource());
+        Type::Type* type = _types->getTypeOf(node->resource());
         if (
             type == nullptr ||
-            (type->intrinsic() != Type::Intrinsic::RESOURCE && type->intrinsic() != Type::Intrinsic::ERROR)
+            ( type->intrinsic() != Type::Intrinsic::RESOURCE && type->intrinsic() != Type::Intrinsic::ERROR )
         ) {
             Reporting::typeError(
                 node->position(),
@@ -614,12 +615,26 @@ protected:
             );
 
             flag = false;
+            localType = Type::Primitive::of(Type::Intrinsic::ERROR);
+        } else {
+            localType = ((Type::Resource*) type)->yields();
+
+            bool lt = localType->intrinsic() != Type::Intrinsic::OPAQUE && localType->intrinsic() != Type::Intrinsic::ERROR;
+            
+            if ( lt ) {
+                Reporting::typeError(
+                    node->local()->position(),
+                    "Resource does not contain an opaque type."
+                );
+                flag = false;
+                localType = Type::Primitive::of(Type::Intrinsic::ERROR);
+            }
         }
 
-        auto localType = ((Type::Resource*) type)->yields();
-
         _types->setTypeOf(node->local(), localType);
-        node->local()->symbol()->_type = useref(localType);  // local is implicitly defined, so need to set its type
+        if ( localType->intrinsic() != Type::Intrinsic::ERROR) {
+            node->local()->symbol()->_type = useref(localType);  // local is implicitly defined, so need to set its type
+        }
 
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;

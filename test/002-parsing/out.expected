@@ -1,10 +1,7 @@
-ProgramNode<#body: 30>
+[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0mProgramNode<#body: 29>
   IncludeStatementNode<ClassAccessNode<path: IdentifierNode<name: Other> id: File>>
   IncludeStatementNode<ClassAccessNode<path: ClassAccessNode<path: IdentifierNode<name: Other> id: Other> id: File>>
   IncludeStatementNode<ClassAccessNode<path: ClassAccessNode<path: IdentifierNode<name: Other> id: Other> id: File>>
-  VariableDeclarationNode<name: tag, shared:false>
-    Type<Primitive<STRING> :: Primitive<STRING> :: RESOURCE<Primitive<VOID>>>
-    FunctionNode<type: Type<Primitive<STRING> :: Primitive<STRING> :: RESOURCE<Primitive<VOID>>>>
   VariableDeclarationNode<name: log, shared:false>
     Type<Primitive<STRING> :: Primitive<VOID>>
     FunctionNode<type: Type<Primitive<STRING> :: Primitive<VOID>>>

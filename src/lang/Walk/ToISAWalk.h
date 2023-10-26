@@ -455,11 +455,16 @@ protected:
     ISA::Instructions* walkWithStatement(WithStatement* node) override {
         auto instrs = walk(node->resource());
         auto resLoc = getLocFromAssign(instrs->back());
+        static auto resFunc = new ISA::LocationReference(ISA::Affinity::FUNCTION, "RESOURCE_T");
 
         // get yield type
         auto type = getTypeRef(node->local()->type()->copy());
+        assert(node->local()->type()->intrinsic() == Type::Intrinsic::OPAQUE);
+        auto opaque = ((Type::Opaque*)node->local()->type())->toString();
+        auto tagLoc = makeNewTmp(ISA::Affinity::LOCAL);
+        instrs->push_back(useref(new ISA::AssignEval(tagLoc, new ISA::Call0(_opaqueVals.at(opaque)))));
         auto typeLoc = makeNewTmp(ISA::Affinity::LOCAL);
-        instrs->push_back(useref(new ISA::AssignValue(typeLoc, type)));
+        instrs->push_back(useref(new ISA::AssignEval(typeLoc, new ISA::Call1(resFunc, tagLoc))));
         std::string name = "WITH_" + std::to_string(_tempCounter++);
 
         _inFunction++;
@@ -1086,6 +1091,10 @@ private:
 
     // used for assignments in constructors
     std::stack<std::pair<ISA::LocationReference*,Type::Object*>> _constructing;
+
+    std::unordered_map<std::string, ISA::LocationReference*> _opaqueVals = {
+        { "Opaque<PROLOGUE::TAG>", new ISA::LocationReference(ISA::Affinity::FUNCTION, "TAG_T") },
+    };
 };
 
 }
