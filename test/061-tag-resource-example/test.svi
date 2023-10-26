@@ -1,0 +1,17 @@
+-- Call the f:TAG with the key-value region=sweden
+$l:sweden_tag_call <- curry f:TAG "region"
+$l:sweden_tag <- call $l:sweden_tag_call "sweden"
+
+-- Get the resultant type of the resource (Opaque PROLOGUE::TAG)
+$l:tag_t <- call f:TAG_T
+$l:tag_resource_t <- call f:RESOURCE_T $l:tag_t
+
+-- Declare the code that will run in company of the Swedes
+beginfn f:RUNS_IN_SWEDEN p:VOID
+    fnparam $l:tag_resource_t $l:tag_resource
+    $l:msg <- "Running in Sweden!"
+    streampush $l:STDOUT $l:msg
+return
+
+-- Execute the with closure
+with $l:sweden_tag f:RUNS_IN_SWEDEN

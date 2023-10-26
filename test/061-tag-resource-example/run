@@ -1,0 +1,3 @@
+#!/bin/bash -e
+
+$SWARMC --locally --verbose --svi test.svi
