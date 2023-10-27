@@ -11,6 +11,7 @@ Q := @
 CXX := clang++
 ECHO := $(Q)./bin/color.bash
 ECXX := $(ECHO) blue "    CXX "
+ETEST := $(ECHO) red "   TEST "
 ELEXER := $(ECHO) yellow "  LEXER "
 EPARSER := $(ECHO) purple " PARSER"
 EBIN := $(ECHO) green "    BIN "
@@ -36,12 +37,20 @@ CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall -DSWARM_DEBUG #-DNSL
 #LDFLAGS ?= -lredis++ -lhiredis -pthread
 LDFLAGS ?= -rdynamic -ldl -lbinn -pthread
 
-$(TARGET_EXEC): $(OBJS) $(HEADERS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
+TEST_DIR := tests
+TEST_SOURCES = $(wildcard $(TEST_DIR)/*.cpp)
+TEST_OBJECTS = $(patsubst $(TEST_DIR)/%.cpp,$(BUILD_DIR)/test_%.o,$(TEST_SOURCES))
+TEST_LIBRARY_OBJ = ./build/./src/lib/catch_amalgamated.cpp.o
+DEBUG_TEST_LIBRARY_OBJ = ./build_debug/./src/lib/catch_amalgamated.cpp.o
+TEST_EXEC := swarmc_tests
+TESTFLAGS ?= -Wextra -DSWARMC_BUILD_TEST_SUITE
+
+$(TARGET_EXEC): $(filter-out $(TEST_LIBRARY_OBJ), $(OBJS)) $(HEADERS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
 	$(EBIN) $@
-	$(Q)$(CXX) $(OBJS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o -o $@ $(LDFLAGS)
+	$(Q)$(CXX) $(filter-out $(TEST_LIBRARY_OBJ), $(OBJS)) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o -o $@ $(LDFLAGS)
 
 .PHONY: all
-all: $(TARGET_EXEC) debug
+all: $(TARGET_EXEC) debug tests
 
 .PHONY: info
 info:
@@ -73,9 +82,9 @@ $(BUILD_DIR)/parser.o: src/bison/parser.cc
 
 
 # Build a version with debugging enabled. Should be (mostly) non-clashing with the release version
-debug: $(DEBUG_OBJS) $(HEADERS) $(DEBUG_BUILD_DIR)/parser_debug.o $(DEBUG_BUILD_DIR)/lexer.o
+debug: $(filter-out $(DEBUG_TEST_LIBRARY_OBJ), $(DEBUG_OBJS)) $(HEADERS) $(DEBUG_BUILD_DIR)/parser_debug.o $(DEBUG_BUILD_DIR)/lexer.o
 	$(EBIN) $(TARGET_EXEC)_debug
-	$(Q)$(CXX) $(DEBUG_OBJS) $(DEBUG_BUILD_DIR)/lexer.o $(DEBUG_BUILD_DIR)/parser_debug.o -o $(TARGET_EXEC)_debug $(LDFLAGS) $(CPPFLAGS_debug)
+	$(Q)$(CXX) $(filter-out $(DEBUG_TEST_LIBRARY_OBJ), $(DEBUG_OBJS)) $(DEBUG_BUILD_DIR)/lexer.o $(DEBUG_BUILD_DIR)/parser_debug.o -o $(TARGET_EXEC)_debug $(LDFLAGS) $(CPPFLAGS_debug)
 
 # c++ sources for debug
 $(DEBUG_BUILD_DIR)/%.cpp.o: %.cpp %.h src/bison/parser_debug.cc
@@ -111,14 +120,33 @@ $(DEBUG_BUILD_DIR)/parser_debug.o: src/bison/parser_debug.cc
 	$(Q)$(CXX) $(CPPFLAGS_debug) -c -o $@ $<
 
 
+
+# Build the test suite:
+#  - Build all the object files for the main application
+#  - Build all the object files for the tests/*.cpp cases
+#  - Compile the test suite binary, excluding main.cpp.o
+.PHONY: tests
+tests: $(TEST_EXEC)
+
+$(TEST_EXEC): $(TEST_OBJECTS) $(filter-out ./build/./src/main.cpp.o, $(OBJS)) $(HEADERS) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o
+	$(EBIN) $@
+	$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TESTFLAGS) $(TEST_OBJECTS) $(filter-out ./build/./src/main.cpp.o, $(OBJS)) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o -o $@ $(LDFLAGS)
+
+$(BUILD_DIR)/test_%.o: $(TEST_DIR)/%.cpp
+	$(Q)$(MKDIR_P) $(dir $@)
+	$(ETEST) $<
+	$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TESTFLAGS) -c $< -o $@
+
+
+
 .PHONY: clean
 clean:
 	$(Q)$(RM) -r $(BUILD_DIR) $(TARGET_EXEC) $(DEBUG_BUILD_DIR) $(TARGET_EXEC)_debug $(BISON_FILES) run_tests vgcore.*
 
 
 .PHONY: test
-test: $(TARGET_EXEC)
-	./bin/run_tests.bash
+test: tests
+	./$(TEST_EXEC)
 
 -include $(DEPS)
 
@@ -132,8 +160,25 @@ docker: Dockerfile
 docker_run:
 	docker run --rm -it "${DOCKER_REGISTRY}/swarmlang/swarm:latest" bash
 
+
+
+# Dependencies -- use `make build_deps`
+
 .PHONY: binn
 binn:
 	git submodule update --init
 	$(MAKE) -C mod/binn
 	sudo $(MAKE) -C mod/binn install
+
+.PHONY: googletest
+googletest:
+	git submodule update --init
+	cd mod/googletest && cmake . && cd ../..
+	$(MAKE) -C mod/googletest
+	sudo $(MAKE) -C mod/googletest install
+	cd mod/googletest && git clean -f .
+
+.PHONY: build_deps
+build_deps:
+	$(MAKE) binn
+	$(MAKE) googletest

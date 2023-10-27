@@ -37,6 +37,7 @@ build*
 .idea
 .sublime
 swarmc_debug
+swarmc_tests
 run_tests
 vgcore.*
 
