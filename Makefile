@@ -132,7 +132,7 @@ $(TEST_EXEC): $(TEST_OBJECTS) $(filter-out ./build/./src/main.cpp.o, $(OBJS)) $(
 	$(EBIN) $@
 	$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TESTFLAGS) $(TEST_OBJECTS) $(filter-out ./build/./src/main.cpp.o, $(OBJS)) $(BUILD_DIR)/parser.o $(BUILD_DIR)/lexer.o -o $@ $(LDFLAGS)
 
-$(BUILD_DIR)/test_%.o: $(TEST_DIR)/%.cpp
+$(BUILD_DIR)/test_%.o: $(TEST_DIR)/%.cpp src/bison/parser.cc
 	$(Q)$(MKDIR_P) $(dir $@)
 	$(ETEST) $<
 	$(Q)$(CXX) $(CXXFLAGS) $(CPPFLAGS) $(TESTFLAGS) -c $< -o $@
@@ -170,15 +170,16 @@ binn:
 	$(MAKE) -C mod/binn
 	sudo $(MAKE) -C mod/binn install
 
-.PHONY: googletest
-googletest:
+.PHONY: hiredis
+hiredis:
 	git submodule update --init
-	cd mod/googletest && cmake . && cd ../..
-	$(MAKE) -C mod/googletest
-	sudo $(MAKE) -C mod/googletest install
-	cd mod/googletest && git clean -f .
+	$(MAKE) -C mod/hiredis
+	sudo $(MAKE) -C mod/hiredis install
+	cd mod/redis-plus-plus && mkdir build && cd build && cmake .. && cd ../../..
+	$(MAKE) -C mod/redis-plus-plus/build
+	sudo $(MAKE) -C mod/redis-plus-plus/build install
 
 .PHONY: build_deps
 build_deps:
 	$(MAKE) binn
-	$(MAKE) googletest
+	$(MAKE) hiredis

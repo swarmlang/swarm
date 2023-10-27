@@ -1,3 +1,9 @@
 [submodule "mod/binn"]
 	path = mod/binn
 	url = https://github.com/liteserver/binn
+[submodule "mod/hiredis"]
+	path = mod/hiredis
+	url = https://github.com/redis/hiredis.git
+[submodule "mod/redis-plus-plus"]
+	path = mod/redis-plus-plus
+	url = https://github.com/sewenew/redis-plus-plus.git
