@@ -1,4 +1,6 @@
-[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0m[0mProgramNode<#body: 29>
+#pragma once
+
+const char* test_output = R"(ProgramNode<#body: 29>
   IncludeStatementNode<ClassAccessNode<path: IdentifierNode<name: Other> id: File>>
   IncludeStatementNode<ClassAccessNode<path: ClassAccessNode<path: IdentifierNode<name: Other> id: Other> id: File>>
   IncludeStatementNode<ClassAccessNode<path: ClassAccessNode<path: IdentifierNode<name: Other> id: Other> id: File>>
@@ -203,4 +205,4 @@
           ClassAccessNode<path: IdentifierNode<name: obj> id: regFunc>
             IdentifierNode<name: obj>
         NumberLiteralExpressionNode<#value: 4.000000>
-[32m success [39m[0m[main] Parsed input program.
+)";

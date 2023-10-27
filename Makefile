@@ -38,7 +38,7 @@ CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall -DSWARM_DEBUG #-DNSL
 LDFLAGS ?= -rdynamic -ldl -lbinn -pthread
 
 TEST_DIR := tests
-TEST_SOURCES = $(wildcard $(TEST_DIR)/*.cpp)
+TEST_SOURCES := $(shell find $(TEST_DIR) -name *.cpp -or -name *.c -or -name *.s)
 TEST_OBJECTS = $(patsubst $(TEST_DIR)/%.cpp,$(BUILD_DIR)/test_%.o,$(TEST_SOURCES))
 TEST_LIBRARY_OBJ = ./build/./src/lib/catch_amalgamated.cpp.o
 DEBUG_TEST_LIBRARY_OBJ = ./build_debug/./src/lib/catch_amalgamated.cpp.o

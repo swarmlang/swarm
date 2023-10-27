@@ -1,6 +1,8 @@
--- this test contains every token
+#pragma once
+
+const char* test_input = R"(-- this test contains every token
 --*
-multiline * comment *- 
+multiline * comment *-
 ends *-*
 here
 *--
@@ -32,7 +34,7 @@ enumerate t6{b} as shared var {
     }
 }
 
-enumerate t6{b} as v, i {   
+enumerate t6{b} as v, i {
 }
 
 enumerate t6{b} as shared v, i {
@@ -106,4 +108,5 @@ type UserDefined = {
 };
 
 UserDefined obj = UserDefined();
-obj = obj.regfunc()(4);
+obj = obj.regFunc()(4);
+)";

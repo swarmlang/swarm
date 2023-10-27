@@ -321,7 +321,6 @@ from {
 
 . {
 	std::string s(yytext), pos = "[" + std::to_string(lineNum) + ", " + std::to_string(colNum) + "]";
-	Console::get()->error("Lexing error, unexpected character " + s + " at position " + pos);
-	exit(1);
+	nslib::Fatal::error("Lexing error, unexpected character " + s + " at position " + pos);
 }
 %%

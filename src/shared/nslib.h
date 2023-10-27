@@ -58,6 +58,7 @@
 #include <mutex>
 #include <typeinfo>
 #include <string_view>
+#include <sys/wait.h>
 #include NSLIB_BINN_H_PATH
 
 #define NSLIB_SERIAL_TAG 0
@@ -837,6 +838,76 @@ namespace nslib {
 
             return v;
         }
+
+        /**
+         * A quick-n-dirty (TM) string diff, mostly for use by the test suite.
+         * This is not performant, and is not meant to be. Currently just does a
+         * fork -> execlp -> wait for the Linux `diff` command using temp files.
+         * Don't use this at prod-time.
+         */
+        inline std::string diff(const std::string& str1, const std::string& str2) {
+            auto str1FileName = "/tmp/str_diff1_" + std::to_string(getpid());
+            auto str2FileName = "/tmp/str_diff2_" + std::to_string(getpid());
+
+            std::ofstream str1File(str1FileName);
+            std::ofstream str2File(str2FileName);
+            if ( !str1File || !str2File ) {
+                throw NSLibException("Unable to open temp files for writing.");
+            }
+
+            str1File << str1;
+            str2File << str2;
+
+            str1File.close();
+            str2File.close();
+
+            int pipefd[2];
+            if ( pipe(pipefd) == -1 ) {
+                throw NSLibException("Unable to open pipe for diff command.");
+            }
+
+            pid_t pid = fork();
+            if ( pid == -1 ) {
+                throw NSLibException("Unable to fork child process for diff command.");
+            }
+
+            if ( pid == 0 ) {
+                // we are the child process
+                close(pipefd[0]); // close the read end
+
+                // redirect the standard output to write end
+                dup2(pipefd[1], STDOUT_FILENO);
+                close(pipefd[1]);
+
+                // execute the `diff` command
+                execlp("diff", "diff", str1FileName.c_str(), str2FileName.c_str(), nullptr);
+                throw NSLibException("Unable to execute diff command.");
+            }
+
+            // we are the parent process
+            close(pipefd[1]); // close the write end
+
+            // wait for the child process
+            int status;
+            waitpid(pid, &status, 0);
+
+            // Read the output of the 'diff' command from the pipe
+            std::string output;
+            char buffer[1024];
+            ssize_t bytesRead;
+            while ((bytesRead = read(pipefd[0], buffer, sizeof(buffer))) > 0) {
+                output.append(buffer, bytesRead);
+            }
+
+            remove(str1FileName.c_str());
+            remove(str2FileName.c_str());
+
+            return output;
+        }
+
+        inline std::string diffTrimmed(const std::string& str1, const std::string& str2) {
+            return diff(trim(str1), trim(str2));
+        }
     }
 
 
@@ -852,7 +923,7 @@ namespace nslib {
         }
 
         std::stringstream s;
-        for ( std::size_t i = 0; i < size; i += 1 ) {
+        for ( int i = 0; i < size; i += 1 ) {
             s << strings[i] << "\n";
         }
 
@@ -1822,6 +1893,36 @@ namespace nslib {
         [[nodiscard]] std::string toString() const override {
             return "ConsoleTarget<>";
         }
+    };
+
+
+    class FatalException : public NSLibException {
+    public:
+        FatalException(int code, std::string message) : NSLibException(message), _code(code), _message(message) {}
+
+        virtual ~FatalException() {}
+
+        int code() { return _code; }
+        std::string message() { return _message; }
+    protected:
+        int _code;
+        std::string _message;
+    };
+
+    class Fatal {
+    public:
+        static void error(const std::string& message, int code = 1) {
+            if ( _throw ) {
+                throw FatalException(code, message);
+            }
+
+            Console::get()->error(message);
+            exit(code);
+        }
+
+        static void shouldThrow() { _throw = true; }
+    private:
+        static inline bool _throw = false;
     };
 
 

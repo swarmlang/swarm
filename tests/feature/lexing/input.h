@@ -1,6 +1,8 @@
--- this test contains every token
+#pragma once
+
+const char* test_input = R"(-- this test contains every token
 --*
-multiline * comment *- 
+multiline * comment *-
 ends *-*
 here
 *--
@@ -106,4 +108,5 @@ type UserDefined = {
 };
 
 UserDefined obj = UserDefined();
-obj = obj.regFunc()(4);
+obj = obj.regfunc()(4);
+)";

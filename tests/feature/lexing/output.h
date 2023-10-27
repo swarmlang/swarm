@@ -1,4 +1,6 @@
-INCLUDE [l: 7, c: 1]->[l: 7, c: 8]
+#pragma once
+
+const char* test_output = R"(INCLUDE [l: 7, c: 1]->[l: 7, c: 8]
 ID:Other [l: 7, c: 9]->[l: 7, c: 14]
 DOT [l: 7, c: 14]->[l: 7, c: 15]
 ID:File [l: 7, c: 15]->[l: 7, c: 19]
@@ -578,3 +580,4 @@ NUMBERLITERAL:4 [l: 109, c: 21]->[l: 109, c: 22]
 RPAREN [l: 109, c: 22]->[l: 109, c: 23]
 SEMICOLON [l: 109, c: 23]->[l: 109, c: 24]
 EOF
+)";

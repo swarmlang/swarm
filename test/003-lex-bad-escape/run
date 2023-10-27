@@ -1,3 +1,0 @@
-#!/bin/bash -e
-
-$SWARMC --dbg-output-tokens-to -- $TESTSWARM
