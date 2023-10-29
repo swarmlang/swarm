@@ -80,6 +80,13 @@ int Executive::run(int argc, char **argv) {
         }
     }
 
+    if ( _backend != DistributedBackend::NONE ) {
+        int executeResult = executeDistributedSVI(_backend);
+        if ( executeResult != 0 ) {
+            result = executeResult;
+        }
+    }
+
     if ( flagDebugger ) {
         swarmc::Runtime::Debug::Debugger::launchInteractive();
     }
@@ -207,6 +214,10 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagMultiThreaded = true;
             flagSingleThreaded = false;
             logger->debug("Will execute multithreaded");
+        } else if ( arg == "--redis" ) {
+            flagMultiThreaded = flagSingleThreaded = false;
+            _backend = DistributedBackend::REDIS;
+            logger->debug("Will execute with redis");
         } else if ( arg == "--verbose" ) {
             flagVerbose = true;
             Configuration::DEBUG = true;
@@ -333,8 +344,12 @@ void Executive::printUsage() {
         ->println("Evaluate the given Swarm program without connecting to remote executors.")
         ->println();
 
-    console->bold()->print("  --locally-multithreaded; ", true)
+    console->bold()->print("  --locally-multithreaded: ", true)
         ->println("Evaluate the given Swarm program without connecting to remote executors, but multithreaded.")
+        ->println();
+
+    console->bold()->print("  --redis   :", true)
+        ->println("Evaluate the given Swarm program by connecting to remote executors synchronized with redis.")
         ->println();
 
     console->bold()->print("  --binary  :  ", true)
@@ -597,6 +612,18 @@ int Executive::executeLocalSVI(bool multithreaded) {
     }
 
     auto vm = multithreaded ? pipeline.targetMultiThreaded() : pipeline.targetSingleThreaded();
+    vm->execute();
+    vm->cleanup();
+    delete vm;
+    return 0;
+}
+
+int Executive::executeDistributedSVI(DistributedBackend backend) {
+    swarmc::VM::Pipeline pipeline(_input);
+    pipeline.setExternalProviders(externalProviders);
+
+    auto vm = pipeline.targetRedis();
+
     vm->execute();
     vm->cleanup();
     delete vm;

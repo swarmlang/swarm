@@ -10,6 +10,7 @@
 #include "../Wire.h"
 
 using namespace nslib;
+using namespace swarmc::Runtime;
 
 namespace swarmc::Runtime {
     class VirtualMachine;

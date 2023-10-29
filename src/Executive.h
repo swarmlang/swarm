@@ -24,6 +24,10 @@ public:
     void printUsage();
 
 protected:
+    enum class DistributedBackend {
+        REDIS,NONE
+    };
+
     // CLI options
     bool flagOutputTokens = false;
     bool flagParseAndStop = false;
@@ -56,6 +60,7 @@ protected:
     std::string inputFile;
     std::vector<std::string> externalProviders;
     std::istream* _input = nullptr;
+    DistributedBackend _backend = DistributedBackend::NONE;
 
     int debugOutputTokens();
     int debugOutputParse();
@@ -65,6 +70,7 @@ protected:
     int runTest();
     int parseFilters();
     int executeLocalSVI(bool);
+    int executeDistributedSVI(DistributedBackend);
     int emitBinary();
 };
 

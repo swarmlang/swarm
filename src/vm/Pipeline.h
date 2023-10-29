@@ -8,6 +8,7 @@
 #include "ISAParser.h"
 #include "runtime/single_threaded.h"
 #include "runtime/multi_threaded.h"
+#include "runtime/redis_driver.h"
 #include "VirtualMachine.h"
 #include "prologue/prologue_provider.h"
 #include "walk/ISABinaryWalk.h"
@@ -120,6 +121,27 @@ namespace swarmc::VM {
             vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
             vm->addQueue(new MultiThreaded::Queue(vm));
             vm->useStreamDriver(new MultiThreaded::StreamDriver());
+
+            if ( Configuration::WITH_PROLOGUE ) {
+                vm->addProvider(new Prologue::Provider(vm->global()));
+            }
+
+            for ( const auto& path : _externalProviders ) {
+                vm->addExternalProvider(path);
+            }
+
+            vm->initialize(is);
+            return vm;
+        }
+
+        VirtualMachine* targetRedis() {
+            auto is = targetInstructions();
+            auto vm = new VirtualMachine(new RedisDriver::GlobalServices());
+            vm->addStore(new RedisDriver::RedisStorageInterface(vm));
+            vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
+            //vm->addQueue(new RedisDriver::Queue(vm));
+            vm->addQueue(new SingleThreaded::Queue());
+            vm->useStreamDriver(new RedisDriver::RedisStreamDriver(vm));
 
             if ( Configuration::WITH_PROLOGUE ) {
                 vm->addProvider(new Prologue::Provider(vm->global()));

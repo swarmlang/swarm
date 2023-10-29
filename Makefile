@@ -35,7 +35,7 @@ CXXFLAGS += -std=c++20
 CPPFLAGS ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall
 CPPFLAGS_debug ?= $(INC_FLAGS) -MMD -MP -g -std=c++20 -Wall -DSWARM_DEBUG #-DNSLIB_GC_TRACK
 #LDFLAGS ?= -lredis++ -lhiredis -pthread
-LDFLAGS ?= -rdynamic -ldl -lbinn -pthread
+LDFLAGS ?= -rdynamic -ldl -lbinn -lhiredis -lredis++ -pthread
 
 TEST_DIR := tests
 TEST_SOURCES := $(shell find $(TEST_DIR) -name *.cpp -or -name *.c -or -name *.s)
