@@ -49,9 +49,7 @@ namespace swarmc::Runtime::RedisDriver {
 
     ISA::Reference* RedisStorageInterface::load(ISA::LocationReference* loc) {
         auto b = redisRead(_redis->get(Configuration::REDIS_PREFIX + loc->fqName()));
-        std::cout << "getting value of " << loc->fqName() << std::endl;
         if ( !b ) throw Errors::InvalidStoreLocationError(s(loc), s(this));
-        // Please dear god let it be this easy
         auto ref = Wire::references()->produce(b, _vm);
         binn_free(b);
         return ref;
@@ -63,13 +61,10 @@ namespace swarmc::Runtime::RedisDriver {
             redisSet(Configuration::REDIS_PREFIX + "type:" + loc->fqName(), value->type(), _vm);
         }
         auto b = redisRead(_redis->get(Configuration::REDIS_PREFIX + "type:" + loc->fqName()));
-        auto zoinks = Wire::types()->produce(b, _vm);
-        std::cout << zoinks->toString() << std::endl;
-        assert(value->typei()->isAssignableTo(zoinks));
+        assert(value->typei()->isAssignableTo(Wire::types()->produce(b, _vm)));
         binn_free(b);
 
         redisSet(Configuration::REDIS_PREFIX + loc->fqName(), value, _vm);
-        std::cout << "stored " << loc->fqName() << std::endl;
     }
 
     bool RedisStorageInterface::has(ISA::LocationReference* ref) {
@@ -83,7 +78,6 @@ namespace swarmc::Runtime::RedisDriver {
     void RedisStorageInterface::drop(ISA::LocationReference* ref) {
         _redis->del(Configuration::REDIS_PREFIX + "type:" + ref->fqName());
         _redis->del(Configuration::REDIS_PREFIX + ref->fqName());
-        std::cout << "dropped " << ref->fqName() << std::endl;
     }
 
     const Type::Type* RedisStorageInterface::typeOf(ISA::LocationReference* ref) {
@@ -99,19 +93,28 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     void RedisStorageInterface::clear() {
-        // This interface could only possibly keep track of variables that it has interacted with before
-        // So I'm not sure how to clear out the entire store atm unless I can search for partial keys in redis
+        std::set<std::string> keys;
+        auto cursor = 0LL;
+        while (true) {
+            cursor = _redis->scan(
+                cursor, 
+                Configuration::REDIS_PREFIX + "*", 
+                10, 
+                std::inserter(keys, keys.end())
+            );
+            if ( cursor == 0 ) break;
+        }
+        for ( auto key : keys ) {
+            _redis->del(key);
+        }
     }
 
     IStorageInterface* RedisStorageInterface::copy() {
-        // maybe `return this` instead? Only really matters if we need to copy locks since thats
-        // all thats in here atm
         return new RedisStorageInterface(_vm);
     }
 
     IStorageLock* RedisStorageInterface::acquire(ISA::LocationReference* ref) {
         if ( _redis->setnx(Configuration::REDIS_PREFIX + "lock:" + ref->fqName(), "true") ) {
-            std::cout << "acquiring lock for " << ref->fqName() << std::endl;
             _locks.insert({ ref->fqName(), new RedisStorageLock(this, ref) });
             return _locks[ref->fqName()];
         }
@@ -121,7 +124,6 @@ namespace swarmc::Runtime::RedisDriver {
     void RedisStorageLock::release() {
         _store->_locks.erase(_loc->fqName());
         getRedis()->del(Configuration::REDIS_PREFIX + "lock:" + _loc->fqName());
-        std::cout << "releasing lock for " << _loc->fqName() << std::endl;
     }
 
     std::string RedisStorageLock::toString() const {
@@ -138,8 +140,6 @@ namespace swarmc::Runtime::RedisDriver {
     void Stream::open() {
         // I imagine if the stream is already open, it doesn't matter. That just means
         // someone else opened it
-        std::cout << "opening stream " << _id << std::endl;
-
         auto bin = Wire::types()->reduce(_innerType, _vm);
         std::string s((char*)binn_ptr(bin), binn_size(bin));
 
@@ -149,7 +149,6 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     void Stream::close() {
-        std::cout << "closing stream " << _id << std::endl;
         _redis->del(Configuration::REDIS_PREFIX + _id + "_type");
         _redis->del(Configuration::REDIS_PREFIX + _id + "_open");
     }
@@ -157,12 +156,10 @@ namespace swarmc::Runtime::RedisDriver {
     void Stream::push(ISA::Reference* val) {
         auto bin = Wire::references()->reduce(val, _vm);
         std::string s((char*)binn_ptr(bin), binn_size(bin));
-        std::cout << "pushing " << val->toString() << " to stream " << _id << std::endl;
         _redis->lpush(Configuration::REDIS_PREFIX + _id, s);
     }
 
     ISA::Reference* Stream::pop() {
-        std::cout << "popping from stream " << _id << std::endl;
         assert(!isEmpty());
         auto ref = redisRead(_redis->rpop(Configuration::REDIS_PREFIX + _id));
         return Wire::references()->produce(ref, _vm);
