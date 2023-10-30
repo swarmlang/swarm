@@ -1,4 +1,4 @@
 $s:a <- "Hi!"
+out $s:a
 streampush $l:STDOUT $s:a
 
-out $s:var

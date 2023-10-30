@@ -85,6 +85,8 @@ namespace swarmc::Runtime {
             freeref(_localErr);
             _localErr = useref(new LocalErrorStream());
 
+            clearStores();
+
             VirtualMachineInitializingEvent event(this);
             _lifecycleEvents->dispatch(event);
         }
@@ -95,6 +97,13 @@ namespace swarmc::Runtime {
          */
         void addStore(IStorageInterface* store) {
             _stores.push_back(useref(store));
+        }
+
+        /**
+         * Drop the contents of every registered store.
+         */
+        void clearStores() {
+            for ( auto store : _stores ) store->clear();
         }
 
         /**
