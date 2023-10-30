@@ -97,7 +97,7 @@ namespace swarmc::Runtime::RedisDriver {
 
         void close() override;
 
-        bool isOpen() override { return _redis->exists(_id + "_open"); }
+        bool isOpen() override { return _redis->exists(Configuration::REDIS_PREFIX + _id + "_open"); }
 
         Type::Type* innerType() override { return _innerType; }
 
@@ -105,9 +105,9 @@ namespace swarmc::Runtime::RedisDriver {
 
         ISA::Reference* pop() override;
 
-        bool isEmpty() override { return !_redis->exists(_id); }
+        bool isEmpty() override { return !_redis->exists(Configuration::REDIS_PREFIX + _id); }
 
-        [[nodiscard]] std::string id() const override { return _id; }
+        [[nodiscard]] std::string id() const override { return Configuration::REDIS_PREFIX + _id; }
 
         [[nodiscard]] std::string toString() const override;
     protected:

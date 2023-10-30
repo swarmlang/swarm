@@ -1,2 +1,4 @@
-$l:str <- call f:HELLO_WORLD
-out $l:str
+$s:a <- "Hi!"
+streampush $l:STDOUT $s:a
+
+out $s:var
