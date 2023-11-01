@@ -79,10 +79,97 @@ namespace swarmc::Runtime::RedisDriver {
 
         void release() override;
 
-        [[nodiscard]] std::string toString() const override;
+        [[nodiscard]] std::string toString() const override {
+            return "RedisDriver::RedisStorageLock<loc: " + _loc->toString() + ">";
+        }
     protected:
         RedisStorageInterface* _store = nullptr;
         ISA::LocationReference* _loc = nullptr;
+    };
+
+    class RedisQueueJob : public IQueueJob {
+    public:
+        RedisQueueJob(JobID id, JobState state, IFunctionCall* call, State* vmState, ScopeFrame* vmScope) 
+            : _id(id), _jobState(state), _call(call), _vmState(vmState), _vmScope(vmScope) {}
+
+        /** Get the tracking ID for this job. */
+        [[nodiscard]] virtual JobID id() const override { return _id; };
+
+        /** Get the current status of this job. */
+        [[nodiscard]] virtual JobState state() const override { return _jobState; }
+
+        virtual void setState(JobState state) override { _jobState = state; }
+
+        [[nodiscard]] virtual IFunctionCall* getCall() const override { return _call; }
+
+        [[nodiscard]] virtual State* getVMState() const { return _vmState; }
+
+        [[nodiscard]] virtual ScopeFrame* getVMScope() const { return _vmScope; }
+
+        virtual void setFilters(SchedulingFilters filters) override { _filters = filters; } 
+
+        [[nodiscard]] virtual SchedulingFilters getFilters() const override { return _filters; }
+
+        [[nodiscard]] std::string toString() const override {
+            return "RedisDriver::RedisQueueJob<id: " + std::to_string(_id) + ", call: " + _call->toString() + ">";
+        }
+    protected:
+        JobID _id;
+        JobState _jobState;
+        IFunctionCall* _call;
+        State* _vmState;
+        ScopeFrame* _vmScope;
+
+        SchedulingFilters _filters;
+    };
+
+    class RedisQueue : public IQueue {
+    public:
+        RedisQueue(VirtualMachine* vm) : _redis(getRedis()), _vm(vm) {}
+        /**
+         * Focuses the queue on a particular context.
+         * Contexts provide a way for the VM to isolate jobs in batches.
+         * e.g. an `enumerate` instruction will produce a batch of jobs, one for each element.
+         * The VM will push this batch into its own context so they can be awaited
+         * independently.
+         */
+        virtual void setContext(QueueContextID) override;
+
+        /** Get the ID of the current queue context. */
+        virtual QueueContextID getContext() override;
+
+        /** Determines whether this queue should execute the given function call. */
+        virtual bool shouldHandle(IFunctionCall*) override { return true; }
+
+        /** Given a function call and context, instantiate a new IQueueJob. */
+        virtual IQueueJob* build(VirtualMachine*, IFunctionCall*) override;
+
+        /** Push a call onto this queue. */
+        virtual void push(VirtualMachine*, IQueueJob*) override;
+
+        /** Remove the next pending job from the queue and return it. */
+        virtual IQueueJob* pop() override;
+
+        /** Returns true if there are no pending jobs. */
+        virtual bool isEmpty(QueueContextID) override;
+
+        virtual void tick() override;
+
+        void initialize() {
+            _redis->setnx(Configuration::REDIS_PREFIX + "nextJobID", "0");
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "RedisDriver::RedisQueue<ctx: " + _context + ">";
+        }
+    protected:
+        sw::redis::Redis* _redis;
+        VirtualMachine* _vm;
+        QueueContextID _context;
+
+        void tryToProcessJob();
+        std::pair<IQueueJob*, QueueContextID> tryGetJob();
+        IQueueJob* popFromContext(QueueContextID);
     };
 
     class Stream : public IStream {

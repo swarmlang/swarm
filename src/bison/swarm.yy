@@ -112,7 +112,6 @@
 %token <transToken>      BOOL
 %token <transToken>      VOID
 %token <transToken>      TYPE
-%token <transToken>      RESOURCE
 %token <transNumberToken> NUMBERLITERAL
 %token <transStringToken> STRINGLITERAL
 %token <transToken>      ENUMERABLE
@@ -194,7 +193,7 @@
 %%
 
 program :
-    includes statements {
+    includes statements END {
         $$ = $1;
         $$->assumeAndReduceStatements($2->reduceToStatements());
         *root = $$;

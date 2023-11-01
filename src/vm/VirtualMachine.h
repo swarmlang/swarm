@@ -276,6 +276,12 @@ namespace swarmc::Runtime {
          */
         virtual IFunctionCall* getReturn();
 
+        /** Get the current program state, if on exists. Otherwise, `nullptr`. */
+        virtual State* getState() const;
+
+        /** Get the current scope frame, if on exists. Otherwise, `nullptr`. */
+        virtual ScopeFrame* getScopeFrame() const;
+
         /**
          * Return capture is used when the runtime needs to temporarily store the return value
          * of a call so it can be used by the instruction the call returns to. The canonical

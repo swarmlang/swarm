@@ -329,6 +329,14 @@ namespace swarmc::Runtime {
         return _scope->getReturnCall();
     }
 
+    State* VirtualMachine::getState() const {
+        return _state;
+    }
+
+    ScopeFrame* VirtualMachine::getScopeFrame() const {
+        return _scope;
+    }
+
     void VirtualMachine::setCaptureReturn() {
         _scope->shouldCaptureReturn(true);
     }

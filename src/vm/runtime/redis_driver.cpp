@@ -4,6 +4,7 @@
 #include "../../errors/InvalidStoreLocationError.h"
 #include "../ISA.h"
 #include "../walk/BinaryISAWalk.h"
+#include "../VirtualMachine.h"
 #include "redis_driver.h"
 #include <iostream>
 
@@ -126,8 +127,125 @@ namespace swarmc::Runtime::RedisDriver {
         getRedis()->del(Configuration::REDIS_PREFIX + "lock:" + _loc->fqName());
     }
 
-    std::string RedisStorageLock::toString() const {
-        return "RedisDriver::RedisStorageLock<loc: " + _loc->toString() + ">";
+    void RedisQueue::setContext(QueueContextID context) {
+        // lock on the queue shouldn't be need like it was in multithreaded bc we arent sharing the same
+        // storage object with multiple threads. Same goes for getContext
+        _context = context;
+        _redis->setnx(Configuration::REDIS_PREFIX + "context_" + _context, "true");
+    }
+
+    QueueContextID RedisQueue::getContext() {
+        return _context;
+    }
+
+    IQueueJob* RedisQueue::build(VirtualMachine* vm, IFunctionCall* call) {
+        auto id = _redis->incr(Configuration::REDIS_PREFIX + "nextJobID");
+        return new RedisQueueJob(
+            id, 
+            JobState::PENDING, 
+            call,
+            vm->getState()->copy(),
+            vm->getScopeFrame()->copy()
+        );
+    }
+
+    void RedisQueue::push(VirtualMachine* vm, IQueueJob* job) {
+        auto callbin = Wire::calls()->reduce(job->getCall(), vm);
+        std::string callstr((char*)binn_ptr(callbin), binn_size(callbin));
+        auto statebin = Wire::states()->reduce(vm->getState(), vm);
+        std::string statestr((char*)binn_ptr(statebin), binn_size(statebin));
+        auto scopebin = Wire::scopes()->reduce(vm->getScopeFrame(), vm);
+        std::string scopestr((char*)binn_ptr(scopebin), binn_size(scopebin));
+
+        std::unordered_map<std::string, std::string> m = {
+            {"ID", std::to_string(job->id())},
+            {"JobState", std::to_string(static_cast<std::size_t>(job->state()))},
+            {"Call", callstr},
+            {"VMState", statestr},
+            {"VMScope", scopestr}
+        };
+        _redis->hmset(Configuration::REDIS_PREFIX + "job_" + m["ID"], m.begin(), m.end());
+        _redis->lpush(Configuration::REDIS_PREFIX + "queue_" + _context, Configuration::REDIS_PREFIX + "job_" + m["ID"]);
+    }
+
+    IQueueJob* RedisQueue::pop() {
+        return popFromContext(_context);
+    }
+
+    bool RedisQueue::isEmpty(QueueContextID id) {
+        return !_redis->exists(Configuration::REDIS_PREFIX + "queue_" + _context) 
+            && _redis->get(Configuration::REDIS_PREFIX + "inProgress_" + _context).value_or("") != "0";
+    }
+
+    void RedisQueue::tick() {
+        tryToProcessJob();
+        Framework::tick();
+    }
+
+    void RedisQueue::tryToProcessJob() {
+        auto job = tryGetJob();
+        // we have to restore the vm, so we need a Jobject that contains State and ScopeFrame info
+        auto redisjob = dynamic_cast<RedisQueueJob*>(job.first);
+        if ( job.first != nullptr ) {
+            try {
+                Console::get()->debug("Running job: " + s(redisjob));
+                _vm->copy([redisjob](VirtualMachine* vm) -> void {
+                    vm->restore(redisjob->getVMScope(), redisjob->getVMState());
+                    vm->executeCall(redisjob->getCall());
+                });
+                redisjob->setState(JobState::COMPLETE);
+            } catch (...) {
+                Console::get()->error("Unknown error!");
+                redisjob->setState(JobState::ERROR);
+            }
+            _redis->decr(Configuration::REDIS_PREFIX + "inProgress_" + job.second);
+        }
+    }
+
+    std::pair<IQueueJob*, QueueContextID> RedisQueue::tryGetJob() {
+        // attempt popping from context
+        auto incontext = popFromContext(_context);
+        if ( !incontext ) {
+            // scan for other contexts
+            auto cursor = 0LL;
+            while ( true ) {
+                std::string context;
+                cursor = _redis->scan(//change to use hscan
+                    cursor,
+                    Configuration::REDIS_PREFIX + "context_*",
+                    1,
+                    &context
+                );
+                if ( auto job = popFromContext(context) ) {
+                    _redis->incr(Configuration::REDIS_PREFIX + "inProgress_" + context);
+                    return { job, context };
+                }
+                if ( cursor == 0 ) break;
+            }
+            return { nullptr, _context };
+        }
+        _redis->incr(Configuration::REDIS_PREFIX + "inProgress_" + _context);
+        return { incontext, _context };
+    }
+
+    IQueueJob* RedisQueue::popFromContext(QueueContextID context) {
+        auto job = _redis->rpop(Configuration::REDIS_PREFIX + "queue_" + context);
+        if ( !job ) return nullptr;
+        std::map<std::string, std::string> jobValues;
+        _redis->hgetall(job.value(), std::inserter(jobValues, jobValues.begin()));
+        for ( auto p : jobValues ) {
+            _redis->hdel(job.value(), p.first);
+        }
+        auto a = Wire::calls()->produce(redisRead(jobValues["Call"]), _vm);
+        // crashes in this one
+        auto b = Wire::states()->produce(redisRead(jobValues["VMState"]), _vm);
+        auto c = Wire::scopes()->produce(redisRead(jobValues["VMScope"]), _vm);
+
+        return new RedisQueueJob(
+            static_cast<JobID>(std::atoi(jobValues["ID"].c_str())), 
+            static_cast<JobState>(std::atoi(jobValues["JobState"].c_str())), 
+            a,b,c
+        );
     }
 
     Stream::~Stream() noexcept {

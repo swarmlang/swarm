@@ -75,7 +75,6 @@ namespace swarmc::Lang {
             if (kind == Parser::token::FNDEF) return "FNDEF";
             if (kind == Parser::token::OF) return "OF";
             if (kind == Parser::token::TYPE) return "TYPE";
-            if (kind == Parser::token::RESOURCE) return "RESOURCE";
             if (kind == Parser::token::INCLUDE) return "INCLUDE";
             if (kind == Parser::token::CONSTRUCTOR) return "CONSTRUCTOR";
             if (kind == Parser::token::FROM) return "FROM";
