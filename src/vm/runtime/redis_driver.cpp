@@ -131,7 +131,7 @@ namespace swarmc::Runtime::RedisDriver {
         // lock on the queue shouldn't be need like it was in multithreaded bc we arent sharing the same
         // storage object with multiple threads. Same goes for getContext
         _context = context;
-        _redis->setnx(Configuration::REDIS_PREFIX + "context_" + _context, "true");
+        _redis->hsetnx(Configuration::REDIS_PREFIX + "contexts", _context, "true");
     }
 
     QueueContextID RedisQueue::getContext() {
@@ -174,7 +174,7 @@ namespace swarmc::Runtime::RedisDriver {
 
     bool RedisQueue::isEmpty(QueueContextID id) {
         return !_redis->exists(Configuration::REDIS_PREFIX + "queue_" + _context)
-            && _redis->get(Configuration::REDIS_PREFIX + "inProgress_" + _context).value_or("") != "0";
+            && _redis->hget(Configuration::REDIS_PREFIX + "contextProgress", _context).value_or("0") == "0";
     }
 
     void RedisQueue::tick() {
@@ -187,6 +187,11 @@ namespace swarmc::Runtime::RedisDriver {
         // we have to restore the vm, so we need a Jobject that contains State and ScopeFrame info
         auto redisjob = dynamic_cast<RedisQueueJob*>(job.first);
         if ( job.first != nullptr ) {
+            // FIXME: setting the job state doesn't really do anything here,
+            // because the jobjects are created here by deserializing redis.
+            // Compare to how the multithreaded driver uses the same jobject
+            // both before pushing and after popping because it doesn't
+            // have to serialize anythin into a database
             try {
                 Console::get()->debug("Running job: " + s(redisjob));
                 _vm->copy([redisjob](VirtualMachine* vm) -> void {
@@ -198,7 +203,7 @@ namespace swarmc::Runtime::RedisDriver {
                 Console::get()->error("Unknown error!");
                 redisjob->setState(JobState::ERROR);
             }
-            _redis->decr(Configuration::REDIS_PREFIX + "inProgress_" + job.second);
+            _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", job.second, -1);
         }
     }
 
@@ -209,22 +214,25 @@ namespace swarmc::Runtime::RedisDriver {
             // scan for other contexts
             auto cursor = 0LL;
             while ( true ) {
-                std::string context;
-                cursor = _redis->scan(//change to use hscan
+                std::vector<std::string> contexts;
+                cursor = _redis->hscan(
+                    Configuration::REDIS_PREFIX + "contexts",
                     cursor,
-                    Configuration::REDIS_PREFIX + "context_*",
-                    1,
-                    &context
+                    "*",
+                    10,
+                    std::inserter(contexts, contexts.begin())
                 );
-                if ( auto job = popFromContext(context) ) {
-                    _redis->incr(Configuration::REDIS_PREFIX + "inProgress_" + context);
-                    return { job, context };
+                for ( auto context : contexts ) {
+                    if ( auto job = popFromContext(context) ) {
+                        _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", context, 1);
+                        return { job, context };
+                    }
                 }
                 if ( cursor == 0 ) break;
             }
             return { nullptr, _context };
         }
-        _redis->incr(Configuration::REDIS_PREFIX + "inProgress_" + _context);
+        _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", _context, 1);
         return { incontext, _context };
     }
 
@@ -236,15 +244,13 @@ namespace swarmc::Runtime::RedisDriver {
         for ( auto p : jobValues ) {
             _redis->hdel(job.value(), p.first);
         }
-        auto a = Wire::calls()->produce(redisRead(jobValues["Call"]), _vm);
-        // crashes in this one
-        auto c = Wire::scopes()->produce(redisRead(jobValues["VMScope"]), _vm);
-        auto b = Wire::states()->produce(redisRead(jobValues["VMState"]), _vm);
 
         return new RedisQueueJob(
             static_cast<JobID>(std::atoi(jobValues["ID"].c_str())),
             static_cast<JobState>(std::atoi(jobValues["JobState"].c_str())),
-            a,b,c
+            Wire::calls()->produce(redisRead(jobValues["Call"]), _vm),
+            Wire::states()->produce(redisRead(jobValues["VMState"]), _vm),
+            Wire::scopes()->produce(redisRead(jobValues["VMScope"]), _vm)
         );
     }
 
@@ -256,18 +262,20 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     void Stream::open() {
-        // I imagine if the stream is already open, it doesn't matter. That just means
-        // someone else opened it
+        setKeys();
+    }
+
+    void Stream::close() {
+        clearKeys();
+    }
+
+    void Stream::setKeys() {
         auto bin = Wire::types()->reduce(_innerType, _vm);
         std::string s((char*)binn_ptr(bin), binn_size(bin));
 
         if ( _redis->setnx(Configuration::REDIS_PREFIX + _id + "_type", s) ) {
             _redis->setnx(Configuration::REDIS_PREFIX + _id + "_open", "true");
         }
-    }
-
-    void Stream::close() {
-        clearKeys();
     }
 
     void Stream::clearKeys() {

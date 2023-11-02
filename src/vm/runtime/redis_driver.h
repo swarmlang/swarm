@@ -175,7 +175,7 @@ namespace swarmc::Runtime::RedisDriver {
     class Stream : public IStream {
     public:
         Stream(std::string id, Type::Type* innerType, VirtualMachine* vm) : _id(std::move(id)), _innerType(innerType), _vm(vm) {
-            open();  // FIXME: do not invoke virtual members from the constructor
+            setKeys();
         }
 
         ~Stream() noexcept override;
@@ -203,6 +203,7 @@ namespace swarmc::Runtime::RedisDriver {
         sw::redis::Redis* _redis = getRedis();
         VirtualMachine* _vm;
 
+        void setKeys();
         void clearKeys();
     };
 
