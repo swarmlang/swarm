@@ -98,9 +98,9 @@ namespace swarmc::Runtime::RedisDriver {
         auto cursor = 0LL;
         while (true) {
             cursor = _redis->scan(
-                cursor, 
-                Configuration::REDIS_PREFIX + "*", 
-                10, 
+                cursor,
+                Configuration::REDIS_PREFIX + "*",
+                10,
                 std::inserter(keys, keys.end())
             );
             if ( cursor == 0 ) break;
@@ -141,8 +141,8 @@ namespace swarmc::Runtime::RedisDriver {
     IQueueJob* RedisQueue::build(VirtualMachine* vm, IFunctionCall* call) {
         auto id = _redis->incr(Configuration::REDIS_PREFIX + "nextJobID");
         return new RedisQueueJob(
-            id, 
-            JobState::PENDING, 
+            id,
+            JobState::PENDING,
             call,
             vm->getState()->copy(),
             vm->getScopeFrame()->copy()
@@ -173,7 +173,7 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     bool RedisQueue::isEmpty(QueueContextID id) {
-        return !_redis->exists(Configuration::REDIS_PREFIX + "queue_" + _context) 
+        return !_redis->exists(Configuration::REDIS_PREFIX + "queue_" + _context)
             && _redis->get(Configuration::REDIS_PREFIX + "inProgress_" + _context).value_or("") != "0";
     }
 
@@ -238,12 +238,12 @@ namespace swarmc::Runtime::RedisDriver {
         }
         auto a = Wire::calls()->produce(redisRead(jobValues["Call"]), _vm);
         // crashes in this one
-        auto b = Wire::states()->produce(redisRead(jobValues["VMState"]), _vm);
         auto c = Wire::scopes()->produce(redisRead(jobValues["VMScope"]), _vm);
+        auto b = Wire::states()->produce(redisRead(jobValues["VMState"]), _vm);
 
         return new RedisQueueJob(
-            static_cast<JobID>(std::atoi(jobValues["ID"].c_str())), 
-            static_cast<JobState>(std::atoi(jobValues["JobState"].c_str())), 
+            static_cast<JobID>(std::atoi(jobValues["ID"].c_str())),
+            static_cast<JobState>(std::atoi(jobValues["JobState"].c_str())),
             a,b,c
         );
     }
