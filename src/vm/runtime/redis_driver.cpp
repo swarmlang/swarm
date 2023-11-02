@@ -23,13 +23,13 @@ namespace swarmc::Runtime::RedisDriver {
         return redis;
     }
 
-    bool redisSet(std::string key, ISA::Reference* ref, VirtualMachine* vm) {
+    bool redisSet(const std::string& key, ISA::Reference* ref, VirtualMachine* vm) {
         auto bin = Wire::references()->reduce(ref, vm);
         std::string s((char*)binn_ptr(bin), binn_size(bin));
         return getRedis()->set(key, s);
     }
 
-    bool redisSet(std::string key, Type::Type* ref, VirtualMachine* vm) {
+    bool redisSet(const std::string& key, Type::Type* ref, VirtualMachine* vm) {
         auto bin = Wire::types()->reduce(ref, vm);
         std::string s((char*)binn_ptr(bin), binn_size(bin));
         return getRedis()->set(key, s);
@@ -43,7 +43,7 @@ namespace swarmc::Runtime::RedisDriver {
         auto length = val.value().size();
 
         void* buf = malloc(sizeof(char) * length);
-        ss.read(static_cast<char*>(buf), length);
+        ss.read(static_cast<char*>(buf), static_cast<std::streamsize>(length));
 
         return binn_open((char*)buf);
     }
@@ -105,7 +105,7 @@ namespace swarmc::Runtime::RedisDriver {
             );
             if ( cursor == 0 ) break;
         }
-        for ( auto key : keys ) {
+        for ( const auto& key : keys ) {
             _redis->del(key);
         }
     }
@@ -228,7 +228,7 @@ namespace swarmc::Runtime::RedisDriver {
         return { incontext, _context };
     }
 
-    IQueueJob* RedisQueue::popFromContext(QueueContextID context) {
+    IQueueJob* RedisQueue::popFromContext(const QueueContextID& context) {
         auto job = _redis->rpop(Configuration::REDIS_PREFIX + "queue_" + context);
         if ( !job ) return nullptr;
         std::map<std::string, std::string> jobValues;
@@ -249,7 +249,7 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     Stream::~Stream() noexcept {
-        close();
+        clearKeys();
         while ( !_redis->exists(Configuration::REDIS_PREFIX + _id) ) {
             _redis->rpop(Configuration::REDIS_PREFIX + _id);
         }
@@ -267,6 +267,10 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     void Stream::close() {
+        clearKeys();
+    }
+
+    void Stream::clearKeys() {
         _redis->del(Configuration::REDIS_PREFIX + _id + "_type");
         _redis->del(Configuration::REDIS_PREFIX + _id + "_open");
     }

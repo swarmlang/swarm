@@ -14,8 +14,8 @@ namespace swarmc::Runtime::RedisDriver {
     class RedisStorageLock;
 
     sw::redis::Redis* getRedis();
-    bool redisSet(std::string, ISA::Reference*, VirtualMachine*);
-    bool redisSet(std::string, Type::Type*, VirtualMachine*);
+    bool redisSet(const std::string&, ISA::Reference*, VirtualMachine*);
+    bool redisSet(const std::string&, Type::Type*, VirtualMachine*);
     binn* redisRead(sw::redis::OptionalString);
 
     class GlobalServices : public SingleThreaded::GlobalServices {
@@ -89,7 +89,7 @@ namespace swarmc::Runtime::RedisDriver {
 
     class RedisQueueJob : public IQueueJob {
     public:
-        RedisQueueJob(JobID id, JobState state, IFunctionCall* call, State* vmState, ScopeFrame* vmScope) 
+        RedisQueueJob(JobID id, JobState state, IFunctionCall* call, State* vmState, ScopeFrame* vmScope)
             : _id(id), _jobState(state), _call(call), _vmState(vmState), _vmScope(vmScope) {}
 
         /** Get the tracking ID for this job. */
@@ -106,7 +106,7 @@ namespace swarmc::Runtime::RedisDriver {
 
         [[nodiscard]] virtual ScopeFrame* getVMScope() const { return _vmScope; }
 
-        virtual void setFilters(SchedulingFilters filters) override { _filters = filters; } 
+        virtual void setFilters(SchedulingFilters filters) override { _filters = filters; }
 
         [[nodiscard]] virtual SchedulingFilters getFilters() const override { return _filters; }
 
@@ -169,13 +169,13 @@ namespace swarmc::Runtime::RedisDriver {
 
         void tryToProcessJob();
         std::pair<IQueueJob*, QueueContextID> tryGetJob();
-        IQueueJob* popFromContext(QueueContextID);
+        IQueueJob* popFromContext(const QueueContextID&);
     };
 
     class Stream : public IStream {
     public:
-        Stream(std::string id, Type::Type* innerType, VirtualMachine* vm) : _id(std::move(id)), _innerType(std::move(innerType)), _vm(vm) {
-            open();
+        Stream(std::string id, Type::Type* innerType, VirtualMachine* vm) : _id(std::move(id)), _innerType(innerType), _vm(vm) {
+            open();  // FIXME: do not invoke virtual members from the constructor
         }
 
         ~Stream() noexcept override;
@@ -202,6 +202,8 @@ namespace swarmc::Runtime::RedisDriver {
         Type::Type* _innerType;
         sw::redis::Redis* _redis = getRedis();
         VirtualMachine* _vm;
+
+        void clearKeys();
     };
 
     class RedisStreamDriver : public IStreamDriver {
