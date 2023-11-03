@@ -16,22 +16,14 @@ namespace swarmc::Runtime {
         auto factory = new Factory<State, VirtualMachine*>;
 
         factory->registerReducer("swarm::Runtime::State", [](const State* state, auto vm) {
-            auto fJumpsKeys = binn_list();
-            auto fJumpsValues = binn_list();
-            int fJumpsLen = 0;
+            auto fJumps = binn_object();
             for ( const auto& pair : state->_fJumps ) {
-                fJumpsLen += 1;
-                binn_list_add_str(fJumpsKeys, strdup(pair.first.c_str()));
-                binn_list_add_uint64(fJumpsValues, pair.second);
+                binn_object_set_uint64(fJumps, strdup(pair.first.c_str()), pair.second);
             }
 
-            auto fSkipsKeys = binn_list();
-            auto fSkipsValues = binn_list();
-            int fSkipsLen = 0;
+            auto fSkips = binn_object();
             for ( const auto& pair : state->_fSkips ) {
-                fSkipsLen += 1;
-                binn_list_add_str(fSkipsKeys, strdup(pair.first.c_str()));
-                binn_list_add_uint64(fSkipsValues, pair.second);
+                binn_object_set_uint64(fSkips, strdup(pair.first.c_str()), pair.second);
             }
 
             // FIXME: change this to use Wire once converted
@@ -45,12 +37,8 @@ namespace swarmc::Runtime {
 
             auto obj = binn_map();
             binn_map_set_list(obj, BC_INSTRUCTIONS, is);
-            binn_map_set_list(obj, BC_FJUMPS_K, fJumpsKeys);
-            binn_map_set_list(obj, BC_FJUMPS_V, fJumpsValues);
-            binn_map_set_int64(obj, BC_LENGTH, fJumpsLen);
-            binn_map_set_list(obj, BC_FSKIPS_K, fSkipsKeys);
-            binn_map_set_list(obj, BC_FSKIPS_V, fSkipsValues);
-            binn_map_set_int64(obj, BC_LENGTH2, fSkipsLen);
+            binn_map_set_object(obj, BC_FJUMPS, fJumps);
+            binn_map_set_object(obj, BC_FSKIPS, fSkips);
             binn_map_set_uint64(obj, BC_PC, state->_pc);
             binn_map_set_bool(obj, BC_REWIND_TO_HEAD, state->_rewindToHead);
             binn_map_set_map(obj, BC_EXTRA, state->getExtraSerialData());
@@ -69,35 +57,19 @@ namespace swarmc::Runtime {
             state->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
 
             // FIXME: Debug::Metadata _meta
-
-            std::vector<std::string> fJumpsKeys;
-            auto fJumpsKeysBinn = binn_map_list(obj, BC_FJUMPS_K);
+            auto fJumpsBinn = binn_map_object(obj, BC_FJUMPS);
             binn_iter iter;
+            char key[1028];
             binn value;
-            binn_list_foreach(fJumpsKeysBinn, value) {
-                fJumpsKeys.emplace_back(binn_get_str(&value));
+            binn_object_foreach(fJumpsBinn, key, value) {
+                std::string skey(key);
+                state->_fJumps[skey] = binn_object_uint64(fJumpsBinn, key);
             }
 
-            auto fJumpsValues = binn_map_list(obj, BC_FJUMPS_V);
-            auto fJumpsLen = binn_map_int64(obj, BC_LENGTH);
-            for ( int i = 0; i < fJumpsLen; i += 1 ) {
-                std::string k = fJumpsKeys[i];
-                pc_t v = binn_list_uint64(fJumpsValues, i);
-                state->_fJumps[k] = v;
-            }
-
-            std::vector<std::string> fSkipsKeys;
-            auto fSkipsKeysBinn = binn_map_list(obj, BC_FJUMPS_K);
-            binn_list_foreach(fSkipsKeysBinn, value) {
-                fSkipsKeys.emplace_back(binn_get_str(&value));
-            }
-
-            auto fSkipsValues = binn_map_list(obj, BC_FSKIPS_V);
-            auto fSkipsLen = binn_map_int64(obj, BC_LENGTH2);
-            for ( int i = 0; i < fSkipsLen; i += 1 ) {
-                std::string k = fSkipsKeys[i];
-                pc_t v = binn_list_uint64(fSkipsValues, i);
-                state->_fSkips[k] = v;
+            auto fSkipsBinn = binn_map_list(obj, BC_FSKIPS);
+            binn_object_foreach(fSkipsBinn, key, value) {
+                std::string skey(key);
+                state->_fSkips[skey] = binn_object_uint64(fSkipsBinn, key);
             }
 
             return state;

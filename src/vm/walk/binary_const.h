@@ -32,17 +32,14 @@
 #define BC_RETURN_PC 27
 #define BC_IS_EX_FRAME 28
 #define BC_CAPTURE_RETURN 29
-#define BC_FJUMPS_K 30
-#define BC_FJUMPS_V 31
-#define BC_FSKIPS_K 32
-#define BC_FSKIPS_V 33
-#define BC_INSTRUCTIONS 34
-#define BC_PC 35
-#define BC_REWIND_TO_HEAD 36
-#define BC_LENGTH 37
-#define BC_LENGTH2 38
-#define BC_FINAL 39
-#define BC_OTYPE_K 40
-#define BC_OTYPE_V 41
+#define BC_FJUMPS 30
+#define BC_FSKIPS 31
+#define BC_INSTRUCTIONS 32
+#define BC_PC 33
+#define BC_REWIND_TO_HEAD 34
+#define BC_LENGTH 35
+#define BC_FINAL 36
+#define BC_OTYPE_K 37
+#define BC_OTYPE_V 38
 
 #endif //SWARMVM_BINARY_CONST
