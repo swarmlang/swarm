@@ -143,18 +143,19 @@ namespace swarmc::Runtime::RedisDriver {
         return new RedisQueueJob(
             id,
             JobState::PENDING,
-            call,
+            Wire::calls()->reduce(call, vm),
             vm->getState()->copy(),
             vm->getScopeFrame()->copy()
         );
     }
 
     void RedisQueue::push(VirtualMachine* vm, IQueueJob* job) {
-        auto callbin = Wire::calls()->reduce(job->getCall(), vm);
-        std::string callstr((char*)binn_ptr(callbin), binn_size(callbin));
-        auto statebin = Wire::states()->reduce(vm->getState(), vm);
+        // We should only accept RedisQueueJobs anyway, cast so I can get its important members
+        auto rjob = dynamic_cast<RedisQueueJob*>(job);
+        std::string callstr((char*)binn_ptr(rjob->getCallBin()), binn_size(rjob->getCallBin()));
+        auto statebin = Wire::states()->reduce(rjob->getVMState(), vm);
         std::string statestr((char*)binn_ptr(statebin), binn_size(statebin));
-        auto scopebin = Wire::scopes()->reduce(vm->getScopeFrame(), vm);
+        auto scopebin = Wire::scopes()->reduce(rjob->getVMScope(), vm);
         std::string scopestr((char*)binn_ptr(scopebin), binn_size(scopebin));
 
         std::unordered_map<std::string, std::string> m = {
@@ -196,7 +197,8 @@ namespace swarmc::Runtime::RedisDriver {
                 Console::get()->debug("Running job: " + s(redisjob));
                 _vm->copy([redisjob](VirtualMachine* vm) -> void {
                     vm->restore(redisjob->getVMScope(), redisjob->getVMState());
-                    vm->executeCall(redisjob->getCall());
+                    auto call = Wire::calls()->produce(redisjob->getCallBin(), vm);
+                    vm->executeCall(call);
                 });
                 redisjob->setState(JobState::COMPLETE);
             } catch (...) {
@@ -248,7 +250,7 @@ namespace swarmc::Runtime::RedisDriver {
         return new RedisQueueJob(
             static_cast<JobID>(std::atoi(jobValues["ID"].c_str())),
             static_cast<JobState>(std::atoi(jobValues["JobState"].c_str())),
-            Wire::calls()->produce(redisRead(jobValues["Call"]), _vm),
+            redisRead(jobValues["Call"]),
             Wire::states()->produce(redisRead(jobValues["VMState"]), _vm),
             Wire::scopes()->produce(redisRead(jobValues["VMScope"]), _vm)
         );

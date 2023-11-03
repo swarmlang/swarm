@@ -71,6 +71,7 @@ protected:
     int parseFilters();
     int executeLocalSVI(bool);
     int executeDistributedSVI(DistributedBackend);
+    int createDistributedWorker(DistributedBackend);
     int emitBinary();
 };
 

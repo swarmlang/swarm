@@ -9,6 +9,7 @@ namespace nslib {
     std::vector<std::function<void()>> Framework::_shutdownCallbacks;
     std::vector<std::function<void()>> Framework::_shuttingDownCallbacks;
     std::vector<std::function<bool()>> Framework::_cleanupCallbacks;
+    std::unordered_map<int, std::function<void(int)>> Framework::_signalHandlers;
     std::recursive_mutex Framework::_mutex;
     std::recursive_mutex Framework::_threadMapMutex;
     std::mutex Framework::_cleanupMutex;

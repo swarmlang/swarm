@@ -50,6 +50,7 @@
 #include <unistd.h>
 #include <cstdlib>
 #include <cstring>
+#include <csignal>
 #include <semaphore.h>
 #include <sys/ioctl.h>
 #include <sys/stat.h>
@@ -253,6 +254,8 @@ namespace nslib {
     };
 
 
+    using SignalHandler = void(*)(int);
+
     class Framework {
     public:
         Framework(Framework& other) = delete;  // don't allow cloning
@@ -325,6 +328,28 @@ namespace nslib {
             return std::this_thread::get_id() == _mainPID;
         }
 
+        static void sendSignal(int signal) {
+            if ( Framework::_signalHandlers.count(signal) != 0 ) {
+                Framework::_signalHandlers.at(signal)(signal);
+            }
+        }
+
+        static void registerSignalHandler(int signal, std::function<void(int)>& handler) {
+            std::lock_guard<std::recursive_mutex> m(_mutex);
+            if ( !_booted ) return;
+            std::signal(signal, sendSignal);
+            if ( !_signalHandlers.emplace(signal, handler).second ) {
+                _signalHandlers[signal] = handler;
+            }
+        }
+
+        static void registerSignalHandler(int signal, SignalHandler handler) {
+            if ( _signalHandlers.count(signal) ) {
+                _signalHandlers.erase(signal);
+            }
+            std::signal(signal, handler);
+        }
+
         static void shutdown() {
             std::lock_guard<std::recursive_mutex> m(_mutex);
             if ( !_booted ) return;
@@ -393,6 +418,7 @@ namespace nslib {
         static std::vector<std::function<void()>> _shutdownCallbacks;
         static std::vector<std::function<void()>> _shuttingDownCallbacks;
         static std::vector<std::function<bool()>> _cleanupCallbacks;
+        static std::unordered_map<int, std::function<void(int)>> _signalHandlers;
         static std::recursive_mutex _mutex;
         static std::recursive_mutex _threadMapMutex;
         static std::mutex _cleanupMutex;

@@ -91,6 +91,21 @@ namespace swarmc::Runtime {
             _lifecycleEvents->dispatch(event);
         }
 
+        void initializeWorker() {
+            // _state and _scope need to exist but their values don't matter
+            _state = useref(new State(ISA::Instructions()));
+            _scope = useref(new ScopeFrame(_global, nslib::uuid(), nullptr));
+
+            freeref(_localOut);
+            _localOut = useref(new LocalOutputStream());
+
+            freeref(_localErr);
+            _localErr = useref(new LocalErrorStream());
+
+            VirtualMachineInitializingEvent event(this);
+            _lifecycleEvents->dispatch(event);
+        }
+
         /**
          * Configure the runtime to use the given storage driver.
          * The runtime will give higher priority to an interface the later it is added.

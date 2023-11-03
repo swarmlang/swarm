@@ -14,6 +14,7 @@
 #include "walk/ISABinaryWalk.h"
 #include "walk/BinaryISAWalk.h"
 #include "runtime/external.h"
+#include "runtime/Worker.h"
 
 using namespace nslib;
 
@@ -26,6 +27,7 @@ namespace swarmc::VM {
      */
     class Pipeline : public IStringable {
     public:
+        Pipeline() : _input(nullptr), _parser(nullptr), _isBinary(false) {}
         explicit Pipeline(std::istream* input) {
             _input = input;
             _parser = new ISA::Parser(*input);
@@ -47,6 +49,10 @@ namespace swarmc::VM {
 
         /** Get a list of loaded tokens from the SVI input stream. */
         std::vector<std::string> targetTokenStream() {
+            if ( _input == nullptr ) {
+                throw Errors::SwarmError("Cannot parse token stream without an input");
+            }
+
             if ( _isBinary ) {
                 throw Errors::SwarmError("Cannot parse token stream from binary input.");
             }
@@ -56,6 +62,10 @@ namespace swarmc::VM {
 
         /** Get a list of parsed instructions from the SVI input stream. */
         ISA::Instructions targetInstructions() {
+            if ( _input == nullptr ) {
+                throw Errors::SwarmError("Cannot parse ISA without an input to parse.");
+            }
+
             if ( _isBinary ) {
                 return ISA::BinaryISAWalk::fromInput(*_input);
             }
@@ -74,6 +84,10 @@ namespace swarmc::VM {
 
         /** Print the loaded tokens from the SVI input stream to the given output stream. */
         void targetTokenRepresentation(std::ostream& out) {
+            if ( _input == nullptr ) {
+                throw Errors::SwarmError("Cannot output tokens without an input.");
+            }
+
             if ( _isBinary ) {
                 throw Errors::SwarmError("Cannot output tokens from binary input source.");
             }
@@ -154,6 +168,32 @@ namespace swarmc::VM {
             vm->initialize(is);
             rq->initialize();
             return vm;
+        }
+
+        void targetRedisWorker() {
+            Framework::registerSignalHandler(SIGINT, [](int signal) -> void {
+                Configuration::THREAD_EXIT = true;
+            });
+
+            auto vm = new VirtualMachine(new RedisDriver::GlobalServices());
+            vm->addStore(new RedisDriver::RedisStorageInterface(vm));
+            vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
+            auto rq = new RedisDriver::RedisQueue(vm);
+            vm->addQueue(rq);
+            vm->useStreamDriver(new RedisDriver::RedisStreamDriver(vm));
+
+            if ( Configuration::WITH_PROLOGUE ) {
+                vm->addProvider(new Prologue::Provider(vm->global()));
+            }
+
+            for ( const auto& path : _externalProviders ) {
+                vm->addExternalProvider(path);
+            }
+
+            vm->initializeWorker();
+            rq->initialize();
+            Worker worker(vm->global(), rq);
+            worker.wait();
         }
 
         void targetInteractiveDebugger() {

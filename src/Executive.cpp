@@ -81,7 +81,12 @@ int Executive::run(int argc, char **argv) {
     }
 
     if ( _backend != DistributedBackend::NONE ) {
-        int executeResult = executeDistributedSVI(_backend);
+        int executeResult = 0;
+        if ( !flagWorkQueue ) {
+            executeResult = executeDistributedSVI(_backend);
+        } else {
+            executeResult = createDistributedWorker(_backend);
+        }
         if ( executeResult != 0 ) {
             result = executeResult;
         }
@@ -218,6 +223,18 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             flagMultiThreaded = flagSingleThreaded = false;
             _backend = DistributedBackend::REDIS;
             logger->debug("Will execute with redis");
+        } else if ( arg == "--work-queue" ) {
+            if ( i+1 >= params.size() ) {
+                logger->error("Missing required parameter for --work-queue. Pass --help for more info.");
+                failed = true;
+                continue;
+            }
+            // TODO: filters not currently read in or applied to worker
+
+            flagWorkQueue = true;
+            logger->debug("Set as a remote worker");
+            skipOne = true;
+            noInputFile = true;
         } else if ( arg == "--verbose" ) {
             flagVerbose = true;
             Configuration::DEBUG = true;
@@ -234,6 +251,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
             std::string name = params.at(i+1);
             if ( !flagTestSuiteOutput ) logger->debug("Will output results to: " + name);
             outputResultTo = name;
+            skipOne = true;
         } else if ( arg == "--dbg-use-d-guid" ) {
             nslib::priv::USE_DETERMINISTIC_UUIDS = true;
         } else if ( arg == "--svi" ) {
@@ -621,12 +639,31 @@ int Executive::executeLocalSVI(bool multithreaded) {
 int Executive::executeDistributedSVI(DistributedBackend backend) {
     swarmc::VM::Pipeline pipeline(_input);
     pipeline.setExternalProviders(externalProviders);
+    VirtualMachine* vm = nullptr;
 
-    auto vm = pipeline.targetRedis();
+    if ( backend == DistributedBackend::REDIS ) {
+        vm = pipeline.targetRedis();
+    } else {
+        logger->error("Cannot execute without a specified backend! Pass --help for more info.");
+        return 1;
+    }
 
     vm->execute();
     vm->cleanup();
     delete vm;
+    return 0;
+}
+
+int Executive::createDistributedWorker(DistributedBackend backend) {
+    swarmc::VM::Pipeline pipeline;
+    pipeline.setExternalProviders(externalProviders);
+
+    if ( backend == DistributedBackend::REDIS ) {
+        pipeline.targetRedisWorker();
+    } else {
+        logger->error("Cannot execute without a specified backend! Pass --help for more info.");
+        return 1;
+    }
     return 0;
 }
 

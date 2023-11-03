@@ -89,7 +89,7 @@ namespace swarmc::Runtime::RedisDriver {
 
     class RedisQueueJob : public IQueueJob {
     public:
-        RedisQueueJob(JobID id, JobState state, IFunctionCall* call, State* vmState, ScopeFrame* vmScope)
+        RedisQueueJob(JobID id, JobState state, binn* call, State* vmState, ScopeFrame* vmScope)
             : _id(id), _jobState(state), _call(call), _vmState(vmState), _vmScope(vmScope) {}
 
         /** Get the tracking ID for this job. */
@@ -100,23 +100,26 @@ namespace swarmc::Runtime::RedisDriver {
 
         virtual void setState(JobState state) override { _jobState = state; }
 
-        [[nodiscard]] virtual IFunctionCall* getCall() const override { return _call; }
+        // FIXME: could store this separately preserialization, but becomes impossible postserialization without restoring vm
+        [[nodiscard]] virtual IFunctionCall* getCall() const override { return nullptr; }
 
         [[nodiscard]] virtual State* getVMState() const { return _vmState; }
 
         [[nodiscard]] virtual ScopeFrame* getVMScope() const { return _vmScope; }
+
+        [[nodiscard]] virtual binn* getCallBin() const { return _call; }
 
         virtual void setFilters(SchedulingFilters filters) override { _filters = filters; }
 
         [[nodiscard]] virtual SchedulingFilters getFilters() const override { return _filters; }
 
         [[nodiscard]] std::string toString() const override {
-            return "RedisDriver::RedisQueueJob<id: " + std::to_string(_id) + ", call: " + _call->toString() + ">";
+            return "RedisDriver::RedisQueueJob<id: " + std::to_string(_id) + ">";
         }
     protected:
         JobID _id;
         JobState _jobState;
-        IFunctionCall* _call;
+        binn* _call;
         State* _vmState;
         ScopeFrame* _vmScope;
 
