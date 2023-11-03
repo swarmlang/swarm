@@ -201,6 +201,9 @@ namespace swarmc::Runtime::RedisDriver {
                     vm->executeCall(call);
                 });
                 redisjob->setState(JobState::COMPLETE);
+            } catch (Errors::SwarmError& e) {
+                Console::get()->error(e.what());
+                redisjob->setState(JobState::ERROR);
             } catch (...) {
                 Console::get()->error("Unknown error!");
                 redisjob->setState(JobState::ERROR);
