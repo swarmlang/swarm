@@ -95,7 +95,7 @@ namespace swarmc::Runtime {
                 auto ref = references()->produce(location, vm);
                 assert(ref->tag() == ReferenceTag::LOCATION);
                 auto locRef = dynamic_cast<LocationReference*>(ref);
-                scope->_map[name] = locRef;
+                scope->_map[name] = useref(locRef);
             }
 
             /*auto names = binn_map_list(obj, BC_NAMES);
