@@ -397,6 +397,9 @@ namespace swarmc::Runtime {
 
         virtual ScopeFrame* getExceptionFrame();
 
+        /** Get the storage driver which should be used to access the given location. */
+        virtual IStorageInterface* getStore(ISA::LocationReference*);
+
         /** Make a deep copy of this instance. */
         [[nodiscard]] VirtualMachine* copy() const {
             auto copy = new VirtualMachine(_global);
@@ -473,9 +476,6 @@ namespace swarmc::Runtime {
         virtual void verbose(const std::string& output) const {
             if ( Configuration::VERBOSE ) debug(output);
         }
-
-        /** Get the storage driver which should be used to access the given location. */
-        virtual IStorageInterface* getStore(ISA::LocationReference*);
 
         /** Get the queue which should be used to perform the given function call. */
         virtual IQueue* getQueue(IFunctionCall*);

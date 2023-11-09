@@ -113,7 +113,7 @@ namespace swarmc::Runtime {
     /**
      * Interface for VM variable storage backends.
      */
-    class IStorageInterface : public IStringable, public IRefCountable {
+    class IStorageInterface : public IStringable, public IRefCountable, public nslib::serial::ISerializable {
     public:
         ~IStorageInterface() override = default;
 
@@ -152,6 +152,8 @@ namespace swarmc::Runtime {
 
         /** Returns true if the VM should acquire locks before accessing variables in this store. */
         [[nodiscard]] virtual bool shouldLockAccesses() const { return true; }
+
+        [[nodiscard]] virtual binn* serialize(VirtualMachine*) const { return binn_map(); }
     };
 
 

@@ -61,6 +61,8 @@ namespace swarmc::Runtime::RedisDriver {
 
         virtual IStorageInterface* copy() override;
 
+        [[nodiscard]] virtual serial::tag_t getSerialKey() const override { return "swarm::RedisDriver::RedisStorageInterface"; }
+
         [[nodiscard]] std::string toString() const override {
             return "RedisDriver::RedisStorageInterface<>";
         }
@@ -90,13 +92,14 @@ namespace swarmc::Runtime::RedisDriver {
 
     class RedisQueueJob : public IQueueJob {
     public:
-        RedisQueueJob(JobID id, JobState state, binn* call, State* vmState, ScopeFrame* vmScope)
-            : _id(id), _jobState(state), _call(call), _vmState(useref(vmState)), _vmScope(useref(vmScope)) {}
+        RedisQueueJob(JobID id, JobState state, binn* call, State* vmState, ScopeFrame* vmScope, IStorageInterface* localStore)
+            : _id(id), _jobState(state), _call(call), _vmState(useref(vmState)), _vmScope(useref(vmScope)), _localStore(useref(localStore)) {}
 
         ~RedisQueueJob() {
             binn_free(_call);
             freeref(_vmState);
             freeref(_vmScope);
+            freeref(_localStore);
         }
 
         /** Get the tracking ID for this job. */
@@ -116,6 +119,8 @@ namespace swarmc::Runtime::RedisDriver {
 
         [[nodiscard]] virtual binn* getCallBin() const { return _call; }
 
+        [[nodiscard]] virtual IStorageInterface* getLocalStore() const { return _localStore; }
+
         virtual void setFilters(SchedulingFilters filters) override { _filters = filters; }
 
         [[nodiscard]] virtual SchedulingFilters getFilters() const override { return _filters; }
@@ -129,6 +134,7 @@ namespace swarmc::Runtime::RedisDriver {
         binn* _call;
         State* _vmState;
         ScopeFrame* _vmScope;
+        IStorageInterface* _localStore;
 
         SchedulingFilters _filters;
     };

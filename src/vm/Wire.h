@@ -15,6 +15,7 @@ namespace swarmc::Runtime {
     class IFunctionCall;
     class ScopeFrame;
     class State;
+    class IStorageInterface;
 
     class Wire {
     public:
@@ -57,18 +58,28 @@ namespace swarmc::Runtime {
 
             return _state;
         }
+
+        static Factory<IStorageInterface, VirtualMachine*>* stores() {
+            if ( _store == nullptr ) {
+                _store = buildStores();
+            }
+
+            return _store;
+        }
     protected:
         static inline Factory<Type::Type, void*>* _type = nullptr;
         static inline Factory<ISA::Reference, VirtualMachine*>* _reference = nullptr;
         static inline Factory<IFunctionCall, VirtualMachine*>* _call = nullptr;
         static inline Factory<ScopeFrame, VirtualMachine*>* _scope = nullptr;
         static inline Factory<State, VirtualMachine*>* _state = nullptr;
+        static inline Factory<IStorageInterface, VirtualMachine*>* _store = nullptr;
 
         static Factory<Type::Type, void*>* buildTypes();
         static Factory<ISA::Reference, VirtualMachine*>* buildReferences();
         static Factory<IFunctionCall, VirtualMachine*>* buildCalls();
         static Factory<ScopeFrame, VirtualMachine*>* buildScopes();
         static Factory<State, VirtualMachine*>* buildStates();
+        static Factory<IStorageInterface, VirtualMachine*>* buildStores();
     };
 
 }

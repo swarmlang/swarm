@@ -140,12 +140,14 @@ namespace swarmc::Runtime::RedisDriver {
 
     IQueueJob* RedisQueue::build(VirtualMachine* vm, IFunctionCall* call) {
         auto id = _redis->incr(Configuration::REDIS_PREFIX + "nextJobID");
+        auto dummyLocal = ISA::LocationReference(ISA::Affinity::LOCAL, "dummy");
         return new RedisQueueJob(
             id,
             JobState::PENDING,
             Wire::calls()->reduce(call, vm),
             vm->getState()->copy(),
-            vm->getScopeFrame()->copy()
+            vm->getScopeFrame()->copy(),
+            vm->getStore(&dummyLocal)
         );
     }
 
@@ -157,15 +159,19 @@ namespace swarmc::Runtime::RedisDriver {
         std::string statestr((char*)binn_ptr(statebin), binn_size(statebin));
         auto scopebin = Wire::scopes()->reduce(rjob->getVMScope(), vm);
         std::string scopestr((char*)binn_ptr(scopebin), binn_size(scopebin));
+        auto storebin = Wire::stores()->reduce(rjob->getLocalStore(), vm);
+        std::string storestr((char*)binn_ptr(storebin), binn_size(storebin));
         binn_free(statebin);
         binn_free(scopebin);
+        binn_free(storebin);
 
         std::unordered_map<std::string, std::string> m = {
             {"ID", std::to_string(job->id())},
             {"JobState", std::to_string(static_cast<std::size_t>(job->state()))},
             {"Call", callstr},
             {"VMState", statestr},
-            {"VMScope", scopestr}
+            {"VMScope", scopestr},
+            {"LocalStore", storestr}
         };
         _redis->hmset(Configuration::REDIS_PREFIX + "job_" + m["ID"], m.begin(), m.end());
         _redis->lpush(Configuration::REDIS_PREFIX + "queue_" + _context, Configuration::REDIS_PREFIX + "job_" + m["ID"]);
@@ -255,15 +261,18 @@ namespace swarmc::Runtime::RedisDriver {
 
         auto statebin = redisRead(jobValues["VMState"]);
         auto scopebin = redisRead(jobValues["VMScope"]);
+        auto storebin = redisRead(jobValues["LocalStore"]);
         auto qjob = new RedisQueueJob(
             static_cast<JobID>(std::atoi(jobValues["ID"].c_str())),
             static_cast<JobState>(std::atoi(jobValues["JobState"].c_str())),
             redisRead(jobValues["Call"]),
             Wire::states()->produce(statebin, _vm),
-            Wire::scopes()->produce(scopebin, _vm)
+            Wire::scopes()->produce(scopebin, _vm),
+            Wire::stores()->produce(storebin, _vm)
         );
         binn_free(statebin);
         binn_free(scopebin);
+        binn_free(storebin);
 
         return qjob;
     }

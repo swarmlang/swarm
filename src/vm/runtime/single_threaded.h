@@ -103,6 +103,10 @@ namespace swarmc::Runtime::SingleThreaded {
 
         [[nodiscard]] bool shouldLockAccesses() const override { return false; }
 
+        [[nodiscard]] binn* serialize(VirtualMachine*) const override;
+
+        [[nodiscard]] virtual serial::tag_t getSerialKey() const override { return "swarm::SingleThreaded::StorageInterface"; }
+
         [[nodiscard]] std::string toString() const override {
             return "SingleThreaded::StorageInterface<#loc: " + std::to_string(_map.size()) + ">";
         }

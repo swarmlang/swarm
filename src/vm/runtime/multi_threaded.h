@@ -35,6 +35,8 @@ namespace swarmc::Runtime::MultiThreaded {
         void clear() override;
 
         bool shouldLockAccesses() const override { return true; }
+
+        [[nodiscard]] virtual serial::tag_t getSerialKey() const override { return "swarm::MultiThreaded::SharedStorageInterface"; }
     protected:
         std::map<std::string, std::mutex> _mutexes;
 
