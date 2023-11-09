@@ -181,8 +181,14 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::store(LocationReference* loc, Reference* ref) {
         auto scopeLoc = _scope->map(loc);
-        auto store = getStore(scopeLoc);
+        if ( scopeLoc->is(loc) && _scope->parent() == nullptr ) {
+            // Variables in the global scope don't need a `scopeof` call, so shadow
+            // them automatically to make sure the scope gets set up properly.
+            shadow(loc);
+            scopeLoc = _scope->map(loc);
+        }
 
+        auto store = getStore(scopeLoc);
         if ( store->shouldLockAccesses() && !hasLock(loc) && lock(loc) ) {
             NS_DEFER()([loc, this]() {
                 unlock(loc);
