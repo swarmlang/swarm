@@ -55,10 +55,10 @@ namespace swarmc::Runtime {
      */
     class ScopeFrame : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
-        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent) : _parent(useref(parent)), _global(useref(global)) {
+        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent) : IRefCountable(), _parent(useref(parent)), _global(useref(global)) {
             _id = std::move(id);
         }
-        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent, IFunctionCall* call) : _parent(useref(parent)), _call(useref(call)), _global(useref(global)) {
+        ScopeFrame(IGlobalServices* global, std::string id, ScopeFrame* parent, IFunctionCall* call) : IRefCountable(), _parent(useref(parent)), _call(useref(call)), _global(useref(global)) {
             _id = std::move(id);
         }
         ~ScopeFrame() override {

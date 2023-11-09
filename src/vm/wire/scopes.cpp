@@ -14,13 +14,18 @@ namespace swarmc::Runtime {
         auto factory = new Factory<ScopeFrame, VirtualMachine*>;
 
         factory->registerReducer("swarm::Runtime::ScopeFrame", [factory](const ScopeFrame* scope, VirtualMachine* vm) {
-            auto names = binn_list();
+            /*auto names = binn_list();
             auto locations = binn_list();
             int len = 0;
             for ( const auto& pair : scope->nameMap() ) {
                 len += 1;
                 binn_list_add_str(names, strdup(pair.first.c_str()));
                 binn_list_add_map(locations, references()->reduce(pair.second, vm));
+            }*/
+
+            auto nameMap = binn_object();
+            for ( const auto& pair : scope->nameMap() ) {
+                binn_object_set_map(nameMap, strdup(pair.first.c_str()), references()->reduce(pair.second, vm));
             }
 
 
@@ -30,9 +35,9 @@ namespace swarmc::Runtime {
             auto returnTo = scope->getReturnPC();
 
             auto binn = binn_map();
-            binn_map_set_list(binn, BC_NAMES, names);
-            binn_map_set_list(binn, BC_LOCATIONS, locations);
-            binn_map_set_int64(binn, BC_LENGTH, len);
+            binn_map_set_object(binn, BC_NAMES, nameMap);
+//            binn_map_set_list(binn, BC_LOCATIONS, locations);
+//            binn_map_set_int64(binn, BC_LENGTH, len);
             binn_map_set_str(binn, BC_ID, strdup(scope->id().c_str()));
             binn_map_set_bool(binn, BC_IS_EX_FRAME, scope->isExceptionFrame());
             binn_map_set_bool(binn, BC_CAPTURE_RETURN, scope->shouldCaptureReturn());
@@ -80,7 +85,20 @@ namespace swarmc::Runtime {
             }
             scope->_return = returnCall;
 
-            auto names = binn_map_list(obj, BC_NAMES);
+            auto nameMapBinn = binn_map_object(obj, BC_NAMES);
+            binn_iter iter;
+            char key[1028];
+            binn value;
+            binn_object_foreach(nameMapBinn, key, value) {
+                std::string name = key;
+                auto location = (binn*) binn_object_map(nameMapBinn, key);
+                auto ref = references()->produce(location, vm);
+                assert(ref->tag() == ReferenceTag::LOCATION);
+                auto locRef = dynamic_cast<LocationReference*>(ref);
+                scope->_map[name] = locRef;
+            }
+
+            /*auto names = binn_map_list(obj, BC_NAMES);
             auto locations = binn_map_list(obj, BC_LOCATIONS);
             auto len = binn_map_int64(obj, BC_LENGTH);
             for ( int i = 0; i < len; i += 1 ) {
@@ -89,7 +107,7 @@ namespace swarmc::Runtime {
                 auto ref = references()->produce(location, vm);
                 assert(ref->tag() == ReferenceTag::LOCATION);
                 scope->_map[name] = dynamic_cast<LocationReference*>(ref);
-            }
+            }*/
 
             scope->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
             return scope;
