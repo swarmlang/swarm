@@ -157,6 +157,8 @@ namespace swarmc::Runtime::RedisDriver {
         std::string statestr((char*)binn_ptr(statebin), binn_size(statebin));
         auto scopebin = Wire::scopes()->reduce(rjob->getVMScope(), vm);
         std::string scopestr((char*)binn_ptr(scopebin), binn_size(scopebin));
+        binn_free(statebin);
+        binn_free(scopebin);
 
         std::unordered_map<std::string, std::string> m = {
             {"ID", std::to_string(job->id())},
@@ -197,7 +199,7 @@ namespace swarmc::Runtime::RedisDriver {
                 Console::get()->debug("Running job: " + s(redisjob));
                 _vm->copy([redisjob](VirtualMachine* vm) -> void {
                     vm->restore(redisjob->getVMScope(), redisjob->getVMState());
-                    auto call = Wire::calls()->produce(redisjob->getCallBin(), vm);
+                    auto call = useref(Wire::calls()->produce(redisjob->getCallBin(), vm));
                     vm->executeCall(call);
                 });
                 redisjob->setState(JobState::COMPLETE);
@@ -209,6 +211,7 @@ namespace swarmc::Runtime::RedisDriver {
                 redisjob->setState(JobState::ERROR);
             }
             _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", job.second, -1);
+            delete redisjob;
         }
     }
 
@@ -250,13 +253,19 @@ namespace swarmc::Runtime::RedisDriver {
             _redis->hdel(job.value(), p.first);
         }
 
-        return new RedisQueueJob(
+        auto statebin = redisRead(jobValues["VMState"]);
+        auto scopebin = redisRead(jobValues["VMScope"]);
+        auto qjob = new RedisQueueJob(
             static_cast<JobID>(std::atoi(jobValues["ID"].c_str())),
             static_cast<JobState>(std::atoi(jobValues["JobState"].c_str())),
             redisRead(jobValues["Call"]),
-            Wire::states()->produce(redisRead(jobValues["VMState"]), _vm),
-            Wire::scopes()->produce(redisRead(jobValues["VMScope"]), _vm)
+            Wire::states()->produce(statebin, _vm),
+            Wire::scopes()->produce(scopebin, _vm)
         );
+        binn_free(statebin);
+        binn_free(scopebin);
+
+        return qjob;
     }
 
     Stream::~Stream() noexcept {

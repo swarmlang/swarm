@@ -43,6 +43,7 @@ namespace swarmc::ISA {
             auto list = binn_map_list(obj, BC_BODY);
             auto is = walk.walk((binn*) list);
 
+            free((char*)obj->ptr - 4);
             binn_free(obj);
             return is;
         }

@@ -4,6 +4,7 @@
 #include <sw/redis++/redis++.h>
 #include "interfaces.h"
 #include "single_threaded.h"
+#include "State.h"
 #include "../../Configuration.h"
 
 namespace swarmc::Runtime {
@@ -90,7 +91,13 @@ namespace swarmc::Runtime::RedisDriver {
     class RedisQueueJob : public IQueueJob {
     public:
         RedisQueueJob(JobID id, JobState state, binn* call, State* vmState, ScopeFrame* vmScope)
-            : _id(id), _jobState(state), _call(call), _vmState(vmState), _vmScope(vmScope) {}
+            : _id(id), _jobState(state), _call(call), _vmState(useref(vmState)), _vmScope(useref(vmScope)) {}
+
+        ~RedisQueueJob() {
+            binn_free(_call);
+            freeref(_vmState);
+            freeref(_vmScope);
+        }
 
         /** Get the tracking ID for this job. */
         [[nodiscard]] virtual JobID id() const override { return _id; };
