@@ -93,17 +93,6 @@ namespace swarmc::Runtime::SingleThreaded {
         return copy;
     }
 
-    binn* StorageInterface::serialize(VirtualMachine* vm) const {
-        auto refs = binn_object();
-        for ( const auto& pair : _map ) {
-            binn_object_set_map(refs, strdup(pair.first.c_str()), Wire::references()->reduce(pair.second, vm));
-        }
-
-        auto obj = binn_map();
-        binn_map_set_object(obj, BC_STORE_REFS, refs);
-        return obj;
-    }
-
     StorageLock::StorageLock(StorageInterface* store, ISA::LocationReference* loc) {
         _store = useref(store);
         _loc = useref(loc);

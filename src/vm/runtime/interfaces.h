@@ -152,8 +152,6 @@ namespace swarmc::Runtime {
 
         /** Returns true if the VM should acquire locks before accessing variables in this store. */
         [[nodiscard]] virtual bool shouldLockAccesses() const { return true; }
-
-        [[nodiscard]] virtual binn* serialize(VirtualMachine*) const { return binn_map(); }
     };
 
 

@@ -17,6 +17,7 @@
 
 namespace swarmc::Runtime {
     class VirtualMachine;
+    class Wire;
 }
 
 namespace swarmc::Runtime::SingleThreaded {
@@ -103,8 +104,6 @@ namespace swarmc::Runtime::SingleThreaded {
 
         [[nodiscard]] bool shouldLockAccesses() const override { return false; }
 
-        [[nodiscard]] binn* serialize(VirtualMachine*) const override;
-
         [[nodiscard]] virtual serial::tag_t getSerialKey() const override { return "swarm::SingleThreaded::StorageInterface"; }
 
         [[nodiscard]] std::string toString() const override {
@@ -118,6 +117,7 @@ namespace swarmc::Runtime::SingleThreaded {
         std::map<std::string, IStorageLock*> _locks;
 
         friend class StorageLock;
+        friend class Runtime::Wire;
     };
 
 

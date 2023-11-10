@@ -329,8 +329,11 @@ namespace nslib {
         }
 
         static void sendSignal(int signal) {
-            if ( Framework::_signalHandlers.count(signal) != 0 ) {
-                Framework::_signalHandlers.at(signal)(signal);
+            std::lock_guard<std::recursive_mutex> m(_mutex);
+            if ( _signalHandlers.count(signal) != 0 ) {
+                _signalHandlers.at(signal)(signal);
+            } else {
+                std::raise(signal);
             }
         }
 
@@ -344,6 +347,7 @@ namespace nslib {
         }
 
         static void registerSignalHandler(int signal, SignalHandler handler) {
+            std::lock_guard<std::recursive_mutex> m(_mutex);
             if ( _signalHandlers.count(signal) ) {
                 _signalHandlers.erase(signal);
             }

@@ -12,9 +12,19 @@ namespace swarmc::Runtime {
     Factory<IStorageInterface, VirtualMachine*>* Wire::buildStores() {
         auto factory = new Factory<IStorageInterface, VirtualMachine*>;
 
-        //singlthreaded
+        //FIXME: Maybe have a way to produce stores for nonlocal variables
+
+        //singlethreaded
         factory->registerReducer("swarm::SingleThreaded::StorageInterface", [](const IStorageInterface* store, auto vm) {
-            return store->serialize(vm);
+            auto localStore = dynamic_cast<const SingleThreaded::StorageInterface*>(store);
+            auto refs = binn_object();
+            for ( const auto& pair : localStore->_map ) {
+                binn_object_set_map(refs, strdup(pair.first.c_str()), Wire::references()->reduce(pair.second, vm));
+            }
+
+            auto obj = binn_map();
+            binn_map_set_object(obj, BC_STORE_REFS, refs);
+            return obj;
         });
         factory->registerProducer("swarm::SingleThreaded::StorageInterface", [](binn* obj, auto vm) -> IStorageInterface* {
             auto store = new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL);
@@ -31,11 +41,11 @@ namespace swarmc::Runtime {
             return store;
         });
 
-        // FIXME: implement producers for multithreaded and redis stores.
+        // FIXME: implement reducers & producers for multithreaded and redis stores.
 
         //multithreaded
         factory->registerReducer("swarm::MultiThreaded::SharedStorageInterface", [](const IStorageInterface* store, auto vm) {
-            return store->serialize(vm);
+            return binn_map();
         });
         factory->registerProducer("swarm::MultiThreaded::SharedStorageInterface", [](binn* obj, auto vm) -> IStorageInterface* {
             return new MultiThreaded::SharedStorageInterface();
@@ -43,7 +53,7 @@ namespace swarmc::Runtime {
 
         //redis
         factory->registerReducer("swarm::RedisDriver::RedisStorageInterface", [](const IStorageInterface* store, auto vm) {
-            return store->serialize(vm);
+            return binn_map();
         });
         factory->registerProducer("swarm::RedisDriver::RedisStorageInterface", [](binn* obj, auto vm) -> IStorageInterface* {
             return new RedisDriver::RedisStorageInterface(vm);
