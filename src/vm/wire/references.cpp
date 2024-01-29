@@ -116,6 +116,89 @@ namespace swarmc::Runtime {
         });
 
 
+        // Enumerable references
+        factory->registerReducer(s(ReferenceTag::ENUMERATION), [factory](const Reference* baseRef, VirtualMachine* vm) {
+            auto ref = dynamic_cast<const EnumerationReference*>(baseRef);
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
+
+            auto values = binn_list();
+            for ( auto i = 0; i < ref->length(); i++ ) {
+                binn_list_add_map(values, factory->reduce(ref->get(i), vm));
+            }
+
+            binn_map_set_map(obj, BC_VECTOR_TYPES, types()->reduce(ref->type(), vm));
+            binn_map_set_list(obj, BC_VECTOR_VALUES, values);
+            binn_map_set_map(obj, BC_EXTRA, ref->getExtraSerialData());
+
+            return obj;
+        });
+        factory->registerProducer(s(ReferenceTag::ENUMERATION), [factory](binn* obj, VirtualMachine* vm) {
+            auto typebin = (binn*)binn_map_map(obj, BC_VECTOR_TYPES);
+            auto valuesbin = (binn*)binn_map_list(obj, BC_VECTOR_VALUES);
+
+            auto type = types()->produce(typebin, vm);
+
+            auto ref = new EnumerationReference(type);
+
+            binn_iter iter;
+            binn value;
+            binn_list_foreach(valuesbin, value) {
+                ref->append(factory->produce(&value, vm));
+            }
+
+            ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return ref;
+        });
+
+
+        // Map references
+        factory->registerReducer(s(ReferenceTag::MAP), [factory](const Reference* baseRef, VirtualMachine* vm) {
+            auto ref = dynamic_cast<const MapReference*>(baseRef);
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
+
+            auto keys = ref->keys();
+            auto binnkeys = binn_list();
+            auto binnvals = binn_list();
+            for ( auto i = 0; i < keys->length(); i++ ) {
+                auto key = dynamic_cast<const StringReference*>(keys->get(i))->value();
+                binn_list_add_str(binnkeys, strdup(key.c_str()));
+                binn_list_add_map(binnvals, factory->reduce(ref->get(key), vm));
+            }
+
+            binn_map_set_map(obj, BC_TYPE, types()->reduce(ref->type()->values(), vm));
+            binn_map_set_list(obj, BC_VECTOR_TYPES, binnkeys);
+            binn_map_set_list(obj, BC_VECTOR_VALUES, binnvals);
+            binn_map_set_map(obj, BC_EXTRA, ref->getExtraSerialData());
+
+            return obj;
+        });
+        factory->registerProducer(s(ReferenceTag::MAP), [factory](binn* obj, VirtualMachine* vm) {
+            auto typebin = (binn*)binn_map_map(obj, BC_TYPE);
+            auto keysbin = (binn*)binn_map_list(obj, BC_VECTOR_TYPES);
+            auto valuesbin = (binn*)binn_map_list(obj, BC_VECTOR_VALUES);
+            
+            auto ref = new MapReference(types()->produce(typebin, vm));
+
+            binn_iter iter;
+            binn value;
+            std::vector<std::string> keys;
+            binn_list_foreach(keysbin, value) {
+                std::string key(binn_get_str(&value));
+                keys.push_back(key);
+
+            }
+            auto i = 0;
+            binn_list_foreach(valuesbin, value) {
+                ref->set(keys.at(i), factory->produce(&value, vm));
+                i++;
+            }
+
+            ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return ref; 
+        });
+
         // Function references
         factory->registerReducer(s(ReferenceTag::FUNCTION), [factory](const Reference* baseRef, VirtualMachine* vm) {
             auto ref = dynamic_cast<const FunctionReference*>(baseRef);
