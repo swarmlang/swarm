@@ -65,7 +65,7 @@ protected:
     ISA::Instructions* walkMapAccessNode(MapAccessNode* node) override {
         auto instrs = walk(node->path());
         auto mapget = new ISA::MapGet(
-            makeLocation(ISA::Affinity::LOCAL, "mkey_" + node->end()->name()), getLocFromAssign(instrs->back()));
+            new ISA::StringReference("mkey_" + node->end()->name()), getLocFromAssign(instrs->back()));
         instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), mapget)));
         return instrs;
     }
@@ -652,7 +652,7 @@ protected:
         auto map = new ISA::AssignEval(loc, new ISA::MapInit(getTypeRef(innerType)));
         instrs->push_back(useref(map));
         for ( auto stmt : *node->body() ) {
-            auto id = makeLocation(ISA::Affinity::LOCAL, "mkey_" + stmt->id()->name());
+            ISA::Reference* id = new ISA::StringReference("mkey_" + stmt->id()->name());
             auto mapstmt = walk(stmt);
             auto mapset = new ISA::MapSet(id, getLocFromAssign(mapstmt->back()), loc);
             instrs->insert(instrs->end(), mapstmt->begin(), mapstmt->end());
