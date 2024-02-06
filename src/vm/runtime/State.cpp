@@ -7,8 +7,8 @@
 namespace swarmc::Runtime {
 
     void ScopeFrame::shadow(ISA::LocationReference* ref) {
-        auto name = ISA::LocationReference::affinityString(ref->affinity()) + ":" + ref->name() + "@" + _id;
-        if ( _map.find(name) != _map.end() ) {
+        auto name = ref->name() + "@" + _id;
+        if ( _map.find(ISA::LocationReference::affinityString(ref->affinity()) + ":" + name) != _map.end() ) {
             throw Errors::SwarmError("Attempted to shadow reference in a scope where it was already shadowed: " + ref->toString());
         }
 

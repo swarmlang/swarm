@@ -189,7 +189,7 @@ namespace swarmc::Runtime {
         virtual void restore(ScopeFrame*);
 
         /** Restore the VM to the specified state. Can be used to re-hydrate VMs for queued call execution. */
-        virtual void restore(ScopeFrame*, State*);
+        virtual void restore(ScopeFrame*, State*, IStorageInterface*);
 
         virtual void attachDebugger(Debug::Debugger* debugger) {
             _debugger = useref(debugger);

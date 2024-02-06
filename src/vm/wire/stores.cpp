@@ -19,7 +19,8 @@ namespace swarmc::Runtime {
             auto localStore = dynamic_cast<const SingleThreaded::StorageInterface*>(store);
             auto refs = binn_object();
             for ( const auto& pair : localStore->_map ) {
-                binn_object_set_map(refs, strdup(pair.first.c_str()), Wire::references()->reduce(pair.second, vm));
+                std::string name = pair.first.substr(pair.first.rfind(':')+1);
+                binn_object_set_map(refs, strdup(name.c_str()), Wire::references()->reduce(pair.second, vm));
             }
 
             auto obj = binn_map();
@@ -35,7 +36,8 @@ namespace swarmc::Runtime {
             binn value;
             binn_object_foreach(refs, key, value) {
                 std::string skey(key);
-                store->store(new ISA::LocationReference(ISA::Affinity::LOCAL, skey.substr(3)), Wire::references()->produce(&value, vm));
+                auto ll = new ISA::LocationReference(ISA::Affinity::LOCAL, skey);
+                store->store(ll, Wire::references()->produce(&value, vm));
             }
 
             return store;

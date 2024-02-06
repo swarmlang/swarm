@@ -204,7 +204,7 @@ namespace swarmc::Runtime::RedisDriver {
             try {
                 Console::get()->debug("Running job: " + s(redisjob));
                 _vm->copy([redisjob](VirtualMachine* vm) -> void {
-                    vm->restore(redisjob->getVMScope(), redisjob->getVMState());
+                    vm->restore(redisjob->getVMScope(), redisjob->getVMState(), redisjob->getLocalStore());
                     auto call = useref(Wire::calls()->produce(redisjob->getCallBin(), vm));
                     vm->executeCall(call);
                 });
