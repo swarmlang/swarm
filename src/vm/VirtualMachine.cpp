@@ -61,7 +61,6 @@ namespace swarmc::Runtime {
         }
         if ( current != _stores.end() ) _stores.erase(current);
         addStore(localStore);
-        localStore->dump();
     }
 
     Reference* VirtualMachine::loadFromStore(LocationReference* loc) {
