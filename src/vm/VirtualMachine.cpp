@@ -41,7 +41,7 @@ namespace swarmc::Runtime {
         }
     }
 
-    void VirtualMachine::restore(ScopeFrame* scope, State* state, IStorageInterface* localStore) {
+    void VirtualMachine::restore(ScopeFrame* scope, State* state) {
         if ( _scope != scope ) {
             freeref(_scope);
             _scope = useref(scope);
@@ -51,22 +51,10 @@ namespace swarmc::Runtime {
             freeref(_state);
             _state = useref(state);
         }
-
-        auto current = _stores.end();
-        auto dummy = new LocationReference(Affinity::LOCAL, "dummy");
-        GC_LOCAL_REF(dummy)
-        for ( auto i = _stores.begin(); i != _stores.end(); i++ ) {
-            if ( *i == localStore ) return;
-            if ( (*i)->manages(dummy) ) current = i;
-        }
-        if ( current != _stores.end() ) _stores.erase(current);
-        addStore(localStore);
     }
 
     Reference* VirtualMachine::loadFromStore(LocationReference* loc) {
-        //Console::get()->warn("loadFromStore " + loc->fqName());
         auto scopeLoc = _scope->map(loc);
-        //Console::get()->warn("lFS scopeLoc  " + scopeLoc->fqName());
         auto store = getStore(scopeLoc);
 
         // FIXME: smarter locking (e.g. region awareness, atomic operation exemptions, &c.)

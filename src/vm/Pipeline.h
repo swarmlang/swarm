@@ -177,7 +177,6 @@ namespace swarmc::VM {
 
             auto vm = new VirtualMachine(new RedisDriver::GlobalServices());
             vm->addStore(new RedisDriver::RedisStorageInterface(vm));
-            vm->addStore(new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL));
             auto rq = new RedisDriver::RedisQueue(vm);
             vm->addQueue(rq);
             vm->useStreamDriver(new RedisDriver::RedisStreamDriver(vm));

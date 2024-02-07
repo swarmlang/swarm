@@ -92,13 +92,13 @@ namespace swarmc::Runtime::RedisDriver {
 
     class RedisQueueJob : public IQueueJob {
     public:
-        RedisQueueJob(JobID id, JobState state, binn* call, State* vmState, ScopeFrame* vmScope, IStorageInterface* localStore)
-            : _id(id), _jobState(state), _call(call), _vmState(useref(vmState)), _vmScope(useref(vmScope)), _localStore(useref(localStore)) {}
+        RedisQueueJob(JobID id, JobState state, binn* call, State* vmState, binn* vmScope, IStorageInterface* localStore)
+            : _id(id), _jobState(state), _call(call), _vmState(useref(vmState)), _vmScope(vmScope), _localStore(useref(localStore)) {}
 
         ~RedisQueueJob() {
             binn_free(_call);
             freeref(_vmState);
-            freeref(_vmScope);
+            binn_free(_vmScope);
             freeref(_localStore);
         }
 
@@ -115,7 +115,7 @@ namespace swarmc::Runtime::RedisDriver {
 
         [[nodiscard]] virtual State* getVMState() const { return _vmState; }
 
-        [[nodiscard]] virtual ScopeFrame* getVMScope() const { return _vmScope; }
+        [[nodiscard]] virtual binn* getScopeBinn() const { return _vmScope; }
 
         [[nodiscard]] virtual binn* getCallBin() const { return _call; }
 
@@ -133,7 +133,7 @@ namespace swarmc::Runtime::RedisDriver {
         JobState _jobState;
         binn* _call;
         State* _vmState;
-        ScopeFrame* _vmScope;
+        binn* _vmScope;
         IStorageInterface* _localStore;
 
         SchedulingFilters _filters;
