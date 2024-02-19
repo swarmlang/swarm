@@ -38,6 +38,8 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "FLOOR" ) return new FloorFunction(this);
         if ( name == "CEILING" ) return new CeilingFunction(this);
         if ( name == "NTH_ROOT" ) return new NthRootFunction(this);
+        if ( name == "MAX" ) return new MaxFunction(this);
+        if ( name == "MIN" ) return new MinFunction(this);
         if ( name == "COUNT" ) return new CountFunction(this);
         if ( name == "TIME" ) return new TimeFunction(this);
         if ( name == "ZERO_VECTOR" ) return new ZeroVectorFunction(this);

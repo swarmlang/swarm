@@ -577,7 +577,17 @@ protected:
         }
 
         // reevaluate condition
-        instrs->push_back(useref(new ISA::CallElse0(cfb, makeLocation(ISA::Affinity::FUNCTION, _whileConds->top()))));
+        std::string reevalname = "WHILECONDREEVAL_" + std::to_string(_tempCounter++);
+        instrs->push_back(new ISA::BeginFunction(
+            reevalname, 
+            getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID))
+        ));
+        instrs->push_back(new ISA::AssignEval(
+            makeLocation(ISA::Affinity::LOCAL, "whileCond"),
+            new ISA::Call0(makeLocation(ISA::Affinity::FUNCTION, _whileConds->top()))
+        ));
+        instrs->push_back(new ISA::Return0());
+        instrs->push_back(new ISA::CallElse0(cfb, makeLocation(ISA::Affinity::FUNCTION, reevalname)));
 
         // end of function return
         instrs->push_back(useref(new ISA::Return0()));

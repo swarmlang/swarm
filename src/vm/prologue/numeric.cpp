@@ -32,4 +32,24 @@ namespace swarmc::Runtime::Prologue {
         return new NthRootFunctionCall(_provider, vector, returnType());
     }
 
+    void MaxFunctionCall::execute(VirtualMachine*) {
+        auto num1 = ((ISA::NumberReference*) _vector.at(0).second)->value();
+        auto num2 = ((ISA::NumberReference*) _vector.at(1).second)->value();
+        setReturn(new ISA::NumberReference(num1 > num2 ? num1 : num2));
+    }
+
+    PrologueFunctionCall* MaxFunction::call(CallVector vector) const {
+        return new MaxFunctionCall(_provider, vector, returnType());
+    }
+
+    void MinFunctionCall::execute(VirtualMachine*) {
+        auto num1 = ((ISA::NumberReference*) _vector.at(0).second)->value();
+        auto num2 = ((ISA::NumberReference*) _vector.at(1).second)->value();
+        setReturn(new ISA::NumberReference(num1 < num2 ? num1 : num2));
+    }
+
+    PrologueFunctionCall* MinFunction::call(CallVector vector) const {
+        return new MinFunctionCall(_provider, vector, returnType());
+    }
+
 }

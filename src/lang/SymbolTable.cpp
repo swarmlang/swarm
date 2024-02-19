@@ -229,6 +229,12 @@ namespace swarmc::Lang {
         auto file_append = new PrologueFunctionSymbol("file_append", typeFileStringVoid, new ProloguePosition("file_append"), "APPEND_FILE");
         prologueScope->insert(file_append);
 
+        auto max = new PrologueFunctionSymbol("max", typeNumToNumToNum, new ProloguePosition("max"), "MAX");
+        prologueScope->insert(max);
+
+        auto min = new PrologueFunctionSymbol("min", typeNumToNumToNum, new ProloguePosition("min"), "MIN");
+        prologueScope->insert(min);
+
         return prologueScope;
     }
 

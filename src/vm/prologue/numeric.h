@@ -103,6 +103,74 @@ namespace swarmc::Runtime::Prologue {
         }
     };
 
+    class MaxFunctionCall : public PrologueFunctionCall {
+    public:
+        MaxFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType) :
+                PrologueFunctionCall(provider, "MAX", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "MaxFunctionCall<>";
+        }
+    };
+
+    class MaxFunction : public PrologueFunction {
+    public:
+        explicit MaxFunction(IProvider* provider) : PrologueFunction("MAX", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override {
+            return {
+                Type::Primitive::of(Type::Intrinsic::NUMBER),
+                Type::Primitive::of(Type::Intrinsic::NUMBER)
+            };
+        }
+
+        [[nodiscard]] Type::Type* returnType() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
+        }
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "MaxFunction<>";
+        }
+    };
+
+    class MinFunctionCall : public PrologueFunctionCall {
+    public:
+        MinFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType) :
+                PrologueFunctionCall(provider, "Min", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "MinFunctionCall<>";
+        }
+    };
+
+    class MinFunction : public PrologueFunction {
+    public:
+        explicit MinFunction(IProvider* provider) : PrologueFunction("MIN", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override {
+            return {
+                Type::Primitive::of(Type::Intrinsic::NUMBER),
+                Type::Primitive::of(Type::Intrinsic::NUMBER)
+            };
+        }
+
+        [[nodiscard]] Type::Type* returnType() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
+        }
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "MinFunction<>";
+        }
+    };
+
 }
 
 #endif
