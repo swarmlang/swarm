@@ -12,7 +12,7 @@ namespace swarmc::Runtime {
             throw Errors::SwarmError("Attempted to shadow reference in a scope where it was already shadowed: " + ref->toString());
         }
 
-        _map[name] = useref(new ISA::LocationReference(ref->affinity(), name));
+        _map[ISA::LocationReference::affinityString(ref->affinity()) + ":" + name] = useref(new ISA::LocationReference(ref->affinity(), name));
     }
 
     ISA::LocationReference* ScopeFrame::map(ISA::LocationReference* ref) {

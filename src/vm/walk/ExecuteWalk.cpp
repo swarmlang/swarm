@@ -548,6 +548,7 @@ namespace swarmc::Runtime {
         }
 
         debug("fnparam: " + loc->toString() + " <- " + param->toString());
+        _vm->shadow(loc);
         _vm->store(loc, param);
         return nullptr;
     }
