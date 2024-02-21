@@ -18,10 +18,12 @@ namespace swarmc::Runtime::Prologue {
         auto enumeration = new ISA::EnumerationReference(Type::Primitive::of(Type::Intrinsic::NUMBER));
         enumeration->reserve(len);
 
-        auto n = start;
-        for ( auto i = 0; i <= len; i++ ) {
-            enumeration->append(new ISA::NumberReference(static_cast<double>(n)));
-            n += step;
+        if ( len != 0 ) {
+            auto n = start;
+            for ( auto i = 0; i <= len; i++ ) {
+                enumeration->append(new ISA::NumberReference(static_cast<double>(n)));
+                n += step;
+            }
         }
 
         setReturn(enumeration);
