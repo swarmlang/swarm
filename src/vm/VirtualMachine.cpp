@@ -219,6 +219,12 @@ namespace swarmc::Runtime {
         }
 
         auto scopeLoc = _scope->map(loc);
+        if ( scopeLoc->is(loc) && _scope->parent() == nullptr ) {
+            // Variables in the global scope don't need a `scopeof` call, so shadow
+            // them automatically to make sure the scope gets set up properly.
+            shadow(loc);
+            scopeLoc = _scope->map(loc);
+        }
         auto store = getStore(scopeLoc);
         for ( int i = 0; i < Configuration::LOCK_MAX_RETRIES; i += 1 ) {
             auto lock = store->acquire(scopeLoc);
@@ -238,14 +244,15 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::unlock(LocationReference* loc) {
-        if ( !hasLock(loc) ) {
+        auto scopeLoc = _scope->map(loc);
+        if ( !hasLock(scopeLoc) ) {
             logger->warn("Attempted to release lock that is not held by the requesting control: " + loc->toString());
             return;
         }
 
         for ( auto it = _locks.begin(); it != _locks.end(); ++it ) {
             auto lock = *it;
-            if ( lock->location()->is(loc) ) {
+            if ( lock->location()->is(scopeLoc) ) {
                 GC_LOCAL_REF(lock);
                 lock->release();
                 _locks.erase(it);
