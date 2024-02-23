@@ -21,13 +21,17 @@ namespace swarmc::Runtime::RedisDriver {
 
     class GlobalServices : public SingleThreaded::GlobalServices {
     public:
+        GlobalServices() :_nodeID(std::to_string(getRedis()->incr("nextNodeID"))) {}
+
         std::string getNodeId() override {
-            return "??";
+            return _nodeID;
         }
 
         [[nodiscard]] std::string toString() const override {
             return "RedisDriver::GlobalServices<>";
         }
+    protected:
+        std::string _nodeID;
     };
 
     class RedisStorageInterface : public IStorageInterface {

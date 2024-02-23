@@ -766,9 +766,6 @@ protected:
 
         // bring return value trackers in scope
         auto retVar = makeLocation(ISA::Affinity::LOCAL, "retVal", nullptr);
-        if ( fnType->intrinsic() != Type::Intrinsic::VOID ) {
-            instrs->push_back(useref(new ISA::ScopeOf(retVar)));
-        }
         auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFB", instrs);
         instrs->push_back(useref(new ISA::AssignValue(cfb, new ISA::BooleanReference(false))));
 
@@ -1004,7 +1001,7 @@ protected:
         // change return0 to return retval
         freeref(*(j - 1));
         *(j - 1) = useref(new ISA::Return1(
-            makeLocation(ISA::Affinity::LOCAL, "retVal", transformedFunction)
+            makeLocation(ISA::Affinity::LOCAL, "retVal", nullptr)
         ));
 
          // remove unnecessary temp assignment

@@ -212,9 +212,6 @@ namespace swarmc::Runtime::RedisDriver {
             } catch (Errors::SwarmError& e) {
                 Console::get()->error(e.what());
                 redisjob->setState(JobState::ERROR);
-            } catch (...) {
-                Console::get()->error("Unknown error!");
-                redisjob->setState(JobState::ERROR);
             }
             _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", job.second, -1);
             delete redisjob;
