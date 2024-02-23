@@ -18,7 +18,7 @@ namespace swarmc::Runtime::MultiThreaded {
     class GlobalServices : public SingleThreaded::GlobalServices {
     public:
         std::string getNodeId() override {
-            return "multithreaded::localhost";
+            return "multithreaded::" + s(Framework::context()->getID());
         }
 
         [[nodiscard]] std::string toString() const override {
