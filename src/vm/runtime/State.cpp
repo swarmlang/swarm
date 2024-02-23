@@ -15,10 +15,10 @@ namespace swarmc::Runtime {
         _map[ISA::LocationReference::affinityString(ref->affinity()) + ":" + name] = useref(new ISA::LocationReference(ref->affinity(), name));
     }
 
-    ISA::LocationReference* ScopeFrame::map(ISA::LocationReference* ref) {
+    ISA::LocationReference* ScopeFrame::map(ISA::LocationReference* ref) const {
         auto name = ISA::LocationReference::affinityString(ref->affinity()) + ":" + ref->name() + "@" + _id;
         if ( _map.find(name) != _map.end() ) {
-            return _map[name];
+            return _map.at(name);
         }
 
         if ( _parent != nullptr ) {

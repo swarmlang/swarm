@@ -855,13 +855,15 @@ namespace swarmc::Runtime {
 
     Reference* ExecuteWalk::walkLock(Lock* i) {
         verbose("lock " + i->first()->toString());
-        _vm->lock(i->first());
+        auto scopeLoc = _vm->getScopeFrame()->map(i->first());
+        _vm->lock(scopeLoc);
         return nullptr;
     }
 
     Reference* ExecuteWalk::walkUnlock(Unlock* i) {
         verbose("unlock " + i->first()->toString());
-        _vm->unlock(i->first());
+        auto scopeLoc = _vm->getScopeFrame()->map(i->first());
+        _vm->unlock(scopeLoc);
         return nullptr;
     }
 

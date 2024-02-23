@@ -76,7 +76,7 @@ namespace swarmc::Runtime {
         void shadow(ISA::LocationReference*);
 
         /** Resolve the nominal location to the dynamically-scoped location. */
-        ISA::LocationReference* map(ISA::LocationReference*);
+        ISA::LocationReference* map(ISA::LocationReference*) const;
 
         /** Create a new child of this scope and return it. */
         ScopeFrame* newChild();

@@ -58,9 +58,9 @@ namespace swarmc::Runtime {
         auto store = getStore(scopeLoc);
 
         // FIXME: smarter locking (e.g. region awareness, atomic operation exemptions, &c.)
-        if ( store->shouldLockAccesses() && !hasLock(loc) && lock(loc) ) {
-            NS_DEFER()([loc, this]() {
-                unlock(loc);
+        if ( store->shouldLockAccesses() && !hasLock(scopeLoc) && lock(loc) ) {
+            NS_DEFER()([scopeLoc, this]() {
+                unlock(scopeLoc);
             });
         }
 
@@ -187,11 +187,11 @@ namespace swarmc::Runtime {
             shadow(loc);
             scopeLoc = _scope->map(loc);
         }
-
         auto store = getStore(scopeLoc);
-        if ( store->shouldLockAccesses() && !hasLock(loc) && lock(loc) ) {
-            NS_DEFER()([loc, this]() {
-                unlock(loc);
+
+        if ( store->shouldLockAccesses() && !hasLock(scopeLoc) && lock(loc) ) {
+            NS_DEFER()([scopeLoc, this]() {
+                unlock(scopeLoc);
             });
         }
 
@@ -212,19 +212,14 @@ namespace swarmc::Runtime {
      * @return
      */
     bool VirtualMachine::lock(LocationReference* loc) {
-        if ( hasLock(loc) ) {
+        auto scopeLoc = _scope->map(loc);
+        
+        if ( hasLock(scopeLoc) ) {
             logger->warn("Attempted to acquire lock that is already held by the requesting control: " + loc->toString());
             logger->debug(trace());
             return false;
         }
 
-        auto scopeLoc = _scope->map(loc);
-        if ( scopeLoc->is(loc) && _scope->parent() == nullptr ) {
-            // Variables in the global scope don't need a `scopeof` call, so shadow
-            // them automatically to make sure the scope gets set up properly.
-            shadow(loc);
-            scopeLoc = _scope->map(loc);
-        }
         auto store = getStore(scopeLoc);
         for ( int i = 0; i < Configuration::LOCK_MAX_RETRIES; i += 1 ) {
             auto lock = store->acquire(scopeLoc);
@@ -245,6 +240,7 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::unlock(LocationReference* loc) {
         auto scopeLoc = _scope->map(loc);
+        
         if ( !hasLock(scopeLoc) ) {
             logger->warn("Attempted to release lock that is not held by the requesting control: " + loc->toString());
             return;
