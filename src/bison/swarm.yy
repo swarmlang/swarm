@@ -332,6 +332,13 @@ statement :
         delete $2;
     }
 
+    | DEFER callExpression SEMICOLON {
+        Position* pos = new Position($1->position(), $3->position());
+        auto dc = new DeferCallExpressionNode(pos, $2);
+        $$ = new ExpressionStatementNode(pos, dc);
+        delete $1; delete $3;
+    }
+
     | declaration SEMICOLON {
         $$ = $1;
         delete $2;
