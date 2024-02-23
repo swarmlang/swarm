@@ -45,15 +45,15 @@ protected:
     ISA::Instructions* walkIdentifierNode(IdentifierNode* node) override {
         auto instrs = new ISA::Instructions();
         ISA::Affinity affinity = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        auto ref = makeLocation(affinity, "var_" + node->name());
+        auto ref = makeLocation(affinity, "var_" + node->name(), nullptr);
         // TODO: remove first case once import-based prologue is implemented
         if ( node->symbol()->isPrologue() ) {
-            auto fref = makeLocation(ISA::Affinity::FUNCTION, ((Lang::PrologueFunctionSymbol*)node->symbol())->sviName());
+            auto fref = makeLocation(ISA::Affinity::FUNCTION, ((Lang::PrologueFunctionSymbol*)node->symbol())->sviName(), nullptr);
             instrs->push_back(useref(new ISA::AssignValue(ref, fref)));
         } else if ( node->symbol()->isProperty() ) { // use objget to get property values
             instrs->push_back(useref(new ISA::AssignEval(ref, new ISA::ObjGet(
                 _constructing.top().first, 
-                makeLocation(ISA::Affinity::OBJECTPROP, node->name()))
+                makeLocation(ISA::Affinity::OBJECTPROP, node->name(), nullptr))
             )));
         } else {
             // necessary for instructions that pull the location from the bottommost instruction
@@ -66,7 +66,7 @@ protected:
         auto instrs = walk(node->path());
         auto mapget = new ISA::MapGet(
             new ISA::StringReference("mkey_" + node->end()->name()), getLocFromAssign(instrs->back()));
-        instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), mapget)));
+        instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, instrs), mapget)));
         return instrs;
     }
 
@@ -75,21 +75,21 @@ protected:
         auto llval = walk(node->path());
         auto enumget = new ISA::EnumGet(getLocFromAssign(llval->back()), getLocFromAssign(instrs->back()));
         instrs->insert(instrs->end(), llval->begin(), llval->end());
-        instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), enumget)));
+        instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, instrs), enumget)));
         return instrs;
     }
 
     ISA::Instructions* walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
         auto instrs = new ISA::Instructions();
         auto ref = getTypeRef(node->value());
-        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL), ref)));
+        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL, instrs), ref)));
         return instrs;
     }
 
     ISA::Instructions* walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::BooleanReference(node->value());
-        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL), ref)));
+        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL, instrs), ref)));
         return instrs;
     }
 
@@ -99,16 +99,7 @@ protected:
 
         // Create location from variable name
         auto aff = node->id()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        auto loc = makeLocation(aff, "var_" + node->id()->name());
-
-        // if in a function, add a scopeof just in case
-        if ( _inFunction ) {
-            auto scopeOf = new ISA::Instructions();
-            scopeOf->push_back(useref(new ISA::ScopeOf(loc)));
-            scopeOf->insert(scopeOf->end(), instrs->begin(), instrs->end());
-            delete instrs;
-            instrs = scopeOf;
-        }
+        auto loc = makeLocation(aff, "var_" + node->id()->name(), instrs);
 
         // acquire temporary location from previous instruction and assign
         instrs->push_back(useref(new ISA::AssignValue(loc, vloc)));
@@ -127,7 +118,7 @@ protected:
             if ( name == "lLog" ) {
                 instrs = walk(node->args()->at(0));
                 instrs->push_back(useref(new ISA::StreamPush(
-                    makeLocation(ISA::Affinity::LOCAL, "STDOUT"),
+                    makeLocation(ISA::Affinity::LOCAL, "STDOUT", nullptr),
                     getLocFromAssign(instrs->back())
                 )));
                 return instrs;
@@ -135,7 +126,7 @@ protected:
             if ( name == "lError" ) {
                 instrs = walk(node->args()->at(0));
                 instrs->push_back(useref(new ISA::StreamPush(
-                    makeLocation(ISA::Affinity::LOCAL, "STDERR"),
+                    makeLocation(ISA::Affinity::LOCAL, "STDERR", nullptr),
                     getLocFromAssign(instrs->back())
                 )));
                 return instrs;
@@ -143,7 +134,7 @@ protected:
             if ( name == "sLog" ) {
                 instrs = walk(node->args()->at(0));
                 instrs->push_back(useref(new ISA::StreamPush(
-                    makeLocation(ISA::Affinity::SHARED, "STDOUT"),
+                    makeLocation(ISA::Affinity::SHARED, "STDOUT", nullptr),
                     getLocFromAssign(instrs->back())
                 )));
                 return instrs;
@@ -151,7 +142,7 @@ protected:
             if ( name == "sError" ) {
                 instrs = walk(node->args()->at(0));
                 instrs->push_back(useref(new ISA::StreamPush(
-                    makeLocation(ISA::Affinity::SHARED, "STDERR"),
+                    makeLocation(ISA::Affinity::SHARED, "STDERR", nullptr),
                     getLocFromAssign(instrs->back())
                 )));
                 return instrs;
@@ -164,7 +155,7 @@ protected:
             fnType = node->func()->type();
         } else {
             instrs = new ISA::Instructions();
-            floc = makeLocation(ISA::Affinity::LOCAL, node->calling()->name());
+            floc = makeLocation(ISA::Affinity::LOCAL, node->calling()->name(), nullptr);
             fnType = node->calling()->func()->type();
         }
 
@@ -173,7 +164,7 @@ protected:
             if (node->type()->intrinsic() == Type::Intrinsic::VOID) {
                 instrs->push_back(useref(call));
             } else {
-                instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), call)));
+                instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, instrs), call)));
             }
         } else {
             for ( auto arg : *node->args() ) {
@@ -187,12 +178,12 @@ protected:
                     instrs->push_back(useref(call));
                 } else if (((Type::Lambda*)fnType)->returns()->isCallable()) {
                     auto call = new ISA::Curry(floc, getLocFromAssign(evalarg->back()));
-                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL);
+                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL, instrs);
                     instrs->push_back(useref(new ISA::AssignEval(loc2, call)));
                     floc = loc2;
                 } else {
                     auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
-                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL);
+                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL, instrs);
                     instrs->push_back(useref(new ISA::AssignEval(loc2, call)));
                     floc = loc2;
                 }
@@ -214,7 +205,7 @@ protected:
             if (node->type()->intrinsic() == Type::Intrinsic::VOID) {
                 instrs->push_back(useref(call));
             } else {
-                instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), call)));
+                instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, instrs), call)));
             }
         } else {
             auto fnType = node->expression()->type();
@@ -227,12 +218,12 @@ protected:
                     instrs->push_back(useref(call));
                 } else if (((Type::Lambda*)fnType)->returns()->isCallable()) {
                     auto call = new ISA::Curry(floc, getLocFromAssign(evalarg->back()));
-                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL);
+                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL, instrs);
                     instrs->push_back(useref(new ISA::AssignEval(loc2, call)));
                     floc = loc2;
                 } else {
                     auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
-                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL);
+                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL, instrs);
                     instrs->push_back(useref(new ISA::AssignEval(loc2, call)));
                     floc = loc2;
                 }
@@ -250,7 +241,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::And(lhs, rhs))));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::And(lhs, rhs))));
         delete right;
         return left;
     }
@@ -261,7 +252,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Or(lhs, rhs))));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::Or(lhs, rhs))));
         delete right;
         return left;
     }
@@ -272,7 +263,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::IsEqual(lhs, rhs))));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::IsEqual(lhs, rhs))));
         delete right;
         return left;
     }
@@ -283,7 +274,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        auto loc = makeNewTmp(ISA::Affinity::LOCAL);
+        auto loc = makeNewTmp(ISA::Affinity::LOCAL, left);
         left->push_back(useref(new ISA::AssignEval(loc, new ISA::IsEqual(lhs, rhs))));
         left->push_back(useref(new ISA::AssignEval(loc, new ISA::Not(loc))));
         delete right;
@@ -297,9 +288,9 @@ protected:
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
         if ( node->concatenation() ) {
-            left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::StringConcat(lhs, rhs))));
+            left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::StringConcat(lhs, rhs))));
         } else {
-            left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Plus(lhs, rhs))));
+            left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::Plus(lhs, rhs))));
         }
         delete right;
         return left;
@@ -311,7 +302,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Minus(lhs, rhs))));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::Minus(lhs, rhs))));
         delete right;
         return left;
     }
@@ -322,7 +313,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Times(lhs, rhs))));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::Times(lhs, rhs))));
         delete right;
         return left;
     }
@@ -333,7 +324,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Divide(lhs, rhs))));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::Divide(lhs, rhs))));
         delete right;
         return left;
     }
@@ -344,7 +335,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Mod(lhs, rhs))));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::Mod(lhs, rhs))));
         delete right;
         return left;
     }
@@ -355,7 +346,7 @@ protected:
         auto lhs = getLocFromAssign(left->back());
         auto rhs = getLocFromAssign(right->back());
         left->insert(left->end(), right->begin(), right->end());
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Power(lhs, rhs))));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), new ISA::Power(lhs, rhs))));
         delete right;
         return left;
     }
@@ -363,20 +354,20 @@ protected:
     ISA::Instructions* walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         auto instrs = walk(node->exp());
         auto loc = getLocFromAssign(instrs->back());
-        instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Negative(loc))));
+        instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, instrs), new ISA::Negative(loc))));
         return instrs;
     }
 
     ISA::Instructions* walkSqrtNode(SqrtNode* node) override {
         auto instrs = walk(node->exp());
         auto loc = getLocFromAssign(instrs->back());
-        auto curried = makeNewTmp(ISA::Affinity::LOCAL);
+        auto curried = makeNewTmp(ISA::Affinity::LOCAL, instrs);
         instrs->push_back(useref(new ISA::AssignEval(curried, new ISA::Curry(
-            makeLocation(ISA::Affinity::FUNCTION, "NTH_ROOT"),
+            makeLocation(ISA::Affinity::FUNCTION, "NTH_ROOT", nullptr),
             new ISA::NumberReference(2)
         ))));
         instrs->push_back(useref(new ISA::AssignEval(
-            makeNewTmp(ISA::Affinity::LOCAL),
+            makeNewTmp(ISA::Affinity::LOCAL, instrs),
             new ISA::Call1(curried, loc)
         )));
         return instrs;
@@ -385,13 +376,13 @@ protected:
     ISA::Instructions* walkNotNode(NotNode* node) override {
         auto instrs = walk(node->exp());
         auto loc = getLocFromAssign(instrs->back());
-        instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Not(loc))));
+        instrs->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, instrs), new ISA::Not(loc))));
         return instrs;
     }
 
     ISA::Instructions* walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
         auto instrs = new ISA::Instructions();
-        auto loc = makeNewTmp(ISA::Affinity::LOCAL);
+        auto loc = makeNewTmp(ISA::Affinity::LOCAL, instrs);
         assert(node->type()->intrinsic() == Type::Intrinsic::ENUMERABLE);
         auto innerType = ((Type::Enumerable*)node->type())->values();
         auto map = new ISA::AssignEval(loc, new ISA::EnumInit(getTypeRef(innerType)));
@@ -420,17 +411,17 @@ protected:
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID)))));
         auto elemShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        instrs->push_back(useref(new ISA::FunctionParam(elemType, makeLocation(elemShared, "var_" + node->local()->name()))));
+        instrs->push_back(useref(new ISA::FunctionParam(elemType, makeLocation(elemShared, "var_" + node->local()->name(), nullptr))));
         if ( node->index() != nullptr ) {
             auto idxShared = node->index()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
             instrs->push_back(useref(new ISA::FunctionParam(
                 getTypeRef(Type::Primitive::of(Type::Intrinsic::NUMBER)),
-                makeLocation(idxShared, "var_" + node->index()->name())
+                makeLocation(idxShared, "var_" + node->index()->name(), nullptr)
             )));
         } else {
             instrs->push_back(useref(new ISA::FunctionParam(
                 getTypeRef(Type::Primitive::of(Type::Intrinsic::NUMBER)),
-                makeLocation(ISA::Affinity::LOCAL, "UNUSEDvar_idx")
+                makeLocation(ISA::Affinity::LOCAL, "UNUSEDvar_idx", nullptr)
             )));
         }
 
@@ -446,7 +437,7 @@ protected:
         instrs->push_back(useref(new ISA::Enumerate(
             elemType,
             enumLoc,
-            makeLocation(ISA::Affinity::FUNCTION, name)
+            makeLocation(ISA::Affinity::FUNCTION, name, nullptr)
         )));
 
         return instrs;
@@ -461,16 +452,16 @@ protected:
         assert(node->local()->type()->intrinsic() == Type::Intrinsic::RESOURCE);
         auto resource = (Type::Resource*)node->local()->type();
         auto opaque = ((Type::Opaque*)resource->yields())->toString();
-        auto tagLoc = makeNewTmp(ISA::Affinity::LOCAL);
+        auto tagLoc = makeNewTmp(ISA::Affinity::LOCAL, instrs);
         instrs->push_back(useref(new ISA::AssignEval(tagLoc, new ISA::Call0(_opaqueVals.at(opaque)))));
-        auto typeLoc = makeNewTmp(ISA::Affinity::LOCAL);
+        auto typeLoc = makeNewTmp(ISA::Affinity::LOCAL, instrs);
         instrs->push_back(useref(new ISA::AssignEval(typeLoc, new ISA::Call1(resFunc, tagLoc))));
         std::string name = "WITH_" + std::to_string(_tempCounter++);
 
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID)))));
         auto localShared = node->local()->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        instrs->push_back(useref(new ISA::FunctionParam(typeLoc, makeLocation(localShared, "var_" + node->local()->name()))));
+        instrs->push_back(useref(new ISA::FunctionParam(typeLoc, makeLocation(localShared, "var_" + node->local()->name(), nullptr))));
 
         // walk body
         for ( auto stmt : *node->body() ) {
@@ -482,7 +473,7 @@ protected:
         instrs->push_back(useref(new ISA::Return0()));
         _inFunction--;
 
-        instrs->push_back(useref(new ISA::With(resLoc, makeLocation(ISA::Affinity::FUNCTION, name))));
+        instrs->push_back(useref(new ISA::With(resLoc, makeLocation(ISA::Affinity::FUNCTION, name, nullptr))));
 
         return instrs;
     }
@@ -502,7 +493,7 @@ protected:
         }
         instrs->push_back(useref(new ISA::Return0()));
         _inFunction--;
-        auto func = makeLocation(ISA::Affinity::FUNCTION, name);
+        auto func = makeLocation(ISA::Affinity::FUNCTION, name, nullptr);
 
         // walk condition and callif
         auto condition = walk(node->condition());
@@ -515,28 +506,29 @@ protected:
     ISA::Instructions* walkWhileStatement(WhileStatement* node) override {
         auto instrs = new ISA::Instructions();
 
+        auto whileCondLoc = makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr);
         instrs->push_back(useref(new ISA::AssignValue(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond"),
+            whileCondLoc, 
             new ISA::BooleanReference(false))
         ));
         // condition function
-        _whileConds->push("WHILECOND_" + std::to_string(_tempCounter++));
+        std::string condName = "WHILECOND_" + std::to_string(_tempCounter++);
+        _whileConds->push(condName);
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(_whileConds->top(), getTypeRef(Type::Primitive::of(Type::Intrinsic::BOOLEAN)))));
         auto cond = walk(node->condition());
         instrs->insert(instrs->end(), cond->begin(), cond->end());
+        instrs->push_back(useref(new ISA::AssignValue(whileCondLoc, getLocFromAssign(cond->back()))));
         instrs->push_back(useref(new ISA::Return1(getLocFromAssign(instrs->back()))));
         _inFunction--;
 
         // While function header
         std::string name = "WHILE_" + std::to_string(_tempCounter++);
         auto retType = getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID));
-        auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFBWhile");
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, retType)));
 
-        // bring control flow breaker tracker in scope
-        instrs->push_back(useref(new ISA::ScopeOf(cfb)));
+        auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFBWhile", instrs);
         instrs->push_back(useref(new ISA::AssignValue(cfb, new ISA::BooleanReference(false))));
 
         std::queue<ISA::Instructions*> subfuncs;
@@ -568,7 +560,7 @@ protected:
                 instrs->insert(instrs->end(), subf->begin(), subf->end());
                 instrs->push_back(useref(new ISA::Return0()));
                 _inFunction--;
-                auto loc = makeLocation(ISA::Affinity::FUNCTION, funcnames.front());
+                auto loc = makeLocation(ISA::Affinity::FUNCTION, funcnames.front(), nullptr);
                 instrs->push_back(useref(new ISA::CallElse0(cfb, loc)));
             } else {
                 delete subf->at(0);
@@ -577,17 +569,7 @@ protected:
         }
 
         // reevaluate condition
-        std::string reevalname = "WHILECONDREEVAL_" + std::to_string(_tempCounter++);
-        instrs->push_back(new ISA::BeginFunction(
-            reevalname, 
-            getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID))
-        ));
-        instrs->push_back(new ISA::AssignEval(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond"),
-            new ISA::Call0(makeLocation(ISA::Affinity::FUNCTION, _whileConds->top()))
-        ));
-        instrs->push_back(new ISA::Return0());
-        instrs->push_back(new ISA::CallElse0(cfb, makeLocation(ISA::Affinity::FUNCTION, reevalname)));
+        instrs->push_back(new ISA::CallElse0(cfb, makeLocation(ISA::Affinity::FUNCTION, condName, nullptr)));
 
         // end of function return
         instrs->push_back(useref(new ISA::Return0()));
@@ -595,13 +577,13 @@ protected:
 
         //evaluate condition
         instrs->push_back(useref(new ISA::AssignEval(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond"),
-            new ISA::Call0(makeLocation(ISA::Affinity::FUNCTION, _whileConds->top()))
+            makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr),
+            new ISA::Call0(makeLocation(ISA::Affinity::FUNCTION, _whileConds->top(), nullptr))
         )));
 
         instrs->push_back(useref(new ISA::While(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond"),
-            makeLocation(ISA::Affinity::FUNCTION, name)
+            makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr),
+            makeLocation(ISA::Affinity::FUNCTION, name, nullptr)
         )));
 
         _whileConds->pop();
@@ -612,12 +594,12 @@ protected:
         auto instrs = new ISA::Instructions();
         // evaluate condition
         instrs->push_back(useref(new ISA::AssignEval(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond"),
-            new ISA::Call0(makeLocation(ISA::Affinity::FUNCTION, _whileConds->top()))
+            makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr),
+            new ISA::Call0(makeLocation(ISA::Affinity::FUNCTION, _whileConds->top(), nullptr))
         )));
         // skip rest of function
         instrs->push_back(useref(new ISA::AssignValue(
-            makeLocation(ISA::Affinity::LOCAL, "CFBWhile"),
+            makeLocation(ISA::Affinity::LOCAL, "CFBWhile", nullptr),
             new ISA::BooleanReference(true)
         )));
         return instrs;
@@ -627,12 +609,12 @@ protected:
         auto instrs = new ISA::Instructions();
         // set condition to false
         instrs->push_back(useref(new ISA::AssignValue(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond"),
+            makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr),
             new ISA::BooleanReference(false)
         )));
         // skip rest of function
         instrs->push_back(useref(new ISA::AssignValue(
-            makeLocation(ISA::Affinity::LOCAL, "CFBWhile"),
+            makeLocation(ISA::Affinity::LOCAL, "CFBWhile", nullptr),
             new ISA::BooleanReference(true)
         )));
         return instrs;
@@ -640,12 +622,12 @@ protected:
 
     ISA::Instructions* walkReturnStatementNode(ReturnStatementNode* node) override {
         auto instrs = new ISA::Instructions();
-        instrs->push_back(useref(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL, "CFB"), new ISA::BooleanReference(true))));
+        instrs->push_back(useref(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL, "CFB", nullptr), new ISA::BooleanReference(true))));
         if ( node->value() != nullptr ) {
             auto exp = walk(node->value());
             auto retval = getLocFromAssign(exp->back());
             instrs->insert(instrs->end(), exp->begin(), exp->end());
-            instrs->push_back(useref(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL, "retVal"), retval)));
+            instrs->push_back(useref(new ISA::AssignValue(makeLocation(ISA::Affinity::LOCAL, "retVal", instrs), retval)));
         }
         return instrs;
     }
@@ -656,7 +638,7 @@ protected:
 
     ISA::Instructions* walkMapNode(MapNode* node) override {
         auto instrs = new ISA::Instructions();
-        auto loc = makeNewTmp(ISA::Affinity::LOCAL);
+        auto loc = makeNewTmp(ISA::Affinity::LOCAL, instrs);
         assert(node->type()->intrinsic() == Type::Intrinsic::MAP);
         auto innerType = ((Type::Map*)node->type())->values();
         auto map = new ISA::AssignEval(loc, new ISA::MapInit(getTypeRef(innerType)));
@@ -677,14 +659,14 @@ protected:
     ISA::Instructions* walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::StringReference(node->value());
-        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL), ref)));
+        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL, instrs), ref)));
         return instrs;
     }
 
     ISA::Instructions* walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
         auto instrs = new ISA::Instructions();
         auto ref = new ISA::NumberReference(node->value());
-        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL), ref)));
+        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL, instrs), ref)));
         return instrs;
     }
 
@@ -698,12 +680,12 @@ protected:
                 assert(!_constructing.empty());
                 instrs->push_back(useref(new ISA::ObjSet(
                     _constructing.top().first,
-                    makeLocation(ISA::Affinity::OBJECTPROP, id->name()),
+                    makeLocation(ISA::Affinity::OBJECTPROP, id->name(), nullptr),
                     value
                 )));
             } else {
                 instrs->push_back(useref(new ISA::AssignValue(
-                    makeLocation(aff, "var_" + id->name()),
+                    makeLocation(aff, "var_" + id->name(), instrs),
                     value
                 )));
             }
@@ -725,7 +707,7 @@ protected:
             instrs->insert(instrs->end(), path->begin(), path->end());
             instrs->push_back(useref(
                 new ISA::MapSet(
-                    makeLocation(ISA::Affinity::LOCAL, "mkey_" + ma->end()->name()),
+                    makeLocation(ISA::Affinity::LOCAL, "mkey_" + ma->end()->name(), nullptr),
                     value,
                     getLocFromAssign(path->back()))
             ));
@@ -736,7 +718,7 @@ protected:
             instrs->push_back(useref(
                 new ISA::ObjSet(
                     getLocFromAssign(path->back()),
-                    makeLocation(ISA::Affinity::OBJECTPROP, ca->end()->name()),
+                    makeLocation(ISA::Affinity::OBJECTPROP, ca->end()->name(), nullptr),
                     value
                 )
             ));
@@ -765,12 +747,10 @@ protected:
         }
 
         auto retType = getTypeRef(fnType);
-        auto retVar = makeLocation(ISA::Affinity::LOCAL, "retVal");
-        auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFB");
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, retType)));
         if ( !_isMemberFunctionOf.empty() ) {
-            _constructing.push(std::make_pair(makeNewTmp(ISA::Affinity::LOCAL), _isMemberFunctionOf.top()));
+            _constructing.push(std::make_pair(makeNewTmp(ISA::Affinity::LOCAL, instrs), _isMemberFunctionOf.top()));
             instrs->push_back(useref(new ISA::FunctionParam(
                 getTypeRef(_isMemberFunctionOf.top()),
                 _constructing.top().first
@@ -780,15 +760,16 @@ protected:
         // formals
         for ( auto f : *node->formals() ) {
             auto type = getTypeRef(f.first->value());
-            auto ref = makeLocation(ISA::Affinity::LOCAL, "var_" + f.second->name());
+            auto ref = makeLocation(ISA::Affinity::LOCAL, "var_" + f.second->name(), nullptr);
             instrs->push_back(useref(new ISA::FunctionParam(type, ref)));
         }
 
         // bring return value trackers in scope
+        auto retVar = makeLocation(ISA::Affinity::LOCAL, "retVal", nullptr);
         if ( fnType->intrinsic() != Type::Intrinsic::VOID ) {
             instrs->push_back(useref(new ISA::ScopeOf(retVar)));
         }
-        instrs->push_back(useref(new ISA::ScopeOf(cfb)));
+        auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFB", instrs);
         instrs->push_back(useref(new ISA::AssignValue(cfb, new ISA::BooleanReference(false))));
 
         std::queue<ISA::Instructions*> subfuncs;
@@ -820,7 +801,7 @@ protected:
                 instrs->insert(instrs->end(), subf->begin(), subf->end());
                 instrs->push_back(useref(new ISA::Return0()));
                 _inFunction--;
-                auto loc = makeLocation(ISA::Affinity::FUNCTION, funcnames.front());
+                auto loc = makeLocation(ISA::Affinity::FUNCTION, funcnames.front(), nullptr);
                 instrs->push_back(useref(new ISA::CallElse0(cfb, loc)));
             } else {
                 delete subf->at(0);
@@ -838,7 +819,7 @@ protected:
         _inFunction--;
 
         // needed for assignment
-        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL), makeLocation(ISA::Affinity::FUNCTION, name))));
+        instrs->push_back(useref(new ISA::AssignValue(makeNewTmp(ISA::Affinity::LOCAL, instrs), makeLocation(ISA::Affinity::FUNCTION, name, nullptr))));
 
         return instrs;
     }
@@ -866,7 +847,7 @@ protected:
             instr = new ISA::LessThanOrEqual(lhs, rhs);
             break;
         }
-        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), instr)));
+        left->push_back(useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, left), instr)));
         delete right;
         return left;
     }
@@ -874,7 +855,7 @@ protected:
     ISA::Instructions* walkTypeBodyNode(TypeBodyNode* node) override {
         auto instrs = new ISA::Instructions();
 
-        auto proto = makeNewTmp(ISA::Affinity::LOCAL);
+        auto proto = makeNewTmp(ISA::Affinity::LOCAL, instrs);
         instrs->push_back(useref(new ISA::AssignEval(proto, new ISA::OTypeInit())));
         for (auto prop : *node->declarations()) {
             std::string name = "";
@@ -888,13 +869,13 @@ protected:
             }
             instrs->push_back(useref(new ISA::OTypeProp(
                 proto,
-                makeLocation(ISA::Affinity::OBJECTPROP, name),
+                makeLocation(ISA::Affinity::OBJECTPROP, name, nullptr),
                 getTypeRef(type, node->value())
             )));
         }
 
         // create finalized type
-        auto ofinal = makeNewTmp(ISA::Affinity::LOCAL);
+        auto ofinal = makeNewTmp(ISA::Affinity::LOCAL, instrs);
         instrs->push_back(useref(
             new ISA::AssignEval(ofinal, new ISA::OTypeFinalize(proto))
         ));
@@ -917,7 +898,7 @@ protected:
                 auto defname = "deval_" + std::to_string(node->value()->getId()) + "_" + pvd->id()->name();
                 _objDefaults.insert(defname);
                 instrs->push_back(useref(new ISA::AssignValue(
-                    makeLocation(ISA::Affinity::LOCAL, defname),
+                    makeLocation(ISA::Affinity::LOCAL, defname, nullptr),
                     getLocFromAssign(instrs->back())
                 )));
                 delete eval;
@@ -942,8 +923,8 @@ protected:
         auto obj = getLocFromAssign(instrs->back());
         instrs->push_back(useref(
             new ISA::AssignEval(
-                makeNewTmp(ISA::Affinity::LOCAL),
-                new ISA::ObjGet(obj, makeLocation(ISA::Affinity::OBJECTPROP, node->end()->name()))
+                makeNewTmp(ISA::Affinity::LOCAL, instrs),
+                new ISA::ObjGet(obj, makeLocation(ISA::Affinity::OBJECTPROP, node->end()->name(), nullptr))
             )
         ));
         return instrs;
@@ -955,7 +936,7 @@ protected:
     }
 
     ISA::Instructions* walkConstructorNode(ConstructorNode* node) override {
-        auto obj = makeNewTmp(ISA::Affinity::LOCAL);
+        auto obj = makeNewTmp(ISA::Affinity::LOCAL, nullptr);
 
         // add obj to stack so assignments know what obj to use
         _constructing.push(std::make_pair(obj, node->partOf()));
@@ -974,6 +955,7 @@ protected:
         )));
         freeref(function->front());
         function->erase(function->begin());
+        transformedFunction->push_back(useref(new ISA::ScopeOf(obj)));
 
         while ( true ) {
             if ( function->empty() ) break;
@@ -994,10 +976,10 @@ protected:
         for ( const auto& prop : rettype->getProperties() ) {
             std::string defname = "deval_" + std::to_string(rettype->getId()) + "_" + prop.first;
             if ( _objDefaults.count(defname) ) {
-                auto p = makeLocation(ISA::Affinity::OBJECTPROP, prop.first);
-                auto deval = makeLocation(ISA::Affinity::LOCAL, defname);
+                auto p = makeLocation(ISA::Affinity::OBJECTPROP, prop.first, nullptr);
+                auto deval = makeLocation(ISA::Affinity::LOCAL, defname, nullptr);
                 if ( prop.second->isCallable() ) {
-                    auto a = useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL), new ISA::Curry(deval, obj)));
+                    auto a = useref(new ISA::AssignEval(makeNewTmp(ISA::Affinity::LOCAL, transformedFunction), new ISA::Curry(deval, obj)));
                     transformedFunction->push_back(a);
                     auto b = useref(new ISA::ObjSet(obj, p, a->first()));
                     transformedFunction->push_back(b);
@@ -1016,13 +998,13 @@ protected:
         auto j = transformedFunction->rbegin();
         do { j++; } while ( (*j)->tag() != ISA::Tag::RETURN0 );
         transformedFunction->insert((j + 1).base(), useref(new ISA::AssignEval(
-            makeLocation(ISA::Affinity::LOCAL, "retVal"),
+            makeLocation(ISA::Affinity::LOCAL, "retVal", transformedFunction),
             new ISA::ObjInstance(obj)
         )));
         // change return0 to return retval
         freeref(*(j - 1));
         *(j - 1) = useref(new ISA::Return1(
-            makeLocation(ISA::Affinity::LOCAL, "retVal")
+            makeLocation(ISA::Affinity::LOCAL, "retVal", transformedFunction)
         ));
 
          // remove unnecessary temp assignment
@@ -1031,7 +1013,7 @@ protected:
         _tempCounter--;
 
         transformedFunction->push_back(useref(new ISA::AssignValue(
-            makeLocation(ISA::Affinity::LOCAL, node->name()),
+            makeLocation(ISA::Affinity::LOCAL, node->name(), transformedFunction),
             ((ISA::BeginFunction*)transformedFunction->front())->first()
         )));
 
@@ -1049,8 +1031,8 @@ protected:
 private:
     int _tempCounter, _inFunction;
 
-    ISA::LocationReference* makeNewTmp(ISA::Affinity affinity) {
-        return makeLocation(affinity, "tmp" + std::to_string(_tempCounter++));
+    ISA::LocationReference* makeNewTmp(ISA::Affinity affinity, ISA::Instructions* instrs) {
+        return makeLocation(affinity, "tmp" + std::to_string(_tempCounter++), instrs);
     }
 
     static ISA::LocationReference* getLocFromAssign(ISA::Instruction* instr) {
@@ -1081,13 +1063,19 @@ private:
         return t;
     }
 
-    ISA::LocationReference* makeLocation(ISA::Affinity aff, std::string name) {
+    ISA::LocationReference* makeLocation(ISA::Affinity aff, std::string name, ISA::Instructions* instrs) {
         std::string n = ISA::LocationReference::affinityString(aff) + ":" + name;
         if ( _locMap->count(n) ) {
+            if ( _inFunction && instrs != nullptr ) {
+                instrs->push_back(useref(new ISA::ScopeOf(_locMap->at(n))));
+            }
             return _locMap->at(n);
         }
         auto tmp = useref(new ISA::LocationReference(aff, name));
         _locMap->insert({ tmp->fqName(), tmp });
+        if ( _inFunction && instrs != nullptr ) {
+            instrs->push_back(useref(new ISA::ScopeOf(tmp)));
+        }
         return tmp;
     }
 
