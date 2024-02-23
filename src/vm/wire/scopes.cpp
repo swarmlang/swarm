@@ -64,6 +64,13 @@ namespace swarmc::Runtime {
             ScopeFrame* parent = nullptr;
             if ( binn_map_bool(obj, BC_HAS_PARENT) ) {
                 parent = factory->produce((binn*) binn_map_map(obj, BC_PARENT), vm);
+
+                // Because of computed types, we might need to look up a type from a value
+                // in a parent scope. To account for this, restore the "inner most" scope
+                // to the VM while we deserialize. This might be a problem if we ever serialize
+                // scopes for anything besides restoring a job to a new VM.
+                GC_LOCAL_REF(parent)
+                vm->restore(parent);
             }
 
             IFunctionCall* call = nullptr;

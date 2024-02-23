@@ -22,10 +22,10 @@ namespace swarmc::Runtime {
     };
 
 
-    class InvalidResourceOperation : public NSLibException {
+    class InvalidResourceOperation : public Errors::SwarmError {
     public:
         InvalidResourceOperation(const std::string& resource, const std::string& operation)
-            : NSLibException("Invalid operation " + operation + " on resource " + resource) {}
+            : Errors::SwarmError("Invalid operation " + operation + " on resource " + resource) {}
     };
 
 
