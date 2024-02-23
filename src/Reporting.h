@@ -5,8 +5,6 @@
 #include "lang/Position.h"
 #include "errors/SwarmError.h"
 
-using namespace nslib;
-
 namespace swarmc {
 
     class Reporting {

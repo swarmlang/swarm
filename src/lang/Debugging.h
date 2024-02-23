@@ -80,6 +80,7 @@ namespace swarmc::Lang {
             if (kind == Parser::token::FROM) return "FROM";
             if (kind == Parser::token::SQRT) return "SQRT";
             if (kind == Parser::token::WILDCARD) return "WILDCARD";
+            if (kind == Parser::token::DEFER) return "DEFER";
 
             return "UNKNOWN";
         }

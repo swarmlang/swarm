@@ -206,14 +206,14 @@ namespace swarmc::Lang {
             Type::Primitive::of(Type::Intrinsic::STRING),
             fileType
         );
-        auto file_open = new PrologueFunctionSymbol("file_open", typeStringFile, new ProloguePosition("file_open"), "OPEN_FILE");
+        auto file_open = new PrologueFunctionSymbol("open", typeStringFile, new ProloguePosition("open"), "OPEN_FILE");
         prologueScope->insert(file_open);
 
         auto typeFileString = new Type::Lambda1(
             fileType,
             Type::Primitive::of(Type::Intrinsic::STRING)
         );
-        auto file_read = new PrologueFunctionSymbol("file_read", typeFileString, new ProloguePosition("file_read"), "READ_FILE");
+        auto file_read = new PrologueFunctionSymbol("read", typeFileString, new ProloguePosition("read"), "READ_FILE");
         prologueScope->insert(file_read);
 
         auto typeFileStringVoid = new Type::Lambda1(
@@ -223,10 +223,10 @@ namespace swarmc::Lang {
                 Type::Primitive::of(Type::Intrinsic::VOID)
             )
         );
-        auto file_write = new PrologueFunctionSymbol("file_write", typeFileStringVoid, new ProloguePosition("file_write"), "WRITE_FILE");
+        auto file_write = new PrologueFunctionSymbol("write", typeFileStringVoid, new ProloguePosition("write"), "WRITE_FILE");
         prologueScope->insert(file_write);
 
-        auto file_append = new PrologueFunctionSymbol("file_append", typeFileStringVoid, new ProloguePosition("file_append"), "APPEND_FILE");
+        auto file_append = new PrologueFunctionSymbol("append", typeFileStringVoid, new ProloguePosition("append"), "APPEND_FILE");
         prologueScope->insert(file_append);
 
         auto max = new PrologueFunctionSymbol("max", typeNumToNumToNum, new ProloguePosition("max"), "MAX");

@@ -4,10 +4,10 @@
 
 namespace swarmc {
     void Reporting::parseDebug(const Lang::Position* pos, const std::string& message) {
-        Console::get()->only(Verbosity::DEBUG)
+        Console::get()->debug()
             ->bold()->color(ANSIColor::MAGENTA)->print("[Parse Debug] ")->reset()
-            ->bold()->print(pos->toString() + " ")->reset()
-            ->println(message);
+            ->debug()->bold()->print(pos->toString() + " ")->reset()
+            ->debug()->println(message);
     }
 
     void Reporting::parseError(const Lang::Position* pos, const std::string& message) {
@@ -22,10 +22,10 @@ namespace swarmc {
     }
 
     void Reporting::nameDebug(const Lang::Position* pos, const std::string& message) {
-        Console::get()->only(Verbosity::DEBUG)
+        Console::get()->debug()
             ->bold()->color(ANSIColor::MAGENTA)->print("[Name Debug] ")->reset()
-            ->bold()->print(pos->toString() + " ")->reset()
-            ->println(message);
+            ->debug()->bold()->print(pos->toString() + " ")->reset()
+            ->debug()->println(message);
     }
 
     void Reporting::nameError(const Lang::Position* pos, const std::string& message) {
@@ -40,10 +40,10 @@ namespace swarmc {
     }
 
     void Reporting::typeDebug(const Lang::Position* pos, const std::string& message) {
-        Console::get()->only(Verbosity::DEBUG)
+        Console::get()->debug()
             ->bold()->color(ANSIColor::MAGENTA)->print("[Type Debug] ")->reset()
-            ->bold()->print(pos->toString() + " ")->reset()
-            ->println(message);
+            ->debug()->bold()->print(pos->toString() + " ")->reset()
+            ->debug()->println(message);
     }
 
     void Reporting::typeError(const Lang::Position* pos, const std::string& message) {

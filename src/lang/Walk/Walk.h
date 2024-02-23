@@ -24,6 +24,7 @@ namespace swarmc::Lang::Walk {
             if ( node->getName() == "BooleanLiteralExpressionNode" ) return walkBooleanLiteralExpressionNode((BooleanLiteralExpressionNode*) node);
             if ( node->getName() == "VariableDeclarationNode" ) return walkVariableDeclarationNode((VariableDeclarationNode*) node);
             if ( node->getName() == "CallExpressionNode" ) return walkCallExpressionNode((CallExpressionNode*) node);
+            if ( node->getName() == "DeferCallExpressionNode" ) return walkDeferCallExpressionNode((DeferCallExpressionNode*) node);
             if ( node->getName() == "IIFExpressionNode" ) return walkIIFExpressionNode((IIFExpressionNode*) node);
             if ( node->getName() == "AndNode" ) return walkAndNode((AndNode*) node);
             if ( node->getName() == "OrNode" ) return walkOrNode((OrNode*) node);
@@ -73,6 +74,7 @@ namespace swarmc::Lang::Walk {
         virtual TReturn walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) = 0;
         virtual TReturn walkVariableDeclarationNode(VariableDeclarationNode* node) = 0;
         virtual TReturn walkCallExpressionNode(CallExpressionNode* node) = 0;
+        virtual TReturn walkDeferCallExpressionNode(DeferCallExpressionNode* node) = 0;
         virtual TReturn walkIIFExpressionNode(IIFExpressionNode* node) = 0;
         virtual TReturn walkAndNode(AndNode* node) = 0;
         virtual TReturn walkOrNode(OrNode* node) = 0;

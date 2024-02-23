@@ -915,7 +915,7 @@ namespace Walk {
         virtual ~CallExpressionNode() {
             freeref(_func);
             freeref(_type);
-            freeref(_calling);
+            freeref(_constructor);
             for ( auto arg : *_args ) freeref(arg);
             delete _args;
         }
@@ -925,7 +925,7 @@ namespace Walk {
         }
 
         virtual std::string toString() const override {
-            return "CallExpressionNode<#args: " + std::to_string(_args->size()) + ">";
+            return "CallExpressionNode<#func: " + s(_func) + ",#args: " + std::to_string(_args->size()) + ">";
         }
 
         ExpressionNode* func() const {
@@ -949,18 +949,49 @@ namespace Walk {
             return _type;
         }
 
-        ConstructorNode* calling() const {
-            return _calling;
+        ConstructorNode* constructor() const {
+            return _constructor;
         }
 
     protected:
         ExpressionNode* _func;
-        ConstructorNode* _calling = nullptr;
+        ConstructorNode* _constructor = nullptr;
         std::vector<ExpressionNode*>* _args;
         Type::Type* _type = nullptr;
 
         friend Walk::TypeAnalysisWalk;
     };
+
+
+    /** AST node referencing deferment of a function call */
+    class DeferCallExpressionNode final : public StatementExpressionNode {
+    public:
+        DeferCallExpressionNode(Position* pos, CallExpressionNode* call) : StatementExpressionNode(pos), _call(useref(call)) {}
+
+        virtual std::string getName() const override {
+            return "DeferCallExpressionNode";
+        }
+
+        virtual std::string toString() const override {
+            return "DeferCallExpressionNode<#call: " + s(_call) + ">";
+        }
+
+        virtual DeferCallExpressionNode* copy() const override {
+            return new DeferCallExpressionNode(position(), _call->copy());
+        }
+
+        virtual CallExpressionNode* call() const {
+            return _call;
+        }
+
+        virtual Type::Type* type() const override {
+            return _call->type();
+        }
+
+    protected:
+        CallExpressionNode* _call;
+    };
+
 
     /** AST node representing a call to a function. */
     class IIFExpressionNode final : public StatementExpressionNode {

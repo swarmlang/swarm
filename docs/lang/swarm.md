@@ -77,16 +77,18 @@ To call a function, simply call them as you would in Java or C. The thing being 
 | `sError`          | Logs an error to the master worker's console.               | `string -> void`                                                                    | The string to be logged.                                                                                                                       |
 | `floor`           | Round a number DOWN to the nearest integer.                 | `number -> number`                                                                  | The number to take the floor of.                                                                                                               |
 | `ceiling`         | Round a number UP to the nearest integer.                   | `number -> number`                                                                  | The number to take the ceiling of.                                                                                                             |
+| `max` | Get the max of two numbers | `number -> number -> number` | The two numbers to be compared |
+| `min` | Get the min of two numbers | `number -> number -> number` | The two numbers to be compared |
 | `nthRoot`         | Take the nth-root of the specified number.                  | `number -> number -> number`                                                        | The root to take (e.g. 2 is square root) and the number to root.                                                                               |
 | `count`           | Count the number of elements in an enumerable.              | `enumerable<_> -> number`                                                           | The enumerable to find the size of.                                                                                                            |
 | `time`            | Get the current UNIX timestamp in fractional seconds        | `-> number`                                                                         | N/A                                                                                                                                            |
 | `subVector`       | Get a slice of a numeric enumeration.                       | `number -> number -> enumerable<number> -> enumerable<number>`                      | The element index to start the slice at, the length of the slice, and the vector to slice.                                                     |
 | `subMatrix`       | Get a slice of a nested numeric enumeration.                | `number -> number -> number -> number -> enumerable<number> -> enumerable<number>`  | Row index to start at, row index to end at (non-inclusive), column index to start at, column index to end at (non-inclusive), matrix to slice. |
 | `tag` | Create a remote executor filter | `string -> string -> Resource<Opaque<PROLOGUE::TAG>>` | Filter key, filter value
-| `file_open` | Create a file resource | `string -> Resource<Opaque<PROLOGUE::FILE>>` | The file path |
-| `file_read` | Read from a file | `Resource<Opaque<PROLOGUE::FILE>> -> string` | File to be read from |
-| `file_write` | Write to a file | `Resource<Opaque<PROLOGUE::FILE>> -> string -> void` | File to be written to, contents to write |
-| `file_append` | Appends to a file | `Resource<Opaque<PROLOGUE::FILE>> -> string -> void` | File to be written to, contents to write |
+| `open` | Create a file resource | `string -> Resource<Opaque<PROLOGUE::FILE>>` | The file path |
+| `read` | Read from a file | `Resource<Opaque<PROLOGUE::FILE>> -> string` | File to be read from |
+| `write` | Write to a file | `Resource<Opaque<PROLOGUE::FILE>> -> string -> void` | File to be written to, contents to write |
+| `append` | Appends to a file | `Resource<Opaque<PROLOGUE::FILE>> -> string -> void` | File to be written to, contents to write |
 
 ## Variable Declarations
 
@@ -114,6 +116,29 @@ enumerate nums as num {
 ```
 
 `num` is a local variable created that will take on a different value from `nums` in each distributed iteration.
+
+## Deferred function calls
+
+In addition to enumeration blocks, Swarm supports deferred function calls. The key difference is
+that execution of an enumeration block cannot proceed until all jobs it spawned have completed.
+Execution of a program will continue following deferred function calls until the return value of
+that call is used.
+
+```swarm
+fn foo = (): string {
+    -- do lots of work here
+    return "return value";
+};
+
+-- the `~` marks the function call as deferred
+string s = ~foo();
+
+-- do other unrelated computation here
+lLog("other work");
+
+-- execution will pause here until the deferred call finishes and assigns a value to `s`
+lLog(s);
+```
 
 ## User-Defined Types
 

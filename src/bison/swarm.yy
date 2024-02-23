@@ -153,6 +153,7 @@
 %token <transToken>      CONSTRUCTOR
 %token <transToken>      SQRT
 %token <transToken>      WILDCARD
+%token <transToken>      DEFER
 
 /*    (attribute type)      (nonterminal)    */
 %type <transProgram>        program
@@ -379,15 +380,13 @@ shared :
 declaration :
     SHARED typeid id ASSIGN expression {
         Position* pos = new Position($1->position(), $5->position());
-        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $2, $3, $5, true);
-        $$ = var;
+        $$ = new VariableDeclarationNode(pos, $2, $3, $5, true);
         delete $1; delete $4;
     }
 
     | typeid id ASSIGN expression {
         Position* pos = new Position($1->position(), $4->position());
-        VariableDeclarationNode* var = new VariableDeclarationNode(pos, $1, $2, $4, false);
-        $$ = var;
+        $$ = new VariableDeclarationNode(pos, $1, $2, $4, false);
         delete $3;
     }
 
@@ -829,6 +828,12 @@ expressionF :
     | SQRT term {
         Position* pos = new Position($1->position(), $2->position());
         $$ = new SqrtNode(pos, $2);
+        delete $1;
+    }
+
+    | DEFER callExpression {
+        Position* pos = new Position($1->position(), $2->position());
+        $$ = new DeferCallExpressionNode(pos, $2);
         delete $1;
     }
 

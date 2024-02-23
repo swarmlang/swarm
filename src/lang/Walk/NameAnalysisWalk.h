@@ -21,6 +21,7 @@ protected:
 
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
+            Reporting::nameDebug(stmt->position(), "finished " + s(stmt));
         }
 
         // Exit the global scope
@@ -130,6 +131,10 @@ protected:
         }
 
         return flag;
+    }
+
+    bool walkDeferCallExpressionNode(DeferCallExpressionNode* node) override {
+        return walkCallExpressionNode(node->call());
     }
 
     bool walkIIFExpressionNode(IIFExpressionNode* node) override {

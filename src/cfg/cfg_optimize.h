@@ -189,32 +189,30 @@ private:
 
         if ( fDepth == 0 ) {
             for (auto instr : *block->instructions()) {
-                bool p = true;
                 if ( instr->tag() == ISA::Tag::ASSIGNVALUE ) {
                     std::string name = ((ISA::AssignValue*)instr)->first()->fqName();
                     // check for self-assigns because they cause an infinite loop
                     if ( ((ISA::AssignValue*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION ) {
                         // FIXME: Add propagation of instructions a la upgrading AssignValue to AssignEval
                         // note: whichever one was assigned most recent is the one that gets propagated
-                        if (name != ((ISA::LocationReference*)((ISA::AssignValue*)instr)->second())->fqName()) {
-                            flag = propagate(instr, false) || flag;
-                            _valueMap->set(name, ((ISA::AssignValue*)instr)->second());
-                            console->debug("CP: Added " + name + " = " + ((ISA::AssignValue*)instr)->second()->toString() + " to ValueMap");
+                        if (name == ((ISA::LocationReference*)((ISA::AssignValue*)instr)->second())->fqName()) {
+                            continue;
                         }
                     }
-                    p = false;
+                    flag = propagate(instr, false) || flag;
+                    _valueMap->set(name, ((ISA::AssignValue*)instr)->second());
+                    console->debug("CP: Added " + name + " = " + ((ISA::AssignValue*)instr)->second()->toString() + " to ValueMap");
+                    continue;
                 } else if ( instr->tag() == ISA::Tag::ASSIGNEVAL ) {
                     std::string name = ((ISA::AssignEval*)instr)->first()->fqName();
                     _instrMap->set(name, ((ISA::AssignEval*)instr)->second());
                     console->debug("CP: Added " + name + " = " + ((ISA::AssignEval*)instr)->second()->toString() + " to InstrMap");
                     instr = ((ISA::AssignEval*)instr)->second();
                 } else if ( instr->tag() == ISA::Tag::FNPARAM || instr->tag() == ISA::Tag::SCOPEOF || instr->tag() == ISA::Tag::TYPIFY ) {
-                    p = false;
+                    continue;
                 }
 
-                if ( p ) {
-                    flag = propagate(instr, true) || flag;
-                }
+                flag = propagate(instr, true) || flag;
             }
         }
     

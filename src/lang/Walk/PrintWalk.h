@@ -81,6 +81,13 @@ protected:
         pop_space();
     }
 
+    void walkDeferCallExpressionNode(DeferCallExpressionNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->call());
+        pop_space();
+    }
+
     void walkIIFExpressionNode(IIFExpressionNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();

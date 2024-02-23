@@ -285,6 +285,10 @@ from {
 	return makeBareToken(TokenKind::WILDCARD);
 }
 
+"~" {
+	return makeBareToken(TokenKind::DEFER);
+}
+
 \. {
 	return makeBareToken(TokenKind::DOT);
 }

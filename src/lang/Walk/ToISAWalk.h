@@ -16,14 +16,17 @@ public:
     ToISAWalk() : Walk<ISA::Instructions*>(),
         _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()),
         _typeMap(new std::map<std::size_t, ISA::TypeReference*>()),
-        _locMap(new std::map<std::string, ISA::LocationReference*>()) {}
+        _locMap(new std::map<std::string, ISA::LocationReference*>()),
+        _deferredRetLocs(new std::set<ISA::LocationReference*>()) {}
 
     ~ToISAWalk() override {
         delete _whileConds;
         for (auto p : *_typeMap) freeref(p.second);
         for (auto p : *_locMap) freeref(p.second);
+        for (auto l : *_deferredRetLocs) freeref(l);
         delete _typeMap;
         delete _locMap;
+        delete _deferredRetLocs;
     }
 protected:
     ISA::Instructions* walkProgramNode(ProgramNode* node) override {
@@ -115,48 +118,24 @@ protected:
         // TODO: remove this once import-based prologue gets implemented
         if ( node->func()->getName() == "IdentifierNode" ) {
             std::string name = ((IdentifierNode*)node->func())->name();
-            if ( name == "lLog" ) {
+            if ( ToISAWalk::FuncToLocation.count(name) != 0 ) {
                 instrs = walk(node->args()->at(0));
                 instrs->push_back(useref(new ISA::StreamPush(
-                    makeLocation(ISA::Affinity::LOCAL, "STDOUT", nullptr),
-                    getLocFromAssign(instrs->back())
-                )));
-                return instrs;
-            }
-            if ( name == "lError" ) {
-                instrs = walk(node->args()->at(0));
-                instrs->push_back(useref(new ISA::StreamPush(
-                    makeLocation(ISA::Affinity::LOCAL, "STDERR", nullptr),
-                    getLocFromAssign(instrs->back())
-                )));
-                return instrs;
-            }
-            if ( name == "sLog" ) {
-                instrs = walk(node->args()->at(0));
-                instrs->push_back(useref(new ISA::StreamPush(
-                    makeLocation(ISA::Affinity::SHARED, "STDOUT", nullptr),
-                    getLocFromAssign(instrs->back())
-                )));
-                return instrs;
-            }
-            if ( name == "sError" ) {
-                instrs = walk(node->args()->at(0));
-                instrs->push_back(useref(new ISA::StreamPush(
-                    makeLocation(ISA::Affinity::SHARED, "STDERR", nullptr),
+                    ToISAWalk::FuncToLocation.at(name),
                     getLocFromAssign(instrs->back())
                 )));
                 return instrs;
             }
         }
 
-        if (!node->calling()) {
+        if (node->constructor()) {
+            instrs = new ISA::Instructions();
+            floc = makeLocation(ISA::Affinity::LOCAL, node->constructor()->name(), nullptr);
+            fnType = node->constructor()->func()->type();
+        } else {
             instrs = walk(node->func());
             floc = getLocFromAssign(instrs->back());
             fnType = node->func()->type();
-        } else {
-            instrs = new ISA::Instructions();
-            floc = makeLocation(ISA::Affinity::LOCAL, node->calling()->name(), nullptr);
-            fnType = node->calling()->func()->type();
         }
 
         if ( node->args()->empty() ) {
@@ -173,7 +152,7 @@ protected:
                 assert(fnType->isCallable());
 
                 // curry or call func in sequence
-                if (((Type::Lambda*)fnType)->returns()->intrinsic() == Type::Intrinsic::VOID && !node->calling()) {
+                if (((Type::Lambda*)fnType)->returns()->intrinsic() == Type::Intrinsic::VOID && !node->constructor()) {
                     auto call = new ISA::Call1(floc, getLocFromAssign(evalarg->back()));
                     instrs->push_back(useref(call));
                 } else if (((Type::Lambda*)fnType)->returns()->isCallable()) {
@@ -186,6 +165,93 @@ protected:
                     auto loc2 = makeNewTmp(ISA::Affinity::LOCAL, instrs);
                     instrs->push_back(useref(new ISA::AssignEval(loc2, call)));
                     floc = loc2;
+                }
+
+                fnType = ((Type::Lambda*)fnType)->returns();
+                delete evalarg;
+            }
+        }
+
+        return instrs;
+    }
+
+    ISA::Instructions* walkDeferCallExpressionNode(DeferCallExpressionNode* node) override {
+        ISA::Instructions* instrs;
+        ISA::LocationReference* floc;
+        Type::Type* fnType;
+
+        // Idk why you would ever do this, but this handles the case of
+        // deferring functions that arent actually functions in SVI
+        if ( node->call()->func()->getName() == "IdentifierNode" ) {
+            std::string name = ((IdentifierNode*)node->call()->func())->name();
+            if ( ToISAWalk::FuncToLocation.count(name) != 0 ) {
+                instrs = new ISA::Instructions();
+                // build function
+                if ( ToISAWalk::FuncToFunc.count(name) == 0 ) {
+                    auto finstrs = new ISA::Instructions();
+                    auto param = makeLocation(ISA::Affinity::LOCAL, "var_content", nullptr);
+                    finstrs->push_back(new ISA::BeginFunction(name, getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID))));
+                    finstrs->push_back(new ISA::FunctionParam(
+                        getTypeRef(Type::Primitive::of(Type::Intrinsic::STRING)),
+                        param
+                    ));
+                    finstrs->push_back(useref(new ISA::StreamPush(
+                        ToISAWalk::FuncToLocation.at(name),
+                        param
+                    )));
+                    finstrs->push_back(new ISA::Return0());
+                    ToISAWalk::FuncToFunc.insert({ name, finstrs });
+                    instrs->insert(instrs->begin(), finstrs->begin(), finstrs->end());
+                }
+                instrs = walk(node->call()->args()->at(0));
+                instrs->push_back(new ISA::PushCall1(
+                    makeLocation(ISA::Affinity::FUNCTION, name, nullptr),
+                    getLocFromAssign(instrs->back())
+                ));
+                return instrs;
+            }
+        }
+
+        if (node->call()->constructor()) {
+            instrs = new ISA::Instructions();
+            floc = makeLocation(ISA::Affinity::LOCAL, node->call()->constructor()->name(), nullptr);
+            fnType = node->call()->constructor()->func()->type();
+        } else {
+            instrs = walk(node->call()->func());
+            floc = getLocFromAssign(instrs->back());
+            fnType = node->call()->func()->type();
+        }
+
+        if ( node->call()->args()->empty() ) {
+            auto call = new ISA::PushCall0(floc);
+            if (node->type()->intrinsic() == Type::Intrinsic::VOID) {
+                instrs->push_back(useref(call));
+            } else {
+                auto retLoc = makeNewTmp(ISA::Affinity::LOCAL, instrs);
+                instrs->push_back(useref(new ISA::AssignEval(retLoc, call)));
+                _deferredRetLocs->insert(useref(retLoc));
+            }
+        } else {
+            for ( auto arg : *node->call()->args() ) {
+                auto evalarg = walk(arg);
+                instrs->insert(instrs->end(), evalarg->begin(), evalarg->end());
+                assert(fnType->isCallable());
+
+                // curry or call func in sequence
+                if (((Type::Lambda*)fnType)->returns()->intrinsic() == Type::Intrinsic::VOID && !node->call()->constructor()) {
+                    auto call = new ISA::PushCall1(floc, getLocFromAssign(evalarg->back()));
+                    instrs->push_back(useref(call));
+                } else if (((Type::Lambda*)fnType)->returns()->isCallable()) {
+                    auto call = new ISA::Curry(floc, getLocFromAssign(evalarg->back()));
+                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL, instrs);
+                    instrs->push_back(useref(new ISA::AssignEval(loc2, call)));
+                    floc = loc2;
+                } else {
+                    auto call = new ISA::PushCall1(floc, getLocFromAssign(evalarg->back()));
+                    auto loc2 = makeNewTmp(ISA::Affinity::LOCAL, instrs);
+                    instrs->push_back(useref(new ISA::AssignEval(loc2, call)));
+                    floc = loc2;
+                    _deferredRetLocs->insert(loc2);
                 }
 
                 fnType = ((Type::Lambda*)fnType)->returns();
@@ -519,7 +585,7 @@ protected:
         auto cond = walk(node->condition());
         instrs->insert(instrs->end(), cond->begin(), cond->end());
         instrs->push_back(useref(new ISA::AssignValue(whileCondLoc, getLocFromAssign(cond->back()))));
-        instrs->push_back(useref(new ISA::Return1(getLocFromAssign(instrs->back()))));
+        instrs->push_back(useref(new ISA::Return0()));
         _inFunction--;
 
         // While function header
@@ -576,9 +642,8 @@ protected:
         _inFunction--;
 
         //evaluate condition
-        instrs->push_back(useref(new ISA::AssignEval(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr),
-            new ISA::Call0(makeLocation(ISA::Affinity::FUNCTION, _whileConds->top(), nullptr))
+        instrs->push_back(useref(new ISA::Call0(
+            makeLocation(ISA::Affinity::FUNCTION, _whileConds->top(), nullptr)
         )));
 
         instrs->push_back(useref(new ISA::While(
@@ -685,7 +750,7 @@ protected:
                 )));
             } else {
                 instrs->push_back(useref(new ISA::AssignValue(
-                    makeLocation(aff, "var_" + id->name(), instrs),
+                    makeLocation(aff, "var_" + id->name(),  nullptr),
                     value
                 )));
             }
@@ -1080,6 +1145,7 @@ private:
     std::stack<Type::Object*> _isMemberFunctionOf;
     std::map<std::size_t, ISA::TypeReference*>* _typeMap;
     std::map<std::string, ISA::LocationReference*>* _locMap;
+    std::set<ISA::LocationReference*>* _deferredRetLocs;
 
     // used for keeping track of which type members have default values
     std::set<std::string> _objDefaults;
@@ -1087,10 +1153,9 @@ private:
     // used for assignments in constructors
     std::stack<std::pair<ISA::LocationReference*,Type::Object*>> _constructing;
 
-    std::unordered_map<std::string, ISA::LocationReference*> _opaqueVals = {
-        { "Opaque<PROLOGUE::TAG>", new ISA::LocationReference(ISA::Affinity::FUNCTION, "TAG_T") },
-        { "Opaque<PROLOGUE::FILE>", new ISA::LocationReference(ISA::Affinity::FUNCTION, "FILE_T") }
-    };
+    static const std::unordered_map<std::string, ISA::LocationReference*> _opaqueVals;
+    static const std::unordered_map<std::string, ISA::LocationReference*> FuncToLocation;
+    static std::unordered_map<std::string, ISA::Instructions*> FuncToFunc;
 };
 
 }

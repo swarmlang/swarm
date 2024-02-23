@@ -24,6 +24,7 @@ protected:
         bool flag = true;
         for ( auto stmt : *node->body() ) {
             flag = walk(stmt) && flag;
+            Reporting::typeDebug(stmt->position(), "finished " + s(stmt));
         }
 
         auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
@@ -222,7 +223,7 @@ protected:
                     _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
                     node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
                 }
-                node->_calling = useref(theconstructor);
+                node->_constructor = useref(theconstructor);
                 return flag;
 
             } else {
@@ -280,6 +281,13 @@ protected:
 
         _types->setTypeOf(node, flag ? nodeType : Type::Primitive::of(Type::Intrinsic::ERROR));
         node->_type = useref(flag ? nodeType : Type::Primitive::of(Type::Intrinsic::ERROR));
+        return flag;
+    }
+
+    bool walkDeferCallExpressionNode(DeferCallExpressionNode* node) override {
+        auto flag = walkCallExpressionNode(node->call());
+        auto callType = _types->getTypeOf(node->call());
+        _types->setTypeOf(node, callType);
         return flag;
     }
 

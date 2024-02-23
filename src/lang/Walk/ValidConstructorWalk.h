@@ -53,9 +53,9 @@ protected:
     void walkCallExpressionNode(CallExpressionNode* node) override {
         if ( node->func()->getName() == "IdentifierNode" ) {
             auto id = (IdentifierNode*)node->func();
-            if ( node->calling() ) {
+            if ( node->constructor() ) {
                 // walk the constructor being called
-                walk(node->calling());
+                walk(node->constructor());
             } else if ( _possibleFunctions.count(id->symbol()) ) {
                 _console->debug("Walking all possible values for " + id->name());
                 auto prewalk = _symbols;
@@ -79,8 +79,12 @@ protected:
         }
     }
 
+    void walkDeferCallExpressionNode(DeferCallExpressionNode* node) override {
+        walkCallExpressionNode(node->call());
+    }
+
     void walkIIFExpressionNode(IIFExpressionNode* node) override {
-        return walk(node->expression());
+        walk(node->expression());
     }
 
     void walkWithStatement(WithStatement* node) override {
