@@ -233,11 +233,12 @@ namespace swarmc::Runtime {
             auto ref = vm->loadFunction((Runtime::FunctionBackend) backend, name);
             auto fn = ref->fn();
             for ( auto p : params ) fn = fn->curry(p);
-            delete ref;
 
-            ref = new FunctionReference(fn);
-            ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
-            return ref;
+            auto curriedRef = new FunctionReference(fn);
+            curriedRef->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+
+            delete ref;
+            return curriedRef;
         });
 
 
