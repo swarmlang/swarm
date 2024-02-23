@@ -96,8 +96,8 @@ namespace swarmc::Runtime::RedisDriver {
 
     class RedisQueueJob : public IQueueJob {
     public:
-        RedisQueueJob(JobID id, JobState state, binn* call, State* vmState, binn* vmScope, IStorageInterface* localStore)
-            : _id(id), _jobState(state), _call(call), _vmState(useref(vmState)), _vmScope(vmScope), _localStore(useref(localStore)) {}
+        RedisQueueJob(JobID id, binn* call, State* vmState, binn* vmScope, IStorageInterface* localStore)
+            : _id(id), _call(call), _vmState(useref(vmState)), _vmScope(vmScope), _localStore(useref(localStore)) {}
 
         ~RedisQueueJob() {
             binn_free(_call);
@@ -110,9 +110,14 @@ namespace swarmc::Runtime::RedisDriver {
         [[nodiscard]] virtual JobID id() const override { return _id; };
 
         /** Get the current status of this job. */
-        [[nodiscard]] virtual JobState state() const override { return _jobState; }
+        [[nodiscard]] virtual JobState state() const override { 
+            auto state = getRedis()->get(Configuration::REDIS_PREFIX + "status_" + s(_id));
+            return (JobState)std::atoi(state.value_or(s(JobState::UNKNOWN)).c_str());
+        }
 
-        virtual void setState(JobState state) override { _jobState = state; }
+        virtual void setState(JobState state) override {
+            getRedis()->set(Configuration::REDIS_PREFIX + "status_" + s(_id), s(state), Configuration::REDIS_DEFAULT_TLL);
+        }
 
         // FIXME: could store this separately preserialization, but becomes impossible postserialization without restoring vm
         [[nodiscard]] virtual IFunctionCall* getCall() const override { return nullptr; }
@@ -134,7 +139,6 @@ namespace swarmc::Runtime::RedisDriver {
         }
     protected:
         JobID _id;
-        JobState _jobState;
         binn* _call;
         State* _vmState;
         binn* _vmScope;

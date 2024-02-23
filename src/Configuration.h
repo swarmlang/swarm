@@ -15,6 +15,7 @@ public:
     inline static const std::string REDIS_HOST = "localhost";
     static int REDIS_PORT;
     inline static const std::string REDIS_PREFIX = "swarm_";
+    static const int REDIS_DEFAULT_TLL;
 
     static int QUEUE_SLEEP_uS;
     static int DEBUG_QUEUE_SLEEP_uS;

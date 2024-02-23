@@ -12,6 +12,7 @@ bool Configuration::FORCE_LOCAL = false;
 bool Configuration::WITH_PROLOGUE = true;
 
 int Configuration::REDIS_PORT = 6379;
+const int Configuration::REDIS_DEFAULT_TLL = 86400000;
 
 int Configuration::QUEUE_SLEEP_uS = 1000;
 //int Configuration::QUEUE_SLEEP_uS = 100000000;

@@ -249,4 +249,14 @@ namespace swarmc::Runtime {
     };
 }
 
+namespace nslib {
+    [[nodiscard]] std::string s(swarmc::Runtime::JobState v) {
+        if ( v == JobState::COMPLETE ) return "COMPLETE";
+        if ( v == JobState::ERROR ) return "ERROR";
+        if ( v == JobState::PENDING ) return "PENDING";
+        if ( v == JobState::RUNNING ) return "RUNNING";
+        return "UNKNOWN";
+    }
+}
+
 #endif //SWARMVM_INTERFACES

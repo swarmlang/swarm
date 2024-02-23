@@ -143,7 +143,6 @@ namespace swarmc::Runtime::RedisDriver {
         auto dummyLocal = ISA::LocationReference(ISA::Affinity::LOCAL, "dummy");
         return new RedisQueueJob(
             id,
-            JobState::PENDING,
             Wire::calls()->reduce(call, vm),
             vm->getState()->copy(),
             Wire::scopes()->reduce(vm->getScopeFrame(), vm),
@@ -165,13 +164,13 @@ namespace swarmc::Runtime::RedisDriver {
 
         std::unordered_map<std::string, std::string> m = {
             {"ID", std::to_string(job->id())},
-            {"JobState", std::to_string(static_cast<std::size_t>(job->state()))},
             {"Call", callstr},
             {"VMState", statestr},
             {"VMScope", scopestr},
             {"LocalStore", storestr}
         };
-        _redis->hmset(Configuration::REDIS_PREFIX + "job_" + m["ID"], m.begin(), m.end());
+        _redis->hset(Configuration::REDIS_PREFIX + "job_" + m["ID"], m.begin(), m.end());
+        _redis->set(Configuration::REDIS_PREFIX + "status_" + m["ID"], s(JobState::PENDING), Configuration::REDIS_DEFAULT_TLL);
         _redis->lpush(Configuration::REDIS_PREFIX + "queue_" + _context, Configuration::REDIS_PREFIX + "job_" + m["ID"]);
     }
 
@@ -194,11 +193,6 @@ namespace swarmc::Runtime::RedisDriver {
         // we have to restore the vm, so we need a Jobject that contains State and ScopeFrame info
         auto redisjob = dynamic_cast<RedisQueueJob*>(job.first);
         if ( job.first != nullptr ) {
-            // FIXME: setting the job state doesn't really do anything here,
-            // because the jobjects are created here by deserializing redis.
-            // Compare to how the multithreaded driver uses the same jobject
-            // both before pushing and after popping because it doesn't
-            // have to serialize anythin into a database
             try {
                 Console::get()->debug("Running job: " + s(redisjob));
                 _vm->copy([redisjob](VirtualMachine* vm) -> void {
@@ -260,7 +254,6 @@ namespace swarmc::Runtime::RedisDriver {
         auto storebin = redisRead(jobValues["LocalStore"]);
         auto qjob = new RedisQueueJob(
             static_cast<JobID>(std::atoi(jobValues["ID"].c_str())),
-            static_cast<JobState>(std::atoi(jobValues["JobState"].c_str())),
             redisRead(jobValues["Call"]),
             Wire::states()->produce(statebin, _vm),
             redisRead(jobValues["VMScope"]),
