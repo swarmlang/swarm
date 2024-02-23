@@ -7,6 +7,8 @@
 #include "../../shared/nslib.h"
 #include "../../errors/RuntimeError.h"
 #include "./interfaces.h"
+#include "runtime_provider.h"
+#include "../../lang/Type.h"
 
 namespace swarmc::Runtime {
 
@@ -50,6 +52,56 @@ namespace swarmc::Runtime {
     };
 
 
+    class TunneledResourceOperationFunctionCall : public IFunctionCall {
+    public:
+        TunneledResourceOperationFunctionCall(CallVector vector, Type::Type* returnType) :
+            IFunctionCall(FunctionBackend::FB_INTRINSIC, "FABRIC_TUNNEL_RESOURCE_OP", std::move(vector), returnType) {}
+
+        [[nodiscard]] std::string toString() const override {
+            return "TunneledResourceOperationFunctionCall<i:" + _name + ">";
+        }
+    };
+
+
+    class TunneledResourceOperationFunction : public IFunction {
+    public:
+        [[nodiscard]] FormalTypes paramTypes() const override {
+            // 3 params: the ID of the resource, the name of the operation, and a list of parameters to the operation
+            auto stringT = Type::Primitive::of(Type::Intrinsic::STRING);
+            auto enumAnyT = new Type::Enumerable(Type::Ambiguous::of());  // yes, this is equivalent to (void*) but in swarm
+            return {stringT, stringT, enumAnyT};
+        }
+
+        [[nodiscard]] Type::Type* returnType() const override {
+            return new Type::Enumerable(Type::Ambiguous::of());
+        }
+
+        [[nodiscard]] IFunction* curry(ISA::Reference* ref) override {
+            return new CurriedFunction(ref, this);
+        }
+
+        [[nodiscard]] CallVector getCallVector() const override {
+            return {};
+        }
+
+        [[nodiscard]] TunneledResourceOperationFunctionCall* call(CallVector v) const override {
+            return new TunneledResourceOperationFunctionCall(v, returnType());
+        }
+
+        [[nodiscard]] FunctionBackend backend() const override {
+            return FunctionBackend::FB_INTRINSIC;
+        }
+
+        [[nodiscard]] std::string name() const override {
+            return "FABRIC_TUNNEL_RESOURCE_OP";
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "TunneledResourceOperationFunction<>";
+        }
+    };
+
+
     class TunneledResource : public IResource {
     public:
         TunneledResource(std::string id, NodeID owner, std::string name, Type::Type* type) : _id(std::move(id)), _owner(std::move(owner)), _name(std::move(name)), _type(type) {}
@@ -74,9 +126,7 @@ namespace swarmc::Runtime {
             return _type;
         }
 
-        ResourceOperationFrame performOperation(VirtualMachine*, OperationName op, ResourceOperationFrame) override {
-            throw InvalidResourceOperation(s(this), op);
-        }
+        ResourceOperationFrame performOperation(VirtualMachine*, OperationName op, ResourceOperationFrame) override;
 
         [[nodiscard]] std::string toString() const override {
             return "Runtime::TunneledResource<id: " + _id + ", owner: " + _owner + ", name: " + _name + ">";

@@ -5,6 +5,7 @@ namespace nslib {
     std::string s(swarmc::Runtime::FunctionBackend v) {
         if ( v == swarmc::Runtime::FunctionBackend::FB_INLINE ) return "FunctionBackend(INLINE)";
         if ( v == swarmc::Runtime::FunctionBackend::FB_PROVIDER ) return "FunctionBackend(PROVIDER)";
+        if ( v == swarmc::Runtime::FunctionBackend::FB_INTRINSIC ) return "FunctionBackend(INTRINSIC)";
         return "FunctionBackend(UNKNOWN)";
     }
 }

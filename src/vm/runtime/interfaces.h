@@ -166,6 +166,11 @@ namespace swarmc::Runtime {
         /** Get the current status of this job. */
         [[nodiscard]] virtual JobState state() const = 0;
 
+        [[nodiscard]] virtual bool hasFinished() const {
+            auto currentState = state();
+            return currentState == JobState::COMPLETE || currentState == JobState::ERROR;
+        }
+
         virtual void setState(JobState) = 0;
 
         [[nodiscard]] virtual IFunctionCall* getCall() const = 0;

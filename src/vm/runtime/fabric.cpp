@@ -14,6 +14,48 @@ namespace swarmc::Runtime {
     }
 
 
+    ResourceOperationFrame TunneledResource::performOperation(VirtualMachine* vm, OperationName op, ResourceOperationFrame params) {
+        IFunction* fn = new TunneledResourceOperationFunction;
+        GC_LOCAL_REF(fn)
+
+        // 3 params: the ID of the resource, the name of the operation, and a list of parameters to the operation
+        fn = fn->curry(new ISA::StringReference(_id));
+        GC_LOCAL_REF(fn)
+
+        fn = fn->curry(new ISA::StringReference(op));
+        GC_LOCAL_REF(fn)
+
+        auto frame = new ISA::EnumerationReference(Type::Ambiguous::of());
+        frame->reserve(params.size());
+        for ( auto p : params ) {
+            frame->append(p);
+        }
+
+        fn = fn->curry(frame);
+
+        auto call = fn->call();  // fixme: need to set execution context filters
+        auto job = vm->pushCall(call);
+        while ( !job->hasFinished() ) {
+            vm->whileWaitingForDrain();
+        }
+
+        // fixme: error handling
+        auto result = job->getCall()->getReturn();
+        auto enumAnyT = new Type::Enumerable(Type::Ambiguous::of());
+        GC_LOCAL_REF(enumAnyT);
+        assert(result->typei()->isAssignableTo(enumAnyT));
+
+        auto enumResult = dynamic_cast<ISA::EnumerationReference*>(result);
+        ResourceOperationFrame resultFrame;
+        frame->reserve(sizeof(ISA::Reference*) * enumResult->length());
+        for ( std::size_t i = 0; i < enumResult->length(); i += 1 ) {
+            resultFrame.push_back(enumResult->get(i));
+        }
+
+        return resultFrame;
+    }
+
+
     bool Fabric::shouldPublish(IResource* resource) {
         if ( resource->owner() != _vm->global()->getNodeId() ) {
             return false;

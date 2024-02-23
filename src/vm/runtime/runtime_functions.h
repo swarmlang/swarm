@@ -25,6 +25,7 @@ namespace swarmc::Runtime {
     enum class FunctionBackend : std::size_t {
         FB_INLINE,  // jumps to an inline function body in the program
         FB_PROVIDER,  // calls an external, native function implementation
+        FB_INTRINSIC,  // performs a Fabric function call
     };
 
 }

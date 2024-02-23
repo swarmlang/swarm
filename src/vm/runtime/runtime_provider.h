@@ -5,7 +5,6 @@
 
 #include "../../shared/nslib.h"
 #include "interfaces.h"
-#include "fabric.h"
 #include "runtime_functions.h"
 
 using namespace nslib;
@@ -20,6 +19,7 @@ namespace swarmc::Runtime {
 
     class VirtualMachine;
     class IProvider;
+    class IResource;
     using Providers = std::vector<IProvider*>;
     using Resources = std::vector<IResource*>;
 

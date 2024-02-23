@@ -32,6 +32,7 @@ namespace swarmc::Runtime {
         };
         factory->registerReducer(s(FunctionBackend::FB_INLINE), reducer);
         factory->registerReducer(s(FunctionBackend::FB_PROVIDER), reducer);
+        factory->registerReducer(s(FunctionBackend::FB_INTRINSIC), reducer);
 
         auto producer = [](binn* obj, VirtualMachine* vm) {
             auto backend = (FunctionBackend) binn_map_uint64(obj, BC_BACKEND);
@@ -57,6 +58,7 @@ namespace swarmc::Runtime {
         };
         factory->registerProducer(s(FunctionBackend::FB_INLINE), producer);
         factory->registerProducer(s(FunctionBackend::FB_PROVIDER), producer);
+        factory->registerProducer(s(FunctionBackend::FB_INTRINSIC), producer);
 
         return factory;
     }
