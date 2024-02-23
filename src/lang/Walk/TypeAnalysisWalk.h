@@ -586,6 +586,7 @@ protected:
 
         auto genericType = (Type::Enumerable*) enumType;
         auto concreteType = genericType->values();
+        node->local()->_symbol->_type = useref(concreteType);
         _types->setTypeOf(node->local(), concreteType);
 
         int temp = _funcCount;

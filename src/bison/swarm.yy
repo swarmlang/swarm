@@ -249,7 +249,7 @@ statements :
 
 
 statement :
-    ENUMERATE lval AS shared id LBRACE statements RBRACE {
+    ENUMERATE expression AS shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $8->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $4->shared());
         e->assumeAndReduceStatements($7->reduceToStatements());
@@ -257,7 +257,7 @@ statement :
         delete $1; delete $3; delete $4; delete $6; delete $8;
     }
 
-    | ENUMERATE lval AS shared id COMMA shared id LBRACE statements RBRACE {
+    | ENUMERATE expression AS shared id COMMA shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $11->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $8, $4->shared());
         auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
@@ -267,7 +267,7 @@ statement :
         delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11;
     }
 
-    | ENUMERATE lval AS WILDCARD LBRACE statements RBRACE {
+    | ENUMERATE expression AS WILDCARD LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $7->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, new IdentifierNode($4->position(), "_"), false);
         e->assumeAndReduceStatements($6->reduceToStatements());
@@ -275,7 +275,7 @@ statement :
         delete $1; delete $3; delete $4; delete $5; delete $7;
     }
 
-    | ENUMERATE lval AS WILDCARD COMMA shared id LBRACE statements RBRACE {
+    | ENUMERATE expression AS WILDCARD COMMA shared id LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $10->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, new IdentifierNode($4->position(), "_"), $7, false);
         auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);

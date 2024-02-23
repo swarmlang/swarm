@@ -1588,9 +1588,9 @@ namespace Walk {
     /** AST node representing an enumeration block. */
     class EnumerationStatement final : public BlockStatementNode {
     public:
-        EnumerationStatement(Position* pos, LValNode* enumerable, IdentifierNode* local, IdentifierNode* index, bool shared)
+        EnumerationStatement(Position* pos, ExpressionNode* enumerable, IdentifierNode* local, IdentifierNode* index, bool shared)
             : BlockStatementNode(pos), _enumerable(useref(enumerable)), _local(useref(local)), _index(useref(index)), _shared(std::move(shared)) {}
-        EnumerationStatement(Position* pos, LValNode* enumerable, IdentifierNode* local, bool shared)
+        EnumerationStatement(Position* pos, ExpressionNode* enumerable, IdentifierNode* local, bool shared)
             : BlockStatementNode(pos), _enumerable(useref(enumerable)), _local(useref(local)), _index(nullptr), _shared(std::move(shared)) {}
 
         virtual ~EnumerationStatement() {
@@ -1607,7 +1607,7 @@ namespace Walk {
             return "EnumerationStatement<e: " + _enumerable->toString() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
         }
 
-        LValNode* enumerable() const {
+        ExpressionNode* enumerable() const {
             return _enumerable;
         }
 
@@ -1636,7 +1636,7 @@ namespace Walk {
             return other;
         }
     protected:
-        LValNode* _enumerable;
+        ExpressionNode* _enumerable;
         IdentifierNode* _local, * _index;
         bool _shared;
 

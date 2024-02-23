@@ -36,3 +36,13 @@ namespace swarmc::Runtime {
         return inlineref<Type::Type>(innerType());
     }
 }
+
+namespace nslib {
+    [[nodiscard]] std::string s(swarmc::Runtime::JobState v) {
+        if ( v == swarmc::Runtime::JobState::COMPLETE ) return "COMPLETE";
+        if ( v == swarmc::Runtime::JobState::ERROR ) return "ERROR";
+        if ( v == swarmc::Runtime::JobState::PENDING ) return "PENDING";
+        if ( v == swarmc::Runtime::JobState::RUNNING ) return "RUNNING";
+        return "UNKNOWN";
+    }
+}

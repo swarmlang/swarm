@@ -238,26 +238,16 @@ protected:
         bool flag = walk(node->enumerable());
 
         // Need to register the block-local variable
-        // Its type is implicit as the generic type of the enumerable
-        bool inScope = false;
-        if ( node->local()->symbol() == nullptr ) {
-            std::string name = node->local()->name();
-            Position* pos = node->local()->position();
-            Type::Type* type = nullptr;
+        // Its type is implicit as the generic type of the enumerable,
+        // but we don't know it until type analysis
+        std::string name = node->local()->name();
+        Position* pos = node->local()->position();
 
-            // Try to look up the generic type of the enumerable
-            Type::Type* enumType = node->enumerable()->type();
-            if ( enumType->intrinsic() == Type::Intrinsic::ENUMERABLE ) {
-                auto enumGenericType = (Type::Enumerable*) enumType;
-                type = enumGenericType->values();
-            }
+        // Start a new scope in the body and add the local
+        _symbols->enter();
+        _symbols->addVariable(name, nullptr, pos, node->shared());
 
-            // Start a new scope in the body and add the local
-            _symbols->enter();
-            inScope = true;
-            _symbols->addVariable(name, type, pos, node->shared());
-        }
-
+        // Add the index symbol if it exists. Symbol was created during parsing
         auto i = node->index();
         if (i != nullptr) {
             _symbols->insert(i->symbol());
@@ -265,7 +255,7 @@ protected:
 
         flag = walk(node->local()) && flag;
         flag = walkBlockStatementNode(node) && flag;
-        if ( inScope ) _symbols->leave();
+        _symbols->leave();
         return flag;
     }
 
