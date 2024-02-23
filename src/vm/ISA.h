@@ -311,7 +311,7 @@ namespace swarmc::ISA {
             return Type::Resource::of(_resource->innerType());
         }
 
-        Runtime::IResource* resource() {
+        Runtime::IResource* resource() const {
             return _resource;
         }
 

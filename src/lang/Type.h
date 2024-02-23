@@ -210,6 +210,10 @@ namespace swarmc::Type {
             return Intrinsic::OPAQUE;
         }
 
+        [[nodiscard]] std::string name() const {
+            return _name;
+        }
+
         [[nodiscard]] std::string toString() const override {
             return "Opaque<" + _name + ">";
         }

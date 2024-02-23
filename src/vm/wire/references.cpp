@@ -178,7 +178,7 @@ namespace swarmc::Runtime {
             auto typebin = (binn*)binn_map_map(obj, BC_TYPE);
             auto keysbin = (binn*)binn_map_list(obj, BC_VECTOR_TYPES);
             auto valuesbin = (binn*)binn_map_list(obj, BC_VECTOR_VALUES);
-            
+
             auto ref = new MapReference(types()->produce(typebin, vm));
 
             binn_iter iter;
@@ -196,7 +196,7 @@ namespace swarmc::Runtime {
             }
 
             ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
-            return ref; 
+            return ref;
         });
 
         // Function references
@@ -305,6 +305,28 @@ namespace swarmc::Runtime {
         });
         factory->registerProducer(s(ReferenceTag::BOOLEAN), [](binn* obj, VirtualMachine*) {
             auto ref = new BooleanReference(binn_map_bool(obj, BC_VALUE));
+            ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return ref;
+        });
+
+
+        // Resource references (serialized through Fabric)
+        factory->registerReducer(s(ReferenceTag::RESOURCE), [](const Reference* baseRef, VirtualMachine* vm) {
+            auto ref = dynamic_cast<const ResourceReference*>(baseRef);
+            auto obj = binn_map();
+
+            // Publish the resource to the Fabric, if necessary
+            if ( vm->fabric()->shouldPublish(ref->resource()) ) {
+                vm->fabric()->publish(ref->resource());
+            }
+
+            binn_map_set_str(obj, BC_ID, strdup(ref->resource()->id().c_str()));
+            return obj;
+        });
+        factory->registerProducer(s(ReferenceTag::RESOURCE), [](binn* obj, VirtualMachine* vm) {
+            std::string id = binn_map_str(obj, BC_ID);
+            auto resource = vm->fabric()->load(id);
+            auto ref = new ResourceReference(resource);
             ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
             return ref;
         });

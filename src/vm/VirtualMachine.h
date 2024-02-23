@@ -48,7 +48,7 @@ namespace swarmc::Runtime {
     public:
         explicit VirtualMachine(IGlobalServices* global) : IUsesLogger("vm"), _global(useref(global)) {
             _exec = useref(new ExecuteWalk(this));
-            _fabric = useref(new Fabric(_global));
+            _fabric = useref(new Fabric(this));
             _queueContexts.push(_global->getUuid());
             _lifecycleEvents = useref(event::EventBus::getNew("swarmc::Runtime::VirtualMachine._lifecycleEvents"));
         }

@@ -27,6 +27,21 @@ namespace swarmc::Runtime {
         });
 
 
+        // Opaque types
+        factory->registerReducer(s(Type::Intrinsic::OPAQUE), [common](const Type::Type* t, auto) {
+            auto o = dynamic_cast<const Type::Opaque*>(t);
+            auto binn = common(o, nullptr);
+            binn_map_set_str(binn, BC_NAME, strdup(o->name().c_str()));
+            return binn;
+        });
+        factory->registerProducer(s(Type::Intrinsic::OPAQUE), [](binn* obj, auto) {
+            std::string name = binn_map_str(obj, BC_NAME);
+            auto o = Type::Opaque::of(name);
+            o->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return o;
+        });
+
+
         // Ambiguous types
         factory->registerReducer(s(Type::Intrinsic::AMBIGUOUS), common);
         factory->registerProducer(s(Type::Intrinsic::AMBIGUOUS), [](binn* obj, auto) {

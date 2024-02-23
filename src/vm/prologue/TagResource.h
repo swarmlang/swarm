@@ -34,6 +34,10 @@ namespace swarmc::Runtime::Prologue {
             return {filter()};
         }
 
+        ResourceOperationFrame performOperation(VirtualMachine*, OperationName op, ResourceOperationFrame) override {
+            throw InvalidResourceOperation(s(this), op);
+        }
+
         void acquire(VirtualMachine*) override;
 
         void release(VirtualMachine*) override;

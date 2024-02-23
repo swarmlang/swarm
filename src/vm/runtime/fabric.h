@@ -1,6 +1,8 @@
 #ifndef SWARMVM_FABRIC
 #define SWARMVM_FABRIC
 
+#include <utility>
+
 #include "../../../mod/binn/src/binn.h"
 #include "../../shared/nslib.h"
 #include "../../errors/RuntimeError.h"
@@ -10,10 +12,20 @@ namespace swarmc::Runtime {
 
     class VirtualMachine;
 
+    using OperationName = std::string;
+    using ResourceOperationFrame = std::vector<ISA::Reference*>;
+
     enum class ResourceCategory: std::size_t {
         TUNNELED = 1 << 0,
         REPLICATED = 1 << 1,
         EXCLUSIVE = 1 << 2,
+    };
+
+
+    class InvalidResourceOperation : public NSLibException {
+    public:
+        InvalidResourceOperation(const std::string& resource, const std::string& operation)
+            : NSLibException("Invalid operation " + operation + " on resource " + resource) {}
     };
 
 
@@ -27,6 +39,8 @@ namespace swarmc::Runtime {
         [[nodiscard]] virtual InlineRefHandle<Type::Type> innerTypei() const;
         [[nodiscard]] virtual SchedulingFilters getSchedulingFilters() const { return {}; }
 
+        virtual ResourceOperationFrame performOperation(VirtualMachine*, OperationName, ResourceOperationFrame) = 0;
+
         virtual void acquire(VirtualMachine*) {}
         virtual void release(VirtualMachine*) {}
 
@@ -36,13 +50,54 @@ namespace swarmc::Runtime {
     };
 
 
+    class TunneledResource : public IResource {
+    public:
+        TunneledResource(std::string id, NodeID owner, std::string name, Type::Type* type) : _id(std::move(id)), _owner(std::move(owner)), _name(std::move(name)), _type(type) {}
+
+        [[nodiscard]] ResourceCategory category() const override {
+            return ResourceCategory::TUNNELED;
+        }
+
+        [[nodiscard]] std::string id() const override {
+            return _id;
+        }
+
+        [[nodiscard]] NodeID owner() const override {
+            return _owner;
+        }
+
+        [[nodiscard]] std::string name() const override {
+            return _name;
+        }
+
+        [[nodiscard]] Type::Type* innerType() const override {
+            return _type;
+        }
+
+        ResourceOperationFrame performOperation(VirtualMachine*, OperationName op, ResourceOperationFrame) override {
+            throw InvalidResourceOperation(s(this), op);
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            return "Runtime::TunneledResource<id: " + _id + ", owner: " + _owner + ", name: " + _name + ">";
+        }
+    protected:
+        std::string _id;
+        NodeID _owner;
+        std::string _name;
+        Type::Type* _type;
+    };
+
+
     class Fabric : public IStringable, public IRefCountable {
     public:
-        explicit Fabric(IGlobalServices* global) : _global(useref(global)) {}
+        explicit Fabric(VirtualMachine* vm) : _vm(vm) {}
 
         ~Fabric() override {
-            freeref(_global);
+//            freeref(_vm);
         }
+
+        virtual bool shouldPublish(IResource*);
 
         virtual void publish(IResource*);
 
@@ -55,7 +110,7 @@ namespace swarmc::Runtime {
         }
 
     protected:
-        IGlobalServices* _global;
+        VirtualMachine* _vm;
     };
 
 }

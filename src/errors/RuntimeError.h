@@ -32,6 +32,7 @@ namespace swarmc::Errors {
         MutateFinalizedObject = 27,
         ChildObjectTypeConflict = 28,
         NonFinalObjectType = 29,
+        InvalidOrUnpublishedResourceId = 30,
     };
 
 }

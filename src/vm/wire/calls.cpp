@@ -18,7 +18,7 @@ namespace swarmc::Runtime {
             auto vectorValues = binn_list();
             for ( auto pair : call->vector() ) {
 //                binn_list_add_object(vectorTypes, types()->reduce(pair.first));
-                binn_list_add_object(vectorValues, references()->reduce(pair.second, nullptr));
+                binn_list_add_object(vectorValues, references()->reduce(pair.second, vm));
             }
 
             auto binn = binn_map();

@@ -274,3 +274,4 @@ Exception codes `0` through `499` are reserved by the SVM for exceptions generat
 | 27   | Attempted to mutate a finalized object type                                         |
 | 28   | Child object property type conflicts with parent object property type               |
 | 29   | Attempted to perform type operations using non-final object type                    |
+| 30   | Attempted to load a resource that is not published or was removed                   |

@@ -42,5 +42,7 @@
 #define BC_OTYPE_K 37
 #define BC_OTYPE_V 38
 #define BC_STORE_REFS 39
+#define BC_OWNER 40
+#define BC_CATEGORY 41
 
 #endif //SWARMVM_BINARY_CONST

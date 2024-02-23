@@ -255,7 +255,7 @@ namespace swarmc::Runtime::RedisDriver {
         if ( !job ) return nullptr;
         std::map<std::string, std::string> jobValues;
         _redis->hgetall(job.value(), std::inserter(jobValues, jobValues.begin()));
-        for ( auto p : jobValues ) {
+        for ( const auto& p : jobValues ) {
             _redis->hdel(job.value(), p.first);
         }
 

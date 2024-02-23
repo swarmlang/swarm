@@ -32,6 +32,8 @@ namespace swarmc::Runtime::Prologue {
             return fileType();
         }
 
+        ResourceOperationFrame performOperation(VirtualMachine*, OperationName, ResourceOperationFrame) override;
+
         [[nodiscard]] std::string toString() const override {
             return "Prologue::FileResource<path: " + _path + ", owner: " + _owner + ", id: " + _id + ">";
         }
