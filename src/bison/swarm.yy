@@ -52,6 +52,7 @@
     #include "../shared/nslib.h"
     #include "../lang/Scanner.h"
     #include "../lang/Token.h"
+    #include "../Reporting.h"
     #undef yylex
     #define yylex scanner.yylex
 
@@ -202,13 +203,17 @@ program :
 includes :
     includes INCLUDE classAccess SEMICOLON {
         $$ = $1;
-        $$->pushStatement(new IncludeStatementNode(new Position($2->position(), $4->position()), (ClassAccessNode*)$3, nullptr));
+        auto pos = new Position($2->position(), $4->position());
+        $$->pushStatement(new IncludeStatementNode(pos, (ClassAccessNode*)$3, nullptr));
+        swarmc::Reporting::parseDebug(pos, s($$->body()->back()));
         delete $2; delete $4;
     }
 
     | includes FROM classAccess INCLUDE LBRACE includeSyms RBRACE SEMICOLON {
         $$ = $1;
-        $$->pushStatement(new IncludeStatementNode(new Position($2->position(), $8->position()), (ClassAccessNode*)$3, $6));
+        auto pos = new Position($2->position(), $8->position());
+        $$->pushStatement(new IncludeStatementNode(pos, (ClassAccessNode*)$3, $6));
+        swarmc::Reporting::parseDebug(pos, s($$->body()->back()));
         delete $2; delete $4; delete $5; delete $7; delete $8;
     }
 
@@ -216,7 +221,9 @@ includes :
         $$ = $1;
         auto ids = new std::vector<IdentifierNode*>();
         ids->push_back(useref($5));
-        $$->pushStatement(new IncludeStatementNode(new Position($2->position(), $6->position()), (ClassAccessNode*)$3, ids));
+        auto pos = new Position($2->position(), $6->position());
+        $$->pushStatement(new IncludeStatementNode(pos, (ClassAccessNode*)$3, ids));
+        swarmc::Reporting::parseDebug(pos, s($$->body()->back()));
         delete $2; delete $4; delete $6;
     }
 
@@ -240,6 +247,7 @@ statements :
     statements statement {
         $1->pushStatement($2);
         $$ = $1;
+        swarmc::Reporting::parseDebug($2->position(), s($$->body()->back()));
     }
 
     | %empty {
