@@ -262,3 +262,11 @@ namespace swarmc::Lang {
     }
 
 }
+
+namespace nslib {
+    [[nodiscard]] std::string s(swarmc::Lang::SemanticSymbolKind kind) {
+        if (kind == swarmc::Lang::SemanticSymbolKind::VARIABLE) return "VARIABLE";
+        if (kind == swarmc::Lang::SemanticSymbolKind::FUNCTION) return "FUNCTION";
+        return "UNKNOWN";
+    }
+}

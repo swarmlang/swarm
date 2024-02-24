@@ -7,7 +7,6 @@
 #include <FlexLexer.h>
 #endif
 
-#include "Debugging.h"
 #include "Token.h"
 #include "../bison/grammar.hh"
 
@@ -30,7 +29,7 @@ namespace swarmc::Lang {
             auto length = static_cast<size_t>(yyleng);
             auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
-            yylval->lexeme = new Token(pos, tagIn, Debugging::tokenKindToString(tagIn));
+            yylval->lexeme = new Token(pos, tagIn, s(tagIn));
             colNum += length;
             return tagIn;
         }
@@ -41,7 +40,7 @@ namespace swarmc::Lang {
             auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
-            yylval->lexeme = new StringLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, text.substr(1, text.size() - 2));
+            yylval->lexeme = new StringLiteralToken(pos, tagIn, s(tagIn) + ":" + text, text.substr(1, text.size() - 2));
             colNum += length;
             return tagIn;
         }
@@ -52,7 +51,7 @@ namespace swarmc::Lang {
             auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
-            yylval->lexeme = new NumberLiteralToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, std::stod(yytext));
+            yylval->lexeme = new NumberLiteralToken(pos, tagIn, s(tagIn) + ":" + text, std::stod(yytext));
             colNum += length;
             return tagIn;
         }
@@ -63,7 +62,7 @@ namespace swarmc::Lang {
             auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
-            yylval->lexeme = new IDToken(pos, tagIn, Debugging::tokenKindToString(tagIn) + ":" + text, yytext);
+            yylval->lexeme = new IDToken(pos, tagIn, s(tagIn) + ":" + text, yytext);
             colNum += length;
             return tagIn;
         }
@@ -92,6 +91,10 @@ namespace swarmc::Lang {
         size_t colNum = 1;
     };
 
+}
+
+namespace nslib {
+    [[nodiscard]] std::string s(swarmc::Lang::Parser::token::token_kind_type token);
 }
 
 #endif

@@ -322,4 +322,8 @@ namespace Walk {
 
 }
 
+namespace nslib {
+    [[nodiscard]] std::string s(swarmc::Lang::SemanticSymbolKind kind);
+}
+
 #endif
