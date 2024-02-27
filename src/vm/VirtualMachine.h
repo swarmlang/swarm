@@ -315,8 +315,14 @@ namespace swarmc::Runtime {
         /** Immediately stop execution. */
         virtual void exit();
 
+        /** Get the ID of the current queue context. */
+        virtual QueueContextID getQueueContext();
+
         /** Enter a new queue context. */
         virtual void enterQueueContext();
+
+        /** Enter a pre-existing queue context. */
+        virtual void enterQueueContext(QueueContextID id);
 
         /** Exit the current queue context, returning to the previous one. */
         virtual void exitQueueContext();

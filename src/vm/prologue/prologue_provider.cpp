@@ -35,6 +35,7 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "TAG_T" ) return new TagTFunction(this);
         if ( name == "LAMBDA0_T" ) return new Lambda0Function(this);
         if ( name == "LAMBDA1_T" ) return new Lambda1Function(this);
+        if ( name == "CONTEXT_ID_T" ) return new ContextIdFunction(this);
         if ( name == "FLOOR" ) return new FloorFunction(this);
         if ( name == "CEILING" ) return new CeilingFunction(this);
         if ( name == "NTH_ROOT" ) return new NthRootFunction(this);

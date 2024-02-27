@@ -213,7 +213,7 @@ namespace swarmc::Runtime {
      */
     bool VirtualMachine::lock(LocationReference* loc) {
         auto scopeLoc = _scope->map(loc);
-        
+
         if ( hasLock(scopeLoc) ) {
             logger->warn("Attempted to acquire lock that is already held by the requesting control: " + loc->toString());
             logger->debug(trace());
@@ -240,7 +240,7 @@ namespace swarmc::Runtime {
 
     void VirtualMachine::unlock(LocationReference* loc) {
         auto scopeLoc = _scope->map(loc);
-        
+
         if ( !hasLock(scopeLoc) ) {
             logger->warn("Attempted to release lock that is not held by the requesting control: " + loc->toString());
             return;
@@ -371,8 +371,19 @@ namespace swarmc::Runtime {
         _state->jumpEnd();
     }
 
+    QueueContextID VirtualMachine::getQueueContext() {
+        if ( _queueContexts.empty() ) {
+            throw Errors::SwarmError("Attempted to get non-existent queue context.");
+        }
+
+        return _queueContexts.top();
+    }
+
     void VirtualMachine::enterQueueContext() {
-        QueueContextID id = _global->getUuid();
+        enterQueueContext(_global->getUuid());
+    }
+
+    void VirtualMachine::enterQueueContext(QueueContextID id) {
         _queueContexts.push(id);
 
         for ( auto queue : _queues ) {

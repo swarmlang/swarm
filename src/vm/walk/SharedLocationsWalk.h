@@ -348,6 +348,18 @@ namespace swarmc::ISA {
             return {};
         }
 
+        SharedLocations walkEnterContext(EnterContext* i) override {
+            return {};
+        }
+
+        SharedLocations walkResumeContext(ResumeContext* i) override {
+            return walkUnaryReferenceInstruction(i);
+        }
+
+        SharedLocations walkPopContext(PopContext* i) override {
+            return {};
+        }
+
         SharedLocations walkExit(Exit* i) override {
             return {};
         }

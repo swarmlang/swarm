@@ -1,4 +1,30 @@
-$s:a <- "Hi!"
-out $s:a
-streampush $l:STDOUT $s:a
 
+$s:n_logs <- 0
+
+beginfn f:ASYNC_LOG_INNER p:VOID
+    fnparam p:STRING $l:OUT
+    streampush $l:STDOUT $l:OUT
+    $s:n_logs <- plus $s:n_logs 1
+return
+
+beginfn f:ASYNC_LOG p:VOID
+    fnparam p:STRING $l:OUT
+    pushcall f:ASYNC_LOG_INNER $l:OUT
+return
+
+entercontext
+call f:ASYNC_LOG "log1"
+call f:ASYNC_LOG "log2"
+call f:ASYNC_LOG "log3"
+call f:ASYNC_LOG "log4"
+call f:ASYNC_LOG "log5"
+call f:ASYNC_LOG "log6"
+$l:cid <- popcontext
+
+streampush $l:STDOUT "After popcontext"
+resumecontext $l:cid
+drain
+
+$l:n_logs_str <- call f:NUMBER_TO_STRING $s:n_logs
+$l:n_logs_str <- strconcat "Number of logs: " $l:n_logs_str
+streampush $l:STDOUT $l:n_logs_str

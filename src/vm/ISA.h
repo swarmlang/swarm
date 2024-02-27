@@ -44,6 +44,9 @@ namespace swarmc::ISA {
         PUSHCALLELSE0,
         PUSHCALLELSE1,
         DRAIN,
+        ENTERCONTEXT,
+        RESUMECONTEXT,
+        POPCONTEXT,
         EXIT,
         OUT,
         ERR,
@@ -138,6 +141,7 @@ namespace swarmc::ISA {
         VOID,
         OTYPE,
         OBJECT,
+        CONTEXT_ID,
     };
 }
 
@@ -374,6 +378,36 @@ namespace swarmc::ISA {
 
     protected:
         Runtime::IFunction* _fn;
+    };
+
+    class ContextIdReference : public Reference {
+    public:
+        explicit ContextIdReference(Runtime::QueueContextID id) : Reference(ReferenceTag::CONTEXT_ID), _id(id) {}
+
+        [[nodiscard]] std::string toString() const override {
+            return "ContextIdReference<" + s(_id) + ">";
+        }
+
+        [[nodiscard]] Type::Type* type() const override {
+            return Type::Opaque::of("CONTEXT_ID");
+        }
+
+        [[nodiscard]] virtual Runtime::QueueContextID id() const {
+            return _id;
+        }
+
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != _tag ) return false;
+            auto ref = (ContextIdReference*) other;
+            return ref->id() == _id;
+        }
+
+        [[nodiscard]] ContextIdReference* copy() const override {
+            return new ContextIdReference(_id);
+        }
+
+    protected:
+        Runtime::QueueContextID _id;
     };
 
     /** A type literal */

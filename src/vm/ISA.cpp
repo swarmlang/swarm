@@ -15,6 +15,7 @@ namespace nslib {
         if ( v == swarmc::ISA::ReferenceTag::VOID ) return "ReferenceTag(VOID)";
         if ( v == swarmc::ISA::ReferenceTag::OTYPE ) return "ReferenceTag(OTYPE)";
         if ( v == swarmc::ISA::ReferenceTag::OBJECT ) return "ReferenceTag(OBJECT)";
+        if ( v == swarmc::ISA::ReferenceTag::CONTEXT_ID ) return "ReferenceTag(CONTEXT_ID)";
         return "ReferenceTag(UNKNOWN)";
     }
 }
@@ -41,6 +42,9 @@ namespace swarmc::ISA {
         if ( tag == Tag::PUSHCALLELSE0 ) return "PUSHCALLELSE0";
         if ( tag == Tag::PUSHCALLELSE1 ) return "PUSHCALLELSE1";
         if ( tag == Tag::DRAIN ) return "DRAIN";
+        if ( tag == Tag::ENTERCONTEXT ) return "ENTERCONTEXT";
+        if ( tag == Tag::RESUMECONTEXT ) return "RESUMECONTEXT";
+        if ( tag == Tag::POPCONTEXT ) return "POPCONTEXT";
         if ( tag == Tag::EXIT ) return "EXIT";
         if ( tag == Tag::OUT ) return "OUT";
         if ( tag == Tag::ERR ) return "ERR";

@@ -187,6 +187,30 @@ namespace swarmc::ISA {
         }
     };
 
+    class EnterContext : public NullaryInstruction {
+    public:
+        EnterContext() : NullaryInstruction(Tag::ENTERCONTEXT) {}
+        [[nodiscard]] EnterContext* copy() const override {
+            return new EnterContext();
+        }
+    };
+
+    class ResumeContext : public UnaryInstruction<Reference> {
+    public:
+        ResumeContext(Reference* ctx) : UnaryInstruction<Reference>(Tag::RESUMECONTEXT, ctx) {}
+        [[nodiscard]] ResumeContext* copy() const override {
+            return new ResumeContext(_first->copy());
+        }
+    };
+
+    class PopContext : public NullaryInstruction {
+    public:
+        PopContext() : NullaryInstruction(Tag::POPCONTEXT) {}
+        [[nodiscard]] PopContext* copy() const override {
+            return new PopContext();
+        }
+    };
+
     class Exit : public NullaryInstruction {
     public:
         Exit() : NullaryInstruction(Tag::EXIT) {}

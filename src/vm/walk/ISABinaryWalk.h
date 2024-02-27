@@ -397,6 +397,25 @@ namespace swarmc::ISA {
             return obj;
         }
 
+        binn* walkEnterContext(EnterContext* ec) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ec->tag());
+            return obj;
+        }
+
+        binn* walkResumeContext(ResumeContext* rc) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) rc->tag());
+            binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(rc->first(), _vm));
+            return obj;
+        }
+
+        binn* walkPopContext(PopContext* pc) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) pc->tag());
+            return obj;
+        }
+
         binn* walkExit(Exit* exit) override {
             auto obj = binn_map();
             binn_map_set_uint64(obj, BC_TAG,  (std::size_t) exit->tag());

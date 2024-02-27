@@ -307,7 +307,7 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         } else if ( arg == "--no-constant-propagation" ) {
             flagISAOptimizations |= swarmc::ISAOptimizationType::CONSTANTPROPAGATION;
         } else if ( arg == "--no-optimizations" ) {
-            flagISAOptimizations = swarmc::ISAOptimizationType::REMOVESELFASSIGN 
+            flagISAOptimizations = swarmc::ISAOptimizationType::REMOVESELFASSIGN
                                 | swarmc::ISAOptimizationType::CONSTANTPROPAGATION
                                 | swarmc::ISAOptimizationType::REMOVEDEADCODE;
         } else {
@@ -677,6 +677,7 @@ int Executive::emitBinary() {
         }
 
         auto binary = pipeline.targetBinaryRepresentation();
+        fwrite("\x7fSVI", 1, 4, fh);
         fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
         fclose(fh);
         return 0;

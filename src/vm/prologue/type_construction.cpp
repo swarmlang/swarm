@@ -44,4 +44,19 @@ namespace swarmc::Runtime::Prologue {
         return new Lambda1FunctionCall(_provider, vector, returnType);
     }
 
+    void ContextIdFunctionCall::execute(VirtualMachine*) {
+        setReturn(new ISA::TypeReference(contextIdType()));
+    }
+
+    Type::Type* ContextIdFunction::returnType() const {
+        return Type::Primitive::of(Type::Intrinsic::TYPE);
+    }
+
+    PrologueFunctionCall* ContextIdFunction::call(CallVector vector) const {
+        auto returnType = Type::Primitive::of(Type::Intrinsic::TYPE);
+        return new ContextIdFunctionCall(_provider, vector, returnType);
+    }
+
+
+
 }

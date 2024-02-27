@@ -56,9 +56,13 @@ Shared storage is global across all jobs that have access to a location.
   - `call $lloc1 $lloc2` - call the function at `$lloc1` with the parameter `$lloc2`
   - `callif $lloc ...` - behaves like `call ...` if `$lloc` is valued as `true`
   - `callelse $lloc ...` - behaves like `call ...` if `$lloc` is valued as `false`
+  - `exit` - terminate execution
+- Queue operations
   - `pushcall{,if,else} ...` - behaves like the call derivatives, but pushes the execution of the function onto the work queue
   - `drain` - wait for the current context's work queue to finish
-  - `exit` - terminate execution
+  - `entercontext` - enter a new queue context for job batching
+  - `resumecontext $lloc1` - return to the queue context with ID `$lloc1` (of `p:CONTEXT_ID`)
+  - `popcontext` - exits the current queue context, returning a `p:CONTEXT_ID`
 - Stream operations
   - `streaminit $lloc1 $lloc2` - create an empty stream of type `$lloc1` at `$lloc2`
   - `streampush $lloc1 $lloc2` - push the value `$lloc2` onto the stream `$lloc1`
@@ -194,6 +198,7 @@ EXPRESSION ::= curry | call
          | objinit | objget | objinstance | objcurry
 OPERATION ::= out | err | beginfn | fnparam | return
               | callif | callelse | pushcall | pushcallif | pushcallelse | drain | exit
+              | entercontext | resumecontext | popcontext
               | streampush | streamclose
               | typify | lock | unlock | scopeof
               | mapset
@@ -221,6 +226,7 @@ SVI ::= INST EOF | INST \n INSTS
   - `f:ID v` - the identity function (e.g. `f:ID 3 -> 3`)
   - `f:LAMBDA0_T r` - constructs a lambda type of the form `() -> r`
   - `f:LAMBDA1_T a r` - constructs a lambda type of the form `a -> r`
+  - `f:CONTEXT_ID_T` - constructs the opaque `p:CONTEXT_ID` type
 
 ### Examples
 

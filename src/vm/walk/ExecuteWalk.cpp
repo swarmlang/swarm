@@ -148,6 +148,17 @@ namespace swarmc::Runtime {
         return (FunctionReference*) ref;
     }
 
+    ContextIdReference* ExecuteWalk::ensureContextId(const Reference* ref) {
+        verbose("ensureContextId: " + ref->toString());
+        if ( ref->tag() != ReferenceTag::CONTEXT_ID ) {
+            throw new Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::CONTEXT_ID) + ")"
+            );
+        }
+        return (ContextIdReference*) ref;
+    }
+
     InlineRefHandle<FunctionReference> ExecuteWalk::ensureFunction(const InlineRefHandle<Reference>& ref) {
         return inlineref<FunctionReference>(ensureFunction(ref.get()));
     }
@@ -712,6 +723,26 @@ namespace swarmc::Runtime {
         verbose("drain");
         _vm->drain();
         return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkEnterContext(EnterContext*) {
+        verbose("entercontext");
+        _vm->enterQueueContext();
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkResumeContext(ResumeContext* i) {
+        verbose("resumecontext " + i->first()->toString());
+        auto id = ensureContextId(_vm->resolve(i->first()));
+        _vm->enterQueueContext(id->id());
+        return nullptr;
+    }
+
+    Reference* ExecuteWalk::walkPopContext(PopContext*) {
+        verbose("popcontext");
+        auto id = _vm->getQueueContext();
+        _vm->exitQueueContext();
+        return new ISA::ContextIdReference(id);
     }
 
     Reference* ExecuteWalk::walkExit(Exit*) {

@@ -274,6 +274,15 @@ namespace swarmc::ISA {
                 }
             } else if ( instructionLeader == "drain" ) {
                 is.push_back(new ISA::Drain());
+            } else if ( instructionLeader == "entercontext" ) {
+                is.push_back(new ISA::EnterContext());
+            } else if ( instructionLeader == "resumecontext" ) {
+                is.push_back(new ISA::ResumeContext(
+                        parseUnaryReference(instructionLeader, tokens, startAt+i)
+                ));
+                i += 1;
+            } else if ( instructionLeader == "popcontext" ) {
+                is.push_back(new ISA::PopContext());
             } else if ( instructionLeader == "exit" ) {
                 is.push_back(new ISA::Exit());
             } else if ( instructionLeader == "out" ) {

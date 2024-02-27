@@ -81,6 +81,9 @@ namespace swarmc::ISA {
             if ( tag == Tag::PUSHCALLELSE0 ) return walkPushCallElse0(obj);
             if ( tag == Tag::PUSHCALLELSE1 ) return walkPushCallElse1(obj);
             if ( tag == Tag::DRAIN ) return walkDrain(obj);
+            if ( tag == Tag::ENTERCONTEXT ) return walkEnterContext(obj);
+            if ( tag == Tag::RESUMECONTEXT ) return walkResumeContext(obj);
+            if ( tag == Tag::POPCONTEXT ) return walkPopContext(obj);
             if ( tag == Tag::EXIT ) return walkExit(obj);
             if ( tag == Tag::OUT ) return walkOut(obj);
             if ( tag == Tag::ERR ) return walkErr(obj);
@@ -487,6 +490,20 @@ namespace swarmc::ISA {
 
         Drain* walkDrain(binn* obj) {
             return new Drain;
+        }
+
+        EnterContext* walkEnterContext(binn* obj) {
+            return new EnterContext;
+        }
+
+        ResumeContext* walkResumeContext(binn* obj) {
+            return new ResumeContext(
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm)
+            );
+        }
+
+        PopContext* walkPopContext(binn* obj) {
+            return new PopContext;
         }
 
         Exit* walkExit(binn* obj) {

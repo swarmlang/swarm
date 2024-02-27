@@ -268,6 +268,21 @@ namespace swarmc::Runtime {
         });
 
 
+        // Context ID references
+        factory->registerReducer(s(ReferenceTag::CONTEXT_ID), [](const Reference* baseRef, VirtualMachine*) {
+            auto ref = dynamic_cast<const ContextIdReference*>(baseRef);
+            auto obj = binn_map();
+            binn_map_set_str(obj, BC_ID, strdup(ref->id().c_str()));
+            binn_map_set_map(obj, BC_EXTRA, ref->getExtraSerialData());
+            return obj;
+        });
+        factory->registerProducer(s(ReferenceTag::CONTEXT_ID), [](binn* obj, VirtualMachine*) {
+            auto ref = new ContextIdReference(binn_map_str(obj, BC_ID));
+            ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return ref;
+        });
+
+
         // String references
         factory->registerReducer(s(ReferenceTag::STRING), [](const Reference* baseRef, VirtualMachine*) {
             auto ref = dynamic_cast<const StringReference*>(baseRef);
