@@ -155,7 +155,7 @@ type Person = {
 
     number age = 0;
 
-    fn isAlive(): bool {
+    fn isAlive = (): bool => {
         return age <= 116;
     }
 };

@@ -4,13 +4,13 @@
 <!-- Generated via Iro -->
 <dict>
   <key>fileTypes</key>
-  <array> 
+  <array>
     <string>swarm</string>
    </array>
   <key>name</key>
   <string>swarm</string>
   <key>patterns</key>
-  <array> 
+  <array>
     <dict>
       <key>include</key>
       <string>#main</string>
@@ -25,22 +25,52 @@
     <key>main</key>
     <dict>
       <key>patterns</key>
-      <array> 
+      <array>
+        <dict>
+          <key>begin</key>
+          <string>(\-\-\*)</string>
+          <key>beginCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>comment.swarm</string>
+            </dict>
+          </dict>
+          <key>contentName</key>
+          <string>comment.swarm</string>
+          <key>end</key>
+          <string>(\*\-\-)</string>
+          <key>endCaptures</key>
+          <dict>
+            <key>1</key>
+            <dict>
+              <key>name</key>
+              <string>comment.swarm</string>
+            </dict>
+          </dict>
+        </dict>
         <dict>
           <key>match</key>
-          <string>(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)</string>
+          <string>(\-\-[^\*].*)</string>
+          <key>name</key>
+          <string>comment.swarm</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>(numberToString|booleanToString|vectorToString|matrixToString|sin|cos|tan|random|randomVector|randomMatrix|zeroVector|zeroMatrix|range|lLog|sLog|lError|sError|floor|ceiling|max|min|nthRoot|count|time|subVector|subMatrix|tag|open|read|write|append)</string>
           <key>name</key>
           <string>entity.name.function.swarm</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>(enumerate|with|while|if|as)</string>
+          <string>(enumerate|with|while|if|as|include|from|shared|constructor)</string>
           <key>name</key>
           <string>keyword.swarm</string>
         </dict>
         <dict>
           <key>match</key>
-          <string>(number|bool|map|string|enumerable)</string>
+          <string>(number|bool|map|string|enumerable|fn|type)</string>
           <key>name</key>
           <string>entity.name.type.swarm</string>
         </dict>
@@ -51,8 +81,16 @@
           <string>variable.swarm</string>
         </dict>
         <dict>
-          <key>include</key>
-          <string>#numeric</string>
+          <key>match</key>
+          <string>(\b\d+\.\d+)</string>
+          <key>name</key>
+          <string>constant.numeric.swarm</string>
+        </dict>
+        <dict>
+          <key>match</key>
+          <string>(\b\d+)</string>
+          <key>name</key>
+          <string>constant.numeric.swarm</string>
         </dict>
         <dict>
           <key>begin</key>
@@ -66,10 +104,10 @@
             </dict>
           </dict>
           <key>patterns</key>
-          <array> 
+          <array>
             <dict>
               <key>include</key>
-              <string>#main__1</string>
+              <string>#main__2</string>
             </dict>
            </array>
           <key>end</key>
@@ -85,7 +123,7 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>(;|\.|\^|,|&lt;|&gt;|=|\[|\]|\+|-|\*|\/|\!)</string>
+          <string>(;|\.|\^|,|&lt;|&gt;|=|\[|\]|\+|-|\*|\/|\!|:|&amp;|\||%)</string>
           <key>name</key>
           <string>punctuation.swarm</string>
         </dict>
@@ -128,7 +166,7 @@
           <array>
             <dict>
               <key>include</key>
-              <string>#main__3</string>
+              <string>#main__4</string>
             </dict>
            </array>
           <key>end</key>
@@ -144,12 +182,6 @@
         </dict>
         <dict>
           <key>match</key>
-          <string>(//.*)</string>
-          <key>name</key>
-          <string>comment.swarm</string>
-        </dict>
-        <dict>
-          <key>match</key>
           <string>([^\s])</string>
           <key>name</key>
           <string>invalid.swarm</string>
@@ -160,43 +192,31 @@
     <dict>
       <key>patterns</key>
       <array>
-        <dict>
-          <key>include</key>
-          <string>#main</string>
-        </dict>
        </array>
     </dict>
     <key>main__2</key>
     <dict>
       <key>patterns</key>
       <array>
-       </array>
-    </dict>
-    <key>main__3</key>
-    <dict>
-      <key>patterns</key>
-      <array>
         <dict>
           <key>include</key>
           <string>#main</string>
         </dict>
        </array>
     </dict>
-    <key>numeric</key>
+    <key>main__3</key>
+    <dict>
+      <key>patterns</key>
+      <array>
+       </array>
+    </dict>
+    <key>main__4</key>
     <dict>
       <key>patterns</key>
       <array>
         <dict>
-          <key>match</key>
-          <string>(\b\d+\.\d+)</string>
-          <key>name</key>
-          <string>constant.numeric.swarm</string>
-        </dict>
-        <dict>
-          <key>match</key>
-          <string>(\b\d+)</string>
-          <key>name</key>
-          <string>constant.numeric.swarm</string>
+          <key>include</key>
+          <string>#main</string>
         </dict>
        </array>
     </dict>

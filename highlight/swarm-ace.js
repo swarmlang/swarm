@@ -12,16 +12,25 @@ define(function(require, exports, module) {
       this.$rules = {
          "start" : [
             {
+               "token" : "comment",
+               "regex" : "(\\-\\-\\*)",
+               "push" : "main__1"
+            },
+            {
+               "token" : "comment",
+               "regex" : "(\\-\\-[^\\*].*)"
+            },
+            {
                "token" : "entity.name.function",
-               "regex" : "(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)"
+               "regex" : "(numberToString|booleanToString|vectorToString|matrixToString|sin|cos|tan|random|randomVector|randomMatrix|zeroVector|zeroMatrix|range|lLog|sLog|lError|sError|floor|ceiling|max|min|nthRoot|count|time|subVector|subMatrix|tag|open|read|write|append)"
             },
             {
                "token" : "keyword",
-               "regex" : "(enumerate|with|while|if|as)"
+               "regex" : "(enumerate|with|while|if|as|include|from|shared|constructor)"
             },
             {
                "token" : "entity.name.type",
-               "regex" : "(number|bool|map|string|enumerable)"
+               "regex" : "(number|bool|map|string|enumerable|fn|type)"
             },
             {
                "token" : "variable",
@@ -38,25 +47,21 @@ define(function(require, exports, module) {
             {
                "token" : "punctuation",
                "regex" : "(\\{)",
-               "push" : "main__1"
-            },
-            {
-               "token" : "punctuation",
-               "regex" : "(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)"
-            },
-            {
-               "token" : "string",
-               "regex" : "(\\\")",
                "push" : "main__2"
             },
             {
                "token" : "punctuation",
-               "regex" : "(\\()",
+               "regex" : "(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!|:|&|\\||%)"
+            },
+            {
+               "token" : "string",
+               "regex" : "(\\\")",
                "push" : "main__3"
             },
             {
-               "token" : "comment",
-               "regex" : "(//.*)"
+               "token" : "punctuation",
+               "regex" : "(\\()",
+               "push" : "main__4"
             },
             {
                "token" : "invalid",
@@ -68,21 +73,40 @@ define(function(require, exports, module) {
          ],
          "main__1" : [
             {
+               "token" : "comment",
+               "regex" : "(\\*\\-\\-)",
+               "next" : "pop"
+            },
+            {
+               defaultToken : "comment",
+            }
+         ],
+         "main__2" : [
+            {
                "token" : "punctuation",
                "regex" : "(\\})",
                "next" : "pop"
             },
             {
+               "token" : "comment",
+               "regex" : "(\\-\\-\\*)",
+               "push" : "main__1"
+            },
+            {
+               "token" : "comment",
+               "regex" : "(\\-\\-[^\\*].*)"
+            },
+            {
                "token" : "entity.name.function",
-               "regex" : "(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)"
+               "regex" : "(numberToString|booleanToString|vectorToString|matrixToString|sin|cos|tan|random|randomVector|randomMatrix|zeroVector|zeroMatrix|range|lLog|sLog|lError|sError|floor|ceiling|max|min|nthRoot|count|time|subVector|subMatrix|tag|open|read|write|append)"
             },
             {
                "token" : "keyword",
-               "regex" : "(enumerate|with|while|if|as)"
+               "regex" : "(enumerate|with|while|if|as|include|from|shared|constructor)"
             },
             {
                "token" : "entity.name.type",
-               "regex" : "(number|bool|map|string|enumerable)"
+               "regex" : "(number|bool|map|string|enumerable|fn|type)"
             },
             {
                "token" : "variable",
@@ -99,25 +123,21 @@ define(function(require, exports, module) {
             {
                "token" : "punctuation",
                "regex" : "(\\{)",
-               "push" : "main__1"
-            },
-            {
-               "token" : "punctuation",
-               "regex" : "(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)"
-            },
-            {
-               "token" : "string",
-               "regex" : "(\\\")",
                "push" : "main__2"
             },
             {
                "token" : "punctuation",
-               "regex" : "(\\()",
+               "regex" : "(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!|:|&|\\||%)"
+            },
+            {
+               "token" : "string",
+               "regex" : "(\\\")",
                "push" : "main__3"
             },
             {
-               "token" : "comment",
-               "regex" : "(//.*)"
+               "token" : "punctuation",
+               "regex" : "(\\()",
+               "push" : "main__4"
             },
             {
                "token" : "invalid",
@@ -127,7 +147,7 @@ define(function(require, exports, module) {
                defaultToken : "text",
             }
          ],
-         "main__2" : [
+         "main__3" : [
             {
                "token" : "string",
                "regex" : "(\\\")",
@@ -137,23 +157,32 @@ define(function(require, exports, module) {
                defaultToken : "string",
             }
          ],
-         "main__3" : [
+         "main__4" : [
             {
                "token" : "punctuation",
                "regex" : "(\\))",
                "next" : "pop"
             },
             {
+               "token" : "comment",
+               "regex" : "(\\-\\-\\*)",
+               "push" : "main__1"
+            },
+            {
+               "token" : "comment",
+               "regex" : "(\\-\\-[^\\*].*)"
+            },
+            {
                "token" : "entity.name.function",
-               "regex" : "(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)"
+               "regex" : "(numberToString|booleanToString|vectorToString|matrixToString|sin|cos|tan|random|randomVector|randomMatrix|zeroVector|zeroMatrix|range|lLog|sLog|lError|sError|floor|ceiling|max|min|nthRoot|count|time|subVector|subMatrix|tag|open|read|write|append)"
             },
             {
                "token" : "keyword",
-               "regex" : "(enumerate|with|while|if|as)"
+               "regex" : "(enumerate|with|while|if|as|include|from|shared|constructor)"
             },
             {
                "token" : "entity.name.type",
-               "regex" : "(number|bool|map|string|enumerable)"
+               "regex" : "(number|bool|map|string|enumerable|fn|type)"
             },
             {
                "token" : "variable",
@@ -170,25 +199,21 @@ define(function(require, exports, module) {
             {
                "token" : "punctuation",
                "regex" : "(\\{)",
-               "push" : "main__1"
-            },
-            {
-               "token" : "punctuation",
-               "regex" : "(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)"
-            },
-            {
-               "token" : "string",
-               "regex" : "(\\\")",
                "push" : "main__2"
             },
             {
                "token" : "punctuation",
-               "regex" : "(\\()",
+               "regex" : "(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!|:|&|\\||%)"
+            },
+            {
+               "token" : "string",
+               "regex" : "(\\\")",
                "push" : "main__3"
             },
             {
-               "token" : "comment",
-               "regex" : "(//.*)"
+               "token" : "punctuation",
+               "regex" : "(\\()",
+               "push" : "main__4"
             },
             {
                "token" : "invalid",

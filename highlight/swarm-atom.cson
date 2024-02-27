@@ -13,15 +13,34 @@
   'main' : {
     'patterns' : [
       {
-        'match' : '(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)'
+        'begin' : '(\\-\\-\\*)'
+        'beginCaptures' : {
+          '1' : {
+            'name' : 'comment.swarm'
+          }
+        }
+        'contentName' : 'comment.swarm'
+        'end' : '(\\*\\-\\-)'
+        'endCaptures' : {
+          '1' : {
+            'name' : 'comment.swarm'
+          }
+        }
+      }
+      {
+        'match' : '(\\-\\-[^\\*].*)'
+        'name' : 'comment.swarm'
+      }
+      {
+        'match' : '(numberToString|booleanToString|vectorToString|matrixToString|sin|cos|tan|random|randomVector|randomMatrix|zeroVector|zeroMatrix|range|lLog|sLog|lError|sError|floor|ceiling|max|min|nthRoot|count|time|subVector|subMatrix|tag|open|read|write|append)'
         'name' : 'entity.name.function.swarm'
       }
       {
-        'match' : '(enumerate|with|while|if|as)'
+        'match' : '(enumerate|with|while|if|as|include|from|shared|constructor)'
         'name' : 'keyword.swarm'
       }
       {
-        'match' : '(number|bool|map|string|enumerable)'
+        'match' : '(number|bool|map|string|enumerable|fn|type)'
         'name' : 'entity.name.type.swarm'
       }
       {
@@ -29,7 +48,12 @@
         'name' : 'variable.swarm'
       }
       {
-        'include' : '#numeric'
+        'match' : '(\\b\\d+\\.\\d+)'
+        'name' : 'constant.numeric.swarm'
+      }
+      {
+        'match' : '(\\b\\d+)'
+        'name' : 'constant.numeric.swarm'
       }
       {
         'begin' : '(\\{)'
@@ -40,7 +64,7 @@
         }
         'patterns' : [
           {
-            'include' : '#main__1'
+            'include' : '#main__2'
           }
         ]
         'end' : '(\\})'
@@ -51,7 +75,7 @@
         }
       }
       {
-        'match' : '(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!)'
+        'match' : '(;|\\.|\\^|,|<|>|=|\\[|\\]|\\+|-|\\*|\\/|\\!|:|&|\\||%)'
         'name' : 'punctuation.swarm'
       }
       {
@@ -78,7 +102,7 @@
         }
         'patterns' : [
           {
-            'include' : '#main__3'
+            'include' : '#main__4'
           }
         ]
         'end' : '(\\))'
@@ -89,10 +113,6 @@
         }
       }
       {
-        'match' : '(//.*)'
-        'name' : 'comment.swarm'
-      }
-      {
         'match' : '([^\\s])'
         'name' : 'invalid.swarm'
       }
@@ -100,31 +120,23 @@
   }
   'main__1' : {
     'patterns' : [
-      {
-        'include' : '#main'
-      }
     ]
   }
   'main__2' : {
     'patterns' : [
-    ]
-  }
-  'main__3' : {
-    'patterns' : [
       {
         'include' : '#main'
       }
     ]
   }
-  'numeric' : {
+  'main__3' : {
+    'patterns' : [
+    ]
+  }
+  'main__4' : {
     'patterns' : [
       {
-        'match' : '(\\b\\d+\\.\\d+)'
-        'name' : 'constant.numeric.swarm'
-      }
-      {
-        'match' : '(\\b\\d+)'
-        'name' : 'constant.numeric.swarm'
+        'include' : '#main'
       }
     ]
   }

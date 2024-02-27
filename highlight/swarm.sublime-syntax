@@ -6,19 +6,38 @@ file_extensions: [ swarm ]
 
 contexts:
   main:
-    - match: '(random|randomVector|randomMatrix|log|logError|numberToString|boolToString|min|max|fileContents|range|tag|shell|sin)'
+    - match: '(\-\-\*)'
+      captures:
+        0: comment.swarm
+      push:
+        - match: '(\*\-\-)'
+          pop: true
+          captures:
+            0: comment.swarm
+        - match: '(.)'
+          captures:
+            0: comment.swarm
+    - match: '(\-\-[^\*].*)'
+      captures:
+        0: comment.swarm
+    - match: '(numberToString|booleanToString|vectorToString|matrixToString|sin|cos|tan|random|randomVector|randomMatrix|zeroVector|zeroMatrix|range|lLog|sLog|lError|sError|floor|ceiling|max|min|nthRoot|count|time|subVector|subMatrix|tag|open|read|write|append)'
       captures:
         0: entity.name.function.swarm
-    - match: '(enumerate|with|while|if|as)'
+    - match: '(enumerate|with|while|if|as|include|from|shared|constructor)'
       captures:
         0: keyword.swarm
-    - match: '(number|bool|map|string|enumerable)'
+    - match: '(number|bool|map|string|enumerable|fn|type)'
       captures:
         0: entity.name.type.swarm
     - match: '(\b[a-zA-Z_][a-zA-Z0-9_]*)'
       captures:
         0: variable.swarm
-    - include: numeric
+    - match: '(\b\d+\.\d+)'
+      captures:
+        0: constant.numeric.swarm
+    - match: '(\b\d+)'
+      captures:
+        0: constant.numeric.swarm
     - match: '(\{)'
       captures:
         0: punctuation.swarm
@@ -31,7 +50,7 @@ contexts:
         - match: '(.)'
           captures:
             0: text.swarm
-    - match: '(;|\.|\^|,|<|>|=|\[|\]|\+|-|\*|\/|\!)'
+    - match: '(;|\.|\^|,|<|>|=|\[|\]|\+|-|\*|\/|\!|:|&|\||%)'
       captures:
         0: punctuation.swarm
     - match: '(\")'
@@ -57,22 +76,9 @@ contexts:
         - match: '(.)'
           captures:
             0: text.swarm
-    - match: '(//.*)'
-      captures:
-        0: comment.swarm
     - match: '([^\s])'
       captures:
         0: invalid.swarm
-    - match: '(.)'
-      captures:
-        0: text.swarm
-  numeric:
-    - match: '(\b\d+\.\d+)'
-      captures:
-        0: constant.numeric.swarm
-    - match: '(\b\d+)'
-      captures:
-        0: constant.numeric.swarm
     - match: '(.)'
       captures:
         0: text.swarm
