@@ -207,8 +207,10 @@ namespace swarmc::Runtime {
             binn_map_set_uint64(obj, BC_BACKEND, (std::size_t) ref->fn()->backend());
             binn_map_set_str(obj, BC_NAME, strdup(ref->fn()->name().c_str()));
 
+            // params is ({ BC_VALUE : Wire reduction }) []
             auto params = binn_list();
             for ( auto p : ref->fn()->getCallVector() ) {
+                // param is { BC_VALUE : Wire reduction }
                 auto param = binn_map();
                 binn_map_set_map(param, BC_VALUE, factory->reduce(p.second, vm));
                 binn_list_add_map(params, param);
@@ -223,11 +225,14 @@ namespace swarmc::Runtime {
             auto name = binn_map_str(obj, BC_NAME);
             std::vector<Reference*> params;
 
+            // list is ({ BC_VALUE : Wire reduction })[]
             auto list = binn_map_list(obj, BC_PARAMS);
             binn_iter iter;
             binn value;
             binn_list_foreach(list, value) {
-                params.push_back(factory->produce(&value, vm));
+                // value is { BC_VALUE : Wire reduction }
+                auto reducedValue = (binn*) binn_map_map(&value, BC_VALUE);
+                params.push_back(factory->produce(reducedValue, vm));
             }
 
             auto ref = vm->loadFunction((Runtime::FunctionBackend) backend, name);
