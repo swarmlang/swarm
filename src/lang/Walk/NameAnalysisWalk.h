@@ -411,6 +411,10 @@ protected:
     }
 
     bool walkTypeBodyNode(TypeBodyNode* node) override {
+        walkType(node->value());
+        node->value()->transform([](Type::Type* v) -> Type::Type* {
+            return v->disambiguateStatically();
+        });
         _symbols->enter();
         bool flag = true;
         for (auto decl : *node->declarations()) {
@@ -472,25 +476,39 @@ private:
     SymbolTable* _symbols;
 
     bool walkType(Type::Type* type) {
-        if (type->intrinsic() == Type::Intrinsic::ENUMERABLE) {
-            return walkType(((Type::Enumerable*)type)->values());
+        std::set<std::size_t> visited;
+        return walkTypeRec(type, visited);
+    }
+
+    bool walkTypeRec(Type::Type* type, std::set<std::size_t>& visited) {
+        if ( stl::contains(visited, type->getId()) ) return true;
+        visited.insert(type->getId());
+        // attach symbol to ambiguous types
+        if ( type->isAmbiguous() ) {
+            auto a = (Type::Ambiguous*)type;
+            assert(a->id() != nullptr);
+            return walk(a->id());
         }
-        if (type->intrinsic() == Type::Intrinsic::MAP) {
-            return walkType(((Type::Map*)type)->values());
+        if ( type->intrinsic() == Type::Intrinsic::ENUMERABLE ) {
+            return walkTypeRec(((Type::Enumerable*)type)->values(), visited);
         }
-        if (type->intrinsic() == Type::Intrinsic::RESOURCE) {
-            return walkType(((Type::Resource*)type)->yields());
+        if ( type->intrinsic() == Type::Intrinsic::MAP ) {
+            return walkTypeRec(((Type::Map*)type)->values(), visited);
         }
-        if (type->intrinsic() == Type::Intrinsic::LAMBDA0) {
-            return walkType(((Type::Lambda0*)type)->returns());
+        if ( type->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
+            return walkTypeRec(((Type::Lambda0*)type)->returns(), visited);
         }
-        if (type->intrinsic() == Type::Intrinsic::LAMBDA1) {
-            bool flag = walkType(((Type::Lambda1*)type)->param());
-            return walkType(((Type::Lambda1*)type)->returns()) && flag;
+        if ( type->intrinsic() == Type::Intrinsic::LAMBDA1 ) {
+            auto l = (Type::Lambda1*)type;
+            return walkTypeRec(l->param(), visited) && walkTypeRec(l->returns(), visited);
         }
-        if (type->isAmbiguous()) {
-            assert(((Type::Ambiguous*)type)->id() != nullptr);
-            return walk(((Type::Ambiguous*)type)->id());
+        if ( type->intrinsic() == Type::Intrinsic::OBJECT ) {
+            auto obj = (Type::Object*)type;
+            bool flag = true;
+            for ( auto p : obj->getProperties() ) {
+                flag = walkTypeRec(p.second, visited) && flag;
+            }
+            return flag;
         }
         return true;
     }

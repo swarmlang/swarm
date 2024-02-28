@@ -13,8 +13,8 @@
   - e.g. define named test blocks which are ignored during normal runtime
 - standard library for swarm
 - Implement IStorageInterface, IQueue, IQueueJob, IStreamDriver, IStream, and IGlobalServices
-    - Redis implementation
-    - pthread implementation
+    - ~~Redis implementation~~
+    - ~~pthread implementation~~
     - ...others?
 - ast optimization pass
   - removing statements coming after a return
@@ -27,7 +27,7 @@
   - beginfn followed by return0
 - Runtime
   - threaded listener for `s:STDOUT` and `s:STDERR` streams
-- remove RESOURCE type from lexing (added so I could test WITH statements)
+- ~~remove RESOURCE type from lexing (added so I could test WITH statements)~~
 - change map access back to [] (check for lval type in name analysis to avoid parsing conflict)
 - some form of exception/error system (e.g. exceptions, error values, ...?)
 - Exceptions: show call stack for debugging, map back to original Position data using Metadata
@@ -59,12 +59,7 @@
 - generic types :(
 - make it so constructor nodes don't require rebuilding the entire instruction vector in ToISAWalk
 - update syntax highlighting
-- Syntax for deferred function calls
-  - ```
-    wait<string> a = ~test();
-    ...
-    log(a);
-    ```
+- ~~Syntax for deferred function calls~~
 - FUTURE: (hilariously low priority) blockchain-based distributed drivers
 - FUTURE: separate fetch/execute/writeback threads for runtime
 - FUTURE: Serialize ISA to SVI code

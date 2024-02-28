@@ -29,7 +29,7 @@ namespace swarmc::Type {
 
     std::size_t Type::_nextId = 0;
 
-    std::map<std::size_t, std::vector<std::size_t>> Type::_assignableCache;
+    std::map<std::size_t, std::set<std::size_t>> Type::_assignableCache;
 
     std::map<Intrinsic, Primitive*> Primitive::_primitives;
 
@@ -39,6 +39,10 @@ namespace swarmc::Type {
 
     Ambiguous::Ambiguous(Lang::IdentifierNode* id) : Type(), _typeid(useref(id)) {}
     Ambiguous::~Ambiguous() { freeref(_typeid); }
+    std::string Ambiguous::toString() const {
+        if (_typeid == nullptr) return "AMBIGUOUS";
+        return "AMIBGUOUS<" + _typeid->name() + ">";
+    }
 
     Type* Ambiguous::disambiguateStatically() {
         auto sym = _typeid->symbol();

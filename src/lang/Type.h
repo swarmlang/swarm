@@ -72,6 +72,7 @@ namespace swarmc::Type {
 
         Type() {
             _id = _nextId++;
+            _assignableCache[_id] = std::set<std::size_t>();
         }
 
         ~Type() override = default;
@@ -115,13 +116,13 @@ namespace swarmc::Type {
             return _id;
         }
 
-        virtual Type* disambiguateStatically() { return this; }
+        [[nodiscard]] virtual Type* disambiguateStatically() { return this; }
 
     protected:
         friend class Lang::TypeLiteral;
         std::size_t _id;
         static std::size_t _nextId;
-        static std::map<std::size_t, std::vector<std::size_t>> _assignableCache;
+        static std::map<std::size_t, std::set<std::size_t>> _assignableCache;
     };
 
     class Primitive : public Type {
@@ -256,24 +257,26 @@ namespace swarmc::Type {
             return Intrinsic::AMBIGUOUS;
         }
 
-        [[nodiscard]] std::string toString() const override {
-            return Type::intrinsicString(intrinsic());
-        }
+        [[nodiscard]] std::string toString() const override;
 
         bool isAssignableTo(const Type* other) const override {
             return true;
         }
 
         [[nodiscard]] Ambiguous* copy() const override {
-            return Ambiguous::of();
+            if ( _typeid == nullptr ) return Ambiguous::of();
+            return Ambiguous::partial(_typeid);
         }
 
-        void transformRecursively(std::function<Type*(Type*)>, std::vector<std::size_t>& visited) override {}
+        void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
+            visited.push_back(_id);
+            visitor(this);
+        }
 
         explicit Ambiguous(Lang::IdentifierNode* id = nullptr);
         ~Ambiguous();
 
-        Type* disambiguateStatically() override;
+        [[nodiscard]] Type* disambiguateStatically() override;
     protected:
 
         static Ambiguous* _inst;
@@ -324,7 +327,7 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
 
-        Map* disambiguateStatically() override {
+        [[nodiscard]] Map* disambiguateStatically() override {
             _values = _values->disambiguateStatically();
             return this;
         }
@@ -374,7 +377,7 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _values->toString() + ">";
         }
 
-        Enumerable* disambiguateStatically() override {
+        [[nodiscard]] Enumerable* disambiguateStatically() override {
             _values = _values->disambiguateStatically();
             return this;
         }
@@ -429,7 +432,7 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _yields->toString() + ">";
         }
 
-        Resource* disambiguateStatically() override {
+        [[nodiscard]] Resource* disambiguateStatically() override {
             _yields = _yields->disambiguateStatically();
             return this;
         }
@@ -484,7 +487,7 @@ namespace swarmc::Type {
             return Type::intrinsicString(intrinsic()) + "<" + _inner->toString() + ">";
         }
 
-        Stream* disambiguateStatically() override {
+        [[nodiscard]] Stream* disambiguateStatically() override {
             _inner = _inner->disambiguateStatically();
             return this;
         }
@@ -548,7 +551,7 @@ namespace swarmc::Type {
             return ":: " + _returns->toString();
         }
 
-        Lambda0* disambiguateStatically() override {
+        [[nodiscard]] Lambda0* disambiguateStatically() override {
             _returns = _returns->disambiguateStatically();
             return this;
         }
@@ -611,7 +614,7 @@ namespace swarmc::Type {
             return p;
         }
 
-        Lambda1* disambiguateStatically() override {
+        [[nodiscard]] Lambda1* disambiguateStatically() override {
             _param = _param->disambiguateStatically();
             _returns = _returns->disambiguateStatically();
             return this;
@@ -684,18 +687,28 @@ namespace swarmc::Type {
                 return other->intrinsic() == Intrinsic::THIS;
             }
 
+            // Even without p:THIS a recursive type will still nuke the stack haha
+            // If we arrived at a duplicate, we basically are saying for types `a` and `b`:
+            // a == b <-> a == b
+            // which is of course true, ergo we can return true without recursing further
+            if ( stl::contains(_assignableCache.at(_id), other->getId()) ) return true;
+
             auto otherObject = dynamic_cast<const Object*>(other);
             auto properties = otherObject->getCollapsedProperties();
             auto otherIter = properties.begin();
+            // assume objects to be equal until proven otherwise (because of recursive types)
+            _assignableCache[_id].insert(other->getId());
             for ( ; otherIter != properties.end(); ++otherIter ) {
                 auto thisResult = getProperty(otherIter->first);
                 if ( thisResult == nullptr ) {
                     // We don't have a required property on the base type
+                    _assignableCache[_id].erase(other->getId());
                     return false;
                 }
 
                 if ( !thisResult->isAssignableTo(otherIter->second) ) {
                     // Our property has an incompatible type
+                    _assignableCache[_id].erase(other->getId());
                     return false;
                 }
             }
@@ -790,7 +803,9 @@ namespace swarmc::Type {
         }
 
         [[nodiscard]] std::string toString() const override {
-            return "Type::Object<#prop: " + s(_properties.size()) + ", parent: " + s(_parent) + ">";
+            if ( _final )
+                return "Type::Object<#prop: " + s(_properties.size()) + ", parent: " + s(_parent) + ">";
+            return "Type::Object<final: false, #prop: " + s(_properties.size()) + ", parent: " + s(_parent) + ">";
         }
     protected:
         bool _final = false;

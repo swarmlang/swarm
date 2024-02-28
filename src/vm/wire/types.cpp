@@ -15,6 +15,8 @@ namespace swarmc::Runtime {
             binn_map_set_map(binn, BC_EXTRA, type->getExtraSerialData());
             return binn;
         };
+        // used for preventing recursive object types from exploding the stack
+        static auto CurrentObjectR = std::stack<const Type::Object*>();
 
         // Primitive types
         factory->registerReducer("Type::Primitive", common);
@@ -116,6 +118,16 @@ namespace swarmc::Runtime {
         // FIXME: remove OTYPE intrinsic??
         factory->registerReducer(s(Type::Intrinsic::OBJECT), [factory, common](const Type::Type* t, auto) {
             auto o = dynamic_cast<const Type::Object*>(t);
+            // replace recursive references with p:THIS
+            if ( !CurrentObjectR.empty() ) {
+                auto top = CurrentObjectR.top();
+                // only check 1 way because of potentially circular references
+                // case where `o` is a subclass of `top` should be handled in the normal case
+                if (top->isAssignableTo(o)) {
+                    return common(Type::Primitive::of(Type::Intrinsic::THIS), nullptr);
+                }
+            }
+            CurrentObjectR.push(o);
             auto binn = common(o, nullptr);
 
             auto parent = o->getParent();
@@ -134,10 +146,18 @@ namespace swarmc::Runtime {
             if ( parent != nullptr ) {
                 binn_map_set_map(binn, BC_PARENT, factory->reduce(parent, nullptr));
             }
+            CurrentObjectR.pop();
 
             return binn;
         });
-        factory->registerProducer(s(Type::Intrinsic::OBJECT), [factory](binn* obj, auto) {
+        factory->registerProducer(s(Type::Intrinsic::OBJECT), [factory](binn* obj, auto) -> Type::Type* {
+            auto intrinsic = (Type::Intrinsic) binn_map_uint64(obj, BC_INTRINSIC);
+            // `THIS` will appear in recursive types during serialization
+            // Since we are reconstructing the type, all recursive references
+            // should stay as `THIS` until o->finalize() is called
+            if ( intrinsic == Type::Intrinsic::THIS ) {
+                return Type::Primitive::of(Type::Intrinsic::THIS);
+            }
             auto isFinal = binn_map_bool(obj, BC_FINAL);
             auto binnPropertyKeys = binn_map_list(obj, BC_OTYPE_K);
             auto binnPropertyValues = binn_map_list(obj, BC_OTYPE_V);
@@ -191,7 +211,7 @@ namespace swarmc::Runtime {
             return binn;
         };
         auto lambdaProducer = [factory](binn* obj, auto) {
-            Type::Lambda* l = new Type::Lambda0(factory->produce((binn*) binn_map_map(obj, BC_RETURNS), nullptr));
+            Type::Type* l = factory->produce((binn*) binn_map_map(obj, BC_RETURNS), nullptr);
 
             binn* params = (binn*) binn_map_list(obj, BC_PARAMS);
             binn_iter iter;
@@ -199,6 +219,11 @@ namespace swarmc::Runtime {
 
             binn_list_foreach(params, param) {
                 l = new Type::Lambda1(factory->produce(&param, nullptr), l);
+            }
+
+            // there were no params
+            if ( l->intrinsic() != Type::Intrinsic::LAMBDA1 ) {
+                l = new Type::Lambda0(l);
             }
 
             l->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));

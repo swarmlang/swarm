@@ -815,7 +815,7 @@ protected:
         _inFunction++;
         instrs->push_back(useref(new ISA::BeginFunction(name, retType)));
         if ( !_isMemberFunctionOf.empty() ) {
-            _constructing.push(std::make_pair(makeNewTmp(ISA::Affinity::LOCAL, instrs), _isMemberFunctionOf.top()));
+            _constructing.push(std::make_pair(makeNewTmp(ISA::Affinity::LOCAL, nullptr), _isMemberFunctionOf.top()));
             instrs->push_back(useref(new ISA::FunctionParam(
                 getTypeRef(_isMemberFunctionOf.top()),
                 _constructing.top().first
@@ -1010,6 +1010,7 @@ protected:
 
         auto transformedFunction = new std::vector<ISA::Instruction*>;
 
+        _inFunction++;
         // change ret type to object from void
         transformedFunction->push_back(useref(new ISA::BeginFunction(
             ((ISA::BeginFunction*)function->front())->first()->name(),
@@ -1017,8 +1018,8 @@ protected:
         )));
         freeref(function->front());
         function->erase(function->begin());
-        transformedFunction->push_back(useref(new ISA::ScopeOf(obj)));
 
+        // fnparams
         while ( true ) {
             if ( function->empty() ) break;
             auto front = *function->begin();
@@ -1030,8 +1031,12 @@ protected:
 
             break;
         }
+        transformedFunction->push_back(useref(new ISA::ScopeOf(
+            makeLocation(ISA::Affinity::LOCAL, "retVal", nullptr)
+        )));
 
         // initialize object
+        transformedFunction->push_back(useref(new ISA::ScopeOf(obj)));
         transformedFunction->push_back(useref(new ISA::AssignEval(obj, new ISA::ObjInit(new ISA::ObjectTypeReference(rettype)))));
 
         // insert default values
@@ -1060,7 +1065,7 @@ protected:
         auto j = transformedFunction->rbegin();
         do { j++; } while ( (*j)->tag() != ISA::Tag::RETURN0 );
         transformedFunction->insert((j + 1).base(), useref(new ISA::AssignEval(
-            makeLocation(ISA::Affinity::LOCAL, "retVal", transformedFunction),
+            makeLocation(ISA::Affinity::LOCAL, "retVal", nullptr),
             new ISA::ObjInstance(obj)
         )));
         // change return0 to return retval
@@ -1068,6 +1073,7 @@ protected:
         *(j - 1) = useref(new ISA::Return1(
             makeLocation(ISA::Affinity::LOCAL, "retVal", nullptr)
         ));
+        _inFunction--;
 
          // remove unnecessary temp assignment
         freeref(transformedFunction->back());
@@ -1117,12 +1123,11 @@ private:
     Type::Type* thisify(Type::Type* type, Type::Type* comp) const {
         if (comp == nullptr) return type;
         if (type->isAssignableTo(comp)) return Type::Primitive::of(Type::Intrinsic::THIS);
-        auto t = type->copy();
-        t->transform([comp](Type::Type* t) -> Type::Type* {
+        type->transform([comp](Type::Type* t) -> Type::Type* {
             if (t->isAssignableTo(comp)) return Type::Primitive::of(Type::Intrinsic::THIS);
             return t;
         });
-        return t;
+        return type;
     }
 
     ISA::LocationReference* makeLocation(ISA::Affinity aff, std::string name, ISA::Instructions* instrs) {
