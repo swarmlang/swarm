@@ -11,6 +11,7 @@
 #include "count.h"
 #include "time_helpers.h"
 #include "vectors.h"
+#include "SocketResource.h"
 
 
 namespace swarmc::Runtime::Prologue {
@@ -49,6 +50,9 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "MATRIX_TO_STRING" ) return new MatrixToStringFunction(this);
         if ( name == "SUBVECTOR" ) return new SubVectorFunction(this);
         if ( name == "SUBMATRIX" ) return new SubMatrixFunction(this);
+        if ( name == "SOCKET_T" ) return new SocketTFunction(this);
+        if ( name == "SOCKET" ) return new SocketFunction(this);
+
         return nullptr;
     }
 

@@ -145,6 +145,10 @@ number {
 	return makeBareToken(TokenKind::NUMBER);
 }
 
+socket {
+	return makeBareToken(TokenKind::SOCKET);
+}
+
 bool {
 	return makeBareToken(TokenKind::BOOL);
 }

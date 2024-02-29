@@ -106,7 +106,7 @@ protected:
                 auto sym = (VariableSymbol*)_symbols->lookup(name);
                 sym->setObjectType(objtype);
             }
-            
+
             // Call this to attach the Symbol to the IdentifierNode
             walk(node->id());
             // Check the RHS of the assignment
@@ -221,7 +221,7 @@ protected:
 
     bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
         bool flag = true;
-        
+
         for ( auto actual : *node->actuals() ) {
             flag = walk(actual) && flag;
         }

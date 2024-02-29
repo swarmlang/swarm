@@ -200,6 +200,12 @@ namespace swarmc::Lang {
         auto tag = new PrologueFunctionSymbol("tag", typeStringStringTag, new ProloguePosition("tag"), "TAG");
         prologueScope->insert(tag);
 
+        auto socketType = new Type::Resource(Type::Opaque::of("PROLOGUE::SOCKET"));
+        auto typeSocketInner = new Type::Lambda1(Type::Primitive::of(Type::Intrinsic::NUMBER), socketType);
+        auto typeSocket = new Type::Lambda1(Type::Primitive::of(Type::Intrinsic::NUMBER), typeSocketInner);
+        auto openSocket = new PrologueFunctionSymbol("openSocket", typeSocket, new ProloguePosition("openSocket"), "SOCKET");
+        prologueScope->insert(openSocket);
+
         auto fileType = new Type::Resource(Type::Opaque::of("PROLOGUE::FILE"));
 
         auto typeStringFile = new Type::Lambda1(

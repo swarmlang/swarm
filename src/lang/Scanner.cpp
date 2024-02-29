@@ -22,6 +22,7 @@ namespace nslib {
         if (token == swarmc::Lang::Parser::token::ASSIGN) return "ASSIGN";
         if (token == swarmc::Lang::Parser::token::STRING) return "STRING";
         if (token == swarmc::Lang::Parser::token::NUMBER) return "NUMBER";
+        if (token == swarmc::Lang::Parser::token::SOCKET) return "SOCKET";
         if (token == swarmc::Lang::Parser::token::BOOL) return "BOOL";
         if (token == swarmc::Lang::Parser::token::VOID) return "VOID";
         if (token == swarmc::Lang::Parser::token::NUMBERLITERAL) return "NUMBERLITERAL";

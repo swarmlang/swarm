@@ -110,6 +110,7 @@
 %token <transToken>      ASSIGN
 %token <transToken>      STRING
 %token <transToken>      NUMBER
+%token <transToken>      SOCKET
 %token <transToken>      BOOL
 %token <transToken>      VOID
 %token <transToken>      TYPE
@@ -545,8 +546,8 @@ typeid :
         $$ = new TypeLiteral($1->position(), Type::Ambiguous::partial($1));
     }
 
-    | type { 
-        $$ = $1; 
+    | type {
+        $$ = $1;
     }
 
 type :
@@ -558,6 +559,12 @@ type :
 
     | NUMBER {
         auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
+        $$ = new TypeLiteral($1->position(), t);
+        delete $1;
+    }
+
+    | SOCKET {
+        auto t = new Type::Resource(Type::Opaque::of("PROLOGUE::SOCKET"));
         $$ = new TypeLiteral($1->position(), t);
         delete $1;
     }

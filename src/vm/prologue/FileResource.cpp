@@ -3,6 +3,9 @@
 #include "../../shared/nslib.h"
 #include "FileResource.h"
 #include "../isa_meta.h"
+#include "../VirtualMachine.h"
+#include "../runtime/fabric.h"
+
 
 namespace swarmc::Runtime::Prologue {
 
