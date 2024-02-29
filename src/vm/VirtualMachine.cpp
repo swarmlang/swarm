@@ -359,12 +359,19 @@ namespace swarmc::Runtime {
         return job;
     }
 
-    void VirtualMachine::drain() {
+    ReturnMap VirtualMachine::drain() {
+        auto map = ReturnMap();
         for ( auto queue : _queues ) {
             while ( !queue->isEmpty(_queueContexts.top()) ) {
                 whileWaitingForDrain();
             }
+            auto qm = queue->getJobReturns();
+            map.insert(
+                std::make_move_iterator(qm.begin()), 
+                std::make_move_iterator(qm.end())
+            );
         }
+        return map;
     }
 
     void VirtualMachine::exit() {

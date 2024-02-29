@@ -6,6 +6,7 @@
 #include <random>
 #include <utility>
 #include <chrono>
+#include <unordered_map>
 #include "../../shared/nslib.h"
 #include "interfaces.h"
 
@@ -183,7 +184,10 @@ namespace swarmc::Runtime::SingleThreaded {
      */
     class Queue : public IQueue {
     public:
-        Queue() = default;
+        Queue() : _jobRetMap(new std::unordered_map<QueueContextID, std::unordered_map<JobID, ISA::Reference*>>()) {}
+        ~Queue() {
+            delete _jobRetMap;
+        }
 
         void setContext(QueueContextID ctx) override {
             _context = ctx;
@@ -209,11 +213,30 @@ namespace swarmc::Runtime::SingleThreaded {
             return "SingleThreaded::Queue<ctx: " + _context + ">";
         }
 
+        virtual void setJobReturn(JobID id, ISA::Reference* value) override {
+            if ( value == nullptr ) {
+                Console::get()->debug("Job with ID " + s(id) + " returned");
+                return;
+            }
+            Console::get()->debug("Job with ID " + s(id) + " returned with value " + s(value));
+
+            if ( _jobRetMap->count(_context) == 0 ) {
+                _jobRetMap->insert({ _context, ReturnMap() });
+            }
+            _jobRetMap->at(_context).insert({ id, value });
+        }
+
+        virtual const ReturnMap getJobReturns() override {
+            if ( _jobRetMap->count(_context) ) return _jobRetMap->at(_context);
+            return ReturnMap();
+        }
+
         void tick() override {}
 
     protected:
         JobID _nextId = 0;
         QueueContextID _context;
+        std::unordered_map<QueueContextID, ReturnMap>* _jobRetMap;
     };
 
 

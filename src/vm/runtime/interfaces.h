@@ -38,6 +38,7 @@ namespace swarmc::Runtime {
     using Locks = std::vector<IStorageLock*>;
     using Queues = std::vector<IQueue*>;
     using NodeID = std::string;
+    using ReturnMap = std::unordered_map<JobID, ISA::Reference*>;
 
     /** Tracks the status of a queued function call. */
     enum class JobState: std::size_t {
@@ -214,6 +215,12 @@ namespace swarmc::Runtime {
 
         /** Returns true if there are no pending jobs. */
         virtual bool isEmpty(QueueContextID) = 0;
+
+        /** Add a jobid: return value pair to the current context */
+        virtual void setJobReturn(JobID, ISA::Reference*) = 0;
+
+        /** Get the entire jobid: return value map */
+        virtual const ReturnMap getJobReturns() = 0;
 
         virtual void tick() = 0;
     };

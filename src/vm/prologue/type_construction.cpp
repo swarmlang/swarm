@@ -57,6 +57,32 @@ namespace swarmc::Runtime::Prologue {
         return new ContextIdFunctionCall(_provider, vector, returnType);
     }
 
+    void JobIdFunctionCall::execute(VirtualMachine*) {
+        setReturn(new ISA::TypeReference(jobIdType()));
+    }
+
+    Type::Type* JobIdFunction::returnType() const {
+        return Type::Primitive::of(Type::Intrinsic::TYPE);
+    }
+
+    PrologueFunctionCall* JobIdFunction::call(CallVector vector) const {
+        auto returnType = Type::Primitive::of(Type::Intrinsic::TYPE);
+        return new JobIdFunctionCall(_provider, vector, returnType);
+    }
+
+    void ReturnValueMapFunctionCall::execute(VirtualMachine*) {
+        setReturn(new ISA::TypeReference(returnValueMapType()));
+    }
+
+    Type::Type* ReturnValueMapFunction::returnType() const {
+        return Type::Primitive::of(Type::Intrinsic::TYPE);
+    }
+
+    PrologueFunctionCall* ReturnValueMapFunction::call(CallVector vector) const {
+        auto returnType = Type::Primitive::of(Type::Intrinsic::TYPE);
+        return new ReturnValueMapFunctionCall(_provider, vector, returnType);
+    }
+
 
 
 }

@@ -348,6 +348,34 @@ namespace swarmc::ISA {
             return {};
         }
 
+        SharedLocations walkRetMapHas(RetMapHas* i) override {
+            return walkBinaryReferenceInstruction(i);
+        }
+
+        SharedLocations walkRetMapGet(RetMapGet* i) override {
+            SharedLocations loc;
+
+            if ( i->first()->tag() == ReferenceTag::LOCATION ) {
+                auto sharedFirst = dynamic_cast<LocationReference*>(i->first());
+                if ( sharedFirst->affinity() == Affinity::SHARED ) {
+                    loc.push_back(sharedFirst);
+                }
+            }
+
+            if ( i->second()->tag() == ReferenceTag::LOCATION ) {
+                auto sharedSecond = dynamic_cast<LocationReference*>(i->second());
+                if ( sharedSecond->affinity() == Affinity::SHARED ) {
+                    loc.push_back(sharedSecond);
+                }
+            }
+
+            if ( i->third()->affinity() == Affinity::SHARED ) {
+                loc.push_back(i->third());
+            }
+
+            return loc;
+        }
+
         SharedLocations walkEnterContext(EnterContext* i) override {
             return {};
         }

@@ -282,6 +282,59 @@ namespace swarmc::Runtime {
             return ref;
         });
 
+        // JobID references
+        factory->registerReducer(s(ReferenceTag::JOB_ID), [](const Reference* baseRef, VirtualMachine*) {
+            auto ref = dynamic_cast<const JobIdReference*>(baseRef);
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_ID, ref->id());
+            binn_map_set_map(obj, BC_EXTRA, ref->getExtraSerialData());
+            return obj;
+        });
+        factory->registerProducer(s(ReferenceTag::JOB_ID), [](binn* obj, VirtualMachine*) {
+            auto ref = new JobIdReference(binn_map_uint64(obj, BC_ID));
+            ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return ref;
+        });
+
+        // ReturnValueMap references
+        factory->registerReducer(s(ReferenceTag::RETURN_VALUE_MAP), [factory](const Reference* baseRef, VirtualMachine* vm) {
+            auto ref = dynamic_cast<const ReturnValueMapReference*>(baseRef);
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ref->tag());
+            
+            auto keys = ref->keys();
+            auto binnkeys = binn_list();
+            auto binnvals = binn_list();
+            for ( auto i = 0; i < keys->length(); i++ ) {
+                auto key = dynamic_cast<const JobIdReference*>(keys->get(i))->id();
+                binn_list_add_uint64(binnkeys, key);
+                binn_list_add_map(binnvals, factory->reduce(ref->getReturnValue(key), vm));
+            }
+
+            binn_map_set_list(obj, BC_VECTOR_TYPES, binnkeys);
+            binn_map_set_list(obj, BC_VECTOR_VALUES, binnvals);
+            binn_map_set_uint64(obj, BC_LENGTH, keys->length());
+            binn_map_set_map(obj, BC_EXTRA, ref->getExtraSerialData());
+
+            return obj;
+        });
+        factory->registerProducer(s(ReferenceTag::RETURN_VALUE_MAP), [factory](binn* obj, VirtualMachine* vm) {
+            auto keysbin = (binn*)binn_map_list(obj, BC_VECTOR_TYPES);
+            auto valuesbin = (binn*)binn_map_list(obj, BC_VECTOR_VALUES);
+            auto length = binn_map_uint64(obj, BC_LENGTH);
+
+            Runtime::ReturnMap map;
+            for ( auto i = 0; i < length; i++ ) {
+                map.insert({ 
+                    binn_list_uint64(keysbin, i), 
+                    factory->produce((binn*) binn_list_map(valuesbin, i), vm)
+                });
+            }
+
+            auto ref = new ReturnValueMapReference(map);
+            ref->loadExtraSerialData((binn*) binn_map_map(obj, BC_EXTRA));
+            return ref;
+        });
 
         // String references
         factory->registerReducer(s(ReferenceTag::STRING), [](const Reference* baseRef, VirtualMachine*) {

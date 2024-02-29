@@ -92,6 +92,68 @@ namespace swarmc::Runtime::Prologue {
         }
     };
 
+    inline Type::Opaque* jobIdType() {
+        return Type::Opaque::of("JOB_ID");
+    }
+
+    class JobIdFunctionCall : public PrologueFunctionCall {
+    public:
+        JobIdFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "JOB_ID_T", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "JobIdFunctionCall<>";
+        }
+    };
+
+    class JobIdFunction : public PrologueFunction {
+    public:
+        explicit JobIdFunction(IProvider* provider) : PrologueFunction("JOB_ID_T", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override { return {}; }
+
+        [[nodiscard]] Type::Type* returnType() const override;
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "JobIdFunction<>";
+        }
+    };
+
+    inline Type::Opaque* returnValueMapType() {
+        return Type::Opaque::of("RETURN_VALUE_MAP");
+    }
+
+    class ReturnValueMapFunctionCall : public PrologueFunctionCall {
+    public:
+        ReturnValueMapFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "RETURN_VALUE_MAP_T", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "ReturnValueMapFunctionCall<>";
+        }
+    };
+
+    class ReturnValueMapFunction : public PrologueFunction {
+    public:
+        explicit ReturnValueMapFunction(IProvider* provider) : PrologueFunction("RETURN_VALUE_MAP_T", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override { return {}; }
+
+        [[nodiscard]] Type::Type* returnType() const override;
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "ReturnValueMapFunction<>";
+        }
+    };
+
 }
 
 #endif //SWARM_TYPE_CONSTRUCTION_H

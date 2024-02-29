@@ -41,7 +41,7 @@ namespace swarmc::Runtime::MultiThreaded {
         delete _vm;
     }
 
-    Queue::Queue(VirtualMachine* vm) {
+    Queue::Queue(VirtualMachine* vm) : _jobRetMap(new std::unordered_map<QueueContextID, ReturnMap>()) {
         vm->lifecycle()->listen<VirtualMachineInitializingEvent>([this](VirtualMachineInitializingEvent& e) {
             spawnThreads();
         });
@@ -105,6 +105,7 @@ namespace swarmc::Runtime::MultiThreaded {
             try {
                 Console::get()->debug("Running job: " + s(job));
                 job->getVM()->executeCall(call);
+                setJobReturn(job->id(), call->getReturn());
                 job->setState(JobState::COMPLETE);
                 decrementProcessingCount(jobPair.second);
             } catch (Errors::SwarmError& rte) {
@@ -178,6 +179,26 @@ namespace swarmc::Runtime::MultiThreaded {
         _contextJobsInProgress[context] += 1;
 
         return job;
+    }
+
+    void Queue::setJobReturn(JobID id, ISA::Reference* value) {
+        if ( value == nullptr ) {
+            Console::get()->debug("Job with ID " + s(id) + " returned");
+            return;
+        }
+        Console::get()->debug("Job with ID " + s(id) + " returned with value " + s(value));
+
+        std::unique_lock<std::mutex> queueLock(_queueMutex);
+        if ( _jobRetMap->count(_context) == 0 ) {
+            _jobRetMap->insert({ _context, ReturnMap() });
+        }
+        _jobRetMap->at(_context).insert({ id, value });
+    }
+
+    const ReturnMap Queue::getJobReturns() {
+        std::unique_lock<std::mutex> queueLock(_queueMutex);
+        if ( _jobRetMap->count(_context) ) return _jobRetMap->at(_context);
+        return ReturnMap();
     }
 
     void Queue::decrementProcessingCount(const QueueContextID& context) {

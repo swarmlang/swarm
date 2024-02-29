@@ -64,6 +64,12 @@ namespace swarmc::Runtime {
         /** Cast the reference as a context ID value, or raise an exception. */
         virtual ISA::ContextIdReference* ensureContextId(const ISA::Reference*);
 
+        /** Cast the reference as a Job ID value, or raise an exception. */
+        virtual ISA::JobIdReference* ensureJobId(const ISA::Reference*);
+
+        /** Cast the reference as a ReturnValueMap value, or raise an exception */
+        virtual ISA::ReturnValueMapReference* ensureReturnValueMap(const ISA::Reference*);
+
         /** Cast the reference as a function value, or raise an exception. */
         virtual InlineRefHandle<ISA::FunctionReference> ensureFunction(const InlineRefHandle<ISA::Reference>& ref);
 
@@ -145,6 +151,8 @@ namespace swarmc::Runtime {
         ISA::Reference* walkPushCallElse0(ISA::PushCallElse0*) override;
         ISA::Reference* walkPushCallElse1(ISA::PushCallElse1*) override;
         ISA::Reference* walkDrain(ISA::Drain*) override;
+        ISA::Reference* walkRetMapHas(ISA::RetMapHas*) override;
+        ISA::Reference* walkRetMapGet(ISA::RetMapGet*) override;
         ISA::Reference* walkEnterContext(ISA::EnterContext*) override;
         ISA::Reference* walkResumeContext(ISA::ResumeContext*) override;
         ISA::Reference* walkPopContext(ISA::PopContext*) override;

@@ -95,6 +95,10 @@ namespace swarmc::Runtime::MultiThreaded {
     public:
         explicit Queue(VirtualMachine*);
 
+        ~Queue() {
+            delete _jobRetMap;
+        }
+
         void setContext(QueueContextID ctx) override {
             std::unique_lock<std::mutex> queueLock(_queueMutex);
             _context = ctx;
@@ -130,6 +134,10 @@ namespace swarmc::Runtime::MultiThreaded {
 
         void tryToProcessJob();
 
+        virtual void setJobReturn(JobID id, ISA::Reference* value) override;
+
+        virtual const ReturnMap getJobReturns() override;
+
     protected:
         JobID _nextId = 0;
         QueueContextID _context;
@@ -138,6 +146,7 @@ namespace swarmc::Runtime::MultiThreaded {
         std::vector<IThreadContext*> _threads;
         std::map<QueueContextID, std::queue<IQueueJob*>> _contextQueues;
         std::map<QueueContextID, std::size_t> _contextJobsInProgress;
+        std::unordered_map<QueueContextID, ReturnMap>* _jobRetMap;
 
         bool _shouldExit = false;
 

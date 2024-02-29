@@ -58,8 +58,10 @@ Shared storage is global across all jobs that have access to a location.
   - `callelse $lloc ...` - behaves like `call ...` if `$lloc` is valued as `false`
   - `exit` - terminate execution
 - Queue operations
-  - `pushcall{,if,else} ...` - behaves like the call derivatives, but pushes the execution of the function onto the work queue
-  - `drain` - wait for the current context's work queue to finish
+  - `pushcall{,if,else} ...` - behaves like the call derivatives, but pushes the execution of the function onto the work queue. Returns the job ID of the pushed job
+  - `drain` - wait for the current context's work queue to finish. Returns a map from job IDs to return values
+  - `retmaphas $lloc1 $lloc2` - check if the return value of job ID `$lloc2` is in the return value map `$lloc1`
+  - `retmapget $lloc1 $lloc2 $loc` - assign the return value of job ID `$lloc2` stored in `$lloc1` to `$loc`
   - `entercontext` - enter a new queue context for job batching
   - `resumecontext $lloc1` - return to the queue context with ID `$lloc1` (of `p:CONTEXT_ID`)
   - `popcontext` - exits the current queue context, returning a `p:CONTEXT_ID`
@@ -196,12 +198,13 @@ EXPRESSION ::= curry | call
          | gt | gte | lt | lte
          | otypeinit | otypeget | otypefinalize | otypesubset
          | objinit | objget | objinstance | objcurry
+         | pushcall | drain | retmaphas
 OPERATION ::= out | err | beginfn | fnparam | return
-              | callif | callelse | pushcall | pushcallif | pushcallelse | drain | exit
+              | callif | callelse | pushcallif | pushcallelse | exit
               | entercontext | resumecontext | popcontext
               | streampush | streamclose
               | typify | lock | unlock | scopeof
-              | mapset
+              | mapset | retmapget
               | enumappend | enumprepend | enumerate
               | while | with
               | pushexhandler | popexhandler | raise | resume
@@ -227,6 +230,8 @@ SVI ::= INST EOF | INST \n INSTS
   - `f:LAMBDA0_T r` - constructs a lambda type of the form `() -> r`
   - `f:LAMBDA1_T a r` - constructs a lambda type of the form `a -> r`
   - `f:CONTEXT_ID_T` - constructs the opaque `p:CONTEXT_ID` type
+  - `f:JOB_ID_T` - constructs the opaque `p:JOB_ID` type
+  - `f:RETURN_VALUE_MAP_T` - construct the opaque `p:RETURN_VALUE_MAP` type
 
 ### Examples
 

@@ -179,8 +179,7 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     bool RedisQueue::isEmpty(QueueContextID id) {
-        return !_redis->exists(Configuration::REDIS_PREFIX + "queue_" + _context)
-            && _redis->hget(Configuration::REDIS_PREFIX + "contextProgress", _context).value_or("0") == "0";
+        return !_redis->exists(Configuration::REDIS_PREFIX + "queue_" + _context) && finished(_context);
     }
 
     void RedisQueue::tick() {
@@ -192,16 +191,24 @@ namespace swarmc::Runtime::RedisDriver {
         auto job = tryGetJob();
         // we have to restore the vm, so we need a Jobject that contains State and ScopeFrame info
         auto redisjob = dynamic_cast<RedisQueueJob*>(job.first);
+
         if ( job.first != nullptr ) {
             try {
                 Console::get()->debug("Running job: " + s(redisjob));
-                _vm->copy([redisjob](VirtualMachine* vm) -> void {
+
+                ISA::Reference* ret = nullptr;
+                _vm->copy([redisjob, &ret](VirtualMachine* vm) -> void {
                     vm->restore(nullptr, redisjob->getVMState());
                     vm->restore(Wire::scopes()->produce(redisjob->getScopeBinn(), vm));
                     vm->addStore(redisjob->getLocalStore());
                     auto call = useref(Wire::calls()->produce(redisjob->getCallBin(), vm));
                     vm->executeCall(call);
+                    if ( call->returnType()->intrinsic() != Type::Intrinsic::VOID ) {
+                        ret = call->getReturn();
+                    }
                 });
+
+                setJobReturn(redisjob->id(), ret);
                 redisjob->setState(JobState::COMPLETE);
             } catch (Errors::SwarmError& e) {
                 Console::get()->error(e.what());
@@ -246,9 +253,9 @@ namespace swarmc::Runtime::RedisDriver {
         if ( !job ) return nullptr;
         std::map<std::string, std::string> jobValues;
         _redis->hgetall(job.value(), std::inserter(jobValues, jobValues.begin()));
-        for ( const auto& p : jobValues ) {
-            _redis->hdel(job.value(), p.first);
-        }
+        // for ( const auto& p : jobValues ) {
+        //     _redis->hdel(job.value(), p.first);
+        // }
 
         auto statebin = redisRead(jobValues["VMState"]);
         auto storebin = redisRead(jobValues["LocalStore"]);
@@ -263,6 +270,16 @@ namespace swarmc::Runtime::RedisDriver {
         binn_free(storebin);
 
         return qjob;
+    }
+
+    bool RedisQueue::finished(const QueueContextID& context) {
+        // return true if context never existed or has been removed from redis
+        auto contextExists = _redis->hget(Configuration::REDIS_PREFIX + "contexts", context);
+        if ( !contextExists ) return true;
+        // return true only if contextProgress exists and is 0
+        auto val = _redis->hget(Configuration::REDIS_PREFIX + "contextProgress", context);
+        if ( val ) return val.value() == "0";
+        return false;
     }
 
     Stream::~Stream() noexcept {

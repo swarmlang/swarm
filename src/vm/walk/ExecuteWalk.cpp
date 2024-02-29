@@ -159,6 +159,28 @@ namespace swarmc::Runtime {
         return (ContextIdReference*) ref;
     }
 
+    JobIdReference* ExecuteWalk::ensureJobId(const Reference* ref) {
+        verbose("ensureJobId: " + ref->toString());
+        if ( ref->tag() != ReferenceTag::JOB_ID ) {
+            throw new Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::JOB_ID) + ")"
+            );
+        }
+        return (JobIdReference*) ref;
+    }
+
+    ReturnValueMapReference* ExecuteWalk::ensureReturnValueMap(const ISA::Reference* ref) {
+        verbose("ensureReturnValueMap: " + ref->toString());
+        if ( ref->tag() != ReferenceTag::RETURN_VALUE_MAP ) {
+            throw new Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidReferenceImplementation,
+                "Reference " + s(ref) + " has type " + ref->typei()->toString() + " but invalid tag " + s(ref->tag()) + " (expected tag: " + s(ReferenceTag::RETURN_VALUE_MAP) + ")"
+            );
+        }
+        return (ReturnValueMapReference*) ref;
+    }
+
     InlineRefHandle<FunctionReference> ExecuteWalk::ensureFunction(const InlineRefHandle<Reference>& ref) {
         return inlineref<FunctionReference>(ensureFunction(ref.get()));
     }
@@ -672,8 +694,8 @@ namespace swarmc::Runtime {
         verbose("pushcall0 " + i->first()->toString());
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto call = fn->fn()->call();
-        _vm->pushCall(call);
-        return call->getReturn();
+        auto job = _vm->pushCall(call);
+        return new JobIdReference(job->id());
     }
 
     Reference* ExecuteWalk::walkPushCall1(PushCall1* i) {
@@ -681,8 +703,8 @@ namespace swarmc::Runtime {
         auto fn = ensureFunction(_vm->resolve(i->first()));
         auto param = _vm->resolve(i->second());
         auto call = fn->fn()->curryi(param)->call();
-        _vm->pushCall(call);
-        return call->getReturn();
+        auto job = _vm->pushCall(call);
+        return new JobIdReference(job->id());
     }
 
     Reference* ExecuteWalk::walkPushCallIf0(PushCallIf0* i) {
@@ -721,7 +743,44 @@ namespace swarmc::Runtime {
 
     Reference* ExecuteWalk::walkDrain(Drain*) {
         verbose("drain");
-        _vm->drain();
+        return new ISA::ReturnValueMapReference(_vm->drain());
+    }
+
+    Reference* ExecuteWalk::walkRetMapHas(RetMapHas* i) {
+        verbose("retmaphas " + i->first()->toString() + " " + i->second()->toString());
+        auto retMap = ensureReturnValueMap(_vm->resolve(i->first()));
+        auto jobId = ensureJobId(_vm->resolve(i->second()));
+        return new BooleanReference(retMap->has(jobId->id()));
+    }
+
+    Reference* ExecuteWalk::walkRetMapGet(RetMapGet* i) {
+        verbose("retmapget " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
+        auto retMap = ensureReturnValueMap(_vm->resolve(i->first()));
+        auto jobId = ensureJobId(_vm->resolve(i->second()));
+        auto loc = i->third();
+        
+        // attempt to get return value
+        auto value = retMap->getReturnValue(jobId->id());
+        if ( value == nullptr ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::InvalidMapKey,
+                "ReturnValueMap " + s(retMap) + " does not contain the return value for job with the ID " + s(jobId)
+            );
+        }
+
+        if ( loc->typei()->isAmbiguous() ) {
+            loc->setType(value->type());
+        }
+
+        if ( !value->typei()->isAssignableTo(loc->typei()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Value " + s(value) + " has type which is incompatible with location " + s(loc) + " (expected: " + s(loc->typei()) + ", got: " + s(value->typei()) + ")"
+            );
+        }
+
+        debug(loc->toString() + " <- " + value->toString());
+        _vm->store(loc, value);
         return nullptr;
     }
 

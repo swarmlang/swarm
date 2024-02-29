@@ -187,6 +187,24 @@ namespace swarmc::ISA {
         }
     };
 
+    class RetMapHas : public BinaryReferenceInstruction {
+    public:
+        RetMapHas(Reference* retMap, Reference* jobId) : 
+            BinaryReferenceInstruction(Tag::RETMAPHAS, retMap, jobId) {}
+        [[nodiscard]] RetMapHas* copy() const override {
+            return new RetMapHas(_first->copy(), _second->copy());
+        }
+    };
+
+    class RetMapGet : public TrinaryInstruction<Reference, Reference, LocationReference> {
+    public:
+        RetMapGet(Reference* retMap, Reference* jobId, LocationReference* output) : 
+            TrinaryInstruction<Reference, Reference, LocationReference>(Tag::RETMAPGET, retMap, jobId, output) {}
+        [[nodiscard]] RetMapGet* copy() const override {
+            return new RetMapGet(_first->copy(), _second->copy(), _third->copy());
+        }
+    };
+
     class EnterContext : public NullaryInstruction {
     public:
         EnterContext() : NullaryInstruction(Tag::ENTERCONTEXT) {}

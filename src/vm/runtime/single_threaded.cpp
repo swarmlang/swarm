@@ -137,12 +137,15 @@ namespace swarmc::Runtime::SingleThreaded {
     }
 
     void Queue::push(VirtualMachine* vm, IQueueJob* job) {
-        vm->copy([job](VirtualMachine* clonedVm) {
+        ISA::Reference* ret = nullptr;
+        vm->copy([job, &ret](VirtualMachine* clonedVm) {
             // FIXME: handle errors
             Console::get()->debug("Got VM from queue: " + clonedVm->toString());
             clonedVm->executeCall(job->getCall());
+            ret = job->getCall()->getReturn();
             job->setState(JobState::COMPLETE);
         });
+        setJobReturn(job->id(), ret);
     }
 
 

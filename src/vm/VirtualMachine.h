@@ -310,7 +310,7 @@ namespace swarmc::Runtime {
         virtual IQueueJob* pushCall(IFunctionCall*);
 
         /** Wait for all jobs in the current queue context to finish. */
-        virtual void drain();
+        virtual ReturnMap drain();
 
         /** Immediately stop execution. */
         virtual void exit();

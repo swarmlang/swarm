@@ -183,6 +183,37 @@ namespace swarmc::Runtime::RedisDriver {
             _redis->setnx(Configuration::REDIS_PREFIX + "nextJobID", "0");
         }
 
+        virtual void setJobReturn(JobID id, ISA::Reference* value) override {
+            if ( value == nullptr ) {
+                Console::get()->debug("Job with ID " + s(id) + " returned");
+                return;
+            }
+            Console::get()->debug("Job with ID " + s(id) + " returned with value " + s(value));
+            
+            auto refbin = Wire::references()->reduce(value, _vm);
+            std::string refstr((char*) binn_ptr(refbin), binn_size(refbin));
+            binn_free(refbin);
+            _redis->hset(s(_context), s(id), refstr);
+        }
+
+        const ReturnMap getJobReturns() override {
+            std::unordered_map<std::string, std::string> map;
+            ReturnMap deserialMap;
+
+            _redis->hgetall(_context, std::inserter(map, map.begin()));
+            for ( auto p : map ) {
+                std::size_t jobId;
+                sscanf(p.first.c_str(), "%zu", &jobId);
+                auto retbinn = redisRead(p.second);
+                deserialMap.insert({
+                    static_cast<JobID>(jobId), 
+                    Wire::references()->produce(retbinn, _vm)
+                });
+            }
+
+            return deserialMap;
+        }
+
         [[nodiscard]] std::string toString() const override {
             return "RedisDriver::RedisQueue<ctx: " + _context + ">";
         }
@@ -194,6 +225,8 @@ namespace swarmc::Runtime::RedisDriver {
         void tryToProcessJob();
         std::pair<IQueueJob*, QueueContextID> tryGetJob();
         IQueueJob* popFromContext(const QueueContextID&);
+
+        bool finished(const QueueContextID& context);
     };
 
     class Stream : public IStream {

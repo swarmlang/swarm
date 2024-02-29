@@ -66,6 +66,8 @@ namespace swarmc::ISA {
             if ( inst->tag() == Tag::PUSHCALLELSE0 ) return walkPushCallElse0((PushCallElse0*) inst);
             if ( inst->tag() == Tag::PUSHCALLELSE1 ) return walkPushCallElse1((PushCallElse1*) inst);
             if ( inst->tag() == Tag::DRAIN ) return walkDrain((Drain*) inst);
+            if ( inst->tag() == Tag::RETMAPHAS ) return walkRetMapHas((RetMapHas*) inst);
+            if ( inst->tag() == Tag::RETMAPGET ) return walkRetMapGet((RetMapGet*) inst);
             if ( inst->tag() == Tag::ENTERCONTEXT ) return walkEnterContext((EnterContext*) inst);
             if ( inst->tag() == Tag::RESUMECONTEXT ) return walkResumeContext((ResumeContext*) inst);
             if ( inst->tag() == Tag::POPCONTEXT ) return walkPopContext((PopContext*) inst);
@@ -167,6 +169,8 @@ namespace swarmc::ISA {
         virtual TReturn walkPushCallElse0(PushCallElse0*) = 0;
         virtual TReturn walkPushCallElse1(PushCallElse1*) = 0;
         virtual TReturn walkDrain(Drain*) = 0;
+        virtual TReturn walkRetMapHas(RetMapHas*) = 0;
+        virtual TReturn walkRetMapGet(RetMapGet*) = 0;
         virtual TReturn walkEnterContext(EnterContext*) = 0;
         virtual TReturn walkResumeContext(ResumeContext*) = 0;
         virtual TReturn walkPopContext(PopContext*) = 0;

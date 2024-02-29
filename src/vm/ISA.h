@@ -44,6 +44,8 @@ namespace swarmc::ISA {
         PUSHCALLELSE0,
         PUSHCALLELSE1,
         DRAIN,
+        RETMAPHAS,
+        RETMAPGET,
         ENTERCONTEXT,
         RESUMECONTEXT,
         POPCONTEXT,
@@ -142,6 +144,8 @@ namespace swarmc::ISA {
         OTYPE,
         OBJECT,
         CONTEXT_ID,
+        JOB_ID,
+        RETURN_VALUE_MAP,
     };
 }
 
@@ -408,6 +412,36 @@ namespace swarmc::ISA {
 
     protected:
         Runtime::QueueContextID _id;
+    };
+
+    class JobIdReference : public Reference {
+    public:
+        explicit JobIdReference(Runtime::JobID id) : Reference(ReferenceTag::JOB_ID), _id(id) {}
+
+        [[nodiscard]] std::string toString() const override {
+            return "JobIdReference<job: " + s(_id) + ">";
+        }
+
+        [[nodiscard]] Type::Type* type() const override {
+            return Type::Opaque::of("JOB_ID");
+        }
+
+        [[nodiscard]] virtual Runtime::JobID id() const {
+            return _id;
+        }
+
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != _tag ) return false;
+            auto ref = (JobIdReference*) other;
+            return ref->id() == _id;
+        }
+
+        [[nodiscard]] JobIdReference* copy() const override {
+            return new JobIdReference(_id);
+        }
+
+    protected:
+        Runtime::JobID _id;
     };
 
     /** A type literal */
@@ -853,7 +887,7 @@ namespace swarmc::ISA {
             auto ref = (MapReference*) other;
             if ( ref->length() != length() ) return false;
             return std::all_of(_items.begin(), _items.end(), [ref](const std::pair<std::string, Reference*>& item) {
-                return item.second->isEqualTo(ref->get(item.first));
+                return ref->has(item.first) && item.second->isEqualTo(ref->get(item.first));
             });
         }
 
@@ -868,6 +902,60 @@ namespace swarmc::ISA {
     protected:
         std::map<std::string, Reference*> _items;
         Type::Type* _innerType;
+    };
+
+    class ReturnValueMapReference : public Reference {
+    public:
+        explicit ReturnValueMapReference(Runtime::ReturnMap returnValues) : Reference(ReferenceTag::RETURN_VALUE_MAP), _returnValues(returnValues) {}
+
+        [[nodiscard]] std::string toString() const override {
+            return "ReturnValueMapReference<#values: " + s(_returnValues.size()) + ">";
+        }
+
+        [[nodiscard]] Type::Type* type() const override {
+            return Type::Opaque::of("RETURN_VALUE_MAP");
+        }
+
+        [[nodiscard]] virtual bool has(Runtime::JobID id) const {
+            return _returnValues.count(id);
+        }
+
+        [[nodiscard]] virtual std::size_t length() const {
+            return _returnValues.size();
+        }
+
+        [[nodiscard]] virtual EnumerationReference* keys() const {
+            auto er = new EnumerationReference(Type::Opaque::of("JOB_ID_T"));
+            for ( const auto& item : _returnValues ) {
+                er->append(new JobIdReference(item.first));
+            }
+            return er;
+        }
+
+        [[nodiscard]] virtual ISA::Reference* getReturnValue(Runtime::JobID id) const {
+            if ( has(id) ) return _returnValues.at(id);
+            return nullptr;
+        }
+
+        bool isEqualTo(const Reference* other) const override {
+            if ( other->tag() != _tag ) return false;
+            auto ref = (ReturnValueMapReference*) other;
+            if ( _returnValues.size() != ref->length() ) return false;
+            return std::all_of(_returnValues.begin(), _returnValues.end(), [ref](std::pair<Runtime::JobID, ISA::Reference*> p) {
+                return ref->has(p.first) && p.second->isEqualTo(ref->getReturnValue(p.first));
+            });
+        }
+
+        [[nodiscard]] ReturnValueMapReference* copy() const override {
+            Runtime::ReturnMap map;
+            for ( auto p : _returnValues ) {
+                map.insert({ p.first, p.second->copy() });
+            }
+            return new ReturnValueMapReference(map);
+        }
+
+    protected:
+        Runtime::ReturnMap _returnValues;
     };
 
 
