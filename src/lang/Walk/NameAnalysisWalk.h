@@ -292,12 +292,18 @@ protected:
 
     bool walkIfStatement(IfStatement* node) override {
         bool flag = walk(node->condition());
-        return walkBlockStatementNode(node) && flag;
+        _symbols->enter();
+        flag = walkBlockStatementNode(node) && flag;
+        _symbols->leave();
+        return flag;
     }
 
     bool walkWhileStatement(WhileStatement* node) override {
         bool flag = walk(node->condition());
-        return walkBlockStatementNode(node) && flag;
+        _symbols->enter();
+        flag = walkBlockStatementNode(node) && flag;
+        _symbols->leave();
+        return flag;
     }
 
     bool walkContinueNode(ContinueNode* node) override {
