@@ -14,13 +14,12 @@ namespace swarmc::Lang::Walk {
 class ToISAWalk : public Walk<ISA::Instructions*> {
 public:
     ToISAWalk() : Walk<ISA::Instructions*>(),
-        _tempCounter(0), _inFunction(0), _whileConds(new std::stack<std::string>()),
+        _tempCounter(0), _inFunction(0),
         _typeMap(new std::map<std::size_t, ISA::TypeReference*>()),
         _locMap(new std::map<std::string, ISA::LocationReference*>()),
         _deferredRetLocs(new std::set<ISA::LocationReference*>()) {}
 
     ~ToISAWalk() override {
-        delete _whileConds;
         for (auto p : *_typeMap) freeref(p.second);
         for (auto p : *_locMap) freeref(p.second);
         for (auto l : *_deferredRetLocs) freeref(l);
@@ -572,20 +571,14 @@ protected:
     ISA::Instructions* walkWhileStatement(WhileStatement* node) override {
         auto instrs = new ISA::Instructions();
 
-        auto whileCondLoc = makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr);
-        instrs->push_back(useref(new ISA::AssignValue(
-            whileCondLoc, 
-            new ISA::BooleanReference(false))
-        ));
         // condition function
         std::string condName = "WHILECOND_" + std::to_string(_tempCounter++);
-        _whileConds->push(condName);
+        auto brk = makeLocation(ISA::Affinity::LOCAL, "break", instrs);
         _inFunction++;
-        instrs->push_back(useref(new ISA::BeginFunction(_whileConds->top(), getTypeRef(Type::Primitive::of(Type::Intrinsic::BOOLEAN)))));
+        instrs->push_back(useref(new ISA::BeginFunction(condName, getTypeRef(Type::Primitive::of(Type::Intrinsic::BOOLEAN)))));
         auto cond = walk(node->condition());
         instrs->insert(instrs->end(), cond->begin(), cond->end());
-        instrs->push_back(useref(new ISA::AssignValue(whileCondLoc, getLocFromAssign(cond->back()))));
-        instrs->push_back(useref(new ISA::Return0()));
+        instrs->push_back(useref(new ISA::Return1(getLocFromAssign(cond->back()))));
         _inFunction--;
 
         // While function header
@@ -596,6 +589,7 @@ protected:
 
         auto cfb = makeLocation(ISA::Affinity::LOCAL, "CFBWhile", instrs);
         instrs->push_back(useref(new ISA::AssignValue(cfb, new ISA::BooleanReference(false))));
+        instrs->push_back(useref(new ISA::AssignValue(brk, new ISA::BooleanReference(false))));
 
         std::queue<ISA::Instructions*> subfuncs;
         std::queue<std::string> funcnames;
@@ -634,34 +628,20 @@ protected:
             funcnames.pop();
         }
 
-        // reevaluate condition
-        instrs->push_back(new ISA::CallElse0(cfb, makeLocation(ISA::Affinity::FUNCTION, condName, nullptr)));
-
         // end of function return
         instrs->push_back(useref(new ISA::Return0()));
         _inFunction--;
 
-        //evaluate condition
-        instrs->push_back(useref(new ISA::Call0(
-            makeLocation(ISA::Affinity::FUNCTION, _whileConds->top(), nullptr)
-        )));
-
         instrs->push_back(useref(new ISA::While(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr),
+            makeLocation(ISA::Affinity::FUNCTION, condName, nullptr),
             makeLocation(ISA::Affinity::FUNCTION, name, nullptr)
         )));
 
-        _whileConds->pop();
         return instrs;
     }
 
     ISA::Instructions* walkContinueNode(ContinueNode* node) override {
         auto instrs = new ISA::Instructions();
-        // evaluate condition
-        instrs->push_back(useref(new ISA::AssignEval(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr),
-            new ISA::Call0(makeLocation(ISA::Affinity::FUNCTION, _whileConds->top(), nullptr))
-        )));
         // skip rest of function
         instrs->push_back(useref(new ISA::AssignValue(
             makeLocation(ISA::Affinity::LOCAL, "CFBWhile", nullptr),
@@ -672,16 +652,16 @@ protected:
 
     ISA::Instructions* walkBreakNode(BreakNode* node) override {
         auto instrs = new ISA::Instructions();
-        // set condition to false
-        instrs->push_back(useref(new ISA::AssignValue(
-            makeLocation(ISA::Affinity::LOCAL, "whileCond", nullptr),
-            new ISA::BooleanReference(false)
-        )));
         // skip rest of function
         instrs->push_back(useref(new ISA::AssignValue(
             makeLocation(ISA::Affinity::LOCAL, "CFBWhile", nullptr),
             new ISA::BooleanReference(true)
         )));
+        instrs->push_back(useref(new ISA::AssignValue(
+            makeLocation(ISA::Affinity::LOCAL, "break", nullptr),
+            new ISA::BooleanReference(true)
+        )));
+        Console::get()->warn("Hi. If you're reading this, it means you used a break; statement in your code. I realized that because while conditions can have side effects due to function calls, compiling break was gonna get real goofy. I decided I only wanted to do it once and not have to figure it out in this legacy ToISAWalk, so it currently doesnt work");
         return instrs;
     }
 
@@ -1146,7 +1126,6 @@ private:
         return tmp;
     }
 
-    std::stack<std::string>* _whileConds;
     std::stack<Type::Object*> _isMemberFunctionOf;
     std::map<std::size_t, ISA::TypeReference*>* _typeMap;
     std::map<std::string, ISA::LocationReference*>* _locMap;

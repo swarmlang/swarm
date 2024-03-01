@@ -124,7 +124,7 @@ Shared storage is global across all jobs that have access to a location.
   - `lt $lloc1 $lloc2` - check if `$lloc1` is less than `$lloc2`
   - `lte $lloc1 $lloc2` - check if `$lloc1` is less than or equal to `$lloc2`
 - Loop operations
-  - `while $lloc1 $lloc2` - while `$lloc1` is true, call the parameterless function `$lloc2`
+  - `while $lloc1 $lloc2` - while `$lloc1`, of type `:: p:BOOLEAN` returns true, call the parameterless function `$lloc2`
 - Resource operations
   - `with $lloc1 $lloc2` - execute the function at `$lloc2` in the resource `$lloc1`
     - `$lloc2` must take as a parameter the yield type of the resource `$lloc1`

@@ -362,6 +362,29 @@ namespace swarmc::Runtime {
         verbose("while " + i->first()->toString() + " " + i->second()->toString());
 
         // create expected type for callback
+        auto condType = new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::BOOLEAN));
+        GC_LOCAL_REF(condType)
+
+        // load callback function & validate the type
+        auto condFunc = ensureFunction(_vm->resolve(i->first()));
+        GC_LOCAL_REF(condFunc)
+
+        if ( !condFunc->typei()->isAssignableTo(condType) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::WhileCallbackTypeInvalid,
+                "Invalid while condition " + s(condFunc) + " (expected: " + s(condType) + ", got: " + s(condFunc->typei()) + ")"
+            );
+        }
+
+        // evaluate condition
+        auto condCall = condFunc->fn()->call();
+        GC_LOCAL_REF(condCall)
+        _vm->executeCall(condCall);
+        auto cond = ensureBoolean(condCall->getReturn());
+        // so the pc isnt wrong
+        _vm->rewind();
+
+        // create expected type for callback
         auto callbackType = new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID));
         GC_LOCAL_REF(callbackType)
 
@@ -376,7 +399,6 @@ namespace swarmc::Runtime {
             );
         }
 
-        auto cond = ensureBoolean(_vm->resolve(i->first()));
         if ( cond->value() ) {
             // we want the VM to re-evaluate the condition after the call completes,
             // so rewind the program counter by one so the return jump is correct
