@@ -106,9 +106,11 @@ namespace swarmc::Runtime {
 
     InlineFunction* VirtualMachine::loadInlineFunction(const std::string& name) {
         auto pc = _state->getInlineFunctionPC(name);
+        auto inlineParams = _state->loadInlineFunctionParams(pc);
 
         FormalTypes paramTypes;
-        for ( auto param : _state->loadInlineFunctionParams(pc) ) {
+        paramTypes.reserve(inlineParams.size());
+        for ( auto param : inlineParams ) {
             auto paramType = _exec->ensureType(resolve(param->first()));
             paramTypes.push_back(paramType->value());
         }
@@ -367,7 +369,7 @@ namespace swarmc::Runtime {
             }
             auto qm = queue->getJobReturns();
             map.insert(
-                std::make_move_iterator(qm.begin()), 
+                std::make_move_iterator(qm.begin()),
                 std::make_move_iterator(qm.end())
             );
         }

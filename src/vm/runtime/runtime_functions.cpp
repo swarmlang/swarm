@@ -1,4 +1,6 @@
 #include "runtime_functions.h"
+
+#include <utility>
 #include "../isa_meta.h"
 
 namespace nslib {
@@ -40,6 +42,27 @@ namespace swarmc::Runtime {
 
     InlineRefHandle<Type::Type> IFunction::returnTypei() const {
         return inlineref<Type::Type>(returnType());
+    }
+
+    IFunction* IFunction::curry(ISA::Reference* ref) {
+        // Make sure we have a param to curry
+        if ( paramTypes().empty() ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Attempted to curry reference " + s(ref) + " into function " + s(this) + " that has no parameters"
+            );
+        }
+
+        // Make sure the parameter is the correct type
+        auto paramType = paramTypes()[0];
+        if ( !ref->typei()->isAssignableTo(paramType) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Attempted to curry reference " + s(ref) + " of type " + s(ref->typei()) + " (expected: " + s(paramType) + ", function: " + s(this) + ")"
+            );
+        }
+
+        return new CurriedFunction(ref, this);
     }
 
     CurriedFunction::CurriedFunction(ISA::Reference* ref, IFunction* upstream):

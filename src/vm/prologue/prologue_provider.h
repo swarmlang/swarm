@@ -45,10 +45,6 @@ namespace swarmc::Runtime::Prologue {
             return {};
         }
 
-        IFunction* curry(ISA::Reference* ref) override {
-            return new CurriedFunction(ref, this);
-        }
-
     protected:
         IProvider* _provider;
     };

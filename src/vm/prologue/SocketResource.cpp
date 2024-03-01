@@ -40,7 +40,7 @@ namespace swarmc::Runtime::Prologue {
 	}
 
 	FormalTypes SocketFunction::paramTypes() const {
-		return {};
+		return {Type::Primitive::of(Type::Intrinsic::NUMBER), Type::Primitive::of(Type::Intrinsic::NUMBER)};
 	}
 
 	Type::Type* SocketFunction::returnType() const {

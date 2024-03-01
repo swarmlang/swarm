@@ -76,10 +76,6 @@ namespace swarmc::Runtime {
             return new Type::Enumerable(Type::Ambiguous::of());
         }
 
-        [[nodiscard]] IFunction* curry(ISA::Reference* ref) override {
-            return new CurriedFunction(ref, this);
-        }
-
         [[nodiscard]] CallVector getCallVector() const override {
             return {};
         }

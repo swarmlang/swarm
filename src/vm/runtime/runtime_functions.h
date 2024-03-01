@@ -127,7 +127,7 @@ namespace swarmc::Runtime {
         [[nodiscard]] virtual InlineRefHandle<Type::Type> returnTypei() const;
 
         /** Get a new IFunction which contains the given parameter, curried into a partial application. */
-        [[nodiscard]] virtual IFunction* curry(ISA::Reference*) = 0;
+        [[nodiscard]] virtual IFunction* curry(ISA::Reference*);
 
         [[nodiscard]] virtual InlineRefHandle<IFunction> curryi(ISA::Reference* ref) {
             return inlineref<IFunction>(curry(ref));
@@ -166,10 +166,6 @@ namespace swarmc::Runtime {
 
         [[nodiscard]] Type::Type* returnType() const override {
             return _upstream->returnType();
-        }
-
-        IFunction* curry(ISA::Reference* ref) override {
-            return new CurriedFunction(ref, this);
         }
 
         [[nodiscard]] CallVector getCallVector() const override {
