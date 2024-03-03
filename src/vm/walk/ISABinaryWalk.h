@@ -410,7 +410,6 @@ namespace swarmc::ISA {
             binn_map_set_uint64(obj, BC_TAG, (std::size_t) retMapGet->tag());
             binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(retMapGet->first(), _vm));
             binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(retMapGet->second(), _vm));
-            binn_map_set_map(obj, BC_THIRD, Wire::references()->reduce(retMapGet->third(), _vm));
             return obj;
         }
 

@@ -571,7 +571,7 @@ namespace swarmc::ISA {
             return _properties;
         }
 
-        [[nodiscard]] ObjectReference* finalize() const {
+        [[nodiscard]] ObjectReference* finalize() {
             // If we have properties set, we know they are valid types,
             // so we just need to check for missing properties.
             if ( _properties.size() != _type->numberOfProperties() ) {
@@ -580,10 +580,9 @@ namespace swarmc::ISA {
                     "Cannot finalize object as it is missing one or more properties defined in the base type " + s(_type)
                 );
             }
-
-            auto inst = copy();
-            inst->_final = true;
-            return inst;
+    
+            _final = true;
+            return this;
         }
 
         [[nodiscard]] bool isEqualTo(const Reference* other) const override {

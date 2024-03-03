@@ -61,7 +61,7 @@ Shared storage is global across all jobs that have access to a location.
   - `pushcall{,if,else} ...` - behaves like the call derivatives, but pushes the execution of the function onto the work queue. Returns the job ID of the pushed job
   - `drain` - wait for the current context's work queue to finish. Returns a map from job IDs to return values
   - `retmaphas $lloc1 $lloc2` - check if the return value of job ID `$lloc2` is in the return value map `$lloc1`
-  - `retmapget $lloc1 $lloc2 $loc` - assign the return value of job ID `$lloc2` stored in `$lloc1` to `$loc`
+  - `retmapget $lloc1 $lloc2` - get the return value of job ID `$lloc2` stored in `$lloc1`
   - `entercontext` - enter a new queue context for job batching
   - `resumecontext $lloc1` - return to the queue context with ID `$lloc1` (of `p:CONTEXT_ID`)
   - `popcontext` - exits the current queue context, returning a `p:CONTEXT_ID`
@@ -198,13 +198,13 @@ EXPRESSION ::= curry | call
          | gt | gte | lt | lte
          | otypeinit | otypeget | otypefinalize | otypesubset
          | objinit | objget | objinstance | objcurry
-         | pushcall | drain | retmaphas
+         | pushcall | drain | retmaphas | retmapget
 OPERATION ::= out | err | beginfn | fnparam | return
               | callif | callelse | pushcallif | pushcallelse | exit
               | entercontext | resumecontext | popcontext
               | streampush | streamclose
               | typify | lock | unlock | scopeof
-              | mapset | retmapget
+              | mapset
               | enumappend | enumprepend | enumerate
               | while | with
               | pushexhandler | popexhandler | raise | resume

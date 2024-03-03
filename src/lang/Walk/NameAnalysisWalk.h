@@ -49,13 +49,21 @@ protected:
         return true;
     }
 
+    bool walkEnumerableAccessNode(EnumerableAccessNode* node) override {
+        bool flag = walk(node->path());
+        return walk(node->index()) && flag;
+    }
+
     bool walkMapAccessNode(MapAccessNode* node) override {
         return walk(node->path());
     }
 
-    bool walkEnumerableAccessNode(EnumerableAccessNode* node) override {
-        bool flag = walk(node->path());
-        return walk(node->index()) && flag;
+    bool walkClassAccessNode(ClassAccessNode* node) override {
+        return walk(node->path()); // property names cant be checked until type analysis
+    }
+
+    bool walkIncludeStatementNode(IncludeStatementNode* node) override {
+        return true;
     }
 
     bool walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
@@ -64,6 +72,62 @@ protected:
 
     bool walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {
         return true;
+    }
+
+    bool walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
+        return true;
+    }
+
+    bool walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
+        return true;
+    }
+
+    bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
+        bool flag = true;
+
+        for ( auto actual : *node->actuals() ) {
+            flag = walk(actual) && flag;
+        }
+
+        return flag;
+    }
+
+    bool walkMapStatementNode(MapStatementNode* node) override {
+        return walk(node->value());
+    }
+
+    bool walkMapNode(MapNode* node) override {
+        bool flag = true;
+        // Check each entry in the map
+        for ( auto entry : *node->body() ) {
+            // Check for duplicate name
+            size_t nameCount = 0;
+            for ( auto subentry : *node->body() ) {
+                if ( subentry->id()->name() == entry->id()->name() && nameCount < 2) {
+                    nameCount += 1;
+                }
+            }
+
+            if ( nameCount > 1 ) {
+                Reporting::nameError(
+                    entry->position(),
+                    "Duplicate map key: \"" + entry->id()->name() + "\""
+                );
+
+                flag = false;
+            }
+
+            // Check the value expression
+            flag = walk(entry) && flag;
+        }
+
+        return flag;
+    }
+
+    bool walkAssignExpressionNode(AssignExpressionNode* node) override {
+        bool lvalResult = walk(node->dest());
+        bool rvalResult = walk(node->value());
+        return lvalResult && rvalResult;
     }
 
     bool walkVariableDeclarationNode(VariableDeclarationNode* node) override {
@@ -84,16 +148,16 @@ protected:
         }
 
         bool valueResult;
-        if ( node->value()->getName() == "FunctionNode" || node->typeNode()->value()->intrinsic() == Type::Intrinsic::TYPE ) {
+        if ( node->value()->getTag() == ASTNodeTag::FUNCTION || node->typeNode()->value()->intrinsic() == Type::Intrinsic::TYPE ) {
             // Add the declaration to the current scope
-            _symbols->addVariable(name, type, node->position(), node->shared());
+            _symbols->addVariable(name, type, node->position(), node->shared(), false);
 
             if ( node->typeNode()->value()->intrinsic() == Type::Intrinsic::TYPE ) {
                 // attach actual value of type to the symbol, for disambiguation of instances of this type
                 TypeLiteral* objtype = nullptr;
-                if ( node->value()->getName() == "TypeLiteral" || node->value()->getName() == "TypeBodyNode" ) {
+                if ( node->value()->getTag() == ASTNodeTag::TYPELITERAL || node->value()->getTag() == ASTNodeTag::TYPEBODY ) {
                     objtype = (TypeLiteral*)node->value();
-                } else if ( node->value()->getName() == "IdentifierNode" ) {
+                } else if ( node->value()->getTag() == ASTNodeTag::IDENTIFIER ) {
                     assert(((IdentifierNode*)node->value())->symbol()->kind() == SemanticSymbolKind::VARIABLE);
                     objtype = ((VariableSymbol*)((IdentifierNode*)node->value())->symbol())->getObjectType();
                 } else {
@@ -115,12 +179,109 @@ protected:
             // Check the RHS of the assignment
             valueResult = walk(node->value());
             // Add the declaration to the current scope
-            _symbols->addVariable(name, type, node->position(), node->shared());
+            _symbols->addVariable(name, type, node->position(), node->shared(), node->value()->getTag() == ASTNodeTag::DEFERCALL);
             // Call this to attach the Symbol to the IdentifierNode
             walk(node->id());
         }
 
         return flag && valueResult;
+    }
+
+    bool walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
+        return true; // symbols should be added to scope during type body
+    }
+
+    bool walkReturnStatementNode(ReturnStatementNode* node) override {
+        if ( node->value() == nullptr ) {
+            return true;
+        }
+
+        return walk(node->value());
+    }
+
+    bool walkFunctionNode(FunctionNode* node) override {
+        bool flag = true;
+        _symbols->enter();
+        for ( auto formal : *node->formals() ) {
+            bool t = formal.first->disambiguateValue() && flag;
+            if ( !t ) {
+                Reporting::nameError(formal.first->position(), "Identifier at " + formal.first->position()->toString() + " does not refer to a type!");
+                flag = false;
+            }
+            flag = walk(formal.first) && flag;
+            std::string name = formal.second->name();
+            Type::Type* type = formal.first->value();
+
+            // Make sure the name isn't already declared in this scope
+            if ( _symbols->isClashing(name) ) {
+                SemanticSymbol* existing = _symbols->lookup(name);
+                Reporting::nameError(node->position(), "Redeclaration of identifier \"" + name + "\" first declared at " + existing->declaredAt()->start() + ".");
+                flag = false;
+            }
+
+            // Add the declaration to the current scope
+            _symbols->addVariable(name, type, formal.second->position(), false, false);
+
+            // Call this to attach the Symbol to the IdentifierNode
+            walk(formal.second);
+        }
+        walk(node->typeNode());
+        flag = node->typeNode()->disambiguateValue() && flag;
+
+        for ( auto stmt : *node->body() ) {
+            flag = walk(stmt) && flag;
+        }
+
+        _symbols->leave();
+
+        return flag;
+    }
+
+    bool walkConstructorNode(ConstructorNode* node) override {
+        return walk(node->func());
+    }
+
+    bool walkTypeBodyNode(TypeBodyNode* node) override {
+        walkType(node->value());
+        node->value()->transform([](Type::Type* v) -> Type::Type* {
+            return v->disambiguateStatically();
+        });
+        _symbols->enter();
+        bool flag = true;
+        for (auto decl : *node->declarations()) {
+            if ( decl->getTag() == ASTNodeTag::VARIABLEDECLARATION ) {
+                auto d = (VariableDeclarationNode*)decl;
+                if (d->shared()) {
+                    Reporting::nameError(
+                        d->position(),
+                        "Attempted to create a shared variable " + d->id()->name() + " within type body."
+                    );
+                    flag = false;
+                }
+                flag = walk(d->typeNode()) && flag;
+                flag = d->typeNode()->disambiguateValue() && flag;
+                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), d->value()->getTag() == ASTNodeTag::DEFERCALL);
+                walk(d->id());
+            } else if ( decl->getTag() == ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION ) {
+                auto d = (UninitializedVariableDeclarationNode*)decl;
+                flag = walk(d->typeNode()) && flag;
+                flag = d->typeNode()->disambiguateValue() && flag;
+                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), false);
+                walk(d->id());
+            }
+        }
+        for (auto c : *node->declarations()) {
+            if (c->getTag() == ASTNodeTag::VARIABLEDECLARATION) {
+                flag = walk(((VariableDeclarationNode*)c)->value()) && flag;
+            } else {
+                flag = walk(c) && flag;
+            }
+        }
+        for (auto c : *node->constructors()) {
+            flag = walk(c) && flag;
+        }
+        _symbols->leave();
+        return flag;
     }
 
     bool walkCallExpressionNode(CallExpressionNode* node) override {
@@ -137,16 +298,6 @@ protected:
         return walkCallExpressionNode(node->call());
     }
 
-    bool walkIIFExpressionNode(IIFExpressionNode* node) override {
-        bool flag = walk(node->expression());
-
-        for ( auto arg : *node->args() ) {
-            flag = walk(arg) && flag;
-        }
-
-        return flag;
-    }
-
     bool walkAndNode(AndNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
@@ -160,6 +311,12 @@ protected:
     }
 
     bool walkEqualsNode(EqualsNode* node) override {
+        bool leftResult = walk(node->left());
+        bool rightResult = walk(node->right());
+        return leftResult && rightResult;
+    }
+
+    bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
         bool leftResult = walk(node->left());
         bool rightResult = walk(node->right());
         return leftResult && rightResult;
@@ -219,26 +376,6 @@ protected:
         return walk(node->exp());
     }
 
-    bool walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
-        bool flag = true;
-
-        for ( auto actual : *node->actuals() ) {
-            flag = walk(actual) && flag;
-        }
-
-        return flag;
-    }
-
-    virtual bool walkBlockStatementNode(BlockStatementNode* node) {
-        bool flag = true;
-
-        for ( auto stmt : *node->body() ) {
-            flag = walk(stmt) && flag;
-        }
-
-        return flag;
-    }
-
     bool walkEnumerationStatement(EnumerationStatement* node) override {
         bool flag = walk(node->enumerable());
 
@@ -250,7 +387,7 @@ protected:
 
         // Start a new scope in the body and add the local
         _symbols->enter();
-        _symbols->addVariable(name, nullptr, pos, node->shared());
+        _symbols->addVariable(name, nullptr, pos, node->shared(), false);
 
         // Add the index symbol if it exists. Symbol was created during parsing
         auto i = node->index();
@@ -281,7 +418,7 @@ protected:
             // Start a new scope in the body and add the local
             _symbols->enter();
             inScope = true;
-            _symbols->addVariable(name, type, pos, node->shared());
+            _symbols->addVariable(name, type, pos, node->shared(), false);
         }
 
         flag = walk(node->local()) && flag;
@@ -314,172 +451,21 @@ protected:
         return true;
     }
 
-    bool walkReturnStatementNode(ReturnStatementNode* node) override {
-        if ( node->value() == nullptr ) {
-            return true;
-        }
-
-        return walk(node->value());
-    }
-
-    bool walkMapStatementNode(MapStatementNode* node) override {
-        return walk(node->value());
-    }
-
-    bool walkMapNode(MapNode* node) override {
-        bool flag = true;
-        // Check each entry in the map
-        for ( auto entry : *node->body() ) {
-            // Check for duplicate name
-            size_t nameCount = 0;
-            for ( auto subentry : *node->body() ) {
-                if ( subentry->id()->name() == entry->id()->name() && nameCount < 2) {
-                    nameCount += 1;
-                }
-            }
-
-            if ( nameCount > 1 ) {
-                Reporting::nameError(
-                    entry->position(),
-                    "Duplicate map key: \"" + entry->id()->name() + "\""
-                );
-
-                flag = false;
-            }
-
-            // Check the value expression
-            flag = walk(entry) && flag;
-        }
-
-        return flag;
-    }
-
-    bool walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
-        return true;
-    }
-
-    bool walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
-        return true;
-    }
-
-    bool walkAssignExpressionNode(AssignExpressionNode* node) override {
-        bool lvalResult = walk(node->dest());
-        bool rvalResult = walk(node->value());
-        return lvalResult && rvalResult;
-    }
-
-    bool walkUnitNode(UnitNode* node) override {
-        return true;
-    }
-
-    bool walkFunctionNode(FunctionNode* node) override {
-        bool flag = true;
-        _symbols->enter();
-        for ( auto formal : *node->formals() ) {
-            bool t = formal.first->disambiguateValue() && flag;
-            if ( !t ) {
-                Reporting::nameError(formal.first->position(), "Identifier at " + formal.first->position()->toString() + " does not refer to a type!");
-                flag = false;
-            }
-            flag = walk(formal.first) && flag;
-            std::string name = formal.second->name();
-            Type::Type* type = formal.first->value();
-
-            // Make sure the name isn't already declared in this scope
-            if ( _symbols->isClashing(name) ) {
-                SemanticSymbol* existing = _symbols->lookup(name);
-                Reporting::nameError(node->position(), "Redeclaration of identifier \"" + name + "\" first declared at " + existing->declaredAt()->start() + ".");
-                flag = false;
-            }
-
-            // Add the declaration to the current scope
-            _symbols->addVariable(name, type, formal.second->position(), false);
-
-            // Call this to attach the Symbol to the IdentifierNode
-            walk(formal.second);
-        }
-        walk(node->typeNode());
-        flag = node->typeNode()->disambiguateValue() && flag;
-
-        for ( auto stmt : *node->body() ) {
-            flag = walk(stmt) && flag;
-        }
-
-        _symbols->leave();
-
-        return flag;
-    }
-
-    bool walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
-        bool leftResult = walk(node->left());
-        bool rightResult = walk(node->right());
-        return leftResult && rightResult;
-    }
-
-    bool walkTypeBodyNode(TypeBodyNode* node) override {
-        walkType(node->value());
-        node->value()->transform([](Type::Type* v) -> Type::Type* {
-            return v->disambiguateStatically();
-        });
-        _symbols->enter();
-        bool flag = true;
-        for (auto decl : *node->declarations()) {
-            if ( decl->getName() == "VariableDeclarationNode" ) {
-                auto d = (VariableDeclarationNode*)decl;
-                if (d->shared()) {
-                    Reporting::nameError(
-                        d->position(),
-                        "Attempted to create a shared variable " + d->id()->name() + " within type body."
-                    );
-                    flag = false;
-                }
-                flag = walk(d->typeNode()) && flag;
-                flag = d->typeNode()->disambiguateValue() && flag;
-                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position());
-                walk(d->id());
-            } else if ( decl->getName() == "UninitializedVariableDeclarationNode" ) {
-                auto d = (UninitializedVariableDeclarationNode*)decl;
-                flag = walk(d->typeNode()) && flag;
-                flag = d->typeNode()->disambiguateValue() && flag;
-                _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position());
-                walk(d->id());
-            }
-        }
-        for (auto c : *node->declarations()) {
-            if (c->getName() == "VariableDeclarationNode") {
-                flag = walk(((VariableDeclarationNode*)c)->value()) && flag;
-            } else {
-                flag = walk(c) && flag;
-            }
-        }
-        for (auto c : *node->constructors()) {
-            flag = walk(c) && flag;
-        }
-        _symbols->leave();
-        return flag;
-    }
-
-    bool walkClassAccessNode(ClassAccessNode* node) override {
-        return walk(node->path()); // property names cant be checked until type analysis
-    }
-
-    bool walkIncludeStatementNode(IncludeStatementNode* node) override {
-        return true;
-    }
-
-    bool walkConstructorNode(ConstructorNode* node) override {
-        return walk(node->func());
-    }
-
-    bool walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
-        return true; // symbols should be added to scope during type body
-    }
-
     [[nodiscard]] std::string toString() const override {
         return "NameAnalysisWalk<>";
     }
 private:
     SymbolTable* _symbols;
+
+    bool walkBlockStatementNode(BlockStatementNode* node) {
+        bool flag = true;
+
+        for ( auto stmt : *node->body() ) {
+            flag = walk(stmt) && flag;
+        }
+
+        return flag;
+    }
 
     bool walkType(Type::Type* type) {
         std::set<std::size_t> visited;

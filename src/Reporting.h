@@ -28,6 +28,9 @@ namespace swarmc {
         static void typeError(const Lang::Position* pos, const std::string& message);
 
         static void syntaxError(const Lang::Position* pos, const std::string& message);
+    
+        // Prints ASTToISAWalk Debug messages
+        static void toISADebug(const Lang::Position* pos, const std::string& message);
     };
 
 }

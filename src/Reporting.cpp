@@ -67,4 +67,11 @@ namespace swarmc {
             throw std::runtime_error("syntaxError");
         }
     }
+
+    void Reporting::toISADebug(const Lang::Position* pos, const std::string& message) {
+        Console::get()->debug()
+            ->bold()->color(ANSIColor::MAGENTA)->print("[ASTToISA Debug] ")->reset()
+            ->debug()->bold()->print(pos->toString() + " ")->reset()
+            ->debug()->println(message);
+    }
 }

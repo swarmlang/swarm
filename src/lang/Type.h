@@ -202,6 +202,7 @@ namespace swarmc::Type {
             // FIXME: need to freeref these when the program ends
             auto inst = useref(new Opaque(name));
             _opaques[name] = inst;
+            Framework::onShutdown([inst]() { freeref(inst); });
             return inst;
         }
 

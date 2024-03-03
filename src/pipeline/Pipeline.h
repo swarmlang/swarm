@@ -48,14 +48,6 @@ namespace swarmc {
         ~Pipeline() override {
             delete _scanner;
             delete _parser;
-
-            if ( _root != nullptr) {
-                for ( auto stmt : *_root->body() ) {
-                    freeref(stmt);
-                }
-                delete _root->body();
-            }
-
             delete _root;
             delete _isa;
         }

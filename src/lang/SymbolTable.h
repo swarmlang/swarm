@@ -95,7 +95,7 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing variables. */
     class VariableSymbol : public SemanticSymbol {
     public:
-        VariableSymbol(std::string name, Type::Type* type, Position* declaredAt, bool shared) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)), _value(nullptr) {}
+        VariableSymbol(std::string name, Type::Type* type, Position* declaredAt, bool shared, bool drain) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)), _value(nullptr), _shouldDrain(drain) {}
 
         ~VariableSymbol() {
             freeref(_value);
@@ -113,14 +113,17 @@ namespace Walk {
 
         void disambiguateType();
 
+        bool shouldDrain() const { return _shouldDrain; }
+
     protected:
         // used for type assignments
         TypeLiteral* _value;
+        bool _shouldDrain;
     };
 
     class ObjectPropertySymbol : public VariableSymbol {
     public:
-        ObjectPropertySymbol(std::string name, Type::Type* type, Position* declaredAt) : VariableSymbol(std::move(name), type, declaredAt, false) {}
+        ObjectPropertySymbol(std::string name, Type::Type* type, Position* declaredAt, bool drain) : VariableSymbol(std::move(name), type, declaredAt, false, drain) {}
 
         [[nodiscard]] bool isProperty() const override { return true; }
     };
@@ -197,12 +200,12 @@ namespace Walk {
         }
 
         /** Add a new variable to this scope. */
-        void addVariable(std::string name, Type::Type* type, Position* declaredAt, bool shared) {
-            insert(new VariableSymbol(std::move(name), type, declaredAt, std::move(shared)));
+        void addVariable(std::string name, Type::Type* type, Position* declaredAt, bool shared, bool drain) {
+            insert(new VariableSymbol(std::move(name), type, declaredAt, std::move(shared), std::move(drain)));
         }
 
-        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt) {
-            insert(new ObjectPropertySymbol(std::move(name), type, declaredAt));
+        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, bool drain) {
+            insert(new ObjectPropertySymbol(std::move(name), type, declaredAt, std::move(drain)));
         }
 
         /** Add a new function to this scope. */
@@ -291,12 +294,12 @@ namespace Walk {
         }
 
         /** Add a new variable to the current scope. */
-        void addVariable(std::string name, Type::Type* type, Position* declaredAt, bool shared) {
-            return current()->addVariable(std::move(name), type, declaredAt, std::move(shared));
+        void addVariable(std::string name, Type::Type* type, Position* declaredAt, bool shared, bool drain) {
+            return current()->addVariable(std::move(name), type, declaredAt, std::move(shared), std::move(drain));
         }
 
-        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt) {
-            return current()->addObjectProperty(std::move(name), type, declaredAt);
+        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, bool drain) {
+            return current()->addObjectProperty(std::move(name), type, declaredAt, std::move(drain));
         }
 
         /** Add a new function to the current scope. */

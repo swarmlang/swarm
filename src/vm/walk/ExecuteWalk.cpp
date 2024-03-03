@@ -776,10 +776,9 @@ namespace swarmc::Runtime {
     }
 
     Reference* ExecuteWalk::walkRetMapGet(RetMapGet* i) {
-        verbose("retmapget " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
+        verbose("retmapget " + i->first()->toString() + " " + i->second()->toString());
         auto retMap = ensureReturnValueMap(_vm->resolve(i->first()));
         auto jobId = ensureJobId(_vm->resolve(i->second()));
-        auto loc = i->third();
         
         // attempt to get return value
         auto value = retMap->getReturnValue(jobId->id());
@@ -790,20 +789,7 @@ namespace swarmc::Runtime {
             );
         }
 
-        if ( loc->typei()->isAmbiguous() ) {
-            loc->setType(value->type());
-        }
-
-        if ( !value->typei()->isAssignableTo(loc->typei()) ) {
-            throw Errors::RuntimeError(
-                Errors::RuntimeExCode::TypeError,
-                "Value " + s(value) + " has type which is incompatible with location " + s(loc) + " (expected: " + s(loc->typei()) + ", got: " + s(value->typei()) + ")"
-            );
-        }
-
-        debug(loc->toString() + " <- " + value->toString());
-        _vm->store(loc, value);
-        return nullptr;
+        return retMap->getReturnValue(jobId->id());
     }
 
     Reference* ExecuteWalk::walkEnterContext(EnterContext*) {

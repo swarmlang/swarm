@@ -283,10 +283,9 @@ namespace swarmc::ISA {
             } else if ( instructionLeader == "retmapget" ) {
                 is.push_back(new ISA::RetMapGet(
                         parseUnaryReference(instructionLeader, tokens, startAt+i),
-                        parseUnaryReference(instructionLeader, tokens, startAt+i+1),
-                        parseLocationReference(instructionLeader, tokens, startAt+i+2)
+                        parseUnaryReference(instructionLeader, tokens, startAt+i+1)
                 ));
-                i += 3;
+                i += 2;
             } else if ( instructionLeader == "entercontext" ) {
                 is.push_back(new ISA::EnterContext());
             } else if ( instructionLeader == "resumecontext" ) {

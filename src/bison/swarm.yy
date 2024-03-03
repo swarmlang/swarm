@@ -73,7 +73,6 @@
     swarmc::Lang::ExpressionNode*       transExpression;
     swarmc::Lang::AssignExpressionNode* transAssignExpression;
     swarmc::Lang::CallExpressionNode*   transCallExpression;
-    swarmc::Lang::IIFExpressionNode*    transIIFExpression;
     swarmc::Lang::TypeLiteral*          transType;
     swarmc::Lang::DeclarationNode*      transDeclaration;
     swarmc::Lang::MapStatementNode*     transMapStatement;
@@ -170,7 +169,7 @@
 %type <transExpression>     callable
 %type <transAssignExpression> assignment
 %type <transCallExpression> callExpression
-%type <transIIFExpression>  iifExpression
+%type <transCallExpression>  iifExpression
 %type <transExpressions>    actuals
 %type <transFormals>        formals
 %type <transFunction>       function
@@ -271,7 +270,7 @@ statement :
         Position* pos = new Position($1->position(), $11->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, $5, $8, $4->shared());
         auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
-        $8->overrideSymbol(new VariableSymbol($8->name(), t, $8->position(), $7->shared()));
+        $8->overrideSymbol(new VariableSymbol($8->name(), t, $8->position(), $7->shared(), false));
         e->assumeAndReduceStatements($10->reduceToStatements());
         $$ = e;
         delete $1; delete $3; delete $4; delete $6; delete $7; delete $9; delete $11;
@@ -289,7 +288,7 @@ statement :
         Position* pos = new Position($1->position(), $10->position());
         EnumerationStatement* e = new EnumerationStatement(pos, $2, new IdentifierNode($4->position(), "_"), $7, false);
         auto t = Type::Primitive::of(Type::Intrinsic::NUMBER);
-        $7->overrideSymbol(new VariableSymbol($7->name(), t, $7->position(), $6->shared()));
+        $7->overrideSymbol(new VariableSymbol($7->name(), t, $7->position(), $6->shared(), false));
         e->assumeAndReduceStatements($9->reduceToStatements());
         $$ = e;
         delete $1; delete $3; delete $4; delete $5; delete $6; delete $8; delete $10;
@@ -388,21 +387,58 @@ shared :
 declaration :
     SHARED typeid id ASSIGN expression {
         Position* pos = new Position($1->position(), $5->position());
-        $$ = new VariableDeclarationNode(pos, $2, $3, $5, true);
+        auto assign = new AssignExpressionNode(
+            new Position($3->position(), $5->position()),
+            $3,
+            $5
+        );
+        $$ = new VariableDeclarationNode(pos, $2, assign, true);
         delete $1; delete $4;
     }
 
     | typeid id ASSIGN expression {
         Position* pos = new Position($1->position(), $4->position());
-        $$ = new VariableDeclarationNode(pos, $1, $2, $4, false);
+        auto assign = new AssignExpressionNode(
+            new Position($2->position(), $4->position()),
+            $2,
+            $4
+        );
+        $$ = new VariableDeclarationNode(pos, $1, assign, false);
         delete $3;
     }
 
     | shared FN id ASSIGN function {
         auto p1 = $1->position() == nullptr ? $2->position() : $1->position();
         Position* pos = new Position(p1, $5->position());
-        $$ = new VariableDeclarationNode(pos, $5->typeNode(), $3, $5, $1->shared());
+        auto assign = new AssignExpressionNode(
+            new Position($3->position(), $5->position()),
+            $3,
+            $5
+        );
+        $$ = new VariableDeclarationNode(pos, $5->typeNode(), assign, $1->shared());
         delete $1; delete $2; delete $4;
+    }
+
+    | typeid id ASSIGN DEFER callExpression {
+        auto pos = new Position($1->position(), $5->position());
+        auto assign = new AssignExpressionNode(
+            new Position($2->position(), $5->position()),
+            $2,
+            new DeferCallExpressionNode($5->position(), $5)
+        );
+        $$ = new VariableDeclarationNode(pos, $1, assign, false);
+        delete $3; delete $4;
+    }
+
+    | SHARED typeid id ASSIGN DEFER callExpression {
+        auto pos = new Position($1->position(), $6->position());
+        auto assign = new AssignExpressionNode(
+            new Position($3->position(), $6->position()),
+            $3,
+            $6
+        );
+        $$ = new VariableDeclarationNode(pos, $2, assign, true);
+        delete $1; delete $4; delete $5;
     }
 
 typeBody :
@@ -708,10 +744,10 @@ expression :
         Position* pos = new Position($1->position(), $3->position());
         auto t = new Type::Object();
         for ( auto decl : *$2 ) {
-            if (decl->getName() == "VariableDeclarationNode") {
+            if (decl->getTag() == swarmc::Lang::ASTNodeTag::VARIABLEDECLARATION) {
                 auto vdecl = (VariableDeclarationNode*)decl;
                 t->defineProperty(vdecl->id()->name(), vdecl->typeNode()->value());
-            } else if (decl->getName() == "UninitializedVariableDeclarationNode") {
+            } else if (decl->getTag() == swarmc::Lang::ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION) {
                 auto vdecl = (UninitializedVariableDeclarationNode*)decl;
                 t->defineProperty(vdecl->id()->name(), vdecl->typeNode()->value());
             }
@@ -845,12 +881,6 @@ expressionF :
         delete $1;
     }
 
-    | DEFER callExpression {
-        Position* pos = new Position($1->position(), $2->position());
-        $$ = new DeferCallExpressionNode(pos, $2);
-        delete $1;
-    }
-
 
 
 term :
@@ -976,13 +1006,13 @@ callable :
 iifExpression :
     LPAREN expression RPAREN LPAREN RPAREN {
         Position* pos = new Position($1->position(), $5->position());
-        $$ = new IIFExpressionNode(pos, $2, new std::vector<ExpressionNode*>());
+        $$ = new CallExpressionNode(pos, $2, new std::vector<ExpressionNode*>());
         delete $1; delete $3; delete $4; delete $5;
     }
 
     | LPAREN expression RPAREN LPAREN actuals RPAREN {
         Position* pos = new Position($1->position(), $6->position());
-        $$ = new IIFExpressionNode(pos, $2, $5);
+        $$ = new CallExpressionNode(pos, $2, $5);
         delete $1; delete $3; delete $4; delete $6;
     }
 

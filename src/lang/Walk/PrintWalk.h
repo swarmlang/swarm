@@ -40,6 +40,14 @@ protected:
         _out << _prefix << node->toString() << std::endl;
     }
 
+    void walkEnumerableAccessNode(EnumerableAccessNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->path());
+        walk(node->index());
+        pop_space();
+    }
+
     void walkMapAccessNode(MapAccessNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
@@ -47,12 +55,15 @@ protected:
         pop_space();
     }
 
-    void walkEnumerableAccessNode(EnumerableAccessNode* node) override {
+    void walkClassAccessNode(ClassAccessNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
         walk(node->path());
-        walk(node->index());
         pop_space();
+    }
+
+    void walkIncludeStatementNode(IncludeStatementNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
     }
 
     void walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {
@@ -63,11 +74,96 @@ protected:
         _out << _prefix << node->toString() << std::endl;
     }
 
+    void walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+    }
+
+    void walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+    }
+
+    void walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        for ( auto exp : *node->actuals() ) {
+            walk(exp);
+        }
+        pop_space();
+    }
+
+    void walkMapStatementNode(MapStatementNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->value());
+        pop_space();
+    }
+
+    void walkMapNode(MapNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        for ( auto entry : *node->body() ) {
+            walk(entry);
+        }
+        pop_space();
+    }
+
+    void walkAssignExpressionNode(AssignExpressionNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->value());
+        pop_space();
+    }
+
     void walkVariableDeclarationNode(VariableDeclarationNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
         walk(node->typeNode());
+        walk(node->id());
         walk(node->value());
+        pop_space();
+    }
+
+    void walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->typeNode());
+        pop_space();
+    }
+
+    void walkReturnStatementNode(ReturnStatementNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        if ( node->value() != nullptr ) {
+            push_space();
+            walk(node->value());
+            pop_space();
+        }
+    }
+
+    void walkFunctionNode(FunctionNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        for ( auto stmt : *node->body() ) {
+            walk(stmt);
+        }
+        pop_space();
+    }
+
+    void walkConstructorNode(ConstructorNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->func());
+        pop_space();
+    }
+
+    void walkTypeBodyNode(TypeBodyNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        for ( auto decl : *node->declarations() ) {
+            walk(decl);
+        }
+        for ( auto cons : *node->constructors() ) {
+            walk(cons);
+        }
         pop_space();
     }
 
@@ -85,15 +181,6 @@ protected:
         _out << _prefix << node->toString() << std::endl;
         push_space();
         walk(node->call());
-        pop_space();
-    }
-
-    void walkIIFExpressionNode(IIFExpressionNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        for ( auto exp : *node->args() ) {
-            walk(exp);
-        }
         pop_space();
     }
 
@@ -119,6 +206,10 @@ protected:
         walk(node->left());
         walk(node->right());
         pop_space();
+    }
+
+    void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
     }
 
     void walkNotEqualsNode(NotEqualsNode* node) override {
@@ -198,15 +289,6 @@ protected:
         pop_space();
     }
 
-    void walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        for ( auto exp : *node->actuals() ) {
-            walk(exp);
-        }
-        pop_space();
-    }
-
     void walkEnumerationStatement(EnumerationStatement* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
@@ -250,101 +332,6 @@ protected:
     void walkBreakNode(BreakNode* node) override {
         _out << _prefix << node->toString() << std::endl;
     }
-
-    void walkReturnStatementNode(ReturnStatementNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        if ( node->value() != nullptr ) {
-            push_space();
-            walk(node->value());
-            pop_space();
-        }
-    }
-
-    void walkMapStatementNode(MapStatementNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->value());
-        pop_space();
-    }
-
-    void walkMapNode(MapNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        for ( auto entry : *node->body() ) {
-            walk(entry);
-        }
-        pop_space();
-    }
-
-    void walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
-    void walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
-    void walkAssignExpressionNode(AssignExpressionNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->value());
-        pop_space();
-    }
-
-    void walkUnitNode(UnitNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
-    void walkFunctionNode(FunctionNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        for ( auto stmt : *node->body() ) {
-            walk(stmt);
-        }
-        pop_space();
-    }
-
-    void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
-    void walkTypeBodyNode(TypeBodyNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        for ( auto decl : *node->declarations() ) {
-            walk(decl);
-        }
-        for ( auto cons : *node->constructors() ) {
-            walk(cons);
-        }
-        pop_space();
-    }
-
-    void walkClassAccessNode(ClassAccessNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->path());
-        pop_space();
-    }
-
-    void walkIncludeStatementNode(IncludeStatementNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-    }
-
-    void walkConstructorNode(ConstructorNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->func());
-        pop_space();
-    }
-
-    void walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
-        _out << _prefix << node->toString() << std::endl;
-        push_space();
-        walk(node->typeNode());
-        pop_space();
-    }
-
     [[nodiscard]] std::string toString() const override {
         return "PrintWalk<>";
     }

@@ -11,12 +11,12 @@ public:
         ValidConstructorWalk vcw;
         vcw._console->debug("Validating constructor");
         for ( auto d : *type->declarations() ) {
-            if ( d->getName() == "UninitializedVariableDeclarationNode" ) {
+            if ( d->getTag() == ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION ) {
                 // get symbols that need to be initialized
                 auto uninit = ((UninitializedVariableDeclarationNode*)d);
                 vcw._console->debug("Adding " + uninit->id()->name() + " to list of required initializations.");
                 vcw._symbols.insert(uninit->id()->symbol());
-            } else if ( d->getName() == "VariableDeclarationNode" ) {
+            } else if ( d->getTag() == ASTNodeTag::VARIABLEDECLARATION ) {
                 // get default values of functions
                 auto v = ((VariableDeclarationNode*)d);
                 if ( v->typeNode()->value()->isCallable() ) {
@@ -50,8 +50,77 @@ protected:
         walk(node->expression());
     }
 
+    void walkIdentifierNode(IdentifierNode* node) override {}
+
+    void walkEnumerableAccessNode(EnumerableAccessNode* node) override {}
+
+    void walkMapAccessNode(MapAccessNode* node) override {}
+
+    void walkClassAccessNode(ClassAccessNode* node) override {}
+
+    void walkIncludeStatementNode(IncludeStatementNode* node) override {}
+
+    void walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {}
+
+    void walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {}
+
+    void walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {}
+
+    void walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {}
+
+    void walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {}
+
+    void walkMapStatementNode(MapStatementNode* node) override {}
+
+    void walkMapNode(MapNode* node) override {}
+
+    void walkAssignExpressionNode(AssignExpressionNode* node) override {
+        if ( node->dest()->getTag() == ASTNodeTag::IDENTIFIER ) {
+            auto dest = (IdentifierNode*)node->dest();
+            if ( _symbols.count(dest->symbol()) ) {
+                _symbols.erase(dest->symbol());
+            }
+
+            if ( dest->symbol()->type()->isCallable() ) {
+                setPossibleFunctions(dest->symbol(), node->value());
+            }
+        }
+    }
+
+    void walkVariableDeclarationNode(VariableDeclarationNode* node) override {
+        if ( node->typeNode()->value()->isCallable() ) {
+            setPossibleFunctions(node->id()->symbol(), node->value());
+        }
+    }
+
+    void walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {}
+
+    void walkReturnStatementNode(ReturnStatementNode* node) override {
+        if ( node->value() != nullptr ) walk(node->value());
+
+        if ( !_symbols.empty() ) {
+            std::string s = "";
+            for (auto sym : _symbols) s += sym->name() + ", ";
+            Reporting::typeError(
+                node->position(),
+                "Unable to determine value of { " + s.substr(0, s.size() - 2) + " } in type constructor."
+            );
+            _goodReturns = false;
+        }
+    }
+
+    void walkFunctionNode(FunctionNode* node) override {
+        for ( auto stmt : *node->body() ) {
+            walk(stmt);
+        }
+    }
+
+    void walkConstructorNode(ConstructorNode* node) override {}
+
+    void walkTypeBodyNode(TypeBodyNode* node) override {}
+
     void walkCallExpressionNode(CallExpressionNode* node) override {
-        if ( node->func()->getName() == "IdentifierNode" ) {
+        if ( node->func()->getTag() == ASTNodeTag::IDENTIFIER ) {
             auto id = (IdentifierNode*)node->func();
             if ( node->constructor() ) {
                 // walk the constructor being called
@@ -83,85 +152,13 @@ protected:
         walkCallExpressionNode(node->call());
     }
 
-    void walkIIFExpressionNode(IIFExpressionNode* node) override {
-        walk(node->expression());
-    }
-
-    void walkWithStatement(WithStatement* node) override {
-        // this remains in the top layer because its body executes unconditionally
-        for ( auto stmt : *node->body() ) {
-            walk(stmt);
-        }
-    }
-
-    void walkIfStatement(IfStatement* node) override {
-        walkBlockStatementNode(node);
-    }
-
-    void walkWhileStatement(WhileStatement* node) override {
-        walkBlockStatementNode(node);
-    }
-
-    void walkReturnStatementNode(ReturnStatementNode* node) override {
-        if ( node->value() != nullptr ) walk(node->value());
-
-        if ( !_symbols.empty() ) {
-            std::string s = "";
-            for (auto sym : _symbols) s += sym->name() + ", ";
-            Reporting::typeError(
-                node->position(),
-                "Unable to determine value of { " + s.substr(0, s.size() - 2) + " } in type constructor."
-            );
-            _goodReturns = false;
-        }
-    }
-
-    void walkAssignExpressionNode(AssignExpressionNode* node) override {
-        if ( node->dest()->getName() == "IdentifierNode" ) {
-            auto dest = (IdentifierNode*)node->dest();
-            if ( _symbols.count(dest->symbol()) ) {
-                _symbols.erase(dest->symbol());
-            }
-
-            if ( dest->symbol()->type()->isCallable() ) {
-                setPossibleFunctions(dest->symbol(), node->value());
-            }
-        }
-    }
-
-    void walkFunctionNode(FunctionNode* node) override {
-        for ( auto stmt : *node->body() ) {
-            walk(stmt);
-        }
-    }
-
-    void walkBlockStatementNode(BlockStatementNode* node) {
-        _inTopLayer = false;
-        auto before = _symbols;
-        for (auto stmt : *node->body()) {
-            walk(stmt);
-        }
-        _symbols = before;
-        _inTopLayer = true;
-    }
-
-    void walkIdentifierNode(IdentifierNode* node) override {}
-
-    void walkMapAccessNode(MapAccessNode* node) override {}
-
-    void walkEnumerableAccessNode(EnumerableAccessNode* node) override {}
-
-    void walkTypeLiteral(swarmc::Lang::TypeLiteral *node) override {}
-
-    void walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) override {}
-
-    void walkVariableDeclarationNode(VariableDeclarationNode* node) override {}
-
     void walkAndNode(AndNode* node) override {}
 
     void walkOrNode(OrNode* node) override {}
 
     void walkEqualsNode(EqualsNode* node) override {}
+
+    void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {}
 
     void walkNotEqualsNode(NotEqualsNode* node) override {}
 
@@ -183,40 +180,41 @@ protected:
 
     void walkNotNode(NotNode* node) override {}
 
-    void walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) override {}
-
     void walkEnumerationStatement(EnumerationStatement* node) override {}
+
+    void walkWithStatement(WithStatement* node) override {
+        // this remains in the top layer because its body executes unconditionally
+        for ( auto stmt : *node->body() ) {
+            walk(stmt);
+        }
+    }
+
+    void walkIfStatement(IfStatement* node) override {
+        walkBlockStatementNode(node);
+    }
+
+    void walkWhileStatement(WhileStatement* node) override {
+        walkBlockStatementNode(node);
+    }
 
     void walkContinueNode(ContinueNode* node) override {}
 
     void walkBreakNode(BreakNode* node) override {}
 
-    void walkMapStatementNode(MapStatementNode* node) override {}
-
-    void walkMapNode(MapNode* node) override {}
-
-    void walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) override {}
-
-    void walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) override {}
-
-    void walkUnitNode(UnitNode* node) override {}
-
-    void walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) override {}
-
-    void walkTypeBodyNode(TypeBodyNode* node) override {}
-
-    void walkClassAccessNode(ClassAccessNode* node) override {}
-
-    void walkIncludeStatementNode(IncludeStatementNode* node) override {}
-
-    void walkConstructorNode(ConstructorNode* node) override {}
-
-    void walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {}
-
     [[nodiscard]] std::string toString() const override {
         return "ValidConstructorWalk<>";
     }
 
+    void walkBlockStatementNode(BlockStatementNode* node) {
+        _inTopLayer = false;
+        auto before = _symbols;
+        for (auto stmt : *node->body()) {
+            walk(stmt);
+        }
+        _symbols = before;
+        _inTopLayer = true;
+    }
+private:
     void setPossibleFunctions(SemanticSymbol* destSym, ExpressionNode* value) {
         if ( !_possibleFunctions.count(destSym) ) {
             _possibleFunctions.insert({ destSym, std::vector<FunctionNode*>() });
@@ -224,10 +222,10 @@ protected:
         if ( _inTopLayer ) {
             _possibleFunctions.at(destSym).clear();
         }
-        if ( value->getName() == "FunctionNode" ) {
+        if ( value->getTag() == ASTNodeTag::FUNCTION ) {
             _console->debug("Giving " + destSym->name() + " the possible value of " + value->toString());
             _possibleFunctions.at(destSym).push_back((FunctionNode*)value);
-        } else if ( value->getName() == "IdentifierNode" 
+        } else if ( value->getTag() == ASTNodeTag::IDENTIFIER
                 && _possibleFunctions.count(((IdentifierNode*) value)->symbol()) ) 
         {
             for (auto f : _possibleFunctions.at(((IdentifierNode*) value)->symbol())) {

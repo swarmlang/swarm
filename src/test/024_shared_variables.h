@@ -29,8 +29,8 @@ namespace Test {
             Pipeline pipeline(&program);
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
-            assert(pgNode->body()->at(0)->getName() == "VariableDeclarationNode");
-            assert(pgNode->body()->at(1)->getName() == "VariableDeclarationNode");
+            assert(pgNode->body()->at(0)->getTag() == Lang::ASTNodeTag::VARIABLEDECLARATION);
+            assert(pgNode->body()->at(1)->getTag() == Lang::ASTNodeTag::VARIABLEDECLARATION);
             Lang::VariableDeclarationNode* line1 = (Lang::VariableDeclarationNode*) pgNode->body()->at(0);
             Lang::VariableDeclarationNode* line2 = (Lang::VariableDeclarationNode*) pgNode->body()->at(1);
 
@@ -50,18 +50,18 @@ namespace Test {
             Pipeline pipeline(&program);
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
-            assert(pgNode->body()->at(2)->getName() == "ExpressionStatementNode");
-            assert(pgNode->body()->at(3)->getName() == "ExpressionStatementNode");
+            assert(pgNode->body()->at(2)->getTag() == Lang::ASTNodeTag::EXPRESSIONSTATEMENT);
+            assert(pgNode->body()->at(3)->getTag() == Lang::ASTNodeTag::EXPRESSIONSTATEMENT);
             Lang::ExpressionStatementNode* line3 = (Lang::ExpressionStatementNode*) pgNode->body()->at(2);
             Lang::ExpressionStatementNode* line4 = (Lang::ExpressionStatementNode*) pgNode->body()->at(3);
 
-            assert(line3->expression()->getName() == "AssignExpressionNode");
-            assert(line4->expression()->getName() == "AssignExpressionNode");
+            assert(line3->expression()->getTag() == Lang::ASTNodeTag::ASSIGN);
+            assert(line4->expression()->getTag() == Lang::ASTNodeTag::ASSIGN);
             Lang::AssignExpressionNode* line3Exp = (Lang::AssignExpressionNode*) line3->expression();
             Lang::AssignExpressionNode* line4Exp = (Lang::AssignExpressionNode*) line4->expression();
 
-            assert(line3Exp->dest()->getName() == "MapAccessNode");
-            assert(line4Exp->dest()->getName() == "MapAccessNode");
+            assert(line3Exp->dest()->getTag() == Lang::ASTNodeTag::MAPACCESS);
+            assert(line4Exp->dest()->getTag() == Lang::ASTNodeTag::MAPACCESS);
             Lang::MapAccessNode* lval1 = (Lang::MapAccessNode*) line3Exp->dest();
             Lang::MapAccessNode* lval2 = (Lang::MapAccessNode*) line4Exp->dest();
 
@@ -90,10 +90,10 @@ namespace Test {
             Pipeline pipeline(&program);
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
-            assert(pgNode->body()->at(2)->getName() == "EnumerationStatement");
-            assert(pgNode->body()->at(3)->getName() == "EnumerationStatement");
-            assert(pgNode->body()->at(4)->getName() == "EnumerationStatement");
-            assert(pgNode->body()->at(5)->getName() == "EnumerationStatement");
+            assert(pgNode->body()->at(2)->getTag() == Lang::ASTNodeTag::ENUMERATE);
+            assert(pgNode->body()->at(3)->getTag() == Lang::ASTNodeTag::ENUMERATE);
+            assert(pgNode->body()->at(4)->getTag() == Lang::ASTNodeTag::ENUMERATE);
+            assert(pgNode->body()->at(5)->getTag() == Lang::ASTNodeTag::ENUMERATE);
             Lang::EnumerationStatement* stmt1 = (Lang::EnumerationStatement*) pgNode->body()->at(2);
             Lang::EnumerationStatement* stmt2 = (Lang::EnumerationStatement*) pgNode->body()->at(3);
             Lang::EnumerationStatement* stmt3 = (Lang::EnumerationStatement*) pgNode->body()->at(4);
@@ -118,8 +118,8 @@ namespace Test {
             Pipeline pipeline(&program);
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
-            assert(pgNode->body()->at(0)->getName() == "WithStatement");
-            assert(pgNode->body()->at(1)->getName() == "WithStatement");
+            assert(pgNode->body()->at(0)->getTag() == Lang::ASTNodeTag::WITH);
+            assert(pgNode->body()->at(1)->getTag() == Lang::ASTNodeTag::WITH);
             Lang::WithStatement* stmt1 = (Lang::WithStatement*) pgNode->body()->at(0);
             Lang::WithStatement* stmt2 = (Lang::WithStatement*) pgNode->body()->at(1);
         

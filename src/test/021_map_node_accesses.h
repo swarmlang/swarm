@@ -26,7 +26,7 @@ namespace Test {
 
             auto value1 = node.getKey(&key1);
             assert(value1 != nullptr);
-            assert(value1->getName() == str1.getName());
+            assert(value1->getTag() == str1.getTag());
             assert(((Lang::StringLiteralExpressionNode*) value1)->value() == str1.value());
 
             return true;

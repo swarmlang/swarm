@@ -196,12 +196,12 @@ namespace swarmc::ISA {
         }
     };
 
-    class RetMapGet : public TrinaryInstruction<Reference, Reference, LocationReference> {
+    class RetMapGet : public BinaryReferenceInstruction {
     public:
-        RetMapGet(Reference* retMap, Reference* jobId, LocationReference* output) : 
-            TrinaryInstruction<Reference, Reference, LocationReference>(Tag::RETMAPGET, retMap, jobId, output) {}
+        RetMapGet(Reference* retMap, Reference* jobId) : 
+            BinaryReferenceInstruction(Tag::RETMAPGET, retMap, jobId) {}
         [[nodiscard]] RetMapGet* copy() const override {
-            return new RetMapGet(_first->copy(), _second->copy(), _third->copy());
+            return new RetMapGet(_first->copy(), _second->copy());
         }
     };
 

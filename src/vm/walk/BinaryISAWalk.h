@@ -504,8 +504,7 @@ namespace swarmc::ISA {
         RetMapGet* walkRetMapGet(binn* obj) {
             return new RetMapGet(
                 Wire::references()->produce((binn*) binn_map_map(obj, BC_FIRST), _vm),
-                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
-                walkLocationReference((binn*) binn_map_map(obj, BC_THIRD))
+                Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm)\
             );
         }
 
