@@ -144,26 +144,23 @@ namespace swarmc::Runtime::RedisDriver {
         return new RedisQueueJob(
             id,
             Wire::calls()->reduce(call, vm),
-            vm->getState()->copy(),
+            Wire::states()->reduce(vm->getState(), vm),
             Wire::scopes()->reduce(vm->getScopeFrame(), vm),
-            vm->getStore(&dummyLocal)
+            Wire::stores()->reduce(vm->getStore(&dummyLocal), vm)
         );
     }
 
     void RedisQueue::push(VirtualMachine* vm, IQueueJob* job) {
         // We should only accept RedisQueueJobs anyway, cast so I can get its important members
         auto rjob = dynamic_cast<RedisQueueJob*>(job);
-        std::string callstr((char*)binn_ptr(rjob->getCallBin()), binn_size(rjob->getCallBin()));
-        auto statebin = Wire::states()->reduce(rjob->getVMState(), vm);
-        std::string statestr((char*)binn_ptr(statebin), binn_size(statebin));
+        // convert binn to strings to be pushed to redis
+        std::string callstr((char*)binn_ptr(rjob->getCallBinn()), binn_size(rjob->getCallBinn()));
+        std::string statestr((char*)binn_ptr(rjob->getStateBinn()), binn_size(rjob->getStateBinn()));
         std::string scopestr((char*)binn_ptr(rjob->getScopeBinn()), binn_size(rjob->getScopeBinn()));
-        auto storebin = Wire::stores()->reduce(rjob->getLocalStore(), vm);
-        std::string storestr((char*)binn_ptr(storebin), binn_size(storebin));
-        binn_free(statebin);
-        binn_free(storebin);
+        std::string storestr((char*)binn_ptr(rjob->getLocalStoreBinn()), binn_size(rjob->getLocalStoreBinn()));
 
         std::unordered_map<std::string, std::string> m = {
-            {"ID", std::to_string(job->id())},
+            {"ID", s(job->id())},
             {"Call", callstr},
             {"VMState", statestr},
             {"VMScope", scopestr},
@@ -190,32 +187,32 @@ namespace swarmc::Runtime::RedisDriver {
     void RedisQueue::tryToProcessJob() {
         auto job = tryGetJob();
         // we have to restore the vm, so we need a Jobject that contains State and ScopeFrame info
-        auto redisjob = dynamic_cast<RedisQueueJob*>(job.first);
+        auto rjob = dynamic_cast<RedisQueueJob*>(job.first);
 
         if ( job.first != nullptr ) {
             try {
-                Console::get()->debug("Running job: " + s(redisjob));
+                Console::get()->debug("Running job: " + s(rjob));
 
                 ISA::Reference* ret = nullptr;
-                _vm->copy([redisjob, &ret](VirtualMachine* vm) -> void {
-                    vm->restore(nullptr, redisjob->getVMState());
-                    vm->restore(Wire::scopes()->produce(redisjob->getScopeBinn(), vm));
-                    vm->addStore(redisjob->getLocalStore());
-                    auto call = useref(Wire::calls()->produce(redisjob->getCallBin(), vm));
+                _vm->copy([rjob, &ret](VirtualMachine* vm) -> void {
+                    vm->restore(nullptr, Wire::states()->produce(rjob->getStateBinn(), vm));
+                    vm->restore(Wire::scopes()->produce(rjob->getScopeBinn(), vm));
+                    vm->addStore(Wire::stores()->produce(rjob->getLocalStoreBinn(), vm));
+                    auto call = useref(Wire::calls()->produce(rjob->getCallBinn(), vm));
                     vm->executeCall(call);
                     if ( call->returnType()->intrinsic() != Type::Intrinsic::VOID ) {
                         ret = call->getReturn();
                     }
                 });
 
-                setJobReturn(redisjob->id(), ret);
-                redisjob->setState(JobState::COMPLETE);
+                setJobReturn(rjob->id(), ret);
+                rjob->setState(JobState::COMPLETE);
             } catch (Errors::SwarmError& e) {
                 Console::get()->error(e.what());
-                redisjob->setState(JobState::ERROR);
+                rjob->setState(JobState::ERROR);
             }
             _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", job.second, -1);
-            delete redisjob;
+            delete rjob;
         }
     }
 
@@ -262,9 +259,9 @@ namespace swarmc::Runtime::RedisDriver {
         auto qjob = new RedisQueueJob(
             static_cast<JobID>(std::atoi(jobValues["ID"].c_str())),
             redisRead(jobValues["Call"]),
-            Wire::states()->produce(statebin, _vm),
+            redisRead(jobValues["VMState"]),
             redisRead(jobValues["VMScope"]),
-            Wire::stores()->produce(storebin, _vm)
+            redisRead(jobValues["LocalStore"])
         );
         binn_free(statebin);
         binn_free(storebin);

@@ -27,6 +27,9 @@ namespace swarmc::Runtime {
             binn_map_set_object(obj, BC_STORE_REFS, refs);
             return obj;
         });
+
+        // NOTE: producing a scope is dependent on the VM already being restored to the state
+        // that contains any function references that may appear in said store
         factory->registerProducer("swarm::SingleThreaded::StorageInterface", [](binn* obj, auto vm) -> IStorageInterface* {
             auto store = new SingleThreaded::StorageInterface(ISA::Affinity::LOCAL);
             

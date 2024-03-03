@@ -96,14 +96,14 @@ namespace swarmc::Runtime::RedisDriver {
 
     class RedisQueueJob : public IQueueJob {
     public:
-        RedisQueueJob(JobID id, binn* call, State* vmState, binn* vmScope, IStorageInterface* localStore)
-            : _id(id), _call(call), _vmState(useref(vmState)), _vmScope(vmScope), _localStore(useref(localStore)) {}
+        RedisQueueJob(JobID id, binn* call, binn* vmState, binn* vmScope, binn* localStore)
+            : _id(id), _call(call), _vmState(vmState), _vmScope(vmScope), _localStore(localStore) {}
 
         ~RedisQueueJob() {
             binn_free(_call);
-            freeref(_vmState);
+            binn_free(_vmState);
             binn_free(_vmScope);
-            freeref(_localStore);
+            binn_free(_localStore);
         }
 
         /** Get the tracking ID for this job. */
@@ -122,13 +122,13 @@ namespace swarmc::Runtime::RedisDriver {
         // FIXME: could store this separately preserialization, but becomes impossible postserialization without restoring vm
         [[nodiscard]] virtual IFunctionCall* getCall() const override { return nullptr; }
 
-        [[nodiscard]] virtual State* getVMState() const { return _vmState; }
+        [[nodiscard]] virtual binn* getStateBinn() const { return _vmState; }
 
         [[nodiscard]] virtual binn* getScopeBinn() const { return _vmScope; }
 
-        [[nodiscard]] virtual binn* getCallBin() const { return _call; }
+        [[nodiscard]] virtual binn* getCallBinn() const { return _call; }
 
-        [[nodiscard]] virtual IStorageInterface* getLocalStore() const { return _localStore; }
+        [[nodiscard]] virtual binn* getLocalStoreBinn() const { return _localStore; }
 
         virtual void setFilters(SchedulingFilters filters) override { _filters = filters; }
 
@@ -140,9 +140,9 @@ namespace swarmc::Runtime::RedisDriver {
     protected:
         JobID _id;
         binn* _call;
-        State* _vmState;
+        binn* _vmState;
         binn* _vmScope;
-        IStorageInterface* _localStore;
+        binn* _localStore;
 
         SchedulingFilters _filters;
     };
