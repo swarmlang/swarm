@@ -1168,7 +1168,7 @@ namespace swarmc::Lang::Walk {
                 auto retMap = makeTmp(ISA::Affinity::LOCAL, instrs);
                 append(instrs, new ISA::ResumeContext(jobdata.second));
                 append(instrs, assignEval(retMap, new ISA::Drain()));
-                append(instrs, assignEval(jobdata.second, new ISA::RetMapGet(retMap, jobdata.first)));
+                append(instrs, assignEval(loc, new ISA::RetMapGet(retMap, jobdata.first)));
                 append(instrs, new ISA::PopContext());
             }
         }
