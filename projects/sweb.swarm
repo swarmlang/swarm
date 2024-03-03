@@ -1,0 +1,14 @@
+
+type SWebServer = {
+    number port;
+    number pendingConnectionLimit;
+    socket sock;
+
+    constructor(p: number, pcl: number) => {
+        port = p;
+        pendingConnectionLimit = pcl;
+        sock = openSocket(port, pendingConnectionLimit);
+    };
+};
+
+SWebServer s = SWebServer(4000, 50);
