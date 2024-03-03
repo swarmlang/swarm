@@ -127,7 +127,8 @@ namespace swarmc::Runtime {
                 binn_list_add_map(values, factory->reduce(ref->get(i), vm));
             }
 
-            binn_map_set_map(obj, BC_VECTOR_TYPES, types()->reduce(ref->type(), vm));
+            auto innerType = ((Type::Enumerable*)ref->type())->values();
+            binn_map_set_map(obj, BC_VECTOR_TYPES, types()->reduce(innerType, vm));
             binn_map_set_list(obj, BC_VECTOR_VALUES, values);
             binn_map_set_map(obj, BC_EXTRA, ref->getExtraSerialData());
 
