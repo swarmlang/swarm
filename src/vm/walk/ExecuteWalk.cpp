@@ -37,6 +37,7 @@ namespace swarmc::Runtime {
             auto sharedLocs = _sharedLocations->walkOne(inst);
 
             // Attempt to lock the necessary shared locations
+            // FIXME: in the global scope, locks made here will apply to unscoped locations
             SharedLocations locked;
             for ( auto sharedLoc : sharedLocs ) {
                 if ( !_vm->hasLock(sharedLoc) && _vm->lock(sharedLoc) ) {

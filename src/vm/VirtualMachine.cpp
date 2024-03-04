@@ -56,15 +56,17 @@ namespace swarmc::Runtime {
     Reference* VirtualMachine::loadFromStore(LocationReference* loc) {
         auto scopeLoc = _scope->map(loc);
         auto store = getStore(scopeLoc);
+        NS_DEFER()([scopeLoc, this]() {
+            if (!hasLock(scopeLoc)) unlock(scopeLoc);
+        });
 
         // FIXME: smarter locking (e.g. region awareness, atomic operation exemptions, &c.)
-        if ( store->shouldLockAccesses() && !hasLock(scopeLoc) && lock(loc) ) {
-            NS_DEFER()([scopeLoc, this]() {
-                unlock(scopeLoc);
-            });
+        if ( store->shouldLockAccesses() && !hasLock(scopeLoc) ) {
+            lock(scopeLoc);
         }
 
-        return store->load(scopeLoc);
+        auto value = store->load(scopeLoc);
+        return value;
     }
 
     StreamReference* VirtualMachine::loadBuiltinStream(LocationReference* ref) {
@@ -189,12 +191,13 @@ namespace swarmc::Runtime {
             shadow(loc);
             scopeLoc = _scope->map(loc);
         }
+        NS_DEFER()([scopeLoc, this]() {
+            if (!hasLock(scopeLoc)) unlock(scopeLoc);
+        });
         auto store = getStore(scopeLoc);
 
-        if ( store->shouldLockAccesses() && !hasLock(scopeLoc) && lock(loc) ) {
-            NS_DEFER()([scopeLoc, this]() {
-                unlock(scopeLoc);
-            });
+        if ( store->shouldLockAccesses() && !hasLock(scopeLoc) ) {
+            lock(scopeLoc);
         }
 
         store->store(scopeLoc, ref);
@@ -214,17 +217,15 @@ namespace swarmc::Runtime {
      * @return
      */
     bool VirtualMachine::lock(LocationReference* loc) {
-        auto scopeLoc = _scope->map(loc);
-
-        if ( hasLock(scopeLoc) ) {
+        if ( hasLock(loc) ) {
             logger->warn("Attempted to acquire lock that is already held by the requesting control: " + loc->toString());
             logger->debug(trace());
             return false;
         }
 
-        auto store = getStore(scopeLoc);
+        auto store = getStore(loc);
         for ( int i = 0; i < Configuration::LOCK_MAX_RETRIES; i += 1 ) {
-            auto lock = store->acquire(scopeLoc);
+            auto lock = store->acquire(loc);
             if ( lock == nullptr ) {
                 whileWaitingForLock();
                 continue;
@@ -236,21 +237,19 @@ namespace swarmc::Runtime {
 
         throw Errors::RuntimeError(
             Errors::RuntimeExCode::AcquireLockMaxAttemptsExceeded,
-            "Unable to acquire lock for location (" + scopeLoc->toString() + ") from store (" + store->toString() + ") -- max retries exceeded"
+            "Unable to acquire lock for location (" + loc->toString() + ") from store (" + store->toString() + ") -- max retries exceeded"
         );
     }
 
     void VirtualMachine::unlock(LocationReference* loc) {
-        auto scopeLoc = _scope->map(loc);
-
-        if ( !hasLock(scopeLoc) ) {
+        if ( !hasLock(loc) ) {
             logger->warn("Attempted to release lock that is not held by the requesting control: " + loc->toString());
             return;
         }
 
         for ( auto it = _locks.begin(); it != _locks.end(); ++it ) {
             auto lock = *it;
-            if ( lock->location()->is(scopeLoc) ) {
+            if ( lock->location()->is(loc) ) {
                 GC_LOCAL_REF(lock);
                 lock->release();
                 _locks.erase(it);
