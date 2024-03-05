@@ -654,6 +654,12 @@ type :
         delete $2;
     }
 
+    | ARROW typeid {
+        Position* pos = new Position($1->position(), $2->position());
+        $$ = new TypeLiteral(pos, new Type::Lambda0($2->value()));
+        delete $1;
+    }
+
 function :
     LPAREN formals RPAREN COLON typeid FNDEF LBRACE statements RBRACE {
         Position* pos = new Position($1->position(), $9->position());
