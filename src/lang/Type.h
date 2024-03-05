@@ -46,6 +46,8 @@ namespace nslib {
 }
 
 namespace swarmc::Type {
+    using AssignableCache = std::map<std::size_t, std::set<std::size_t>>;
+
     class Type : public IStringable, public serial::ISerializable, public IRefCountable {
     public:
         static std::string intrinsicString(Intrinsic intrinsic) {
@@ -70,9 +72,11 @@ namespace swarmc::Type {
             return "CONTRADICTION";
         }
 
+        [[nodiscard]] static AssignableCache& getAssignableCache();
+
         Type() {
             _id = _nextId++;
-            _assignableCache[_id] = std::set<std::size_t>();
+            getAssignableCache()[_id] = std::set<std::size_t>();
         }
 
         ~Type() override = default;
@@ -122,7 +126,6 @@ namespace swarmc::Type {
         friend class Lang::TypeLiteral;
         std::size_t _id;
         static std::size_t _nextId;
-        static std::map<std::size_t, std::set<std::size_t>> _assignableCache;
     };
 
     class Primitive : public Type {
@@ -692,24 +695,24 @@ namespace swarmc::Type {
             // If we arrived at a duplicate, we basically are saying for types `a` and `b`:
             // a == b <-> a == b
             // which is of course true, ergo we can return true without recursing further
-            if ( stl::contains(_assignableCache.at(_id), other->getId()) ) return true;
+            if ( stl::contains(getAssignableCache().at(_id), other->getId()) ) return true;
 
             auto otherObject = dynamic_cast<const Object*>(other);
             auto properties = otherObject->getCollapsedProperties();
             auto otherIter = properties.begin();
             // assume objects to be equal until proven otherwise (because of recursive types)
-            _assignableCache[_id].insert(other->getId());
+            getAssignableCache()[_id].insert(other->getId());
             for ( ; otherIter != properties.end(); ++otherIter ) {
                 auto thisResult = getProperty(otherIter->first);
                 if ( thisResult == nullptr ) {
                     // We don't have a required property on the base type
-                    _assignableCache[_id].erase(other->getId());
+                    getAssignableCache()[_id].erase(other->getId());
                     return false;
                 }
 
                 if ( !thisResult->isAssignableTo(otherIter->second) ) {
                     // Our property has an incompatible type
-                    _assignableCache[_id].erase(other->getId());
+                    getAssignableCache()[_id].erase(other->getId());
                     return false;
                 }
             }

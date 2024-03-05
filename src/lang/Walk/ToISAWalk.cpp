@@ -24,7 +24,7 @@ namespace swarmc::Lang::Walk {
             auto i = walk(node->body()->front());
             append(instrs, i);
             Reporting::toISADebug(
-                node->body()->front()->position(), 
+                node->body()->front()->position(),
                 "finished " + node->body()->front()->toString()
             );
             freeref(node->body()->front());
@@ -47,8 +47,8 @@ namespace swarmc::Lang::Walk {
 
         if ( node->symbol()->isPrologue() ) {
             auto fref = makeLocation(
-                ISA::Affinity::FUNCTION, 
-                ((Lang::PrologueFunctionSymbol*)node->symbol())->sviName(), 
+                ISA::Affinity::FUNCTION,
+                ((Lang::PrologueFunctionSymbol*)node->symbol())->sviName(),
                 nullptr
             );
             append(instrs, assignValue(id, fref, false));
@@ -124,7 +124,7 @@ namespace swarmc::Lang::Walk {
 
         auto ref = getTypeRef(node->value());
         append(instrs, assignValue(makeTmp(ISA::Affinity::LOCAL, instrs), ref, false));
-        
+
         return instrs;
     }
 
@@ -229,11 +229,11 @@ namespace swarmc::Lang::Walk {
                 // is if we are inside a function defined in a type
                 append(instrs, new ISA::ObjSet(
                     makeLocation(
-                        ISA::Affinity::LOCAL, 
+                        ISA::Affinity::LOCAL,
                         TO_ISA_OBJECT_INSTANCE + s(scanConstructing(id->name())),
                         nullptr
                     ),
-                    makeLocation(ISA::Affinity::OBJECTPROP, id->name(), nullptr), 
+                    makeLocation(ISA::Affinity::OBJECTPROP, id->name(), nullptr),
                     value
                 ));
             } else {
@@ -256,7 +256,7 @@ namespace swarmc::Lang::Walk {
             auto path = getLastLoc(instrs);
 
             append(instrs, new ISA::MapSet(
-                new ISA::StringReference(TO_ISA_MAP_KEY_PREFIX + m->end()->name()), 
+                new ISA::StringReference(TO_ISA_MAP_KEY_PREFIX + m->end()->name()),
                 value,
                 path
             ));
@@ -267,7 +267,7 @@ namespace swarmc::Lang::Walk {
             auto path = getLastLoc(instrs);
 
             append(instrs, new ISA::ObjSet(
-                path, 
+                path,
                 makeLocation(ISA::Affinity::OBJECTPROP, obj->end()->name(), nullptr),
                 value
             ));
@@ -445,8 +445,8 @@ namespace swarmc::Lang::Walk {
 
                     auto formals = new ISAFormalList({ { objtype, TO_ISA_OBJECT_INSTANCE + s(objtype->getId()) } });
                     formals->insert(
-                        formals->end(), 
-                        std::make_move_iterator(defFormals->begin()), 
+                        formals->end(),
+                        std::make_move_iterator(defFormals->begin()),
                         std::make_move_iterator(defFormals->end())
                     );
                     delete defFormals;
@@ -468,9 +468,9 @@ namespace swarmc::Lang::Walk {
                     vloc = getLastLoc(instrs);
                 }
 
-                // create default value location for 
+                // create default value location for
                 auto defloc = makeLocation(
-                    ISA::Affinity::LOCAL, 
+                    ISA::Affinity::LOCAL,
                     TO_ISA_OBJECT_DEFAULT_PREFIX + s(objtype->getId()) + "_" + decl->id()->name(),
                     instrs
                 );
@@ -499,7 +499,7 @@ namespace swarmc::Lang::Walk {
         // TODO: remove this once import-based prologue gets implemented
         // translates Swarm functions that have instruction equivalents in svi
         if ( node->func()->getTag() == ASTNodeTag::IDENTIFIER ) {
-            if ( ToISAWalk::InstructionAsFunc.count(((IdentifierNode*)node->func())->name()) ) {
+            if ( ToISAWalk::getInstructionAsFunc().count(((IdentifierNode*)node->func())->name()) ) {
                 return callToInstruction(node);
             }
         }
@@ -561,8 +561,8 @@ namespace swarmc::Lang::Walk {
         // TODO: remove when import based prologue exists
         if ( node->call()->func()->getTag() == ASTNodeTag::IDENTIFIER ) {
             std::string name = ((IdentifierNode*)node->call()->func())->name();
-            if ( ToISAWalk::InstructionAsFunc.count(name) ) {
-                auto retType = ToISAWalk::InstructionAsFunc.at(name);
+            if ( ToISAWalk::getInstructionAsFunc().count(name) ) {
+                auto retType = ToISAWalk::getInstructionAsFunc().at(name);
                 auto call = instrs->back();
                 instrs->pop_back();
                 auto funcName = TO_ISA_FUNCTION_PREFIX + s(_tempCounter++);
@@ -575,7 +575,7 @@ namespace swarmc::Lang::Walk {
                 } else {
                     append(instrs, new ISA::Return1(getLastLoc(instrs)));
                     append(instrs, assignEval(
-                        makeTmp(ISA::Affinity::LOCAL, instrs), 
+                        makeTmp(ISA::Affinity::LOCAL, instrs),
                         new ISA::Call0(funcLoc)
                     ));
                 }
@@ -607,21 +607,21 @@ namespace swarmc::Lang::Walk {
             auto call = (ISA::Call1*)last;
             pushcall = new ISA::PushCall1(call->first(), call->second());
         }
-        
+
         if ( returnsValue ) {
             append(instrs, assignEval(
                 makeTmp(ISA::Affinity::LOCAL, instrs),
                 pushcall
             ));
             append(instrs, assignEval(
-                makeTmp(ISA::Affinity::LOCAL, instrs), 
+                makeTmp(ISA::Affinity::LOCAL, instrs),
                 new ISA::PopContext()
             ));
         } else {
             append(instrs, pushcall);
             append(instrs, new ISA::PopContext());
         }
-        
+
 
         return instrs;
     }
@@ -711,15 +711,15 @@ namespace swarmc::Lang::Walk {
         auto enumLoc = getLastLoc(instrs);
 
         // create formals to pass to makeFunction
-        auto name = "ENUM_" + s(_tempCounter++);      
+        auto name = "ENUM_" + s(_tempCounter++);
         ISAFormalList* formals = new ISAFormalList({
-            { 
-                node->local()->type(), 
-                TO_ISA_VARIABLE_PREFIX + node->local()->name() 
+            {
+                node->local()->type(),
+                TO_ISA_VARIABLE_PREFIX + node->local()->name()
             },
-            { 
+            {
                 Type::Primitive::of(Type::Intrinsic::NUMBER),
-                (node->index() == nullptr) ? "index" : node->index()->name() 
+                (node->index() == nullptr) ? "index" : node->index()->name()
             }
         });
         // make function
@@ -728,7 +728,7 @@ namespace swarmc::Lang::Walk {
         auto func = makeFunction(
             name,
             formals,
-            Type::Primitive::of(Type::Intrinsic::VOID), 
+            Type::Primitive::of(Type::Intrinsic::VOID),
             node, false, false, false
         );
         _loopDepth = tempWhile;
@@ -774,7 +774,7 @@ namespace swarmc::Lang::Walk {
         auto name = "IF_" + s(_tempCounter++);
         auto func = makeFunction(
             name, nullptr,
-            Type::Primitive::of(Type::Intrinsic::VOID), 
+            Type::Primitive::of(Type::Intrinsic::VOID),
             node, false, false, false
         );
         append(instrs, func);
@@ -894,7 +894,7 @@ namespace swarmc::Lang::Walk {
         auto leftLoc = getLastLoc(instrs);
         auto rightLoc = getLastLoc(right);
         append(instrs, right);
-        
+
         ISA::Instruction* instr = nullptr;
         if ( node->getTag() == ASTNodeTag::AND ) instr = new ISA::And(leftLoc, rightLoc);
         else if ( node->getTag() == ASTNodeTag::OR ) instr = new ISA::Or(leftLoc, rightLoc);
@@ -911,10 +911,10 @@ namespace swarmc::Lang::Walk {
                 || node->getTag() == ASTNodeTag::NOTEQUALS ) instr = new ISA::IsEqual(leftLoc, rightLoc);
         else if ( node->getTag() == ASTNodeTag::NUMERICCOMPARISON ) {
             auto ctype = ((NumericComparisonExpressionNode*)node)->comparisonType();
-            if ( ctype == NumberComparisonType::GREATER_THAN ) instr = new ISA::GreaterThan(leftLoc, rightLoc); 
-            else if ( ctype == NumberComparisonType::GREATER_THAN_OR_EQUAL ) instr = new ISA::GreaterThanOrEqual(leftLoc, rightLoc); 
-            else if ( ctype == NumberComparisonType::LESS_THAN ) instr = new ISA::LessThan(leftLoc, rightLoc); 
-            else instr = new ISA::LessThanOrEqual(leftLoc, rightLoc); 
+            if ( ctype == NumberComparisonType::GREATER_THAN ) instr = new ISA::GreaterThan(leftLoc, rightLoc);
+            else if ( ctype == NumberComparisonType::GREATER_THAN_OR_EQUAL ) instr = new ISA::GreaterThanOrEqual(leftLoc, rightLoc);
+            else if ( ctype == NumberComparisonType::LESS_THAN ) instr = new ISA::LessThan(leftLoc, rightLoc);
+            else instr = new ISA::LessThanOrEqual(leftLoc, rightLoc);
         }
 
         append(instrs, assignEval(
@@ -940,7 +940,7 @@ namespace swarmc::Lang::Walk {
             append(instrs, stmtISA);
             if ( hasContinue.combine(hasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST)
                 .combine(hasReturn, ASTMapReduce<bool>::CombineSkipType::SECOND)
-                .walk(instr).value_or(false) ) 
+                .walk(instr).value_or(false) )
             {
                 i++;
                 break;
@@ -954,7 +954,7 @@ namespace swarmc::Lang::Walk {
             auto func = makeFunction(
                 name,
                 nullptr,
-                Type::Primitive::of(Type::Intrinsic::VOID), 
+                Type::Primitive::of(Type::Intrinsic::VOID),
                 remainder,
                 loop, false, with
             );
@@ -1066,7 +1066,7 @@ namespace swarmc::Lang::Walk {
     ISA::Instructions* ToISAWalk::callToInstruction(CallExpressionNode* node) {
         assert(node->func()->getTag() == ASTNodeTag::IDENTIFIER);
         std::string name = ((IdentifierNode*)node->func())->name();
-        if ( ToISAWalk::InstructionAsFunc.count(name) == 0 ) return nullptr;
+        if ( ToISAWalk::getInstructionAsFunc().count(name) == 0 ) return nullptr;
         auto instrs = new ISA::Instructions();
         ISA::Instruction* instr = nullptr;
         if ( name == "lLog" ) {
@@ -1098,7 +1098,7 @@ namespace swarmc::Lang::Walk {
             );
         }
         // do assign if ret type not void
-        if ( ToISAWalk::InstructionAsFunc.at(name)->intrinsic() != Type::Intrinsic::VOID ) {
+        if ( ToISAWalk::getInstructionAsFunc().at(name)->intrinsic() != Type::Intrinsic::VOID ) {
             append(instrs, assignEval(
                 makeTmp(ISA::Affinity::LOCAL, instrs),
                 instr
@@ -1116,7 +1116,7 @@ namespace swarmc::Lang::Walk {
             isaFormals->push_back({ p.first->value(), TO_ISA_VARIABLE_PREFIX + p.second->name() });
         }
         return isaFormals;
-    } 
+    }
 
     ISA::TypeReference* ToISAWalk::getTypeRef(Type::Type* type, Type::Type* comp) {
         auto tp = thisify(type, comp);
@@ -1153,8 +1153,8 @@ namespace swarmc::Lang::Walk {
 
     void ToISAWalk::append(ISA::Instructions* first, ISA::Instructions* second) const {
         first->insert(
-            first->end(), 
-            std::make_move_iterator(second->begin()), 
+            first->end(),
+            std::make_move_iterator(second->begin()),
             std::make_move_iterator(second->end())
         );
         delete second;
@@ -1198,10 +1198,14 @@ namespace swarmc::Lang::Walk {
         return instrs;
     }
 
-    const std::map<std::string, Type::Type*> ToISAWalk::InstructionAsFunc = {
-        { "lLog", Type::Primitive::of(Type::Intrinsic::VOID) },
-        { "lError", Type::Primitive::of(Type::Intrinsic::VOID) },
-        { "sLog", Type::Primitive::of(Type::Intrinsic::VOID) },
-        { "sError", Type::Primitive::of(Type::Intrinsic::VOID) },
-    };
+    const std::map<std::string, Type::Type*>& ToISAWalk::getInstructionAsFunc() {
+        static const std::map<std::string, Type::Type*> instructionAsFunc = {
+            { "lLog", Type::Primitive::of(Type::Intrinsic::VOID) },
+            { "lError", Type::Primitive::of(Type::Intrinsic::VOID) },
+            { "sLog", Type::Primitive::of(Type::Intrinsic::VOID) },
+            { "sError", Type::Primitive::of(Type::Intrinsic::VOID) },
+        };
+
+        return instructionAsFunc;
+    }
 }

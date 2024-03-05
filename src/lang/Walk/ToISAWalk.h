@@ -96,7 +96,7 @@ private:
 
     /**
      * Creates a new location reference with the given `affinity` and `name`
-     * `instrs` is the list of instructions a ScopeOf should be appended to, nullptr if no ScopeOf necessary 
+     * `instrs` is the list of instructions a ScopeOf should be appended to, nullptr if no ScopeOf necessary
      */
     ISA::LocationReference* makeLocation(ISA::Affinity affinity, std::string name, ISA::Instructions* instrs);
 
@@ -108,14 +108,14 @@ private:
      * `newScope`: if we are in a function literal (i.e. do we need to scopeof retVal or cfb)
      * `with`: are we a with function
      */
-    ISA::Instructions* makeFunction(std::string name, ISAFormalList* formals, Type::Type* retType, 
+    ISA::Instructions* makeFunction(std::string name, ISAFormalList* formals, Type::Type* retType,
         StatementListWrapper* node, bool loop, bool newScope, bool with);
 
     /** Transforms swarm function call to equivalent SVI instructions */
     ISA::Instructions* callToInstruction(CallExpressionNode*);
 
     /** Transforms `FormalList` into `ISAFormalList` */
-    ISAFormalList* extractFormals(FormalList*) const; 
+    ISAFormalList* extractFormals(FormalList*) const;
 
     /** Get a valid reference for `type`, replacing `comp` with `THIS` */
     ISA::TypeReference* getTypeRef(Type::Type* type, Type::Type* comp=nullptr);
@@ -147,33 +147,33 @@ private:
     ASTMapReduce<bool> hasReturn = ASTMapReduce<bool>(
         [](ASTNode* n) {
             return n->getTag() == ASTNodeTag::RETURN;
-        }, 
-        [](bool l, bool r) { return l || r; }, 
-        [](ASTNode* n) { 
+        },
+        [](bool l, bool r) { return l || r; },
+        [](ASTNode* n) {
             return n->getTag() == ASTNodeTag::FUNCTION
-                || n->getTag() == ASTNodeTag::ENUMERATE; 
+                || n->getTag() == ASTNodeTag::ENUMERATE;
         }
     );
     ASTMapReduce<bool> hasContinue = ASTMapReduce<bool>(
         [](ASTNode* n) {
             return n->getTag() == ASTNodeTag::CONTINUE;
-        }, 
-        [](bool l, bool r) { return l || r; }, 
-        [](ASTNode* n) { 
-            return n->getTag() == ASTNodeTag::FUNCTION 
+        },
+        [](bool l, bool r) { return l || r; },
+        [](ASTNode* n) {
+            return n->getTag() == ASTNodeTag::FUNCTION
                 || n->getTag() == ASTNodeTag::WHILE
-                || n->getTag() == ASTNodeTag::ENUMERATE; 
+                || n->getTag() == ASTNodeTag::ENUMERATE;
         }
     );
     ASTMapReduce<bool> hasBreak = ASTMapReduce<bool>(
         [](ASTNode* n) {
             return n->getTag() == ASTNodeTag::BREAK;
-        }, 
-        [](bool l, bool r) { return l || r; }, 
-        [](ASTNode* n) { 
-            return n->getTag() == ASTNodeTag::FUNCTION 
+        },
+        [](bool l, bool r) { return l || r; },
+        [](ASTNode* n) {
+            return n->getTag() == ASTNodeTag::FUNCTION
                 || n->getTag() == ASTNodeTag::WHILE
-                || n->getTag() == ASTNodeTag::ENUMERATE; 
+                || n->getTag() == ASTNodeTag::ENUMERATE;
         }
     );
 
@@ -183,7 +183,7 @@ private:
     std::map<std::size_t, ISA::TypeReference*> _typeMap;
     // top of stack is the type of the object whose constructor is being compiled
     TypeConstructorData _constructing;
-    static const std::map<std::string, Type::Type*> InstructionAsFunc;
+    const std::map<std::string, Type::Type*>& getInstructionAsFunc();
 };
 
 }

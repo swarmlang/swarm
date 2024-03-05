@@ -29,7 +29,10 @@ namespace swarmc::Type {
 
     std::size_t Type::_nextId = 0;
 
-    std::map<std::size_t, std::set<std::size_t>> Type::_assignableCache;
+    AssignableCache& Type::getAssignableCache() {
+        static AssignableCache assignableCache;
+        return assignableCache;
+    }
 
     std::map<Intrinsic, Primitive*> Primitive::_primitives;
 
@@ -55,6 +58,6 @@ namespace swarmc::Type {
         }
         auto value = useref(((Lang::VariableSymbol*)sym)->getObjectType()->value());
         return value->disambiguateStatically();
-    } 
+    }
 
 }
