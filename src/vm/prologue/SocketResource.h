@@ -12,15 +12,20 @@
 
 namespace swarmc::Runtime::Prologue {
 
+    class SocketConnectionResource;
+
     inline Type::Opaque* socketType() {
         return Type::Opaque::of("PROLOGUE::SOCKET");
     }
 
     class SocketResource : public IResource {
     public:
-        SocketResource(NodeID owner, std::string id) : _owner(std::move(owner)), _id(std::move(id)) {
+        SocketResource(NodeID owner, std::string id, double port, double pendingConnectionLimit)
+            : _owner(std::move(owner)), _id(std::move(id)), _socket(0), _port(port), _pendingConnectionLimit(pendingConnectionLimit) {
             _config.sin_family = AF_INET;
             _config.sin_addr.s_addr = INADDR_ANY;
+            _config.sin_port = htons(floor(_port));
+            memset(_config.sin_zero, '\0', sizeof _config.sin_zero);
         }
 
         [[nodiscard]] ResourceCategory category() const override {
@@ -46,8 +51,50 @@ namespace swarmc::Runtime::Prologue {
     protected:
         NodeID _owner;
         std::string _id;
-        std::optional<int> _socket;
+        int _socket;
+        std::unordered_map<std::string, SocketConnectionResource*> _connections;
+        double _port;
+        double _pendingConnectionLimit;
         sockaddr_in _config {};
+    };
+
+    inline Type::Opaque* socketConnectionType() {
+        return Type::Opaque::of("PROLOGUE::SOCKET::CONNECTION");
+    }
+
+    class SocketConnectionResource : public IResource {
+    public:
+        SocketConnectionResource(NodeID owner, std::string id)
+            : _owner(std::move(owner)), _id(std::move(id)), _client(0), _addrLen(sizeof(_addr)) {}
+
+        [[nodiscard]] ResourceCategory category() const override {
+            return ResourceCategory::TUNNELED;
+        }
+
+        [[nodiscard]] std::string id() const override { return _id; }
+
+        [[nodiscard]] NodeID owner() const override { return _owner; }
+
+        [[nodiscard]] std::string name() const override { return "PROLOGUE::SOCKET::CONNECTION"; }
+
+        void acceptFromServer(int serverDescriptor);
+
+        [[nodiscard]] Type::Type* innerType() const override {
+            return socketConnectionType();
+        }
+
+        ResourceOperationFrame performOperation(VirtualMachine*, OperationName, ResourceOperationFrame) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "Prologue::SocketConnectionResource<owner: " + s(_owner) + ", id: " + _id + ">";
+        }
+
+    protected:
+        NodeID _owner;
+        std::string _id;
+        int _client;
+        struct sockaddr_in _addr {};
+        socklen_t _addrLen;
     };
 
     class SocketFunctionCall : public PrologueFunctionCall {
@@ -101,6 +148,60 @@ namespace swarmc::Runtime::Prologue {
 
         [[nodiscard]] std::string toString() const override {
             return "OpenSocketFunction<>";
+        }
+    };
+
+    class AcceptSocketConnectionFunctionCall : public PrologueFunctionCall {
+    public:
+        AcceptSocketConnectionFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "ACCEPT_SOCKET_CONNECTION", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "AcceptSocketConnectionFunctionCall<>";
+        }
+    };
+
+    class AcceptSocketConnectionFunction : public PrologueFunction {
+    public:
+        explicit AcceptSocketConnectionFunction(IProvider* provider) : PrologueFunction("ACCEPT_SOCKET_CONNECTION", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override;
+
+        [[nodiscard]] Type::Type* returnType() const override;
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "AcceptSocketConnectionFunction<>";
+        }
+    };
+
+    class ReadFromConnectionFunctionCall : public PrologueFunctionCall {
+    public:
+        ReadFromConnectionFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+                PrologueFunctionCall(provider, "READ_FROM_CONNECTION", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "ReadFromConnectionFunctionCall<>";
+        }
+    };
+
+    class ReadFromConnectionFunction : public PrologueFunction {
+    public:
+        explicit ReadFromConnectionFunction(IProvider* provider) : PrologueFunction("READ_FROM_CONNECTION", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override;
+
+        [[nodiscard]] Type::Type* returnType() const override;
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "ReadFromConnectionFunction<>";
         }
     };
 

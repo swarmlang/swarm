@@ -17,6 +17,8 @@ public:
     inline static const std::string REDIS_PREFIX = "swarm_";
     static const int REDIS_DEFAULT_TLL;
 
+    static const size_t SOCKET_MAX_BUFFER_SIZE = 65536;  // 64 KiB
+
     static int QUEUE_SLEEP_uS;
     static int DEBUG_QUEUE_SLEEP_uS;
     static int LOCK_SLEEP_uS;

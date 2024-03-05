@@ -149,6 +149,10 @@ socket {
 	return makeBareToken(TokenKind::SOCKET);
 }
 
+connection {
+	return makeBareToken(TokenKind::SOCKETCONNECTION);
+}
+
 bool {
 	return makeBareToken(TokenKind::BOOL);
 }

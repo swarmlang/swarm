@@ -1,0 +1,65 @@
+
+type SWebRequest = {
+    connection conn;
+    string raw = "";
+    bool isRead = false;
+
+    -- Parsed from the Request-Line (RFC 2616 § 5.1)
+    string method = "";
+    string uri = "";
+    string httpVersion = "";
+
+    constructor(c: connection) => {
+        conn = c;
+    };
+
+    constructor(c: connection, s: string) => {
+        conn = c;
+        raw = s;
+        isRead = true;
+    };
+
+    fn read = (): void => {
+        if ( isRead ) {
+            return;
+        }
+
+        raw = readFromConnection(conn);
+        isRead = true;
+    };
+
+    fn parse = (): void => {
+        if ( !isRead ) {}
+    };
+};
+
+type SWebServer = {
+    number port;
+    number pendingConnectionLimit;
+    socket sock;
+
+    constructor(p: number, pcl: number) => {
+        port = p;
+        pendingConnectionLimit = pcl;
+        sock = getSocket(port, pendingConnectionLimit);
+    };
+
+    fn open = (): void => {
+        openSocket(sock);
+        log("Opened socket on port " + numberToString(port));
+    };
+
+    fn accept = (): SWebRequest => {
+        return SWebRequest(acceptSocketConnection(sock));
+    };
+
+    fn log = (msg: string): void => {
+        lLog("[SWebServer] " + msg);
+    };
+};
+
+SWebServer s = SWebServer(4000, 50);
+s.open();
+
+SWebRequest r = s.accept();
+r.read();

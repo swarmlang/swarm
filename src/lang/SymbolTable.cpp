@@ -211,6 +211,15 @@ namespace swarmc::Lang {
         auto openSocket = new PrologueFunctionSymbol("openSocket", typeSocketVoid, new ProloguePosition("openSocket"), "OPEN_SOCKET");
         prologueScope->insert(openSocket);
 
+        auto connectionType = new Type::Resource(Type::Opaque::of("PROLOGUE::SOCKET::CONNECTION"));
+        auto typeSocketConnection = new Type::Lambda1(socketType, connectionType);
+        auto acceptSocketConnection = new PrologueFunctionSymbol("acceptSocketConnection", typeSocketConnection, new ProloguePosition("acceptSocketConnection"), "ACCEPT_SOCKET_CONNECTION");
+        prologueScope->insert(acceptSocketConnection);
+
+        auto typeConnectionString = new Type::Lambda1(connectionType, Type::Primitive::of(Type::Intrinsic::STRING));
+        auto readFromConnection = new PrologueFunctionSymbol("readFromConnection", typeConnectionString, new ProloguePosition("readFromConnection"), "READ_FROM_CONNECTION");
+        prologueScope->insert(readFromConnection);
+
         auto fileType = new Type::Resource(Type::Opaque::of("PROLOGUE::FILE"));
 
         auto typeStringFile = new Type::Lambda1(

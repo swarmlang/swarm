@@ -110,6 +110,7 @@
 %token <transToken>      STRING
 %token <transToken>      NUMBER
 %token <transToken>      SOCKET
+%token <transToken>      SOCKETCONNECTION
 %token <transToken>      BOOL
 %token <transToken>      VOID
 %token <transToken>      TYPE
@@ -601,6 +602,12 @@ type :
 
     | SOCKET {
         auto t = new Type::Resource(Type::Opaque::of("PROLOGUE::SOCKET"));
+        $$ = new TypeLiteral($1->position(), t);
+        delete $1;
+    }
+
+    | SOCKETCONNECTION {
+        auto t = new Type::Resource(Type::Opaque::of("PROLOGUE::SOCKET::CONNECTION"));
         $$ = new TypeLiteral($1->position(), t);
         delete $1;
     }

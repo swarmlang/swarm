@@ -55,6 +55,8 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "SOCKET_T" ) return new SocketTFunction(this);
         if ( name == "SOCKET" ) return new SocketFunction(this);
         if ( name == "OPEN_SOCKET" ) return new OpenSocketFunction(this);
+        if ( name == "ACCEPT_SOCKET_CONNECTION" ) return new AcceptSocketConnectionFunction(this);
+        if ( name == "READ_FROM_CONNECTION" ) return new ReadFromConnectionFunction(this);
 
         return nullptr;
     }

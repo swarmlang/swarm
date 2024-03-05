@@ -371,10 +371,10 @@ namespace swarmc::Lang::Walk {
 
         // function header
         append(instrs, new ISA::BeginFunction(node->name(), getTypeRef(type)));
-        for ( auto f : *extractFormals(node->func()->formals()) ) {
+        for ( const auto& f : *extractFormals(node->func()->formals()) ) {
             append(instrs, new ISA::FunctionParam(
                 getTypeRef(f.first),
-                makeLocation(ISA::Affinity::LOCAL, TO_ISA_VARIABLE_PREFIX + f.second, nullptr)
+                makeLocation(ISA::Affinity::LOCAL, f.second, nullptr)
             ));
         }
 
