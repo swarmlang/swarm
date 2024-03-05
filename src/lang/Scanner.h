@@ -40,6 +40,23 @@ namespace swarmc::Lang {
             auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
+            // replace "escape characters" with the actual ascii escape characters
+            // i stg i tried doing this with std::regex and couldnt get it to work
+            for ( auto i = 1; i < text.size() - 2; i++ ) {
+                if ( text[i] != '\\' ) continue;
+                text.erase(i, 1);
+                switch ( text[i] ) {
+                case 'n':  text[i] = '\n'; break;
+                case 't':  text[i] = '\t'; break;
+                case 'r':  text[i] = '\r'; break;
+                case '\'': text[i] = '\''; break;
+                case '\"': text[i] = '\"'; break;
+                case '\\': text[i] = '\\'; break;
+                default: // this not possible
+                    break;
+                }
+            }
+
             yylval->lexeme = new StringLiteralToken(pos, tagIn, s(tagIn) + ":" + text, text.substr(1, text.size() - 2));
             colNum += length;
             return tagIn;
