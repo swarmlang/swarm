@@ -54,6 +54,7 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "SUBMATRIX" ) return new SubMatrixFunction(this);
         if ( name == "SOCKET_T" ) return new SocketTFunction(this);
         if ( name == "SOCKET" ) return new SocketFunction(this);
+        if ( name == "OPEN_SOCKET" ) return new OpenSocketFunction(this);
 
         return nullptr;
     }

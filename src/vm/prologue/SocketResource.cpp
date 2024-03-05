@@ -51,6 +51,29 @@ namespace swarmc::Runtime::Prologue {
 		return new SocketFunctionCall(_provider, vector, returnType());
 	}
 
+	void OpenSocketFunctionCall::execute(VirtualMachine* vm) {
+		// Load the resource and make some sanity checks
+		auto resource = (ISA::ResourceReference*) _vector.at(0).second;
+		assert(resource->resource()->name() == "PROLOGUE::SOCKET");
+
+		// Perform the operation on the resource
+		auto socket = resource->resource();
+		socket->performOperation(vm, "PROLOGUE::OP::SOCKET::OPEN", {});
+	}
+
+	FormalTypes OpenSocketFunction::paramTypes() const {
+		return {Type::Resource::of(socketType())};
+	}
+
+	Type::Type* OpenSocketFunction::returnType() const {
+		return Type::Primitive::of(Type::Intrinsic::VOID);
+	}
+
+	PrologueFunctionCall* OpenSocketFunction::call(CallVector vector) const {
+		return new OpenSocketFunctionCall(_provider, vector, returnType());
+	}
+
+
 	void SocketTFunctionCall::execute(VirtualMachine*) {
 		setReturn(new ISA::TypeReference(socketType()));
 	}

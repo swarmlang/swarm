@@ -77,10 +77,37 @@ namespace swarmc::Runtime::Prologue {
         }
     };
 
+    class OpenSocketFunctionCall : public PrologueFunctionCall {
+    public:
+        OpenSocketFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
+            PrologueFunctionCall(provider, "OPEN_SOCKET", vector, returnType) {}
+
+        void execute(VirtualMachine*) override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "OpenSocketFunctionCall<>";
+        }
+    };
+
+    class OpenSocketFunction : public PrologueFunction {
+    public:
+        explicit OpenSocketFunction(IProvider* provider) : PrologueFunction("OPEN_SOCKET", provider) {}
+
+        [[nodiscard]] FormalTypes paramTypes() const override;
+
+        [[nodiscard]] Type::Type* returnType() const override;
+
+        [[nodiscard]] PrologueFunctionCall* call(CallVector) const override;
+
+        [[nodiscard]] std::string toString() const override {
+            return "OpenSocketFunction<>";
+        }
+    };
+
     class SocketTFunctionCall : public PrologueFunctionCall {
     public:
         SocketTFunctionCall(IProvider* provider, const CallVector& vector, Type::Type* returnType):
-                PrologueFunctionCall(provider, "FILE_T", vector, returnType) {}
+                PrologueFunctionCall(provider, "SOCKET_T", vector, returnType) {}
 
         void execute(VirtualMachine*) override;
 
@@ -91,7 +118,7 @@ namespace swarmc::Runtime::Prologue {
 
     class SocketTFunction : public PrologueFunction {
     public:
-        explicit SocketTFunction(IProvider* provider) : PrologueFunction("FILE_T", provider) {}
+        explicit SocketTFunction(IProvider* provider) : PrologueFunction("SOCKET_T", provider) {}
 
         [[nodiscard]] FormalTypes paramTypes() const override;
 

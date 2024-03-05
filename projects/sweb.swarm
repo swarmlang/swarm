@@ -7,8 +7,10 @@ type SWebServer = {
     constructor(p: number, pcl: number) => {
         port = p;
         pendingConnectionLimit = pcl;
-        sock = openSocket(port, pendingConnectionLimit);
+        sock = getSocket(port, pendingConnectionLimit);
     };
+
+    fn open = (): void => {};
 };
 
 SWebServer s = SWebServer(4000, 50);
