@@ -56,8 +56,8 @@ namespace swarmc::Runtime {
     Reference* VirtualMachine::loadFromStore(LocationReference* loc) {
         auto scopeLoc = _scope->map(loc);
         auto store = getStore(scopeLoc);
-        NS_DEFER()([scopeLoc, this]() {
-            if (!hasLock(scopeLoc)) unlock(scopeLoc);
+        NS_DEFER()([store, scopeLoc, this]() {
+            if (store->shouldLockAccesses() && !hasLock(scopeLoc)) unlock(scopeLoc);
         });
 
         // FIXME: smarter locking (e.g. region awareness, atomic operation exemptions, &c.)
@@ -65,8 +65,7 @@ namespace swarmc::Runtime {
             lock(scopeLoc);
         }
 
-        auto value = store->load(scopeLoc);
-        return value;
+        return store->load(scopeLoc);
     }
 
     StreamReference* VirtualMachine::loadBuiltinStream(LocationReference* ref) {
@@ -191,10 +190,10 @@ namespace swarmc::Runtime {
             shadow(loc);
             scopeLoc = _scope->map(loc);
         }
-        NS_DEFER()([scopeLoc, this]() {
-            if (!hasLock(scopeLoc)) unlock(scopeLoc);
-        });
         auto store = getStore(scopeLoc);
+        NS_DEFER()([store, scopeLoc, this]() {
+            if ( store->shouldLockAccesses() && !hasLock(scopeLoc) ) unlock(scopeLoc);
+        });
 
         if ( store->shouldLockAccesses() && !hasLock(scopeLoc) ) {
             lock(scopeLoc);
