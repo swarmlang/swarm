@@ -52,13 +52,21 @@ protected:
 
     void walkIdentifierNode(IdentifierNode* node) override {}
 
-    void walkEnumerableAccessNode(EnumerableAccessNode* node) override {}
+    void walkEnumerableAccessNode(EnumerableAccessNode* node) override {
+        return walk(node->path());
+    }
 
-    void walkEnumerableAppendNode(EnumerableAppendNode* node) override {}
+    void walkEnumerableAppendNode(EnumerableAppendNode* node) override {
+        return walk(node->path());
+    }
 
-    void walkMapAccessNode(MapAccessNode* node) override {}
+    void walkMapAccessNode(MapAccessNode* node) override {
+        return walk(node->path());
+    }
 
-    void walkClassAccessNode(ClassAccessNode* node) override {}
+    void walkClassAccessNode(ClassAccessNode* node) override {
+        return walk(node->path());
+    }
 
     void walkIncludeStatementNode(IncludeStatementNode* node) override {}
 

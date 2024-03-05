@@ -211,6 +211,12 @@ namespace swarmc::Lang::Walk {
                 new ISA::StringReference(TO_ISA_MAP_KEY_PREFIX + stmt->id()->name()), val, mapLoc));
         }
 
+        append(instrs, assignValue(
+            makeTmp(ISA::Affinity::LOCAL, instrs),
+            mapLoc,
+            false
+        ));
+
         return instrs;
     }
 

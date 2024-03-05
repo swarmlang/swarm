@@ -18,22 +18,6 @@ namespace swarmc::Lang {
         return other;
     }
 
-    SemanticSymbol* MapAccessNode::lockable() const {
-        return _path->lockable();
-    }
-
-    SemanticSymbol* EnumerableAccessNode::lockable() const {
-        return _path->lockable();
-    }
-
-    SemanticSymbol* EnumerableAppendNode::lockable() const {
-        return _path->lockable();
-    }
-
-    SemanticSymbol* ClassAccessNode::lockable() const {
-        return _path->lockable();
-    }
-
     size_t ConstructorNode::nameID = 0;
 
 }

@@ -300,8 +300,6 @@ namespace Walk {
 
         virtual bool shared() const = 0;
 
-        virtual SemanticSymbol* lockable() const = 0;
-
         LValNode* copy() const override = 0;
 
         Type::Type* type() const override = 0;
@@ -329,10 +327,6 @@ namespace Walk {
         /** Get the semantic symbol associated with this identifier in its scope. */
         SemanticSymbol* symbol() const {
             return _symbol;
-        }
-
-        SemanticSymbol* lockable() const override {
-            return symbol();
         }
 
         void overrideSymbol(SemanticSymbol* sym) {
@@ -369,7 +363,7 @@ namespace Walk {
     /** Node for accessing data from an array */
     class EnumerableAccessNode final : public LValNode {
     public:
-        EnumerableAccessNode(Position* pos, LValNode* path, ExpressionNode* index) : LValNode(pos), _path(useref(path)), _index(useref(index)) {}
+        EnumerableAccessNode(Position* pos, ExpressionNode* path, ExpressionNode* index) : LValNode(pos), _path(useref(path)), _index(useref(index)) {}
         virtual ~EnumerableAccessNode() {
             freeref(_path);
             freeref(_index);
@@ -385,7 +379,7 @@ namespace Walk {
             return s.str();
         }
 
-        LValNode* path() const {
+        ExpressionNode* path() const {
             return _path;
         }
 
@@ -393,10 +387,9 @@ namespace Walk {
             return _index;
         }
 
-        SemanticSymbol* lockable() const override;
-
-        virtual bool shared() const override {
-            return _path->shared();
+        bool shared() const override {
+            if ( _path->isLVal() ) return ((LValNode*)_path)->shared();
+            return false;
         }
 
         virtual EnumerableAccessNode* copy() const override {
@@ -409,14 +402,14 @@ namespace Walk {
             return ((Type::Enumerable*) baseType)->values();
         }
     private:
-        LValNode* _path;
+        ExpressionNode* _path;
         ExpressionNode* _index;
     };
 
     /** Node for appending data to an array */
     class EnumerableAppendNode final : public LValNode {
     public:
-        EnumerableAppendNode(Position* pos, LValNode* path) : LValNode(pos), _path(useref(path)) {}
+        EnumerableAppendNode(Position* pos, ExpressionNode* path) : LValNode(pos), _path(useref(path)) {}
         virtual ~EnumerableAppendNode() {
             freeref(_path);
         }
@@ -431,14 +424,13 @@ namespace Walk {
             return s.str();
         }
 
-        LValNode* path() const {
+        ExpressionNode* path() const {
             return _path;
         }
 
-        SemanticSymbol* lockable() const override;
-
-        virtual bool shared() const override {
-            return _path->shared();
+        bool shared() const override {
+            if ( _path->isLVal() ) return ((LValNode*)_path)->shared();
+            return false;
         }
 
         virtual EnumerableAppendNode* copy() const override {
@@ -451,13 +443,13 @@ namespace Walk {
             return ((Type::Enumerable*) baseType)->values();
         }
     private:
-        LValNode* _path;
+        ExpressionNode* _path;
     };
 
     /** Node for accessing data from a map */
     class MapAccessNode final : public LValNode {
     public:
-        MapAccessNode(Position* pos, LValNode* path, IdentifierNode* end) : LValNode(pos), _path(useref(path)), _end(useref(end)) {}
+        MapAccessNode(Position* pos, ExpressionNode* path, IdentifierNode* end) : LValNode(pos), _path(useref(path)), _end(useref(end)) {}
         virtual ~MapAccessNode() {
             freeref(_path);
             freeref(_end);
@@ -471,7 +463,7 @@ namespace Walk {
             return "MapAccessNode<path: " + _path->toString() + " id: " + _end->name() + ">";
         }
 
-        LValNode* path() const {
+        ExpressionNode* path() const {
             return _path;
         }
 
@@ -479,10 +471,9 @@ namespace Walk {
             return _end;
         }
 
-        SemanticSymbol* lockable() const override;
-
-        virtual bool shared() const override {
-            return _path->shared();
+        bool shared() const override {
+            if ( _path->isLVal() ) return ((LValNode*)_path)->shared();
+            return false;
         }
 
         virtual MapAccessNode* copy() const override {
@@ -495,13 +486,13 @@ namespace Walk {
             return ((Type::Map*) pathType)->values();
         }
     private:
-        LValNode* _path;
+        ExpressionNode* _path;
         IdentifierNode* _end;
     };
 
     class ClassAccessNode : public LValNode {
     public:
-        ClassAccessNode(Position* pos, LValNode* path, IdentifierNode* end) : LValNode(pos), _path(useref(path)), _end(useref(end)) {}
+        ClassAccessNode(Position* pos, ExpressionNode* path, IdentifierNode* end) : LValNode(pos), _path(useref(path)), _end(useref(end)) {}
         ~ClassAccessNode() {
             freeref(_path);
             freeref(_end);
@@ -515,7 +506,7 @@ namespace Walk {
             return "ClassAccessNode<path: " + _path->toString() + " id: " + _end->name() + ">";
         }
 
-        LValNode* path() const {
+        ExpressionNode* path() const {
             return _path;
         }
 
@@ -524,10 +515,9 @@ namespace Walk {
         }
 
         bool shared() const override {
-            return _path->shared();
+            if ( _path->isLVal() ) return ((LValNode*)_path)->shared();
+            return false;
         }
-
-        SemanticSymbol* lockable() const override;
 
         virtual ClassAccessNode* copy() const override {
             return new ClassAccessNode(position(), _path->copy(), _end->copy());
@@ -539,7 +529,7 @@ namespace Walk {
             return ((Type::Object*) pathType)->getProperty(_end->name());
         }
     private:
-        LValNode* _path;
+        ExpressionNode* _path;
         IdentifierNode* _end;
     };
 

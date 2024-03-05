@@ -556,7 +556,19 @@ lval :
         delete $2; delete $4;
     }
 
+    | callExpression LBRACE id RBRACE {
+        Position* pos = new Position($1->position(), $4->position());
+        $$ = new MapAccessNode(pos, $1, $3);
+        delete $2; delete $4;
+    }
+
     | lval LBRACKET expression RBRACKET {
+        Position* pos = new Position($1->position(), $4->position());
+        $$ = new EnumerableAccessNode(pos, $1, $3);
+        delete $2; delete $4;
+    }
+
+    | callExpression LBRACKET expression RBRACKET {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new EnumerableAccessNode(pos, $1, $3);
         delete $2; delete $4;
@@ -568,12 +580,23 @@ lval :
         delete $2; delete $3;
     }
 
+    | callExpression LBRACKET RBRACKET {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new EnumerableAppendNode(pos, $1);
+        delete $2; delete $3;
+    }
+
     | classAccess {
         $$ = $1;
     }
 
 classAccess :
     lval DOT id {
+        $$ = new ClassAccessNode(new Position($1->position(), $3->position()), $1, $3);
+        delete $2;
+    }
+
+    | callExpression DOT id {
         $$ = new ClassAccessNode(new Position($1->position(), $3->position()), $1, $3);
         delete $2;
     }
