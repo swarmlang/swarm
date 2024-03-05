@@ -514,7 +514,7 @@ protected:
         auto argTypes = typeOfCallee->params();
 
         // Make sure the # of arguments matches
-        if ( argTypes.size() < node->args()->size() ) {
+        if ( argTypes.size() < node->args()->size() || (node->args()->size() == 0 && typeOfCallee->intrinsic() == Type::Intrinsic::LAMBDA1) ) {
             Reporting::typeError(
                 node->position(),
                 "Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
