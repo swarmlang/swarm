@@ -12,6 +12,7 @@
 #include "time_helpers.h"
 #include "vectors.h"
 #include "SocketResource.h"
+#include "string_helpers.h"
 
 
 namespace swarmc::Runtime::Prologue {
@@ -57,6 +58,8 @@ namespace swarmc::Runtime::Prologue {
         if ( name == "OPEN_SOCKET" ) return new OpenSocketFunction(this);
         if ( name == "ACCEPT_SOCKET_CONNECTION" ) return new AcceptSocketConnectionFunction(this);
         if ( name == "READ_FROM_CONNECTION" ) return new ReadFromConnectionFunction(this);
+        if ( name == "CHAR_COUNT" ) return new CharCountFunction(this);
+        if ( name == "CHAR_AT" ) return new CharAtFunction(this);
 
         return nullptr;
     }

@@ -15,7 +15,8 @@ Example:
 `enumerable<number> nums = [1,2,3];`  
 *Note: To have an empty enumerable literal, you must ascribe a type to its values to prevent ambiguity.*  
 *Example:* `enumerable<number> nums = [] of number;`  
-To access the values of an enumerable, use the `[]` operator.  
+To access the values of an enumerable, use the `[<idx>]` operator.
+To append a value to an enumerable, use the `nums[] = <val>;` syntax.
 Example: `nums[1]`  
 - **Maps**  
 A map is an unordered set of mappings from identifiers to values. The types of the values must be declared similar to an enumerable.  

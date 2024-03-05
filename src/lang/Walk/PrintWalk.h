@@ -48,6 +48,13 @@ protected:
         pop_space();
     }
 
+    void walkEnumerableAppendNode(EnumerableAppendNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->path());
+        pop_space();
+    }
+
     void walkMapAccessNode(MapAccessNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();

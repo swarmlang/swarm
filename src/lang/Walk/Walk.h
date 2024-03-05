@@ -19,6 +19,7 @@ namespace swarmc::Lang::Walk {
             if ( node->getTag() == ASTNodeTag::EXPRESSIONSTATEMENT ) return walkExpressionStatementNode((ExpressionStatementNode*) node);
             if ( node->getTag() == ASTNodeTag::IDENTIFIER ) return walkIdentifierNode((IdentifierNode*) node);
             if ( node->getTag() == ASTNodeTag::ENUMERABLEACCESS ) return walkEnumerableAccessNode((EnumerableAccessNode*) node);
+            if ( node->getTag() == ASTNodeTag::ENUMERABLEAPPEND ) return walkEnumerableAppendNode((EnumerableAppendNode*) node);
             if ( node->getTag() == ASTNodeTag::MAPACCESS ) return walkMapAccessNode((MapAccessNode*) node);
             if ( node->getTag() == ASTNodeTag::CLASSACCESS ) return walkClassAccessNode((ClassAccessNode*) node);
             if ( node->getTag() == ASTNodeTag::INCLUDE ) return walkIncludeStatementNode((IncludeStatementNode*) node);
@@ -58,7 +59,7 @@ namespace swarmc::Lang::Walk {
             if ( node->getTag() == ASTNodeTag::WHILE ) return walkWhileStatement((WhileStatement*) node);
             if ( node->getTag() == ASTNodeTag::CONTINUE ) return walkContinueNode((ContinueNode*) node);
             if ( node->getTag() == ASTNodeTag::BREAK ) return walkBreakNode((BreakNode*) node);
-            
+
             throw Errors::SwarmError("Invalid node type: " + s(node->getTag()));
         }
     protected:
@@ -66,6 +67,7 @@ namespace swarmc::Lang::Walk {
         virtual TReturn walkExpressionStatementNode(ExpressionStatementNode* node) = 0;
         virtual TReturn walkIdentifierNode(IdentifierNode* node) = 0;
         virtual TReturn walkEnumerableAccessNode(EnumerableAccessNode* node) = 0;
+        virtual TReturn walkEnumerableAppendNode(EnumerableAppendNode* node) = 0;
         virtual TReturn walkMapAccessNode(MapAccessNode* node) = 0;
         virtual TReturn walkClassAccessNode(ClassAccessNode* node) = 0;
         virtual TReturn walkIncludeStatementNode(IncludeStatementNode* node) = 0;

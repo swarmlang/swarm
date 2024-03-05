@@ -54,6 +54,10 @@ protected:
         return walk(node->index()) && flag;
     }
 
+    bool walkEnumerableAppendNode(EnumerableAppendNode* node) override {
+        return walk(node->path());
+    }
+
     bool walkMapAccessNode(MapAccessNode* node) override {
         return walk(node->path());
     }

@@ -1,4 +1,51 @@
 
+type LibString = {
+    constructor() => {};
+
+    fn length = (s: string): number => {
+        return charCount(s);
+    };
+
+    --fn at = (s: string, idx: number): string => {
+    --    return charAt(s, idx);
+    --};
+
+    -- Split a string by (CR)LF
+    fn lines = (s: string): enumerable<string> => {
+        enumerable<string> ss = [] of string;
+
+        number len = trimmedLength(s);
+        number i = 0;
+        string acc = "";
+        while ( i < len ) {
+            string c = charAt(s, i);
+            lLog("Lines | len: " + numberToString(len) + " | i: " + numberToString(i) + " | acc: " + acc + " | char: '" + c + "'");
+
+            if ( c == "\r" ) {
+                continue;
+            }
+
+            if ( c == "\n" ) {
+                ss[] = acc;
+                acc = "";
+                continue;
+            }
+
+            acc = acc + c;
+            i += 1;
+        }
+
+        if ( acc != "" ) {
+            ss[] = acc;
+        }
+
+        return ss;
+    };
+
+};
+
+LibString String = LibString();
+
 type SWebRequest = {
     connection conn;
     string raw = "";
@@ -19,7 +66,7 @@ type SWebRequest = {
         isRead = true;
     };
 
-    fn read = (): void => {
+    fn readRaw = (): void => {
         if ( isRead ) {
             return;
         }
@@ -29,7 +76,14 @@ type SWebRequest = {
     };
 
     fn parse = (): void => {
-        if ( !isRead ) {}
+        if ( !isRead ) {
+            readRaw();
+        }
+
+        enumerable<string> lines = String.lines(raw);
+        enumerate lines as line {
+            lLog("line: " + line);
+        }
     };
 };
 
@@ -62,4 +116,4 @@ SWebServer s = SWebServer(4000, 50);
 s.open();
 
 SWebRequest r = s.accept();
-r.read();
+r.parse();

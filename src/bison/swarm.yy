@@ -562,6 +562,12 @@ lval :
         delete $2; delete $4;
     }
 
+    | lval LBRACKET RBRACKET {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new EnumerableAppendNode(pos, $1);
+        delete $2; delete $3;
+    }
+
     | classAccess {
         $$ = $1;
     }

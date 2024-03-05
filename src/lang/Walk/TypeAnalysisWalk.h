@@ -56,6 +56,27 @@ protected:
         return true;
     }
 
+    bool walkEnumerableAppendNode(EnumerableAppendNode* node) override {
+        bool pathresult = walk(node->path());
+        if ( !pathresult ) {
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
+
+        const Type::Type* typeLVal = _types->getTypeOf(node->path());
+        if ( typeLVal->intrinsic() != Type::Intrinsic::ENUMERABLE ) {
+            Reporting::typeError(
+                    node->position(),
+                    "Invalid array access: " + node->path()->toString()
+            );
+            _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
+            return false;
+        }
+
+        _types->setTypeOf(node, ((Type::Enumerable*) typeLVal)->values());
+        return true;
+    }
+
     bool walkEnumerableAccessNode(EnumerableAccessNode* node) override {
         bool pathresult = walk(node->path());
         if ( !pathresult ) {
@@ -138,7 +159,7 @@ protected:
         if ( actualPathType->intrinsic() != Type::Intrinsic::OBJECT ) {
             Reporting::typeError(
                 node->position(),
-                "Attempt to access property of variable of type " + Type::Type::intrinsicString(actualPathType->intrinsic()) 
+                "Attempt to access property of variable of type " + Type::Type::intrinsicString(actualPathType->intrinsic())
                 + ": " + node->end()->name()
             );
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
@@ -153,7 +174,7 @@ protected:
             );
             _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
             return false;
-        } 
+        }
 
         _types->setTypeOf(node, endType);
         return true;
@@ -456,7 +477,7 @@ protected:
                     return false;
                 }
                 auto tLit = (TypeBodyNode*)((VariableSymbol*)sym)->getObjectType();
-               
+
                 std::vector<const Type::Type*> paramtypes;
                 std::string typeString;
                 for (size_t i = 0; i < node->args()->size(); i++) {
@@ -784,7 +805,7 @@ protected:
             localType = ((Type::Resource*) type)->yields();
 
             bool lt = localType->intrinsic() != Type::Intrinsic::OPAQUE && localType->intrinsic() != Type::Intrinsic::ERROR;
-            
+
             if ( lt ) {
                 Reporting::typeError(
                     node->local()->position(),

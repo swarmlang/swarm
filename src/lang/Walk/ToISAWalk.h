@@ -43,6 +43,7 @@ protected:
     ISA::Instructions* walkExpressionStatementNode(ExpressionStatementNode* node) override;
     ISA::Instructions* walkIdentifierNode(IdentifierNode* node) override;
     ISA::Instructions* walkEnumerableAccessNode(EnumerableAccessNode* node) override;
+    ISA::Instructions* walkEnumerableAppendNode(EnumerableAppendNode* node) override;
     ISA::Instructions* walkMapAccessNode(MapAccessNode* node) override;
     ISA::Instructions* walkClassAccessNode(ClassAccessNode* node) override;
     ISA::Instructions* walkIncludeStatementNode(IncludeStatementNode* node) override;

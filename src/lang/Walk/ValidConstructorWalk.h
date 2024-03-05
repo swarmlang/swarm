@@ -54,6 +54,8 @@ protected:
 
     void walkEnumerableAccessNode(EnumerableAccessNode* node) override {}
 
+    void walkEnumerableAppendNode(EnumerableAppendNode* node) override {}
+
     void walkMapAccessNode(MapAccessNode* node) override {}
 
     void walkClassAccessNode(ClassAccessNode* node) override {}
@@ -226,7 +228,7 @@ private:
             _console->debug("Giving " + destSym->name() + " the possible value of " + value->toString());
             _possibleFunctions.at(destSym).push_back((FunctionNode*)value);
         } else if ( value->getTag() == ASTNodeTag::IDENTIFIER
-                && _possibleFunctions.count(((IdentifierNode*) value)->symbol()) ) 
+                && _possibleFunctions.count(((IdentifierNode*) value)->symbol()) )
         {
             for (auto f : _possibleFunctions.at(((IdentifierNode*) value)->symbol())) {
                 _console->debug("Giving " + destSym->name() + " the possible value of " + f->toString());

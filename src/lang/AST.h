@@ -41,6 +41,7 @@ namespace Walk {
         EXPRESSIONSTATEMENT,
         IDENTIFIER,
         ENUMERABLEACCESS,
+        ENUMERABLEAPPEND,
         MAPACCESS,
         CLASSACCESS,
         INCLUDE,
@@ -410,6 +411,47 @@ namespace Walk {
     private:
         LValNode* _path;
         ExpressionNode* _index;
+    };
+
+    /** Node for appending data to an array */
+    class EnumerableAppendNode final : public LValNode {
+    public:
+        EnumerableAppendNode(Position* pos, LValNode* path) : LValNode(pos), _path(useref(path)) {}
+        virtual ~EnumerableAppendNode() {
+            freeref(_path);
+        }
+
+        virtual ASTNodeTag getTag() const override {
+            return ASTNodeTag::ENUMERABLEAPPEND;
+        }
+
+        virtual std::string toString() const override {
+            std::stringstream s;
+            s << "EnumerableAppendNode<path: " << _path->toString() << ">";
+            return s.str();
+        }
+
+        LValNode* path() const {
+            return _path;
+        }
+
+        SemanticSymbol* lockable() const override;
+
+        virtual bool shared() const override {
+            return _path->shared();
+        }
+
+        virtual EnumerableAppendNode* copy() const override {
+            return new EnumerableAppendNode(position(), _path->copy());
+        }
+
+        virtual Type::Type* type() const override {
+            auto baseType = _path->type();
+            assert(baseType->intrinsic() == Type::Intrinsic::ENUMERABLE);
+            return ((Type::Enumerable*) baseType)->values();
+        }
+    private:
+        LValNode* _path;
     };
 
     /** Node for accessing data from a map */
@@ -1132,7 +1174,7 @@ namespace Walk {
         ConstructorNode(Position* pos, FunctionNode* func) : DeclarationNode(pos), _func(useref(func)), _partOfType(nullptr) {
             _name = "constructor" + std::to_string(++ConstructorNode::nameID);
         }
-        ~ConstructorNode() { 
+        ~ConstructorNode() {
             freeref(_func);
             freeref(_partOfType);
         }
@@ -1158,7 +1200,7 @@ namespace Walk {
 
         std::string name() const {
             return _name;
-        }    
+        }
 
         Type::Object* partOf() const {
             return _partOfType;
@@ -1174,7 +1216,7 @@ namespace Walk {
 
     class TypeBodyNode final : public TypeLiteral {
     public:
-        TypeBodyNode(Position* pos, DeclarationList* decls, Type::Object* type) : TypeLiteral(pos, type) {            
+        TypeBodyNode(Position* pos, DeclarationList* decls, Type::Object* type) : TypeLiteral(pos, type) {
             _constructors = new std::vector<ConstructorNode*>();
             _declarations = new std::vector<DeclarationNode*>();
             for ( auto d : *decls ) {
@@ -1595,8 +1637,8 @@ namespace Walk {
             return new AddNode(position(), _left->copy(), _right->copy());
         }
 
-        void setConcat(bool c) { 
-            _concatenation = c; 
+        void setConcat(bool c) {
+            _concatenation = c;
         }
 
         [[nodiscard]] bool concatenation() const {
@@ -1720,7 +1762,7 @@ namespace Walk {
     class NegativeExpressionNode final : public UnaryExpressionNode {
     public:
         NegativeExpressionNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
-    
+
         virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::NEGATIVE;
         }
@@ -1741,7 +1783,7 @@ namespace Walk {
     class SqrtNode final : public UnaryExpressionNode {
     public:
         SqrtNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
-    
+
         virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::SQUAREROOT;
         }
@@ -1835,10 +1877,10 @@ namespace Walk {
         virtual EnumerationStatement* copy() const override {
             EnumerationStatement* other;
             if (_index == nullptr) {
-                other = new EnumerationStatement(position(), _enumerable->copy(), 
+                other = new EnumerationStatement(position(), _enumerable->copy(),
                     _local->copy(), _shared);
             } else {
-                other = new EnumerationStatement(position(), _enumerable->copy(), 
+                other = new EnumerationStatement(position(), _enumerable->copy(),
                     _local->copy(), _index->copy(), _shared);
             }
             other->assumeAndReduceStatements(copyBody());

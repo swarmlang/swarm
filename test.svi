@@ -1,30 +1,23 @@
-
-$s:n_logs <- 0
-
-beginfn f:ASYNC_LOG_INNER p:VOID
-    fnparam p:STRING $l:OUT
-    streampush $l:STDOUT $l:OUT
-    $s:n_logs <- plus $s:n_logs 1
-return
-
-beginfn f:ASYNC_LOG p:VOID
-    fnparam p:STRING $l:OUT
-    pushcall f:ASYNC_LOG_INNER $l:OUT
-return
-
-entercontext
-call f:ASYNC_LOG "log1"
-call f:ASYNC_LOG "log2"
-call f:ASYNC_LOG "log3"
-call f:ASYNC_LOG "log4"
-call f:ASYNC_LOG "log5"
-call f:ASYNC_LOG "log6"
-$l:cid <- popcontext
-
-streampush $l:STDOUT "After popcontext"
-resumecontext $l:cid
-drain
-
-$l:n_logs_str <- call f:NUMBER_TO_STRING $s:n_logs
-$l:n_logs_str <- strconcat "Number of logs: " $l:n_logs_str
-streampush $l:STDOUT $l:n_logs_str
+BEGINFN<Location<f:ENUM_5>, TypeReference<Primitive<VOID>>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:var_n>>
+FNPARAM<TypeReference<Primitive<NUMBER>>, Location<l:index>>
+SCOPEOF<Location<l:tmp6>>
+ASSIGNVALUE<Location<l:tmp6>, StringReference<n: >>
+ASSIGNVALUE<Location<l:var_numberToString>, Location<f:NUMBER_TO_STRING>>
+SCOPEOF<Location<l:tmp7>>
+ASSIGNEVAL<Location<l:tmp7>, CALL1<Location<f:NUMBER_TO_STRING>, Location<l:var_n>>>
+SCOPEOF<Location<l:tmp8>>
+ASSIGNEVAL<Location<l:tmp8>, STRCONCAT<Location<l:tmp6>, Location<l:tmp7>>>
+STREAMPUSH<Location<l:STDOUT>, Location<l:tmp8>>
+RETURN0<>
+ASSIGNEVAL<Location<l:tmp0>, ENUMINIT<TypeReference<Primitive<NUMBER>>>>
+ASSIGNVALUE<Location<l:tmp1>, NumberReference<1.000000>>
+ENUMAPPEND<NumberReference<1.000000>, Location<l:tmp0>>
+ASSIGNVALUE<Location<l:tmp2>, NumberReference<2.000000>>
+ENUMAPPEND<NumberReference<2.000000>, Location<l:tmp0>>
+ASSIGNVALUE<Location<l:tmp3>, NumberReference<3.000000>>
+ENUMAPPEND<NumberReference<3.000000>, Location<l:tmp0>>
+ASSIGNVALUE<Location<l:var_ns>, Location<l:tmp0>>
+ASSIGNVALUE<Location<l:tmp4>, NumberReference<4.000000>>
+ENUMAPPEND<NumberReference<4.000000>, Location<l:tmp0>>
+ENUMERATE<TypeReference<Primitive<NUMBER>>, Location<l:tmp0>, Location<f:ENUM_5>>

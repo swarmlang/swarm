@@ -26,6 +26,10 @@ namespace swarmc::Lang {
         return _path->lockable();
     }
 
+    SemanticSymbol* EnumerableAppendNode::lockable() const {
+        return _path->lockable();
+    }
+
     SemanticSymbol* ClassAccessNode::lockable() const {
         return _path->lockable();
     }
@@ -40,6 +44,7 @@ namespace nslib {
         if ( tag == swarmc::Lang::ASTNodeTag::EXPRESSIONSTATEMENT ) return "ExpressionStatementNode";
         if ( tag == swarmc::Lang::ASTNodeTag::IDENTIFIER ) return "IdentifierNode";
         if ( tag == swarmc::Lang::ASTNodeTag::ENUMERABLEACCESS ) return "EnumerableAccessNode";
+        if ( tag == swarmc::Lang::ASTNodeTag::ENUMERABLEAPPEND ) return "EnumerableAppendNode";
         if ( tag == swarmc::Lang::ASTNodeTag::MAPACCESS ) return "MapAccessNode";
         if ( tag == swarmc::Lang::ASTNodeTag::CLASSACCESS ) return "ClassAccessNode";
         if ( tag == swarmc::Lang::ASTNodeTag::INCLUDE ) return "IncludeStatementNode";

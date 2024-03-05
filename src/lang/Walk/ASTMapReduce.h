@@ -9,9 +9,9 @@ namespace swarmc::Lang::Walk {
 template <typename TReturn>
 class ASTMapReduce : public Walk<std::optional<TReturn>> {
 public:
-    ASTMapReduce(std::function<std::optional<TReturn>(ASTNode*)> map, std::function<TReturn(TReturn, TReturn)> reducer) 
+    ASTMapReduce(std::function<std::optional<TReturn>(ASTNode*)> map, std::function<TReturn(TReturn, TReturn)> reducer)
         : Walk<std::optional<TReturn>>(), _map(map), _reducer(reducer), _skip([](ASTNode*) { return false; }) {}
-    ASTMapReduce(std::function<std::optional<TReturn>(ASTNode*)> map, std::function<TReturn(TReturn, TReturn)> reducer, 
+    ASTMapReduce(std::function<std::optional<TReturn>(ASTNode*)> map, std::function<TReturn(TReturn, TReturn)> reducer,
         std::function<bool(ASTNode*)> skip) : Walk<std::optional<TReturn>>(), _map(map), _reducer(reducer), _skip(skip) {}
     ~ASTMapReduce() = default;
 
@@ -27,11 +27,11 @@ public:
             l.push_back(other._map(n));
             return reduce(l);
         };
-        if ( cst == CombineSkipType::AND ) return ASTMapReduce(mapc, _reducer, [this,other](ASTNode* n) { 
-            return _skip(n) && other._skip(n); 
+        if ( cst == CombineSkipType::AND ) return ASTMapReduce(mapc, _reducer, [this,other](ASTNode* n) {
+            return _skip(n) && other._skip(n);
         });
-        if ( cst == CombineSkipType::OR ) return ASTMapReduce(mapc, _reducer, [this,other](ASTNode* n) { 
-            return _skip(n) || other._skip(n); 
+        if ( cst == CombineSkipType::OR ) return ASTMapReduce(mapc, _reducer, [this,other](ASTNode* n) {
+            return _skip(n) || other._skip(n);
         });
         if ( cst == CombineSkipType::SECOND ) return ASTMapReduce(mapc, _reducer, other._skip);
         return ASTMapReduce(mapc, _reducer, _skip);
@@ -64,7 +64,7 @@ protected:
 
     virtual std::optional<TReturn> walkEnumerableAccessNode(EnumerableAccessNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->path()),
             this->walk(node->index())
@@ -72,9 +72,18 @@ protected:
         return reduce(rets);
     }
 
+    virtual std::optional<TReturn> walkEnumerableAppendNode(EnumerableAppendNode* node) override {
+        if ( _skip(node) ) return std::nullopt;
+        std::list<std::optional<TReturn>> rets = {
+            _map(node),
+            this->walk(node->path())
+        };
+        return reduce(rets);
+    }
+
     virtual std::optional<TReturn> walkMapAccessNode(MapAccessNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->path()),
             this->walk(node->end())
@@ -84,7 +93,7 @@ protected:
 
     virtual std::optional<TReturn> walkClassAccessNode(ClassAccessNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->path()),
             this->walk(node->end())
@@ -134,7 +143,7 @@ protected:
 
     virtual std::optional<TReturn> walkMapStatementNode(MapStatementNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->id()),
             this->walk(node->value())
@@ -153,7 +162,7 @@ protected:
 
     virtual std::optional<TReturn> walkAssignExpressionNode(AssignExpressionNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->dest()),
             this->walk(node->value())
@@ -163,7 +172,7 @@ protected:
 
     virtual std::optional<TReturn> walkVariableDeclarationNode(VariableDeclarationNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->typeNode()),
             this->walk(node->assignment())
@@ -173,7 +182,7 @@ protected:
 
     virtual std::optional<TReturn> walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->typeNode()),
             this->walk(node->id())
@@ -190,7 +199,7 @@ protected:
 
     virtual std::optional<TReturn> walkFunctionNode(FunctionNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->typeNode())
         };
@@ -225,7 +234,7 @@ protected:
 
     virtual std::optional<TReturn> walkCallExpressionNode(CallExpressionNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->func())
         };
@@ -237,7 +246,7 @@ protected:
 
     virtual std::optional<TReturn> walkDeferCallExpressionNode(DeferCallExpressionNode* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->call())
         };
@@ -302,7 +311,7 @@ protected:
 
     virtual std::optional<TReturn> walkEnumerationStatement(EnumerationStatement* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->enumerable()),
             this->walk(node->local())
@@ -314,7 +323,7 @@ protected:
 
     virtual std::optional<TReturn> walkWithStatement(WithStatement* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->resource()),
             this->walk(node->local())
@@ -325,7 +334,7 @@ protected:
 
     virtual std::optional<TReturn> walkIfStatement(IfStatement* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->condition())
         };
@@ -335,7 +344,7 @@ protected:
 
     virtual std::optional<TReturn> walkWhileStatement(WhileStatement* node) override {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->condition())
         };
@@ -363,7 +372,7 @@ private:
 
     virtual std::optional<TReturn> walkBinaryExpressionNode(BinaryExpressionNode* node) {
         if ( _skip(node) ) return std::nullopt;
-        std::list<std::optional<TReturn>> rets = { 
+        std::list<std::optional<TReturn>> rets = {
             _map(node),
             this->walk(node->left()),
             this->walk(node->right())

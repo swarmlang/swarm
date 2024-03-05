@@ -71,6 +71,10 @@ namespace swarmc::Lang::Walk {
         return instrs;
     }
 
+    ISA::Instructions* ToISAWalk::walkEnumerableAppendNode(EnumerableAppendNode* node) {
+        return walk(node->path());
+    }
+
     ISA::Instructions* ToISAWalk::walkEnumerableAccessNode(EnumerableAccessNode* node) {
         auto instrs = walk(node->path());
         auto enumeration = getLastLoc(instrs);
@@ -249,6 +253,13 @@ namespace swarmc::Lang::Walk {
             auto index = getLastLoc(instrs);
 
             append(instrs, new ISA::EnumSet(path, index, value));
+        } else if ( node->dest()->getTag() == ASTNodeTag::ENUMERABLEAPPEND ) {
+            auto e = (EnumerableAppendNode*) node->dest();
+
+            append(instrs, walk(e));
+            auto enumeration = getLastLoc(instrs);
+
+            append(instrs, new ISA::EnumAppend(value, enumeration));
         } else if ( node->dest()->getTag() == ASTNodeTag::MAPACCESS ) {
             auto m = (MapAccessNode*)node->dest();
 
