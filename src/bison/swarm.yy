@@ -164,6 +164,7 @@
 %type <transDeclarations>   typeBody
 %type <transID>             id
 %type <transLVal>           lval
+%type <transLVal>           assignable
 %type <transExpression>     expression
 %type <transExpression>     expressionF
 %type <transExpression>     term
@@ -482,68 +483,74 @@ typeBody :
     }
 
 assignment :
-    lval ASSIGN expression {
+    assignable ASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new AssignExpressionNode(pos, $1, $3);
         delete $2;
     }
 
-    | lval ADDASSIGN expression {
+    | assignable ADDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new AddNode(pos, $1, $3);
         $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
-    | lval MULTIPLYASSIGN expression {
+    | assignable MULTIPLYASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new MultiplyNode(pos, $1, $3);
         $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
-    | lval SUBTRACTASSIGN expression {
+    | assignable SUBTRACTASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new SubtractNode(pos, $1, $3);
         $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
-    | lval DIVIDEASSIGN expression {
+    | assignable DIVIDEASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new DivideNode(pos, $1, $3);
         $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
-    | lval MODULUSASSIGN expression {
+    | assignable MODULUSASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new ModulusNode(pos, $1, $3);
         $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
-    | lval POWERASSIGN expression {
+    | assignable POWERASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new PowerNode(pos, $1, $3);
         $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
-    | lval ANDASSIGN expression {
+    | assignable ANDASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new AndNode(pos, $1, $3);
         $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
-    | lval ORASSIGN expression {
+    | assignable ORASSIGN expression {
         Position* pos = new Position($1->position(), $3->position());
         auto r = new OrNode(pos, $1, $3);
         $$ = new AssignExpressionNode(pos, $1->copy(), r);
         delete $2;
     }
 
+assignable
+    : lval { $$ = $1; }
+    | lval LBRACKET RBRACKET {
+        $$ = new EnumerableAppendNode(new Position($1->position(), $2->position()), $1);
+        delete $2; delete $3;
+    }
 
 lval :
     id {
@@ -572,18 +579,6 @@ lval :
         Position* pos = new Position($1->position(), $4->position());
         $$ = new EnumerableAccessNode(pos, $1, $3);
         delete $2; delete $4;
-    }
-
-    | lval LBRACKET RBRACKET {
-        Position* pos = new Position($1->position(), $3->position());
-        $$ = new EnumerableAppendNode(pos, $1);
-        delete $2; delete $3;
-    }
-
-    | callExpression LBRACKET RBRACKET {
-        Position* pos = new Position($1->position(), $3->position());
-        $$ = new EnumerableAppendNode(pos, $1);
-        delete $2; delete $3;
     }
 
     | classAccess {
