@@ -223,7 +223,7 @@ public:
     }
 };
 
-class ControlFlowGraph {
+class ControlFlowGraph : public IUsesLogger {
 public:
     explicit ControlFlowGraph(ISA::Instructions*);
     

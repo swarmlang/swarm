@@ -439,11 +439,11 @@ namespace swarmc::ISA {
         }
 
         SharedLocations walkLock(Lock* i) override {
-            return walkUnaryLocationReferenceInstruction(i);
+            return {};
         }
 
         SharedLocations walkUnlock(Unlock* i) override {
-            return walkUnaryLocationReferenceInstruction(i);
+            return {};
         }
 
         SharedLocations walkIsEqual(IsEqual* i) override {

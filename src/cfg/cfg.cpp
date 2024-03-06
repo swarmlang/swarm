@@ -72,7 +72,7 @@ std::pair<Block*,Block*> CFGFunction::makeCopy(std::size_t i, std::vector<Block*
     return { copyOf.at(_start), copyOf.at(_end) };
 }
 
-ControlFlowGraph::ControlFlowGraph(ISA::Instructions* instrs) {
+ControlFlowGraph::ControlFlowGraph(ISA::Instructions* instrs) : IUsesLogger("CFG") {
     // get mappings of instruction order for ease
     auto cfg = CFGBuild(instrs);
     _instrs = cfg._instrs;
@@ -128,6 +128,8 @@ ISA::Instructions* ControlFlowGraph::reconstruct(Block* block, std::size_t fDept
 
 bool ControlFlowGraph::optimize(bool rSelfAssign, bool litProp) {
     bool optimized = false, flag;
+
+    if ( !rSelfAssign ) logger->warn("Disabling removal of self-assignments can result in the loss of atomicity in swarm statements.");
 
     do {
         flag = false;

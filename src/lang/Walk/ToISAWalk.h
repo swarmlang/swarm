@@ -5,6 +5,8 @@
 #include "ASTMapReduce.h"
 #include "../../vm/isa_meta.h"
 #include "../../vm/walk/DeferrableLocationsWalk.h"
+#include "../../vm/walk/SharedLocationsWalk.h"
+#include "SharedLocationsWalk.h"
 
 #define TO_ISA_FUNCTION_PREFIX "FUNC_"
 #define TO_ISA_SUBFUNCTION_PREFIX "SUBFUNC_"
@@ -30,7 +32,7 @@ class DeferredLocationScope;
 
 namespace Walk {
 
-using ISAFormalList = std::vector<std::pair<Type::Type*, std::string>>;
+using ISAFormalList = std::vector<std::tuple<Type::Type*, ISA::Affinity, std::string, SemanticSymbol*>>;
 // list of pairs mapping ObjectType to locations where the default values are stored
 using TypeConstructorData = std::list<std::pair<Type::Object*, std::map<std::string, ISA::LocationReference*>>>;
 
@@ -144,6 +146,8 @@ private:
     bool _functionOuterScope = false;
     DeferredLocationScope* _deferredResults;
     ISA::DeferrableLocationsWalk _combLocations;
+    ISA::SharedLocationsWalk _sharedLocsWalkISA;
+    SharedLocations _sharedLocs;
 
     ASTMapReduce<bool> hasReturn = ASTMapReduce<bool>(
         [](ASTNode* n) {

@@ -21,7 +21,9 @@ namespace swarmc::Lang::Walk {
         auto instrs = new ISA::Instructions();
 
         while ( node->body()->size() ) {
+            _sharedLocs = SharedLocationsWalk::getLocs(node->body()->front());
             auto i = walk(node->body()->front());
+            assert(_sharedLocs.size() == 0);
             append(instrs, i);
             Reporting::toISADebug(
                 node->body()->front()->position(),
@@ -44,6 +46,7 @@ namespace swarmc::Lang::Walk {
 
         auto affinity = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
         auto id = makeLocation(affinity, "var_" + node->name(), nullptr);
+        SharedLocations::registerLoc(id, node->symbol());
 
         if ( node->symbol()->isPrologue() ) {
             auto fref = makeLocation(
@@ -228,10 +231,10 @@ namespace swarmc::Lang::Walk {
             auto id = (IdentifierNode*)node->dest();
             auto affinity = id->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
             auto loc = makeLocation(affinity,  TO_ISA_VARIABLE_PREFIX + id->name(), nullptr);
+            SharedLocations::registerLoc(loc, id->symbol());
 
             if ( node->value()->getTag() == ASTNodeTag::DEFERCALL ) {
                 auto jobid = getLastLoc(instrs, 1);
-
                 // loc is the variable the result will eventually be stored in, value is the context
                 _deferredResults->add(loc, jobid, value);
             } else if ( id->symbol()->isProperty() && _constructing.size() > 0 ) {
@@ -389,10 +392,9 @@ namespace swarmc::Lang::Walk {
         // function header
         append(instrs, new ISA::BeginFunction(node->name(), getTypeRef(type)));
         for ( const auto& f : *extractFormals(node->func()->formals()) ) {
-            append(instrs, new ISA::FunctionParam(
-                getTypeRef(f.first),
-                makeLocation(ISA::Affinity::LOCAL, f.second, nullptr)
-            ));
+            auto ploc = makeLocation(std::get<1>(f), std::get<2>(f), nullptr);
+            SharedLocations::registerLoc(ploc, std::get<3>(f));
+            append(instrs, new ISA::FunctionParam(getTypeRef(std::get<0>(f)), ploc));
         }
 
         // cfb
@@ -460,7 +462,12 @@ namespace swarmc::Lang::Walk {
                         retType = ((Type::Lambda*)retType)->returns();
                     }
 
-                    auto formals = new ISAFormalList({ { objtype, TO_ISA_OBJECT_INSTANCE + s(objtype->getId()) } });
+                    auto formals = new ISAFormalList({ {
+                        objtype,
+                        ISA::Affinity::LOCAL,
+                        TO_ISA_OBJECT_INSTANCE + s(objtype->getId()),
+                        nullptr
+                    } });
                     formals->insert(
                         formals->end(),
                         std::make_move_iterator(defFormals->begin()),
@@ -732,15 +739,20 @@ namespace swarmc::Lang::Walk {
         ISAFormalList* formals = new ISAFormalList({
             {
                 node->local()->type(),
-                TO_ISA_VARIABLE_PREFIX + node->local()->name()
+                node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
+                TO_ISA_VARIABLE_PREFIX + node->local()->name(),
+                node->local()->symbol()
             },
             {
                 Type::Primitive::of(Type::Intrinsic::NUMBER),
-                (node->index() == nullptr) ? "index" : node->index()->name()
+                (node->index() != nullptr && node->index()->shared())
+                    ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
+                (node->index() == nullptr) ? "index" : node->index()->name(),
+                (node->index() == nullptr) ? nullptr : node->index()->symbol()
             }
         });
         // make function
-        auto tempWhile = _loopDepth;
+        auto tempLoop = _loopDepth;
         _loopDepth = 0;
         auto func = makeFunction(
             name,
@@ -748,7 +760,7 @@ namespace swarmc::Lang::Walk {
             Type::Primitive::of(Type::Intrinsic::VOID),
             node, false, false, false
         );
-        _loopDepth = tempWhile;
+        _loopDepth = tempLoop;
         append(instrs, func);
 
         append(instrs, new ISA::Enumerate(
@@ -765,7 +777,12 @@ namespace swarmc::Lang::Walk {
         auto resLoc = getLastLoc(instrs);
 
         ISAFormalList* formals = new ISAFormalList({
-            { node->resource()->type(), TO_ISA_VARIABLE_PREFIX + node->local()->name() }
+            {
+                node->resource()->type(),
+                node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
+                TO_ISA_VARIABLE_PREFIX + node->local()->name(),
+                node->local()->symbol()
+            }
         });
 
         auto name = TO_ISA_WITH_PREFIX + s(_tempCounter++);
@@ -952,7 +969,9 @@ namespace swarmc::Lang::Walk {
             auto instr = block->body()->at(i);
             // prevent setting cfb if return occurs in function outermost scope
             if ( newScope && instr->getTag() == ASTNodeTag::RETURN ) _functionOuterScope = true;
+            _sharedLocs = SharedLocationsWalk::getLocs(block->body()->at(i));
             auto stmtISA = walk(instr);
+            assert(_sharedLocs.size() == 0);
             _functionOuterScope = false;
             append(instrs, stmtISA);
             if ( hasContinue.combine(hasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST)
@@ -1026,8 +1045,10 @@ namespace swarmc::Lang::Walk {
         // fnparams
         if ( formals != nullptr ) {
             for ( auto i = 0; i < formals->size(); i ++ ) {
-                auto loc = makeLocation(ISA::Affinity::LOCAL, formals->at(i).second, nullptr);
-                append(instrs, new ISA::FunctionParam(getTypeRef(formals->at(i).first), loc));
+                auto formal = formals->at(i);
+                auto loc = makeLocation(std::get<1>(formal), std::get<2>(formal), nullptr);
+                SharedLocations::registerLoc(loc, std::get<3>(formal));
+                append(instrs, new ISA::FunctionParam(getTypeRef(std::get<0>(formal)), loc));
                 _deferredResults->remove(loc);
             }
         }
@@ -1130,7 +1151,12 @@ namespace swarmc::Lang::Walk {
     ISAFormalList* ToISAWalk::extractFormals(FormalList* formals) const {
         auto isaFormals = new ISAFormalList();
         for ( auto p : *formals ) {
-            isaFormals->push_back({ p.first->value(), TO_ISA_VARIABLE_PREFIX + p.second->name() });
+            isaFormals->push_back({
+                p.first->value(),
+                p.second->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
+                TO_ISA_VARIABLE_PREFIX + p.second->name(),
+                p.second->symbol()
+            });
         }
         return isaFormals;
     }
@@ -1179,17 +1205,50 @@ namespace swarmc::Lang::Walk {
 
     void ToISAWalk::append(ISA::Instructions* instrs, ISA::Instruction* instr) {
         ISA::DeferrableLocations dl = _combLocations.walkOne(instr);
+        auto isl = _sharedLocsWalkISA.walkOne(instr);
+        //std::set<ISA::LocationReference*> isl(instrSharedLocs.begin(), instrSharedLocs.end());
         for ( auto loc : dl ) {
             if ( _deferredResults->contains(loc) ) {
+                // determine if we need to lock prematurely for the retmapget
+                bool lock = _sharedLocs.has(loc) && !_sharedLocs.locked(loc);
+
                 auto jobdata = _deferredResults->drain(loc);
                 auto retMap = makeTmp(ISA::Affinity::LOCAL, instrs);
                 append(instrs, new ISA::ResumeContext(jobdata.second));
                 append(instrs, assignEval(retMap, new ISA::Drain()));
+                if ( lock ) {
+                    instrs->push_back(useref(new ISA::Lock(loc)));
+                    _sharedLocs.dec(loc);
+                }
                 append(instrs, assignEval(loc, new ISA::RetMapGet(retMap, jobdata.first)));
                 append(instrs, new ISA::PopContext());
             }
         }
+
+        for ( auto i : isl ) { // lock all unlocked shared locs that appear in this instr
+            if ( _sharedLocs.has(i) ) {
+                if ( !_sharedLocs.locked(i) ) instrs->push_back(useref(new ISA::Lock(i)));
+                _sharedLocs.dec(i);
+            }
+        }
         instrs->push_back(useref(instr));
+
+        ISA::LocationReference* ll = nullptr;
+        if ( instrs->back()->tag() == ISA::Tag::ASSIGNEVAL || instrs->back()->tag() == ISA::Tag::ASSIGNVALUE ) {
+            ll = getLastLoc(instrs);
+        }
+
+        for ( auto i : isl ) { // unlock all locked shared locs whose last appearance was this instr
+            if ( _sharedLocs.has(i) && _sharedLocs.shouldUnlock(i) ) {
+                instrs->push_back(useref(new ISA::Unlock(i)));
+                _sharedLocs.remove(i);
+            }
+        }
+
+        // because of getLastLoc
+        if ( ll != nullptr && instrs->back()->tag() == ISA::Tag::UNLOCK ) {
+            append(instrs, assignValue(ll, ll, true));
+        }
     }
 
     ISA::Instructions* ToISAWalk::assignEval(ISA::LocationReference* dest, ISA::Instruction* instr) {

@@ -82,7 +82,7 @@ private:
             if ( uinstr->first()->tag() == ISA::ReferenceTag::LOCATION ) {
                 std::string name = ((ISA::LocationReference*)uinstr->first())->fqName();
                 auto v = _valueMap->get(name);
-                if ( v != nullptr ) {
+                if ( v != nullptr && uinstr->tag() != ISA::Tag::LOCK && uinstr->tag() != ISA::Tag::UNLOCK ) {
                     freeref(uinstr->first());
                     uinstr->setFirst(v);
                     flag = true;

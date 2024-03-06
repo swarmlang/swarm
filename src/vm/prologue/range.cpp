@@ -20,7 +20,7 @@ namespace swarmc::Runtime::Prologue {
 
         if ( len != 0 ) {
             auto n = start;
-            for ( auto i = 0; i <= len; i++ ) {
+            for ( auto i = 0; i < len; i++ ) {
                 enumeration->append(new ISA::NumberReference(static_cast<double>(n)));
                 n += step;
             }
