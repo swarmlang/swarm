@@ -141,7 +141,7 @@ $(BUILD_DIR)/test_%.o: $(TEST_DIR)/%.cpp src/bison/parser.cc
 
 .PHONY: clean
 clean:
-	$(Q)$(RM) -r $(BUILD_DIR) $(TARGET_EXEC) $(DEBUG_BUILD_DIR) $(TARGET_EXEC)_debug $(BISON_FILES) run_tests vgcore.*
+	$(Q)$(RM) -r $(BUILD_DIR) $(TARGET_EXEC) $(DEBUG_BUILD_DIR) $(TARGET_EXEC)_debug $(BISON_FILES) run_tests vgcore.* $(TEST_EXEC)
 
 
 .PHONY: test

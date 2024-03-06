@@ -277,9 +277,9 @@ namespace swarmc::Lang {
 
     void VariableSymbol::setObjectType(TypeLiteral* type) {
         if ( _value != nullptr ) {
-            Reporting::typeError(
-                declaredAt(),
-                "Attempt to rebind value of type variable. "
+            logger->error(
+                s(declaredAt()) +
+                " Attempt to rebind value of type variable. "
             );
             return;
         }
@@ -292,9 +292,9 @@ namespace swarmc::Lang {
             return;
         }
 
-        Reporting::typeError(
-            _declaredAt,
-            "Unable to disambiguate type of variable " + _name
+        logger->error(
+            s(_declaredAt) +
+            " Unable to disambiguate type of variable " + _name
         );
     }
 

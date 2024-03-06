@@ -131,7 +131,10 @@ bool ControlFlowGraph::optimize(bool rSelfAssign, bool litProp) {
 
     if ( !rSelfAssign ) logger->warn("Disabling removal of self-assignments can result in the loss of atomicity in swarm statements.");
 
+    auto iterations = 1;
+
     do {
+        logger->debug("Starting CFG optimization pass " + s(iterations++));
         flag = false;
         if (rSelfAssign) flag = RemoveSelfAssign::optimize(this) || flag;
         if (litProp) flag = ConstantPropagation::optimize(this) || flag;

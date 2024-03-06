@@ -8,7 +8,6 @@
 #include "../shared/nslib.h"
 #include "Position.h"
 #include "Type.h"
-#include "../Reporting.h"
 
 using namespace nslib;
 
@@ -93,9 +92,11 @@ namespace Walk {
 
 
     /** Semantic symbol implementation for names referencing variables. */
-    class VariableSymbol : public SemanticSymbol {
+    class VariableSymbol : public SemanticSymbol, public IUsesLogger {
     public:
-        VariableSymbol(std::string name, Type::Type* type, Position* declaredAt, bool shared, bool drain) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)), _value(nullptr), _shouldDrain(drain) {}
+        VariableSymbol(std::string name, Type::Type* type, Position* declaredAt, bool shared, bool drain) 
+            : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)), 
+            IUsesLogger("Name Analysis"), _value(nullptr), _shouldDrain(drain) {}
 
         ~VariableSymbol() {
             freeref(_value);
@@ -236,9 +237,9 @@ namespace Walk {
 
 
     /** Linked-list of scopes for tracking symbols in the program. */
-    class SymbolTable : public IStringable {
+    class SymbolTable : public IStringable, public IUsesLogger {
     public:
-        SymbolTable() {
+        SymbolTable() : IUsesLogger("SymbolTable") {
             _scopes = new std::list<ScopeTable*>();
             _scopes->push_back(ScopeTable::prologue());
         }
@@ -284,7 +285,7 @@ namespace Walk {
                 }
             }
 
-            Console::get()->debug("Unable to find symbol in table for identifier: " + name);
+            logger->debug("Unable to find symbol in table for identifier: " + name);
             return nullptr;
         }
 

@@ -150,6 +150,7 @@ private:
     SharedLocations _sharedLocs;
 
     ASTMapReduce<bool> hasReturn = ASTMapReduce<bool>(
+        "AST Has Return",
         [](ASTNode* n) {
             return n->getTag() == ASTNodeTag::RETURN;
         },
@@ -160,6 +161,7 @@ private:
         }
     );
     ASTMapReduce<bool> hasContinue = ASTMapReduce<bool>(
+        "AST Has Continue",
         [](ASTNode* n) {
             return n->getTag() == ASTNodeTag::CONTINUE;
         },
@@ -171,6 +173,7 @@ private:
         }
     );
     ASTMapReduce<bool> hasBreak = ASTMapReduce<bool>(
+        "AST Has Break",
         [](ASTNode* n) {
             return n->getTag() == ASTNodeTag::BREAK;
         },

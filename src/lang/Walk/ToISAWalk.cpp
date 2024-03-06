@@ -1,9 +1,8 @@
 #include "ToISAWalk.h"
 #include "../DeferredLocationScope.h"
-#include "../../Reporting.h"
 
 namespace swarmc::Lang::Walk {
-    ToISAWalk::ToISAWalk() : Walk<ISA::Instructions*>(), _deferredResults(new DeferredLocationScope(nullptr)) {
+    ToISAWalk::ToISAWalk() : Walk<ISA::Instructions*>("AST->ISA Walk"), _deferredResults(new DeferredLocationScope(nullptr)) {
         _locMap[ISA::Affinity::LOCAL] = std::map<std::string, ISA::LocationReference*>();
         _locMap[ISA::Affinity::SHARED] = std::map<std::string, ISA::LocationReference*>();
         _locMap[ISA::Affinity::FUNCTION] = std::map<std::string, ISA::LocationReference*>();
@@ -25,9 +24,9 @@ namespace swarmc::Lang::Walk {
             auto i = walk(node->body()->front());
             assert(_sharedLocs.size() == 0);
             append(instrs, i);
-            Reporting::toISADebug(
-                node->body()->front()->position(),
-                "finished " + node->body()->front()->toString()
+            logger->debug(
+                s(node->body()->front()->position()) +
+                "finished " + s(node->body()->front())
             );
             freeref(node->body()->front());
             node->body()->erase(node->body()->begin());
@@ -74,10 +73,6 @@ namespace swarmc::Lang::Walk {
         return instrs;
     }
 
-    ISA::Instructions* ToISAWalk::walkEnumerableAppendNode(EnumerableAppendNode* node) {
-        return walk(node->path());
-    }
-
     ISA::Instructions* ToISAWalk::walkEnumerableAccessNode(EnumerableAccessNode* node) {
         auto instrs = walk(node->path());
         auto enumeration = getLastLoc(instrs);
@@ -92,11 +87,15 @@ namespace swarmc::Lang::Walk {
         return instrs;
     }
 
+    ISA::Instructions* ToISAWalk::walkEnumerableAppendNode(EnumerableAppendNode* node) {
+        return walk(node->path());
+    }
+
     ISA::Instructions* ToISAWalk::walkMapAccessNode(MapAccessNode* node) {
         auto instrs = walk(node->path());
 
         auto value = new ISA::MapGet(
-            new ISA::StringReference("mkey_" + node->end()->name()),
+            new ISA::StringReference(TO_ISA_MAP_KEY_PREFIX + node->end()->name()),
             getLastLoc(instrs)
         );
 
@@ -236,6 +235,7 @@ namespace swarmc::Lang::Walk {
             if ( node->value()->getTag() == ASTNodeTag::DEFERCALL ) {
                 auto jobid = getLastLoc(instrs, 1);
                 // loc is the variable the result will eventually be stored in, value is the context
+                logger->debug(s(id->position()) + " Marking " + s(loc) + " as the return location of a deferred call");
                 _deferredResults->add(loc, jobid, value);
             } else if ( id->symbol()->isProperty() && _constructing.size() > 0 ) {
                 // the only case in which a raw identifier is an object property

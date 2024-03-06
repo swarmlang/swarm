@@ -4,24 +4,17 @@
 %defines
 %define api.namespace{swarmc::Lang}
 %define api.parser.class {Parser}
-%define parse.error verbose
-%token-table
+%define parse.error detailed
 
-%code requires{
-	#include <list>
-    #include <float.h>
-    #include "../shared/nslib.h"
-	#include "../lang/Token.h"
-   	#include "../lang/AST.h"
-   	#include "../lang/Type.h"
-    #include "../Reporting.h"
-    #include "../errors/ParseError.h"
+%code requires {
+    #include <vector>
+    #include "../lang/Token.h"
+    #include "../lang/AST.h"
 
-    using namespace nslib;
+    namespace swarmc::Lang {
+        class Scanner;
+    };
 
-	namespace swarmc::Lang {
-		class Scanner;
-	}
     class Shared {
     public:
         Shared(swarmc::Lang::Position* pos, bool shared): _pos(useref(pos)), _shared(shared) {}
@@ -48,15 +41,15 @@
     #include <iostream>
     #include <cstdlib>
     #include <fstream>
+    #include <float.h>
 
-    #include "../shared/nslib.h"
+   	#include "../lang/Type.h"
+    #include "../errors/ParseError.h"
     #include "../lang/Scanner.h"
-    #include "../lang/Token.h"
-    #include "../Reporting.h"
     #undef yylex
     #define yylex scanner.yylex
 
-    using namespace nslib;
+    auto parseLog = nslib::Logging::get()->get("Bison");
 }
 
 %union {
@@ -208,7 +201,7 @@ includes :
         $$ = $1;
         auto pos = new Position($2->position(), $4->position());
         $$->pushStatement(new IncludeStatementNode(pos, (ClassAccessNode*)$3, nullptr));
-        swarmc::Reporting::parseDebug(pos, s($$->body()->back()));
+        parseLog->debug(s(pos) + " Finished: " + s($$->body()->back()));
         delete $2; delete $4;
     }
 
@@ -216,7 +209,7 @@ includes :
         $$ = $1;
         auto pos = new Position($2->position(), $8->position());
         $$->pushStatement(new IncludeStatementNode(pos, (ClassAccessNode*)$3, $6));
-        swarmc::Reporting::parseDebug(pos, s($$->body()->back()));
+        parseLog->debug(s(pos) + " Finished: " + s($$->body()->back()));
         delete $2; delete $4; delete $5; delete $7; delete $8;
     }
 
@@ -226,7 +219,7 @@ includes :
         ids->push_back(useref($5));
         auto pos = new Position($2->position(), $6->position());
         $$->pushStatement(new IncludeStatementNode(pos, (ClassAccessNode*)$3, ids));
-        swarmc::Reporting::parseDebug(pos, s($$->body()->back()));
+        parseLog->debug(s(pos) + " Finished: " + s($$->body()->back()));
         delete $2; delete $4; delete $6;
     }
 
@@ -250,7 +243,7 @@ statements :
     statements statement {
         $1->pushStatement($2);
         $$ = $1;
-        swarmc::Reporting::parseDebug($2->position(), s($$->body()->back()));
+        parseLog->debug(s($2->position()) + " Finished: " + s($$->body()->back()));
     }
 
     | %empty {

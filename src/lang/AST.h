@@ -603,7 +603,7 @@ namespace Walk {
                 freeref(temp);
             } catch (swarmc::Errors::SwarmError& e) {
                 std::string m(e.what());
-                Reporting::nameError(this->position(), m);
+                Logging::get()->get("Name Analysis")->error(s(this->position()) + " " + m);
                 return false;
             }
             return true;

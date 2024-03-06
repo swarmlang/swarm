@@ -41,6 +41,7 @@ public:
         return "SharedLocationsWalk<>";
     }
 protected:
+    SharedLocationsWalk();
     [[nodiscard]] virtual SharedLocationsMap walkProgramNode(ProgramNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkExpressionStatementNode(ExpressionStatementNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkIdentifierNode(IdentifierNode* node) override;

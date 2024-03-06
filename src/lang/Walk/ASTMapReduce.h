@@ -9,10 +9,10 @@ namespace swarmc::Lang::Walk {
 template <typename TReturn>
 class ASTMapReduce : public Walk<std::optional<TReturn>> {
 public:
-    ASTMapReduce(std::function<std::optional<TReturn>(ASTNode*)> map, std::function<TReturn(TReturn, TReturn)> reducer)
-        : Walk<std::optional<TReturn>>(), _map(map), _reducer(reducer), _skip([](ASTNode*) { return false; }) {}
-    ASTMapReduce(std::function<std::optional<TReturn>(ASTNode*)> map, std::function<TReturn(TReturn, TReturn)> reducer,
-        std::function<bool(ASTNode*)> skip) : Walk<std::optional<TReturn>>(), _map(map), _reducer(reducer), _skip(skip) {}
+    ASTMapReduce(std::string log, std::function<std::optional<TReturn>(ASTNode*)> map, std::function<TReturn(TReturn, TReturn)> reducer)
+        : Walk<std::optional<TReturn>>(log), _map(map), _reducer(reducer), _skip([](ASTNode*) { return false; }), _logName(log) {}
+    ASTMapReduce(std::string log, std::function<std::optional<TReturn>(ASTNode*)> map, std::function<TReturn(TReturn, TReturn)> reducer,
+        std::function<bool(ASTNode*)> skip) : Walk<std::optional<TReturn>>(log), _map(map), _reducer(reducer), _skip(skip), _logName(log) {}
     ~ASTMapReduce() = default;
 
     enum class CombineSkipType {
@@ -27,14 +27,15 @@ public:
             l.push_back(other._map(n));
             return reduce(l);
         };
-        if ( cst == CombineSkipType::AND ) return ASTMapReduce(mapc, _reducer, [this,other](ASTNode* n) {
+        std::string logName = _logName + " + " + other._logName;
+        if ( cst == CombineSkipType::AND ) return ASTMapReduce(logName, mapc, _reducer, [this,other](ASTNode* n) {
             return _skip(n) && other._skip(n);
         });
-        if ( cst == CombineSkipType::OR ) return ASTMapReduce(mapc, _reducer, [this,other](ASTNode* n) {
+        if ( cst == CombineSkipType::OR ) return ASTMapReduce(logName, mapc, _reducer, [this,other](ASTNode* n) {
             return _skip(n) || other._skip(n);
         });
-        if ( cst == CombineSkipType::SECOND ) return ASTMapReduce(mapc, _reducer, other._skip);
-        return ASTMapReduce(mapc, _reducer, _skip);
+        if ( cst == CombineSkipType::SECOND ) return ASTMapReduce(logName, mapc, _reducer, other._skip);
+        return ASTMapReduce(logName, mapc, _reducer, _skip);
     }
 
     virtual std::optional<TReturn> walkStatementList(StatementListWrapper* node) {
@@ -369,6 +370,7 @@ private:
     std::function<std::optional<TReturn>(ASTNode*)> _map;
     std::function<TReturn(TReturn, TReturn)> _reducer;
     std::function<bool(ASTNode*)> _skip;
+    std::string _logName;
 
     virtual std::optional<TReturn> walkBinaryExpressionNode(BinaryExpressionNode* node) {
         if ( _skip(node) ) return std::nullopt;

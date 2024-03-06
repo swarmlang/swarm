@@ -1,5 +1,4 @@
 #include "SharedLocationsWalk.h"
-#include "../../Reporting.h"
 #include "../../vm/isa_meta.h"
 
 namespace swarmc::Lang::Walk {
@@ -49,16 +48,18 @@ bool SharedLocations::shouldUnlock(const ISA::LocationReference* loc) const {
 
 void SharedLocations::registerLoc(const ISA::LocationReference* loc, const SemanticSymbol* sym) {
     if ( loc->affinity() != ISA::Affinity::SHARED ) return;
-    Reporting::toISADebug(sym->declaredAt(), "Registering shared variable " + sym->name());
+    nslib::Logging::get()->get("AST Shared Locations Walk")
+        ->debug(s(sym->declaredAt()) + " Registering shared variable " + sym->name());
     if ( _locRefToSymbol.count(loc->fqName()) )_locRefToSymbol.at(loc->fqName()) = sym;
     else _locRefToSymbol.insert({ loc->fqName(), sym });
 }
 
 std::map<std::string, const SemanticSymbol*> SharedLocations::_locRefToSymbol;
 
+SharedLocationsWalk::SharedLocationsWalk() : Walk<SharedLocationsMap>("AST Shared Locations Walk") {}
+
 SharedLocations SharedLocationsWalk::getLocs(ASTNode* node) {
     SharedLocationsWalk swalk;
-    Reporting::toISADebug(node->position(), "SharedVariableWalk: " + node->toString());
     auto locs = swalk.walk(node);
     // because SVI instructions are atomic, we only need to lock
     // locations that appear more than once in a statement
@@ -71,7 +72,9 @@ SharedLocations SharedLocationsWalk::getLocs(ASTNode* node) {
         sharedLocs._locked.insert({ p.first, false });
         found += p.first->name() + ":" + s(p.second) + ", ";
     }
-    Reporting::toISADebug(node->position(), "SharedLocations: {" + found + "} <- " + node->toString());
+    if ( found.size() > 0 ) {
+        swalk.logger->debug(s(node) + " lockable locations: {" + found.substr(0, found.size()-2) + "}");
+    }
 
     return sharedLocs;
 }

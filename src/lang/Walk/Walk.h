@@ -10,9 +10,9 @@ using namespace nslib;
 namespace swarmc::Lang::Walk {
 
     template <typename TReturn>
-    class Walk : public IStringable, public IUsesConsole {
+    class Walk : public IStringable, public IUsesLogger {
     public:
-        Walk() : IUsesConsole() {}
+        Walk(std::string log) : IUsesLogger(log) {}
 
         virtual TReturn walk(ASTNode* node) {
             if ( node->getTag() == ASTNodeTag::PROGRAM ) return walkProgramNode((ProgramNode*) node);

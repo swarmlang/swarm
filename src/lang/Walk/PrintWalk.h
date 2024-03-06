@@ -17,7 +17,7 @@ public:
         p.walk(node);
     }
 
-    explicit PrintWalk(std::ostream& out) : Walk<void>(), _out(out) {}
+    explicit PrintWalk(std::ostream& out) : Walk<void>("Print Walk"), _out(out) {}
 protected:
     void walkProgramNode(ProgramNode* node) override {
         _out << _prefix << node->toString() << std::endl;
