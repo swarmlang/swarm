@@ -765,7 +765,7 @@ namespace swarmc::Lang::Walk {
         auto resLoc = getLastLoc(instrs);
 
         ISAFormalList* formals = new ISAFormalList({
-            { node->resource()->type(), node->local()->name() }
+            { node->resource()->type(), TO_ISA_VARIABLE_PREFIX + node->local()->name() }
         });
 
         auto name = TO_ISA_WITH_PREFIX + s(_tempCounter++);

@@ -48,6 +48,18 @@ namespace swarmc::Runtime::RedisDriver {
         return binn_open((char*)buf);
     }
 
+    std::optional<std::string> GlobalServices::getKeyValue(const std::string &key) {
+        return getRedis()->get(key);
+    }
+
+    void GlobalServices::putKeyValue(const std::string& key, const std::string& value) {
+        getRedis()->set(key, value);
+    }
+
+    void GlobalServices::dropKeyValue(const std::string& key) {
+        getRedis()->del(key);
+    }
+
     ISA::Reference* RedisStorageInterface::load(ISA::LocationReference* loc) {
         auto b = redisRead(_redis->get(Configuration::REDIS_PREFIX + loc->fqName()));
         if ( !b ) throw Errors::InvalidStoreLocationError(s(loc), s(this));
@@ -57,13 +69,16 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     void RedisStorageInterface::store(ISA::LocationReference* loc, ISA::Reference* value) {
-        auto type = redisRead(_redis->get(Configuration::REDIS_PREFIX + "type:" + loc->fqName()));
-        if ( !type ) {
+        auto typeBinn = redisRead(_redis->get(Configuration::REDIS_PREFIX + "type:" + loc->fqName()));
+        Type::Type* type = nullptr;
+        if ( !typeBinn ) {
             redisSet(Configuration::REDIS_PREFIX + "type:" + loc->fqName(), value->type(), _vm);
+            type = value->type();
+        } else {
+            type = Wire::types()->produce(typeBinn, _vm);
+            binn_free(typeBinn);
         }
-        auto b = redisRead(_redis->get(Configuration::REDIS_PREFIX + "type:" + loc->fqName()));
-        assert(value->typei()->isAssignableTo(Wire::types()->produce(b, _vm)));
-        binn_free(b);
+        assert(value->type()->isAssignableTo(type));
 
         redisSet(Configuration::REDIS_PREFIX + loc->fqName(), value, _vm);
     }
@@ -130,8 +145,10 @@ namespace swarmc::Runtime::RedisDriver {
     void RedisQueue::setContext(QueueContextID context) {
         // lock on the queue shouldn't be need like it was in multithreaded bc we arent sharing the same
         // storage object with multiple threads. Same goes for getContext
-        _context = context;
-        _redis->hsetnx(Configuration::REDIS_PREFIX + "contexts", _context, "true");
+        if ( _context != context ) {
+            _context = context;
+            _redis->hsetnx(Configuration::REDIS_PREFIX + "contextProgress", _context, "0");
+        }
     }
 
     QueueContextID RedisQueue::getContext() {
@@ -219,13 +236,14 @@ namespace swarmc::Runtime::RedisDriver {
     std::pair<IQueueJob*, QueueContextID> RedisQueue::tryGetJob() {
         // attempt popping from context
         auto incontext = popFromContext(_context);
+        std::string contextProgress = Configuration::REDIS_PREFIX + "contextProgress";
         if ( !incontext ) {
             // scan for other contexts
             auto cursor = 0LL;
             while ( true ) {
                 std::vector<std::string> contexts;
                 cursor = _redis->hscan(
-                    Configuration::REDIS_PREFIX + "contexts",
+                    contextProgress,
                     cursor,
                     "*",
                     10,
@@ -233,7 +251,7 @@ namespace swarmc::Runtime::RedisDriver {
                 );
                 for ( auto context : contexts ) {
                     if ( auto job = popFromContext(context) ) {
-                        _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", context, 1);
+                        _redis->hincrby(contextProgress, context, 1);
                         return { job, context };
                     }
                 }
@@ -241,7 +259,7 @@ namespace swarmc::Runtime::RedisDriver {
             }
             return { nullptr, _context };
         }
-        _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", _context, 1);
+        _redis->hincrby(contextProgress, _context, 1);
         return { incontext, _context };
     }
 
@@ -254,8 +272,6 @@ namespace swarmc::Runtime::RedisDriver {
         //     _redis->hdel(job.value(), p.first);
         // }
 
-        auto statebin = redisRead(jobValues["VMState"]);
-        auto storebin = redisRead(jobValues["LocalStore"]);
         auto qjob = new RedisQueueJob(
             static_cast<JobID>(std::atoi(jobValues["ID"].c_str())),
             redisRead(jobValues["Call"]),
@@ -263,20 +279,14 @@ namespace swarmc::Runtime::RedisDriver {
             redisRead(jobValues["VMScope"]),
             redisRead(jobValues["LocalStore"])
         );
-        binn_free(statebin);
-        binn_free(storebin);
 
         return qjob;
     }
 
     bool RedisQueue::finished(const QueueContextID& context) {
-        // return true if context never existed or has been removed from redis
-        auto contextExists = _redis->hget(Configuration::REDIS_PREFIX + "contexts", context);
-        if ( !contextExists ) return true;
-        // return true only if contextProgress exists and is 0
+        // return true if inProgress is 0 or if context doesnt exist
         auto val = _redis->hget(Configuration::REDIS_PREFIX + "contextProgress", context);
-        if ( val ) return val.value() == "0";
-        return false;
+        return val.value_or("0") == "0";
     }
 
     Stream::~Stream() noexcept {

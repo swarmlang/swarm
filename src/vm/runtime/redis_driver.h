@@ -27,6 +27,12 @@ namespace swarmc::Runtime::RedisDriver {
             return _nodeID;
         }
 
+        std::optional<std::string> getKeyValue(const std::string &key) override;
+
+        void putKeyValue(const std::string& key, const std::string& value) override;
+
+        void dropKeyValue(const std::string& key) override;
+
         [[nodiscard]] std::string toString() const override {
             return "RedisDriver::GlobalServices<>";
         }
