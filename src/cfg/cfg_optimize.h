@@ -7,10 +7,10 @@
 namespace swarmc::CFG {
 
 template <typename T>
-class TieredMap : public IUsesConsole {
+class TieredMap {
 public:
     TieredMap() : _map(new std::vector<std::unordered_map<std::string, T*>*>()) {}
-    ~TieredMap() override {
+    ~TieredMap() {
         for ( auto v : *_map ) delete v;
         delete _map; 
     }
@@ -52,16 +52,15 @@ private:
     std::vector<std::unordered_map<std::string, T*>*>* _map;
 };
 
-class ConstantPropagation : public IUsesConsole {
+class ConstantPropagation : public IUsesLogger {
 public:
     static bool optimize(ControlFlowGraph* graph) {
         ConstantPropagation cp;
-        Console::get()->debug("Starting Constant Propagation");
         return cp.execute(graph);
     }
 private:
-    ConstantPropagation() : _valueMap(new TieredMap<ISA::Reference>()), _instrMap(new TieredMap<ISA::Instruction>()) {
-        console->debug("CP: Added scope");
+    ConstantPropagation() : IUsesLogger("Const. Prop."), _valueMap(new TieredMap<ISA::Reference>()), _instrMap(new TieredMap<ISA::Instruction>()) {
+        logger->debug("Added scope");
         _valueMap->pushTier(new std::unordered_map<std::string, ISA::Reference*>());
         _instrMap->pushTier(new std::unordered_map<std::string, ISA::Instruction*>());
     }
@@ -76,19 +75,17 @@ private:
 
     bool propagate(ISA::Instruction* instr, bool doFirstBinary) {
         bool flag = false;
-        std::string s = instr->toString();
+        // FIXME: upgrade assignvalues to assignevals using the instr map
         if ( instr->isUnary() ) {
             auto uinstr = (ISA::UnaryInstruction<ISA::Reference>*)instr;
             if ( uinstr->first()->tag() == ISA::ReferenceTag::LOCATION ) {
                 std::string name = ((ISA::LocationReference*)uinstr->first())->fqName();
                 auto v = _valueMap->get(name);
-                if ( v != nullptr && uinstr->tag() != ISA::Tag::LOCK && uinstr->tag() != ISA::Tag::UNLOCK ) {
+                if ( v != nullptr ) {
+                    logger->debug("Replaced " + s(uinstr->first()) + " with " + s(v) + " in " + s(uinstr));
                     freeref(uinstr->first());
                     uinstr->setFirst(v);
                     flag = true;
-                    console->debug("CP: " + name + " found (" + v->toString() + ")!");
-                } else {
-                    console->debug("CP: " + name + " not found!");
                 }
             }
         } else if ( instr->isBinary() ) {
@@ -97,24 +94,20 @@ private:
                 std::string name = ((ISA::LocationReference*)binstr->first())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
+                    logger->debug("Replaced " + s(binstr->first()) + " with " + s(v) + " in " + s(binstr));
                     freeref(binstr->first());
                     binstr->setFirst(v);
                     flag = true;
-                    console->debug("CP: " + name + " found (" + v->toString() + ")!");
-                } else {
-                    console->debug("CP: " + name + " not found!");
                 }
             }
             if ( binstr->second()->tag() == ISA::ReferenceTag::LOCATION ) {
                 std::string name = ((ISA::LocationReference*)binstr->second())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
+                    logger->debug("Replaced " + s(binstr->second()) + " with " + s(v) + " in " + s(binstr));
                     freeref(binstr->second());
                     binstr->setSecond(v);
                     flag = true;
-                    console->debug("CP: " + name + " found (" + v->toString() + ")!");
-                } else {
-                    console->debug("CP: " + name + " not found!");
                 }
             }
         } else if ( instr->isTrinary() ) {
@@ -123,46 +116,39 @@ private:
                 std::string name = ((ISA::LocationReference*)tinstr->first())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
+                    logger->debug("Replaced " + s(tinstr->first()) + " with " + s(v) + " in " + s(tinstr));
                     freeref(tinstr->first());
                     tinstr->setFirst(v);
                     flag = true;
-                    console->debug("CP: " + name + " found (" + v->toString() + ")!");
-                } else {
-                    console->debug("CP: " + name + " not found!");
                 }
             }
             if ( tinstr->second()->tag() == ISA::ReferenceTag::LOCATION ) {
                 std::string name = ((ISA::LocationReference*)tinstr->second())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
+                    logger->debug("Replaced " + s(tinstr->second()) + " with " + s(v) + " in " + s(tinstr));
                     freeref(tinstr->second());
                     tinstr->setSecond(v);
                     flag = true;
-                    console->debug("CP: " + name + " found (" + v->toString() + ")!");
-                } else {
-                    console->debug("CP: " + name + " not found!");
                 }
             }
             if ( tinstr->third()->tag() == ISA::ReferenceTag::LOCATION ) {
                 std::string name = ((ISA::LocationReference*)tinstr->third())->fqName();
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
+                    logger->debug("Replaced " + s(tinstr->third()) + " with " + s(v) + " in " + s(tinstr));
                     freeref(tinstr->third());
                     tinstr->setThird(v);
                     flag = true;
-                    console->debug("CP: " + name + " found (" + v->toString() + ")!");
-                } else {
-                    console->debug("CP: " + name + " not found!");
                 }
             }
         }
-        
-        if (flag) console->debug(s + "\n\t->\n\t\t" + instr->toString());
+
         return flag;
     }
 
     void reset() {
-        console->debug("CP: Reset");
+        logger->debug("Reset");
         _valueMap->clear();
         _instrMap->clear();
         _valueMap->pushTier(new std::unordered_map<std::string, ISA::Reference*>());
@@ -185,7 +171,7 @@ private:
     bool blockPropagate(Block* block, size_t fDepth) {
         bool flag = false;
 
-        console->debug("CP: " + block->toString());
+        logger->debug("Starting " + s(block));
 
         if ( fDepth == 0 ) {
             for (auto instr : *block->instructions()) {
@@ -201,14 +187,21 @@ private:
                     }
                     flag = propagate(instr, false) || flag;
                     _valueMap->set(name, ((ISA::AssignValue*)instr)->second());
-                    console->debug("CP: Added " + name + " = " + ((ISA::AssignValue*)instr)->second()->toString() + " to ValueMap");
+                    logger->debug("Added " + name + " <- " + ((ISA::AssignValue*)instr)->second()->toString() + " to ValueMap");
                     continue;
                 } else if ( instr->tag() == ISA::Tag::ASSIGNEVAL ) {
+                    // FIXME: dont add impure calls
+                    auto second = ((ISA::AssignEval*)instr)->second();
                     std::string name = ((ISA::AssignEval*)instr)->first()->fqName();
                     _instrMap->set(name, ((ISA::AssignEval*)instr)->second());
-                    console->debug("CP: Added " + name + " = " + ((ISA::AssignEval*)instr)->second()->toString() + " to InstrMap");
-                    instr = ((ISA::AssignEval*)instr)->second();
-                } else if ( instr->tag() == ISA::Tag::FNPARAM || instr->tag() == ISA::Tag::SCOPEOF || instr->tag() == ISA::Tag::TYPIFY ) {
+                    logger->debug("Added " + name + " <- " + second->toString() + " to InstrMap");
+                    instr = second;
+                } else if ( instr->tag() == ISA::Tag::FNPARAM 
+                        || instr->tag() == ISA::Tag::SCOPEOF 
+                        || instr->tag() == ISA::Tag::TYPIFY
+                        || instr->tag() != ISA::Tag::LOCK 
+                        || instr->tag() != ISA::Tag::UNLOCK )
+                {
                     continue;
                 }
 
@@ -233,11 +226,10 @@ private:
     }
 };
 
-class RemoveSelfAssign : public IUsesConsole {
+class RemoveSelfAssign : public IUsesLogger {
 public:
     static bool optimize(ControlFlowGraph* graph) {
         RemoveSelfAssign rsa;
-        Console::get()->debug("Starting Removal of Self-Assigns");
         bool flag = false;
 
         for (auto b : *graph->blocks()) rsa.execute(b);
@@ -245,16 +237,18 @@ public:
         return flag;
     }
 private:
+    RemoveSelfAssign() : IUsesLogger("Remove Self-Assigns") {}
+
     bool execute(Block* block) {
         bool flag = false;
-        console->debug("RSA: block " + block->toString());
+        logger->debug("Starting " + block->toString());
 
         for ( size_t j = 0; j < block->instructions()->size(); j++ ) {
             if ( block->instructions()->at(j)->tag() == ISA::Tag::ASSIGNVALUE ) {
                 auto instr = ((ISA::AssignValue*)block->instructions()->at(j));
                 if ( instr->second()->tag() == ISA::ReferenceTag::LOCATION ) {
                     if ( instr->first()->name() == ((ISA::LocationReference*)instr->second())->name() ) {
-                        console->debug("RSA: removed " + instr->toString());
+                        logger->debug("Removed " + instr->toString());
                         freeref(block->instructions()->at(j));
                         block->instructions()->erase(block->instructions()->begin() + (long)j);
                         j--;

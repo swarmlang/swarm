@@ -15,7 +15,7 @@ void CFGBuild::buildBlocks() {
             std::string name = ((ISA::BeginFunction*)_instrs->at(i))->first()->fqName();
             auto fstart = new Block(name, Block::BlockType::FUNCTION, i);
             auto cfgf = new CFGFunction(name, fstart);
-            console->debug("Created function " + name);
+            logger->debug("Created function " + name);
             _blocks->push_back(useref(fstart));
             bstack.push(fstart);
             _nameMap->insert({ name, cfgf });
@@ -101,7 +101,7 @@ void CFGBuild::buildBlocks() {
                 // create call edge
                 if ( _nameMap->count(name) == 0 ) {
                     Block* am = new AmbiguousFunctionBlock(name, i);
-                    console->debug("Created ambiguous function " + am->id());
+                    logger->debug("Created ambiguous function " + am->id());
                     _blocks->push_back(useref(am));
                     auto cedge = new CallEdge(previous, am);
                     previous->setCallOutEdge(cedge);
@@ -113,7 +113,7 @@ void CFGBuild::buildBlocks() {
                     if (!callStack.empty()) callStack.top()->addBlock(am);
                 } else {
                     auto funcCopy = _nameMap->at(name)->makeCopy(i, _blocks, &callStack);
-                    console->debug("Copied function " + _nameMap->at(name)->id());
+                    logger->debug("Copied function " + _nameMap->at(name)->id());
                     auto cedge = new CallEdge(previous, funcCopy.first);
                     previous->setCallOutEdge(cedge);
                     funcCopy.first->setCallInEdge(cedge);

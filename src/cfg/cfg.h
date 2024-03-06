@@ -258,9 +258,9 @@ private:
     ISA::Instructions* reconstruct(Block*, size_t) const;
 };
 
-class CFGBuild : public IUsesConsole {
+class CFGBuild : public IUsesLogger {
 public:
-    explicit CFGBuild(ISA::Instructions* instrs) : _instrs(instrs), _blocks(new std::vector<Block*>()),
+    explicit CFGBuild(ISA::Instructions* instrs) : IUsesLogger("CFG Construction"), _instrs(instrs), _blocks(new std::vector<Block*>()),
         _nameMap(new std::unordered_map<std::string, CFGFunction*>()) {
         buildBlocks();
     }
