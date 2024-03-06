@@ -16,7 +16,7 @@ bool NameAnalysisWalk::walkProgramNode(ProgramNode* node) {
 
     for ( auto stmt : *node->body() ) {
         flag = walk(stmt) && flag;
-        logger->debug(s(stmt->position()) + " Finished " + s(stmt));
+        logger->debug(s(stmt->position()) + " Finished: " + s(stmt));
     }
 
     // Exit the global scope

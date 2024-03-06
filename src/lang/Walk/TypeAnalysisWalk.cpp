@@ -19,7 +19,7 @@ bool TypeAnalysisWalk::walkProgramNode(ProgramNode* node) {
     bool flag = true;
     for ( auto stmt : *node->body() ) {
         flag = walk(stmt) && flag;
-        logger->debug(s(stmt->position()) + " Finished " + s(stmt));
+        logger->debug(s(stmt->position()) + " Finished: " + s(stmt));
     }
 
     auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);

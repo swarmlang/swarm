@@ -310,23 +310,23 @@ from {
 }
 
 \n|(\r\n) {
-	lineNum++;
-	colNum = 1;
+	setLineNum(lineNum + 1);
+	setColNum(1);
 }
 
 [ \t]+ {
-	colNum += yyleng;
+	setColNum(colNum + yyleng);
 }
 
 --.*\n {
-	lineNum++;
+	setLineNum(lineNum + 1);
 }
 
 --\*([^*]|(\*[^-])|(\*-[^-]))*\*-- {
 	std::string s(yytext);
 	for (char c : s) {
 		if (c == '\n') {
-			lineNum++;
+			setLineNum(lineNum + 1);
 		}
 	}
 }

@@ -28,7 +28,6 @@ public:
         _instructions(new ISA::Instructions()) {}
 
     ~Block() override {
-        for (auto i : *_instructions) freeref(i);
         delete _instructions;
         freeref(_callOutEdge);
         freeref(_callInEdge);
@@ -39,13 +38,13 @@ public:
     }
 
     void addInstruction(ISA::Instruction* instr) {
-        _instructions->push_back(useref(instr));
+        _instructions->push_back(instr);
     }
 
     void removeInstruction(ISA::Instruction* instr) {
         for (auto i = _instructions->begin(); i != _instructions->end(); i++) {
             if (*i == instr) {
-                freeref(*i);
+                freeref(*i); //This *should* delete the instruction in its entirety
                 _instructions->erase(i);
                 break;
             }

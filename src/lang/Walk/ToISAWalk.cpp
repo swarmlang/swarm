@@ -26,7 +26,7 @@ namespace swarmc::Lang::Walk {
             append(instrs, i);
             logger->debug(
                 s(node->body()->front()->position()) +
-                "finished " + s(node->body()->front())
+                " Finished: " + s(node->body()->front())
             );
             freeref(node->body()->front());
             node->body()->erase(node->body()->begin());

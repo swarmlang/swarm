@@ -18,7 +18,11 @@ namespace swarmc::Lang {
     class Scanner : public yyFlexLexer {
     public:
         explicit Scanner(std::istream* in) : yyFlexLexer(in) {};
-        ~Scanner() override = default;
+        ~Scanner() override {
+            for ( auto token : _tokens ) {
+                delete token;
+            }
+        }
 
         using FlexLexer::yylex;
 
@@ -30,7 +34,8 @@ namespace swarmc::Lang {
             auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             yylval->lexeme = new Token(pos, tagIn, s(tagIn));
-            colNum += length;
+            _tokens.push_back(yylval->lexeme);
+            setColNum(colNum + length);
             return tagIn;
         }
 
@@ -58,7 +63,8 @@ namespace swarmc::Lang {
             }
 
             yylval->lexeme = new StringLiteralToken(pos, tagIn, s(tagIn) + ":" + text, text.substr(1, text.size() - 2));
-            colNum += length;
+            _tokens.push_back(yylval->lexeme);
+            setColNum(colNum + length);
             return tagIn;
         }
 
@@ -69,7 +75,8 @@ namespace swarmc::Lang {
 
             std::string text(yytext);
             yylval->lexeme = new NumberLiteralToken(pos, tagIn, s(tagIn) + ":" + text, std::stod(yytext));
-            colNum += length;
+            _tokens.push_back(yylval->lexeme);
+            setColNum(colNum + length);
             return tagIn;
         }
 
@@ -80,7 +87,8 @@ namespace swarmc::Lang {
 
             std::string text(yytext);
             yylval->lexeme = new IDToken(pos, tagIn, s(tagIn) + ":" + text, yytext);
-            colNum += length;
+            _tokens.push_back(yylval->lexeme);
+            setColNum(colNum + length);
             return tagIn;
         }
 
@@ -97,15 +105,33 @@ namespace swarmc::Lang {
                     return;
                 }
 
-                out << lex.lexeme->toString() << std::endl;
+                out << s(lex.lexeme) << std::endl;
                 delete lex.lexeme;
             }
         }
 
+        Position* currentPos() const {
+            return new Position(prevLine, lineNum, prevCol, colNum);
+        }
+
+        void setLineNum(size_t line) {
+            prevLine = lineNum;
+            lineNum = line;
+        }
+
+        void setColNum(size_t col) {
+            prevCol = colNum;
+            colNum = col;
+        }
+
     protected:
         Parser::semantic_type* yylval = nullptr;
+        size_t prevLine = 0;
+        size_t prevCol = 0;
         size_t lineNum = 1;
         size_t colNum = 1;
+
+        std::list<Token*> _tokens;
     };
 
 }

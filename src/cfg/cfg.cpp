@@ -95,11 +95,21 @@ ISA::Instructions* ControlFlowGraph::reconstruct() const {
 
     for ( const auto& cfgf : *_nameMap ) {
         auto temp = reconstruct(cfgf.second->start(), 0);
-        instrs->insert(instrs->end(), temp->begin(), temp->end());
+        instrs->insert(
+            instrs->end(),
+            std::make_move_iterator(temp->begin()),
+            std::make_move_iterator(temp->end())
+        );
+        delete temp;
     }
 
     auto main = reconstruct(_first, 0);
-    instrs->insert(instrs->end(), main->begin(), main->end());
+    instrs->insert(
+        instrs->end(),
+        std::make_move_iterator(main->begin()),
+        std::make_move_iterator(main->end())
+    );
+    delete main;
     for (auto i : *instrs) useref(i);
 
     return instrs;
@@ -109,18 +119,28 @@ ISA::Instructions* ControlFlowGraph::reconstruct(Block* block, std::size_t fDept
     auto instrs = new ISA::Instructions();
 
     if ( fDepth == 0 ) {
-        instrs->insert(instrs->end(), block->instructions()->begin(), block->instructions()->end());
+        instrs->insert(
+            instrs->end(),
+            std::make_move_iterator(block->instructions()->begin()),
+            std::make_move_iterator(block->instructions()->end())
+        );
     }
 
+    ISA::Instructions* tempInstrs = nullptr;
     if ( block->getFallOutEdge() != nullptr ) {
-        auto temp = reconstruct(block->getFallOutEdge()->destination(), fDepth);
-        instrs->insert(instrs->end(), temp->begin(), temp->end());
+        tempInstrs = reconstruct(block->getFallOutEdge()->destination(), fDepth);
     } else if ( block->getRetOutEdge() != nullptr ) {
-        auto temp = reconstruct(block->getRetOutEdge()->destination(), fDepth - 1);
-        instrs->insert(instrs->end(), temp->begin(), temp->end());
+        tempInstrs = reconstruct(block->getRetOutEdge()->destination(), fDepth - 1);
     } else if ( block->getCallOutEdge() != nullptr ) {
-        auto temp = reconstruct(block->getCallOutEdge()->destination(), fDepth + 1);
-        instrs->insert(instrs->end(), temp->begin(), temp->end());
+        tempInstrs = reconstruct(block->getCallOutEdge()->destination(), fDepth + 1);
+    }
+    if ( tempInstrs != nullptr ) {
+        instrs->insert(
+            instrs->end(),
+            std::make_move_iterator(tempInstrs->begin()),
+            std::make_move_iterator(tempInstrs->end())
+        );
+        delete tempInstrs;
     }
 
     return instrs;
