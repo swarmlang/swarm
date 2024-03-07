@@ -423,9 +423,19 @@ bool TypeAnalysisWalk::walkTypeBodyNode(TypeBodyNode* node) {
     for (auto d : *node->declarations()) {
         flag = walk(d) && flag;
     }
+    std::vector<Type::Type*> constructorTypes;
     for (auto c : *node->constructors()) {
         flag = walk(c) && flag;
         flag = ValidConstructorWalk::isValidConstructor(node, c) && flag;
+        auto type = _types->getTypeOf(c);
+        if ( type->intrinsic() != Type::Intrinsic::ERROR ) {
+            for ( auto t : constructorTypes ) {
+                if ( type->isAssignableTo(t) ) {
+                    logger->warn(s(c->position()) + " Constructors with duplicate type signatures will be removed in compilation.");
+                }
+            }
+            constructorTypes.push_back(type);
+        }
     }
     if ( flag ) {
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::TYPE));
