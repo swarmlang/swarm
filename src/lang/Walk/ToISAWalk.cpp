@@ -401,7 +401,7 @@ namespace swarmc::Lang::Walk {
 
         // cfb
         for ( auto stmt : *node->func()->body() ) {
-            if ( stmt->isBlock() && hasReturn.walk(stmt).value_or(false) ) {
+            if ( stmt->isBlock() && HasReturn.walk(stmt).value_or(false) ) {
                 auto cfb = makeLocation(ISA::Affinity::LOCAL, TO_ISA_FUNC_CONTROL_FLOW_BREAKER, instrs);
                 append(instrs, assignValue(cfb, new ISA::BooleanReference(false), false));
                 break;
@@ -841,11 +841,15 @@ namespace swarmc::Lang::Walk {
         auto tc = s(_tempCounter++);
         auto instrs = new ISA::Instructions();
         // Create while condition. If there is a break or return, we have to do it goofy
-        if ( hasBreak.walkStatementList(node).value_or(false) || hasReturn.walkStatementList(node).value_or(false) ) {
+        bool hb = false;
+        if ( (hb = HasBreak.walkStatementList(node).value_or(false)) || HasReturn.walkStatementList(node).value_or(false) ) {
             auto condLoc = makeLocation(ISA::Affinity::LOCAL, TO_ISA_WHILE_COND_LOCATION, nullptr);
             // to make sure we check the "break" flag first, we actually
             // have to wrap the entire condition function in *another* function
             // which only gets called if break flag is false
+
+            auto brk = makeLocation(ISA::Affinity::LOCAL, TO_ISA_BREAK, instrs);
+            append(instrs, assignValue(brk, new ISA::BooleanReference(false), false));
 
             // inner function (actual condition)
             append(instrs, new ISA::BeginFunction(
@@ -863,10 +867,7 @@ namespace swarmc::Lang::Walk {
                 getTypeRef(Type::Primitive::of(Type::Intrinsic::BOOLEAN))
             ));
             append(instrs, new ISA::ScopeOf(condLoc));
-            append(instrs, new ISA::CallElse0(
-                makeLocation(ISA::Affinity::LOCAL, TO_ISA_BREAK, nullptr),
-                condInnerFunc
-            ));
+            append(instrs, new ISA::CallElse0(brk, condInnerFunc));
             append(instrs, new ISA::Return1(condLoc));
         } else {
             // no break/return means no inner function necessary
@@ -989,9 +990,9 @@ namespace swarmc::Lang::Walk {
             assert(_sharedLocs.size() == 0);
             _functionOuterScope = false;
             append(instrs, stmtISA);
-            if ( hasContinue.combine(hasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST)
-                .combine(hasReturn, ASTMapReduce<bool>::CombineSkipType::SECOND)
-                .walk(instr).value_or(false) )
+            if ( (loop && HasContinue.combine(HasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST)
+                .walk(instr).value_or(false))
+                || HasReturn.walk(instr).value_or(false) )
             {
                 i++;
                 break;
@@ -1011,7 +1012,6 @@ namespace swarmc::Lang::Walk {
             );
             delete remainder;
             append(instrs, func);
-            // FIXME: have return set BOTH CFBs when inside a while loop in a function
             std::string cname = loop ? TO_ISA_LOOP_CONTROL_FLOW_BREAKER : TO_ISA_FUNC_CONTROL_FLOW_BREAKER;
             append(instrs, new ISA::CallElse0(
                 makeLocation(ISA::Affinity::LOCAL, cname, nullptr),
@@ -1077,20 +1077,17 @@ namespace swarmc::Lang::Walk {
 
         // check whether CFB will be used
         if ( loop ) {
-            if ( hasContinue.walkStatementList(node).value_or(false) ) {
+            if ( HasContinue.combine(HasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST)
+                .combine(HasReturn, ASTMapReduce<bool>::CombineSkipType::SECOND)
+                .walkStatementList(node).value_or(false) )
+            {
                 auto cfb = makeLocation(ISA::Affinity::LOCAL, TO_ISA_LOOP_CONTROL_FLOW_BREAKER, instrs);
                 append(instrs, assignValue(cfb, new ISA::BooleanReference(false), false));
-            }
-            if ( hasReturn.combine(hasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST).walkStatementList(node).value_or(false) ) {
-                auto cfb = makeLocation(ISA::Affinity::LOCAL, TO_ISA_LOOP_CONTROL_FLOW_BREAKER, instrs);
-                auto brk = makeLocation(ISA::Affinity::LOCAL, TO_ISA_BREAK, instrs);
-                append(instrs, assignValue(cfb, new ISA::BooleanReference(false), false));
-                append(instrs, assignValue(brk, new ISA::BooleanReference(false), false));
             }
         } else if ( newScope ) {
             // only need to add cfb if a return appears in a lower scope
             for ( auto stmt : *node->body() ) {
-                if ( stmt->isBlock() && hasReturn.walk(stmt).value_or(false) ) {
+                if ( stmt->isBlock() && HasReturn.walk(stmt).value_or(false) ) {
                     auto cfb = makeLocation(ISA::Affinity::LOCAL, TO_ISA_FUNC_CONTROL_FLOW_BREAKER, instrs);
                     append(instrs, assignValue(cfb, new ISA::BooleanReference(false), false));
                     break;

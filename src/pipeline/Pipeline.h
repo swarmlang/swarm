@@ -103,13 +103,25 @@ namespace swarmc {
             return _root;
         }
 
-        void targetASTRepresentation(std::ostream& out) {
+        Lang::ProgramNode* targetASTSymbolicTypedOptimized() {
             targetASTSymbolicTyped();
+
+            bool flag = true;
+
+            while ( flag ) {
+                flag = Lang::Walk::RemoveRedundantCFB.walk(_root).value_or(false);
+            }
+
+            return _root;
+        }
+
+        void targetASTRepresentation(std::ostream& out) {
+            targetASTSymbolicTypedOptimized();
             Lang::Walk::PrintWalk::print(out, _root);
         }
 
         ISA::Instructions* targetISA() {
-            targetASTSymbolicTyped();
+            targetASTSymbolicTypedOptimized();
 
             Lang::Walk::ToISAWalk isaWalk;
             _isa = isaWalk.walk(_root);

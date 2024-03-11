@@ -155,42 +155,6 @@ private:
     ISA::SharedLocationsWalk _sharedLocsWalkISA;
     SharedLocations _sharedLocs;
 
-    ASTMapReduce<bool> hasReturn = ASTMapReduce<bool>(
-        "AST Has Return",
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::RETURN;
-        },
-        [](bool l, bool r) { return l || r; },
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::FUNCTION
-                || n->getTag() == ASTNodeTag::ENUMERATE;
-        }
-    );
-    ASTMapReduce<bool> hasContinue = ASTMapReduce<bool>(
-        "AST Has Continue",
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::CONTINUE;
-        },
-        [](bool l, bool r) { return l || r; },
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::FUNCTION
-                || n->getTag() == ASTNodeTag::WHILE
-                || n->getTag() == ASTNodeTag::ENUMERATE;
-        }
-    );
-    ASTMapReduce<bool> hasBreak = ASTMapReduce<bool>(
-        "AST Has Break",
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::BREAK;
-        },
-        [](bool l, bool r) { return l || r; },
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::FUNCTION
-                || n->getTag() == ASTNodeTag::WHILE
-                || n->getTag() == ASTNodeTag::ENUMERATE;
-        }
-    );
-
     // locationref cache
     std::map<ISA::Affinity, std::map<std::string, ISA::LocationReference*>> _locMap;
     // typeref cache
