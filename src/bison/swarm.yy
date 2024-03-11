@@ -147,6 +147,7 @@
 %token <transToken>      SQRT
 %token <transToken>      WILDCARD
 %token <transToken>      DEFER
+%token <transToken>      USE
 
 /*    (attribute type)      (nonterminal)    */
 %type <transProgram>        program
@@ -165,6 +166,7 @@
 %type <transCallExpression> callExpression
 %type <transCallExpression>  iifExpression
 %type <transExpressions>    actuals
+%type <transExpressions>    callExpressions
 %type <transFormals>        formals
 %type <transFunction>       function
 %type <transDeclaration>    funcConstr
@@ -175,7 +177,7 @@
 %type <transMapStatements>  mapStatements
 %type <transShared>         shared
 %type <transLVal>           classAccess
-%type <transIdentifiers>    includeSyms
+%type <transIdentifiers>    idList
 
 %precedence FNDEF
 %left OR
@@ -207,7 +209,7 @@ includes :
         parseLog->debug(s(pos) + " Finished: " + s($$->body()->back()));
     }
 
-    | includes FROM classAccess INCLUDE LBRACE includeSyms RBRACE SEMICOLON {
+    | includes FROM classAccess INCLUDE LBRACE idList RBRACE SEMICOLON {
         $$ = $1;
         auto pos = new Position($2->position(), $8->position());
         $$->pushStatement(new IncludeStatementNode(pos, (ClassAccessNode*)$3, $6));
@@ -227,8 +229,8 @@ includes :
         $$ = new ProgramNode();
     }
 
-includeSyms :
-    includeSyms COMMA id {
+idList :
+    idList COMMA id {
         $$ = $1;
         $$->push_back(useref($3));
     }
@@ -430,6 +432,13 @@ typeBody :
         $$->push_back(useref($2));
     }
 
+    | typeBody USE idList SEMICOLON {
+        $$ = $1;
+        $$->push_back(useref(new UseNode(
+            new Position($2->position(), $4->position()), $3
+        )));
+    }
+
     | declaration SEMICOLON {
         $$ = new std::vector<DeclarationNode*>();
         $$->push_back(useref($1));
@@ -444,6 +453,13 @@ typeBody :
     | funcConstr SEMICOLON {
         $$ = new std::vector<DeclarationNode*>();
         $$->push_back(useref($1));
+    }
+
+    | USE idList SEMICOLON {
+        $$ = new std::vector<DeclarationNode*>();
+        $$->push_back(useref(new UseNode(
+            new Position($1->position(), $3->position()), $2
+        )));
     }
 
 assignment :
@@ -674,7 +690,7 @@ funcConstr :
         auto t = new TypeLiteral($1->position(), new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID)));
         auto func = new FunctionNode(pos2, t, new FormalList());
         func->assumeAndReduceStatements($6->reduceToStatements());
-        $$ = new ConstructorNode(pos, func);
+        $$ = new ConstructorNode(pos, func, new std::vector<ExpressionNode*>());
     }
 
     | CONSTRUCTOR LPAREN formals RPAREN FNDEF LBRACE statements RBRACE {
@@ -690,7 +706,43 @@ funcConstr :
 
         auto func = new FunctionNode(pos2, new TypeLiteral(typepos, t), $3);
         func->assumeAndReduceStatements($7->reduceToStatements());
-        $$ = new ConstructorNode(pos, func);
+        $$ = new ConstructorNode(pos, func, new std::vector<ExpressionNode*>());
+    }
+
+    | CONSTRUCTOR LPAREN RPAREN COLON callExpressions FNDEF LBRACE statements RBRACE {
+        auto pos = new Position($1->position(), $9->position());
+        auto pos2 = new Position($2->position(), $9->position());
+        auto t = new TypeLiteral($1->position(), new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID)));
+        auto func = new FunctionNode(pos2, t, new FormalList());
+        func->assumeAndReduceStatements($8->reduceToStatements());
+        $$ = new ConstructorNode(pos, func, $5);
+    }
+
+    | CONSTRUCTOR LPAREN formals RPAREN COLON callExpressions FNDEF LBRACE statements RBRACE {
+        Position* pos = new Position($1->position(), $10->position());
+        Position* pos2 = new Position($2->position(), $10->position());
+        Position* typepos = new Position($1->position(), $4->position());
+
+        Type::Type* t = Type::Primitive::of(Type::Intrinsic::VOID);
+
+        for ( auto i = $3->rbegin(); i != $3->rend(); ++i ) {
+            t = new Type::Lambda1((*i).first->value(), t);
+        }
+
+        auto func = new FunctionNode(pos2, new TypeLiteral(typepos, t), $3);
+        func->assumeAndReduceStatements($9->reduceToStatements());
+        $$ = new ConstructorNode(pos, func, $6);
+    }
+
+callExpressions
+    : callExpression {
+        $$ = new std::vector<ExpressionNode*>();
+        $$->push_back(useref($1));
+    }
+
+    | callExpressions COMMA callExpression {
+        $$ = $1;
+        $$->push_back(useref($3));
     }
 
 expression :
@@ -707,18 +759,7 @@ expression :
 
     | LBRACE typeBody RBRACE {
         Position* pos = new Position($1->position(), $3->position());
-        auto t = new Type::Object();
-        for ( auto decl : *$2 ) {
-            if (decl->getTag() == swarmc::Lang::ASTNodeTag::VARIABLEDECLARATION) {
-                auto vdecl = (VariableDeclarationNode*)decl;
-                t->defineProperty(vdecl->id()->name(), vdecl->typeNode()->value());
-            } else if (decl->getTag() == swarmc::Lang::ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION) {
-                auto vdecl = (UninitializedVariableDeclarationNode*)decl;
-                t->defineProperty(vdecl->id()->name(), vdecl->typeNode()->value());
-            }
-        }
-        $$ = new TypeBodyNode(pos, $2, t->finalize());
-        delete t;
+        $$ = new TypeBodyNode(pos, $2);
     }
 
     | expressionF {

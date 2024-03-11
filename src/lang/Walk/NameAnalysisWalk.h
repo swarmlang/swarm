@@ -28,6 +28,7 @@ protected:
     bool walkAssignExpressionNode(AssignExpressionNode* node) override;
     bool walkVariableDeclarationNode(VariableDeclarationNode* node) override;
     bool walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override;
+    bool walkUseNode(UseNode* node) override;
     bool walkReturnStatementNode(ReturnStatementNode* node) override;
     bool walkFunctionNode(FunctionNode* node) override;
     bool walkConstructorNode(ConstructorNode* node) override;
@@ -60,6 +61,7 @@ protected:
     }
 private:
     SymbolTable* _symbols;
+    std::stack<Type::Object*> _objects;
 
     bool walkBlockStatementNode(BlockStatementNode* node) ;
     bool walkType(Type::Type* type);

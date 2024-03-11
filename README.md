@@ -2,6 +2,7 @@
 
 > Swarm is still a work-in-progress and is frequently in a broken or half-functional state.
 > For a rough list of ongoing and future work, see `TODO.md`.
+> For a tutorial on the features of the language that *should* be working, see [the swarm documentation](https://github.com/swarmlang/swarm/blob/main/docs/lang/swarm.md)
 
 Swarm is a parallel/distributed programming language with modular, swappable parallel drivers. It is intended for everything
 from multi-threaded local computation on a single machine to large scientific computations split across many nodes in

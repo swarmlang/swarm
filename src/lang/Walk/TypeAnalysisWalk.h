@@ -28,6 +28,7 @@ protected:
     bool walkAssignExpressionNode(AssignExpressionNode* node) override;
     bool walkVariableDeclarationNode(VariableDeclarationNode* node) override;
     bool walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override;
+    bool walkUseNode(UseNode* node) override;
     bool walkReturnStatementNode(ReturnStatementNode* node) override;
     bool walkFunctionNode(FunctionNode* node) override;
     bool walkConstructorNode(ConstructorNode* node) override;

@@ -7,9 +7,11 @@ namespace swarmc::Lang::Walk {
 
 class ValidConstructorWalk : Walk<void> {
 public:
-    static bool isValidConstructor(TypeBodyNode* type, ConstructorNode* constructor);
+    [[nodiscard]] static bool isValidConstructor(TypeBodyNode* type, ConstructorNode* constructor);
 protected:
     explicit ValidConstructorWalk() : Walk<void>("Constructor Verification") {}
+
+    static void populate(ValidConstructorWalk& vcw, TypeBodyNode* type, ConstructorNode* constructor, std::string name);
 
     void walkProgramNode(ProgramNode* node) override;
     void walkExpressionStatementNode(ExpressionStatementNode* node) override;
@@ -29,6 +31,7 @@ protected:
     void walkAssignExpressionNode(AssignExpressionNode* node) override;
     void walkVariableDeclarationNode(VariableDeclarationNode* node) override;
     void walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override {}
+    void walkUseNode(UseNode* node) override {}
     void walkReturnStatementNode(ReturnStatementNode* node) override;
     void walkFunctionNode(FunctionNode* node) override;
     void walkConstructorNode(ConstructorNode* node) override {}
@@ -66,6 +69,7 @@ private:
 
     std::set<SemanticSymbol*> _symbols;
     std::map<SemanticSymbol*, std::vector<FunctionNode*>> _possibleFunctions;
+    std::map<SemanticSymbol*, std::string> _errNameMap;
     bool _inTopLayer = true, _goodReturns = true;
 };
 

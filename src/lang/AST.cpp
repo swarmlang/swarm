@@ -42,6 +42,7 @@ namespace nslib {
         if ( tag == swarmc::Lang::ASTNodeTag::ASSIGN ) return "AssignNode";
         if ( tag == swarmc::Lang::ASTNodeTag::VARIABLEDECLARATION ) return "VariableDeclarationNode";
         if ( tag == swarmc::Lang::ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION ) return "UninitializedVariableDeclarationNode";
+        if ( tag == swarmc::Lang::ASTNodeTag::USE ) return "UseNode";
         if ( tag == swarmc::Lang::ASTNodeTag::RETURN ) return "ReturnNode";
         if ( tag == swarmc::Lang::ASTNodeTag::FUNCTION ) return "FunctionNode";
         if ( tag == swarmc::Lang::ASTNodeTag::CONSTRUCTOR ) return "ConstructorNode";

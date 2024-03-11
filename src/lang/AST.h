@@ -55,6 +55,7 @@ namespace Walk {
         ASSIGN,
         VARIABLEDECLARATION,
         UNINITIALIZEDVARIABLEDECLARATION,
+        USE,
         RETURN,
         FUNCTION,
         CONSTRUCTOR,
@@ -1078,6 +1079,41 @@ namespace Walk {
         IdentifierNode* _id;
     };
 
+    class UseNode final : public DeclarationNode {
+    public:
+        UseNode(Position* pos, std::vector<IdentifierNode*>* ids) : DeclarationNode(pos), _ids(ids) {}
+
+        ~UseNode() {
+            for ( auto id : *_ids ) freeref(id);
+            delete _ids;
+        }
+
+        ASTNodeTag getTag() const override {
+            return ASTNodeTag::USE;
+        }
+
+        std::vector<IdentifierNode*>* ids() const {
+            return _ids;
+        }
+
+        UseNode* copy() const override {
+            auto ids = new std::vector<IdentifierNode*>();
+            for ( auto id : *_ids ) {
+                ids->push_back(useref(id->copy()));
+            }
+            return new UseNode(
+                position(),
+                ids
+            );
+        }
+
+        std::string toString() const override {
+            return "UseNode<#ids: " + s(_ids->size()) + ">";
+        }
+    private:
+        std::vector<IdentifierNode*>* _ids;
+    };
+
     class ReturnStatementNode : public StatementNode {
     public:
         ReturnStatementNode(Position* pos, ExpressionNode* value) : StatementNode(pos), _value(useref(value)) {}
@@ -1161,12 +1197,14 @@ namespace Walk {
 
     class ConstructorNode final : public DeclarationNode {
     public:
-        ConstructorNode(Position* pos, FunctionNode* func) : DeclarationNode(pos), _func(useref(func)), _partOfType(nullptr) {
+        ConstructorNode(Position* pos, FunctionNode* func, ExpressionList* parentCons) : DeclarationNode(pos), _func(useref(func)), _parentConstructors(parentCons), _partOfType(nullptr) {
             _name = "constructor" + std::to_string(++ConstructorNode::nameID);
         }
         ~ConstructorNode() {
             freeref(_func);
             freeref(_partOfType);
+            for ( auto c : *_parentConstructors ) freeref(c);
+            delete _parentConstructors;
         }
 
         virtual ASTNodeTag getTag() const override {
@@ -1178,14 +1216,21 @@ namespace Walk {
         }
 
         virtual ConstructorNode* copy() const override {
+            ExpressionList* parents = new ExpressionList();
+            for ( auto c : *_parentConstructors ) parents->push_back(useref(c->copy()));
             return new ConstructorNode(
                 position(),
-                _func->copy()
+                _func->copy(),
+                parents
             );
         }
 
         FunctionNode* func() const {
             return _func;
+        }
+
+        ExpressionList* parentConstructors() const {
+            return _parentConstructors;
         }
 
         std::string name() const {
@@ -1197,6 +1242,7 @@ namespace Walk {
         }
     protected:
         FunctionNode* _func;
+        ExpressionList* _parentConstructors;
         Type::Object* _partOfType;
         std::string _name;
         static size_t nameID;
@@ -1206,25 +1252,56 @@ namespace Walk {
 
     class TypeBodyNode final : public TypeLiteral {
     public:
-        TypeBodyNode(Position* pos, DeclarationList* decls, Type::Object* type) : TypeLiteral(pos, type) {
-            _constructors = new std::vector<ConstructorNode*>();
-            _declarations = new std::vector<DeclarationNode*>();
+        TypeBodyNode(Position* pos, DeclarationList* decls) : TypeLiteral(pos, nullptr),
+            _declarations(new DeclarationList()),
+            _parents(new DeclarationList()),
+            _constructors(new std::vector<ConstructorNode*>())
+        {
             for ( auto d : *decls ) {
                 if ( d->getTag() == ASTNodeTag::CONSTRUCTOR ) {
                     _constructors->push_back((ConstructorNode*)d);
-                    ((ConstructorNode*)d)->_partOfType = useref(type);
+                } else if ( d->getTag() == ASTNodeTag::USE ) {
+                    _parents->push_back(d);
                 } else {
                     _declarations->push_back(d);
                 }
             }
+            // FIXME: remove once multiinheritance supported
+            if ( _parents->size() > 1 || (_parents->size() == 1 && ((UseNode*)_parents->at(0))->ids()->size() > 1) ) {
+                throw Errors::SwarmError(s(pos) + " Swarm currently only support single inheritance!");
+            }
+            // default constructor
+            if ( _constructors->size() == 0 ) {
+                _constructors->push_back(useref(new ConstructorNode(
+                    pos,
+                    new FunctionNode(
+                        pos,
+                        new TypeLiteral(pos, new Type::Lambda0(Type::Primitive::of(Type::Intrinsic::VOID))),
+                        new FormalList()
+                    ),
+                    new ExpressionList()
+                )));
+            } 
             delete decls;
         }
 
         ~TypeBodyNode() {
             for (auto d : *_declarations) freeref(d);
             delete _declarations;
+            for (auto p : *_parents) freeref(p);
+            delete _parents;
             for (auto c : *_constructors) freeref(c);
-            delete _constructors; // constructors is subset of _declarations and thus doesnt need to be emptied
+            delete _constructors;
+        }
+
+        void setType(Type::Object* type) {
+            if ( _type != nullptr ) {
+                throw Errors::SwarmError("Attempt to reassign value of Type Body");
+            }
+            _type = useref(type);
+            for ( auto c : *_constructors ) {
+                c->_partOfType = useref(type);
+            }
         }
 
         [[nodiscard]] ASTNodeTag getTag() const override {
@@ -1232,6 +1309,7 @@ namespace Walk {
         }
 
         [[nodiscard]] std::string toString() const override {
+            if ( _type == nullptr ) return "TypeBodyNode<>";
             return "TypeBodyNode<#type:" + _type->toString() + ">";
         }
 
@@ -1240,14 +1318,25 @@ namespace Walk {
             for ( auto d : *_declarations ) {
                 decls->push_back(useref(d->copy()));
             }
+            for ( auto p : *_parents ) {
+                decls->push_back(useref(p->copy()));
+            }
             for ( auto c : *_constructors ) {
                 decls->push_back(useref(c->copy()));
             }
-            return new TypeBodyNode(position(), decls, (Type::Object*)_type);
+            auto t = new TypeBodyNode(position(), decls);
+            if ( _type != nullptr ) {
+                t->setType(((Type::Object*)_type)->copy());
+            }
+            return t;
         }
 
         [[nodiscard]] DeclarationList* declarations() const {
             return _declarations;
+        }
+
+        [[nodiscard]] DeclarationList* parents() const {
+            return _parents;
         }
 
         [[nodiscard]] std::vector<ConstructorNode*>* constructors() const {
@@ -1256,6 +1345,7 @@ namespace Walk {
 
     private:
         DeclarationList* _declarations;
+        DeclarationList* _parents;
         std::vector<ConstructorNode*>* _constructors;
     };
 

@@ -191,6 +191,15 @@ protected:
         return reduce(rets);
     }
 
+    virtual std::optional<TReturn> walkUseNode(UseNode* node) override {
+        if ( _skip(node) ) return std::nullopt;
+        std::list<std::optional<TReturn>> rets = { _map(node) };
+        for ( auto id : *node->ids() ) {
+            rets.push_back(this->walk(id));
+        }
+        return reduce(rets);
+    }
+
     virtual std::optional<TReturn> walkReturnStatementNode(ReturnStatementNode* node) override {
         if ( _skip(node) ) return std::nullopt;
         std::list<std::optional<TReturn>> rets = { _map(node) };
@@ -218,6 +227,9 @@ protected:
             _map(node),
             this->walk(node->func())
         };
+        for ( auto pc : *node->parentConstructors() ) {
+            rets.push_back(this->walk(pc));
+        }
         return reduce(rets);
     }
 

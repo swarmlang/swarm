@@ -33,6 +33,7 @@ namespace swarmc::Lang::Walk {
             if ( node->getTag() == ASTNodeTag::ASSIGN ) return walkAssignExpressionNode((AssignExpressionNode*) node);
             if ( node->getTag() == ASTNodeTag::VARIABLEDECLARATION ) return walkVariableDeclarationNode((VariableDeclarationNode*) node);
             if ( node->getTag() == ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION ) return walkUninitializedVariableDeclarationNode((UninitializedVariableDeclarationNode*)node);
+            if ( node->getTag() == ASTNodeTag::USE ) return walkUseNode((UseNode*) node);
             if ( node->getTag() == ASTNodeTag::RETURN ) return walkReturnStatementNode((ReturnStatementNode*) node);
             if ( node->getTag() == ASTNodeTag::FUNCTION ) return walkFunctionNode((FunctionNode*) node);
             if ( node->getTag() == ASTNodeTag::CONSTRUCTOR ) return walkConstructorNode((ConstructorNode*)node);
@@ -81,6 +82,7 @@ namespace swarmc::Lang::Walk {
         virtual TReturn walkAssignExpressionNode(AssignExpressionNode* node) = 0;
         virtual TReturn walkVariableDeclarationNode(VariableDeclarationNode* node) = 0;
         virtual TReturn walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) = 0;
+        virtual TReturn walkUseNode(UseNode* node) = 0;
         virtual TReturn walkReturnStatementNode(ReturnStatementNode* node) = 0;
         virtual TReturn walkFunctionNode(FunctionNode* node) = 0;
         virtual TReturn walkConstructorNode(ConstructorNode* node) = 0;

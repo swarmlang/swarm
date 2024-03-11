@@ -60,6 +60,7 @@ protected:
     [[nodiscard]] virtual SharedLocationsMap walkAssignExpressionNode(AssignExpressionNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkVariableDeclarationNode(VariableDeclarationNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override;
+    [[nodiscard]] virtual SharedLocationsMap walkUseNode(UseNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkReturnStatementNode(ReturnStatementNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkFunctionNode(FunctionNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkConstructorNode(ConstructorNode* node) override;

@@ -3,7 +3,9 @@
 
 namespace swarmc::Lang::Walk {
 
-NameAnalysisWalk::NameAnalysisWalk() : Walk<bool>("Name Analysis"), _symbols(new SymbolTable()) {}
+NameAnalysisWalk::NameAnalysisWalk() : Walk<bool>("Name Analysis"), _symbols(new SymbolTable()) {
+    _objects.push(nullptr);
+}
 
 NameAnalysisWalk::~NameAnalysisWalk() {
     delete _symbols;
@@ -34,7 +36,7 @@ bool NameAnalysisWalk::walkIdentifierNode(IdentifierNode* node) {
     }
 
     std::string name = node->name();
-    node->_symbol = useref(_symbols->lookup(name));
+    node->_symbol = useref(_symbols->lookup(name, _objects.top()));
 
     if ( node->_symbol == nullptr ) {
         logger->error(s(node->position()) + " Use of free identifier \"" + name + "\".");
@@ -141,24 +143,26 @@ bool NameAnalysisWalk::walkVariableDeclarationNode(VariableDeclarationNode* node
 
     // Make sure the name isn't already declared in this scope
     if ( _symbols->isClashing(name) ) {
-        SemanticSymbol* existing = _symbols->lookup(name);
+        SemanticSymbol* existing = _symbols->lookup(name, nullptr);
         logger->error(s(node->position()) + " Redeclaration of identifier \"" + name + "\" first declared at " + existing->declaredAt()->start() + ".");
         return false;
     }
 
-    bool valueResult;
+    bool valueResult = true;
     if ( node->value()->getTag() == ASTNodeTag::FUNCTION || node->typeNode()->value()->intrinsic() == Type::Intrinsic::TYPE ) {
         // Add the declaration to the current scope
         _symbols->addVariable(name, type, node->position(), node->shared(), false);
 
+        bool typeAlias = false;
         if ( node->typeNode()->value()->intrinsic() == Type::Intrinsic::TYPE ) {
             // attach actual value of type to the symbol, for disambiguation of instances of this type
             TypeLiteral* objtype = nullptr;
             if ( node->value()->getTag() == ASTNodeTag::TYPELITERAL || node->value()->getTag() == ASTNodeTag::TYPEBODY ) {
                 objtype = (TypeLiteral*)node->value();
             } else if ( node->value()->getTag() == ASTNodeTag::IDENTIFIER ) {
-                assert(((IdentifierNode*)node->value())->symbol()->kind() == SemanticSymbolKind::VARIABLE);
-                objtype = ((VariableSymbol*)((IdentifierNode*)node->value())->symbol())->getObjectType();
+                flag = walk(node->value()) && flag;
+                objtype = ((IdentifierNode*)node->value())->symbol()->ensureVariable()->getObjectType();
+                typeAlias = true;
             } else {
                 logger->error(
                     s(node->value()->position()) +
@@ -166,7 +170,7 @@ bool NameAnalysisWalk::walkVariableDeclarationNode(VariableDeclarationNode* node
                 );
                 return false;
             }
-            auto sym = (VariableSymbol*)_symbols->lookup(name);
+            auto sym = _symbols->lookup(name, _objects.top())->ensureVariable();
             logger->debug("Assigned " + s(objtype) + " to symbol " + s(sym));
             sym->setObjectType(objtype);
         }
@@ -174,7 +178,7 @@ bool NameAnalysisWalk::walkVariableDeclarationNode(VariableDeclarationNode* node
         // Call this to attach the Symbol to the IdentifierNode
         walk(node->id());
         // Check the RHS of the assignment
-        valueResult = walk(node->value());
+        if ( !typeAlias ) valueResult = walk(node->value());
     } else {
         // Check the RHS of the assignment
         valueResult = walk(node->value());
@@ -191,6 +195,16 @@ bool NameAnalysisWalk::walkUninitializedVariableDeclarationNode(UninitializedVar
     return true; // symbols should be added to scope during type body
 }
 
+bool NameAnalysisWalk::walkUseNode(UseNode* node) {
+    bool flag = true;
+
+    for ( auto id : *node->ids() ) {
+        flag = walk(id) && flag;
+    }
+
+    return flag;
+}
+
 bool NameAnalysisWalk::walkReturnStatementNode(ReturnStatementNode* node) {
     if ( node->value() == nullptr ) {
         return true;
@@ -203,18 +217,14 @@ bool NameAnalysisWalk::walkFunctionNode(FunctionNode* node) {
     bool flag = true;
     _symbols->enter();
     for ( auto formal : *node->formals() ) {
-        bool t = formal.first->disambiguateValue() && flag;
-        if ( !t ) {
-            logger->error(s(formal.first->position()) + " Identifier at " + formal.first->position()->toString() + " does not refer to a type!");
-            flag = false;
-        }
         flag = walk(formal.first) && flag;
+        flag = formal.first->disambiguateValue() && flag;
         std::string name = formal.second->name();
         Type::Type* type = formal.first->value();
 
         // Make sure the name isn't already declared in this scope
         if ( _symbols->isClashing(name) ) {
-            SemanticSymbol* existing = _symbols->lookup(name);
+            SemanticSymbol* existing = _symbols->lookup(name, nullptr);
             logger->error(s(node->position()) + " Redeclaration of identifier \"" + name + "\" first declared at " + existing->declaredAt()->start() + ".");
             flag = false;
         }
@@ -238,16 +248,111 @@ bool NameAnalysisWalk::walkFunctionNode(FunctionNode* node) {
 }
 
 bool NameAnalysisWalk::walkConstructorNode(ConstructorNode* node) {
-    return walk(node->func());
+    bool flag = true;
+    _symbols->enter();
+
+    auto func = node->func();
+    for ( auto formal : *func->formals() ) {
+        flag = walk(formal.first) && flag;
+        flag = formal.first->disambiguateValue() && flag;
+        std::string name = formal.second->name();
+        Type::Type* type = formal.first->value();
+
+        // Make sure the name isn't already declared in this scope
+        if ( _symbols->isClashing(name) ) {
+            SemanticSymbol* existing = _symbols->lookup(name, nullptr);
+            logger->error(s(node->position()) + " Redeclaration of identifier \"" + name + "\" first declared at " + existing->declaredAt()->start() + ".");
+            flag = false;
+        }
+
+        // Add the declaration to the current scope
+        _symbols->addVariable(name, type, formal.second->position(), false, false);
+
+        // Call this to attach the Symbol to the IdentifierNode
+        walk(formal.second);
+    }
+    walk(func->typeNode());
+    flag = func->typeNode()->disambiguateValue() && flag;
+
+    std::set<Type::Type*> cCalls;
+    for ( auto pc : *node->parentConstructors() ) {
+        flag = walk(pc) && flag;
+        auto call = (CallExpressionNode*)pc;
+        if ( call->func()->getTag() == ASTNodeTag::IDENTIFIER ) {
+            auto id = (IdentifierNode*)call->func();
+            auto type = id->symbol()->ensureVariable()->getObjectType()->value();
+            for ( auto c : cCalls ) {
+                if ( c->isAssignableTo(type) && type->isAssignableTo(c) ) {
+                    logger->error(
+                        s(call->position()) + " Duplicate constructor calls to parent type: " + id->symbol()->name()
+                    );
+                    flag = false;
+                }
+            }
+            cCalls.insert(id->symbol()->ensureVariable()->getObjectType()->value());
+        }
+    }
+
+    for ( auto stmt : *func->body() ) {
+        flag = walk(stmt) && flag;
+    }
+
+    _symbols->leave();
+    return flag;
 }
 
 bool NameAnalysisWalk::walkTypeBodyNode(TypeBodyNode* node) {
+    bool flag = true;
+
+    // walk parents
+    std::vector<VariableSymbol*> parents;
+    for (auto p : *node->parents()) {
+        flag = walk(p) && flag;
+        auto unode = (UseNode*)p;
+        for ( auto id : *unode->ids() ) {
+            for ( auto pid : parents ) {
+                auto objid = id->symbol()->ensureVariable()->getObjectType()->value();
+                auto objpid = pid->getObjectType()->value();
+                if ( objid->isAssignableTo(objpid) && objpid->isAssignableTo(objid) ) {
+                    logger->error(
+                        s(id->position()) + " Duplicate superclass " + id->symbol()->name()
+                    );
+                    flag = false;
+                }
+            }
+            parents.push_back(id->symbol()->ensureVariable());
+        }
+    }
+    // FIXME: change for multiinheritance
+    Type::Object* objType;
+    if ( parents.size() == 0 ) objType = new Type::Object();
+    else {
+        Type::Object* parent = (Type::Object*)parents.front()->getObjectType()->value();
+        objType = new Type::Object(parent);
+    }
+
+    for (auto c : *node->declarations()) {
+        if (c->getTag() == ASTNodeTag::VARIABLEDECLARATION) {
+            auto v = (VariableDeclarationNode*)c;
+            objType->defineProperty(v->id()->name(), v->typeNode()->value());
+        } else if (c->getTag() == ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION) {
+            auto v = (UninitializedVariableDeclarationNode*)c;
+            objType->defineProperty(v->id()->name(), v->typeNode()->value());
+        }
+    }
+
+    // finalize type
+    GC_LOCAL_REF(objType)
+    objType = objType->finalize();
+    node->setType(objType);
     walkType(node->value());
     node->value()->transform([](Type::Type* v) -> Type::Type* {
         return v->disambiguateStatically();
     });
+
+    // walk decls
     _symbols->enter();
-    bool flag = true;
+    _objects.push(objType->getParent());
     for (auto decl : *node->declarations()) {
         if ( decl->getTag() == ASTNodeTag::VARIABLEDECLARATION ) {
             auto d = (VariableDeclarationNode*)decl;
@@ -260,26 +365,49 @@ bool NameAnalysisWalk::walkTypeBodyNode(TypeBodyNode* node) {
             }
             flag = walk(d->typeNode()) && flag;
             flag = d->typeNode()->disambiguateValue() && flag;
-            _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), d->value()->getTag() == ASTNodeTag::DEFERCALL);
+            _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), d->value()->getTag() == ASTNodeTag::DEFERCALL, objType);
             walk(d->id());
         } else if ( decl->getTag() == ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION ) {
             auto d = (UninitializedVariableDeclarationNode*)decl;
             flag = walk(d->typeNode()) && flag;
             flag = d->typeNode()->disambiguateValue() && flag;
-            _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), false);
+            _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), false, objType);
             walk(d->id());
         }
     }
-    for (auto c : *node->declarations()) {
-        if (c->getTag() == ASTNodeTag::VARIABLEDECLARATION) {
-            flag = walk(((VariableDeclarationNode*)c)->value()) && flag;
-        } else {
-            flag = walk(c) && flag;
+    // walk decl values AFTER ids have been added to scope
+    for ( auto decl : *node->declarations() ) {
+        if ( decl->getTag() == ASTNodeTag::VARIABLEDECLARATION ) {
+            flag = walk(((VariableDeclarationNode*)decl)->value()) && flag;
         }
     }
+
     for (auto c : *node->constructors()) {
         flag = walk(c) && flag;
+        for ( auto pc : *c->parentConstructors() ) {
+            auto isParentFlag = false;
+            auto call = (CallExpressionNode*)pc;
+            if ( call->func()->getTag() == ASTNodeTag::IDENTIFIER ) {
+                auto id = (IdentifierNode*)call->func();
+                if ( id->symbol()->ensureVariable()->getObjectType() != nullptr ) {
+                    auto consType = id->symbol()->ensureVariable()->getObjectType()->value();
+                    for ( auto p : parents ) {
+                        auto pType = p->getObjectType()->value();
+                        if ( pType->isAssignableTo(consType) && consType->isAssignableTo(pType) ) {
+                            isParentFlag = true;
+                        }
+                    }
+                }
+            }
+            if ( !isParentFlag ) {
+                logger->error(
+                    s(call->position()) + " is not a call to a parent constructor of type " + s(objType)
+                );
+            }
+            flag = flag && isParentFlag;
+        }
     }
+    _objects.pop();
     _symbols->leave();
     return flag;
 }

@@ -85,7 +85,12 @@ namespace swarmc::Type {
             return s(intrinsic());
         }
 
-        [[nodiscard]] virtual Type* copy() const = 0;
+        [[nodiscard]] virtual Type* copy() const {
+            std::map<const Type*, Type*> visited;
+            return copyRec(visited);
+        }
+
+        [[nodiscard]] virtual Type* copyRec(std::map<const Type*, Type*>&) const = 0;
 
         virtual void transform(std::function<Type*(Type*)> visitor) {
             std::vector<std::size_t> visited;
@@ -161,7 +166,7 @@ namespace swarmc::Type {
             return "Type::Primitive";
         }
 
-        [[nodiscard]] Primitive* copy() const override {
+        [[nodiscard]] virtual Primitive* copy() const override {
             return Primitive::of(_intrinsic);
         }
 
@@ -191,6 +196,10 @@ namespace swarmc::Type {
     protected:
         static std::map<Intrinsic, Primitive*> _primitives;
         Intrinsic _intrinsic;
+
+        [[nodiscard]] virtual Type* copyRec(std::map<const Type*, Type*>&) const override {
+            return Primitive::of(_intrinsic);
+        }
     };
 
 
@@ -227,7 +236,7 @@ namespace swarmc::Type {
             return other->intrinsic() == Intrinsic::OPAQUE && ((const Opaque*) other)->_name == _name;
         }
 
-        [[nodiscard]] Opaque* copy() const override {
+        [[nodiscard]] virtual Opaque* copy() const override {
             return Opaque::of(_name);
         }
 
@@ -236,6 +245,10 @@ namespace swarmc::Type {
     protected:
         static std::map<std::string, Opaque*> _opaques;
         std::string _name;
+
+        [[nodiscard]] virtual Type* copyRec(std::map<const Type*, Type*>&) const override {
+            return Opaque::of(_name);
+        }
     };
 
 
@@ -267,7 +280,7 @@ namespace swarmc::Type {
             return true;
         }
 
-        [[nodiscard]] Ambiguous* copy() const override {
+        [[nodiscard]] virtual Ambiguous* copy() const override {
             if ( _typeid == nullptr ) return Ambiguous::of();
             return Ambiguous::partial(_typeid);
         }
@@ -282,9 +295,14 @@ namespace swarmc::Type {
 
         [[nodiscard]] Type* disambiguateStatically() override;
     protected:
-
         static Ambiguous* _inst;
         Lang::IdentifierNode* _typeid;
+
+        [[nodiscard]] Ambiguous* copyRec(std::map<const Type*, Type*>& visited) const override {
+            if ( _typeid == nullptr ) return Ambiguous::of();
+            if ( visited.count(this) == 0 ) visited[this] = Ambiguous::partial(_typeid);
+            return (Ambiguous*)visited[this];
+        }
     };
 
     class Map : public Type {
@@ -307,8 +325,9 @@ namespace swarmc::Type {
             return inlineref<Type>(values());
         }
 
-        [[nodiscard]] Map* copy() const override {
-            return new Map(_values->copy());
+        [[nodiscard]] virtual Map* copy() const override {
+            std::map<const Type*, Type*> visited;
+            return copyRec(visited);
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
@@ -337,6 +356,11 @@ namespace swarmc::Type {
         }
     protected:
         Type* _values;
+
+        [[nodiscard]] Map* copyRec(std::map<const Type*, Type*>& visited) const override {
+            if ( visited.count(this) == 0 ) visited[this] = new Map(_values->copyRec(visited));
+            return (Map*)visited[this];
+        }
     };
 
     class Enumerable : public Type {
@@ -359,8 +383,9 @@ namespace swarmc::Type {
             return inlineref<Type>(_values);
         }
 
-        [[nodiscard]] Enumerable* copy() const override {
-            return new Enumerable(_values->copy());
+        [[nodiscard]] virtual Enumerable* copy() const override {
+            std::map<const Type*, Type*> visited;
+            return copyRec(visited);
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
@@ -387,6 +412,11 @@ namespace swarmc::Type {
         }
     protected:
         Type* _values;
+
+        [[nodiscard]] Enumerable* copyRec(std::map<const Type*, Type*>& visited) const override {
+            if ( visited.count(this) == 0 ) visited[this] = new Enumerable(_values->copyRec(visited));
+            return (Enumerable*)visited[this];
+        }
     };
 
     class Resource : public Type {
@@ -413,8 +443,9 @@ namespace swarmc::Type {
             return inlineref<Type>(yields());
         }
 
-        [[nodiscard]] Resource* copy() const override {
-            return new Resource(_yields);
+        [[nodiscard]] virtual Resource* copy() const override {
+            std::map<const Type*, Type*> visited;
+            return copyRec(visited);
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
@@ -442,6 +473,11 @@ namespace swarmc::Type {
         }
     protected:
         Type* _yields;
+
+        [[nodiscard]] Resource* copyRec(std::map<const Type*, Type*>& visited) const override {
+            if ( visited.count(this) == 0 ) visited[this] = new Resource(_yields->copyRec(visited));
+            return (Resource*)visited[this];
+        }
     };
 
     class Stream : public Type {
@@ -468,8 +504,9 @@ namespace swarmc::Type {
             return inlineref<Type>(inner());
         }
 
-        [[nodiscard]] Stream* copy() const override {
-            return new Stream(_inner->copy());
+        [[nodiscard]] virtual Stream* copy() const override {
+            std::map<const Type*, Type*> visited;
+            return copyRec(visited);
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
@@ -498,6 +535,11 @@ namespace swarmc::Type {
 
     protected:
         Type* _inner;
+
+        [[nodiscard]] Stream* copyRec(std::map<const Type*, Type*>& visited) const override {
+            if ( visited.count(this) == 0 ) visited[this] = new Stream(_inner->copyRec(visited));
+            return (Stream*)visited[this];
+        }
     };
 
     class Lambda : public Type {
@@ -540,8 +582,9 @@ namespace swarmc::Type {
             return Intrinsic::LAMBDA0;
         }
 
-        [[nodiscard]] Lambda0* copy() const override {
-            return new Lambda0(_returns->copy());
+        [[nodiscard]] virtual Lambda0* copy() const override {
+            std::map<const Type*, Type*> visited;
+            return copyRec(visited);
         }
 
         bool isAssignableTo(const Type* other) const override {
@@ -558,6 +601,11 @@ namespace swarmc::Type {
         [[nodiscard]] Lambda0* disambiguateStatically() override {
             _returns = _returns->disambiguateStatically();
             return this;
+        }
+    protected:
+        [[nodiscard]] Lambda0* copyRec(std::map<const Type*, Type*>& visited) const override {
+            if ( visited.count(this) == 0 ) visited[this] = new Lambda0(_returns->copyRec(visited));
+            return (Lambda0*)visited[this];
         }
     };
 
@@ -581,8 +629,9 @@ namespace swarmc::Type {
             return inlineref<Type>(_param);
         }
 
-        [[nodiscard]] Lambda1* copy() const override {
-            return new Lambda1(_param->copy(), _returns->copy());
+        [[nodiscard]] virtual Lambda1* copy() const override {
+            std::map<const Type*, Type*> visited;
+            return copyRec(visited);
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
@@ -598,7 +647,7 @@ namespace swarmc::Type {
             if ( other->getId() == _id ) return true;
             if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
             if ( other->intrinsic() != Intrinsic::LAMBDA1 ) return false;
-            return _returns->isAssignableTo(((Lambda1*) other)->returns()) && _param->isAssignableTo(((Lambda1*) other)->param());
+            return _returns->isAssignableTo(((Lambda1*) other)->returns()) && ((Lambda1*) other)->param()->isAssignableTo(_param);
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -626,6 +675,12 @@ namespace swarmc::Type {
 
     protected:
         Type* _param;
+        
+        [[nodiscard]] Lambda1* copyRec(std::map<const Type*, Type*>& visited) const override {
+            if ( visited.count(this) == 0 ) 
+                visited[this] = new Lambda1(_param->copyRec(visited), _returns->copyRec(visited));
+            return (Lambda1*)visited[this];
+        }
     };
 
     class Object : public Type {
@@ -642,13 +697,9 @@ namespace swarmc::Type {
             return Intrinsic::OBJECT_PROTO;
         }
 
-        [[nodiscard]] Object* copy() const override {
-            auto inst = new Object(_parent);
-            inst->_final = _final;
-            for ( const auto& p : _properties ) {
-                inst->_properties.insert({ p.first, useref(p.second->copy()) });
-            }
-            return inst;
+        [[nodiscard]] virtual Object* copy() const override {
+            std::map<const Type*, Type*> visited;
+            return copyRec(visited);
         }
 
         void transformRecursively(std::function<Type*(Type*)> visitor, std::vector<std::size_t>& visited) override {
@@ -840,6 +891,18 @@ namespace swarmc::Type {
                     "Property '" + name + "' on child object type is not assignable to the parent type (expected: " + s(parentMatch) + ", got: " + s(type) + ")"
                 );
             }
+        }
+
+        [[nodiscard]] Object* copyRec(std::map<const Type*, Type*>& visited) const override {
+            if ( visited.count(this) == 0 ) {
+                auto inst = new Object(_parent);
+                visited[this] = inst;
+                inst->_final = _final;
+                for ( const auto& p : _properties ) {
+                    inst->_properties.insert({ p.first, useref(p.second->copyRec(visited)) });
+                }
+            }
+            return (Object*)visited[this];
         }
     };
 }

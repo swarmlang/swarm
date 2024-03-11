@@ -16,7 +16,7 @@ namespace swarmc::Runtime {
             return binn;
         };
         // used for preventing recursive object types from exploding the stack
-        static auto CurrentObjectR = std::stack<const Type::Object*>();
+        static auto CurrentObjectR = std::stack<std::size_t>();
 
         // Primitive types
         factory->registerReducer("Type::Primitive", common);
@@ -120,14 +120,11 @@ namespace swarmc::Runtime {
             auto o = dynamic_cast<const Type::Object*>(t);
             // replace recursive references with p:THIS
             if ( !CurrentObjectR.empty() ) {
-                auto top = CurrentObjectR.top();
-                // only check 1 way because of potentially circular references
-                // case where `o` is a subclass of `top` should be handled in the normal case
-                if (top->isAssignableTo(o)) {
+                if (CurrentObjectR.top() == o->getId()) {
                     return common(Type::Primitive::of(Type::Intrinsic::THIS), nullptr);
                 }
             }
-            CurrentObjectR.push(o);
+            CurrentObjectR.push(o->getId());
             auto binn = common(o, nullptr);
 
             auto parent = o->getParent();

@@ -15,9 +15,10 @@ Example:
 `enumerable<number> nums = [1,2,3];`  
 *Note: To have an empty enumerable literal, you must ascribe a type to its values to prevent ambiguity.*  
 *Example:* `enumerable<number> nums = [] of number;`  
-To access the values of an enumerable, use the `[<idx>]` operator.
-To append a value to an enumerable, use the `nums[] = <val>;` syntax.
+To access the values of an enumerable, use the `[<idx>]` operator.  
 Example: `nums[1]`  
+To append a value to an enumerable, use the `nums[] = <val>;` syntax.  
+Example: `nums[] = 1;`
 - **Maps**  
 A map is an unordered set of mappings from identifiers to values. The types of the values must be declared similar to an enumerable.  
 Example: `map<number> m = { a: 3, b: 4 };`  
@@ -166,13 +167,14 @@ There are three types of declarations within a type body: initialized variable d
 
 - **Initialized variable declarations:**  
 The values of initialized members of a type are computed when the type is created.  
-*Note: initialized members of a class cannot directly refer to members of the type. For instance, you cannot add a new member* `bool isalive = isAlive();` *. However, indirectly referring to other members of the type (such as using them in a function) is fine.*  
+*Note: initialized members of a class cannot directly refer to members of the type. For instance, you cannot add a new member* `bool isalive = isAlive();` *. However, indirectly referring to other members of the type (such as `fn foo = (): bool => isAlive()` using them in a function) is fine.*  
 - **Uninitialized variable declarations:**  
 These are not assigned any value by default. However, all members of a type must be instantiated in an object, meaning that you *must* initialize these members in the constructor.
 - **Constructors:**  
 Constructors can be thought of as functions that return instances of the type. Since they always return an instance of the type, the return type is omitted in the syntax. Constructors are not technically members of the type and thus cannot be access as members of the type.  
 Types can have multiple constructors. If two or more constructors have the same function signature, the compiler will always choose the first one, making the second dead code.  
-All uninitialized member variables must be initialized in *all* constructors.
+All uninitialized member variables must be initialized in *all* constructors.  
+If there are no uninitialized members of a type, the constructor can be omitted, and the compiler will implicitly insert an empty constructor.
 
 ## Objects
 
@@ -180,6 +182,67 @@ Objects are instances of user-defined types.
 To create an object, use the popular Java-esque syntax: `Person p = Person("George Washington", 291);`  
 Constructors cannot be partially applied, so all arguments to the constructor must be given.
 
+## SubTyping
+At the moment, Swarm supports 2 forms of subtyping:
+```swarm
+type Parent = {
+    string a = "hello";
+};
+
+type Child = {
+    string a = "goodbye";
+    number b = 4;
+};
+
+Parent p = Child();
+lLog(p.a);
+```
+Because the `Child` type has at least all of the same properties with all of the same types as the `Parent` type, `Child` is implicitly a subtype of `Parent`. As you would expect, the variable `p` cannot be used to access the `b` property of the instance it has been assigned, as `Parent` has no such property. When executed, this example should print `goodbye`.  
+```swarm
+type Parent = {
+    constructor(s: string) => {
+        a = s;
+    };
+    string a;
+};
+
+type Child = {
+    use Parent;
+    constructor() : Parent("goodbye") => {};
+    number b = 4;
+};
+
+Parent p = Child();
+lLog(p.a);
+```
+The `use` statement tells the compiler that `Child` is a subtype of `Parent`, thus inheriting all of its members. Despite not having an explicitly written `a` property, constructors of the `Child` type must still initialize all uninitialized members of its parent type. This can be done via assignments in the constructor bodies, or by calls to the parent constructors (as shown in the example).  
+
+Whereas the implicit subtyping only relates 2 types via their similar properties (i.e., if either type were to change the name or type of its `a` property, the 2 types would no longer be related), the explicit syntax binds the definition of the child type to that of the parent.
+
 ## Other
 
 Swarm supports a few other generic programming-language-isms, such as `while` loops and `if` statements, `break` and `continue`. It currently does not support else statements or for loops.
+
+## Known Bugs
+- Having a deferred function call as the default value of a property of an object type is
+ideally supported, but it currently does not compile correctly
+- Due to how the runtime handles scope and curried functions, something like this:
+`fn foo = (n: number): ->number => (): number => n;` will die in runtime, as the `n` falls
+out of scope before the inner function can be called.  
+Potential fixes:
+    - only allow functions to reference variables that have been passed in or defined in the body
+        - Pros: potentially easier to identify pure functions statically
+        - Cons: this sucks for the user of the language
+    - have the compiler identify what variables from other scopes it needs, and have the compiler implicitly change the type of the function so that it can curry them in
+        - Pros: the outer language stays the same, a walk to identify these things is something that needs to be done anyway for other optimizations
+        - Cons: this sucks for me, the compiler writer
+- Code written after a `return`, `continue`, or `break` will still compile and execute, as none of those statements compile to a break in control flow in svi.
+    - Fix: stop being lazy and implement a trivial optimization pass over the AST
+- Directly referencing other members of a type as default values should fail name analysis but doesnt
+example
+```swarm
+type Test = {
+    number a = 4;
+    number b = a; -- this shouldnt work because it cant `objget` the value of `a` for an object that doesnt exist yet
+};
+```

@@ -19,6 +19,7 @@ namespace Walk {
 
     class WithStatement;
     class ExpressionNode;
+    class VariableSymbol;
 
     /** Enum of the various possible things that a name may reference. */
     enum class SemanticSymbolKind {
@@ -50,6 +51,11 @@ namespace Walk {
 
         /** The kind of the symbol. */
         [[nodiscard]] virtual SemanticSymbolKind kind() const = 0;
+
+        /** Ensure the symbol is a variable */
+        [[nodiscard]] virtual VariableSymbol* ensureVariable() {
+            throw Errors::SwarmError("Symbol " + toString() + " is not a variable");
+        } 
 
         /** The type of the symbol. */
         [[nodiscard]] virtual Type::Type* type() const {
@@ -106,6 +112,10 @@ namespace Walk {
             return SemanticSymbolKind::VARIABLE;
         }
 
+        [[nodiscard]] VariableSymbol* ensureVariable() override {
+            return this;
+        }
+
         TypeLiteral* getObjectType() const {
             return _value;
         }
@@ -122,6 +132,7 @@ namespace Walk {
         bool _shouldDrain;
     };
 
+    /** Semantic symbol implementation for names referencing object properties */
     class ObjectPropertySymbol : public VariableSymbol {
     public:
         ObjectPropertySymbol(std::string name, Type::Type* type, Position* declaredAt, bool drain) : VariableSymbol(std::move(name), type, declaredAt, false, drain) {}
@@ -129,8 +140,7 @@ namespace Walk {
         [[nodiscard]] bool isProperty() const override { return true; }
     };
 
-
-    /** Semantic symbol implementation for names referencing variables. */
+    /** Semantic symbol implementation for names referencing functions. */
     class FunctionSymbol : public SemanticSymbol {
     public:
         FunctionSymbol(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) : SemanticSymbol(std::move(name), type, declaredAt, std::move(shared)) {}
@@ -140,8 +150,7 @@ namespace Walk {
         }
     };
 
-
-    /** Semantic symbol implementation for names referencing variables. */
+    /** Semantic symbol implementation for names referencing prologue functions. */
     class PrologueFunctionSymbol : public FunctionSymbol {
     public:
         PrologueFunctionSymbol(std::string name, Type::Lambda* type, Position* declaredAt, std::string sviName) : FunctionSymbol(std::move(name), type, declaredAt, false), _sviName(sviName) {}
@@ -205,8 +214,10 @@ namespace Walk {
             insert(new VariableSymbol(std::move(name), type, declaredAt, std::move(shared), std::move(drain)));
         }
 
-        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, bool drain) {
-            insert(new ObjectPropertySymbol(std::move(name), type, declaredAt, std::move(drain)));
+        SemanticSymbol* addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, bool drain) {
+            auto sym = new ObjectPropertySymbol(std::move(name), type, declaredAt, std::move(drain));
+            insert(sym);
+            return sym;
         }
 
         /** Add a new function to this scope. */
@@ -277,9 +288,24 @@ namespace Walk {
         }
 
         /** Find a symbol by name, recursing up the scope list. */
-        SemanticSymbol* lookup(const std::string& name) {
-            for ( ScopeTable* scope : *_scopes ) {
-                SemanticSymbol* symbol = scope->lookup(name);
+        SemanticSymbol* lookup(const std::string& name, const Type::Object* parent) {
+            assert(_scopes->size() != 0);
+            // lookup in front scope first (in case parent member has been shadowed)
+            auto symbol = _scopes->front()->lookup(name);
+            if ( symbol != nullptr ) return symbol;
+
+            // lookup in parent types
+            while ( parent != nullptr ) {
+                assert( _memberSymbols.count(parent) != 0 );
+                for ( auto p : _memberSymbols.at(parent) ) {
+                    if ( p.first == name ) return p.second;
+                }
+                parent = parent->getParent();
+            }
+
+            // lookup through rest of scope tables
+            for ( auto i = ++_scopes->begin(); i != _scopes->end(); i++ ) {
+                symbol = (*i)->lookup(name);
                 if ( symbol != nullptr ) {
                     return symbol;
                 }
@@ -296,16 +322,18 @@ namespace Walk {
 
         /** Add a new variable to the current scope. */
         void addVariable(std::string name, Type::Type* type, Position* declaredAt, bool shared, bool drain) {
-            return current()->addVariable(std::move(name), type, declaredAt, std::move(shared), std::move(drain));
+            current()->addVariable(std::move(name), type, declaredAt, std::move(shared), std::move(drain));
         }
 
-        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, bool drain) {
-            return current()->addObjectProperty(std::move(name), type, declaredAt, std::move(drain));
+        /** Add a new object property symbol to the current scope */
+        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, bool drain, Type::Object* object) {
+            if ( _memberSymbols.count(object) == 0 ) _memberSymbols[object] = std::map<const std::string, SemanticSymbol*>();
+            _memberSymbols[object].insert({ name, current()->addObjectProperty(name, type, declaredAt, std::move(drain)) });
         }
 
         /** Add a new function to the current scope. */
         void addFunction(std::string name, Type::Lambda* type, Position* declaredAt, bool shared) {
-            return current()->addFunction(std::move(name), type, declaredAt, std::move(shared));
+            current()->addFunction(std::move(name), type, declaredAt, std::move(shared));
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -322,6 +350,7 @@ namespace Walk {
 
     protected:
         std::list<ScopeTable*>* _scopes;
+        std::unordered_map<const Type::Object*, std::map<const std::string, SemanticSymbol*>> _memberSymbols;
     };
 
 }

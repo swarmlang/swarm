@@ -316,6 +316,10 @@ namespace swarmc::Lang::Walk {
         throw Errors::SwarmError("Unresolved UninitVarDeclNode in ToISAWalk");
     }
 
+    ISA::Instructions* ToISAWalk::walkUseNode(UseNode* node) {
+        throw Errors::SwarmError("Unresolved UseNode in ToISAWalk");
+    }
+
     ISA::Instructions* ToISAWalk::walkReturnStatementNode(ReturnStatementNode* node) {
         auto instrs = new ISA::Instructions();
 
@@ -379,13 +383,9 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkConstructorNode(ConstructorNode* node) {
-        // in THeoRY, if there are no Uninitialized variables in the type,
-        // we might be able to construct the object reference in the compiler
-        // instead of using the objinit stuff.
-        // would basically be just moving the assignment of default values to the
-        // reference from the runtime to the compiler
         auto instrs = new ISA::Instructions();
         auto type = _constructing.back().first;
+        auto instLoc = makeLocation(ISA::Affinity::LOCAL, TO_ISA_OBJECT_INSTANCE + s(node->partOf()->getId()), nullptr);
         _depth++;
         _deferredResults = _deferredResults->enter();
 
@@ -396,6 +396,8 @@ namespace swarmc::Lang::Walk {
             SharedLocations::registerLoc(ploc, std::get<3>(f));
             append(instrs, new ISA::FunctionParam(getTypeRef(std::get<0>(f)), ploc));
         }
+        // add inst as final parameter
+        append(instrs, new ISA::FunctionParam(getTypeRef(type), instLoc));
 
         // cfb
         for ( auto stmt : *node->func()->body() ) {
@@ -406,9 +408,9 @@ namespace swarmc::Lang::Walk {
             }
         }
 
-        // objinit
-        auto instLoc = makeLocation(ISA::Affinity::LOCAL, TO_ISA_OBJECT_INSTANCE + s(type->getId()), instrs);
-        append(instrs, assignEval(instLoc, new ISA::ObjInit(getTypeRef(type))));
+        for ( auto parent : *node->parentConstructors() ) {
+            append(instrs, parentCall((CallExpressionNode*)parent));
+        }
 
         // default values
         for ( auto d : _constructing.back().second ) {
@@ -426,10 +428,7 @@ namespace swarmc::Lang::Walk {
         }
 
         append(instrs, walkStatementList(node->func(), false, true, false));
-
-        auto retLoc = makeLocation(ISA::Affinity::LOCAL, TO_ISA_RETURN_LOCATION, instrs);
-        append(instrs, assignEval(retLoc, new ISA::ObjInstance(instLoc)));
-        append(instrs, new ISA::Return1(retLoc));
+        append(instrs, new ISA::Return1(instLoc));
 
         _depth--;
         _deferredResults = _deferredResults->leave();
@@ -530,19 +529,18 @@ namespace swarmc::Lang::Walk {
 
         ISA::Instructions* instrs = nullptr;
         ISA::LocationReference* func = nullptr;
-        Type::Type* type = nullptr;
 
         if ( node->constructor() ) {
             instrs = new ISA::Instructions();
             func = makeLocation(ISA::Affinity::FUNCTION, node->constructor()->name(), nullptr);
-            type = node->constructor()->func()->type();
         } else {
             instrs = walk(node->func());
             func = getLastLoc(instrs);
-            type = node->func()->type();
         }
 
         // evaluate args
+        auto temp = _parentCall;
+        _parentCall = false;
         std::list<ISA::LocationReference*> arglocs;
         for ( auto arg : *node->args() ) {
             auto ainstrs = walk(arg);
@@ -550,31 +548,48 @@ namespace swarmc::Lang::Walk {
             append(instrs, ainstrs);
         }
 
+        auto initLoc = temp
+            ? makeLocation(ISA::Affinity::LOCAL, TO_ISA_OBJECT_INSTANCE + s(_constructing.back().first->getId()), nullptr) 
+            : makeTmp(ISA::Affinity::LOCAL, instrs);
+        if ( node->constructor() ) {
+            arglocs.push_back(initLoc);
+        };
+
         // curry
-        while ( type->isCallable() && arglocs.size() > 1 ) {
+        while ( arglocs.size() > 1 ) {
             auto curried = makeTmp(ISA::Affinity::LOCAL, instrs);
             append(instrs, assignEval(curried, new ISA::Curry(func, arglocs.front())));
-            type = ((Type::Lambda*)type)->returns();
             func = curried;
             arglocs.pop_front();
         }
+        _parentCall = temp;
 
         // call with remaining parameter if exists
         ISA::Instruction* call = nullptr;
-        if ( type->intrinsic() == Type::Intrinsic::LAMBDA0 ) {
+        if ( arglocs.size() == 0 ) {
             call = new ISA::Call0(func);
         } else {
             call = new ISA::Call1(func, arglocs.front());
         }
 
-        if ( ((Type::Lambda*)type)->returns()->intrinsic() == Type::Intrinsic::VOID && !node->constructor() ) {
+        if ( !node->constructor() && node->type()->intrinsic() == Type::Intrinsic::VOID ) {
             append(instrs, call);
-        } else {
-            append(instrs, assignEval(
-                makeTmp(ISA::Affinity::LOCAL, instrs),
-                call
-            ));
+            return instrs;
         }
+
+        if ( node->constructor() ) {
+            if ( _parentCall ) {
+                append(instrs, assignEval(initLoc, call));
+                return instrs;
+            }
+
+            append(instrs, assignEval(initLoc, new ISA::ObjInit(getTypeRef(node->constructor()->partOf()))));
+            append(instrs, assignEval(initLoc, call));
+            append(instrs, assignEval(initLoc, new ISA::ObjInstance(initLoc)));
+            return instrs;
+        }
+
+        append(instrs, assignEval(initLoc, call));
 
         return instrs;
     }
@@ -1146,6 +1161,13 @@ namespace swarmc::Lang::Walk {
         }
 
         return instrs;
+    }
+
+    ISA::Instructions* ToISAWalk::parentCall(CallExpressionNode* call) {
+        _parentCall = true;
+        auto i = walk(call);
+        _parentCall = false;
+        return i;
     }
 
     ISAFormalList* ToISAWalk::extractFormals(FormalList* formals) const {

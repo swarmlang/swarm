@@ -16,8 +16,28 @@
     - ~~Redis implementation~~
     - ~~pthread implementation~~
     - ...others?
+- minimal set of used locations in a function walk
+  - identify pure functions
+  - fix scoping issue
+    - `fn foo = (n: number): ->number => (): number => n;` does not compile correctly, but should
+      be allowed. Potential compile-time fix is to identify all unscoped locations in a function
+      literal and modify the signature to curry in all of those locations.
+- modify Type::Object (and subsequently the compiler walks) to support multiinheritance
+- add syntax to swarm for (or otherwise implicitly support) currying a 1 argument function into a 0 argument function instead of immediately calling functions once they have no more arguments. Consider as an implicit example:
+```swarmc
+fn ex = (n: number): number => n + 1;
+
+-- this is the existing behavior
+number called = ex(5);
+
+-- explicitly writing the `->number` type could inform the compiler to curry the last argument instead of calling it.
+
+->number curried = ex(5);
+```
+This would mostly be finagling with type analysis to allow something of type `T->T` to be assigned to both `T` and `->T`, and setting a flag for which one to compile to.
+
 - ast optimization pass
-  - removing statements coming after a return
+  - removing statements coming after a return/continue/break
   - simplification of trivial expressions
   - name mangling to prevent imported modules from compiling to objects
 - assembly optimization pass

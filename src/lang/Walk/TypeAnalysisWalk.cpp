@@ -62,7 +62,7 @@ bool TypeAnalysisWalk::walkEnumerableAppendNode(EnumerableAppendNode* node) {
     if ( typeLVal->intrinsic() != Type::Intrinsic::ENUMERABLE ) {
         logger->error(
             s(node->position()) +
-            " Invalid array access: " + node->path()->toString()
+            " Invalid array access: " + s(node->path())
         );
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
         return false;
@@ -83,7 +83,7 @@ bool TypeAnalysisWalk::walkEnumerableAccessNode(EnumerableAccessNode* node) {
     if ( typeLVal->intrinsic() != Type::Intrinsic::ENUMERABLE ) {
         logger->error(
             s(node->position()) +
-            " Invalid array access: " + node->path()->toString()
+            " Invalid array access: " + s(node->path())
         );
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
         return false;
@@ -99,7 +99,7 @@ bool TypeAnalysisWalk::walkEnumerableAccessNode(EnumerableAccessNode* node) {
     if ( typeIndex->intrinsic() != Type::Intrinsic::NUMBER ) {
         logger->error(
             s(node->position()) +
-            " Invalid index type: " + node->index()->type()->toString()
+            " Invalid index type: " + s(node->index()->type())
         );
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
         return false;
@@ -142,8 +142,7 @@ bool TypeAnalysisWalk::walkClassAccessNode(ClassAccessNode* node) {
     if ( parsedPathType->intrinsic() == Type::Intrinsic::AMBIGUOUS && ((Type::Ambiguous*)parsedPathType)->id() != nullptr ) {
         auto id = ((Type::Ambiguous*)parsedPathType)->id();
         assert(id->symbol() != nullptr);
-        assert(id->symbol()->kind() == SemanticSymbolKind::VARIABLE);
-        auto t = ((VariableSymbol*)id->symbol())->getObjectType();
+        auto t = id->symbol()->ensureVariable()->getObjectType();
 
         assert(t->getTag() == ASTNodeTag::TYPELITERAL || t->getTag() == ASTNodeTag::TYPEBODY);
         actualPathType = ((TypeLiteral*)t)->value();
@@ -165,7 +164,7 @@ bool TypeAnalysisWalk::walkClassAccessNode(ClassAccessNode* node) {
     if ( endType == nullptr ) {
         logger->error(
             s(node->end()->position()) + " " +
-            node->end()->name() + " is not a member of type " + s(node->path())
+            node->end()->name() + " is not a member of type " + s(actualPathType)
         );
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
         return false;
@@ -266,7 +265,7 @@ bool TypeAnalysisWalk::walkMapNode(MapNode* node) {
         } else if ( !stmtType->isAssignableTo(innerType) ) {
             logger->error(
                 s(node->position()) +
-                " Invalid entry in map at position " + std::to_string(idx) + ". Expected: " + s(innerType) + "; Found: " + s(stmtType)
+                " Invalid entry in map at position " + s(idx) + ". Expected: " + s(innerType) + "; Found: " + s(stmtType)
             );
             flag = false;
         }
@@ -314,13 +313,13 @@ bool TypeAnalysisWalk::walkVariableDeclarationNode(VariableDeclarationNode* node
     flag = walk(node->value()) && flag;
 
     const Type::Type* typeOfValue = _types->getTypeOf(node->value());
-    if ( !node->id()->type()->isAssignableTo(typeOfValue)
+    if ( !typeOfValue->isAssignableTo(node->id()->type())
         && typeOfValue->intrinsic() != Type::Intrinsic::ERROR
     ) {
 
         logger->error(
             s(node->position()) +
-            " Attempted to initialize identifier of type " + node->id()->type()->toString() + " with value of type " + s(typeOfValue) + "."
+            " Attempted to initialize identifier of type " + s(node->id()->type()) + " with value of type " + s(typeOfValue) + "."
         );
 
         flag = false;
@@ -338,6 +337,10 @@ bool TypeAnalysisWalk::walkUninitializedVariableDeclarationNode(UninitializedVar
     auto type = flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR);
     _types->setTypeOf(node, type);
     return flag;
+}
+
+bool TypeAnalysisWalk::walkUseNode(UseNode* node) {
+    throw Errors::SwarmError("Unresolved UseNode in Type Analysis");
 }
 
 bool TypeAnalysisWalk::walkReturnStatementNode(ReturnStatementNode* node) {
@@ -414,7 +417,12 @@ bool TypeAnalysisWalk::walkFunctionNode(FunctionNode* node) {
 
 bool TypeAnalysisWalk::walkConstructorNode(ConstructorNode* node) {
     bool flag = walk(node->func());
-    _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::UNIT));
+
+    for ( auto pc : *node->parentConstructors() ) {
+        flag = walk(pc) && flag;
+    }
+
+    _types->setTypeOf(node, flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR));
     return flag;
 }
 
@@ -458,9 +466,8 @@ bool TypeAnalysisWalk::walkCallExpressionNode(CallExpressionNode* node) {
     const Type::Type* baseTypeOfCallee = _types->getTypeOf(node->func());
     if ( !baseTypeOfCallee->isCallable() ) {
         if ( node->func()->getTag() == ASTNodeTag::IDENTIFIER && baseTypeOfCallee->intrinsic() == Type::Intrinsic::TYPE ) {
-            auto sym = ((IdentifierNode*)node->func())->symbol();
-            assert(sym->kind() == SemanticSymbolKind::VARIABLE);
-            if ( ((VariableSymbol*)sym)->getObjectType() == nullptr ) {
+            auto sym = ((IdentifierNode*)node->func())->symbol()->ensureVariable();
+            if ( sym->getObjectType() == nullptr ) {
                 logger->error(
                     s(node->position()) +
                     " Attempted to create object instance of type " + ((IdentifierNode*)node->func())->name() + "."
@@ -471,26 +478,26 @@ bool TypeAnalysisWalk::walkCallExpressionNode(CallExpressionNode* node) {
                 return false;
             }
 
-            if ( ((VariableSymbol*)sym)->getObjectType()->getTag() != ASTNodeTag::TYPEBODY ) {
+            if ( sym->getObjectType()->getTag() != ASTNodeTag::TYPEBODY ) {
                 logger->error(
                     s(node->position()) +
-                    " Attempted to create object of type " + ((VariableSymbol*)sym)->getObjectType()->value()->toString() + "."
+                    " Attempted to create object of type " + s(sym->getObjectType()->value()) + "."
                 );
 
                 _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
                 node->_type = useref(Type::Primitive::of(Type::Intrinsic::ERROR));
                 return false;
             }
-            auto tLit = (TypeBodyNode*)((VariableSymbol*)sym)->getObjectType();
+            auto tLit = (TypeBodyNode*)sym->getObjectType();
 
             std::vector<const Type::Type*> paramtypes;
             std::string typeString;
             for (size_t i = 0; i < node->args()->size(); i++) {
                 paramtypes.push_back(_types->getTypeOf(node->args()->at(i)));
                 if (typeString != "") typeString += " -> ";
-                typeString += paramtypes.back()->toString();
+                typeString += s(paramtypes.back());
             }
-            typeString += " -> " + tLit->value()->toString();
+            typeString += " -> " + s(tLit->value());
 
             ConstructorNode* theconstructor = nullptr;
             for (auto c : *((TypeBodyNode*)tLit)->constructors()) {
@@ -543,7 +550,7 @@ bool TypeAnalysisWalk::walkCallExpressionNode(CallExpressionNode* node) {
     if ( argTypes.size() < node->args()->size() || (node->args()->size() == 0 && typeOfCallee->intrinsic() == Type::Intrinsic::LAMBDA1) ) {
         logger->error(
             s(node->position()) +
-            " Invalid number of arguments for call (expected: " + std::to_string(argTypes.size()) + ")."
+            " Invalid number of arguments for call (expected: " + s(argTypes.size()) + ")."
         );
 
         _types->setTypeOf(node, Type::Primitive::of(Type::Intrinsic::ERROR));
@@ -567,7 +574,7 @@ bool TypeAnalysisWalk::walkCallExpressionNode(CallExpressionNode* node) {
         ) {
             logger->error(
                 s(node->position()) +
-                " Invalid argument of type " + s(actualType) + " in position " + std::to_string(i) + " (expected: " + s(expectedType) + ")."
+                " Invalid argument of type " + s(actualType) + " in position " + s(i) + " (expected: " + s(expectedType) + ")."
             );
 
             flag = false;
@@ -673,7 +680,7 @@ bool TypeAnalysisWalk::walkAddNode(AddNode* node) {
             flag = false;
         }
         node->setConcat(true);
-    } else {
+    } else if ( actualLeftType->intrinsic() != Type::Intrinsic::ERROR ) {
         logger->error(
             s(node->position()) +
             " Invalid type " + s(actualLeftType) + " of left-hand operand to expression (expected: Primitive<NUMBER> or Primitive<STRING>)."
@@ -921,7 +928,7 @@ bool TypeAnalysisWalk::walkPureBinaryExpression(PureBinaryExpressionNode* node) 
     if ( !node->leftType()->isAssignableTo(actualLeftType) && actualLeftType->intrinsic() != Type::Intrinsic::ERROR ) {
         logger->error(
             s(node->position()) +
-            " Invalid type " + s(actualLeftType) + " of left-hand operand to expression (expected: " + node->leftType()->toString() + ")."
+            " Invalid type " + s(actualLeftType) + " of left-hand operand to expression (expected: " + s(node->leftType()) + ")."
         );
 
         flag = false;
@@ -930,7 +937,7 @@ bool TypeAnalysisWalk::walkPureBinaryExpression(PureBinaryExpressionNode* node) 
     if ( !node->rightType()->isAssignableTo(actualRightType) && actualRightType->intrinsic() != Type::Intrinsic::ERROR ) {
         logger->error(
             s(node->position()) +
-            " Invalid type " + s(actualRightType) + " of right-hand operand to expression (expected: " + node->rightType()->toString() + ")."
+            " Invalid type " + s(actualRightType) + " of right-hand operand to expression (expected: " + s(node->rightType()) + ")."
         );
 
         flag = false;

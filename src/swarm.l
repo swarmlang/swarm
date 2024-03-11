@@ -205,6 +205,10 @@ from {
 	return makeBareToken(TokenKind::FROM);
 }
 
+use {
+	return makeBareToken(TokenKind::USE);
+}
+
 "=>" {
 	return makeBareToken(TokenKind::FNDEF);
 }

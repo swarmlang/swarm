@@ -166,6 +166,14 @@ SharedLocations SharedLocationsWalk::getLocs(ASTNode* node) {
     return {};
 }
 
+[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkUseNode(UseNode* node) {
+    auto sharedLocs = SharedLocationsMap();
+    for ( auto id : *node->ids() ) {
+        combine(sharedLocs, walk(id));
+    }
+    return sharedLocs;
+}
+
 [[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkReturnStatementNode(ReturnStatementNode* node) {
     if ( node->value() != nullptr ) {
         return walk(node->value());
