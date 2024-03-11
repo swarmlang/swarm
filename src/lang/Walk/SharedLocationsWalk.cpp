@@ -249,11 +249,11 @@ SharedLocations SharedLocationsWalk::getLocs(ASTNode* node) {
     return walkBinaryExpressionNode(node);
 }
 
-[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
-    return walkUnaryExpressionNode(node);
+[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkNthRootNode(NthRootNode* node) {
+    return walkBinaryExpressionNode(node);
 }
 
-[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkSqrtNode(SqrtNode* node) {
+[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
     return walkUnaryExpressionNode(node);
 }
 

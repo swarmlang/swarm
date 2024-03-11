@@ -39,7 +39,8 @@ Swarm supports most of the basic operations on primitive values. The operators, 
 | Addition and Subtraction | `x <op> y` |
 | String Concatenation | `x + y` |
 | Multiplication, Division, and Modulus | `x <op> y` |
-| Exponentiation | `x ^ y` |
+| Exponentiation and Xth Root | `x ^ y`, `x _/ y` |
+| Negation, Boolean NOT, and Square Root | `<op> x` |
 
 ## Functions
 
@@ -81,7 +82,6 @@ To call a function, simply call them as you would in Java or C. The thing being 
 | `ceiling`         | Round a number UP to the nearest integer.                   | `number -> number`                                                                  | The number to take the ceiling of.                                                                                                             |
 | `max` | Get the max of two numbers | `number -> number -> number` | The two numbers to be compared |
 | `min` | Get the min of two numbers | `number -> number -> number` | The two numbers to be compared |
-| `nthRoot`         | Take the nth-root of the specified number.                  | `number -> number -> number`                                                        | The root to take (e.g. 2 is square root) and the number to root.                                                                               |
 | `count`           | Count the number of elements in an enumerable.              | `enumerable<_> -> number`                                                           | The enumerable to find the size of.                                                                                                            |
 | `time`            | Get the current UNIX timestamp in fractional seconds        | `-> number`                                                                         | N/A                                                                                                                                            |
 | `subVector`       | Get a slice of a numeric enumeration.                       | `number -> number -> enumerable<number> -> enumerable<number>`                      | The element index to start the slice at, the length of the slice, and the vector to slice.                                                     |

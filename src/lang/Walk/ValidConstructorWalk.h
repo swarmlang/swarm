@@ -49,8 +49,8 @@ protected:
     void walkDivideNode(DivideNode* node) override {}
     void walkModulusNode(ModulusNode* node) override {}
     void walkPowerNode(PowerNode* node) override {}
+    void walkNthRootNode(NthRootNode* node) override {}
     void walkNegativeExpressionNode(NegativeExpressionNode* node) override {}
-    void walkSqrtNode(SqrtNode* node) override {}
     void walkNotNode(NotNode* node) override {}
     void walkEnumerationStatement(EnumerationStatement* node) override {}
     void walkWithStatement(WithStatement* node) override;

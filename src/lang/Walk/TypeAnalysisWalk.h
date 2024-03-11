@@ -46,8 +46,8 @@ protected:
     bool walkDivideNode(DivideNode* node) override;
     bool walkModulusNode(ModulusNode* node) override;
     bool walkPowerNode(PowerNode* node) override;
+    bool walkNthRootNode(NthRootNode* node) override;
     bool walkNegativeExpressionNode(NegativeExpressionNode* node) override;
-    bool walkSqrtNode(SqrtNode* node) override;
     bool walkNotNode(NotNode* node) override;
     bool walkEnumerationStatement(EnumerationStatement* node) override;
     bool walkWithStatement(WithStatement* node) override;

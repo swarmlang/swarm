@@ -283,14 +283,15 @@ protected:
         pop_space();
     }
 
-    void walkNegativeExpressionNode(NegativeExpressionNode* node) override {
+    void walkNthRootNode(NthRootNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
-        walk(node->exp());
+        walk(node->left());
+        walk(node->right());
         pop_space();
     }
 
-    void walkSqrtNode(SqrtNode* node) override {
+    void walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
         walk(node->exp());

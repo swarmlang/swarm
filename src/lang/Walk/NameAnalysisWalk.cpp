@@ -427,76 +427,54 @@ bool NameAnalysisWalk::walkDeferCallExpressionNode(DeferCallExpressionNode* node
 }
 
 bool NameAnalysisWalk::walkAndNode(AndNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkOrNode(OrNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkEqualsNode(EqualsNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkNotEqualsNode(NotEqualsNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkAddNode(AddNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkSubtractNode(SubtractNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkMultiplyNode(MultiplyNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkDivideNode(DivideNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkModulusNode(ModulusNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkPowerNode(PowerNode* node) {
-    bool leftResult = walk(node->left());
-    bool rightResult = walk(node->right());
-    return leftResult && rightResult;
+    return walkBinaryExpressionNode(node);
+}
+
+bool NameAnalysisWalk::walkNthRootNode(NthRootNode* node) {
+    return walkBinaryExpressionNode(node);
 }
 
 bool NameAnalysisWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
-    return walk(node->exp());
-}
-
-bool NameAnalysisWalk::walkSqrtNode(SqrtNode* node) {
     return walk(node->exp());
 }
 
@@ -587,6 +565,12 @@ bool NameAnalysisWalk::walkBlockStatementNode(BlockStatementNode* node) {
     }
 
     return flag;
+}
+
+bool NameAnalysisWalk::walkBinaryExpressionNode(BinaryExpressionNode* node) {
+    bool leftResult = walk(node->left());
+    bool rightResult = walk(node->right());
+    return leftResult && rightResult;
 }
 
 bool NameAnalysisWalk::walkType(Type::Type* type) {

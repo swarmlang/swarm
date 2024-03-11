@@ -46,8 +46,8 @@ protected:
     bool walkDivideNode(DivideNode* node) override;
     bool walkModulusNode(ModulusNode* node) override;
     bool walkPowerNode(PowerNode* node) override;
+    bool walkNthRootNode(NthRootNode* node) override;
     bool walkNegativeExpressionNode(NegativeExpressionNode* node) override;
-    bool walkSqrtNode(SqrtNode* node) override;
     bool walkNotNode(NotNode* node) override;
     bool walkEnumerationStatement(EnumerationStatement* node) override;
     bool walkWithStatement(WithStatement* node) override;
@@ -63,7 +63,8 @@ private:
     SymbolTable* _symbols;
     std::stack<Type::Object*> _objects;
 
-    bool walkBlockStatementNode(BlockStatementNode* node) ;
+    bool walkBlockStatementNode(BlockStatementNode* node);
+    bool walkBinaryExpressionNode(BinaryExpressionNode* node);
     bool walkType(Type::Type* type);
     bool walkTypeRec(Type::Type* type, std::set<std::size_t>& visited);
 };

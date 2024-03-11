@@ -51,8 +51,8 @@ namespace swarmc::Lang::Walk {
             if ( node->getTag() == ASTNodeTag::DIVIDE ) return walkDivideNode((DivideNode*) node);
             if ( node->getTag() == ASTNodeTag::MODULUS ) return walkModulusNode((ModulusNode*) node);
             if ( node->getTag() == ASTNodeTag::POWER ) return walkPowerNode((PowerNode*) node);
+            if ( node->getTag() == ASTNodeTag::NTHROOT ) return walkNthRootNode((NthRootNode*) node);
             if ( node->getTag() == ASTNodeTag::NEGATIVE ) return walkNegativeExpressionNode((NegativeExpressionNode*) node);
-            if ( node->getTag() == ASTNodeTag::SQUAREROOT ) return walkSqrtNode((SqrtNode*) node);
             if ( node->getTag() == ASTNodeTag::NOT ) return walkNotNode((NotNode*) node);
             if ( node->getTag() == ASTNodeTag::ENUMERATE ) return walkEnumerationStatement((EnumerationStatement*) node);
             if ( node->getTag() == ASTNodeTag::WITH ) return walkWithStatement((WithStatement*) node);
@@ -100,8 +100,8 @@ namespace swarmc::Lang::Walk {
         virtual TReturn walkDivideNode(DivideNode* node) = 0;
         virtual TReturn walkModulusNode(ModulusNode* node) = 0;
         virtual TReturn walkPowerNode(PowerNode* node) = 0;
+        virtual TReturn walkNthRootNode(NthRootNode* node) = 0;
         virtual TReturn walkNegativeExpressionNode(NegativeExpressionNode* node) = 0;
-        virtual TReturn walkSqrtNode(SqrtNode* node) = 0;
         virtual TReturn walkNotNode(NotNode* node) = 0;
         virtual TReturn walkEnumerationStatement(EnumerationStatement* node) = 0;
         virtual TReturn walkWithStatement(WithStatement* node) = 0;

@@ -77,8 +77,8 @@ protected:
     ISA::Instructions* walkDivideNode(DivideNode* node) override;
     ISA::Instructions* walkModulusNode(ModulusNode* node) override;
     ISA::Instructions* walkPowerNode(PowerNode* node) override;
+    ISA::Instructions* walkNthRootNode(NthRootNode* node) override;
     ISA::Instructions* walkNegativeExpressionNode(NegativeExpressionNode* node) override;
-    ISA::Instructions* walkSqrtNode(SqrtNode* node) override;
     ISA::Instructions* walkNotNode(NotNode* node) override;
     ISA::Instructions* walkEnumerationStatement(EnumerationStatement* node) override;
     ISA::Instructions* walkWithStatement(WithStatement* node) override;

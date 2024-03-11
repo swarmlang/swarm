@@ -717,21 +717,17 @@ namespace swarmc::Lang::Walk {
         return walkBinaryExpressionNode(node);
     }
 
-    ISA::Instructions* ToISAWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
-        return walkUnaryExpressionNode(node);
-    }
-
-    ISA::Instructions* ToISAWalk::walkSqrtNode(SqrtNode* node) {
-        auto instrs = walk(node->exp());
+    ISA::Instructions* ToISAWalk::walkNthRootNode(NthRootNode* node) {
+        auto instrs = walk(node->left());
+        auto n = getLastLoc(instrs);
+        
+        append(instrs, walk(node->right()));
         auto exp = getLastLoc(instrs);
 
         auto curried = makeTmp(ISA::Affinity::LOCAL, instrs);
         append(instrs, assignEval(
             curried,
-            new ISA::Curry(
-                makeLocation(ISA::Affinity::FUNCTION, "NTH_ROOT", nullptr),
-                new ISA::NumberReference(2)
-            )
+            new ISA::Curry(makeLocation(ISA::Affinity::FUNCTION, "NTH_ROOT", nullptr), n)
         ));
         append(instrs, assignEval(
             makeTmp(ISA::Affinity::LOCAL, instrs),
@@ -739,6 +735,10 @@ namespace swarmc::Lang::Walk {
         ));
 
         return instrs;
+    }
+
+    ISA::Instructions* ToISAWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
+        return walkUnaryExpressionNode(node);
     }
 
     ISA::Instructions* ToISAWalk::walkNotNode(NotNode* node) {

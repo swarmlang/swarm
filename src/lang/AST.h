@@ -73,8 +73,8 @@ namespace Walk {
         DIVIDE,
         MODULUS,
         POWER,
+        NTHROOT,
         NEGATIVE,
-        SQUAREROOT,
         NOT,
         ENUMERATE,
         WITH,
@@ -1821,6 +1821,27 @@ namespace Walk {
         }
     };
 
+    class NthRootNode final : public PureNumberBinaryExpressionNode {
+    public:
+        NthRootNode(Position* pos, ExpressionNode* n, ExpressionNode* exp) : PureNumberBinaryExpressionNode(pos, n, exp) {}
+
+        virtual ASTNodeTag getTag() const override {
+            return ASTNodeTag::NTHROOT;
+        }
+
+        virtual std::string toString() const override {
+            return "SqrtNode<>";
+        }
+
+        virtual NthRootNode* copy() const override {
+            return new NthRootNode(position(), _left->copy(), _right->copy());
+        }
+
+        virtual Type::Type* type() const override {
+            return Type::Primitive::of(Type::Intrinsic::NUMBER);
+        }
+    };
+
     /** Base class for expressions of one operand. */
     class UnaryExpressionNode : public ExpressionNode {
     public:
@@ -1853,27 +1874,6 @@ namespace Walk {
 
         virtual NegativeExpressionNode* copy() const override {
             return new NegativeExpressionNode(position(), _exp->copy());
-        }
-
-        virtual Type::Type* type() const override {
-            return Type::Primitive::of(Type::Intrinsic::NUMBER);
-        }
-    };
-
-    class SqrtNode final : public UnaryExpressionNode {
-    public:
-        SqrtNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
-
-        virtual ASTNodeTag getTag() const override {
-            return ASTNodeTag::SQUAREROOT;
-        }
-
-        virtual std::string toString() const override {
-            return "SqrtNode<>";
-        }
-
-        virtual SqrtNode* copy() const override {
-            return new SqrtNode(position(), _exp->copy());
         }
 
         virtual Type::Type* type() const override {

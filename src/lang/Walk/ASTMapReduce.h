@@ -310,11 +310,11 @@ protected:
         return walkBinaryExpressionNode(node);
     }
 
-    virtual std::optional<TReturn> walkNegativeExpressionNode(NegativeExpressionNode* node) override {
-        return walkUnaryExpressionNode(node);
+    virtual std::optional<TReturn> walkNthRootNode(NthRootNode* node) override {
+        return walkBinaryExpressionNode(node);
     }
 
-    virtual std::optional<TReturn> walkSqrtNode(SqrtNode* node) override {
+    virtual std::optional<TReturn> walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         return walkUnaryExpressionNode(node);
     }
 
@@ -420,6 +420,7 @@ private:
 };
 
 // implementations
+
 // Removes statements after a return/continue/break, continues at the end of whiles, and void returns at the end of functions
 static ASTMapReduce<bool> RemoveRedundantCFB = ASTMapReduce<bool>(
     "AST Remove Post-CFB",
@@ -447,7 +448,6 @@ static ASTMapReduce<bool> RemoveRedundantCFB = ASTMapReduce<bool>(
                 log->debug(s(p) + " Remove dead statements");
                 GC_LOCAL_REF(p)
                 while ( i != bsn->end() ) {
-                    //log->warn("obliterating: " + s((*i)->position()) + " " + s(*i));
                     freeref(*i);
                     i = bsn->erase(i);
                 }

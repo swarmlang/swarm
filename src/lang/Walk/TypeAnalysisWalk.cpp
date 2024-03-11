@@ -713,6 +713,10 @@ bool TypeAnalysisWalk::walkPowerNode(PowerNode* node) {
     return walkPureBinaryExpression(node);
 }
 
+bool TypeAnalysisWalk::walkNthRootNode(NthRootNode* node) {
+    return walkPureBinaryExpression(node);
+}
+
 bool TypeAnalysisWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
     bool flag = walk(node->exp());
 
@@ -722,23 +726,6 @@ bool TypeAnalysisWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) 
         logger->error(
             s(node->position()) +
             " Attempted to perform numeric negation on invalid type. Expected: " + s(numType) + "; actual: " + s(expType)
-        );
-        flag = false;
-    }
-
-    _types->setTypeOf(node, flag ? numType : Type::Primitive::of(Type::Intrinsic::ERROR));
-    return flag;
-}
-
-bool TypeAnalysisWalk::walkSqrtNode(SqrtNode* node) {
-    bool flag = walk(node->exp());
-
-    Type::Type* numType = Type::Primitive::of(Type::Intrinsic::NUMBER);
-    Type::Type* expType = _types->getTypeOf(node->exp());
-    if ( !expType->isAssignableTo(numType) && expType->intrinsic() != Type::Intrinsic::ERROR ) {
-        logger->error(
-            s(node->position()) +
-            " Attempted to perform square root operation on non-numeric expression."
         );
         flag = false;
     }

@@ -27,8 +27,6 @@ using TokenKind = swarmc::Lang::Parser::token;
 %option noyywrap
 %option c++
 
-DIGIT [0-9]
-LETTER [a-zA-Z]
 ESCAPEE [ntr'"\\]
 STRELT (([\\]{ESCAPEE})|([^\\\n"]))
 /*
@@ -290,7 +288,7 @@ use {
 }
 
 "_/" {
-	return makeBareToken(TokenKind::SQRT);
+	return makeBareToken(TokenKind::ROOT);
 }
 
 "_" {
@@ -305,7 +303,7 @@ use {
 	return makeBareToken(TokenKind::DOT);
 }
 
-({LETTER}({LETTER}|{DIGIT}|_)*)|(_*({LETTER}|{DIGIT})({LETTER}|{DIGIT}|_)*) {
+[_a-zA-Z][_a-zA-Z0-9]* {
 	return makeIDToken();
 }
 

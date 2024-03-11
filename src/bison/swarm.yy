@@ -144,7 +144,7 @@
 %token <transToken>      INCLUDE
 %token <transToken>      FROM
 %token <transToken>      CONSTRUCTOR
-%token <transToken>      SQRT
+%token <transToken>      ROOT
 %token <transToken>      WILDCARD
 %token <transToken>      DEFER
 %token <transToken>      USE
@@ -185,7 +185,7 @@
 %nonassoc EQUAL NOTEQUAL LARROW LARROWEQUALS RARROW RARROWEQUALS
 %left SUBTRACT ADD
 %left MULTIPLY DIVIDE MODULUS
-%left POWER
+%left POWER ROOT
 %right ARROW
 
 %%
@@ -823,6 +823,11 @@ expressionF :
         $$ = new PowerNode(pos, $1, $3);
     }
 
+    | expressionF ROOT expressionF {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new NthRootNode(pos, $1, $3);
+    }
+
     | expressionF OR expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new OrNode(pos, $1, $3);
@@ -863,9 +868,9 @@ expressionF :
         $$ = new NotNode(pos, $2);
     }
 
-    | SQRT term {
+    | ROOT term {
         Position* pos = new Position($1->position(), $2->position());
-        $$ = new SqrtNode(pos, $2);
+        $$ = new NthRootNode(pos, new NumberLiteralExpressionNode($1->position(), 2), $2);
     }
 
 

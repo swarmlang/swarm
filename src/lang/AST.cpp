@@ -60,8 +60,8 @@ namespace nslib {
         if ( tag == swarmc::Lang::ASTNodeTag::DIVIDE ) return "DivideNode";
         if ( tag == swarmc::Lang::ASTNodeTag::MODULUS ) return "ModulusNode";
         if ( tag == swarmc::Lang::ASTNodeTag::POWER ) return "PowerNode";
+        if ( tag == swarmc::Lang::ASTNodeTag::NTHROOT ) return "NthRootNode";
         if ( tag == swarmc::Lang::ASTNodeTag::NEGATIVE ) return "NegativeNode";
-        if ( tag == swarmc::Lang::ASTNodeTag::SQUAREROOT ) return "SquareRootNode";
         if ( tag == swarmc::Lang::ASTNodeTag::NOT ) return "NotNode";
         if ( tag == swarmc::Lang::ASTNodeTag::ENUMERATE ) return "EnumerateNode";
         if ( tag == swarmc::Lang::ASTNodeTag::WITH ) return "WithNode";
