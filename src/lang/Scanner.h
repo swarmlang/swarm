@@ -17,7 +17,7 @@ namespace swarmc::Lang {
      */
     class Scanner : public yyFlexLexer {
     public:
-        explicit Scanner(std::istream* in) : yyFlexLexer(in) {};
+        explicit Scanner(std::istream* in, std::string file) : yyFlexLexer(in), _file(std::move(file)) {};
         ~Scanner() override {
             for ( auto token : _tokens ) {
                 delete token;
@@ -31,7 +31,7 @@ namespace swarmc::Lang {
         /** Creates a new Token instance for the given Parser::token kind. */
         int makeBareToken(int tagIn) {
             auto length = static_cast<size_t>(yyleng);
-            auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+            auto pos = new Position(_file, this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             yylval->lexeme = new Token(pos, tagIn, s(tagIn));
             _tokens.push_back(yylval->lexeme);
@@ -42,7 +42,7 @@ namespace swarmc::Lang {
         int makeStringLiteralToken() {
             int tagIn = Parser::token::STRINGLITERAL;
             auto length = static_cast<size_t>(yyleng);
-            auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+            auto pos = new Position(_file, this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
             // replace "escape characters" with the actual ascii escape characters
@@ -71,7 +71,7 @@ namespace swarmc::Lang {
         int makeNumberLiteralToken() {
             int tagIn = Parser::token::NUMBERLITERAL;
             auto length = static_cast<size_t>(yyleng);
-            auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+            auto pos = new Position(_file, this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
             yylval->lexeme = new NumberLiteralToken(pos, tagIn, s(tagIn) + ":" + text, std::stod(yytext));
@@ -83,7 +83,7 @@ namespace swarmc::Lang {
         int makeIDToken() {
             int tagIn = Parser::token::ID;
             auto length = static_cast<size_t>(yyleng);
-            auto pos = new Position(this->lineNum, this->lineNum, this->colNum, this->colNum+length);
+            auto pos = new Position(_file, this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
             yylval->lexeme = new IDToken(pos, tagIn, s(tagIn) + ":" + text, yytext);
@@ -111,7 +111,7 @@ namespace swarmc::Lang {
         }
 
         Position* currentPos() const {
-            return new Position(prevLine, lineNum, prevCol, colNum);
+            return new Position(_file, prevLine, lineNum, prevCol, colNum);
         }
 
         void setLineNum(size_t line) {
@@ -126,6 +126,7 @@ namespace swarmc::Lang {
 
     protected:
         Parser::semantic_type* yylval = nullptr;
+        std::string _file;
         size_t prevLine = 0;
         size_t prevCol = 0;
         size_t lineNum = 1;

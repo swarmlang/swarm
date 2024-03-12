@@ -26,7 +26,7 @@ namespace Test {
             program << "enumerable<map<map<number>>> v1 = [{w:{a:1},x:{b:2}},{} of map<number>];\n"
                     << "shared enumerable<map<map<number>>> v2 = [{y:{c:3},z:{d:4}},{} of map<number>];\n";
 
-            Pipeline pipeline(&program);
+            Pipeline pipeline(&program, "");
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
             assert(pgNode->body()->at(0)->getTag() == Lang::ASTNodeTag::VARIABLEDECLARATION);
@@ -47,7 +47,7 @@ namespace Test {
                     << "e1[0][a] = 3;\n"
                     << "e2[0][d] = 5;\n";
 
-            Pipeline pipeline(&program);
+            Pipeline pipeline(&program, "");
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
             assert(pgNode->body()->at(2)->getTag() == Lang::ASTNodeTag::EXPRESSIONSTATEMENT);
@@ -87,7 +87,7 @@ namespace Test {
                     << "enumerate e2 as shared sstrs {\n"
                     << "}\n";
 
-            Pipeline pipeline(&program);
+            Pipeline pipeline(&program, "");
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
             assert(pgNode->body()->at(2)->getTag() == Lang::ASTNodeTag::ENUMERATE);
@@ -115,7 +115,7 @@ namespace Test {
                     << "with fileContents(\"file.txt\") as shared contents {\n"
                     << "}\n";
 
-            Pipeline pipeline(&program);
+            Pipeline pipeline(&program, "");
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
             assert(pgNode->body()->at(0)->getTag() == Lang::ASTNodeTag::WITH);

@@ -35,7 +35,7 @@
 # endif
 }
 
-%parse-param { swarmc::Lang::Scanner &scanner } { swarmc::Lang::ProgramNode** root }
+%parse-param { swarmc::Lang::Scanner &scanner } { swarmc::Lang::ProgramNode** root } { std::string file }
 %code{
     #include <iostream>
     #include <cstdlib>

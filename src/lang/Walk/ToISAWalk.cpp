@@ -21,6 +21,7 @@ namespace swarmc::Lang::Walk {
 
         while ( node->body()->size() ) {
             _sharedLocs = SharedLocationsWalk::getLocs(node->body()->front());
+            append(instrs, position(node->body()->front()));
             auto i = walk(node->body()->front());
             assert(_sharedLocs.size() == 0);
             append(instrs, i);
@@ -41,7 +42,7 @@ namespace swarmc::Lang::Walk {
 
     ISA::Instructions* ToISAWalk::walkIdentifierNode(IdentifierNode* node) {
         // self assign
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
 
         auto affinity = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
         auto id = makeLocation(affinity, "var_" + node->name(), nullptr);
@@ -74,11 +75,14 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkEnumerableAccessNode(EnumerableAccessNode* node) {
-        auto instrs = walk(node->path());
+        auto instrs = position(node->path());
+        append(instrs, walk(node->path()));
         auto enumeration = getLastLoc(instrs);
+        append(instrs, position(node->index()));
         append(instrs, walk(node->index()));
         auto index = getLastLoc(instrs);
 
+        append(instrs, position(node));
         append(instrs, assignEval(
             makeTmp(ISA::Affinity::LOCAL, instrs),
             new ISA::EnumGet(enumeration, index)
@@ -88,12 +92,16 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkEnumerableAppendNode(EnumerableAppendNode* node) {
-        return walk(node->path());
+        auto instrs = position(node->path());
+        append(instrs, walk(node->path()));
+        return instrs;
     }
 
     ISA::Instructions* ToISAWalk::walkMapAccessNode(MapAccessNode* node) {
-        auto instrs = walk(node->path());
+        auto instrs = position(node->path());
+        append(instrs, walk(node->path()));
 
+        append(instrs, position(node));
         auto value = new ISA::MapGet(
             new ISA::StringReference(TO_ISA_MAP_KEY_PREFIX + node->end()->name()),
             getLastLoc(instrs)
@@ -108,10 +116,12 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkClassAccessNode(ClassAccessNode* node) {
-        auto instrs = walk(node->path());
+        auto instrs = position(node->path());
+        append(instrs, walk(node->path()));
 
         auto path = getLastLoc(instrs);
         auto loc = makeTmp(ISA::Affinity::LOCAL, instrs);
+        append(instrs, position(node));
         append(instrs, assignEval(loc, new ISA::ObjGet(
             path,
             makeLocation(ISA::Affinity::OBJECTPROP, node->end()->name(), nullptr)
@@ -126,7 +136,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkTypeLiteral(swarmc::Lang::TypeLiteral* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
 
         auto ref = getTypeRef(node->value());
         append(instrs, assignValue(makeTmp(ISA::Affinity::LOCAL, instrs), ref, false));
@@ -135,7 +145,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkBooleanLiteralExpressionNode(BooleanLiteralExpressionNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
 
         append(instrs, assignValue(
             makeTmp(ISA::Affinity::LOCAL, _depth ? instrs : nullptr),
@@ -147,7 +157,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkStringLiteralExpressionNode(StringLiteralExpressionNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
 
         append(instrs, assignValue(
             makeTmp(ISA::Affinity::LOCAL, _depth ? instrs : nullptr),
@@ -159,7 +169,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkNumberLiteralExpressionNode(NumberLiteralExpressionNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
 
         append(instrs, assignValue(
             makeTmp(ISA::Affinity::LOCAL, _depth ? instrs : nullptr),
@@ -171,7 +181,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
 
         // enuminit
         auto innerType = ((Type::Enumerable*)node->type())->values();
@@ -183,6 +193,7 @@ namespace swarmc::Lang::Walk {
 
         // contents
         for ( auto i : *node->actuals() ) {
+            append(instrs, position(i));
             append(instrs, walk(i));
             append(instrs, new ISA::EnumAppend(getLastLoc(instrs), enumLoc));
         }
@@ -194,11 +205,13 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkMapStatementNode(MapStatementNode* node) {
-        return walk(node->value());
+        auto instrs = position(node->value());
+        append(instrs, walk(node->value()));
+        return instrs;
     }
 
     ISA::Instructions* ToISAWalk::walkMapNode(MapNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
 
         // create map
         auto innerType = ((Type::Map*)node->type())->values();
@@ -207,23 +220,21 @@ namespace swarmc::Lang::Walk {
 
         // set values
         for ( auto stmt : *node->body()) {
+            append(instrs, position(stmt));
             append(instrs, walk(stmt));
             auto val = getLastLoc(instrs);
             append(instrs, new ISA::MapSet(
                 new ISA::StringReference(TO_ISA_MAP_KEY_PREFIX + stmt->id()->name()), val, mapLoc));
         }
 
-        append(instrs, assignValue(
-            makeTmp(ISA::Affinity::LOCAL, instrs),
-            mapLoc,
-            false
-        ));
+        append(instrs, assignValue(makeTmp(ISA::Affinity::LOCAL, instrs), mapLoc, false));
 
         return instrs;
     }
 
     ISA::Instructions* ToISAWalk::walkAssignExpressionNode(AssignExpressionNode* node) {
-        auto instrs = walk(node->value());
+        auto instrs = position(node->value());
+        append(instrs, walk(node->value()));
         auto value = getLastLoc(instrs);
 
         if ( node->dest()->getTag() == ASTNodeTag::IDENTIFIER ) {
@@ -231,6 +242,7 @@ namespace swarmc::Lang::Walk {
             auto affinity = id->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
             auto loc = makeLocation(affinity,  TO_ISA_VARIABLE_PREFIX + id->name(), nullptr);
             SharedLocations::registerLoc(loc, id->symbol());
+            append(instrs, position(node->dest()));
 
             if ( node->value()->getTag() == ASTNodeTag::DEFERCALL ) {
                 auto jobid = getLastLoc(instrs, 1);
@@ -240,6 +252,7 @@ namespace swarmc::Lang::Walk {
             } else if ( id->symbol()->isProperty() && _constructing.size() > 0 ) {
                 // the only case in which a raw identifier is an object property
                 // is if we are inside a function defined in a type
+                append(instrs, position(node));
                 append(instrs, new ISA::ObjSet(
                     makeLocation(
                         ISA::Affinity::LOCAL,
@@ -255,26 +268,33 @@ namespace swarmc::Lang::Walk {
         } else if ( node->dest()->getTag() == ASTNodeTag::ENUMERABLEACCESS ) {
             auto e = (EnumerableAccessNode*)node->dest();
 
+            append(instrs, position(e->path()));
             append(instrs, walk(e->path()));
             auto path = getLastLoc(instrs);
 
+            append(instrs, position(e->index()));
             append(instrs, walk(e->index()));
             auto index = getLastLoc(instrs);
 
+            append(instrs, position(node));
             append(instrs, new ISA::EnumSet(path, index, value));
         } else if ( node->dest()->getTag() == ASTNodeTag::ENUMERABLEAPPEND ) {
             auto e = (EnumerableAppendNode*) node->dest();
 
+            append(instrs, position(e));
             append(instrs, walk(e));
             auto enumeration = getLastLoc(instrs);
 
+            append(instrs, position(node));
             append(instrs, new ISA::EnumAppend(value, enumeration));
         } else if ( node->dest()->getTag() == ASTNodeTag::MAPACCESS ) {
             auto m = (MapAccessNode*)node->dest();
 
+            append(instrs, position(m->path()));
             append(instrs, walk(m->path()));
             auto path = getLastLoc(instrs);
 
+            append(instrs, position(node));
             append(instrs, new ISA::MapSet(
                 new ISA::StringReference(TO_ISA_MAP_KEY_PREFIX + m->end()->name()),
                 value,
@@ -283,9 +303,11 @@ namespace swarmc::Lang::Walk {
         } else if ( node->dest()->getTag() == ASTNodeTag::CLASSACCESS ) {
             auto obj = (ClassAccessNode*)node->dest();
 
+            append(instrs, position(obj->path()));
             append(instrs, walk(obj->path()));
             auto path = getLastLoc(instrs);
 
+            append(instrs, position(node));
             append(instrs, new ISA::ObjSet(
                 path,
                 makeLocation(ISA::Affinity::OBJECTPROP, obj->end()->name(), nullptr),
@@ -321,7 +343,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkReturnStatementNode(ReturnStatementNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
 
         // set the variable that prevents execution of subfunctions
         if ( !_functionOuterScope ) {
@@ -346,8 +368,8 @@ namespace swarmc::Lang::Walk {
         }
         // set `retVal`
         if ( node->value() != nullptr ) {
-            auto vinstrs = walk(node->value());
-            append(instrs, vinstrs);
+            append(instrs, position(node->value()));
+            append(instrs, walk(node->value()));
             append(instrs, assignValue(
                 makeLocation(ISA::Affinity::LOCAL, TO_ISA_RETURN_LOCATION, nullptr),
                 getLastLoc(instrs),
@@ -370,7 +392,8 @@ namespace swarmc::Lang::Walk {
         auto name = TO_ISA_FUNCTION_PREFIX + s(_tempCounter++);
         auto tempLoop = _loopDepth;
         _loopDepth = 0;
-        auto instrs = makeFunction(name, extractFormals(node->formals()), retType, node, false, true, false);
+        auto instrs = position(node);
+        append(instrs, makeFunction(name, extractFormals(node->formals()), retType, node, false, true, false));
         _loopDepth = tempLoop;
 
         append(instrs, assignValue(
@@ -383,7 +406,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkConstructorNode(ConstructorNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
         auto type = _constructing.back().first;
         auto instLoc = makeLocation(ISA::Affinity::LOCAL, TO_ISA_OBJECT_INSTANCE + s(node->partOf()->getId()), nullptr);
         _depth++;
@@ -409,10 +432,12 @@ namespace swarmc::Lang::Walk {
         }
 
         for ( auto parent : *node->parentConstructors() ) {
+            append(instrs, position(parent));
             append(instrs, parentCall((CallExpressionNode*)parent));
         }
 
         // default values
+        // FIXME: position annotations?
         for ( auto d : _constructing.back().second ) {
             auto defloc = d.second;
             // if function, curry object instance
@@ -437,7 +462,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkTypeBodyNode(TypeBodyNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
         assert(node->value()->intrinsic() == Type::Intrinsic::OBJECT);
         auto objtype = (Type::Object*)node->value();
 
@@ -527,14 +552,13 @@ namespace swarmc::Lang::Walk {
             }
         }
 
-        ISA::Instructions* instrs = nullptr;
+        ISA::Instructions* instrs = position(node);
         ISA::LocationReference* func = nullptr;
 
         if ( node->constructor() ) {
-            instrs = new ISA::Instructions();
             func = makeLocation(ISA::Affinity::FUNCTION, node->constructor()->name(), nullptr);
         } else {
-            instrs = walk(node->func());
+            append(instrs, walk(node->func()));
             func = getLastLoc(instrs);
         }
 
@@ -543,9 +567,9 @@ namespace swarmc::Lang::Walk {
         _parentCall = false;
         std::list<ISA::LocationReference*> arglocs;
         for ( auto arg : *node->args() ) {
-            auto ainstrs = walk(arg);
-            arglocs.push_back(getLastLoc(ainstrs));
-            append(instrs, ainstrs);
+            append(instrs, position(arg));
+            append(instrs, walk(arg));
+            arglocs.push_back(getLastLoc(instrs));
         }
 
         auto initLoc = temp
@@ -553,7 +577,8 @@ namespace swarmc::Lang::Walk {
             : makeTmp(ISA::Affinity::LOCAL, instrs);
         if ( node->constructor() ) {
             arglocs.push_back(initLoc);
-        };
+        }
+        append(instrs, position(node));
 
         // curry
         while ( arglocs.size() > 1 ) {
@@ -595,7 +620,8 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkDeferCallExpressionNode(DeferCallExpressionNode* node) {
-        auto instrs = walk(node->call());
+        auto instrs = position(node->call());
+        append(instrs, walk(node->call()));
 
         // TODO: remove when import based prologue exists
         if ( node->call()->func()->getTag() == ASTNodeTag::IDENTIFIER ) {
@@ -633,6 +659,7 @@ namespace swarmc::Lang::Walk {
            last = ((ISA::AssignEval*)last)->second();
            returnsValue = true;
         }
+        append(instrs, position(node));
 
         // enter new context
         append(instrs, new ISA::EnterContext());
@@ -718,13 +745,16 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkNthRootNode(NthRootNode* node) {
-        auto instrs = walk(node->left());
+        auto instrs = position(node->left());
+        append(instrs, walk(node->left()));
         auto n = getLastLoc(instrs);
         
+        append(instrs, position(node->right()));
         append(instrs, walk(node->right()));
         auto exp = getLastLoc(instrs);
 
         auto curried = makeTmp(ISA::Affinity::LOCAL, instrs);
+        append(instrs, position(node));
         append(instrs, assignEval(
             curried,
             new ISA::Curry(makeLocation(ISA::Affinity::FUNCTION, "NTH_ROOT", nullptr), n)
@@ -746,7 +776,8 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkEnumerationStatement(EnumerationStatement* node) {
-        auto instrs = walk(node->enumerable());
+        auto instrs = position(node->enumerable());
+        append(instrs, walk(node->enumerable()));
         auto enumLoc = getLastLoc(instrs);
 
         // create formals to pass to makeFunction
@@ -777,6 +808,7 @@ namespace swarmc::Lang::Walk {
         );
         _loopDepth = tempLoop;
         append(instrs, func);
+        append(instrs, position(node));
 
         append(instrs, new ISA::Enumerate(
             getTypeRef(node->local()->type()),
@@ -788,7 +820,8 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkWithStatement(WithStatement* node) {
-        auto instrs = walk(node->resource());
+        auto instrs = position(node->resource());
+        append(instrs, walk(node->resource()));
         auto resLoc = getLastLoc(instrs);
 
         ISAFormalList* formals = new ISAFormalList({
@@ -807,16 +840,19 @@ namespace swarmc::Lang::Walk {
             Type::Primitive::of(Type::Intrinsic::VOID),
             node, false, false, true
         ));
-        append(instrs, new ISA::Call1(
-            makeLocation(ISA::Affinity::FUNCTION, name, nullptr),
-            resLoc
+
+        append(instrs, position(node));
+        append(instrs, new ISA::With(
+            resLoc,
+            makeLocation(ISA::Affinity::FUNCTION, name, nullptr)
         ));
 
         return instrs;
     }
 
     ISA::Instructions* ToISAWalk::walkIfStatement(IfStatement* node) {
-        auto instrs = walk(node->condition());
+        auto instrs = position(node->condition());
+        append(instrs, walk(node->condition()));
         auto conditionLoc = getLastLoc(instrs);
 
         // create function
@@ -827,6 +863,7 @@ namespace swarmc::Lang::Walk {
             node, false, false, false
         );
         append(instrs, func);
+        append(instrs, position(node));
 
         append(instrs, new ISA::CallIf0(
             conditionLoc,
@@ -839,7 +876,7 @@ namespace swarmc::Lang::Walk {
     ISA::Instructions* ToISAWalk::walkWhileStatement(WhileStatement* node) {
         // Create condition function
         auto tc = s(_tempCounter++);
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
         // Create while condition. If there is a break or return, we have to do it goofy
         bool hb = false;
         if ( (hb = HasBreak.walkStatementList(node).value_or(false)) || HasReturn.walkStatementList(node).value_or(false) ) {
@@ -856,6 +893,7 @@ namespace swarmc::Lang::Walk {
                 TO_ISA_WHILE_COND_INNER_PREFIX + tc,
                 getTypeRef(Type::Primitive::of(Type::Intrinsic::VOID))
             ));
+            append(instrs, position(node->condition()));
             append(instrs, walk(node->condition()));
             append(instrs, assignValue(condLoc, getLastLoc(instrs), false));
             append(instrs, new ISA::Return0());
@@ -875,6 +913,7 @@ namespace swarmc::Lang::Walk {
                 TO_ISA_WHILE_COND_OUTER_PREFIX + tc,
                 getTypeRef(Type::Primitive::of(Type::Intrinsic::BOOLEAN))
             ));
+            append(instrs, position(node->condition()));
             append(instrs, walk(node->condition()));
             append(instrs, new ISA::Return1(getLastLoc(instrs)));
         }
@@ -887,6 +926,7 @@ namespace swarmc::Lang::Walk {
             node, true, false, false
         ));
         _loopDepth--;
+        append(instrs, position(node));
         append(instrs, new ISA::While(
             makeLocation(ISA::Affinity::FUNCTION, TO_ISA_WHILE_COND_OUTER_PREFIX + tc, nullptr),
             makeLocation(ISA::Affinity::FUNCTION, TO_ISA_WHILE_PREFIX + tc, nullptr)
@@ -896,7 +936,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkContinueNode(ContinueNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
         append(instrs, assignValue(
             makeLocation(ISA::Affinity::LOCAL, TO_ISA_LOOP_CONTROL_FLOW_BREAKER, nullptr),
             new ISA::BooleanReference(true),
@@ -906,7 +946,7 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkBreakNode(BreakNode* node) {
-        auto instrs = new ISA::Instructions();
+        auto instrs = position(node);
         append(instrs, assignValue(
             makeLocation(ISA::Affinity::LOCAL, TO_ISA_BREAK, nullptr),
             new ISA::BooleanReference(true),
@@ -922,13 +962,15 @@ namespace swarmc::Lang::Walk {
 
 
     ISA::Instructions* ToISAWalk::walkUnaryExpressionNode(UnaryExpressionNode* node) {
-        auto instrs = walk(node->exp());
+        auto instrs = position(node->exp());
+        append(instrs, walk(node->exp()));
         auto exp = getLastLoc(instrs);
 
         ISA::Instruction* instr = nullptr;
         if ( node->getTag() == ASTNodeTag::NOT ) instr = new ISA::Not(exp);
         else if ( node->getTag() == ASTNodeTag::NEGATIVE ) instr = new ISA::Negative(exp);
 
+        append(instrs, position(node));
         append(instrs, assignEval(
             makeTmp(ISA::Affinity::LOCAL, instrs),
             instr
@@ -938,11 +980,13 @@ namespace swarmc::Lang::Walk {
     }
 
     ISA::Instructions* ToISAWalk::walkBinaryExpressionNode(BinaryExpressionNode* node) {
-        auto instrs = walk(node->left());
+        auto instrs = position(node->left());
+        append(instrs, walk(node->left()));
         auto right = walk(node->right());
 
         auto leftLoc = getLastLoc(instrs);
         auto rightLoc = getLastLoc(right);
+        append(instrs, position(node->right()));
         append(instrs, right);
 
         ISA::Instruction* instr = nullptr;
@@ -967,6 +1011,7 @@ namespace swarmc::Lang::Walk {
             else instr = new ISA::LessThanOrEqual(leftLoc, rightLoc);
         }
 
+        append(instrs, position(node));
         append(instrs, assignEval(
             makeTmp(ISA::Affinity::LOCAL, instrs),
             instr
@@ -989,6 +1034,7 @@ namespace swarmc::Lang::Walk {
             auto stmtISA = walk(instr);
             assert(_sharedLocs.size() == 0);
             _functionOuterScope = false;
+            append(instrs, position(instr));
             append(instrs, stmtISA);
             if ( (loop && HasContinue.combine(HasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST)
                 .walk(instr).value_or(false))
@@ -1148,6 +1194,7 @@ namespace swarmc::Lang::Walk {
             );
         }
         // do assign if ret type not void
+        append(instrs, position(node));
         if ( ToISAWalk::getInstructionAsFunc().at(name)->intrinsic() != Type::Intrinsic::VOID ) {
             append(instrs, assignEval(
                 makeTmp(ISA::Affinity::LOCAL, instrs),
@@ -1268,6 +1315,18 @@ namespace swarmc::Lang::Walk {
         if ( ll != nullptr && instrs->back()->tag() == ISA::Tag::UNLOCK ) {
             append(instrs, assignValue(ll, ll, true));
         }
+    }
+
+    ISA::Instructions* ToISAWalk::position(ASTNode* node) const {
+#ifdef SWARM_DEBUG
+        return new ISA::Instructions({ useref(new ISA::PositionAnnotation(
+            new ISA::StringReference(node->position()->file()),
+            new ISA::NumberReference(node->position()->startLine()),
+            new ISA::NumberReference(node->position()->startCol())
+        )) });
+#else
+        return new ISA::Instructions();
+#endif
     }
 
     ISA::Instructions* ToISAWalk::assignEval(ISA::LocationReference* dest, ISA::Instruction* instr) {

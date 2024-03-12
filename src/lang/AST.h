@@ -197,7 +197,7 @@ namespace Walk {
     /** AST node representing the root of the program. */
     class ProgramNode final : public ASTNode, public StatementListWrapper {
     public:
-        ProgramNode() : ASTNode(new Position(0, 0, 0, 0)), StatementListWrapper() {}
+        ProgramNode() : ASTNode(new Position("", 0, 0, 0, 0)), StatementListWrapper() {}
 
         virtual ~ProgramNode() = default;
 

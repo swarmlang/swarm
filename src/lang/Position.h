@@ -17,10 +17,12 @@ namespace swarmc::Lang {
      */
     class Position : public IStringable, public IRefCountable {
     public:
-        Position(size_t startLine, size_t endLine, size_t startCol, size_t endCol) :
-            _startLine(startLine), _endLine(endLine), _startCol(startCol), _endCol(endCol) {};
+        Position(std::string file, size_t startLine, size_t endLine, size_t startCol, size_t endCol) :
+            _file(std::move(file)), _startLine(startLine), _endLine(endLine), _startCol(startCol), _endCol(endCol) {};
 
         Position(Position* start, Position* end) {
+            assert(start->_file == end->_file);
+            _file = start->_file;
             _startLine = start->_startLine;
             _endLine = end->_endLine;
             _startCol = start->_startCol;
@@ -36,14 +38,18 @@ namespace swarmc::Lang {
 
         [[nodiscard]] virtual std::string start() const {
             std::stringstream s;
-            s << "[l: " << _startLine << ", c: " << _startCol << "]";
+            s << "[" + _file + ": " << _startLine << "," << _startCol << "]";
             return s.str();
         }
 
         [[nodiscard]] virtual std::string end() const {
             std::stringstream s;
-            s << "[l: " << _endLine << ", c: " << _endCol << "]";
+            s << "[" + _file + ": " << _endLine << "," << _endCol << "]";
             return s.str();
+        }
+
+        [[nodiscard]] virtual std::string file() const {
+            return _file;
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -69,10 +75,11 @@ namespace swarmc::Lang {
         }
 
         [[nodiscard]] virtual Position* copy() const {
-            return new Position(_startLine, _endLine, _startCol, _endCol);
+            return new Position(_file, _startLine, _endLine, _startCol, _endCol);
         }
 
     protected:
+        std::string _file;
         size_t _startLine;
         size_t _endLine;
         size_t _startCol;
@@ -83,7 +90,7 @@ namespace swarmc::Lang {
     /** Arbitrary Position instance representing something defined in the Prologue standard library. */
     class ProloguePosition : public Position {
     public:
-        explicit ProloguePosition(std::string symbolName): Position(0, 0, 0, 0), _symbolName(std::move(symbolName)) {}
+        explicit ProloguePosition(std::string symbolName): Position("PROLOGUE", 0, 0, 0, 0), _symbolName(std::move(symbolName)) {}
 
         [[nodiscard]] std::string start() const override {
             return toString();

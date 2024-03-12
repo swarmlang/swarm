@@ -466,7 +466,7 @@ static ASTMapReduce<bool> RemoveRedundantCFB = ASTMapReduce<bool>(
 
             // remove unnecessary return
             if ( node->getTag() == ASTNodeTag::FUNCTION ) {
-                if ( bsn->size() > 0 && bsn->back()->getTag() == ASTNodeTag::RETURN && ((ReturnStatementNode*)bsn->back())->value() != nullptr ) {
+                if ( bsn->size() > 0 && bsn->back()->getTag() == ASTNodeTag::RETURN && ((ReturnStatementNode*)bsn->back())->value() == nullptr ) {
                     log->debug(s(bsn->back()->position()) + " Removed void return at end of function");
                     freeref(bsn->back());
                     bsn->resize(bsn->size() - 1);

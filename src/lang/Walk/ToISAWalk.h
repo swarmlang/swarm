@@ -139,6 +139,9 @@ private:
     /** appends an instruction to the end of a list of instructions. Add drain logic if the variable refers to a deferred call */
     void append(ISA::Instructions*, ISA::Instruction*);
 
+    /** Adds a position annotation */
+    ISA::Instructions* position(ASTNode*) const;
+
     /** adds an AssignEval instruction, removes location from possible deferred locations */
     ISA::Instructions* assignEval(ISA::LocationReference*, ISA::Instruction*);
 

@@ -37,11 +37,11 @@ namespace swarmc {
 
     class Pipeline : public IStringable {
     public:
-        explicit Pipeline(std::istream* input) {
+        explicit Pipeline(std::istream* input, std::string file) {
             _input = input;
-            _scanner = new Lang::Scanner(input);
+            _scanner = new Lang::Scanner(input, file);
             _root = nullptr;
-            _parser = new Lang::Parser(*_scanner, &_root);
+            _parser = new Lang::Parser(*_scanner, &_root, file);
             _isa = nullptr;
         }
 

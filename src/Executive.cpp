@@ -491,7 +491,7 @@ int Executive::debugOutputTokens() {
         swarmc::VM::Pipeline pipeline(_input);
         pipeline.targetTokenRepresentation(*stream);
     } else {
-        swarmc::Pipeline pipeline(_input);
+        swarmc::Pipeline pipeline(_input, inputFile);
         pipeline.targetTokenRepresentation(*stream);
     }
 
@@ -522,7 +522,7 @@ int Executive::debugOutputParse() {
         }
     } else {
         try {
-            swarmc::Pipeline pipeline(_input);
+            swarmc::Pipeline pipeline(_input, inputFile);
             pipeline.targetASTRepresentation(*stream);
         } catch (swarmc::Errors::ParseError& e) {
             return e.exitCode;
@@ -535,7 +535,7 @@ int Executive::debugOutputParse() {
 }
 
 int Executive::debugParseAndStop() {
-    swarmc::Pipeline pipeline(_input);
+    swarmc::Pipeline pipeline(_input, inputFile);
 
     try {
         pipeline.targetASTSymbolic();
@@ -581,7 +581,7 @@ int Executive::debugOutputISA() {
         }
     }
 
-    swarmc::Pipeline pipeline(_input);
+    swarmc::Pipeline pipeline(_input, inputFile);
     pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
 
     try {
@@ -607,7 +607,7 @@ int Executive::debugOutputCFG() {
         }
     }
 
-    swarmc::Pipeline pipeline(_input);
+    swarmc::Pipeline pipeline(_input, inputFile);
     pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
 
     try {
@@ -683,7 +683,7 @@ int Executive::emitBinary() {
         return 0;
     }
 
-    swarmc::Pipeline pipeline(_input);
+    swarmc::Pipeline pipeline(_input, inputFile);
     pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
     auto binary = pipeline.targetBinary();
     auto fh = fopen(outputBinaryTo.c_str(), "w");
