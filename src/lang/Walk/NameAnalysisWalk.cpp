@@ -1,4 +1,5 @@
 #include "NameAnalysisWalk.h"
+#include "ASTMapReduce.h"
 #include "../SymbolTable.h"
 
 namespace swarmc::Lang::Walk {
@@ -349,6 +350,24 @@ bool NameAnalysisWalk::walkTypeBodyNode(TypeBodyNode* node) {
     node->value()->transform([](Type::Type* v) -> Type::Type* {
         return v->disambiguateStatically();
     });
+
+    // for finding directly executed default members
+    ASTMapReduce<bool> DefaultDirectMember = ASTMapReduce<bool>(
+        "AST Obj. Def. Has Direct Member",
+        [this](ASTNode* node) {
+            return walk(node);
+        },
+        [](bool l, bool r) { return l && r; },
+        [](ASTNode* node) {
+            return node->isBlock() || node->getTag() == ASTNodeTag::FUNCTION;
+        }
+    );
+
+    for ( auto decl : *node->declarations()) {
+        if ( decl->getTag() == ASTNodeTag::VARIABLEDECLARATION ) {
+            flag = DefaultDirectMember.walk(((VariableDeclarationNode*)decl)->value()).value_or(true) && flag;
+        }
+    }
 
     // walk decls
     _symbols->enter();

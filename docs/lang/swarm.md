@@ -236,11 +236,4 @@ Potential fixes:
     - have the compiler identify what variables from other scopes it needs, and have the compiler implicitly change the type of the function so that it can curry them in
         - Pros: the outer language stays the same, a walk to identify these things is something that needs to be done anyway for other optimizations
         - Cons: this sucks for me, the compiler writer
-- Directly referencing other members of a type as default values should fail name analysis but doesnt  
-Example:
-```swarm
-type Test = {
-    number a = 4;
-    number b = a; -- this shouldnt work because it cant `objget` the value of `a` for an object that doesnt exist yet
-};
-```
+
