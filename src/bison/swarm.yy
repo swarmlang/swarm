@@ -259,6 +259,7 @@ statement :
         auto e = new EnumerationStatement(pos, $2, $5, $4->shared());
         e->assumeAndReduceStatements($7->reduceToStatements());
         $$ = e;
+        delete $4;
     }
 
     | ENUMERATE expression AS shared id COMMA shared id LBRACE statements RBRACE {
@@ -268,6 +269,7 @@ statement :
         $8->overrideSymbol(new VariableSymbol($8->name(), t, $8->position(), $7->shared(), false));
         e->assumeAndReduceStatements($10->reduceToStatements());
         $$ = e;
+        delete $4; delete $7;
     }
 
     | ENUMERATE expression AS WILDCARD LBRACE statements RBRACE {
@@ -284,6 +286,7 @@ statement :
         $7->overrideSymbol(new VariableSymbol($7->name(), t, $7->position(), $6->shared(), false));
         e->assumeAndReduceStatements($9->reduceToStatements());
         $$ = e;
+        delete $6;
     }
 
     | WITH term AS shared id LBRACE statements RBRACE {
@@ -291,6 +294,7 @@ statement :
         auto w = new WithStatement(pos, $2, $5, $4->shared());
         w->assumeAndReduceStatements($7->reduceToStatements());
         $$ = w;
+        delete $4;
     }
 
     | WITH term AS WILDCARD LBRACE statements RBRACE {
@@ -393,6 +397,7 @@ declaration :
             $5
         );
         $$ = new VariableDeclarationNode(pos, $5->typeNode(), assign, $1->shared());
+        delete $1;
     }
 
     | typeid id ASSIGN DEFER callExpression {
@@ -613,21 +618,25 @@ type :
     | ENUMERABLE LARROW typeid RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new TypeLiteral(pos, new Type::Enumerable($3->value()));
+        delete $3;
     }
 
     | MAP LARROW typeid RARROW {
         Position* pos = new Position($1->position(), $4->position());
         $$ = new TypeLiteral(pos, new Type::Map($3->value()));
+        delete $3;
     }
 
     | typeid ARROW typeid {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new TypeLiteral(pos, new Type::Lambda1($1->value(), $3->value()));
+        delete $1; delete $3;
     }
 
     | ARROW typeid {
         Position* pos = new Position($1->position(), $2->position());
         $$ = new TypeLiteral(pos, new Type::Lambda0($2->value()));
+        delete $2;
     }
 
 function :
@@ -644,6 +653,7 @@ function :
         auto fn = new FunctionNode(pos, new TypeLiteral(typepos, t), $2);
         fn->assumeAndReduceStatements($8->reduceToStatements());
         $$ = fn;
+        delete $5;
     }
 
     | LPAREN RPAREN COLON typeid FNDEF LBRACE statements RBRACE {
@@ -653,6 +663,7 @@ function :
             pos, new TypeLiteral($4->position(), new Type::Lambda0($4->value())), new FormalList());
         fn->assumeAndReduceStatements($7->reduceToStatements());
         $$ = fn;
+        delete $4;
     }
 
     | LPAREN formals RPAREN COLON typeid FNDEF expressionF {
@@ -667,9 +678,10 @@ function :
 
         auto fn = new FunctionNode(pos, new TypeLiteral(typepos, t), $2);
         auto retstmt = new StatementList();
-        retstmt->push_back(new ReturnStatementNode($7->position()->copy(), $7));
+        retstmt->push_back(useref(new ReturnStatementNode($7->position()->copy(), $7)));
         fn->assumeAndReduceStatements(retstmt);
         $$ = fn;
+        delete $5;
     }
 
     | LPAREN RPAREN COLON typeid FNDEF expressionF {
@@ -678,9 +690,10 @@ function :
         auto fn = new FunctionNode(
             pos, new TypeLiteral($4->position()->copy(), new Type::Lambda0($4->value())), new FormalList());
         auto retstmt = new StatementList();
-        retstmt->push_back(new ReturnStatementNode($6->position()->copy(), $6));
+        retstmt->push_back(useref(new ReturnStatementNode($6->position()->copy(), $6)));
         fn->assumeAndReduceStatements(retstmt);
         $$ = fn;
+        delete $4;
     }
 
 funcConstr :
@@ -750,6 +763,7 @@ expression :
         Position* pos = new Position($1->position(), $4->position());
         std::vector<MapStatementNode*>* body = new std::vector<MapStatementNode*>();
         $$ = new MapNode(pos, body, new TypeLiteral($4->position(), new Type::Map($4->value())));
+        delete $4;
     }
 
     | LBRACE mapStatements RBRACE {
@@ -776,6 +790,7 @@ expressionF :
         std::vector<ExpressionNode*>* actuals = new std::vector<ExpressionNode*>();
         $$ = new EnumerationLiteralExpressionNode(pos, actuals,
             new TypeLiteral($4->position(), new Type::Enumerable($4->value())));
+        delete $4;
     }
 
     | LBRACKET actuals RBRACKET {

@@ -110,7 +110,6 @@ ISA::Instructions* ControlFlowGraph::reconstruct() const {
         std::make_move_iterator(main->end())
     );
     delete main;
-    for (auto i : *instrs) useref(i);
 
     return instrs;
 }

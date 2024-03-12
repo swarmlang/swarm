@@ -13,6 +13,9 @@ namespace swarmc::Lang::Walk {
         for ( auto aff : _locMap ) {
             for ( auto loc : aff.second ) freeref(loc.second);
         }
+        for ( auto t : _typeMap ) {
+            freeref(t.second);
+        }
         delete _deferredResults;
     }
 
@@ -414,17 +417,19 @@ namespace swarmc::Lang::Walk {
 
         // function header
         append(instrs, new ISA::BeginFunction(node->name(), getTypeRef(type)));
-        for ( const auto& f : *extractFormals(node->func()->formals()) ) {
+        auto formals = extractFormals(node->func()->formals());
+        for ( const auto& f : *formals ) {
             auto ploc = makeLocation(std::get<1>(f), std::get<2>(f), nullptr);
             SharedLocations::registerLoc(ploc, std::get<3>(f));
             append(instrs, new ISA::FunctionParam(getTypeRef(std::get<0>(f)), ploc));
         }
+        delete formals;
         // add inst as final parameter
         append(instrs, new ISA::FunctionParam(getTypeRef(type), instLoc));
 
         // cfb
         for ( auto stmt : *node->func()->body() ) {
-            if ( stmt->isBlock() && HasReturn.walk(stmt).value_or(false) ) {
+            if ( stmt->isBlock() && hasReturn()->walk(stmt).value_or(false) ) {
                 auto cfb = makeLocation(ISA::Affinity::LOCAL, TO_ISA_FUNC_CONTROL_FLOW_BREAKER, instrs);
                 append(instrs, assignValue(cfb, new ISA::BooleanReference(false), false));
                 break;
@@ -879,7 +884,7 @@ namespace swarmc::Lang::Walk {
         auto instrs = position(node);
         // Create while condition. If there is a break or return, we have to do it goofy
         bool hb = false;
-        if ( (hb = HasBreak.walkStatementList(node).value_or(false)) || HasReturn.walkStatementList(node).value_or(false) ) {
+        if ( (hb = hasBreak()->walkStatementList(node).value_or(false)) || hasReturn()->walkStatementList(node).value_or(false) ) {
             auto condLoc = makeLocation(ISA::Affinity::LOCAL, TO_ISA_WHILE_COND_LOCATION, nullptr);
             // to make sure we check the "break" flag first, we actually
             // have to wrap the entire condition function in *another* function
@@ -1036,9 +1041,9 @@ namespace swarmc::Lang::Walk {
             _functionOuterScope = false;
             append(instrs, position(instr));
             append(instrs, stmtISA);
-            if ( (loop && HasContinue.combine(HasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST)
+            if ( (loop && hasContinue()->combine(*hasBreak(), ASTMapReduce<bool>::CombineSkipType::FIRST)
                 .walk(instr).value_or(false))
-                || HasReturn.walk(instr).value_or(false) )
+                || hasReturn()->walk(instr).value_or(false) )
             {
                 i++;
                 break;
@@ -1123,8 +1128,8 @@ namespace swarmc::Lang::Walk {
 
         // check whether CFB will be used
         if ( loop ) {
-            if ( HasContinue.combine(HasBreak, ASTMapReduce<bool>::CombineSkipType::FIRST)
-                .combine(HasReturn, ASTMapReduce<bool>::CombineSkipType::SECOND)
+            if ( hasContinue()->combine(*hasBreak(), ASTMapReduce<bool>::CombineSkipType::FIRST)
+                .combine(*hasReturn(), ASTMapReduce<bool>::CombineSkipType::SECOND)
                 .walkStatementList(node).value_or(false) )
             {
                 auto cfb = makeLocation(ISA::Affinity::LOCAL, TO_ISA_LOOP_CONTROL_FLOW_BREAKER, instrs);
@@ -1133,7 +1138,7 @@ namespace swarmc::Lang::Walk {
         } else if ( newScope ) {
             // only need to add cfb if a return appears in a lower scope
             for ( auto stmt : *node->body() ) {
-                if ( stmt->isBlock() && HasReturn.walk(stmt).value_or(false) ) {
+                if ( stmt->isBlock() && hasReturn()->walk(stmt).value_or(false) ) {
                     auto cfb = makeLocation(ISA::Affinity::LOCAL, TO_ISA_FUNC_CONTROL_FLOW_BREAKER, instrs);
                     append(instrs, assignValue(cfb, new ISA::BooleanReference(false), false));
                     break;
@@ -1272,7 +1277,7 @@ namespace swarmc::Lang::Walk {
     void ToISAWalk::append(ISA::Instructions* instrs, ISA::Instruction* instr) {
         ISA::DeferrableLocations dl = _combLocations.walkOne(instr);
         auto isl = _sharedLocsWalkISA.walkOne(instr);
-        //std::set<ISA::LocationReference*> isl(instrSharedLocs.begin(), instrSharedLocs.end());
+
         for ( auto loc : dl ) {
             if ( _deferredResults->contains(loc) ) {
                 // determine if we need to lock prematurely for the retmapget

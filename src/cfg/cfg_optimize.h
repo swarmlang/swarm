@@ -83,7 +83,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(uinstr->first()) + " with " + s(v) + " in " + s(uinstr));
-                    freeref(uinstr->first());
                     uinstr->setFirst(v);
                     flag = true;
                 }
@@ -95,7 +94,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(binstr->first()) + " with " + s(v) + " in " + s(binstr));
-                    freeref(binstr->first());
                     binstr->setFirst(v);
                     flag = true;
                 }
@@ -105,7 +103,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(binstr->second()) + " with " + s(v) + " in " + s(binstr));
-                    freeref(binstr->second());
                     binstr->setSecond(v);
                     flag = true;
                 }
@@ -117,7 +114,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(tinstr->first()) + " with " + s(v) + " in " + s(tinstr));
-                    freeref(tinstr->first());
                     tinstr->setFirst(v);
                     flag = true;
                 }
@@ -127,7 +123,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(tinstr->second()) + " with " + s(v) + " in " + s(tinstr));
-                    freeref(tinstr->second());
                     tinstr->setSecond(v);
                     flag = true;
                 }
@@ -137,7 +132,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(tinstr->third()) + " with " + s(v) + " in " + s(tinstr));
-                    freeref(tinstr->third());
                     tinstr->setThird(v);
                     flag = true;
                 }

@@ -49,6 +49,9 @@ namespace swarmc {
             delete _scanner;
             delete _parser;
             delete _root;
+            if ( _isa != nullptr ) {
+                for ( auto i : *_isa ) freeref(i);
+            }
             delete _isa;
         }
 
@@ -109,7 +112,7 @@ namespace swarmc {
             bool flag = true;
 
             while ( flag ) {
-                flag = Lang::Walk::RemoveRedundantCFB.walk(_root).value_or(false);
+                flag = Lang::Walk::removeRedundantCFB()->walk(_root).value_or(false);
             }
 
             return _root;
