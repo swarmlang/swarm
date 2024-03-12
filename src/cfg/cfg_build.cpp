@@ -18,7 +18,7 @@ void CFGBuild::buildBlocks() {
             logger->debug("Created function " + name);
             _blocks->push_back(useref(fstart));
             bstack.push(fstart);
-            _nameMap->insert({ name, cfgf });
+            _nameMap->insert({ name, useref(cfgf) });
             callStack.push(cfgf);
             bstack.top()->addInstruction(_instrs->at(i));
         } else if ( _instrs->at(i)->tag() == ISA::Tag::RETURN0

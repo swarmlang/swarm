@@ -689,6 +689,7 @@ int Executive::emitBinary() {
         fwrite("\x7fSVI", 1, 4, fh);
         fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
         fclose(fh);
+        binn_free(binary);
         return 0;
     }
 
@@ -698,11 +699,13 @@ int Executive::emitBinary() {
     auto fh = fopen(outputBinaryTo.c_str(), "w");
     if ( fh == nullptr ) {
         logger->error("Could not open binary output file for writing: " + outputBinaryTo);
+        binn_free(binary);
         return 1;
     }
 
     fwrite("\x7fSVI", 1, 4, fh);
     fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
     fclose(fh);
+    binn_free(binary);
     return 0;
 }

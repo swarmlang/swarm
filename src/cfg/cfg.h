@@ -28,6 +28,7 @@ public:
         _instructions(new ISA::Instructions()) {}
 
     ~Block() override {
+        for ( auto i : *_instructions ) freeref(i);
         delete _instructions;
         freeref(_callOutEdge);
         freeref(_callInEdge);
@@ -38,13 +39,13 @@ public:
     }
 
     void addInstruction(ISA::Instruction* instr) {
-        _instructions->push_back(instr);
+        _instructions->push_back(useref(instr));
     }
 
     void removeInstruction(ISA::Instruction* instr) {
         for (auto i = _instructions->begin(); i != _instructions->end(); i++) {
             if (*i == instr) {
-                freeref(*i); //This *should* delete the instruction in its entirety
+                freeref(*i);
                 _instructions->erase(i);
                 break;
             }
@@ -128,7 +129,7 @@ public:
     }
 };
 
-class CFGFunction : public IStringable {
+class CFGFunction : public IStringable, public IRefCountable {
 public:
     CFGFunction(std::string id, Block* start) : _id(std::move(id)), _start(useref(start)), _end(nullptr), _blocks(new std::vector<Block*>()) {
         _blocks->push_back(_start);
@@ -169,8 +170,8 @@ public:
         CALL, FALL, RETURN
     };
 
-    Edge(Block* source, Block* dest, EdgeType label) : _source(useref(source)), _destination(useref(dest)), _label(std::move(label)) {}
-    ~Edge() { freeref(_source); freeref(_destination); }
+    Edge(Block* source, Block* dest, EdgeType label) : _source(source), _destination(dest), _label(std::move(label)) {}
+    ~Edge() = default;
 
     [[nodiscard]] Block* source() const { return _source; }
 
@@ -229,7 +230,7 @@ public:
     ~ControlFlowGraph() {
         for ( auto b : *_blocks ) freeref(b);
         delete _blocks;
-        for ( const auto& p : *_nameMap ) delete p.second;
+        for ( const auto& p : *_nameMap ) freeref(p.second);
         delete _nameMap;
     }
     

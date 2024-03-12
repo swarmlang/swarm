@@ -65,6 +65,14 @@ namespace swarmc {
             if ( flags & REMOVEDEADCODE ) flagRemoveDeadCode = b;
         }
 
+        void swapISA(ISA::Instructions* newISA) {
+            if ( _isa != nullptr ) {
+                for ( auto i : *_isa ) freeref(i);
+                delete _isa;
+            }
+            _isa = newISA;
+        }
+
         void targetTokenRepresentation(std::ostream& out) {
             _scanner->outputTokens(out);
         }
@@ -139,10 +147,7 @@ namespace swarmc {
 
             c.optimize(flagRemoveSelfAssigns, flagConstantPropagation);
 
-            auto isa = c.reconstruct();
-
-            delete _isa;
-            _isa = isa;
+            swapISA(c.reconstruct());
         }
 
         void targetISARepresentation(std::ostream& out) {
@@ -160,10 +165,7 @@ namespace swarmc {
 
             c.serialize(out);
 
-            auto isa = c.reconstruct();
-
-            delete _isa;
-            _isa = isa;
+            swapISA(c.reconstruct());
         }
 
         binn* targetBinary() {
