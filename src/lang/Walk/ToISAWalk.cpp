@@ -48,7 +48,7 @@ namespace swarmc::Lang::Walk {
         auto instrs = position(node);
 
         auto affinity = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        auto id = makeLocation(affinity, "var_" + node->name(), nullptr);
+        auto id = makeLocation(affinity, "var_" + node->name() + "_" + node->symbol()->uuid(), nullptr);
         SharedLocations::registerLoc(id, node->symbol());
 
         if ( node->symbol()->isPrologue() ) {
@@ -243,7 +243,11 @@ namespace swarmc::Lang::Walk {
         if ( node->dest()->getTag() == ASTNodeTag::IDENTIFIER ) {
             auto id = (IdentifierNode*)node->dest();
             auto affinity = id->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-            auto loc = makeLocation(affinity,  TO_ISA_VARIABLE_PREFIX + id->name(), nullptr);
+            auto loc = makeLocation(
+                affinity,
+                TO_ISA_VARIABLE_PREFIX + id->name() + "_" + id->symbol()->uuid(),
+                nullptr
+            );
             SharedLocations::registerLoc(loc, id->symbol());
             append(instrs, position(node->dest()));
 
@@ -328,7 +332,7 @@ namespace swarmc::Lang::Walk {
         if ( _depth > 0 ) {
             auto affinity = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
             append(instrs, new ISA::ScopeOf(
-                makeLocation(affinity, "var_" + node->id()->name(), nullptr)
+                makeLocation(affinity, "var_" + node->id()->name() + "_" + node->id()->symbol()->uuid(), nullptr)
             ));
         }
 
@@ -406,7 +410,7 @@ namespace swarmc::Lang::Walk {
                     {
                         sym->type(),
                         ISA::Affinity::LOCAL,
-                        TO_ISA_VARIABLE_PREFIX + sym->name(),
+                        TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
                         sym
                     }
                 });
@@ -424,7 +428,7 @@ namespace swarmc::Lang::Walk {
                 makeTmp(ISA::Affinity::LOCAL, instrs),
                 new ISA::Curry(floc, makeLocation(
                     sym->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
-                    TO_ISA_VARIABLE_PREFIX + sym->name(),
+                    TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
                     nullptr
                 ))
             ));
@@ -458,7 +462,7 @@ namespace swarmc::Lang::Walk {
                     {
                         sym->type(),
                         ISA::Affinity::LOCAL,
-                        TO_ISA_VARIABLE_PREFIX + sym->name(),
+                        TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
                         sym
                     }
                 });
@@ -514,7 +518,7 @@ namespace swarmc::Lang::Walk {
                 makeTmp(ISA::Affinity::LOCAL, instrs),
                 new ISA::Curry(floc, makeLocation(
                     sym->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
-                    TO_ISA_VARIABLE_PREFIX + sym->name(),
+                    TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
                     nullptr
                 ))
             ));
@@ -854,7 +858,7 @@ namespace swarmc::Lang::Walk {
             {
                 node->local()->type(),
                 node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
-                TO_ISA_VARIABLE_PREFIX + node->local()->name(),
+                TO_ISA_VARIABLE_PREFIX + node->local()->name() + "_" + node->local()->symbol()->uuid(),
                 node->local()->symbol()
             },
             {
@@ -896,7 +900,7 @@ namespace swarmc::Lang::Walk {
             {
                 node->resource()->type(),
                 node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
-                TO_ISA_VARIABLE_PREFIX + node->local()->name(),
+                TO_ISA_VARIABLE_PREFIX + node->local()->name() + "_" + node->local()->symbol()->uuid(),
                 node->local()->symbol()
             }
         });
@@ -1288,7 +1292,7 @@ namespace swarmc::Lang::Walk {
             isaFormals->push_back({
                 p.first->value(),
                 p.second->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
-                TO_ISA_VARIABLE_PREFIX + p.second->name(),
+                TO_ISA_VARIABLE_PREFIX + p.second->name() + "_" + p.second->symbol()->uuid(),
                 p.second->symbol()
             });
         }

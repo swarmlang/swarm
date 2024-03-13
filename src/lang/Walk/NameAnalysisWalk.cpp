@@ -235,6 +235,7 @@ bool NameAnalysisWalk::walkFunctionNode(FunctionNode* node) {
 
         // Call this to attach the Symbol to the IdentifierNode
         walk(formal.second);
+        node->appendUsedSymbol(formal.second->symbol()->ensureVariable());
     }
     walk(node->typeNode());
     flag = node->typeNode()->disambiguateValue() && flag;
