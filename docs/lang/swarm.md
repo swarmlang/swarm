@@ -226,14 +226,3 @@ Swarm supports a few other generic programming-language-isms, such as `while` lo
 ## Known Bugs
 - Having a deferred function call as the default value of a property of an object type is
 ideally supported, but it currently does not compile correctly
-- Due to how the runtime handles scope and curried functions, something like this:
-`fn foo = (n: number): ->number => (): number => n;` will die in runtime, as the `n` falls
-out of scope before the inner function can be called.  
-Potential fixes:
-    - only allow functions to reference variables that have been passed in or defined in the body
-        - Pros: potentially easier to identify pure functions statically
-        - Cons: this sucks for the user of the language
-    - have the compiler identify what variables from other scopes it needs, and have the compiler implicitly change the type of the function so that it can curry them in
-        - Pros: the outer language stays the same, a walk to identify these things is something that needs to be done anyway for other optimizations
-        - Cons: this sucks for me, the compiler writer
-

@@ -1,6 +1,7 @@
 #include "TypeAnalysisWalk.h"
 #include "../TypeTable.h"
 #include "ValidConstructorWalk.h"
+#include "ASTMapReduce.h"
 #include <stack>
 
 namespace swarmc::Lang::Walk {
@@ -410,6 +411,12 @@ bool TypeAnalysisWalk::walkFunctionNode(FunctionNode* node) {
     _funcArgs->pop();
     _funcCount--;
     _whileCount = temp;
+
+    // for modifying the type later, to preserve the static scoping scheme
+    auto syms = unscopedLocations()->walkStatementList(node);
+    if ( syms.has_value() && syms.value().second.size() > 0 ) {
+        node->setUsedSymbols(syms.value());
+    }
 
     _types->setTypeOf(node, flag ? node->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
     return flag;

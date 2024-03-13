@@ -35,6 +35,7 @@ namespace Walk {
     using MapBody = std::vector<MapStatementNode*>;
     using FormalList = std::vector<std::pair<TypeLiteral*, IdentifierNode*>>;
     using DeclarationList = std::vector<DeclarationNode*>;
+    using UsedSymbols = std::pair<std::set<VariableSymbol*>, std::set<VariableSymbol*>>;
 
     enum class ASTNodeTag : std::size_t {
         PROGRAM,
@@ -94,42 +95,42 @@ namespace Walk {
         };
 
         /** Implements IStringable. */
-        std::string toString() const override = 0;
+        [[nodiscard]] std::string toString() const override = 0;
 
-        virtual ASTNode* copy() const = 0;
+        [[nodiscard]] virtual ASTNode* copy() const = 0;
 
         /** Get the node's Position instance. */
-        virtual Position* position() const {
+        [[nodiscard]] virtual Position* position() const {
             return _pos;
         };
 
-        virtual ASTNodeTag getTag() const = 0;
+        [[nodiscard]] virtual ASTNodeTag getTag() const = 0;
 
-        virtual bool isStatement() const {
+        [[nodiscard]] virtual bool isStatement() const {
             return false;
         }
 
-        virtual bool isResource() const {
+        [[nodiscard]] virtual bool isResource() const {
             return false;
         }
 
-        virtual bool isExpression() const {
+        [[nodiscard]] virtual bool isExpression() const {
             return false;
         }
 
-        virtual bool isValue() const {
+        [[nodiscard]] virtual bool isValue() const {
             return false;
         }
 
-        virtual bool isLVal() const {
+        [[nodiscard]] virtual bool isLVal() const {
             return false;
         }
 
-        virtual bool isType() const {
+        [[nodiscard]] virtual bool isType() const {
             return false;
         }
 
-        virtual bool isBlock() const {
+        [[nodiscard]] virtual bool isBlock() const {
             return false;
         }
     private:
@@ -142,11 +143,11 @@ namespace Walk {
         StatementNode(Position* pos) : ASTNode(pos) {}
         virtual ~StatementNode() {}
 
-        virtual bool isStatement() const override {
+        [[nodiscard]] virtual bool isStatement() const override {
             return true;
         }
 
-        virtual StatementNode* copy() const override = 0;
+        [[nodiscard]] virtual StatementNode* copy() const override = 0;
     };
 
 
@@ -180,11 +181,11 @@ namespace Walk {
             delete body;
         }
 
-        StatementList* body() const {
+        [[nodiscard]] StatementList* body() const {
             return _body;
         }
 
-        StatementList* copyBody() const {
+        [[nodiscard]] StatementList* copyBody() const {
             auto other = new StatementList();
             for ( auto stmt : *body() ) other->push_back(useref(stmt->copy()));
             return other;
@@ -201,7 +202,7 @@ namespace Walk {
 
         virtual ~ProgramNode() = default;
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::PROGRAM;
         }
 
@@ -210,7 +211,7 @@ namespace Walk {
          * This destructs the current instance, so only the
          * returned StatementList is valid.
          */
-        StatementList* reduceToStatements() {
+        [[nodiscard]] StatementList* reduceToStatements() {
             StatementList* list = new StatementList();
             for ( auto stmt : *_body ) {
                 useref(stmt);
@@ -220,11 +221,11 @@ namespace Walk {
             return list;
         }
 
-        virtual std::string toString() const override {
-            return "ProgramNode<#body: " + std::to_string(_body->size()) + ">";
+        [[nodiscard]] virtual std::string toString() const override {
+            return "ProgramNode<#body: " + s(_body->size()) + ">";
         }
 
-        virtual ProgramNode* copy() const override;
+        [[nodiscard]] virtual ProgramNode* copy() const override;
     };
 
     /** AST node representing code that evaluates to a value. */
@@ -233,13 +234,13 @@ namespace Walk {
         ExpressionNode(Position* pos) : ASTNode(pos) {}
         virtual ~ExpressionNode() {}
 
-        virtual bool isExpression() const override {
+        [[nodiscard]] virtual bool isExpression() const override {
             return true;
         }
 
-        virtual ExpressionNode* copy() const override = 0;
+        [[nodiscard]] virtual ExpressionNode* copy() const override = 0;
 
-        virtual Type::Type* type() const = 0;
+        [[nodiscard]] virtual Type::Type* type() const = 0;
     };
 
 
@@ -253,7 +254,7 @@ namespace Walk {
     public:
         StatementExpressionNode(Position* pos) : ExpressionNode(pos) {}
         virtual ~StatementExpressionNode() {}
-        virtual StatementExpressionNode* copy() const override = 0;
+        [[nodiscard]] virtual StatementExpressionNode* copy() const override = 0;
     };
 
 
@@ -268,19 +269,19 @@ namespace Walk {
             freeref(_exp);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::EXPRESSIONSTATEMENT;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string toString() const override {
             return "ExpressionStatementNode<" + _exp->toString() + ">";
         }
 
-        StatementExpressionNode* expression() const {
+        [[nodiscard]] StatementExpressionNode* expression() const {
             return _exp;
         }
 
-        virtual ExpressionStatementNode* copy() const override {
+        [[nodiscard]] virtual ExpressionStatementNode* copy() const override {
             return new ExpressionStatementNode(position(), _exp->copy());
         }
 
@@ -295,15 +296,15 @@ namespace Walk {
         LValNode(Position* pos) : ExpressionNode(pos) {}
         virtual ~LValNode() {}
 
-        bool isLVal() const override {
+        [[nodiscard]] bool isLVal() const override {
             return true;
         }
 
-        virtual bool shared() const = 0;
+        [[nodiscard]] virtual bool shared() const = 0;
 
-        LValNode* copy() const override = 0;
+        [[nodiscard]] LValNode* copy() const override = 0;
 
-        Type::Type* type() const override = 0;
+        [[nodiscard]] Type::Type* type() const override = 0;
     };
 
 
@@ -315,18 +316,18 @@ namespace Walk {
             freeref(_symbol);
         }
 
-        const std::string name() { return _name; }
+        [[nodiscard]] const std::string name() { return _name; }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::IDENTIFIER;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "IdentifierNode<name: " + _name + ">";
         }
 
         /** Get the semantic symbol associated with this identifier in its scope. */
-        SemanticSymbol* symbol() const {
+        [[nodiscard]] SemanticSymbol* symbol() const {
             return _symbol;
         }
 
@@ -334,7 +335,7 @@ namespace Walk {
             _symbol = swapref(_symbol, sym);
         }
 
-        virtual bool shared() const override {
+        [[nodiscard]] virtual bool shared() const override {
             if (_symbol == nullptr) {
                 throw Errors::SwarmError("Attempt to get sharedness of symbol-less identifier: " + _name);
             }
@@ -342,13 +343,13 @@ namespace Walk {
             return _symbol->shared();
         }
 
-        virtual IdentifierNode* copy() const override {
+        [[nodiscard]] virtual IdentifierNode* copy() const override {
             auto other = new IdentifierNode(position(), _name);
             other->_symbol = useref(_symbol);
             return other;
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return _symbol->type();
         }
 
@@ -370,34 +371,34 @@ namespace Walk {
             freeref(_index);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::ENUMERABLEACCESS;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             std::stringstream s;
             s << "EnumerableAccessNode<path: " << _path->toString() << ", index: " << _index->toString() << ">";
             return s.str();
         }
 
-        ExpressionNode* path() const {
+        [[nodiscard]] ExpressionNode* path() const {
             return _path;
         }
 
-        ExpressionNode* index() const {
+        [[nodiscard]] ExpressionNode* index() const {
             return _index;
         }
 
-        bool shared() const override {
+        [[nodiscard]] bool shared() const override {
             if ( _path->isLVal() ) return ((LValNode*)_path)->shared();
             return false;
         }
 
-        virtual EnumerableAccessNode* copy() const override {
+        [[nodiscard]] virtual EnumerableAccessNode* copy() const override {
             return new EnumerableAccessNode(position(), _path->copy(), _index->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             auto baseType = _path->type();
             assert(baseType->intrinsic() == Type::Intrinsic::ENUMERABLE);
             return ((Type::Enumerable*) baseType)->values();
@@ -415,30 +416,30 @@ namespace Walk {
             freeref(_path);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::ENUMERABLEAPPEND;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             std::stringstream s;
             s << "EnumerableAppendNode<path: " << _path->toString() << ">";
             return s.str();
         }
 
-        ExpressionNode* path() const {
+        [[nodiscard]] ExpressionNode* path() const {
             return _path;
         }
 
-        bool shared() const override {
+        [[nodiscard]] bool shared() const override {
             if ( _path->isLVal() ) return ((LValNode*)_path)->shared();
             return false;
         }
 
-        virtual EnumerableAppendNode* copy() const override {
+        [[nodiscard]] virtual EnumerableAppendNode* copy() const override {
             return new EnumerableAppendNode(position(), _path->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             auto baseType = _path->type();
             assert(baseType->intrinsic() == Type::Intrinsic::ENUMERABLE);
             return ((Type::Enumerable*) baseType)->values();
@@ -456,32 +457,32 @@ namespace Walk {
             freeref(_end);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::MAPACCESS;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "MapAccessNode<path: " + _path->toString() + " id: " + _end->name() + ">";
         }
 
-        ExpressionNode* path() const {
+        [[nodiscard]] ExpressionNode* path() const {
             return _path;
         }
 
-        IdentifierNode* end() const {
+        [[nodiscard]] IdentifierNode* end() const {
             return _end;
         }
 
-        bool shared() const override {
+        [[nodiscard]] bool shared() const override {
             if ( _path->isLVal() ) return ((LValNode*)_path)->shared();
             return false;
         }
 
-        virtual MapAccessNode* copy() const override {
+        [[nodiscard]] virtual MapAccessNode* copy() const override {
             return new MapAccessNode(position(), _path->copy(), _end->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             auto pathType = _path->type();
             assert(pathType->intrinsic() == Type::Intrinsic::MAP);
             return ((Type::Map*) pathType)->values();
@@ -499,32 +500,32 @@ namespace Walk {
             freeref(_end);
         }
 
-        ASTNodeTag getTag() const override {
+        [[nodiscard]] ASTNodeTag getTag() const override {
             return ASTNodeTag::CLASSACCESS;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "ClassAccessNode<path: " + _path->toString() + " id: " + _end->name() + ">";
         }
 
-        ExpressionNode* path() const {
+        [[nodiscard]] ExpressionNode* path() const {
             return _path;
         }
 
-        IdentifierNode* end() const {
+        [[nodiscard]] IdentifierNode* end() const {
             return _end;
         }
 
-        bool shared() const override {
+        [[nodiscard]] bool shared() const override {
             if ( _path->isLVal() ) return ((LValNode*)_path)->shared();
             return false;
         }
 
-        virtual ClassAccessNode* copy() const override {
+        [[nodiscard]] virtual ClassAccessNode* copy() const override {
             return new ClassAccessNode(position(), _path->copy(), _end->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             auto pathType = _path->type();
             assert(pathType->intrinsic() == Type::Intrinsic::OBJECT);
             return ((Type::Object*) pathType)->getProperty(_end->name());
@@ -545,15 +546,15 @@ namespace Walk {
             }
         }
 
-        ASTNodeTag getTag() const override {
+        [[nodiscard]] ASTNodeTag getTag() const override {
             return ASTNodeTag::INCLUDE;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "IncludeStatementNode<" + _path->toString() + ">";
         }
 
-        IncludeStatementNode* copy() const override {
+        [[nodiscard]] IncludeStatementNode* copy() const override {
             auto ids = new std::vector<IdentifierNode*>();
             for ( auto id : *_identifiers ) {
                 ids->push_back(useref(id->copy()));
@@ -561,11 +562,11 @@ namespace Walk {
             return new IncludeStatementNode(position(), _path->copy(), ids);
         }
 
-        ClassAccessNode* path() const {
+        [[nodiscard]] ClassAccessNode* path() const {
             return _path;
         }
 
-        std::vector<IdentifierNode*>* identifiers() const {
+        [[nodiscard]] std::vector<IdentifierNode*>* identifiers() const {
             return _identifiers;
         }
     private:
@@ -581,19 +582,19 @@ namespace Walk {
             freeref(_type);
         }
 
-        TypeLiteral* copy() const override {
+        [[nodiscard]] TypeLiteral* copy() const override {
             return new TypeLiteral(position(), _type);
         }
 
-        ASTNodeTag getTag() const override {
+        [[nodiscard]] ASTNodeTag getTag() const override {
             return ASTNodeTag::TYPELITERAL;
         }
 
-        Type::Type* type() const override {
+        [[nodiscard]] Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::TYPE);
         }
 
-        Type::Type* value() const {
+        [[nodiscard]] Type::Type* value() const {
             return _type;
         }
 
@@ -610,7 +611,7 @@ namespace Walk {
             return true;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "Type<" + _type->toString() + ">";
         }
     protected:
@@ -625,28 +626,28 @@ namespace Walk {
     public:
         BooleanLiteralExpressionNode(Position* pos, const bool val) : ExpressionNode(pos), _val(std::move(val)) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::BOOLEANLITERAL;
         }
 
-        virtual std::string toString() const override {
-            return "BoolLiteralNode<of: " + std::to_string(_val) + ">";
+        [[nodiscard]] virtual std::string  toString() const override {
+            return "BoolLiteralNode<of: " + s(_val) + ">";
         }
 
         /** Get the value of the literal expression. */
-        virtual bool value() const {
+        [[nodiscard]] virtual bool value() const {
             return _val;
         }
 
-        virtual bool isValue() const override {
+        [[nodiscard]] virtual bool isValue() const override {
             return true;
         }
 
-        virtual BooleanLiteralExpressionNode* copy() const override {
+        [[nodiscard]] virtual BooleanLiteralExpressionNode* copy() const override {
             return new BooleanLiteralExpressionNode(position(), _val);
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
@@ -660,27 +661,27 @@ namespace Walk {
         StringLiteralExpressionNode(Position* pos, std::string value) : ExpressionNode(pos), _value(std::move(value)) {}
         virtual ~StringLiteralExpressionNode() {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::STRINGLITERAL;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "StringLiteralExpressionNode<#value: '" + _value + "'>";
         }
 
-        std::string value() {
+        [[nodiscard]] std::string value() {
             return _value;
         }
 
-        virtual bool isValue() const override {
+        [[nodiscard]] virtual bool isValue() const override {
             return true;
         }
 
-        virtual StringLiteralExpressionNode* copy() const override {
+        [[nodiscard]] virtual StringLiteralExpressionNode* copy() const override {
             return new StringLiteralExpressionNode(position(), _value);
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
     protected:
@@ -693,27 +694,27 @@ namespace Walk {
         NumberLiteralExpressionNode(Position* pos, double value) : ExpressionNode(pos), _value(std::move(value)) {}
         virtual ~NumberLiteralExpressionNode() {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::NUMBERLITERAL;
         }
 
-        std::string toString() const override {
-            return "NumberLiteralExpressionNode<#value: " + std::to_string(_value) + ">";
+        [[nodiscard]] std::string toString() const override {
+            return "NumberLiteralExpressionNode<#value: " + s(_value) + ">";
         }
 
-        double value() const {
+        [[nodiscard]] double value() const {
             return _value;
         }
 
-        virtual bool isValue() const override {
+        [[nodiscard]] virtual bool isValue() const override {
             return true;
         }
 
-        virtual NumberLiteralExpressionNode* copy() const override {
+        [[nodiscard]] virtual NumberLiteralExpressionNode* copy() const override {
             return new NumberLiteralExpressionNode(position(), _value);
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
     protected:
@@ -732,31 +733,31 @@ namespace Walk {
             delete _actuals;
         }
 
-        std::string toString() const override {
-            return "EnumerationLiteralExpressionNode<#actuals: " + std::to_string(_actuals->size()) + ">";
+        [[nodiscard]] std::string toString() const override {
+            return "EnumerationLiteralExpressionNode<#actuals: " + s(_actuals->size()) + ">";
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::ENUMERATIONLITERAL;
         }
 
-        ExpressionList* actuals() const {
+        [[nodiscard]] ExpressionList* actuals() const {
             return _actuals;
         }
 
-        virtual bool isValue() const override {
+        [[nodiscard]] virtual bool isValue() const override {
             return true;
         }
 
-        virtual bool isEmpty() const {
+        [[nodiscard]] virtual bool isEmpty() const {
             return _actuals->empty();
         }
 
-        virtual bool hasIndex(size_t idx) const {
+        [[nodiscard]] virtual bool hasIndex(size_t idx) const {
             return idx < _actuals->size();
         }
 
-        virtual ExpressionNode* getIndex(size_t idx) const {
+        [[nodiscard]] virtual ExpressionNode* getIndex(size_t idx) const {
             if ( !hasIndex(idx) ) {
                 // todo raise exception
             }
@@ -786,14 +787,14 @@ namespace Walk {
             _actuals->pop_back();
         }
 
-        virtual EnumerationLiteralExpressionNode* copy() const override {
+        [[nodiscard]] virtual EnumerationLiteralExpressionNode* copy() const override {
             auto actuals = new ExpressionList;
             for ( auto actual : *_actuals ) actuals->push_back(useref(actual->copy()));
 
             return new EnumerationLiteralExpressionNode(position(), actuals, _type->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             assert(_type != nullptr);
             return _type->value();
         }
@@ -814,11 +815,11 @@ namespace Walk {
             freeref(_value);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::MAPSTATEMENT;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "MapStatementNode<id: " + _id->name() + ">";
         }
 
@@ -828,11 +829,11 @@ namespace Walk {
          *       has no semantic symbol attached to it and, therefore, no type directly.
          *       Instead, its type is inferred from the type of the map.
          */
-        virtual IdentifierNode* id() const {
+        [[nodiscard]] virtual IdentifierNode* id() const {
             return _id;
         }
 
-        ExpressionNode* value() const {
+        [[nodiscard]] ExpressionNode* value() const {
             return _value;
         }
 
@@ -841,7 +842,7 @@ namespace Walk {
             _value = value;
         }
 
-        virtual MapStatementNode* copy() const override {
+        [[nodiscard]] virtual MapStatementNode* copy() const override {
             return new MapStatementNode(position(), _id->copy(), _value->copy());
         }
 
@@ -862,27 +863,27 @@ namespace Walk {
             delete _body;
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::MAPLITERAL;
         }
 
-        std::string toString() const override {
-            return "MapNode<#body: " + std::to_string(_body->size()) + ">";
+        [[nodiscard]] std::string toString() const override {
+            return "MapNode<#body: " + s(_body->size()) + ">";
         }
 
-        MapBody* body() const {
+        [[nodiscard]] MapBody* body() const {
             return _body;
         }
 
-        virtual bool isValue() const override {
+        [[nodiscard]] virtual bool isValue() const override {
             return true;
         }
 
-        virtual bool hasKey(IdentifierNode* name) const {
+        [[nodiscard]] virtual bool hasKey(IdentifierNode* name) const {
             return getBodyNode(name) != nullptr;
         }
 
-        virtual ExpressionNode* getKey(IdentifierNode* name) const {
+        [[nodiscard]] virtual ExpressionNode* getKey(IdentifierNode* name) const {
             auto node = getBodyNode(name);
             if ( node != nullptr ) {
                 return node->value();
@@ -903,13 +904,13 @@ namespace Walk {
             node->setValue(value);
         }
 
-        virtual MapNode* copy() const override {
+        [[nodiscard]] virtual MapNode* copy() const override {
             auto body = new MapBody;
             for ( auto entry : *_body ) body->push_back(useref(entry->copy()));
             return new MapNode(position(), body, _type->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             assert(_type != nullptr);
             return _type->value();
         }
@@ -918,7 +919,7 @@ namespace Walk {
         MapBody* _body;
         TypeLiteral* _type;
 
-        virtual MapStatementNode* getBodyNode(IdentifierNode* name) const {
+        [[nodiscard]] virtual MapStatementNode* getBodyNode(IdentifierNode* name) const {
             for ( auto stmt : *_body ) {
                 if ( stmt->id()->name() == name->name() ) {
                     return stmt;
@@ -941,27 +942,27 @@ namespace Walk {
             freeref(_value);
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "AssignExpressionNode<lval: " + _dest->toString() + ">";
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::ASSIGN;
         }
 
-        virtual LValNode* dest() const {
+        [[nodiscard]] virtual LValNode* dest() const {
             return _dest;
         }
 
-        virtual ExpressionNode* value() const {
+        [[nodiscard]] virtual ExpressionNode* value() const {
             return _value;
         }
 
-        virtual AssignExpressionNode* copy() const override {
+        [[nodiscard]] virtual AssignExpressionNode* copy() const override {
             return new AssignExpressionNode(position(), _dest->copy(), _value->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return _value->type();
         }
 
@@ -976,7 +977,7 @@ namespace Walk {
     public:
         DeclarationNode(Position* pos) : StatementNode(pos) {}
         virtual ~DeclarationNode() {}
-        virtual DeclarationNode* copy() const override = 0;
+        [[nodiscard]] virtual DeclarationNode* copy() const override = 0;
     };
 
     /** AST node that declares a variable and sets its value to some expression's result. */
@@ -996,37 +997,37 @@ namespace Walk {
             freeref(_assignment);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::VARIABLEDECLARATION;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "VariableDeclarationNode<name: " + id()->name() + ", shared:" +
                 (_shared ? "true" : "false") + ">";
         }
 
-        IdentifierNode* id() const {
+        [[nodiscard]] IdentifierNode* id() const {
             assert(_assignment->dest()->getTag() == ASTNodeTag::IDENTIFIER);
             return (IdentifierNode*)_assignment->dest();
         }
 
-        ExpressionNode* value() const {
+        [[nodiscard]] ExpressionNode* value() const {
             return _assignment->value();
         }
 
-        AssignExpressionNode* assignment() const {
+        [[nodiscard]] AssignExpressionNode* assignment() const {
             return _assignment;
         }
 
-        bool shared() const {
+        [[nodiscard]] bool shared() const {
             return _shared;
         }
 
-        TypeLiteral* typeNode() const {
+        [[nodiscard]] TypeLiteral* typeNode() const {
             return _type;
         }
 
-        virtual VariableDeclarationNode* copy() const override {
+        [[nodiscard]] virtual VariableDeclarationNode* copy() const override {
             return new VariableDeclarationNode(
                 position(),
                 _type->copy(),
@@ -1050,23 +1051,23 @@ namespace Walk {
             freeref(_id);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "UninitializedVariableDeclarationNode<name: " + _id->name() + ">";
         }
 
-        IdentifierNode* id() const {
+        [[nodiscard]] IdentifierNode* id() const {
             return _id;
         }
 
-        TypeLiteral* typeNode() const {
+        [[nodiscard]] TypeLiteral* typeNode() const {
             return _type;
         }
 
-        virtual UninitializedVariableDeclarationNode* copy() const override {
+        [[nodiscard]] virtual UninitializedVariableDeclarationNode* copy() const override {
             return new UninitializedVariableDeclarationNode(
                 position(),
                 _type->copy(),
@@ -1088,15 +1089,15 @@ namespace Walk {
             delete _ids;
         }
 
-        ASTNodeTag getTag() const override {
+        [[nodiscard]] ASTNodeTag getTag() const override {
             return ASTNodeTag::USE;
         }
 
-        std::vector<IdentifierNode*>* ids() const {
+        [[nodiscard]] std::vector<IdentifierNode*>* ids() const {
             return _ids;
         }
 
-        UseNode* copy() const override {
+        [[nodiscard]] UseNode* copy() const override {
             auto ids = new std::vector<IdentifierNode*>();
             for ( auto id : *_ids ) {
                 ids->push_back(useref(id->copy()));
@@ -1107,7 +1108,7 @@ namespace Walk {
             );
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "UseNode<#ids: " + s(_ids->size()) + ">";
         }
     private:
@@ -1121,22 +1122,22 @@ namespace Walk {
             freeref(_value);
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             if (_value == nullptr) {
                 return "ReturnStatementNode<>";
             }
             return "ReturnStatementNode<lval: " + _value->toString() + ">";
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::RETURN;
         }
 
-        virtual ReturnStatementNode* copy() const override {
+        [[nodiscard]] virtual ReturnStatementNode* copy() const override {
             return new ReturnStatementNode(position(), _value->copy());
         }
 
-        ExpressionNode* value() const {
+        [[nodiscard]] ExpressionNode* value() const {
             return _value;
         }
     private:
@@ -1146,8 +1147,8 @@ namespace Walk {
     class FunctionNode : public ExpressionNode, public StatementListWrapper {
     public:
         FunctionNode(Position* pos, TypeLiteral* type, FormalList* formals)
-            : ExpressionNode(pos), StatementListWrapper(), _type(useref(type)), _formals(formals) {
-        }
+            : ExpressionNode(pos), StatementListWrapper(), _type(useref(type)), 
+            _formals(formals), _symbols(new std::vector<VariableSymbol*>()) {}
 
         virtual ~FunctionNode() {
             for ( auto f : *_formals ) {
@@ -1156,29 +1157,52 @@ namespace Walk {
             }
             delete _formals;
             freeref(_type);
+            for ( auto s : *_symbols ) freeref(s);
+            delete _symbols;
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::FUNCTION;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string toString() const override {
             return "FunctionNode<type: " + _type->toString() + ">";
         }
 
-        TypeLiteral* typeNode() const {
+        [[nodiscard]] TypeLiteral* typeNode() const {
             return _type;
         }
 
-        FormalList* formals() const {
+        [[nodiscard]] FormalList* formals() const {
             return _formals;
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] std::vector<VariableSymbol*>* usedSymbols() const {
+            return _symbols;
+        }
+
+        void appendUsedSymbol(VariableSymbol* sym) {
+            _symbols->push_back(useref(sym));
+        }
+
+        void setUsedSymbols(UsedSymbols& symbols) {
+            for ( auto sym : *_symbols ) {
+                if ( stl::contains(symbols.second, sym) ) {
+                    symbols.second.erase(sym);
+                    freeref(sym);
+                }
+            }
+            _symbols->clear();
+            for ( auto s : symbols.second ) {
+                _symbols->push_back(useref(s));
+            }
+        }
+
+        [[nodiscard]] virtual Type::Type* type() const override {
             return _type->value();
         }
 
-        virtual FunctionNode* copy() const override {
+        [[nodiscard]] virtual FunctionNode* copy() const override {
             auto formals = new FormalList();
             for ( auto f : *_formals ) {
                 formals->push_back(
@@ -1188,17 +1212,23 @@ namespace Walk {
 
             auto fn = new FunctionNode(position(), _type->copy(), formals);
             fn->_body = copyBody();
+
+            for ( auto s : *_symbols ) {
+                fn->_symbols->push_back(useref(s));
+            }
+
             return fn;
         }
     protected:
         TypeLiteral* _type;
         FormalList* _formals;
+        std::vector<VariableSymbol*>* _symbols;
     };
 
     class ConstructorNode final : public DeclarationNode {
     public:
         ConstructorNode(Position* pos, FunctionNode* func, ExpressionList* parentCons) : DeclarationNode(pos), _func(useref(func)), _parentConstructors(parentCons), _partOfType(nullptr) {
-            _name = "constructor" + std::to_string(++ConstructorNode::nameID);
+            _name = "constructor" + s(++ConstructorNode::nameID);
         }
         ~ConstructorNode() {
             freeref(_func);
@@ -1207,15 +1237,15 @@ namespace Walk {
             delete _parentConstructors;
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::CONSTRUCTOR;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "ConstructorNode<name: " + _name + ">";
         }
 
-        virtual ConstructorNode* copy() const override {
+        [[nodiscard]] virtual ConstructorNode* copy() const override {
             ExpressionList* parents = new ExpressionList();
             for ( auto c : *_parentConstructors ) parents->push_back(useref(c->copy()));
             return new ConstructorNode(
@@ -1225,19 +1255,19 @@ namespace Walk {
             );
         }
 
-        FunctionNode* func() const {
+        [[nodiscard]] FunctionNode* func() const {
             return _func;
         }
 
-        ExpressionList* parentConstructors() const {
+        [[nodiscard]] ExpressionList* parentConstructors() const {
             return _parentConstructors;
         }
 
-        std::string name() const {
+        [[nodiscard]] std::string name() const {
             return _name;
         }
 
-        Type::Object* partOf() const {
+        [[nodiscard]] Type::Object* partOf() const {
             return _partOfType;
         }
     protected:
@@ -1361,23 +1391,23 @@ namespace Walk {
             delete _args;
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::CALL;
         }
 
-        virtual std::string toString() const override {
-            return "CallExpressionNode<#func: " + _func->toString() + ",#args: " + std::to_string(_args->size()) + ">";
+        [[nodiscard]] virtual std::string  toString() const override {
+            return "CallExpressionNode<#func: " + _func->toString() + ",#args: " + s(_args->size()) + ">";
         }
 
-        ExpressionNode* func() const {
+        [[nodiscard]] ExpressionNode* func() const {
             return _func;
         }
 
-        std::vector<ExpressionNode*>* args() const {
+        [[nodiscard]] std::vector<ExpressionNode*>* args() const {
             return _args;
         }
 
-        virtual CallExpressionNode* copy() const override {
+        [[nodiscard]] virtual CallExpressionNode* copy() const override {
             auto args = new std::vector<ExpressionNode*>;
             for ( auto arg : *_args ) {
                 args->push_back(useref(arg->copy()));
@@ -1386,11 +1416,11 @@ namespace Walk {
             return new CallExpressionNode(position(), _func->copy(), args);
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return _type;
         }
 
-        ConstructorNode* constructor() const {
+        [[nodiscard]] ConstructorNode* constructor() const {
             return _constructor;
         }
 
@@ -1409,23 +1439,23 @@ namespace Walk {
     public:
         DeferCallExpressionNode(Position* pos, CallExpressionNode* call) : StatementExpressionNode(pos), _call(useref(call)) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::DEFERCALL;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "DeferCallExpressionNode<#call: " + _call->toString() + ">";
         }
 
-        virtual DeferCallExpressionNode* copy() const override {
+        [[nodiscard]] virtual DeferCallExpressionNode* copy() const override {
             return new DeferCallExpressionNode(position(), _call->copy());
         }
 
-        virtual CallExpressionNode* call() const {
+        [[nodiscard]] virtual CallExpressionNode* call() const {
             return _call;
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return _call->type();
         }
 
@@ -1443,15 +1473,15 @@ namespace Walk {
             freeref(_right);
         }
 
-        ExpressionNode* left() const {
+        [[nodiscard]] ExpressionNode* left() const {
             return _left;
         }
 
-        ExpressionNode* right() const {
+        [[nodiscard]] ExpressionNode* right() const {
             return _right;
         }
 
-        virtual BinaryExpressionNode* copy() const override = 0;
+        [[nodiscard]] virtual BinaryExpressionNode* copy() const override = 0;
     protected:
         ExpressionNode* _left;
         ExpressionNode* _right;
@@ -1464,15 +1494,15 @@ namespace Walk {
         PureBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
         virtual ~PureBinaryExpressionNode() {}
 
-        virtual Type::Type* leftType() const = 0;
+        [[nodiscard]] virtual Type::Type* leftType() const = 0;
 
-        virtual Type::Type* rightType() const = 0;
+        [[nodiscard]] virtual Type::Type* rightType() const = 0;
 
-        virtual Type::Type* resultType() const = 0;
+        [[nodiscard]] virtual Type::Type* resultType() const = 0;
 
-        virtual PureBinaryExpressionNode* copy() const override = 0;
+        [[nodiscard]] virtual PureBinaryExpressionNode* copy() const override = 0;
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return resultType();
         }
     };
@@ -1484,19 +1514,19 @@ namespace Walk {
         PureBooleanBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
         virtual ~PureBooleanBinaryExpressionNode() {}
 
-        virtual Type::Type* leftType() const override {
+        [[nodiscard]] virtual Type::Type* leftType() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
-        virtual Type::Type* rightType() const override {
+        [[nodiscard]] virtual Type::Type* rightType() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
-        virtual Type::Type* resultType() const override {
+        [[nodiscard]] virtual Type::Type* resultType() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
-        virtual PureBooleanBinaryExpressionNode* copy() const override = 0;
+        [[nodiscard]] virtual PureBooleanBinaryExpressionNode* copy() const override = 0;
     };
 
 
@@ -1506,19 +1536,19 @@ namespace Walk {
         PureNumberBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
         virtual ~PureNumberBinaryExpressionNode() {}
 
-        virtual Type::Type* leftType() const override {
+        [[nodiscard]] virtual Type::Type* leftType() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        virtual Type::Type* rightType() const override {
+        [[nodiscard]] virtual Type::Type* rightType() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        virtual Type::Type* resultType() const override {
+        [[nodiscard]] virtual Type::Type* resultType() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        virtual PureNumberBinaryExpressionNode* copy() const override = 0;
+        [[nodiscard]] virtual PureNumberBinaryExpressionNode* copy() const override = 0;
     };
 
 
@@ -1528,19 +1558,19 @@ namespace Walk {
         PureStringBinaryExpressionNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right) {}
         virtual ~PureStringBinaryExpressionNode() {}
 
-        virtual Type::Type* leftType() const override {
+        [[nodiscard]] virtual Type::Type* leftType() const override {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
-        virtual Type::Type* rightType() const override {
+        [[nodiscard]] virtual Type::Type* rightType() const override {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
-        virtual Type::Type* resultType() const override {
+        [[nodiscard]] virtual Type::Type* resultType() const override {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
 
-        virtual PureStringBinaryExpressionNode* copy() const override = 0;
+        [[nodiscard]] virtual PureStringBinaryExpressionNode* copy() const override = 0;
     };
 
 
@@ -1549,15 +1579,15 @@ namespace Walk {
     public:
         AndNode(Position* pos, ExpressionNode* left, ExpressionNode* right): PureBooleanBinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::AND;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "AndNode<>";
         }
 
-        virtual AndNode* copy() const override {
+        [[nodiscard]] virtual AndNode* copy() const override {
             return new AndNode(position(), _left->copy(), _right->copy());
         }
     };
@@ -1568,15 +1598,15 @@ namespace Walk {
     public:
         OrNode(Position* pos, ExpressionNode* left, ExpressionNode* right): PureBooleanBinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::OR;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "OrNode<>";
         }
 
-        virtual OrNode* copy() const override {
+        [[nodiscard]] virtual OrNode* copy() const override {
             return new OrNode(position(), _left->copy(), _right->copy());
         }
     };
@@ -1587,19 +1617,19 @@ namespace Walk {
     public:
         EqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::EQUALS;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "EqualsNode<>";
         }
 
-        virtual EqualsNode* copy() const override {
+        [[nodiscard]] virtual EqualsNode* copy() const override {
             return new EqualsNode(position(), _left->copy(), _right->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
     };
@@ -1618,35 +1648,35 @@ namespace Walk {
     public:
         NumericComparisonExpressionNode(Position* pos, NumberComparisonType comparisonType, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right), _comparisonType(std::move(comparisonType)) {}
 
-        Type::Type* leftType() const override {
+        [[nodiscard]] Type::Type* leftType() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        Type::Type* rightType() const override {
+        [[nodiscard]] Type::Type* rightType() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        Type::Type* resultType() const override {
+        [[nodiscard]] Type::Type* resultType() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
-        PureBinaryExpressionNode* copy() const override {
+        [[nodiscard]] PureBinaryExpressionNode* copy() const override {
             return new NumericComparisonExpressionNode(position(), _comparisonType, _left->copy(), _right->copy());
         }
 
-        ASTNodeTag getTag() const override {
+        [[nodiscard]] ASTNodeTag getTag() const override {
             return ASTNodeTag::NUMERICCOMPARISON;
         }
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "NumericComparisonExpressionNode<type: " + comparisonTypeToString() + ">";
         }
 
-        NumberComparisonType comparisonType() const {
+        [[nodiscard]] NumberComparisonType comparisonType() const {
             return _comparisonType;
         }
 
-        std::string comparisonTypeToString() const {
+        [[nodiscard]] std::string comparisonTypeToString() const {
             if ( _comparisonType == NumberComparisonType::LESS_THAN ) return "LESS_THAN";
             if ( _comparisonType == NumberComparisonType::LESS_THAN_OR_EQUAL ) return "LESS_THAN_OR_EQUAL";
             if ( _comparisonType == NumberComparisonType::GREATER_THAN ) return "GREATER_THAN";
@@ -1662,19 +1692,19 @@ namespace Walk {
     public:
         NotEqualsNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : BinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::NOTEQUALS;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "NotEqualsNode<>";
         }
 
-        virtual NotEqualsNode* copy() const override {
+        [[nodiscard]] virtual NotEqualsNode* copy() const override {
             return new NotEqualsNode(position(), _left->copy(), _right->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
     };
@@ -1684,36 +1714,36 @@ namespace Walk {
     public:
         AddNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureBinaryExpressionNode(pos, left, right), _concatenation(false) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::ADD;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "AddNode<>";
         }
 
-        virtual Type::Type* leftType() const override {
+        [[nodiscard]] virtual Type::Type* leftType() const override {
             if ( _concatenation ) {
                 return Type::Primitive::of(Type::Intrinsic::STRING);
             }
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        virtual Type::Type* rightType() const override {
+        [[nodiscard]] virtual Type::Type* rightType() const override {
             if ( _concatenation ) {
                 return Type::Primitive::of(Type::Intrinsic::STRING);
             }
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        virtual Type::Type* resultType() const override {
+        [[nodiscard]] virtual Type::Type* resultType() const override {
             if ( _concatenation ) {
                 return Type::Primitive::of(Type::Intrinsic::STRING);
             }
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
 
-        virtual AddNode* copy() const override {
+        [[nodiscard]] virtual AddNode* copy() const override {
             return new AddNode(position(), _left->copy(), _right->copy());
         }
 
@@ -1733,15 +1763,15 @@ namespace Walk {
     public:
         SubtractNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::SUBTRACT;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "SubtractNode<>";
         }
 
-        virtual SubtractNode* copy() const override {
+        [[nodiscard]] virtual SubtractNode* copy() const override {
             return new SubtractNode(position(), _left->copy(), _right->copy());
         }
     };
@@ -1752,15 +1782,15 @@ namespace Walk {
     public:
         MultiplyNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::MULTIPLY;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "MultiplyNode<>";
         }
 
-        virtual MultiplyNode* copy() const override {
+        [[nodiscard]] virtual MultiplyNode* copy() const override {
             return new MultiplyNode(position(), _left->copy(), _right->copy());
         }
     };
@@ -1770,15 +1800,15 @@ namespace Walk {
     public:
         DivideNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::DIVIDE;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "DivideNode<>";
         }
 
-        virtual DivideNode* copy() const override {
+        [[nodiscard]] virtual DivideNode* copy() const override {
             return new DivideNode(position(), _left->copy(), _right->copy());
         }
     };
@@ -1789,15 +1819,15 @@ namespace Walk {
     public:
         ModulusNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::MODULUS;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "ModulusNode<>";
         }
 
-        virtual ModulusNode* copy() const override {
+        [[nodiscard]] virtual ModulusNode* copy() const override {
             return new ModulusNode(position(), _left->copy(), _right->copy());
         }
     };
@@ -1808,15 +1838,15 @@ namespace Walk {
     public:
         PowerNode(Position* pos, ExpressionNode* left, ExpressionNode* right) : PureNumberBinaryExpressionNode(pos, left, right) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::POWER;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "PowerNode<>";
         }
 
-        virtual PowerNode* copy() const override {
+        [[nodiscard]] virtual PowerNode* copy() const override {
             return new PowerNode(position(), _left->copy(), _right->copy());
         }
     };
@@ -1825,19 +1855,19 @@ namespace Walk {
     public:
         NthRootNode(Position* pos, ExpressionNode* n, ExpressionNode* exp) : PureNumberBinaryExpressionNode(pos, n, exp) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::NTHROOT;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "SqrtNode<>";
         }
 
-        virtual NthRootNode* copy() const override {
+        [[nodiscard]] virtual NthRootNode* copy() const override {
             return new NthRootNode(position(), _left->copy(), _right->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
     };
@@ -1850,11 +1880,11 @@ namespace Walk {
             freeref(_exp);
         }
 
-        ExpressionNode* exp() const {
+        [[nodiscard]] ExpressionNode* exp() const {
             return _exp;
         }
 
-        virtual UnaryExpressionNode* copy() const override = 0;
+        [[nodiscard]] virtual UnaryExpressionNode* copy() const override = 0;
     protected:
         ExpressionNode* _exp;
     };
@@ -1864,19 +1894,19 @@ namespace Walk {
     public:
         NegativeExpressionNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::NEGATIVE;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "NegativeExpressionNode<>";
         }
 
-        virtual NegativeExpressionNode* copy() const override {
+        [[nodiscard]] virtual NegativeExpressionNode* copy() const override {
             return new NegativeExpressionNode(position(), _exp->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
     };
@@ -1886,19 +1916,19 @@ namespace Walk {
     public:
         NotNode(Position* pos, ExpressionNode* exp) : UnaryExpressionNode(pos, exp) {}
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::NOT;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "NotNode<>";
         }
 
-        virtual NotNode* copy() const override {
+        [[nodiscard]] virtual NotNode* copy() const override {
             return new NotNode(position(), _exp->copy());
         }
 
-        virtual Type::Type* type() const override {
+        [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
     };
@@ -1911,9 +1941,9 @@ namespace Walk {
 
         virtual ~BlockStatementNode() = default;
 
-        virtual BlockStatementNode* copy() const override = 0;
+        [[nodiscard]] virtual BlockStatementNode* copy() const override = 0;
 
-        bool isBlock() const override { return true; }
+        [[nodiscard]] bool isBlock() const override { return true; }
     };
 
     /** AST node representing an enumeration block. */
@@ -1930,31 +1960,31 @@ namespace Walk {
             freeref(_index);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::ENUMERATE;
         }
 
-        virtual std::string toString() const override {
-            return "EnumerationStatement<e: " + _enumerable->toString() + ", as: " + _local->name() + ", #body: " + std::to_string(_body->size()) + ">";
+        [[nodiscard]] virtual std::string  toString() const override {
+            return "EnumerationStatement<e: " + _enumerable->toString() + ", as: " + _local->name() + ", #body: " + s(_body->size()) + ">";
         }
 
-        ExpressionNode* enumerable() const {
+        [[nodiscard]] ExpressionNode* enumerable() const {
             return _enumerable;
         }
 
-        IdentifierNode* local() const {
+        [[nodiscard]] IdentifierNode* local() const {
             return _local;
         }
 
-        IdentifierNode* index() const {
+        [[nodiscard]] IdentifierNode* index() const {
             return _index;
         }
 
-        bool shared() const {
+        [[nodiscard]] bool shared() const {
             return _shared;
         }
 
-        virtual EnumerationStatement* copy() const override {
+        [[nodiscard]] virtual EnumerationStatement* copy() const override {
             EnumerationStatement* other;
             if (_index == nullptr) {
                 other = new EnumerationStatement(position(), _enumerable->copy(),
@@ -1986,27 +2016,27 @@ namespace Walk {
             freeref(_local);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::WITH;
         }
 
-        virtual std::string toString() const override {
+        [[nodiscard]] virtual std::string  toString() const override {
             return "WithStatement<r: " + _resource->toString() + ", as: " + _local->name() + ">";
         }
 
-        ExpressionNode* resource() const {
+        [[nodiscard]] ExpressionNode* resource() const {
             return _resource;
         }
 
-        IdentifierNode* local() const {
+        [[nodiscard]] IdentifierNode* local() const {
             return _local;
         }
 
-        bool shared() const {
+        [[nodiscard]] bool shared() const {
             return _shared;
         }
 
-        virtual WithStatement* copy() const override {
+        [[nodiscard]] virtual WithStatement* copy() const override {
             auto other = new WithStatement(position(), _resource->copy(), _local->copy(), _shared);
             other->assumeAndReduceStatements(copyBody());
             return other;
@@ -2030,19 +2060,19 @@ namespace Walk {
             freeref(_condition);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::IF;
         }
 
-        virtual std::string toString() const override {
-            return "IfStatement<f: if " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
+        [[nodiscard]] virtual std::string  toString() const override {
+            return "IfStatement<f: if " + _condition->toString() + " then, #body: " + s(_body->size()) + ">";
         }
 
-        ExpressionNode* condition() const {
+        [[nodiscard]] ExpressionNode* condition() const {
             return _condition;
         }
 
-        virtual IfStatement* copy() const override {
+        [[nodiscard]] virtual IfStatement* copy() const override {
             auto other = new IfStatement(position(), _condition->copy());
             other->assumeAndReduceStatements(copyBody());
             return other;
@@ -2062,19 +2092,19 @@ namespace Walk {
             freeref(_condition);
         }
 
-        virtual ASTNodeTag getTag() const override {
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
             return ASTNodeTag::WHILE;
         }
 
-        virtual std::string toString() const override {
-            return "WhileStatement<w: while " + _condition->toString() + " then, #body: " + std::to_string(_body->size()) + ">";
+        [[nodiscard]] virtual std::string  toString() const override {
+            return "WhileStatement<w: while " + _condition->toString() + " then, #body: " + s(_body->size()) + ">";
         }
 
-        ExpressionNode* condition() const {
+        [[nodiscard]] ExpressionNode* condition() const {
             return _condition;
         }
 
-        virtual WhileStatement* copy() const override {
+        [[nodiscard]] virtual WhileStatement* copy() const override {
             auto other = new WhileStatement(position(), _condition->copy());
             other->assumeAndReduceStatements(copyBody());
             return other;
@@ -2088,15 +2118,15 @@ namespace Walk {
         ContinueNode(Position* pos) : StatementNode(pos) {}
         virtual ~ContinueNode() {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "ContinueNode<>";
         }
 
-        ASTNodeTag getTag() const override {
+        [[nodiscard]] ASTNodeTag getTag() const override {
             return ASTNodeTag::CONTINUE;
         }
 
-        virtual ContinueNode* copy() const override {
+        [[nodiscard]] virtual ContinueNode* copy() const override {
             return new ContinueNode(position());
         }
     };
@@ -2106,15 +2136,15 @@ namespace Walk {
         BreakNode(Position* pos) : StatementNode(pos) {}
         virtual ~BreakNode() {}
 
-        std::string toString() const override {
+        [[nodiscard]] std::string toString() const override {
             return "BreakNode<>";
         }
 
-        ASTNodeTag getTag() const override {
+        [[nodiscard]] ASTNodeTag getTag() const override {
             return ASTNodeTag::BREAK;
         }
 
-        virtual BreakNode* copy() const override {
+        [[nodiscard]] virtual BreakNode* copy() const override {
             return new BreakNode(position());
         }
     };
@@ -2126,17 +2156,17 @@ namespace Walk {
         PrologueResourceNode(Position* pos) : ExpressionNode(pos) {}
         virtual ~PrologueResourceNode() {}
 
-        virtual ExpressionNode* value() = 0;
+        [[nodiscard]] virtual ExpressionNode* value() = 0;
 
-        virtual bool isOpened() const {
+        [[nodiscard]] virtual bool isOpened() const {
             return _opened;
         }
 
-        virtual bool isValue() const override {
+        [[nodiscard]] virtual bool isValue() const override {
             return true;
         }
 
-        virtual bool isResource() const override {
+        [[nodiscard]] virtual bool isResource() const override {
             return true;
         }
 

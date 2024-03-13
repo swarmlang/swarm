@@ -116,7 +116,7 @@ namespace Walk {
             return this;
         }
 
-        TypeLiteral* getObjectType() const {
+        [[nodiscard]] TypeLiteral* getObjectType() const {
             return _value;
         }
 
@@ -124,7 +124,7 @@ namespace Walk {
 
         void disambiguateType();
 
-        bool shouldDrain() const { return _shouldDrain; }
+        [[nodiscard]] bool shouldDrain() const { return _shouldDrain; }
 
     protected:
         // used for type assignments
@@ -157,7 +157,7 @@ namespace Walk {
 
         [[nodiscard]] bool isPrologue() const override { return true; }
 
-        std::string sviName() const {
+        [[nodiscard]] std::string sviName() const {
             return _sviName;
         }
     protected:
@@ -183,7 +183,7 @@ namespace Walk {
         }
 
         /** Try to find a symbol in scope by name. Returns nullptr if none exists. */
-        SemanticSymbol* lookup(const std::string& name) {
+        [[nodiscard]] SemanticSymbol* lookup(const std::string& name) {
             auto found = _symbols->find(name);
             if ( found == _symbols->end() ) {
                 return nullptr;
@@ -204,7 +204,7 @@ namespace Walk {
         }
 
         /** Returns true if this scope already has the given name. */
-        bool isClashing(const std::string& name) {
+        [[nodiscard]] bool isClashing(const std::string& name) {
             SemanticSymbol* found = lookup(name);
             return found != nullptr;
         }
@@ -278,7 +278,7 @@ namespace Walk {
         }
 
         /** Get the current scope. */
-        ScopeTable* current() {
+        [[nodiscard]] ScopeTable* current() {
             return _scopes->front();
         }
 
@@ -288,7 +288,7 @@ namespace Walk {
         }
 
         /** Find a symbol by name, recursing up the scope list. */
-        SemanticSymbol* lookup(const std::string& name, const Type::Object* parent) {
+        [[nodiscard]] SemanticSymbol* lookup(const std::string& name, const Type::Object* parent) {
             assert(_scopes->size() != 0);
             // lookup in front scope first (in case parent member has been shadowed)
             auto symbol = _scopes->front()->lookup(name);
@@ -316,7 +316,7 @@ namespace Walk {
         }
 
         /** Returns true if the current scope already has a symbol with the given name. */
-        bool isClashing(const std::string& name) {
+        [[nodiscard]] bool isClashing(const std::string& name) {
             return current()->isClashing(name);
         }
 

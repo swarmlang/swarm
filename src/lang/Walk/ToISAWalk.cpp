@@ -396,12 +396,44 @@ namespace swarmc::Lang::Walk {
         auto tempLoop = _loopDepth;
         _loopDepth = 0;
         auto instrs = position(node);
-        append(instrs, makeFunction(name, extractFormals(node->formals()), retType, node, false, true, false));
+
+        // modify type signature to maintain static scope
+        auto formals = extractFormals(node->formals());
+        if ( node->usedSymbols()->size() > 0 ) {
+            for ( auto s = node->usedSymbols()->rbegin(); s != node->usedSymbols()->rend(); s++ ) {
+                auto sym = *s;
+                auto nf = new ISAFormalList({
+                    {
+                        sym->type(),
+                        ISA::Affinity::LOCAL,
+                        TO_ISA_VARIABLE_PREFIX + sym->name(),
+                        sym
+                    }
+                });
+                formals = mergeFormals(nf, formals);
+            }
+        }
+
+        append(instrs, makeFunction(name, formals, retType, node, false, true, false));
         _loopDepth = tempLoop;
+
+        // curry usedSymbols here
+        auto floc = makeLocation(ISA::Affinity::FUNCTION, name, nullptr);
+        for ( auto sym : *node->usedSymbols() ) {
+            append(instrs, assignEval(
+                makeTmp(ISA::Affinity::LOCAL, instrs),
+                new ISA::Curry(floc, makeLocation(
+                    sym->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
+                    TO_ISA_VARIABLE_PREFIX + sym->name(),
+                    nullptr
+                ))
+            ));
+            floc = getLastLoc(instrs);
+        }
 
         append(instrs, assignValue(
             makeTmp(ISA::Affinity::LOCAL, _depth ? instrs : nullptr),
-            makeLocation(ISA::Affinity::FUNCTION, name, nullptr),
+            floc,
             false
         ));
 
@@ -417,7 +449,23 @@ namespace swarmc::Lang::Walk {
 
         // function header
         append(instrs, new ISA::BeginFunction(node->name(), getTypeRef(type)));
+        // modify type signature to maintain static scope
         auto formals = extractFormals(node->func()->formals());
+        if ( node->func()->usedSymbols()->size() > 0 ) {
+            for ( auto s = node->func()->usedSymbols()->rbegin(); s != node->func()->usedSymbols()->rend(); s++ ) {
+                auto sym = *s;
+                auto nf = new ISAFormalList({
+                    {
+                        sym->type(),
+                        ISA::Affinity::LOCAL,
+                        TO_ISA_VARIABLE_PREFIX + sym->name(),
+                        sym
+                    }
+                });
+                formals = mergeFormals(nf, formals);
+            }
+        }
+
         for ( const auto& f : *formals ) {
             auto ploc = makeLocation(std::get<1>(f), std::get<2>(f), nullptr);
             SharedLocations::registerLoc(ploc, std::get<3>(f));
@@ -459,6 +507,21 @@ namespace swarmc::Lang::Walk {
 
         append(instrs, walkStatementList(node->func(), false, true, false));
         append(instrs, new ISA::Return1(instLoc));
+
+        auto floc = makeLocation(ISA::Affinity::FUNCTION, node->name(), nullptr);
+        for ( auto sym : *node->func()->usedSymbols() ) {
+            append(instrs, assignEval(
+                makeTmp(ISA::Affinity::LOCAL, instrs),
+                new ISA::Curry(floc, makeLocation(
+                    sym->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
+                    TO_ISA_VARIABLE_PREFIX + sym->name(),
+                    nullptr
+                ))
+            ));
+            floc = getLastLoc(instrs);
+        }
+
+        _constructorLoc.insert({ node->name(), floc });
 
         _depth--;
         _deferredResults = _deferredResults->leave();
@@ -561,7 +624,7 @@ namespace swarmc::Lang::Walk {
         ISA::LocationReference* func = nullptr;
 
         if ( node->constructor() ) {
-            func = makeLocation(ISA::Affinity::FUNCTION, node->constructor()->name(), nullptr);
+            func = _constructorLoc[node->constructor()->name()];
         } else {
             append(instrs, walk(node->func()));
             func = getLastLoc(instrs);
@@ -1230,6 +1293,16 @@ namespace swarmc::Lang::Walk {
             });
         }
         return isaFormals;
+    }
+
+    ISAFormalList* ToISAWalk::mergeFormals(ISAFormalList* first, ISAFormalList* second) const {
+        first->insert(
+            first->end(),
+            std::make_move_iterator(second->begin()),
+            std::make_move_iterator(second->end())
+        );
+        delete second;
+        return first;
     }
 
     ISA::TypeReference* ToISAWalk::getTypeRef(Type::Type* type, Type::Type* comp) {

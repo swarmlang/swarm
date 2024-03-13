@@ -231,6 +231,9 @@ namespace swarmc::Runtime {
         factory->registerReducer(s(Type::Intrinsic::LAMBDA1), lambdaReducer);
         factory->registerProducer(s(Type::Intrinsic::LAMBDA1), lambdaProducer);
 
+        Framework::onShutdown([factory]() {
+            delete factory;
+        });
         return factory;
     }
 

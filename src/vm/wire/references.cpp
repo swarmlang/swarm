@@ -406,6 +406,9 @@ namespace swarmc::Runtime {
             return ref;
         });
 
+        Framework::onShutdown([factory]() {
+            delete factory;
+        });
         return factory;
     }
 }

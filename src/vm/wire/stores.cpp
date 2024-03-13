@@ -64,6 +64,9 @@ namespace swarmc::Runtime {
             return new RedisDriver::RedisStorageInterface(vm);
         });
 
+        Framework::onShutdown([factory]() {
+            delete factory;
+        });
         return factory;
     }
 

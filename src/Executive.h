@@ -17,6 +17,9 @@ using namespace nslib;
 class Executive : public IUsesConsole, public IUsesLogger {
 public:
     Executive() : IUsesConsole(), IUsesLogger("main") {};
+    ~Executive() {
+        delete _input;
+    }
 
     int run(int argc, char **argv);
     void cleanup();

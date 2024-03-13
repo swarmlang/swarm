@@ -110,4 +110,48 @@ ASTMapReduce<bool>* hasBreak() {
     return &hb;
 }
 
+ASTMapReduce<UsedSymbols>* unscopedLocations() {
+    static auto ul = ASTMapReduce<UsedSymbols>(
+        "AST Used Symbols",
+        [](ASTNode* node) {
+            auto out = UsedSymbols();
+            if ( node->getTag() == ASTNodeTag::VARIABLEDECLARATION ) {
+                auto v = (VariableDeclarationNode*)node;
+                out.first.insert(v->id()->symbol()->ensureVariable());
+            } else if ( node->getTag() == ASTNodeTag::IDENTIFIER ) {
+                auto id = (IdentifierNode*)node;
+                out.second.insert(id->symbol()->ensureVariable());
+            }
+            return out;
+        },
+        [](UsedSymbols p1, UsedSymbols p2) {
+            auto out = UsedSymbols();
+
+            // merge scoped symbols
+            out.first.insert(
+                std::make_move_iterator(p1.first.begin()),
+                std::make_move_iterator(p1.first.end())
+            );
+            out.first.insert(
+                std::make_move_iterator(p2.first.begin()),
+                std::make_move_iterator(p2.first.end())
+            );
+
+            // merge unscoped symbols
+            for ( auto sym : p1.second ) {
+                if ( !stl::contains(out.first, sym) ) out.second.insert(sym);
+            }
+            for ( auto sym : p2.second ) {
+                if ( !stl::contains(out.first, sym) ) out.second.insert(sym);
+            }
+
+            return out;
+        },
+        [](ASTNode* node) {
+            return node->isBlock() || node->getTag() == ASTNodeTag::FUNCTION;
+        }
+    );
+    return &ul;
+}
+
 }

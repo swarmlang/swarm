@@ -75,6 +75,9 @@ namespace swarmc::Runtime {
             return state;
         });
 
+        Framework::onShutdown([factory]() {
+            delete factory;
+        });
         return factory;
     }
 

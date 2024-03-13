@@ -124,6 +124,9 @@ private:
     /** Transforms `FormalList` into `ISAFormalList` */
     ISAFormalList* extractFormals(FormalList*) const;
 
+    /** Concatenate 2 ISAFormalLists, delete the second and return the first */
+    ISAFormalList* mergeFormals(ISAFormalList*, ISAFormalList*) const;
+
     /** Get a valid reference for `type`, replacing `comp` with `THIS` */
     ISA::TypeReference* getTypeRef(Type::Type* type, Type::Type* comp=nullptr);
 
@@ -162,6 +165,8 @@ private:
     std::map<ISA::Affinity, std::map<std::string, ISA::LocationReference*>> _locMap;
     // typeref cache
     std::map<std::size_t, ISA::TypeReference*> _typeMap;
+    // map from constructor function location name to the temp location where the scope-curried instance should reside
+    std::map<std::string, ISA::LocationReference*> _constructorLoc;
     // top of stack is the type of the object whose constructor is being compiled
     TypeConstructorData _constructing;
     TypeConstructorData _defaultValues;

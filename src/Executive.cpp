@@ -104,7 +104,6 @@ int Executive::run(int argc, char **argv) {
     }
 
 //    delete console;
-    delete _input;
     Framework::shutdown();
     return result;
 }
@@ -337,9 +336,6 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         _input = new std::ifstream(inputFile);
         if ( _input->bad() ) {
             if ( !flagTestSuiteOutput ) logger->error("Could not open input file: " + inputFile);
-
-            delete _input;
-            _input = nullptr;
 
             failed = true;
         }

@@ -433,6 +433,9 @@ ASTMapReduce<bool>* hasContinue();
 // Returns `true` if the AST has a break statement belonging to this scope
 ASTMapReduce<bool>* hasBreak();
 
+// Returns a pair of sets, containing the symbols declared in this scope, and the symbols used in this scope but declared in another
+ASTMapReduce<UsedSymbols>* unscopedLocations();
+
 }
 
 #endif
