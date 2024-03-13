@@ -1185,16 +1185,19 @@ namespace Walk {
             _symbols->push_back(useref(sym));
         }
 
-        void setUsedSymbols(UsedSymbols& symbols) {
-            for ( auto sym : *_symbols ) {
-                if ( stl::contains(symbols.second, sym) ) {
-                    symbols.second.erase(sym);
-                    freeref(sym);
+        void setUsedSymbols(UsedSymbols& symbols, bool replace) {
+            if ( replace ) {
+                for ( auto sym : *_symbols ) {
+                    if ( stl::contains(symbols.second, sym) ) {
+                        symbols.second.erase(sym);
+                    }
                 }
             }
+            for ( auto s : *_symbols ) freeref(s);
             _symbols->clear();
             for ( auto s : symbols.second ) {
-                _symbols->push_back(useref(s));
+                if ( !stl::contains(*_symbols, s) )
+                    _symbols->push_back(useref(s));
             }
         }
 

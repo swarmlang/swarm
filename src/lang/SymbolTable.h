@@ -135,9 +135,13 @@ namespace Walk {
     /** Semantic symbol implementation for names referencing object properties */
     class ObjectPropertySymbol : public VariableSymbol {
     public:
-        ObjectPropertySymbol(std::string name, Type::Type* type, Position* declaredAt, bool drain) : VariableSymbol(std::move(name), type, declaredAt, false, drain) {}
+        ObjectPropertySymbol(std::string name, Type::Type* type, Type::Object* partOf, Position* declaredAt, bool drain) : VariableSymbol(std::move(name), type, declaredAt, false, drain), _partOf(partOf) {}
 
         [[nodiscard]] bool isProperty() const override { return true; }
+
+        [[nodiscard]] Type::Object* partOf() const { return _partOf; }
+    protected:
+        Type::Object* _partOf;
     };
 
     /** Semantic symbol implementation for names referencing functions. */
@@ -214,8 +218,8 @@ namespace Walk {
             insert(new VariableSymbol(std::move(name), type, declaredAt, std::move(shared), std::move(drain)));
         }
 
-        SemanticSymbol* addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, bool drain) {
-            auto sym = new ObjectPropertySymbol(std::move(name), type, declaredAt, std::move(drain));
+        SemanticSymbol* addObjectProperty(std::string name, Type::Type* type, Type::Object* partOf, Position* declaredAt, bool drain) {
+            auto sym = new ObjectPropertySymbol(std::move(name), type, partOf, declaredAt, std::move(drain));
             insert(sym);
             return sym;
         }
@@ -326,9 +330,9 @@ namespace Walk {
         }
 
         /** Add a new object property symbol to the current scope */
-        void addObjectProperty(std::string name, Type::Type* type, Position* declaredAt, bool drain, Type::Object* object) {
+        void addObjectProperty(std::string name, Type::Type* type, Type::Object* object, Position* declaredAt, bool drain) {
             if ( _memberSymbols.count(object) == 0 ) _memberSymbols[object] = std::map<const std::string, SemanticSymbol*>();
-            _memberSymbols[object].insert({ name, current()->addObjectProperty(name, type, declaredAt, std::move(drain)) });
+            _memberSymbols[object].insert({ name, current()->addObjectProperty(name, type, object, declaredAt, std::move(drain)) });
         }
 
         /** Add a new function to the current scope. */
@@ -347,6 +351,11 @@ namespace Walk {
                 scope->print(out);
             }
         }
+
+        [[nodiscard]] std::map<const std::string, SemanticSymbol*> getMemberSymbols(const Type::Object* obj) const {
+            if ( !_memberSymbols.count(obj) ) throw Errors::SwarmError("Attempted to get member symbols of unregistered type " + s(obj));
+            return _memberSymbols.at(obj);
+        } 
 
     protected:
         std::list<ScopeTable*>* _scopes;

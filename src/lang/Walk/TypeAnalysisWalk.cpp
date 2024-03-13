@@ -414,8 +414,8 @@ bool TypeAnalysisWalk::walkFunctionNode(FunctionNode* node) {
 
     // for modifying the type later, to preserve the static scoping scheme
     auto syms = unscopedLocations()->walkStatementList(node);
-    if ( syms.has_value() && syms.value().second.size() > 0 ) {
-        node->setUsedSymbols(syms.value());
+    if ( syms.has_value() ) {
+        node->setUsedSymbols(syms.value(), true);
     }
 
     _types->setTypeOf(node, flag ? node->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
@@ -427,6 +427,13 @@ bool TypeAnalysisWalk::walkConstructorNode(ConstructorNode* node) {
 
     for ( auto pc : *node->parentConstructors() ) {
         flag = walk(pc) && flag;
+        assert(pc->getTag() == ASTNodeTag::CALL);
+        for ( auto arg : *((CallExpressionNode*)pc)->args() ) {
+            auto syms = unscopedLocations()->walk(arg);
+            if ( syms.has_value() && syms.value().second.size() > 0 ) {
+                node->func()->setUsedSymbols(syms.value(), false);
+            }
+        }
     }
 
     _types->setTypeOf(node, flag ? Type::Primitive::of(Type::Intrinsic::UNIT) : Type::Primitive::of(Type::Intrinsic::ERROR));

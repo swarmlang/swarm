@@ -61,6 +61,7 @@ namespace swarmc::Lang::Walk {
         } else if ( node->symbol()->isProperty() ) {
             // only case where variable is property but is raw identifier
             // is inside member function
+            append(instrs, new ISA::ScopeOf(id));
             append(instrs, assignEval(id, new ISA::ObjGet(
                 makeLocation(
                     ISA::Affinity::LOCAL,
@@ -404,16 +405,29 @@ namespace swarmc::Lang::Walk {
         // modify type signature to maintain static scope
         auto formals = extractFormals(node->formals());
         if ( node->usedSymbols()->size() > 0 ) {
-            for ( auto s = node->usedSymbols()->rbegin(); s != node->usedSymbols()->rend(); s++ ) {
-                auto sym = *s;
-                auto nf = new ISAFormalList({
-                    {
-                        sym->type(),
-                        ISA::Affinity::LOCAL,
-                        TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
-                        sym
-                    }
-                });
+            for ( auto sy = node->usedSymbols()->rbegin(); sy != node->usedSymbols()->rend(); sy++ ) {
+                auto sym = *sy;
+                ISAFormalList* nf = nullptr;
+                if ( sym->isProperty() ) {
+                    auto osym = (ObjectPropertySymbol*)sym;
+                    nf = new ISAFormalList({
+                        {
+                            osym->partOf(),
+                            ISA::Affinity::LOCAL,
+                            TO_ISA_OBJECT_INSTANCE + s(osym->partOf()->getId()),
+                            sym
+                        }
+                    });
+                } else {
+                    nf = new ISAFormalList({
+                        {
+                            sym->type(),
+                            ISA::Affinity::LOCAL,
+                            TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
+                            sym
+                        }
+                    });
+                }
                 formals = mergeFormals(nf, formals);
             }
         }
@@ -424,13 +438,16 @@ namespace swarmc::Lang::Walk {
         // curry usedSymbols here
         auto floc = makeLocation(ISA::Affinity::FUNCTION, name, nullptr);
         for ( auto sym : *node->usedSymbols() ) {
-            append(instrs, assignEval(
-                makeTmp(ISA::Affinity::LOCAL, instrs),
-                new ISA::Curry(floc, makeLocation(
+            auto loc = sym->isProperty() 
+                ? makeLocation(ISA::Affinity::LOCAL, TO_ISA_OBJECT_INSTANCE + s(scanConstructing(sym->name())), nullptr)
+                : makeLocation(
                     sym->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
                     TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
                     nullptr
-                ))
+                );
+            append(instrs, assignEval(
+                makeTmp(ISA::Affinity::LOCAL, instrs),
+                new ISA::Curry(floc, loc)
             ));
             floc = getLastLoc(instrs);
         }
@@ -456,16 +473,29 @@ namespace swarmc::Lang::Walk {
         // modify type signature to maintain static scope
         auto formals = extractFormals(node->func()->formals());
         if ( node->func()->usedSymbols()->size() > 0 ) {
-            for ( auto s = node->func()->usedSymbols()->rbegin(); s != node->func()->usedSymbols()->rend(); s++ ) {
-                auto sym = *s;
-                auto nf = new ISAFormalList({
-                    {
-                        sym->type(),
-                        ISA::Affinity::LOCAL,
-                        TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
-                        sym
-                    }
-                });
+            for ( auto sy = node->func()->usedSymbols()->rbegin(); sy != node->func()->usedSymbols()->rend(); sy++ ) {
+                auto sym = *sy;
+                ISAFormalList* nf = nullptr;
+                if ( sym->isProperty() ) {
+                    auto osym = (ObjectPropertySymbol*)sym;
+                    nf = new ISAFormalList({
+                        {
+                            osym->partOf(),
+                            ISA::Affinity::LOCAL,
+                            TO_ISA_OBJECT_INSTANCE + s(osym->partOf()->getId()),
+                            sym
+                        }
+                    });
+                } else {
+                    nf = new ISAFormalList({
+                        {
+                            sym->type(),
+                            ISA::Affinity::LOCAL,
+                            TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
+                            sym
+                        }
+                    });
+                }
                 formals = mergeFormals(nf, formals);
             }
         }
@@ -514,13 +544,16 @@ namespace swarmc::Lang::Walk {
 
         auto floc = makeLocation(ISA::Affinity::FUNCTION, node->name(), nullptr);
         for ( auto sym : *node->func()->usedSymbols() ) {
-            append(instrs, assignEval(
-                makeTmp(ISA::Affinity::LOCAL, instrs),
-                new ISA::Curry(floc, makeLocation(
+            auto loc = sym->isProperty() 
+                ? makeLocation(ISA::Affinity::LOCAL, TO_ISA_OBJECT_INSTANCE + s(scanConstructing(sym->name())), nullptr)
+                : makeLocation(
                     sym->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
                     TO_ISA_VARIABLE_PREFIX + sym->name() + "_" + sym->uuid(),
                     nullptr
-                ))
+                );
+            append(instrs, assignEval(
+                makeTmp(ISA::Affinity::LOCAL, instrs),
+                new ISA::Curry(floc, loc)
             ));
             floc = getLastLoc(instrs);
         }
@@ -640,7 +673,47 @@ namespace swarmc::Lang::Walk {
         std::list<ISA::LocationReference*> arglocs;
         for ( auto arg : *node->args() ) {
             append(instrs, position(arg));
-            append(instrs, walk(arg));
+            if ( temp && arg->getTag() == ASTNodeTag::FUNCTION ) {
+                auto func = (FunctionNode*)arg;
+                // prepend instance of type as parameter
+                auto defFormals = extractFormals(func->formals());
+
+                // get new return type
+                Type::Type* retType = ((Type::Lambda*)func->type())->returns();
+                auto offset = (func->type()->intrinsic() == Type::Intrinsic::LAMBDA0) ? 0 : 1;
+                for ( auto i = 0; i < defFormals->size() - offset; i++ ) {
+                    assert(retType->isCallable());
+                    retType = ((Type::Lambda*)retType)->returns();
+                }
+
+                auto formals = new ISAFormalList({ {
+                    _constructing.back().first,
+                    ISA::Affinity::LOCAL,
+                    TO_ISA_OBJECT_INSTANCE + s(_constructing.back().first->getId()),
+                    nullptr
+                } });
+                formals->insert(
+                    formals->end(),
+                    std::make_move_iterator(defFormals->begin()),
+                    std::make_move_iterator(defFormals->end())
+                );
+                delete defFormals;
+
+                auto fnname = TO_ISA_FUNCTION_PREFIX + s(_tempCounter++);
+                append(instrs, makeFunction(
+                    fnname, formals, retType,
+                    func, false, true, false
+                ));
+                append(instrs, assignEval(
+                    makeTmp(ISA::Affinity::LOCAL, instrs),
+                    new ISA::Curry(
+                        makeLocation(ISA::Affinity::FUNCTION, fnname, nullptr),
+                        makeLocation(ISA::Affinity::LOCAL, TO_ISA_OBJECT_INSTANCE + s(_constructing.back().first->getId()), nullptr)
+                    )
+                ));
+            } else {
+                append(instrs, walk(arg));
+            }
             arglocs.push_back(getLastLoc(instrs));
         }
 

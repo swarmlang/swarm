@@ -120,7 +120,7 @@ ASTMapReduce<UsedSymbols>* unscopedLocations() {
                 out.first.insert(v->id()->symbol()->ensureVariable());
             } else if ( node->getTag() == ASTNodeTag::IDENTIFIER ) {
                 auto id = (IdentifierNode*)node;
-                if ( id->symbol()->kind() == SemanticSymbolKind::VARIABLE )
+                if ( id->symbol()->kind() == SemanticSymbolKind::VARIABLE && !id->symbol()->isProperty() )
                     out.second.insert(id->symbol()->ensureVariable());
             }
             return out;

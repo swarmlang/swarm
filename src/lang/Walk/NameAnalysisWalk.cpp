@@ -272,6 +272,7 @@ bool NameAnalysisWalk::walkConstructorNode(ConstructorNode* node) {
 
         // Call this to attach the Symbol to the IdentifierNode
         walk(formal.second);
+        node->func()->appendUsedSymbol(formal.second->symbol()->ensureVariable());
     }
     walk(func->typeNode());
     flag = func->typeNode()->disambiguateValue() && flag;
@@ -374,7 +375,6 @@ bool NameAnalysisWalk::walkTypeBodyNode(TypeBodyNode* node) {
     _symbols->enter();
     _objects.push(objType->getParent());
     for (auto decl : *node->declarations()) {
-        IdentifierNode* id = nullptr;
         if ( decl->getTag() == ASTNodeTag::VARIABLEDECLARATION ) {
             auto d = (VariableDeclarationNode*)decl;
             if (d->shared()) {
@@ -386,19 +386,14 @@ bool NameAnalysisWalk::walkTypeBodyNode(TypeBodyNode* node) {
             }
             flag = walk(d->typeNode()) && flag;
             flag = d->typeNode()->disambiguateValue() && flag;
-            _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), d->value()->getTag() == ASTNodeTag::DEFERCALL, objType);
+            _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), objType, d->position(), d->value()->getTag() == ASTNodeTag::DEFERCALL);
             walk(d->id());
-            id = d->id();
         } else if ( decl->getTag() == ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION ) {
             auto d = (UninitializedVariableDeclarationNode*)decl;
             flag = walk(d->typeNode()) && flag;
             flag = d->typeNode()->disambiguateValue() && flag;
-            _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), d->position(), false, objType);
+            _symbols->addObjectProperty(d->id()->name(), d->typeNode()->value(), objType, d->position(), false);
             walk(d->id());
-            id = d->id();
-        }
-        for ( auto c : *node->constructors() ) {
-            c->func()->appendUsedSymbol(id->symbol()->ensureVariable());
         }
     }
     // walk decl values AFTER ids have been added to scope
