@@ -226,3 +226,6 @@ Swarm supports a few other generic programming-language-isms, such as `while` lo
 ## Known Bugs
 - Having a deferred function call as the default value of a property of an object type is
 ideally supported, but it currently does not compile correctly
+- Shared variables in a "captured context" (i.e. a function) need to have their affinity
+changed to local, as they should refer to the implicit argument rather than the actual
+shared location

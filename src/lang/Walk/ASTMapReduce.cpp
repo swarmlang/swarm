@@ -149,7 +149,7 @@ ASTMapReduce<UsedSymbols>* unscopedLocations() {
             return out;
         },
         [](ASTNode* node) {
-            return node->isBlock() || node->getTag() == ASTNodeTag::FUNCTION;
+            return node->getTag() == ASTNodeTag::FUNCTION;
         }
     );
     return &ul;

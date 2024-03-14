@@ -5,7 +5,7 @@ namespace swarmc::Lang::Walk {
 
 [[nodiscard]] bool SharedLocations::has(const ISA::LocationReference* loc) const {
     if ( loc->affinity() != ISA::Affinity::SHARED ) return false;
-    assert( SharedLocations::_locRefToSymbol.count(loc->fqName()) );
+    if ( SharedLocations::_locRefToSymbol.count(loc->fqName()) == 0 ) return false;
     return _map.count(SharedLocations::_locRefToSymbol.at(loc->fqName())) != 0;
 }
 
