@@ -725,6 +725,7 @@ namespace swarmc::Type {
 
         [[nodiscard]] bool isAssignableTo(const Type* other) const override {
             if ( other->getId() == _id ) return true;
+            if ( other->intrinsic() == Intrinsic::AMBIGUOUS ) return true;
 
             if ( other->intrinsic() != Intrinsic::OBJECT ) {
                 // Can only assign to finalized object types
