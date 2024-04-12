@@ -72,11 +72,13 @@ namespace swarmc::Type {
             return "CONTRADICTION";
         }
 
-        [[nodiscard]] static AssignableCache& getAssignableCache();
+        [[nodiscard]] static nslib::Monitor<AssignableCache>& getAssignableCache();
 
         Type() {
             _id = _nextId++;
-            getAssignableCache()[_id] = std::set<std::size_t>();
+            getAssignableCache().access<void>([this](AssignableCache* cache) {
+                (*cache)[_id] = std::set<std::size_t>();
+            });
         }
 
         ~Type() override = default;
@@ -695,24 +697,35 @@ namespace swarmc::Type {
             // If we arrived at a duplicate, we basically are saying for types `a` and `b`:
             // a == b <-> a == b
             // which is of course true, ergo we can return true without recursing further
-            if ( stl::contains(getAssignableCache().at(_id), other->getId()) ) return true;
+            auto cachedIds = getAssignableCache().access<std::set<std::size_t>>([this](AssignableCache* cache) {
+                return (*cache).at(_id);
+            });
+            if ( stl::contains(cachedIds, other->getId()) ) return true;
 
             auto otherObject = dynamic_cast<const Object*>(other);
             auto properties = otherObject->getCollapsedProperties();
             auto otherIter = properties.begin();
+
             // assume objects to be equal until proven otherwise (because of recursive types)
-            getAssignableCache()[_id].insert(other->getId());
+            getAssignableCache().access<void>([this, other](AssignableCache* cache) {
+                (*cache)[_id].insert(other->getId());
+            });
+
             for ( ; otherIter != properties.end(); ++otherIter ) {
                 auto thisResult = getProperty(otherIter->first);
                 if ( thisResult == nullptr ) {
                     // We don't have a required property on the base type
-                    getAssignableCache()[_id].erase(other->getId());
+                    getAssignableCache().access<void>([this, other](AssignableCache* cache) {
+                        (*cache)[_id].erase(other->getId());
+                    });
                     return false;
                 }
 
                 if ( !thisResult->isAssignableTo(otherIter->second) ) {
                     // Our property has an incompatible type
-                    getAssignableCache()[_id].erase(other->getId());
+                    getAssignableCache().access<void>([this, other](AssignableCache* cache) {
+                        (*cache)[_id].erase(other->getId());
+                    });
                     return false;
                 }
             }

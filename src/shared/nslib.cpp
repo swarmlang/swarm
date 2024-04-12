@@ -25,6 +25,7 @@ namespace nslib {
     std::function<void()> ThreadContext::wrap(const std::function<int()>& body) {
         return [body, this]() {
             std::unique_lock<std::recursive_mutex> fwLock(Framework::_threadMapMutex);
+            std::cout << "_threadMap insert | thread get_id " << std::this_thread::get_id() << " | _id " << _id << std::endl;
             Framework::_threadMap.insert({std::this_thread::get_id(), _id});
             fwLock.unlock();
 
@@ -51,11 +52,12 @@ namespace nslib {
         auto inst = produceNewForContext();
         _ctxStore[std::this_thread::get_id()] = inst;
         csm.unlock();
-        Framework::context()
-            ->onShutdown([inst, this]() {
-                std::lock_guard<std::mutex> csm2(_ctxStoreMutex);
-                disposeOfElementForContext(inst);
-            });
+        auto ctx = Framework::context();
+        ctx->onShutdown([inst, this]() {
+            std::lock_guard<std::mutex> csm2(_ctxStoreMutex);
+            _ctxStore.erase(std::this_thread::get_id());
+            disposeOfElementForContext(inst);
+        });
         return inst;
     }
 

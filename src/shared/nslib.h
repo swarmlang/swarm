@@ -28,8 +28,6 @@
 
 #define NS_DELETE_ON_SHUTDOWN(ref) nslib::Framework::onShutdown([ref]() { delete ref; });
 
-#define NS_DEFER() nslib::Defer UNIQUE_NAME(deferred)
-
 #include <dlfcn.h>
 #include <cassert>
 #include <random>
@@ -86,6 +84,29 @@ namespace nslib {
     public:
         virtual ~IStringable() = default;
         [[nodiscard]] virtual std::string toString() const = 0;
+    };
+
+
+    template <typename InnerT>
+    class Monitor : public IStringable {
+    public:
+        explicit Monitor(InnerT* value) : _value(value) {}
+
+        template <typename ReturnT>
+        ReturnT access(std::function<ReturnT(InnerT*)> op) {
+            std::lock_guard<std::mutex> m(_accessMutex);
+            return op(_value);
+        }
+
+        [[nodiscard]] std::string toString() const override {
+            std::stringstream s;
+            s << "Monitor<" << typeid(InnerT).name() << ">";
+            return s.str();
+        }
+
+    private:
+        std::mutex _accessMutex;
+        InnerT* _value;
     };
 
 
@@ -302,7 +323,11 @@ namespace nslib {
 
             // Look up the context for the mapped thread ID
             auto id = idIter->second;
-            return _contexts[id];
+            auto result = _contexts[id];
+            if ( result == nullptr ) {
+                std::cout << "IThreadContext::context NULL  |  id: " << id << "  |  thread id: " << std::this_thread::get_id() << std::endl;
+            }
+            return result;
         }
 
         static bool isThread() {
@@ -2622,12 +2647,12 @@ namespace nslib {
 
     /**
      * A helper for deferring logic until function return a la GoLang.
-     * Prefer the NS_DEFER() macro instead of using this class directly:
      *
      * @example
      * ```cpp
      * void myFunc() {
-     *     NS_DEFER()(()[] {
+     *     nslib::Defer defer;
+     *     defer(()[] {
      *         std::cout << "Some cleanup work.\n";
      *     });
      *
@@ -2644,16 +2669,24 @@ namespace nslib {
      */
     class Defer : public IStringable {
     public:
-        Defer(const std::function<void()>& callback) : _callback(callback) {}
+        Defer() = default;
 
-        ~Defer() override { _callback(); }
+        ~Defer() override {
+            for ( const auto& callback : _callbacks ) {
+                callback();
+            }
+        }
 
-        std::string toString() const override {
-            return "nslib::Defer<>";
+        [[nodiscard]] std::string toString() const override {
+            return "nslib::Defer<#callbacks: " + s(_callbacks.size()) + ">";
+        }
+
+        void operator()(std::function<void()> callback) {
+            _callbacks.push_back(callback);
         }
 
     protected:
-        std::function<void()> _callback;
+        std::vector<std::function<void()>> _callbacks;
     };
 
 

@@ -29,9 +29,10 @@ namespace swarmc::Type {
 
     std::size_t Type::_nextId = 0;
 
-    AssignableCache& Type::getAssignableCache() {
+    nslib::Monitor<AssignableCache>& Type::getAssignableCache() {
         static AssignableCache assignableCache;
-        return assignableCache;
+        static nslib::Monitor<AssignableCache> monitor(&assignableCache);
+        return monitor;
     }
 
     std::map<Intrinsic, Primitive*> Primitive::_primitives;

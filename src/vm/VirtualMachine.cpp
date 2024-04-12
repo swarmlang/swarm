@@ -54,14 +54,19 @@ namespace swarmc::Runtime {
     }
 
     Reference* VirtualMachine::loadFromStore(LocationReference* loc) {
+        nslib::Defer defer;
+
         auto scopeLoc = _scope->map(loc);
         auto store = getStore(scopeLoc);
 
-        // FIXME: smarter locking (e.g. region awareness, atomic operation exemptions, &c.)
-        bool shouldUnlock = store->shouldLockAccesses() && !hasLock(scopeLoc) && lock(scopeLoc);
+        // TODO: smarter locking (e.g. region awareness, atomic operation exemptions, &c.)
+        if ( store->shouldLockAccesses() && !hasLock(scopeLoc) && lock(scopeLoc) ) {
+            defer([this, scopeLoc]() {
+                unlock(scopeLoc);
+            });
+        }
 
         auto value = store->load(scopeLoc);
-        if ( shouldUnlock ) unlock(scopeLoc);
         return value;
     }
 
@@ -180,6 +185,8 @@ namespace swarmc::Runtime {
     }
 
     void VirtualMachine::store(LocationReference* loc, Reference* ref) {
+        nslib::Defer defer;
+
         auto scopeLoc = _scope->map(loc);
         if ( scopeLoc->is(loc) && _scope->parent() == nullptr ) {
             // Variables in the global scope don't need a `scopeof` call, so shadow
@@ -187,12 +194,15 @@ namespace swarmc::Runtime {
             shadow(loc);
             scopeLoc = _scope->map(loc);
         }
-        auto store = getStore(scopeLoc);
 
-        bool shouldUnlock = store->shouldLockAccesses() && !hasLock(scopeLoc) && lock(scopeLoc);
+        auto store = getStore(scopeLoc);
+        if ( store->shouldLockAccesses() && !hasLock(scopeLoc) && lock(scopeLoc) ) {
+            defer([this, scopeLoc]() {
+                unlock(scopeLoc);
+            });
+        }
 
         store->store(scopeLoc, ref);
-        if ( shouldUnlock ) unlock(scopeLoc);
     }
 
     bool VirtualMachine::hasLock(LocationReference* loc) {
