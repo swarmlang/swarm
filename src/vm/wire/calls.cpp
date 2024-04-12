@@ -60,6 +60,9 @@ namespace swarmc::Runtime {
         factory->registerProducer(s(FunctionBackend::FB_PROVIDER), producer);
         factory->registerProducer(s(FunctionBackend::FB_INTRINSIC), producer);
 
+        Framework::onShutdown([factory]() {
+            delete factory;
+        });
         return factory;
     }
 

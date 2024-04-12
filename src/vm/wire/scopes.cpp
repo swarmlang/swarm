@@ -120,6 +120,9 @@ namespace swarmc::Runtime {
             return scope;
         });
 
+        Framework::onShutdown([factory]() {
+            delete factory;
+        });
         return factory;
     }
 

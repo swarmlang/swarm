@@ -24,7 +24,7 @@
 #define TO_ISA_TMP_PREFIX "tmp"
 #define TO_ISA_MAP_KEY_PREFIX "mkey_"
 #define TO_ISA_OBJECT_DEFAULT_PREFIX "defval_"
-#define TO_ISA_OBJECT_INSTANCE "obj_"
+#define TO_ISA_OBJECT_INSTANCE "objinst_"
 
 namespace swarmc::Lang {
 
@@ -59,6 +59,7 @@ protected:
     ISA::Instructions* walkAssignExpressionNode(AssignExpressionNode* node) override;
     ISA::Instructions* walkVariableDeclarationNode(VariableDeclarationNode* node) override;
     ISA::Instructions* walkUninitializedVariableDeclarationNode(UninitializedVariableDeclarationNode* node) override;
+    ISA::Instructions* walkUseNode(UseNode* node) override;
     ISA::Instructions* walkReturnStatementNode(ReturnStatementNode* node) override;
     ISA::Instructions* walkFunctionNode(FunctionNode* node) override;
     ISA::Instructions* walkConstructorNode(ConstructorNode* node) override;
@@ -76,8 +77,8 @@ protected:
     ISA::Instructions* walkDivideNode(DivideNode* node) override;
     ISA::Instructions* walkModulusNode(ModulusNode* node) override;
     ISA::Instructions* walkPowerNode(PowerNode* node) override;
+    ISA::Instructions* walkNthRootNode(NthRootNode* node) override;
     ISA::Instructions* walkNegativeExpressionNode(NegativeExpressionNode* node) override;
-    ISA::Instructions* walkSqrtNode(SqrtNode* node) override;
     ISA::Instructions* walkNotNode(NotNode* node) override;
     ISA::Instructions* walkEnumerationStatement(EnumerationStatement* node) override;
     ISA::Instructions* walkWithStatement(WithStatement* node) override;
@@ -117,8 +118,14 @@ private:
     /** Transforms swarm function call to equivalent SVI instructions */
     ISA::Instructions* callToInstruction(CallExpressionNode*);
 
+    /** Wraps parent constructor calls in a flag marking the lack of creation of new instances*/
+    ISA::Instructions* parentCall(CallExpressionNode*);
+
     /** Transforms `FormalList` into `ISAFormalList` */
     ISAFormalList* extractFormals(FormalList*) const;
+
+    /** Concatenate 2 ISAFormalLists, delete the second and return the first */
+    ISAFormalList* mergeFormals(ISAFormalList*, ISAFormalList*) const;
 
     /** Get a valid reference for `type`, replacing `comp` with `THIS` */
     ISA::TypeReference* getTypeRef(Type::Type* type, Type::Type* comp=nullptr);
@@ -126,6 +133,7 @@ private:
     /** Recursively replaces all instances of `comp` with instances of `Type::Primitive::of(Type::Intrinsic::THIS)` in `type` */
     Type::Type* thisify(Type::Type* type, Type::Type* comp) const;
 
+    /** Scans for what type a property belongs to (in the case that we are constructing types within types) */
     std::size_t scanConstructing(std::string name) const;
 
     /** appends second instructions to first, deletes second */
@@ -133,6 +141,9 @@ private:
 
     /** appends an instruction to the end of a list of instructions. Add drain logic if the variable refers to a deferred call */
     void append(ISA::Instructions*, ISA::Instruction*);
+
+    /** Adds a position annotation */
+    ISA::Instructions* position(ASTNode*) const;
 
     /** adds an AssignEval instruction, removes location from possible deferred locations */
     ISA::Instructions* assignEval(ISA::LocationReference*, ISA::Instruction*);
@@ -144,53 +155,21 @@ private:
     std::size_t _depth = 0;
     std::size_t _loopDepth = 0;
     bool _functionOuterScope = false;
+    bool _parentCall = false;
     DeferredLocationScope* _deferredResults;
     ISA::DeferrableLocationsWalk _combLocations;
     ISA::SharedLocationsWalk _sharedLocsWalkISA;
     SharedLocations _sharedLocs;
 
-    ASTMapReduce<bool> hasReturn = ASTMapReduce<bool>(
-        "AST Has Return",
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::RETURN;
-        },
-        [](bool l, bool r) { return l || r; },
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::FUNCTION
-                || n->getTag() == ASTNodeTag::ENUMERATE;
-        }
-    );
-    ASTMapReduce<bool> hasContinue = ASTMapReduce<bool>(
-        "AST Has Continue",
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::CONTINUE;
-        },
-        [](bool l, bool r) { return l || r; },
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::FUNCTION
-                || n->getTag() == ASTNodeTag::WHILE
-                || n->getTag() == ASTNodeTag::ENUMERATE;
-        }
-    );
-    ASTMapReduce<bool> hasBreak = ASTMapReduce<bool>(
-        "AST Has Break",
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::BREAK;
-        },
-        [](bool l, bool r) { return l || r; },
-        [](ASTNode* n) {
-            return n->getTag() == ASTNodeTag::FUNCTION
-                || n->getTag() == ASTNodeTag::WHILE
-                || n->getTag() == ASTNodeTag::ENUMERATE;
-        }
-    );
-
     // locationref cache
     std::map<ISA::Affinity, std::map<std::string, ISA::LocationReference*>> _locMap;
     // typeref cache
     std::map<std::size_t, ISA::TypeReference*> _typeMap;
+    // map from constructor function location name to the temp location where the scope-curried instance should reside
+    std::map<std::string, ISA::LocationReference*> _constructorLoc;
     // top of stack is the type of the object whose constructor is being compiled
     TypeConstructorData _constructing;
+    TypeConstructorData _defaultValues;
     const std::map<std::string, Type::Type*>& getInstructionAsFunc();
 };
 

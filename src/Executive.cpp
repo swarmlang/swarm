@@ -104,7 +104,6 @@ int Executive::run(int argc, char **argv) {
     }
 
 //    delete console;
-    delete _input;
     Framework::shutdown();
     return result;
 }
@@ -338,9 +337,6 @@ bool Executive::parseArgs(std::vector<std::string>& params) {
         if ( _input->bad() ) {
             if ( !flagTestSuiteOutput ) logger->error("Could not open input file: " + inputFile);
 
-            delete _input;
-            _input = nullptr;
-
             failed = true;
         }
     }
@@ -474,15 +470,16 @@ void Executive::printUsage() {
 }
 
 int Executive::debugOutputTokens() {
-    std::ostream* stream;
+    std::ostream* stream = &std::cout;
 
-    if ( flagOutputTokensTo == "--" ) {
-        stream = &std::cout;
-    } else {
+    NS_DEFER()([stream]() {
+        if ( stream != &std::cout ) delete stream;
+    });
+
+    if ( flagOutputTokensTo != "--" ) {
         stream = new std::ofstream(flagOutputTokensTo);
         if ( stream->bad() ) {
             logger->error("Could not open token output file for writing: " + flagOutputTokensTo);
-            delete stream;
             return 1;
         }
     }
@@ -491,23 +488,24 @@ int Executive::debugOutputTokens() {
         swarmc::VM::Pipeline pipeline(_input);
         pipeline.targetTokenRepresentation(*stream);
     } else {
-        swarmc::Pipeline pipeline(_input);
+        swarmc::Pipeline pipeline(_input, inputFile);
         pipeline.targetTokenRepresentation(*stream);
     }
 
-    if ( stream != &std::cout ) delete stream;
     return 0;
 }
 
 int Executive::debugOutputParse() {
-    std::ostream* stream;
-    if ( flagOutputParseTo == "--" ) {
-        stream = &std::cout;
-    } else {
+    std::ostream* stream = &std::cout;
+
+    NS_DEFER()([stream]() {
+        if ( stream != &std::cout ) delete stream;
+    });
+
+    if ( flagOutputParseTo != "--" ) {
         stream = new std::ofstream(flagOutputParseTo);
         if ( stream->bad() ) {
             logger->error("Could not open parse output file for writing: " + flagOutputParseTo);
-            delete stream;
             return 1;
         }
     }
@@ -522,7 +520,7 @@ int Executive::debugOutputParse() {
         }
     } else {
         try {
-            swarmc::Pipeline pipeline(_input);
+            swarmc::Pipeline pipeline(_input, inputFile);
             pipeline.targetASTRepresentation(*stream);
         } catch (swarmc::Errors::ParseError& e) {
             return e.exitCode;
@@ -530,12 +528,11 @@ int Executive::debugOutputParse() {
     }
 
     logger->success("Parsed input program.");
-    if ( stream != &std::cout ) delete stream;
     return 0;
 }
 
 int Executive::debugParseAndStop() {
-    swarmc::Pipeline pipeline(_input);
+    swarmc::Pipeline pipeline(_input, inputFile);
 
     try {
         pipeline.targetASTSymbolic();
@@ -569,19 +566,25 @@ int Executive::parseFilters() {
 }
 
 int Executive::debugOutputISA() {
-    std::ostream* stream;
-    if ( outputISATo == "--" ) {
-        stream = &std::cout;
-    } else {
+    std::ostream* stream = &std::cout;
+
+    NS_DEFER()([stream]() {
+        if ( stream != &std::cout ) delete stream;
+
+        // hey big g can you change all the defers I put in Executive.cpp
+        // to right after the `stream = new std::ofstream(...)` lines
+        // and change the callbacks to just `delete stream;` with no condition
+    });
+
+    if ( outputISATo != "--" ) {
         stream = new std::ofstream(outputISATo);
         if ( stream->bad() ) {
             logger->error("Could not open parse output file for writing: " + outputISATo);
-            delete stream;
             return 1;
         }
     }
 
-    swarmc::Pipeline pipeline(_input);
+    swarmc::Pipeline pipeline(_input, inputFile);
     pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
 
     try {
@@ -595,19 +598,21 @@ int Executive::debugOutputISA() {
 }
 
 int Executive::debugOutputCFG() {
-    std::ostream* stream;
-    if ( outputCFGTo == "--" ) {
-        stream = &std::cout;
-    } else {
+    std::ostream* stream = &std::cout;
+
+    NS_DEFER()([stream]() {
+        if ( stream != &std::cout ) delete stream;
+    });
+
+    if ( outputCFGTo != "--" ) {
         stream = new std::ofstream(outputCFGTo);
         if ( stream->bad() ) {
             logger->error("Could not open parse output file for writing: " + outputCFGTo);
-            delete stream;
             return 1;
         }
     }
 
-    swarmc::Pipeline pipeline(_input);
+    swarmc::Pipeline pipeline(_input, inputFile);
     pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
 
     try {
@@ -680,20 +685,23 @@ int Executive::emitBinary() {
         fwrite("\x7fSVI", 1, 4, fh);
         fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
         fclose(fh);
+        binn_free(binary);
         return 0;
     }
 
-    swarmc::Pipeline pipeline(_input);
+    swarmc::Pipeline pipeline(_input, inputFile);
     pipeline.setISAOptimizationLevel(flagISAOptimizations, false);
     auto binary = pipeline.targetBinary();
     auto fh = fopen(outputBinaryTo.c_str(), "w");
     if ( fh == nullptr ) {
         logger->error("Could not open binary output file for writing: " + outputBinaryTo);
+        binn_free(binary);
         return 1;
     }
 
     fwrite("\x7fSVI", 1, 4, fh);
     fwrite(binn_ptr(binary), binn_size(binary), 1, fh);
     fclose(fh);
+    binn_free(binary);
     return 0;
 }

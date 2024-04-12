@@ -37,11 +37,11 @@ namespace swarmc {
 
     class Pipeline : public IStringable {
     public:
-        explicit Pipeline(std::istream* input) {
+        explicit Pipeline(std::istream* input, std::string file) {
             _input = input;
-            _scanner = new Lang::Scanner(input);
+            _scanner = new Lang::Scanner(input, file);
             _root = nullptr;
-            _parser = new Lang::Parser(*_scanner, &_root);
+            _parser = new Lang::Parser(*_scanner, &_root, file);
             _isa = nullptr;
         }
 
@@ -49,6 +49,9 @@ namespace swarmc {
             delete _scanner;
             delete _parser;
             delete _root;
+            if ( _isa != nullptr ) {
+                for ( auto i : *_isa ) freeref(i);
+            }
             delete _isa;
         }
 
@@ -60,6 +63,14 @@ namespace swarmc {
             if ( flags & REMOVESELFASSIGN ) flagRemoveSelfAssigns = b;
             if ( flags & CONSTANTPROPAGATION ) flagConstantPropagation = b;
             if ( flags & REMOVEDEADCODE ) flagRemoveDeadCode = b;
+        }
+
+        void swapISA(ISA::Instructions* newISA) {
+            if ( _isa != nullptr ) {
+                for ( auto i : *_isa ) freeref(i);
+                delete _isa;
+            }
+            _isa = newISA;
         }
 
         void targetTokenRepresentation(std::ostream& out) {
@@ -103,13 +114,25 @@ namespace swarmc {
             return _root;
         }
 
-        void targetASTRepresentation(std::ostream& out) {
+        Lang::ProgramNode* targetASTSymbolicTypedOptimized() {
             targetASTSymbolicTyped();
+
+            bool flag = true;
+
+            while ( flag ) {
+                flag = Lang::Walk::removeRedundantCFB()->walk(_root).value_or(false);
+            }
+
+            return _root;
+        }
+
+        void targetASTRepresentation(std::ostream& out) {
+            targetASTSymbolicTypedOptimized();
             Lang::Walk::PrintWalk::print(out, _root);
         }
 
         ISA::Instructions* targetISA() {
-            targetASTSymbolicTyped();
+            targetASTSymbolicTypedOptimized();
 
             Lang::Walk::ToISAWalk isaWalk;
             _isa = isaWalk.walk(_root);
@@ -124,10 +147,7 @@ namespace swarmc {
 
             c.optimize(flagRemoveSelfAssigns, flagConstantPropagation);
 
-            auto isa = c.reconstruct();
-
-            delete _isa;
-            _isa = isa;
+            swapISA(c.reconstruct());
         }
 
         void targetISARepresentation(std::ostream& out) {
@@ -145,10 +165,7 @@ namespace swarmc {
 
             c.serialize(out);
 
-            auto isa = c.reconstruct();
-
-            delete _isa;
-            _isa = isa;
+            swapISA(c.reconstruct());
         }
 
         binn* targetBinary() {

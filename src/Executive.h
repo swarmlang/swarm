@@ -17,6 +17,9 @@ using namespace nslib;
 class Executive : public IUsesConsole, public IUsesLogger {
 public:
     Executive() : IUsesConsole(), IUsesLogger("main") {};
+    ~Executive() {
+        delete _input;
+    }
 
     int run(int argc, char **argv);
     void cleanup();
@@ -55,7 +58,7 @@ protected:
     std::string outputResultTo = "--";
     std::string outputISATo = "--";
     std::string outputBinaryTo;
-    std::string outputCFGTo;
+    std::string outputCFGTo = "--";
     std::string flagFilterFile;
     std::string inputFile;
     std::vector<std::string> externalProviders;

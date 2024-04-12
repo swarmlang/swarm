@@ -61,11 +61,7 @@ namespace swarmc::ISA {
     class Curry : public BinaryReferenceInstruction {
     public:
         Curry(Reference* fn, Reference* param) :
-            BinaryReferenceInstruction(Tag::CURRY, useref(fn), useref(param)) {}
-        ~Curry() override {
-            freeref(_first);
-            freeref(_second);
-        }
+            BinaryReferenceInstruction(Tag::CURRY, fn, param) {}
         [[nodiscard]] Curry* copy() const override {
             return new Curry(_first->copy(), _second->copy());
         }

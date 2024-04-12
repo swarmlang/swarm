@@ -117,14 +117,6 @@ namespace swarmc::Lang {
         auto range = new PrologueFunctionSymbol("range", typeNumToNumToNumToEnumNum, new ProloguePosition("range"), "RANGE");
         prologueScope->insert(range);
 
-        // nthRoot :: number -> number -> number
-        auto typeNumToNumToNum = new Type::Lambda1(
-            Type::Primitive::of(Type::Intrinsic::NUMBER),
-            typeNumToNum
-        );
-        auto nthRoot = new PrologueFunctionSymbol("nthRoot", typeNumToNumToNum, new ProloguePosition("nthRoot"), "NTH_ROOT");
-        prologueScope->insert(nthRoot);
-
         auto typeStrVoid = new Type::Lambda1(
             Type::Primitive::of(Type::Intrinsic::STRING),
             Type::Primitive::of(Type::Intrinsic::VOID)
@@ -266,6 +258,10 @@ namespace swarmc::Lang {
         auto file_append = new PrologueFunctionSymbol("append", typeFileStringVoid, new ProloguePosition("append"), "APPEND_FILE");
         prologueScope->insert(file_append);
 
+        auto typeNumToNumToNum = new Type::Lambda1(
+            Type::Primitive::of(Type::Intrinsic::NUMBER),
+            typeNumToNum
+        );
         auto max = new PrologueFunctionSymbol("max", typeNumToNumToNum, new ProloguePosition("max"), "MAX");
         prologueScope->insert(max);
 

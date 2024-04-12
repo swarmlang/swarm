@@ -15,9 +15,10 @@ Example:
 `enumerable<number> nums = [1,2,3];`  
 *Note: To have an empty enumerable literal, you must ascribe a type to its values to prevent ambiguity.*  
 *Example:* `enumerable<number> nums = [] of number;`  
-To access the values of an enumerable, use the `[<idx>]` operator.
-To append a value to an enumerable, use the `nums[] = <val>;` syntax.
+To access the values of an enumerable, use the `[<idx>]` operator.  
 Example: `nums[1]`  
+To append a value to an enumerable, use the `nums[] = <val>;` syntax.  
+Example: `nums[] = 1;`
 - **Maps**  
 A map is an unordered set of mappings from identifiers to values. The types of the values must be declared similar to an enumerable.  
 Example: `map<number> m = { a: 3, b: 4 };`  
@@ -38,7 +39,8 @@ Swarm supports most of the basic operations on primitive values. The operators, 
 | Addition and Subtraction | `x <op> y` |
 | String Concatenation | `x + y` |
 | Multiplication, Division, and Modulus | `x <op> y` |
-| Exponentiation | `x ^ y` |
+| Exponentiation and Xth Root | `x ^ y`, `x _/ y` |
+| Negation, Boolean NOT, and Square Root | `<op> x` |
 
 ## Functions
 
@@ -80,7 +82,6 @@ To call a function, simply call them as you would in Java or C. The thing being 
 | `ceiling`         | Round a number UP to the nearest integer.                   | `number -> number`                                                                  | The number to take the ceiling of.                                                                                                             |
 | `max` | Get the max of two numbers | `number -> number -> number` | The two numbers to be compared |
 | `min` | Get the min of two numbers | `number -> number -> number` | The two numbers to be compared |
-| `nthRoot`         | Take the nth-root of the specified number.                  | `number -> number -> number`                                                        | The root to take (e.g. 2 is square root) and the number to root.                                                                               |
 | `count`           | Count the number of elements in an enumerable.              | `enumerable<_> -> number`                                                           | The enumerable to find the size of.                                                                                                            |
 | `time`            | Get the current UNIX timestamp in fractional seconds        | `-> number`                                                                         | N/A                                                                                                                                            |
 | `subVector`       | Get a slice of a numeric enumeration.                       | `number -> number -> enumerable<number> -> enumerable<number>`                      | The element index to start the slice at, the length of the slice, and the vector to slice.                                                     |
@@ -166,13 +167,14 @@ There are three types of declarations within a type body: initialized variable d
 
 - **Initialized variable declarations:**  
 The values of initialized members of a type are computed when the type is created.  
-*Note: initialized members of a class cannot directly refer to members of the type. For instance, you cannot add a new member* `bool isalive = isAlive();` *. However, indirectly referring to other members of the type (such as using them in a function) is fine.*  
+*Note: initialized members of a class cannot directly refer to members of the type. For instance, you cannot add a new member* `bool isalive = isAlive();` *. However, indirectly referring to other members of the type (such as `fn foo = (): bool => isAlive()` using them in a function) is fine.*  
 - **Uninitialized variable declarations:**  
 These are not assigned any value by default. However, all members of a type must be instantiated in an object, meaning that you *must* initialize these members in the constructor.
 - **Constructors:**  
 Constructors can be thought of as functions that return instances of the type. Since they always return an instance of the type, the return type is omitted in the syntax. Constructors are not technically members of the type and thus cannot be access as members of the type.  
 Types can have multiple constructors. If two or more constructors have the same function signature, the compiler will always choose the first one, making the second dead code.  
-All uninitialized member variables must be initialized in *all* constructors.
+All uninitialized member variables must be initialized in *all* constructors.  
+If there are no uninitialized members of a type, the constructor can be omitted, and the compiler will implicitly insert an empty constructor.
 
 ## Objects
 
@@ -180,6 +182,50 @@ Objects are instances of user-defined types.
 To create an object, use the popular Java-esque syntax: `Person p = Person("George Washington", 291);`  
 Constructors cannot be partially applied, so all arguments to the constructor must be given.
 
+## SubTyping
+At the moment, Swarm supports 2 forms of subtyping:
+```swarm
+type Parent = {
+    string a = "hello";
+};
+
+type Child = {
+    string a = "goodbye";
+    number b = 4;
+};
+
+Parent p = Child();
+lLog(p.a);
+```
+Because the `Child` type has at least all of the same properties with all of the same types as the `Parent` type, `Child` is implicitly a subtype of `Parent`. As you would expect, the variable `p` cannot be used to access the `b` property of the instance it has been assigned, as `Parent` has no such property. When executed, this example should print `goodbye`.  
+```swarm
+type Parent = {
+    constructor(s: string) => {
+        a = s;
+    };
+    string a;
+};
+
+type Child = {
+    use Parent;
+    constructor() : Parent("goodbye") => {};
+    number b = 4;
+};
+
+Parent p = Child();
+lLog(p.a);
+```
+The `use` statement tells the compiler that `Child` is a subtype of `Parent`, thus inheriting all of its members. Despite not having an explicitly written `a` property, constructors of the `Child` type must still initialize all uninitialized members of its parent type. This can be done via assignments in the constructor bodies, or by calls to the parent constructors (as shown in the example).  
+
+Whereas the implicit subtyping only relates 2 types via their similar properties (i.e., if either type were to change the name or type of its `a` property, the 2 types would no longer be related), the explicit syntax binds the definition of the child type to that of the parent.
+
 ## Other
 
 Swarm supports a few other generic programming-language-isms, such as `while` loops and `if` statements, `break` and `continue`. It currently does not support else statements or for loops.
+
+## Known Bugs
+- Having a deferred function call as the default value of a property of an object type is
+ideally supported, but it currently does not compile correctly
+- Shared variables in a "captured context" (i.e. a function) need to have their affinity
+changed to local, as they should refer to the implicit argument rather than the actual
+shared location

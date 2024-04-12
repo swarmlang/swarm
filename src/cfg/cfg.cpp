@@ -68,7 +68,11 @@ std::pair<Block*,Block*> CFGFunction::makeCopy(std::size_t i, std::vector<Block*
         }
     }
 
-    blocks->insert(blocks->end(), newblocks.begin(), newblocks.end());
+    blocks->insert(
+        blocks->end(),
+        std::make_move_iterator(newblocks.begin()),
+        std::make_move_iterator(newblocks.end())
+    );
     return { copyOf.at(_start), copyOf.at(_end) };
 }
 
@@ -110,7 +114,22 @@ ISA::Instructions* ControlFlowGraph::reconstruct() const {
         std::make_move_iterator(main->end())
     );
     delete main;
-    for (auto i : *instrs) useref(i);
+
+    /*
+     * Instructions are referenced in 2 possible places:
+     * 1. The original instruction list that was used to build the CFG (copies will not have this ref)
+     * 2. Blocks
+     * 
+     * When we reassign the instruction list in the pipeline we have to do 2 things:
+     * 1. freeref the original list (some of those instructions might have been removed
+     *      by the opt. pass, meaning that list is the last ref to them)
+     * 2. freeref all the blocks (happens in CFG and CFGFunction destructors). This needs to
+     *      happen because otherwise some instructions (copies) dont get deleted, causing leaks
+     * 
+     * Thus, this useref loop right here re-userefs the instructions we actually want to keep
+     * post-optimization pass, such that when the CFG is free'd, the instructions remain
+     */
+    for ( auto i : *instrs ) useref(i);
 
     return instrs;
 }

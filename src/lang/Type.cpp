@@ -53,11 +53,10 @@ namespace swarmc::Type {
         if (sym == nullptr) {
             throw Errors::SwarmError("Failed to disambiguate type at " + _typeid->position()->toString());
         }
-        assert(sym->kind() == Lang::SemanticSymbolKind::VARIABLE);
-        if (((Lang::VariableSymbol*)sym)->getObjectType() == nullptr) {
+        if (sym->ensureVariable()->getObjectType() == nullptr) {
             throw Errors::SwarmError(_typeid->name() + " is not a type!");
         }
-        auto value = useref(((Lang::VariableSymbol*)sym)->getObjectType()->value());
+        auto value = useref(sym->ensureVariable()->getObjectType()->value());
         return value->disambiguateStatically();
     }
 

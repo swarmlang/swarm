@@ -100,12 +100,16 @@ namespace swarmc::Runtime {
             auto propertyValues = binn_map_list(obj, BC_OTYPE_V);
             binn_iter iter;
             binn binnPropertyValue;
+            std::vector<std::string> keys;
+            binn_list_foreach(propertyKeys, binnPropertyValue) {
+                std::string bstr(binn_get_str(&binnPropertyValue));
+                keys.push_back(bstr);
+            }
             int i = -1;
             binn_list_foreach(propertyValues, binnPropertyValue) {
                 i += 1;
-                auto key = binn_list_str(propertyKeys, i);
                 auto value = factory->produce(&binnPropertyValue, nullptr);
-                inst->setProperty(key, value);
+                inst->setProperty(keys.at(i), value);
             }
 
             if ( binn_map_bool(obj, BC_FINAL) ) {
@@ -406,6 +410,9 @@ namespace swarmc::Runtime {
             return ref;
         });
 
+        Framework::onShutdown([factory]() {
+            delete factory;
+        });
         return factory;
     }
 }

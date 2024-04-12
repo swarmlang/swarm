@@ -66,9 +66,10 @@ namespace nslib {
         if (token == swarmc::Lang::Parser::token::INCLUDE) return "INCLUDE";
         if (token == swarmc::Lang::Parser::token::CONSTRUCTOR) return "CONSTRUCTOR";
         if (token == swarmc::Lang::Parser::token::FROM) return "FROM";
-        if (token == swarmc::Lang::Parser::token::SQRT) return "SQRT";
+        if (token == swarmc::Lang::Parser::token::ROOT) return "ROOT";
         if (token == swarmc::Lang::Parser::token::WILDCARD) return "WILDCARD";
         if (token == swarmc::Lang::Parser::token::DEFER) return "DEFER";
+        if (token == swarmc::Lang::Parser::token::USE) return "USE";
 
         return "UNKNOWN";
     }

@@ -466,6 +466,11 @@ namespace swarmc::Runtime {
 
         enumeration->append(value);
 
+        // update shared store
+        if ( i->second()->affinity() == ISA::Affinity::SHARED ) {
+            _vm->store(i->second(), enumeration);
+        }
+
         return nullptr;
     }
 
@@ -484,6 +489,11 @@ namespace swarmc::Runtime {
         }
 
         enumeration->prepend(value);
+
+        // update shared store
+        if ( i->second()->affinity() == ISA::Affinity::SHARED ) {
+            _vm->store(i->second(), enumeration);
+        }
 
         return nullptr;
     }
@@ -532,6 +542,12 @@ namespace swarmc::Runtime {
         }
 
         enumeration->set(static_cast<std::size_t>(idx->value()), value);
+
+        // update shared store
+        if ( i->first()->affinity() == ISA::Affinity::SHARED ) {
+            _vm->store(i->first(), enumeration);
+        }
+
         return nullptr;
     }
 

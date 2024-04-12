@@ -137,6 +137,10 @@ protected:
         pop_space();
     }
 
+    void walkUseNode(UseNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+    }
+
     void walkReturnStatementNode(ReturnStatementNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         if ( node->value() != nullptr ) {
@@ -158,6 +162,7 @@ protected:
     void walkConstructorNode(ConstructorNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
+        for ( auto pc : *node->parentConstructors() ) walk(pc);
         walk(node->func());
         pop_space();
     }
@@ -165,6 +170,9 @@ protected:
     void walkTypeBodyNode(TypeBodyNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
+        for ( auto decl : *node->parents() ) {
+            walk(decl);
+        }
         for ( auto decl : *node->declarations() ) {
             walk(decl);
         }
@@ -275,14 +283,15 @@ protected:
         pop_space();
     }
 
-    void walkNegativeExpressionNode(NegativeExpressionNode* node) override {
+    void walkNthRootNode(NthRootNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
-        walk(node->exp());
+        walk(node->left());
+        walk(node->right());
         pop_space();
     }
 
-    void walkSqrtNode(SqrtNode* node) override {
+    void walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();
         walk(node->exp());

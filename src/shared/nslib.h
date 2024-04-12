@@ -747,6 +747,11 @@ namespace nslib {
         if ( v == nullptr ) return "(nullptr)";
         return v->toString();
     }
+    inline std::string s(const IStringable& v) { return v.toString(); }
+    inline std::string s(const IStringable* v) {
+        if ( v == nullptr ) return "(nullptr)";
+        return v->toString();
+    }
 
     template <typename T>
     inline std::string s(std::optional<T> v) {

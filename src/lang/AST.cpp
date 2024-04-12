@@ -42,6 +42,7 @@ namespace nslib {
         if ( tag == swarmc::Lang::ASTNodeTag::ASSIGN ) return "AssignNode";
         if ( tag == swarmc::Lang::ASTNodeTag::VARIABLEDECLARATION ) return "VariableDeclarationNode";
         if ( tag == swarmc::Lang::ASTNodeTag::UNINITIALIZEDVARIABLEDECLARATION ) return "UninitializedVariableDeclarationNode";
+        if ( tag == swarmc::Lang::ASTNodeTag::USE ) return "UseNode";
         if ( tag == swarmc::Lang::ASTNodeTag::RETURN ) return "ReturnNode";
         if ( tag == swarmc::Lang::ASTNodeTag::FUNCTION ) return "FunctionNode";
         if ( tag == swarmc::Lang::ASTNodeTag::CONSTRUCTOR ) return "ConstructorNode";
@@ -59,8 +60,8 @@ namespace nslib {
         if ( tag == swarmc::Lang::ASTNodeTag::DIVIDE ) return "DivideNode";
         if ( tag == swarmc::Lang::ASTNodeTag::MODULUS ) return "ModulusNode";
         if ( tag == swarmc::Lang::ASTNodeTag::POWER ) return "PowerNode";
+        if ( tag == swarmc::Lang::ASTNodeTag::NTHROOT ) return "NthRootNode";
         if ( tag == swarmc::Lang::ASTNodeTag::NEGATIVE ) return "NegativeNode";
-        if ( tag == swarmc::Lang::ASTNodeTag::SQUAREROOT ) return "SquareRootNode";
         if ( tag == swarmc::Lang::ASTNodeTag::NOT ) return "NotNode";
         if ( tag == swarmc::Lang::ASTNodeTag::ENUMERATE ) return "EnumerateNode";
         if ( tag == swarmc::Lang::ASTNodeTag::WITH ) return "WithNode";

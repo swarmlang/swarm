@@ -191,6 +191,15 @@ protected:
         return reduce(rets);
     }
 
+    virtual std::optional<TReturn> walkUseNode(UseNode* node) override {
+        if ( _skip(node) ) return std::nullopt;
+        std::list<std::optional<TReturn>> rets = { _map(node) };
+        for ( auto id : *node->ids() ) {
+            rets.push_back(this->walk(id));
+        }
+        return reduce(rets);
+    }
+
     virtual std::optional<TReturn> walkReturnStatementNode(ReturnStatementNode* node) override {
         if ( _skip(node) ) return std::nullopt;
         std::list<std::optional<TReturn>> rets = { _map(node) };
@@ -218,6 +227,9 @@ protected:
             _map(node),
             this->walk(node->func())
         };
+        for ( auto pc : *node->parentConstructors() ) {
+            rets.push_back(this->walk(pc));
+        }
         return reduce(rets);
     }
 
@@ -298,11 +310,11 @@ protected:
         return walkBinaryExpressionNode(node);
     }
 
-    virtual std::optional<TReturn> walkNegativeExpressionNode(NegativeExpressionNode* node) override {
-        return walkUnaryExpressionNode(node);
+    virtual std::optional<TReturn> walkNthRootNode(NthRootNode* node) override {
+        return walkBinaryExpressionNode(node);
     }
 
-    virtual std::optional<TReturn> walkSqrtNode(SqrtNode* node) override {
+    virtual std::optional<TReturn> walkNegativeExpressionNode(NegativeExpressionNode* node) override {
         return walkUnaryExpressionNode(node);
     }
 
@@ -406,6 +418,23 @@ private:
         return acc;
     }
 };
+
+// implementations
+
+// Removes statements after a return/continue/break, continues at the end of whiles, and void returns at the end of functions
+ASTMapReduce<bool>* removeRedundantCFB();
+
+// Returns `true` if the AST has a return statement belonging to this scope
+ASTMapReduce<bool>* hasReturn();
+
+// Returns `true` if the AST has a continue statement belonging to this scope
+ASTMapReduce<bool>* hasContinue();
+
+// Returns `true` if the AST has a break statement belonging to this scope
+ASTMapReduce<bool>* hasBreak();
+
+// Returns a pair of sets, containing the symbols declared in this scope, and the symbols used in this scope but declared in another
+ASTMapReduce<UsedSymbols>* unscopedLocations();
 
 }
 

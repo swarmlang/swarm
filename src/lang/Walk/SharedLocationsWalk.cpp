@@ -5,7 +5,7 @@ namespace swarmc::Lang::Walk {
 
 [[nodiscard]] bool SharedLocations::has(const ISA::LocationReference* loc) const {
     if ( loc->affinity() != ISA::Affinity::SHARED ) return false;
-    assert( SharedLocations::_locRefToSymbol.count(loc->fqName()) );
+    if ( SharedLocations::_locRefToSymbol.count(loc->fqName()) == 0 ) return false;
     return _map.count(SharedLocations::_locRefToSymbol.at(loc->fqName())) != 0;
 }
 
@@ -166,6 +166,14 @@ SharedLocations SharedLocationsWalk::getLocs(ASTNode* node) {
     return {};
 }
 
+[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkUseNode(UseNode* node) {
+    auto sharedLocs = SharedLocationsMap();
+    for ( auto id : *node->ids() ) {
+        combine(sharedLocs, walk(id));
+    }
+    return sharedLocs;
+}
+
 [[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkReturnStatementNode(ReturnStatementNode* node) {
     if ( node->value() != nullptr ) {
         return walk(node->value());
@@ -241,11 +249,11 @@ SharedLocations SharedLocationsWalk::getLocs(ASTNode* node) {
     return walkBinaryExpressionNode(node);
 }
 
-[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
-    return walkUnaryExpressionNode(node);
+[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkNthRootNode(NthRootNode* node) {
+    return walkBinaryExpressionNode(node);
 }
 
-[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkSqrtNode(SqrtNode* node) {
+[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
     return walkUnaryExpressionNode(node);
 }
 

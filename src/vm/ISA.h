@@ -1017,7 +1017,8 @@ namespace swarmc::ISA {
         }
 
         virtual void setFirst(TFirst* first) {
-            _first = first;
+            freeref(_first);
+            _first = useref(first);
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -1046,11 +1047,13 @@ namespace swarmc::ISA {
         }
 
         virtual void setFirst(TFirst* first) {
-            _first = first;
+            freeref(_first);
+            _first = useref(first);
         }
 
         virtual void setSecond(TSecond* second) {
-            _second = second;
+            freeref(_second);
+            _second = useref(second);
         }
 
         [[nodiscard]] std::string toString() const override {
@@ -1095,15 +1098,18 @@ namespace swarmc::ISA {
         }
 
         virtual void setFirst(TFirst* first) {
-            _first = first;
+            freeref(_first);
+            _first = useref(first);
         }
 
         virtual void setSecond(TSecond* second) {
-            _second = second;
+            freeref(_second);
+            _second = useref(second);
         }
 
         virtual void setThird(TThird* third) {
-            _third = third;
+            freeref(_third);
+            _third = useref(third);
         }
 
         [[nodiscard]] std::string toString() const override {

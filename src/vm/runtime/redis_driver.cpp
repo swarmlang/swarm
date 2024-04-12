@@ -18,6 +18,9 @@ namespace swarmc::Runtime::RedisDriver {
             opts.port = Configuration::REDIS_PORT;
             opts.socket_timeout = std::chrono::milliseconds(0);
             redis = new sw::redis::Redis(opts);
+            Framework::onShutdown([]() {
+                delete redis;
+            });
         }
 
         return redis;

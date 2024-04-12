@@ -83,7 +83,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(uinstr->first()) + " with " + s(v) + " in " + s(uinstr));
-                    freeref(uinstr->first());
                     uinstr->setFirst(v);
                     flag = true;
                 }
@@ -95,7 +94,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(binstr->first()) + " with " + s(v) + " in " + s(binstr));
-                    freeref(binstr->first());
                     binstr->setFirst(v);
                     flag = true;
                 }
@@ -105,7 +103,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(binstr->second()) + " with " + s(v) + " in " + s(binstr));
-                    freeref(binstr->second());
                     binstr->setSecond(v);
                     flag = true;
                 }
@@ -117,7 +114,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(tinstr->first()) + " with " + s(v) + " in " + s(tinstr));
-                    freeref(tinstr->first());
                     tinstr->setFirst(v);
                     flag = true;
                 }
@@ -127,7 +123,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(tinstr->second()) + " with " + s(v) + " in " + s(tinstr));
-                    freeref(tinstr->second());
                     tinstr->setSecond(v);
                     flag = true;
                 }
@@ -137,7 +132,6 @@ private:
                 auto v = _valueMap->get(name);
                 if ( v != nullptr ) {
                     logger->debug("Replaced " + s(tinstr->third()) + " with " + s(v) + " in " + s(tinstr));
-                    freeref(tinstr->third());
                     tinstr->setThird(v);
                     flag = true;
                 }
@@ -176,12 +170,11 @@ private:
         if ( fDepth == 0 ) {
             for (auto instr : *block->instructions()) {
                 if ( instr->tag() == ISA::Tag::ASSIGNVALUE ) {
-                    std::string name = ((ISA::AssignValue*)instr)->first()->fqName();
+                    auto a = (ISA::AssignValue*)instr;
+                    std::string name = a->first()->fqName();
                     // check for self-assigns because they cause an infinite loop
-                    if ( ((ISA::AssignValue*)instr)->second()->tag() == ISA::ReferenceTag::LOCATION ) {
-                        // FIXME: Add propagation of instructions a la upgrading AssignValue to AssignEval
-                        // note: whichever one was assigned most recent is the one that gets propagated
-                        if (name == ((ISA::LocationReference*)((ISA::AssignValue*)instr)->second())->fqName()) {
+                    if ( a->second()->tag() == ISA::ReferenceTag::LOCATION ) {
+                        if (a->first()->is((ISA::LocationReference*)a->second())) {
                             continue;
                         }
                     }
@@ -199,13 +192,15 @@ private:
                 } else if ( instr->tag() == ISA::Tag::FNPARAM 
                         || instr->tag() == ISA::Tag::SCOPEOF 
                         || instr->tag() == ISA::Tag::TYPIFY
-                        || instr->tag() != ISA::Tag::LOCK 
-                        || instr->tag() != ISA::Tag::UNLOCK )
+                        || instr->tag() == ISA::Tag::LOCK 
+                        || instr->tag() == ISA::Tag::UNLOCK )
                 {
                     continue;
                 }
 
                 flag = propagate(instr, true) || flag;
+                // TODO: if we modify an enum/map/obj, we can no longer propagate `enuminit`-esque
+                // instructions, so we should remove them from the instruction map
             }
         }
     
