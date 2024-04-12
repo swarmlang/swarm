@@ -938,7 +938,7 @@ namespace swarmc::Lang::Walk {
                 Type::Primitive::of(Type::Intrinsic::NUMBER),
                 (node->index() != nullptr && node->index()->shared())
                     ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL,
-                (node->index() == nullptr) ? "index" : node->index()->name(),
+                (node->index() == nullptr) ? "index" : TO_ISA_VARIABLE_PREFIX + node->index()->name() + "_" + node->index()->symbol()->uuid(),
                 (node->index() == nullptr) ? nullptr : node->index()->symbol()
             }
         });
