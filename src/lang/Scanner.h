@@ -12,6 +12,8 @@
 
 namespace swarmc::Lang {
 
+    [[nodiscard]] std::string tokenTagString(swarmc::Lang::Parser::token::token_kind_type token);
+
     /**
      * Base class for the Flex-based input lexer.
      */
@@ -20,7 +22,7 @@ namespace swarmc::Lang {
         explicit Scanner(std::istream* in, std::string file) : yyFlexLexer(in), _file(std::move(file)) {};
         ~Scanner() override {
             for ( auto token : _tokens ) {
-                delete token;
+                freeref(token);
             }
         }
 
@@ -29,18 +31,18 @@ namespace swarmc::Lang {
         virtual int yylex(Parser::semantic_type* const lval);
 
         /** Creates a new Token instance for the given Parser::token kind. */
-        int makeBareToken(int tagIn) {
+        int makeBareToken(swarmc::Lang::Parser::token::token_kind_type tagIn) {
             auto length = static_cast<size_t>(yyleng);
             auto pos = new Position(_file, this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
-            yylval->lexeme = new Token(pos, tagIn, s(tagIn));
-            _tokens.push_back(yylval->lexeme);
+            yylval->lexeme = new Token(pos, tagIn, tokenTagString(tagIn));
+            _tokens.push_back(useref(yylval->lexeme));
             setColNum(colNum + length);
             return tagIn;
         }
 
         int makeStringLiteralToken() {
-            int tagIn = Parser::token::STRINGLITERAL;
+            auto tagIn = Parser::token::STRINGLITERAL;
             auto length = static_cast<size_t>(yyleng);
             auto pos = new Position(_file, this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
@@ -62,32 +64,32 @@ namespace swarmc::Lang {
                 }
             }
 
-            yylval->lexeme = new StringLiteralToken(pos, tagIn, s(tagIn) + ":" + text, text.substr(1, text.size() - 2));
-            _tokens.push_back(yylval->lexeme);
+            yylval->lexeme = new StringLiteralToken(pos, tagIn, tokenTagString(tagIn) + ":" + text, text.substr(1, text.size() - 2));
+            _tokens.push_back(useref(yylval->lexeme));
             setColNum(colNum + length);
             return tagIn;
         }
 
         int makeNumberLiteralToken() {
-            int tagIn = Parser::token::NUMBERLITERAL;
+            auto tagIn = Parser::token::NUMBERLITERAL;
             auto length = static_cast<size_t>(yyleng);
             auto pos = new Position(_file, this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
-            yylval->lexeme = new NumberLiteralToken(pos, tagIn, s(tagIn) + ":" + text, std::stod(yytext));
-            _tokens.push_back(yylval->lexeme);
+            yylval->lexeme = new NumberLiteralToken(pos, tagIn, tokenTagString(tagIn) + ":" + text, std::stod(yytext));
+            _tokens.push_back(useref(yylval->lexeme));
             setColNum(colNum + length);
             return tagIn;
         }
 
         int makeIDToken() {
-            int tagIn = Parser::token::ID;
+            auto tagIn = Parser::token::ID;
             auto length = static_cast<size_t>(yyleng);
             auto pos = new Position(_file, this->lineNum, this->lineNum, this->colNum, this->colNum+length);
 
             std::string text(yytext);
-            yylval->lexeme = new IDToken(pos, tagIn, s(tagIn) + ":" + text, yytext);
-            _tokens.push_back(yylval->lexeme);
+            yylval->lexeme = new IDToken(pos, tagIn, tokenTagString(tagIn) + ":" + text, yytext);
+            _tokens.push_back(useref(yylval->lexeme));
             setColNum(colNum + length);
             return tagIn;
         }
@@ -106,7 +108,6 @@ namespace swarmc::Lang {
                 }
 
                 out << s(lex.lexeme) << std::endl;
-                delete lex.lexeme;
             }
         }
 
@@ -135,10 +136,6 @@ namespace swarmc::Lang {
         std::list<Token*> _tokens;
     };
 
-}
-
-namespace nslib {
-    [[nodiscard]] std::string s(swarmc::Lang::Parser::token::token_kind_type token);
 }
 
 #endif

@@ -241,6 +241,8 @@ namespace Walk {
         [[nodiscard]] virtual ExpressionNode* copy() const override = 0;
 
         [[nodiscard]] virtual Type::Type* type() const = 0;
+
+        [[nodiscard]] virtual bool is(const ExpressionNode*) const = 0;
     };
 
 
@@ -353,6 +355,11 @@ namespace Walk {
             return _symbol->type();
         }
 
+        [[nodiscard]] bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::IDENTIFIER ) return false;
+            return _symbol->uuid() == ((IdentifierNode*)node)->_symbol->uuid();
+        }
+
     protected:
         std::string _name;
         SemanticSymbol* _symbol = nullptr;
@@ -403,6 +410,12 @@ namespace Walk {
             assert(baseType->intrinsic() == Type::Intrinsic::ENUMERABLE);
             return ((Type::Enumerable*) baseType)->values();
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::ENUMERABLEACCESS ) return false;
+            auto cnode = (EnumerableAccessNode*)node;
+            return _path->is(cnode->path()) && _index->is(cnode->index());
+        }
     private:
         ExpressionNode* _path;
         ExpressionNode* _index;
@@ -443,6 +456,12 @@ namespace Walk {
             auto baseType = _path->type();
             assert(baseType->intrinsic() == Type::Intrinsic::ENUMERABLE);
             return ((Type::Enumerable*) baseType)->values();
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::ENUMERABLEAPPEND ) return false;
+            auto cnode = (EnumerableAppendNode*)node;
+            return _path->is(cnode->path());
         }
     private:
         ExpressionNode* _path;
@@ -487,6 +506,12 @@ namespace Walk {
             assert(pathType->intrinsic() == Type::Intrinsic::MAP);
             return ((Type::Map*) pathType)->values();
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::MAPACCESS ) return false;
+            auto cnode = (MapAccessNode*)node;
+            return _end->is(cnode->end()) && _path->is(cnode->path());
+        }
     private:
         ExpressionNode* _path;
         IdentifierNode* _end;
@@ -529,6 +554,12 @@ namespace Walk {
             auto pathType = _path->type();
             assert(pathType->intrinsic() == Type::Intrinsic::OBJECT);
             return ((Type::Object*) pathType)->getProperty(_end->name());
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::CLASSACCESS ) return false;
+            auto cnode = (ClassAccessNode*)node;
+            return _end->is(cnode->end()) && _path->is(cnode->end());
         }
     private:
         ExpressionNode* _path;
@@ -614,6 +645,13 @@ namespace Walk {
         [[nodiscard]] std::string toString() const override {
             return "Type<" + _type->toString() + ">";
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::TYPELITERAL 
+                && node->getTag() != ASTNodeTag::TYPEBODY ) return false;
+            auto cnode = (TypeLiteral*)node;
+            return _type->isAssignableTo(cnode->_type) && cnode->_type->isAssignableTo(_type);
+        }
     protected:
         swarmc::Type::Type* _type;
 
@@ -651,6 +689,10 @@ namespace Walk {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
         }
 
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::BOOLEANLITERAL ) return false;
+            return _val == ((BooleanLiteralExpressionNode*)node)->_val;
+        }
     private:
         const bool _val;
     };
@@ -684,6 +726,11 @@ namespace Walk {
         [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::STRING);
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::STRINGLITERAL ) return false;
+            return _value == ((StringLiteralExpressionNode*)node)->_value;
+        }
     protected:
         std::string _value;
     };
@@ -716,6 +763,11 @@ namespace Walk {
 
         [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::NUMBERLITERAL ) return false;
+            return _value == ((NumberLiteralExpressionNode*)node)->_value;
         }
     protected:
         double _value;
@@ -797,6 +849,17 @@ namespace Walk {
         [[nodiscard]] virtual Type::Type* type() const override {
             assert(_type != nullptr);
             return _type->value();
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::ENUMERATIONLITERAL ) return false;
+            auto cnode = (EnumerationLiteralExpressionNode*)node;
+            if ( !_type->is(cnode->_type) ) return false;
+            if ( _actuals->size() != cnode->_actuals->size() ) return false;
+            for ( auto i = 0; i < _actuals->size(); i++ ) {
+                if ( !_actuals->at(i)->is(cnode->_actuals->at(i)) ) return false;
+            }
+            return true;
         }
 
     protected:
@@ -915,6 +978,27 @@ namespace Walk {
             return _type->value();
         }
 
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::MAPLITERAL ) return false;
+            auto cnode = (MapNode*)node;
+            if ( !_type->is(cnode->_type) ) return false;
+            if ( _body->size() != cnode->_body->size() ) return false;
+            // semantically, statements are unordered
+            // but compilation-wise, execution of the statement values *does* matter
+            // ergo we have to do this the cringe way
+            for ( auto i = 0; i < _body->size(); i++ ) {
+                bool flag = false;
+                for ( auto j = 0; j < cnode->_body->size(); j++ ) {
+                    if ( _body->at(i)->id()->name() == cnode->_body->at(j)->id()->name()
+                        && _body->at(i)->value()->is(cnode->_body->at(j)->value()) ) {
+                        flag = true;
+                        break;
+                    }
+                }
+                if ( !flag ) return false;
+            }
+            return true;
+        }
     protected:
         MapBody* _body;
         TypeLiteral* _type;
@@ -966,6 +1050,11 @@ namespace Walk {
             return _value->type();
         }
 
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::ASSIGN ) return false;
+            auto cnode = (AssignExpressionNode*)node;
+            return _value->is(cnode->_value) && _dest->is(cnode->_dest);
+        }
     protected:
         LValNode* _dest;
         ExpressionNode* _value;
@@ -1001,7 +1090,7 @@ namespace Walk {
             return ASTNodeTag::VARIABLEDECLARATION;
         }
 
-        [[nodiscard]] virtual std::string  toString() const override {
+        [[nodiscard]] virtual std::string toString() const override {
             return "VariableDeclarationNode<name: " + id()->name() + ", shared:" +
                 (_shared ? "true" : "false") + ">";
         }
@@ -1222,6 +1311,10 @@ namespace Walk {
 
             return fn;
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            return false;// FIXME?
+        }
     protected:
         TypeLiteral* _type;
         FormalList* _formals;
@@ -1427,6 +1520,10 @@ namespace Walk {
             return _constructor;
         }
 
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            return false; // could be true if function is pure and components `is`
+        }
+
     protected:
         ExpressionNode* _func;
         ConstructorNode* _constructor = nullptr;
@@ -1460,6 +1557,10 @@ namespace Walk {
 
         [[nodiscard]] virtual Type::Type* type() const override {
             return _call->type();
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            return false;
         }
 
     protected:
@@ -1593,6 +1694,14 @@ namespace Walk {
         [[nodiscard]] virtual AndNode* copy() const override {
             return new AndNode(position(), _left->copy(), _right->copy());
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::AND ) return false;
+            auto cnode = (AndNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            if ( _left->is(cnode->_right) && _right->is(cnode->_left) ) return true;
+            return false;
+        }
     };
 
 
@@ -1611,6 +1720,14 @@ namespace Walk {
 
         [[nodiscard]] virtual OrNode* copy() const override {
             return new OrNode(position(), _left->copy(), _right->copy());
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::OR ) return false;
+            auto cnode = (OrNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            if ( _left->is(cnode->_right) && _right->is(cnode->_left) ) return true;
+            return false;
         }
     };
 
@@ -1634,6 +1751,14 @@ namespace Walk {
 
         [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::EQUALS ) return false;
+            auto cnode = (EqualsNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            if ( _left->is(cnode->_right) && _right->is(cnode->_left) ) return true;
+            return false;
         }
     };
 
@@ -1685,6 +1810,14 @@ namespace Walk {
             if ( _comparisonType == NumberComparisonType::GREATER_THAN ) return "GREATER_THAN";
             return "GREATER_THAN_OR_EQUAL";
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::NUMERICCOMPARISON ) return false;
+            auto cnode = (NumericComparisonExpressionNode*)node;
+            if ( _comparisonType != cnode->_comparisonType ) return false;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            return false;
+        }
     protected:
         NumberComparisonType _comparisonType;
     };
@@ -1709,6 +1842,14 @@ namespace Walk {
 
         [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::NOTEQUALS ) return false;
+            auto cnode = (NotEqualsNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            if ( _left->is(cnode->_right) && _right->is(cnode->_left) ) return true;
+            return false;
         }
     };
 
@@ -1757,6 +1898,14 @@ namespace Walk {
         [[nodiscard]] bool concatenation() const {
             return _concatenation;
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::ADD ) return false;
+            auto cnode = (AddNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            if ( _left->is(cnode->_right) && _right->is(cnode->_left) ) return true;
+            return false;
+        }
     private:
         bool _concatenation;
     };
@@ -1777,6 +1926,13 @@ namespace Walk {
         [[nodiscard]] virtual SubtractNode* copy() const override {
             return new SubtractNode(position(), _left->copy(), _right->copy());
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::SUBTRACT ) return false;
+            auto cnode = (SubtractNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            return false;
+        }
     };
 
 
@@ -1796,6 +1952,14 @@ namespace Walk {
         [[nodiscard]] virtual MultiplyNode* copy() const override {
             return new MultiplyNode(position(), _left->copy(), _right->copy());
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::MULTIPLY ) return false;
+            auto cnode = (MultiplyNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            if ( _left->is(cnode->_right) && _right->is(cnode->_left) ) return true;
+            return false;
+        }
     };
 
     /** AST node referencing division of two values. */
@@ -1813,6 +1977,13 @@ namespace Walk {
 
         [[nodiscard]] virtual DivideNode* copy() const override {
             return new DivideNode(position(), _left->copy(), _right->copy());
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::DIVIDE ) return false;
+            auto cnode = (DivideNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            return false;
         }
     };
 
@@ -1833,6 +2004,13 @@ namespace Walk {
         [[nodiscard]] virtual ModulusNode* copy() const override {
             return new ModulusNode(position(), _left->copy(), _right->copy());
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::MODULUS ) return false;
+            auto cnode = (ModulusNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            return false;
+        }
     };
 
 
@@ -1851,6 +2029,13 @@ namespace Walk {
 
         [[nodiscard]] virtual PowerNode* copy() const override {
             return new PowerNode(position(), _left->copy(), _right->copy());
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::POWER ) return false;
+            auto cnode = (PowerNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            return false;
         }
     };
 
@@ -1872,6 +2057,13 @@ namespace Walk {
 
         [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::NTHROOT ) return false;
+            auto cnode = (NthRootNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            return false;
         }
     };
 
@@ -1912,6 +2104,12 @@ namespace Walk {
         [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::NUMBER);
         }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::NEGATIVE ) return false;
+            auto cnode = (NegativeExpressionNode*)node;
+            return _exp->is(cnode->_exp);
+        }
     };
 
     /** AST node referencing boolean negation of an expression. */
@@ -1933,6 +2131,12 @@ namespace Walk {
 
         [[nodiscard]] virtual Type::Type* type() const override {
             return Type::Primitive::of(Type::Intrinsic::BOOLEAN);
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::NOT ) return false;
+            auto cnode = (NotNode*)node;
+            return _exp->is(cnode->_exp);
         }
     };
 
@@ -2171,6 +2375,10 @@ namespace Walk {
 
         [[nodiscard]] virtual bool isResource() const override {
             return true;
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            return false;
         }
 
     protected:

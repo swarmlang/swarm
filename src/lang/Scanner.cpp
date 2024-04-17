@@ -1,7 +1,7 @@
 #include "Scanner.h"
 
-namespace nslib {
-    [[nodiscard]] std::string s(swarmc::Lang::Parser::token::token_kind_type token) {
+namespace swarmc::Lang {
+    [[nodiscard]] std::string tokenTagString(swarmc::Lang::Parser::token::token_kind_type token) {
         if (token == swarmc::Lang::Parser::token::END) return "EOF";
         if (token == swarmc::Lang::Parser::token::ENUMERATE) return "ENUMERATE";
         if (token == swarmc::Lang::Parser::token::SHARED) return "SHARED";

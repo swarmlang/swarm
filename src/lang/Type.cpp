@@ -56,7 +56,7 @@ namespace swarmc::Type {
         if (sym->ensureVariable()->getObjectType() == nullptr) {
             throw Errors::SwarmError(_typeid->name() + " is not a type!");
         }
-        auto value = useref(sym->ensureVariable()->getObjectType()->value());
+        auto value = sym->ensureVariable()->getObjectType()->value();
         return value->disambiguateStatically();
     }
 

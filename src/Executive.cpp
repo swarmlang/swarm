@@ -472,12 +472,13 @@ void Executive::printUsage() {
 int Executive::debugOutputTokens() {
     std::ostream* stream = &std::cout;
 
-    NS_DEFER()([stream]() {
-        if ( stream != &std::cout ) delete stream;
-    });
+    Defer defer;
 
     if ( flagOutputTokensTo != "--" ) {
         stream = new std::ofstream(flagOutputTokensTo);
+        defer([stream]() {
+            delete stream;
+        });
         if ( stream->bad() ) {
             logger->error("Could not open token output file for writing: " + flagOutputTokensTo);
             return 1;
@@ -498,12 +499,13 @@ int Executive::debugOutputTokens() {
 int Executive::debugOutputParse() {
     std::ostream* stream = &std::cout;
 
-    NS_DEFER()([stream]() {
-        if ( stream != &std::cout ) delete stream;
-    });
+    Defer defer;
 
     if ( flagOutputParseTo != "--" ) {
         stream = new std::ofstream(flagOutputParseTo);
+        defer([stream]() {
+            delete stream;
+        });
         if ( stream->bad() ) {
             logger->error("Could not open parse output file for writing: " + flagOutputParseTo);
             return 1;
@@ -568,16 +570,13 @@ int Executive::parseFilters() {
 int Executive::debugOutputISA() {
     std::ostream* stream = &std::cout;
 
-    NS_DEFER()([stream]() {
-        if ( stream != &std::cout ) delete stream;
-
-        // hey big g can you change all the defers I put in Executive.cpp
-        // to right after the `stream = new std::ofstream(...)` lines
-        // and change the callbacks to just `delete stream;` with no condition
-    });
+    Defer defer;
 
     if ( outputISATo != "--" ) {
         stream = new std::ofstream(outputISATo);
+        defer([stream]() {
+            delete stream;
+        });
         if ( stream->bad() ) {
             logger->error("Could not open parse output file for writing: " + outputISATo);
             return 1;
@@ -600,12 +599,13 @@ int Executive::debugOutputISA() {
 int Executive::debugOutputCFG() {
     std::ostream* stream = &std::cout;
 
-    NS_DEFER()([stream]() {
-        if ( stream != &std::cout ) delete stream;
-    });
+    Defer defer;
 
     if ( outputCFGTo != "--" ) {
         stream = new std::ofstream(outputCFGTo);
+        defer([stream]() {
+            delete stream;
+        });
         if ( stream->bad() ) {
             logger->error("Could not open parse output file for writing: " + outputCFGTo);
             return 1;

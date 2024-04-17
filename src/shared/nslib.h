@@ -2676,6 +2676,10 @@ namespace nslib {
     public:
         Defer() = default;
 
+        explicit Defer(std::function<void()> callback) {
+            _callbacks.push_back(callback);
+        }
+
         ~Defer() override {
             for ( const auto& callback : _callbacks ) {
                 callback();

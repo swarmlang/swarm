@@ -50,20 +50,15 @@ namespace Test {
             Pipeline pipeline(&program, "");
             Lang::ProgramNode* pgNode = pipeline.targetASTSymbolicTyped();
 
-            assert(pgNode->body()->at(2)->getTag() == Lang::ASTNodeTag::EXPRESSIONSTATEMENT);
-            assert(pgNode->body()->at(3)->getTag() == Lang::ASTNodeTag::EXPRESSIONSTATEMENT);
-            Lang::ExpressionStatementNode* line3 = (Lang::ExpressionStatementNode*) pgNode->body()->at(2);
-            Lang::ExpressionStatementNode* line4 = (Lang::ExpressionStatementNode*) pgNode->body()->at(3);
+            assert(pgNode->body()->at(2)->getTag() == Lang::ASTNodeTag::ASSIGN);
+            assert(pgNode->body()->at(3)->getTag() == Lang::ASTNodeTag::ASSIGN);
+            auto line3Ass = (Lang::AssignExpressionNode*) pgNode->body()->at(2);
+            auto line4Ass = (Lang::AssignExpressionNode*) pgNode->body()->at(3);
 
-            assert(line3->expression()->getTag() == Lang::ASTNodeTag::ASSIGN);
-            assert(line4->expression()->getTag() == Lang::ASTNodeTag::ASSIGN);
-            Lang::AssignExpressionNode* line3Exp = (Lang::AssignExpressionNode*) line3->expression();
-            Lang::AssignExpressionNode* line4Exp = (Lang::AssignExpressionNode*) line4->expression();
-
-            assert(line3Exp->dest()->getTag() == Lang::ASTNodeTag::MAPACCESS);
-            assert(line4Exp->dest()->getTag() == Lang::ASTNodeTag::MAPACCESS);
-            Lang::MapAccessNode* lval1 = (Lang::MapAccessNode*) line3Exp->dest();
-            Lang::MapAccessNode* lval2 = (Lang::MapAccessNode*) line4Exp->dest();
+            assert(line3Ass->dest()->getTag() == Lang::ASTNodeTag::MAPACCESS);
+            assert(line4Ass->dest()->getTag() == Lang::ASTNodeTag::MAPACCESS);
+            Lang::MapAccessNode* lval1 = (Lang::MapAccessNode*) line3Ass->dest();
+            Lang::MapAccessNode* lval2 = (Lang::MapAccessNode*) line4Ass->dest();
 
             // the shared function recursively calls to the leftmost id, so this should
             // test for all sub-lvals as well

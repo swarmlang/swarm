@@ -14,7 +14,7 @@ namespace swarmc::Lang {
      * Base class for tokens lexed from some input source.
      * Should be overridden for types that need more detailed recordkeeping.
      */
-    class Token : public IStringable {
+    class Token : public IStringable, public IRefCountable {
     public:
         Token(Position* pos, int kind, std::string display) : _pos(useref(pos)), _kind(kind), _display(std::move(display)) {};
         ~Token() override {
