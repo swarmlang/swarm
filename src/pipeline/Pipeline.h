@@ -143,11 +143,11 @@ namespace swarmc {
         }
 
         void targetISAOptimized() {
-            CFG::ControlFlowGraph c(targetISA());
-
-            c.optimize(flagRemoveSelfAssigns, flagConstantPropagation);
-
-            swapISA(c.reconstruct());
+            swapISA(CFG::ControlFlowGraph::optimize(
+                targetISA(),
+                flagRemoveSelfAssigns,
+                flagConstantPropagation
+            ));
         }
 
         void targetISARepresentation(std::ostream& out) {
@@ -159,13 +159,12 @@ namespace swarmc {
         }
 
         void targetCFGRepresentation(std::ostream& out) {
-            CFG::ControlFlowGraph c(targetISA());
-
-            c.optimize(flagRemoveSelfAssigns, flagConstantPropagation);
-
-            c.serialize(out);
-
-            swapISA(c.reconstruct());
+            swapISA(CFG::ControlFlowGraph::optimize(
+                targetISA(),
+                flagRemoveSelfAssigns,
+                flagConstantPropagation,
+                &out
+            ));
         }
 
         binn* targetBinary() {

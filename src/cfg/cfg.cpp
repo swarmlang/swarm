@@ -165,22 +165,28 @@ ISA::Instructions* ControlFlowGraph::reconstruct(Block* block, std::size_t fDept
     return instrs;
 }
 
-bool ControlFlowGraph::optimize(bool rSelfAssign, bool litProp) {
-    bool optimized = false, flag;
-
-    if ( !rSelfAssign ) logger->warn("Disabling removal of self-assignments can result in the loss of atomicity in swarm statements.");
-
+ISA::Instructions* ControlFlowGraph::optimize(ISA::Instructions* instrs, bool rSelfAssign, bool litProp, std::ostream* out) {
+       
+    bool flag;
     auto iterations = 1;
+    auto iOpt = instrs;
 
     do {
-        logger->debug("Starting CFG optimization pass " + s(iterations++));
+        ControlFlowGraph cfg(iOpt);
+
+        if ( iterations == 1 && !rSelfAssign ) 
+            cfg.logger->warn("Disabling removal of self-assignments can result in the loss of atomicity in swarm statements.");
+        if ( iterations == 1 && out != nullptr )
+            cfg.serialize(*out);
+
+        cfg.logger->debug("Starting CFG optimization pass " + s(iterations++));
         flag = false;
-        if (rSelfAssign) flag = RemoveSelfAssign::optimize(this) || flag;
-        if (litProp) flag = ConstantPropagation::optimize(this) || flag;
-        optimized = optimized || flag;
+        if (rSelfAssign) flag = RemoveSelfAssign::optimize(&cfg) || flag;
+        if (litProp) flag = ConstantPropagation::optimize(&cfg) || flag;
+        iOpt = cfg.reconstruct();
     } while (flag);
 
-    return optimized;
+    return iOpt;
 }
 
 

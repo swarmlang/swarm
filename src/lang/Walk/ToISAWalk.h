@@ -29,6 +29,7 @@
 namespace swarmc::Lang {
 
 class DeferredLocationScope;
+class SymbolRemapScope;
 
 namespace Walk {
 
@@ -160,6 +161,7 @@ private:
     ISA::DeferrableLocationsWalk _combLocations;
     ISA::SharedLocationsWalk _sharedLocsWalkISA;
     SharedLocations _sharedLocs;
+    SymbolRemapScope* _symbolRemap;
 
     // locationref cache
     std::map<ISA::Affinity, std::map<std::string, ISA::LocationReference*>> _locMap;

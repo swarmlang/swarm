@@ -1,8 +1,9 @@
 #include "ToISAWalk.h"
 #include "../DeferredLocationScope.h"
+#include "../SymbolRemap.h"
 
 namespace swarmc::Lang::Walk {
-    ToISAWalk::ToISAWalk() : Walk<ISA::Instructions*>("AST->ISA Walk"), _deferredResults(new DeferredLocationScope(nullptr)) {
+    ToISAWalk::ToISAWalk() : Walk<ISA::Instructions*>("AST->ISA Walk"), _deferredResults(new DeferredLocationScope(nullptr)), _symbolRemap(new SymbolRemapScope(nullptr)) {
         _locMap[ISA::Affinity::LOCAL] = std::map<std::string, ISA::LocationReference*>();
         _locMap[ISA::Affinity::SHARED] = std::map<std::string, ISA::LocationReference*>();
         _locMap[ISA::Affinity::FUNCTION] = std::map<std::string, ISA::LocationReference*>();
@@ -17,6 +18,7 @@ namespace swarmc::Lang::Walk {
             freeref(t.second);
         }
         delete _deferredResults;
+        delete _symbolRemap;
     }
 
     ISA::Instructions* ToISAWalk::walkProgramNode(ProgramNode* node) {
@@ -48,7 +50,8 @@ namespace swarmc::Lang::Walk {
         auto instrs = position(node);
 
         auto affinity = node->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-        auto id = makeLocation(affinity, "var_" + node->name() + "_" + node->symbol()->uuid(), nullptr);
+        auto id = _symbolRemap->replace(node->symbol());
+        if ( !id ) id = makeLocation(affinity, "var_" + node->name() + "_" + node->symbol()->uuid(), nullptr);
         SharedLocations::registerLoc(id, node->symbol());
 
         if ( node->symbol()->isPrologue() ) {
@@ -244,7 +247,8 @@ namespace swarmc::Lang::Walk {
         if ( node->dest()->getTag() == ASTNodeTag::IDENTIFIER ) {
             auto id = (IdentifierNode*)node->dest();
             auto affinity = id->shared() ? ISA::Affinity::SHARED : ISA::Affinity::LOCAL;
-            auto loc = makeLocation(
+            auto loc = _symbolRemap->replace(id->symbol());
+            if ( !loc ) loc = makeLocation(
                 affinity,
                 TO_ISA_VARIABLE_PREFIX + id->name() + "_" + id->symbol()->uuid(),
                 nullptr
@@ -432,7 +436,9 @@ namespace swarmc::Lang::Walk {
             }
         }
 
+        _symbolRemap = _symbolRemap->enter();
         append(instrs, makeFunction(name, formals, retType, node, false, true, false));
+        _symbolRemap = _symbolRemap->leave();
         _loopDepth = tempLoop;
 
         // curry usedSymbols here
@@ -1254,6 +1260,7 @@ namespace swarmc::Lang::Walk {
                 auto formal = formals->at(i);
                 auto loc = makeLocation(std::get<1>(formal), std::get<2>(formal), nullptr);
                 SharedLocations::registerLoc(loc, std::get<3>(formal));
+                _symbolRemap->registerSymbol(std::get<3>(formal), loc);
                 append(instrs, new ISA::FunctionParam(getTypeRef(std::get<0>(formal)), loc));
                 _deferredResults->remove(loc);
             }

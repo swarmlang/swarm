@@ -179,16 +179,20 @@ private:
                         }
                     }
                     flag = propagate(instr, false) || flag;
-                    _valueMap->set(name, ((ISA::AssignValue*)instr)->second());
-                    logger->debug("Added " + name + " <- " + ((ISA::AssignValue*)instr)->second()->toString() + " to ValueMap");
+                    if ( a->first()->affinity() != ISA::Affinity::SHARED ) {
+                        _valueMap->set(name, ((ISA::AssignValue*)instr)->second());
+                        logger->debug("Added " + name + " <- " + ((ISA::AssignValue*)instr)->second()->toString() + " to ValueMap");
+                    }
                     continue;
                 } else if ( instr->tag() == ISA::Tag::ASSIGNEVAL ) {
                     // FIXME: dont add impure calls
-                    auto second = ((ISA::AssignEval*)instr)->second();
-                    std::string name = ((ISA::AssignEval*)instr)->first()->fqName();
-                    _instrMap->set(name, ((ISA::AssignEval*)instr)->second());
-                    logger->debug("Added " + name + " <- " + second->toString() + " to InstrMap");
-                    instr = second;
+                    auto a = (ISA::AssignEval*)instr;
+                    std::string name = a->first()->fqName();
+                    if ( a->first()->affinity() != ISA::Affinity::SHARED ) {
+                        _instrMap->set(name, ((ISA::AssignEval*)instr)->second());
+                        logger->debug("Added " + name + " <- " + a->second()->toString() + " to InstrMap");
+                    }
+                    instr = a->second();
                 } else if ( instr->tag() == ISA::Tag::FNPARAM 
                         || instr->tag() == ISA::Tag::SCOPEOF 
                         || instr->tag() == ISA::Tag::TYPIFY

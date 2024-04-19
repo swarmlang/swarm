@@ -151,7 +151,9 @@ SharedLocations SharedLocationsWalk::getLocs(ASTNode* node) {
 }
 
 [[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkAssignExpressionNode(AssignExpressionNode* node) {
-    return walk(node->value());
+    auto sharedLocs = walk(node->dest());
+    combine(sharedLocs, walk(node->value()));
+    return sharedLocs;
 }
 
 [[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkVariableDeclarationNode(VariableDeclarationNode* node) {

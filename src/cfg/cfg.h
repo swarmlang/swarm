@@ -225,36 +225,35 @@ public:
 
 class ControlFlowGraph : public IUsesLogger {
 public:
-    explicit ControlFlowGraph(ISA::Instructions*);
-    
     ~ControlFlowGraph() {
         for ( auto b : *_blocks ) freeref(b);
         delete _blocks;
         for ( const auto& p : *_nameMap ) freeref(p.second);
         delete _nameMap;
     }
-    
-    // make a dot file :)
-    void serialize(std::ostream&) const;
 
     /* Rebuilds a linear ISA with optimizations */
     [[nodiscard]] ISA::Instructions* reconstruct() const;
 
     /* Calls different optimization walks until a fixpoint is reached */
-    bool optimize(bool rSelfAssign, bool litProp);
+    static ISA::Instructions* optimize(ISA::Instructions*, bool rSelfAssign, bool litProp, std::ostream* out=nullptr);
 
     [[nodiscard]] Block* first() const { return _first; }
     [[nodiscard]] Block* last() const { return _last; }
     [[nodiscard]] std::vector<Block*>* blocks() const { return _blocks; }
     [[nodiscard]] std::unordered_map<std::string, CFGFunction*>* getNameMap() const { return _nameMap; }
 private:
+    explicit ControlFlowGraph(ISA::Instructions*);
+
     Block* _first = nullptr;
     Block* _last = nullptr;
 
     ISA::Instructions* _instrs;
     std::vector<Block*>* _blocks;
     std::unordered_map<std::string, CFGFunction*>* _nameMap;
-
+    
+    // make a dot file :)
+    void serialize(std::ostream&) const;
     ISA::Instructions* reconstruct(Block*, size_t) const;
 };
 
