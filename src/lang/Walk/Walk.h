@@ -54,6 +54,7 @@ namespace swarmc::Lang::Walk {
             if ( node->getTag() == ASTNodeTag::NTHROOT ) return walkNthRootNode((NthRootNode*) node);
             if ( node->getTag() == ASTNodeTag::NEGATIVE ) return walkNegativeExpressionNode((NegativeExpressionNode*) node);
             if ( node->getTag() == ASTNodeTag::NOT ) return walkNotNode((NotNode*) node);
+            if ( node->getTag() == ASTNodeTag::ENUMERABLECONCAT ) return walkEnumerationConcatNode((EnumerationConcatNode*) node);
             if ( node->getTag() == ASTNodeTag::ENUMERATE ) return walkEnumerationStatement((EnumerationStatement*) node);
             if ( node->getTag() == ASTNodeTag::WITH ) return walkWithStatement((WithStatement*) node);
             if ( node->getTag() == ASTNodeTag::IF ) return walkIfStatement((IfStatement*) node);
@@ -103,6 +104,7 @@ namespace swarmc::Lang::Walk {
         virtual TReturn walkNthRootNode(NthRootNode* node) = 0;
         virtual TReturn walkNegativeExpressionNode(NegativeExpressionNode* node) = 0;
         virtual TReturn walkNotNode(NotNode* node) = 0;
+        virtual TReturn walkEnumerationConcatNode(EnumerationConcatNode* node) = 0;
         virtual TReturn walkEnumerationStatement(EnumerationStatement* node) = 0;
         virtual TReturn walkWithStatement(WithStatement* node) = 0;
         virtual TReturn walkIfStatement(IfStatement* node) = 0;

@@ -40,6 +40,7 @@ Swarm supports most of the basic operations on primitive values. The operators, 
 | String Concatenation | `x + y` |
 | Multiplication, Division, and Modulus | `x <op> y` |
 | Exponentiation and Xth Root | `x ^ y`, `x _/ y` |
+| Enumeration Concatenation | `x ++ y` |
 | Negation, Boolean NOT, and Square Root | `<op> x` |
 
 ## Functions

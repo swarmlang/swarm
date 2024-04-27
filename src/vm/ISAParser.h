@@ -465,6 +465,12 @@ namespace swarmc::ISA {
                     parseUnaryReference(instructionLeader, tokens, startAt+i+2)
                 ));
                 i += 3;
+            } else if ( instructionLeader == "enumconcat" ) {
+                is.push_back(new ISA::EnumConcat(
+                    parseLocationReference(instructionLeader, tokens, startAt+i),
+                    parseLocationReference(instructionLeader, tokens, startAt+i+1)
+                ));
+                i += 2;
             } else if ( instructionLeader == "enumerate" ) {
                 is.push_back(new ISA::Enumerate(
                     parseUnaryReference(instructionLeader, tokens, startAt+i),

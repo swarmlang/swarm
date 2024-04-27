@@ -225,6 +225,13 @@ namespace swarmc::ISA {
             return loc;
         }
 
+        DeferrableLocations walkEnumConcat(EnumConcat* i) override {
+            DeferrableLocations loc;
+            loc.push_back(i->first());
+            loc.push_back(i->second());
+            return loc;
+        }
+
         DeferrableLocations walkEnumerate(Enumerate* i) override {
             DeferrableLocations loc;
 

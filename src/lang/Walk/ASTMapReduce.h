@@ -322,6 +322,10 @@ protected:
         return walkUnaryExpressionNode(node);
     }
 
+    virtual std::optional<TReturn> walkEnumerationConcatNode(EnumerationConcatNode* node) override {
+        return walkBinaryExpressionNode(node);
+    }
+
     virtual std::optional<TReturn> walkEnumerationStatement(EnumerationStatement* node) override {
         if ( _skip(node) ) return std::nullopt;
         std::list<std::optional<TReturn>> rets = {

@@ -132,6 +132,7 @@ namespace swarmc::Runtime {
         ISA::Reference* walkEnumLength(ISA::EnumLength*) override;
         ISA::Reference* walkEnumGet(ISA::EnumGet*) override;
         ISA::Reference* walkEnumSet(ISA::EnumSet*) override;
+        ISA::Reference* walkEnumConcat(ISA::EnumConcat*) override;
         ISA::Reference* walkEnumerate(ISA::Enumerate*) override;
         ISA::Reference* walkBeginFunction(ISA::BeginFunction*) override;
         ISA::Reference* walkFunctionParam(ISA::FunctionParam*) override;

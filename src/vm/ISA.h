@@ -83,6 +83,7 @@ namespace swarmc::ISA {
         ENUMLENGTH,
         ENUMGET,
         ENUMSET,
+        ENUMCONCAT,
         ENUMERATE,
         STRCONCAT,
         STRLENGTH,
@@ -775,6 +776,12 @@ namespace swarmc::ISA {
         /** Add an item to the beginning of this enumeration. */
         virtual void prepend(Reference* value) {
             _items.insert(_items.begin(), useref(value));
+        }
+
+        /** Concatenate a second enumerable */
+        virtual void concat(EnumerationReference* other) {
+            _items.insert(_items.end(), other->_items.begin(), other->_items.end());
+            for ( auto i : _items ) useref(i);
         }
 
         /** Returns true if this enumeration has an item at the given index. */

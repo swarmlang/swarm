@@ -120,6 +120,7 @@ namespace swarmc::ISA {
             if ( tag == Tag::ENUMLENGTH ) return walkEnumLength(obj);
             if ( tag == Tag::ENUMGET ) return walkEnumGet(obj);
             if ( tag == Tag::ENUMSET ) return walkEnumSet(obj);
+            if ( tag == Tag::ENUMCONCAT ) return walkEnumConcat(obj);
             if ( tag == Tag::ENUMERATE ) return walkEnumerate(obj);
             if ( tag == Tag::STRCONCAT ) return walkStringConcat(obj);
             if ( tag == Tag::STRLENGTH ) return walkStringLength(obj);
@@ -356,6 +357,13 @@ namespace swarmc::ISA {
                 walkLocationReference((binn*) binn_map_map(obj, BC_FIRST)),
                 Wire::references()->produce((binn*) binn_map_map(obj, BC_SECOND), _vm),
                 Wire::references()->produce((binn*) binn_map_map(obj, BC_THIRD), _vm)
+            );
+        }
+
+        EnumConcat* walkEnumConcat(binn* obj) {
+            return new EnumConcat(
+                walkLocationReference((binn*) binn_map_map(obj, BC_FIRST)),
+                walkLocationReference((binn*) binn_map_map(obj, BC_SECOND))
             );
         }
 

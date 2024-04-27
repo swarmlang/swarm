@@ -77,6 +77,7 @@ namespace Walk {
         NTHROOT,
         NEGATIVE,
         NOT,
+        ENUMERABLECONCAT,
         ENUMERATE,
         WITH,
         IF,
@@ -2121,7 +2122,7 @@ namespace Walk {
             return ASTNodeTag::NOT;
         }
 
-        [[nodiscard]] virtual std::string  toString() const override {
+        [[nodiscard]] virtual std::string toString() const override {
             return "NotNode<>";
         }
 
@@ -2137,6 +2138,35 @@ namespace Walk {
             if ( node->getTag() != ASTNodeTag::NOT ) return false;
             auto cnode = (NotNode*)node;
             return _exp->is(cnode->_exp);
+        }
+    };
+
+    class EnumerationConcatNode : public BinaryExpressionNode {
+    public:
+        EnumerationConcatNode(Position* pos, ExpressionNode* left, ExpressionNode* right)
+            : BinaryExpressionNode(pos, left, right) {}
+
+        [[nodiscard]] virtual ASTNodeTag getTag() const override {
+            return ASTNodeTag::ENUMERABLECONCAT;
+        }
+
+        [[nodiscard]] virtual std::string toString() const override {
+            return "EnumerationConcatNode<>";
+        }
+
+        [[nodiscard]] virtual EnumerationConcatNode* copy() const override {
+            return new EnumerationConcatNode(position(), _left->copy(), _right->copy());
+        }
+
+        [[nodiscard]] virtual Type::Type* type() const override {
+            return _left->type();
+        }
+
+        [[nodiscard]] virtual bool is(const ExpressionNode* node) const override {
+            if ( node->getTag() != ASTNodeTag::ENUMERABLECONCAT ) return false;
+            auto cnode = (EnumerationConcatNode*)node;
+            if ( _left->is(cnode->_left) && _right->is(cnode->_right) ) return true;
+            return false;
         }
     };
 

@@ -257,7 +257,10 @@ namespace swarmc::Lang::Walk {
             append(instrs, position(node->dest()));
 
             if ( node->value()->getTag() == ASTNodeTag::DEFERCALL ) {
-                auto jobid = getLastLoc(instrs, 1);
+                auto jobid = getLastLoc(
+                    instrs, 
+                    (instrs->at(instrs->size() - 2)->tag() == ISA::Tag::SCOPEOF) ? 2 : 1
+                );
                 // loc is the variable the result will eventually be stored in, value is the context
                 logger->debug(s(id->position()) + " Marking " + s(loc) + " as the return location of a deferred call");
                 _deferredResults->add(loc, jobid, value);
@@ -926,6 +929,10 @@ namespace swarmc::Lang::Walk {
         return walkUnaryExpressionNode(node);
     }
 
+    ISA::Instructions* ToISAWalk::walkEnumerationConcatNode(EnumerationConcatNode* node) {
+        return walkBinaryExpressionNode(node);
+    }
+
     ISA::Instructions* ToISAWalk::walkEnumerationStatement(EnumerationStatement* node) {
         auto instrs = position(node->enumerable());
         append(instrs, walk(node->enumerable()));
@@ -1160,7 +1167,7 @@ namespace swarmc::Lang::Walk {
             else if ( ctype == NumberComparisonType::GREATER_THAN_OR_EQUAL ) instr = new ISA::GreaterThanOrEqual(leftLoc, rightLoc);
             else if ( ctype == NumberComparisonType::LESS_THAN ) instr = new ISA::LessThan(leftLoc, rightLoc);
             else instr = new ISA::LessThanOrEqual(leftLoc, rightLoc);
-        }
+        } else if ( node->getTag() == ASTNodeTag::ENUMERABLECONCAT ) instr = new ISA::EnumConcat(leftLoc, rightLoc);
 
         append(instrs, position(node));
         append(instrs, assignEval(

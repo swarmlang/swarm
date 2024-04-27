@@ -246,6 +246,14 @@ namespace swarmc::ISA {
             return obj;
         }
 
+        binn* walkEnumConcat(EnumConcat* ec) override {
+            auto obj = binn_map();
+            binn_map_set_uint64(obj, BC_TAG, (std::size_t) ec->tag());
+            binn_map_set_map(obj, BC_FIRST, Wire::references()->reduce(ec->first(), _vm));
+            binn_map_set_map(obj, BC_SECOND, Wire::references()->reduce(ec->second(), _vm));
+            return obj;
+        }
+
         binn* walkEnumerate(Enumerate* e) override {
             auto obj = binn_map();
             binn_map_set_uint64(obj, BC_TAG, (std::size_t) e->tag());

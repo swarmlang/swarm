@@ -81,6 +81,7 @@ protected:
     [[nodiscard]] virtual SharedLocationsMap walkNthRootNode(NthRootNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkNegativeExpressionNode(NegativeExpressionNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkNotNode(NotNode* node) override;
+    [[nodiscard]] virtual SharedLocationsMap walkEnumerationConcatNode(EnumerationConcatNode* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkEnumerationStatement(EnumerationStatement* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkWithStatement(WithStatement* node) override;
     [[nodiscard]] virtual SharedLocationsMap walkIfStatement(IfStatement* node) override;

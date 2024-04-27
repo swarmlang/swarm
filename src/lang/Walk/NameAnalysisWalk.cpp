@@ -503,6 +503,10 @@ bool NameAnalysisWalk::walkNotNode(NotNode* node) {
     return walk(node->exp());
 }
 
+bool NameAnalysisWalk::walkEnumerationConcatNode(EnumerationConcatNode* node) {
+    return walkBinaryExpressionNode(node);
+}
+
 bool NameAnalysisWalk::walkEnumerationStatement(EnumerationStatement* node) {
     bool flag = walk(node->enumerable());
 

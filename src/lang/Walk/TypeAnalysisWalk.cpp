@@ -765,6 +765,44 @@ bool TypeAnalysisWalk::walkNotNode(NotNode* node) {
     return flag;
 }
 
+bool TypeAnalysisWalk::walkEnumerationConcatNode(EnumerationConcatNode* node) {
+    bool flag = walk(node->left());
+    flag = walk(node->right()) && flag;
+
+    const Type::Type* leftType = _types->getTypeOf(node->left());
+    const Type::Type* rightType = _types->getTypeOf(node->right());
+
+    if ( leftType->intrinsic() != Type::Intrinsic::ENUMERABLE && leftType->intrinsic() != Type::Intrinsic::ERROR ) {
+        logger->error(
+            s(node->position()) +
+            " Invalid type " + s(leftType) + " of left-hand operand to expression (expected: ENUMERABLE)."
+        );
+
+        flag = false;
+    }
+
+    if ( rightType->intrinsic() != Type::Intrinsic::ENUMERABLE && rightType->intrinsic() != Type::Intrinsic::ERROR ) {
+        logger->error(
+            s(node->position()) +
+            " Invalid type " + s(rightType) + " of right-hand operand to expression (expected: ENUMERABLE)."
+        );
+
+        flag = false;
+    }
+
+    if ( flag && (!leftType->isAssignableTo(rightType) || !rightType->isAssignableTo(leftType)) && leftType->intrinsic() != Type::Intrinsic::ERROR && rightType->intrinsic() != Type::Intrinsic::ERROR ) {
+        logger->error(
+            s(node->position()) +
+            " Types of left and right-hand sides do not match (left: " + s(leftType) + ", right: " + s(rightType) + ")"
+        );
+
+        flag = false;
+    }
+
+    _types->setTypeOf(node, flag ? node->left()->type() : Type::Primitive::of(Type::Intrinsic::ERROR));
+    return flag;
+}
+
 bool TypeAnalysisWalk::walkEnumerationStatement(EnumerationStatement* node) {
     bool flag = walk(node->enumerable());
 

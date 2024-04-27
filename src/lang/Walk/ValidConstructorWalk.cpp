@@ -90,6 +90,22 @@ void ValidConstructorWalk::walkClassAccessNode(ClassAccessNode* node) {
     return walk(node->path());
 }
 
+void ValidConstructorWalk::walkEnumerationLiteralExpressionNode(EnumerationLiteralExpressionNode* node) {
+    for ( auto i : *node->actuals() ) {
+        walk(i);
+    }
+}
+
+void ValidConstructorWalk::walkMapStatementNode(MapStatementNode* node) {
+    walk(node->value());
+}
+
+void ValidConstructorWalk::walkMapNode(MapNode* node) {
+    for ( auto i : *node->body() ) {
+        walk(i);
+    }
+}
+
 void ValidConstructorWalk::walkAssignExpressionNode(AssignExpressionNode* node) {
     if ( node->dest()->getTag() == ASTNodeTag::IDENTIFIER ) {
         auto dest = (IdentifierNode*)node->dest();
@@ -101,12 +117,14 @@ void ValidConstructorWalk::walkAssignExpressionNode(AssignExpressionNode* node) 
             setPossibleFunctions(dest->symbol(), node->value());
         }
     }
+    walk(node->value());
 }
 
 void ValidConstructorWalk::walkVariableDeclarationNode(VariableDeclarationNode* node) {
     if ( node->typeNode()->value()->isCallable() ) {
         setPossibleFunctions(node->id()->symbol(), node->value());
     }
+    walk(node->assignment()->value());
 }
 
 void ValidConstructorWalk::walkReturnStatementNode(ReturnStatementNode* node) {
@@ -130,6 +148,9 @@ void ValidConstructorWalk::walkFunctionNode(FunctionNode* node) {
 }
 
 void ValidConstructorWalk::walkCallExpressionNode(CallExpressionNode* node) {
+    for ( auto arg : *node->args() ) {
+        walk(arg);
+    }
     if ( node->func()->getTag() == ASTNodeTag::IDENTIFIER ) {
         auto id = (IdentifierNode*)node->func();
         if ( node->constructor() ) {
@@ -161,6 +182,67 @@ void ValidConstructorWalk::walkDeferCallExpressionNode(DeferCallExpressionNode* 
     walkCallExpressionNode(node->call());
 }
 
+void ValidConstructorWalk::walkAndNode(AndNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkOrNode(OrNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkEqualsNode(EqualsNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkNumericComparisonExpressionNode(NumericComparisonExpressionNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkNotEqualsNode(NotEqualsNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkAddNode(AddNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkSubtractNode(SubtractNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkMultiplyNode(MultiplyNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkDivideNode(DivideNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkModulusNode(ModulusNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkPowerNode(PowerNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkNthRootNode(NthRootNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkNegativeExpressionNode(NegativeExpressionNode* node) {
+    walkUnaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkNotNode(NotNode* node) {
+    walkUnaryExpressionNode(node);
+}
+
+void ValidConstructorWalk::walkEnumerationConcatNode(EnumerationConcatNode* node) {
+    walkBinaryExpressionNode(node);
+}
+
+
 void ValidConstructorWalk::walkWithStatement(WithStatement* node) {
     // this remains in the top layer because its body executes unconditionally
     for ( auto stmt : *node->body() ) {
@@ -174,6 +256,15 @@ void ValidConstructorWalk::walkIfStatement(IfStatement* node) {
 
 void ValidConstructorWalk::walkWhileStatement(WhileStatement* node) {
     walkBlockStatementNode(node);
+}
+
+void ValidConstructorWalk::walkBinaryExpressionNode(BinaryExpressionNode* node) {
+    walk(node->left());
+    walk(node->right());
+}
+
+void ValidConstructorWalk::walkUnaryExpressionNode(UnaryExpressionNode* node) {
+    walk(node->exp());
 }
 
 void ValidConstructorWalk::walkBlockStatementNode(BlockStatementNode* node) {

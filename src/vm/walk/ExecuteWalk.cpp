@@ -551,6 +551,26 @@ namespace swarmc::Runtime {
         return nullptr;
     }
 
+    Reference* ExecuteWalk::walkEnumConcat(EnumConcat* i) {
+        verbose("enumconcat " + i->first()->toString() + " " + i->second()->toString());
+        auto enum1 = ensureEnumeration(_vm->resolve(i->first()));
+        auto enum2 = ensureEnumeration(_vm->resolve(i->second()));
+
+        if ( !enum1->type()->isAssignableTo(enum2->type()) ) {
+            throw Errors::RuntimeError(
+                Errors::RuntimeExCode::TypeError,
+                "Invalid concatenation of enumerables with different inner types (left: " + s(enum1->type()->values()) + ", right:" + s(enum2->type()->values()) + ")"
+            );
+        }
+
+        auto ret = new EnumerationReference(enum1->type()->values());
+        ret->reserve(enum1->length() + enum2->length());
+        ret->concat(enum1);
+        ret->concat(enum2);
+
+        return ret;
+    }
+
     Reference* ExecuteWalk::walkEnumerate(Enumerate* i) {
         verbose("enumerate " + i->first()->toString() + " " + i->second()->toString() + " " + i->third()->toString());
         auto elemType = ensureType(_vm->resolve(i->first()));

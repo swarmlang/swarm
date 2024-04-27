@@ -49,6 +49,7 @@ protected:
     bool walkNthRootNode(NthRootNode* node) override;
     bool walkNegativeExpressionNode(NegativeExpressionNode* node) override;
     bool walkNotNode(NotNode* node) override;
+    bool walkEnumerationConcatNode(EnumerationConcatNode* node) override;
     bool walkEnumerationStatement(EnumerationStatement* node) override;
     bool walkWithStatement(WithStatement* node) override;
     bool walkIfStatement(IfStatement* node) override;

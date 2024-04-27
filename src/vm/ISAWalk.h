@@ -47,6 +47,7 @@ namespace swarmc::ISA {
             if ( inst->tag() == Tag::ENUMLENGTH ) return walkEnumLength((EnumLength*) inst);
             if ( inst->tag() == Tag::ENUMGET ) return walkEnumGet((EnumGet*) inst);
             if ( inst->tag() == Tag::ENUMSET ) return walkEnumSet((EnumSet*) inst);
+            if ( inst->tag() == Tag::ENUMCONCAT ) return walkEnumConcat((EnumConcat*) inst);
             if ( inst->tag() == Tag::ENUMERATE ) return walkEnumerate((Enumerate*) inst);
             if ( inst->tag() == Tag::BEGINFN ) return walkBeginFunction((BeginFunction*) inst);
             if ( inst->tag() == Tag::FNPARAM ) return walkFunctionParam((FunctionParam*) inst);
@@ -150,6 +151,7 @@ namespace swarmc::ISA {
         virtual TReturn walkEnumLength(EnumLength*) = 0;
         virtual TReturn walkEnumGet(EnumGet*) = 0;
         virtual TReturn walkEnumSet(EnumSet*) = 0;
+        virtual TReturn walkEnumConcat(EnumConcat*) = 0;
         virtual TReturn walkEnumerate(Enumerate*) = 0;
         virtual TReturn walkBeginFunction(BeginFunction*) = 0;
         virtual TReturn walkFunctionParam(FunctionParam*) = 0;

@@ -83,6 +83,7 @@ namespace swarmc::ISA {
         if ( tag == Tag::ENUMLENGTH ) return "ENUMLENGTH";
         if ( tag == Tag::ENUMGET ) return "ENUMGET";
         if ( tag == Tag::ENUMSET ) return "ENUMSET";
+        if ( tag == Tag::ENUMCONCAT ) return "ENUMCONCAT";
         if ( tag == Tag::ENUMERATE ) return "ENUMERATE";
         if ( tag == Tag::STRCONCAT ) return "STRCONCAT";
         if ( tag == Tag::STRLENGTH ) return "STRLENGTH";

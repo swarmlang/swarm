@@ -136,6 +136,7 @@
 %token <transToken>      ORASSIGN
 %token <transToken>      MODULUS
 %token <transToken>      POWER
+%token <transToken>      ENUMCONCAT
 %token <transToken>      DOT
 %token <transToken>      SHARED
 %token <transToken>      FN
@@ -186,6 +187,7 @@
 %left SUBTRACT ADD
 %left MULTIPLY DIVIDE MODULUS
 %left POWER ROOT
+%left ENUMCONCAT
 %right ARROW
 
 %%
@@ -871,6 +873,11 @@ expressionF :
     | expressionF RARROWEQUALS expressionF {
         Position* pos = new Position($1->position(), $3->position());
         $$ = new NumericComparisonExpressionNode(pos, NumberComparisonType::GREATER_THAN_OR_EQUAL, $1, $3);
+    }
+
+    | expressionF ENUMCONCAT expressionF {
+        Position* pos = new Position($1->position(), $3->position());
+        $$ = new EnumerationConcatNode(pos, $1, $3);
     }
 
     | SUBTRACT term {

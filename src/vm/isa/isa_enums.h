@@ -78,6 +78,19 @@ namespace swarmc::ISA {
         }
     };
 
+    class EnumConcat : public BinaryInstruction<LocationReference, LocationReference> {
+    public:
+        EnumConcat(LocationReference* enum1, LocationReference* enum2) :
+            BinaryInstruction<LocationReference, LocationReference>(Tag::ENUMCONCAT, useref(enum1), useref(enum2)) {}
+        ~EnumConcat() override {
+            freeref(_first);
+            freeref(_second);
+        }
+        [[nodiscard]] EnumConcat* copy() const override {
+            return new EnumConcat(_first->copy(), _second->copy());
+        }
+    };
+
     class Enumerate : public TrinaryInstruction<Reference, LocationReference, LocationReference> {
     public:
         Enumerate(Reference* elemType, LocationReference* enumeration, LocationReference* fn) :

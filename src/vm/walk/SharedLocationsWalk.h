@@ -255,6 +255,20 @@ namespace swarmc::ISA {
             return loc;
         }
 
+        SharedLocations walkEnumConcat(EnumConcat* i) override {
+            SharedLocations loc;
+
+            if ( i->first()->affinity() == Affinity::SHARED ) {
+                loc.push_back(i->first());
+            }
+
+            if ( i->second()->affinity() == Affinity::SHARED ) {
+                loc.push_back(i->second());
+            }
+
+            return loc;
+        }
+
         SharedLocations walkEnumerate(Enumerate* i) override {
             SharedLocations loc;
 

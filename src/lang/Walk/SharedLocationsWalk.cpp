@@ -261,6 +261,10 @@ SharedLocations SharedLocationsWalk::getLocs(ASTNode* node) {
     return walkUnaryExpressionNode(node);
 }
 
+[[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkEnumerationConcatNode(EnumerationConcatNode* node) {
+    return walkBinaryExpressionNode(node);
+}
+
 [[nodiscard]] SharedLocationsMap SharedLocationsWalk::walkEnumerationStatement(EnumerationStatement* node) {
     return walk(node->enumerable());
 }

@@ -305,6 +305,14 @@ protected:
         pop_space();
     }
 
+    void walkEnumerationConcatNode(EnumerationConcatNode* node) override {
+        _out << _prefix << node->toString() << std::endl;
+        push_space();
+        walk(node->left());
+        walk(node->right());
+        pop_space();
+    }
+
     void walkEnumerationStatement(EnumerationStatement* node) override {
         _out << _prefix << node->toString() << std::endl;
         push_space();

@@ -81,6 +81,7 @@ protected:
     ISA::Instructions* walkNthRootNode(NthRootNode* node) override;
     ISA::Instructions* walkNegativeExpressionNode(NegativeExpressionNode* node) override;
     ISA::Instructions* walkNotNode(NotNode* node) override;
+    ISA::Instructions* walkEnumerationConcatNode(EnumerationConcatNode* node) override;
     ISA::Instructions* walkEnumerationStatement(EnumerationStatement* node) override;
     ISA::Instructions* walkWithStatement(WithStatement* node) override;
     ISA::Instructions* walkIfStatement(IfStatement* node) override;

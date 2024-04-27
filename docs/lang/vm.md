@@ -103,6 +103,7 @@ Shared storage is global across all jobs that have access to a location.
   - `enumlength $lloc` - number of entries in enum at `$lloc`
   - `enumget $lloc1 $lloc2` - get the value of the `$lloc2`-th entry of the enum at `$lloc1`
   - `enumset $lloc1 $lloc2 $lloc3` - set the value of the `$lloc2`-th entry of the enum at `$lloc1` to `$lloc3`
+  - `enumconcat $lloc1 $lloc2` - create an enum containing the elements of `$lloc1` followed by those of `$lloc2`
   - `enumerate $lloc1 $lloc2 $lloc3` - syntactic sugar for `f:ENUMERATE`
     - Async enumeration over the elements of the enum `$lloc2`, which are of type `$lloc1`, calling the function `$lloc3`
     - `$lloc3` must take two parameters: first, an element of type `$lloc1`; second, a `p:NUMBER` which is the index of the element
