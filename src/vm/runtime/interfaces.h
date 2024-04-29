@@ -217,10 +217,10 @@ namespace swarmc::Runtime {
         virtual bool isEmpty(QueueContextID) = 0;
 
         /** Add a jobid: return value pair to the current context */
-        virtual void setJobReturn(JobID, ISA::Reference*) = 0;
+        virtual void setJobReturn(QueueContextID, JobID, ISA::Reference*) = 0;
 
         /** Get the entire jobid: return value map */
-        virtual const ReturnMap getJobReturns() = 0;
+        virtual const ReturnMap getJobReturns(QueueContextID) = 0;
 
         virtual void tick() = 0;
     };

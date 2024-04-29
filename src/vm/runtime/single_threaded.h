@@ -213,21 +213,21 @@ namespace swarmc::Runtime::SingleThreaded {
             return "SingleThreaded::Queue<ctx: " + _context + ">";
         }
 
-        virtual void setJobReturn(JobID id, ISA::Reference* value) override {
+        virtual void setJobReturn(QueueContextID qid, JobID id, ISA::Reference* value) override {
             if ( value == nullptr ) {
                 Console::get()->debug("Job with ID " + s(id) + " returned");
                 return;
             }
             Console::get()->debug("Job with ID " + s(id) + " returned with value " + s(value));
 
-            if ( _jobRetMap->count(_context) == 0 ) {
+            if ( _jobRetMap->count(qid) == 0 ) {
                 _jobRetMap->insert({ _context, ReturnMap() });
             }
-            _jobRetMap->at(_context).insert({ id, value });
+            _jobRetMap->at(qid).insert({ id, value });
         }
 
-        virtual const ReturnMap getJobReturns() override {
-            if ( _jobRetMap->count(_context) ) return _jobRetMap->at(_context);
+        virtual const ReturnMap getJobReturns(QueueContextID qid) override {
+            if ( _jobRetMap->count(qid) ) return _jobRetMap->at(qid);
             return ReturnMap();
         }
 

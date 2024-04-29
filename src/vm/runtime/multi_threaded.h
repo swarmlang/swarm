@@ -127,16 +127,16 @@ namespace swarmc::Runtime::MultiThreaded {
         }
 
         [[nodiscard]] std::string toString() const override {
-            return "MultiThreaded::Queue<ctx: " + _context + ">";
+            return "MultiThreaded::Queue<#thread: " + s(_threads.size()) + ">";
         }
 
         void tick() override;
 
-        void tryToProcessJob();
+        void tryToProcessJob(int);
 
-        virtual void setJobReturn(JobID id, ISA::Reference* value) override;
+        virtual void setJobReturn(QueueContextID qid, JobID id, ISA::Reference* value) override;
 
-        virtual const ReturnMap getJobReturns() override;
+        virtual const ReturnMap getJobReturns(QueueContextID) override;
 
     protected:
         JobID _nextId = 0;
@@ -147,12 +147,13 @@ namespace swarmc::Runtime::MultiThreaded {
         std::map<QueueContextID, std::queue<IQueueJob*>> _contextQueues;
         std::map<QueueContextID, std::size_t> _contextJobsInProgress;
         std::unordered_map<QueueContextID, ReturnMap>* _jobRetMap;
+        std::vector<QueueContextID> _currentContext;
 
         bool _shouldExit = false;
 
         void spawnThreads();
 
-        std::pair<IQueueJob*, QueueContextID> popForProcessing();
+        std::pair<IQueueJob*, QueueContextID> popForProcessing(int);
 
         IQueueJob* popForProcessingFromContext(const QueueContextID&);
 

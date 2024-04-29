@@ -189,24 +189,24 @@ namespace swarmc::Runtime::RedisDriver {
             _redis->setnx(Configuration::REDIS_PREFIX + "nextJobID", "0");
         }
 
-        virtual void setJobReturn(JobID id, ISA::Reference* value) override {
+        virtual void setJobReturn(QueueContextID qid, JobID id, ISA::Reference* value) override {
             if ( value == nullptr ) {
                 Console::get()->debug("Job with ID " + s(id) + " returned");
                 return;
             }
-            Console::get()->debug("Job with ID " + s(id) + " returned with value " + s(value));
+            Console::get()->debug("Job with ID " + s(id) + " returned with value " + s(value) + " in context " + s(qid));
             
             auto refbin = Wire::references()->reduce(value, _vm);
             std::string refstr((char*) binn_ptr(refbin), binn_size(refbin));
             binn_free(refbin);
-            _redis->hset(s(_context), s(id), refstr);
+            _redis->hset(qid, s(id), refstr);
         }
 
-        const ReturnMap getJobReturns() override {
+        const ReturnMap getJobReturns(QueueContextID qid) override {
             std::unordered_map<std::string, std::string> map;
             ReturnMap deserialMap;
 
-            _redis->hgetall(_context, std::inserter(map, map.begin()));
+            _redis->hgetall(qid, std::inserter(map, map.begin()));
             for ( auto p : map ) {
                 std::size_t jobId;
                 sscanf(p.first.c_str(), "%zu", &jobId);

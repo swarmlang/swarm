@@ -196,7 +196,7 @@ namespace swarmc::Runtime::RedisDriver {
     }
 
     bool RedisQueue::isEmpty(QueueContextID id) {
-        return !_redis->exists(Configuration::REDIS_PREFIX + "queue_" + _context) && finished(_context);
+        return !_redis->exists(Configuration::REDIS_PREFIX + "queue_" + id) && finished(id);
     }
 
     void RedisQueue::tick() {
@@ -210,6 +210,7 @@ namespace swarmc::Runtime::RedisDriver {
         auto rjob = dynamic_cast<RedisQueueJob*>(job.first);
 
         if ( job.first != nullptr ) {
+            _vm->enterQueueContext(job.second);
             try {
                 Console::get()->debug("Running job: " + s(rjob));
 
@@ -225,12 +226,13 @@ namespace swarmc::Runtime::RedisDriver {
                     }
                 });
 
-                setJobReturn(rjob->id(), ret);
+                setJobReturn(job.second, rjob->id(), ret);
                 rjob->setState(JobState::COMPLETE);
             } catch (Errors::SwarmError& e) {
                 Console::get()->error(e.what());
                 rjob->setState(JobState::ERROR);
             }
+            _vm->exitQueueContext();
             _redis->hincrby(Configuration::REDIS_PREFIX + "contextProgress", job.second, -1);
             delete rjob;
         }

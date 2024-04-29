@@ -145,7 +145,7 @@ namespace swarmc::Runtime::SingleThreaded {
             ret = job->getCall()->getReturn();
             job->setState(JobState::COMPLETE);
         });
-        setJobReturn(job->id(), ret);
+        setJobReturn(_context, job->id(), ret);
     }
 
 

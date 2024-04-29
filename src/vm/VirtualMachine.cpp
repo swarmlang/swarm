@@ -368,7 +368,7 @@ namespace swarmc::Runtime {
             while ( !queue->isEmpty(_queueContexts.top()) ) {
                 whileWaitingForDrain();
             }
-            auto qm = queue->getJobReturns();
+            auto qm = queue->getJobReturns(_queueContexts.top());
             map.insert(
                 std::make_move_iterator(qm.begin()),
                 std::make_move_iterator(qm.end())
