@@ -201,6 +201,7 @@ namespace swarmc::Runtime {
             auto params = binn_list();
             for ( auto param : l->params() ) {
                 binn_list_add_map(params, factory->reduce(param, nullptr));
+                break;
             }
 
             binn_map_set_map(binn, BC_RETURNS, factory->reduce(l->returns(), nullptr));
