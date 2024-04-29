@@ -232,3 +232,7 @@ consistent behavior across drivers. Specifically, because a closure can still mo
 underlying data structure due to it being passed by reference, the Local and Multithreaded
 drivers will correctly modify it, while the Redis driver will not, due to there not
 being a literal pointer to the memory within the redis database
+- recursive closures that use variables outside their scope do not work, as the fixpoint
+does not include the closure aspect. Recursive call fails at runtime.
+- Redis driver circular dependency: computed types in scopes need the stores to be restored,
+functions stored as values in stores require scopes to be restored

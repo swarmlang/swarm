@@ -174,6 +174,8 @@ bool NameAnalysisWalk::walkVariableDeclarationNode(VariableDeclarationNode* node
             auto sym = _symbols->lookup(name, _objects.top())->ensureVariable();
             logger->debug("Assigned " + s(objtype) + " to symbol " + s(sym));
             sym->setObjectType(objtype);
+        } else {
+            ((FunctionNode*)node->value())->setVarDecldTo((IdentifierNode*)node->assignment()->dest());
         }
 
         // Call this to attach the Symbol to the IdentifierNode

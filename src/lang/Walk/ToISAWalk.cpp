@@ -414,6 +414,7 @@ namespace swarmc::Lang::Walk {
         if ( node->usedSymbols()->size() > 0 ) {
             for ( auto sy = node->usedSymbols()->rbegin(); sy != node->usedSymbols()->rend(); sy++ ) {
                 auto sym = *sy;
+                if ( node->varDecldTo() && node->varDecldTo()->symbol() == sym ) continue;
                 ISAFormalList* nf = nullptr;
                 if ( sym->isProperty() ) {
                     auto osym = (ObjectPropertySymbol*)sym;
@@ -440,6 +441,12 @@ namespace swarmc::Lang::Walk {
         }
 
         _symbolRemap = _symbolRemap->enter();
+        if ( node->varDecldTo() ) { // statically evaluate fixpoint
+            _symbolRemap->registerSymbol(
+                node->varDecldTo()->symbol(), 
+                makeLocation(ISA::Affinity::FUNCTION, name, nullptr)
+            );
+        }
         append(instrs, makeFunction(name, formals, retType, node, false, true, false));
         _symbolRemap = _symbolRemap->leave();
         _loopDepth = tempLoop;
@@ -447,6 +454,7 @@ namespace swarmc::Lang::Walk {
         // curry usedSymbols here
         auto floc = makeLocation(ISA::Affinity::FUNCTION, name, nullptr);
         for ( auto sym : *node->usedSymbols() ) {
+            if ( node->varDecldTo() && node->varDecldTo()->symbol() == sym ) continue;
             auto loc = sym->isProperty() 
                 ? makeLocation(ISA::Affinity::LOCAL, TO_ISA_OBJECT_INSTANCE + s(scanConstructing(sym->name())), nullptr)
                 : makeLocation(
